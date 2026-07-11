@@ -147,7 +147,7 @@ function Home({ addToCart }) {
               </li>
             </ul>
             <div style={{ marginTop: '25px', padding: '15px', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '8px', fontSize: '0.85rem', color: '#cbd5e1', textAlign: 'center' }}>
-              📍 First Floor, Gondal Road, Rajkot, Gujarat
+              📍 Block no. 52B, Panchayat Nagar-3, University Rd, Rajkot, Gujarat
             </div>
           </div>
         </div>

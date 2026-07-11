@@ -14,16 +14,12 @@ function Footer() {
         <div className="footer-top">
           {/* Brand Info */}
           <div className="footer-widget" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <svg width="35" height="35" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M20 70C20 40 40 20 60 20C65 20 70 25 70 30C70 45 40 45 40 70C40 75 35 80 30 80C25 80 20 75 20 70Z" fill="#ffffff" />
-                <path d="M40 70C40 40 60 30 80 30C85 30 90 35 90 40C90 55 60 55 60 80C60 85 55 90 50 90C45 90 40 85 40 70Z" fill="#81c784" />
-              </svg>
-              <div style={{ lineHeight: '1.1' }}>
-                <span style={{ fontSize: '1.2rem', fontWeight: '800', fontFamily: 'Outfit', color: '#ffffff', letterSpacing: '1px' }}>NIYANSH</span>
-                <br />
-                <span style={{ fontSize: '0.75rem', fontWeight: '700', letterSpacing: '3px', color: '#81c784' }}>PHARMA</span>
-              </div>
+            <div style={{ backgroundColor: '#ffffff', padding: '10px 15px', borderRadius: '8px', display: 'inline-block', alignSelf: 'flex-start' }}>
+              <img 
+                src="/logo.jpg" 
+                alt="Niyansh Pharma" 
+                style={{ height: '48px', width: 'auto', display: 'block', objectFit: 'contain' }} 
+              />
             </div>
             <p style={{ fontSize: '0.9rem', lineHeight: '1.6', color: '#94a3b8' }}>
               Niyansh Pharma is a trusted pharmaceutical wholesale distributor based in Rajkot, Gujarat. We supply genuine, quality assured medicines, OTC products, and surgical supplies across the region.
@@ -60,9 +56,10 @@ function Footer() {
               <li>
                 <MapPin size={18} />
                 <span style={{ fontSize: '0.9rem' }}>
-                  First Floor, [Your Building/Address],<br />
-                  Gondal Road, Rajkot - 360002,<br />
-                  Gujarat, India.
+                  Block no. 52B, Panchayat Nagar-3,<br />
+                  Ram Park Main Road, University Rd,<br />
+                  Above Jan Aarogya Sevao,<br />
+                  Rajkot, Gujarat - 360005.
                 </span>
               </li>
               <li>

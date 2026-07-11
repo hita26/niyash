@@ -43,20 +43,11 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm }) {
       <div className="main-header">
         <div className="container main-header-content">
           <Link to="/" className="logo-container">
-            {/* Fallback styling in case image is missing */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <svg width="45" height="45" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M20 70C20 40 40 20 60 20C65 20 70 25 70 30C70 45 40 45 40 70C40 75 35 80 30 80C25 80 20 75 20 70Z" fill="#0c3d6c" />
-                <path d="M40 70C40 40 60 30 80 30C85 30 90 35 90 40C90 55 60 55 60 80C60 85 55 90 50 90C45 90 40 85 40 70Z" fill="#388e3c" />
-                <circle cx="50" cy="50" r="12" fill="#ffffff" stroke="#1b75bc" strokeWidth="4" />
-                <line x1="45" y1="45" x2="55" y2="55" stroke="#1b75bc" strokeWidth="4" />
-              </svg>
-              <div style={{ lineHeight: '1.1' }}>
-                <span style={{ fontSize: '1.4rem', fontWeight: '800', fontFamily: 'Outfit', color: '#0c3d6c', letterSpacing: '1px' }}>NIYANSH</span>
-                <br />
-                <span style={{ fontSize: '0.85rem', fontWeight: '700', letterSpacing: '4px', color: '#388e3c' }}>PHARMA</span>
-              </div>
-            </div>
+            <img 
+              src="/logo.jpg" 
+              alt="Niyansh Pharma" 
+              style={{ height: '65px', width: 'auto', display: 'block', objectFit: 'contain' }} 
+            />
           </Link>
 
           {/* Search Form */}

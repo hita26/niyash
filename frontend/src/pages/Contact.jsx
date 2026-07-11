@@ -71,9 +71,10 @@ function Contact() {
                   <div>
                     <h3 style={{ fontSize: '1.05rem', marginBottom: '4px' }}>Office Address</h3>
                     <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem', lineHeight: '1.5' }}>
-                      First Floor, [Your Building/Address],<br />
-                      Gondal Road, Rajkot - 360002,<br />
-                      Gujarat, India.
+                      Block no. 52B, Panchayat Nagar-3,<br />
+                      Ram Park Main Road, University Rd,<br />
+                      Above Jan Aarogya Sevao,<br />
+                      Rajkot, Gujarat - 360005.
                     </p>
                   </div>
                 </li>

@@ -86,4 +86,30 @@ router.get('/', async (req, res) => {
   }
 });
 
+// @desc    Delete a career application
+// @route   DELETE /api/careers/:id
+// @access  Public
+router.delete('/:id', async (req, res) => {
+  try {
+    const career = await Career.findById(req.params.id);
+    if (!career) {
+      return res.status(404).json({ message: 'Application not found' });
+    }
+    
+    if (career.resumePath) {
+      const fs = require('fs');
+      const path = require('path');
+      const filePath = path.join(__dirname, '..', career.resumePath);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    }
+    
+    await Career.deleteOne({ _id: req.params.id });
+    res.json({ message: 'Application removed successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 module.exports = router;

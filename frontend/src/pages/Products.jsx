@@ -14,9 +14,11 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
   const [total, setTotal] = useState(0);
   const [sortOrder, setSortOrder] = useState('popular');
   
-  // Filtering states
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedBrand, setSelectedBrand] = useState('');
+  // Filtering states (arrays for checkboxes)
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedBrands, setSelectedBrands] = useState([]);
+  const [selectedForms, setSelectedForms] = useState([]);
+  const [maxPrice, setMaxPrice] = useState(100);
 
   const categories = [
     'Pharma Products',
@@ -32,17 +34,25 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
     'Lucid Pharma', 'Elder Pharmaceuticals'
   ];
 
+  const forms = [
+    'Tablet', 'Capsule', 'Injection', 'Powder', 'IV Fluid', 'Syrup', 'Gloves', 'Syringe'
+  ];
+
   // Sync state with search params on load or change
   useEffect(() => {
     const searchVal = searchParams.get('search') || '';
-    const catVal = searchParams.get('category') || '';
-    const brandVal = searchParams.get('brand') || '';
+    const catVal = searchParams.get('category') ? searchParams.get('category').split(',') : [];
+    const brandVal = searchParams.get('brand') ? searchParams.get('brand').split(',') : [];
+    const formVal = searchParams.get('form') ? searchParams.get('form').split(',') : [];
+    const priceVal = parseFloat(searchParams.get('maxPrice')) || 100;
     const pageVal = parseInt(searchParams.get('page')) || 1;
     const sortVal = searchParams.get('sort') || 'popular';
 
     setSearchTerm(searchVal);
-    setSelectedCategory(catVal);
-    setSelectedBrand(brandVal);
+    setSelectedCategories(catVal.filter(Boolean));
+    setSelectedBrands(brandVal.filter(Boolean));
+    setSelectedForms(formVal.filter(Boolean));
+    setMaxPrice(priceVal);
     setPage(pageVal);
     setSortOrder(sortVal);
   }, [searchParams]);
@@ -56,8 +66,10 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
         const searchVal = searchParams.get('search') || '';
         
         if (searchVal) queryParams.append('search', searchVal);
-        if (selectedCategory) queryParams.append('category', selectedCategory);
-        if (selectedBrand) queryParams.append('brand', selectedBrand);
+        if (selectedCategories.length > 0) queryParams.append('category', selectedCategories.join(','));
+        if (selectedBrands.length > 0) queryParams.append('brand', selectedBrands.join(','));
+        if (selectedForms.length > 0) queryParams.append('form', selectedForms.join(','));
+        if (maxPrice < 100) queryParams.append('maxPrice', maxPrice.toString());
         if (sortOrder) queryParams.append('sort', sortOrder);
         queryParams.append('page', page.toString());
         queryParams.append('limit', '12');
@@ -77,17 +89,38 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
     };
 
     fetchProducts();
-  }, [searchParams, selectedCategory, selectedBrand, sortOrder, page]);
+  }, [searchParams, selectedCategories, selectedBrands, selectedForms, maxPrice, sortOrder, page]);
 
-  // Update query params helper
-  const updateQueryParam = (key, value) => {
+  // Update query params helper for arrays (checkboxes)
+  const handleCheckboxChange = (key, list, setList, val) => {
+    let newList;
+    if (list.includes(val)) {
+      newList = list.filter((item) => item !== val);
+    } else {
+      newList = [...list, val];
+    }
+    setList(newList);
+
     const newParams = new URLSearchParams(searchParams);
-    if (value) {
-      newParams.set(key, value);
+    if (newList.length > 0) {
+      newParams.set(key, newList.join(','));
     } else {
       newParams.delete(key);
     }
     newParams.set('page', '1'); // Reset to page 1 on filter change
+    setSearchParams(newParams);
+  };
+
+  const handlePriceChange = (e) => {
+    const val = parseFloat(e.target.value);
+    setMaxPrice(val);
+    const newParams = new URLSearchParams(searchParams);
+    if (val < 100) {
+      newParams.set('maxPrice', val.toString());
+    } else {
+      newParams.delete('maxPrice');
+    }
+    newParams.set('page', '1');
     setSearchParams(newParams);
   };
 
@@ -103,15 +136,25 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
   const handleResetFilters = () => {
     setSearchParams({});
     setSearchTerm('');
-    setSelectedCategory('');
-    setSelectedBrand('');
+    setSelectedCategories([]);
+    setSelectedBrands([]);
+    setSelectedForms([]);
+    setMaxPrice(100);
     setSortOrder('popular');
     setPage(1);
   };
 
+  const updateSortParam = (val) => {
+    setSortOrder(val);
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('sort', val);
+    newParams.set('page', '1');
+    setSearchParams(newParams);
+  };
+
   return (
     <div className="section animate-fade-in" style={{ backgroundColor: 'var(--bg-main)', minHeight: '80vh' }}>
-      <div className="container" style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '30px' }}>
+      <div className="container products-layout">
         
         {/* Left Filters Sidebar */}
         <aside style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -129,27 +172,16 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
             </div>
 
             {/* Categories filter */}
-            <div style={{ marginBottom: '25px' }}>
+            <div style={{ marginBottom: '25px', borderBottom: '1px solid #f1f5f9', paddingBottom: '20px' }}>
               <h4 style={{ fontSize: '0.95rem', marginBottom: '12px', color: 'var(--text-dark)', fontWeight: '700' }}>Categories</h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', cursor: 'pointer' }}>
-                  <input
-                    type="radio"
-                    name="category"
-                    checked={selectedCategory === ''}
-                    onChange={() => updateQueryParam('category', '')}
-                    style={{ accentColor: 'var(--primary-blue)' }}
-                  />
-                  <span>All Categories</span>
-                </label>
                 {categories.map((cat, i) => (
-                  <label key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', cursor: 'pointer' }}>
+                  <label key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', cursor: 'pointer', color: selectedCategories.includes(cat) ? 'var(--primary-blue)' : 'var(--text-dark)', fontWeight: selectedCategories.includes(cat) ? '600' : '400' }}>
                     <input
-                      type="radio"
-                      name="category"
-                      checked={selectedCategory === cat}
-                      onChange={() => updateQueryParam('category', cat)}
-                      style={{ accentColor: 'var(--primary-blue)' }}
+                      type="checkbox"
+                      checked={selectedCategories.includes(cat)}
+                      onChange={() => handleCheckboxChange('category', selectedCategories, setSelectedCategories, cat)}
+                      style={{ accentColor: 'var(--primary-blue)', width: '15px', height: '15px', cursor: 'pointer' }}
                     />
                     <span>{cat}</span>
                   </label>
@@ -157,34 +189,63 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
               </div>
             </div>
 
+            {/* Price Slider Filter */}
+            <div style={{ marginBottom: '25px', borderBottom: '1px solid #f1f5f9', paddingBottom: '20px' }}>
+              <h4 style={{ fontSize: '0.95rem', marginBottom: '12px', color: 'var(--text-dark)', fontWeight: '700', display: 'flex', justifyContent: 'space-between' }}>
+                <span>Wholesale Price</span>
+                <span style={{ color: 'var(--primary-blue)', fontWeight: '700' }}>≤ ₹{maxPrice}</span>
+              </h4>
+              <input 
+                type="range" 
+                min="2" 
+                max="100" 
+                value={maxPrice}
+                onChange={handlePriceChange}
+                style={{ width: '100%', accentColor: 'var(--primary-blue)', cursor: 'pointer' }}
+                aria-label="Price range filter"
+              />
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-light)', marginTop: '5px' }}>
+                <span>₹2</span>
+                <span>₹100</span>
+              </div>
+            </div>
+
             {/* Brands filter */}
-            <div>
-              <h4 style={{ fontSize: '0.95rem', marginBottom: '12px', color: 'var(--text-dark)', fontWeight: '700' }}>Top Brands</h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '300px', overflowY: 'auto', paddingRight: '5px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', cursor: 'pointer' }}>
-                  <input
-                    type="radio"
-                    name="brand"
-                    checked={selectedBrand === ''}
-                    onChange={() => updateQueryParam('brand', '')}
-                    style={{ accentColor: 'var(--primary-blue)' }}
-                  />
-                  <span>All Brands</span>
-                </label>
+            <div style={{ marginBottom: '25px', borderBottom: '1px solid #f1f5f9', paddingBottom: '20px' }}>
+              <h4 style={{ fontSize: '0.95rem', marginBottom: '12px', color: 'var(--text-dark)', fontWeight: '700' }}>Brands</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '200px', overflowY: 'auto', paddingRight: '5px' }}>
                 {brands.map((br, i) => (
-                  <label key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', cursor: 'pointer' }}>
+                  <label key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', cursor: 'pointer', color: selectedBrands.includes(br) ? 'var(--primary-blue)' : 'var(--text-dark)', fontWeight: selectedBrands.includes(br) ? '600' : '400' }}>
                     <input
-                      type="radio"
-                      name="brand"
-                      checked={selectedBrand === br}
-                      onChange={() => updateQueryParam('brand', br)}
-                      style={{ accentColor: 'var(--primary-blue)' }}
+                      type="checkbox"
+                      checked={selectedBrands.includes(br)}
+                      onChange={() => handleCheckboxChange('brand', selectedBrands, setSelectedBrands, br)}
+                      style={{ accentColor: 'var(--primary-blue)', width: '15px', height: '15px', cursor: 'pointer' }}
                     />
                     <span>{br}</span>
                   </label>
                 ))}
               </div>
             </div>
+
+            {/* Formulation Forms Filter */}
+            <div>
+              <h4 style={{ fontSize: '0.95rem', marginBottom: '12px', color: 'var(--text-dark)', fontWeight: '700' }}>Formulation Form</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '180px', overflowY: 'auto', paddingRight: '5px' }}>
+                {forms.map((fr, i) => (
+                  <label key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', cursor: 'pointer', color: selectedForms.includes(fr) ? 'var(--primary-blue)' : 'var(--text-dark)', fontWeight: selectedForms.includes(fr) ? '600' : '400' }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedForms.includes(fr)}
+                      onChange={() => handleCheckboxChange('form', selectedForms, setSelectedForms, fr)}
+                      style={{ accentColor: 'var(--primary-blue)', width: '15px', height: '15px', cursor: 'pointer' }}
+                    />
+                    <span>{fr}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
           </div>
         </aside>
 
@@ -210,7 +271,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
               </span>
               <select 
                 value={sortOrder} 
-                onChange={(e) => updateQueryParam('sort', e.target.value)}
+                onChange={(e) => updateSortParam(e.target.value)}
                 style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-light)', fontSize: '0.9rem', backgroundColor: '#ffffff' }}
               >
                 <option value="popular">Default / Newest</option>

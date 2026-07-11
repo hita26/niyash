@@ -7,7 +7,7 @@ const Product = require('../models/Product');
 // @access  Public
 router.get('/', async (req, res) => {
   try {
-    const { search, category, brand, form, inStock, sort, page = 1, limit = 12 } = req.query;
+    const { search, category, brand, form, inStock, sort, page = 1, limit = 12, maxPrice } = req.query;
     
     const query = {};
 
@@ -21,19 +21,36 @@ router.get('/', async (req, res) => {
       ];
     }
 
-    // Category filter
+    // Category filter (supports comma-separated list)
     if (category) {
-      query.category = category;
+      if (category.includes(',')) {
+        query.category = { $in: category.split(',') };
+      } else {
+        query.category = category;
+      }
     }
 
-    // Brand filter
+    // Brand filter (supports comma-separated list)
     if (brand) {
-      query.brand = brand;
+      if (brand.includes(',')) {
+        query.brand = { $in: brand.split(',') };
+      } else {
+        query.brand = brand;
+      }
     }
 
-    // Form filter (Tablet, Capsule, etc.)
+    // Form filter (supports comma-separated list)
     if (form) {
-      query.form = form;
+      if (form.includes(',')) {
+        query.form = { $in: form.split(',') };
+      } else {
+        query.form = form;
+      }
+    }
+
+    // Price filter
+    if (maxPrice) {
+      query.price = { $lte: parseFloat(maxPrice) };
     }
 
     // Stock filter
@@ -96,9 +113,9 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// @desc    Create a product (Admin or test helper)
+// @desc    Create a product
 // @route   POST /api/products
-// @access  Public (for test/seeding purposes)
+// @access  Public
 router.post('/', async (req, res) => {
   try {
     const product = new Product(req.body);
@@ -106,6 +123,41 @@ router.post('/', async (req, res) => {
     res.status(201).json(createdProduct);
   } catch (error) {
     res.status(400).json({ message: 'Invalid product data', error: error.message });
+  }
+});
+
+// @desc    Update a product
+// @route   PUT /api/products/:id
+// @access  Public
+router.put('/:id', async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+    
+    Object.assign(product, req.body);
+    const updatedProduct = await product.save();
+    res.json(updatedProduct);
+  } catch (error) {
+    res.status(400).json({ message: 'Invalid product data or update error', error: error.message });
+  }
+});
+
+// @desc    Delete a product
+// @route   DELETE /api/products/:id
+// @access  Public
+router.delete('/:id', async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+    
+    await Product.deleteOne({ _id: req.params.id });
+    res.json({ message: 'Product removed successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 

@@ -60,4 +60,41 @@ router.get('/', async (req, res) => {
   }
 });
 
+// @desc    Update enquiry status
+// @route   PUT /api/enquiries/:id
+// @access  Public
+router.put('/:id', async (req, res) => {
+  try {
+    const enquiry = await Enquiry.findById(req.params.id);
+    if (!enquiry) {
+      return res.status(404).json({ message: 'Enquiry not found' });
+    }
+    
+    enquiry.status = req.body.status || enquiry.status;
+    const updatedEnquiry = await enquiry.save();
+    
+    const populated = await Enquiry.findById(updatedEnquiry._id).populate('items.product');
+    res.json(populated);
+  } catch (error) {
+    res.status(400).json({ message: 'Error updating enquiry', error: error.message });
+  }
+});
+
+// @desc    Delete an enquiry
+// @route   DELETE /api/enquiries/:id
+// @access  Public
+router.delete('/:id', async (req, res) => {
+  try {
+    const enquiry = await Enquiry.findById(req.params.id);
+    if (!enquiry) {
+      return res.status(404).json({ message: 'Enquiry not found' });
+    }
+    
+    await Enquiry.deleteOne({ _id: req.params.id });
+    res.json({ message: 'Enquiry removed successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 module.exports = router;

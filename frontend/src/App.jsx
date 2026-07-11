@@ -11,6 +11,7 @@ import Career from './pages/Career';
 import Partner from './pages/Partner';
 import Supplier from './pages/Supplier';
 import Manufacturing from './pages/Manufacturing';
+import Admin from './pages/Admin';
 
 function App() {
   const [enquiryCart, setEnquiryCart] = useState([]);
@@ -99,6 +100,7 @@ function App() {
             <Route path="/partner" element={<Partner />} />
             <Route path="/supplier" element={<Supplier />} />
             <Route path="/manufacturing" element={<Manufacturing />} />
+            <Route path="/admin" element={<Admin />} />
           </Routes>
         </main>
 

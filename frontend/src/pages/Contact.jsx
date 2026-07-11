@@ -56,7 +56,7 @@ function Contact() {
         <h1 className="section-title">Contact Us</h1>
         <p className="section-subtitle">Reach out to Niyansh Pharma for wholesale distributorship queries, orders, or support.</p>
 
-        <div className="grid-2" style={{ gap: '40px', alignItems: 'stretch' }}>
+        <div className="contact-layout">
           
           {/* Contact Details & Info */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>

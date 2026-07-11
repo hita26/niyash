@@ -69,8 +69,7 @@ function ProductDetail({ addToCart }) {
           <ArrowLeft size={16} /> Back to Products
         </Link>
 
-        {/* Product Detail Card */}
-        <div className="card" style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '40px', padding: '40px', marginBottom: '50px' }}>
+        <div className="detail-layout" style={{ marginBottom: '50px' }}>
           
           {/* Image */}
           <div style={{

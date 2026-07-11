@@ -122,7 +122,7 @@ function Contact() {
             <div className="card" style={{ padding: '0', overflow: 'hidden', height: '280px' }}>
               <iframe 
                 title="Niyansh Pharma Location Map"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3692.0076938927806!2d70.79374027589257!3d22.2777329437149!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3959ca187f5835cf%3A0xc489551c6b1a3297!2sGondal%20Rd%2C%20Rajkot%2C%20Gujarat!5e0!3m2!1sen!2sin!4v1709400000000!5m2!1sen!2sin" 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3691.4650393043817!2d70.76194731589283!3d22.287219093721385!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3959cb33b44fc73f%3A0x3c79432bfa8b8b1d!2sNiyansh%20pharma!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin" 
                 width="100%" 
                 height="100%" 
                 style={{ border: 0 }} 

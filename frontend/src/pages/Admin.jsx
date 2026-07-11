@@ -171,10 +171,12 @@ function Admin() {
         fetchDashboardData();
         alert(editingProduct ? 'Product updated!' : 'Product added!');
       } else {
-        alert('Failed to save product.');
+        const errorData = await response.json().catch(() => ({}));
+        alert(`Failed to save product: ${errorData.message || errorData.error || response.statusText}`);
       }
     } catch (error) {
       console.error('Error saving product:', error);
+      alert(`Network error saving product: ${error.message}`);
     }
   };
 

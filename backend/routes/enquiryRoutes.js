@@ -1,13 +1,32 @@
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
 const Enquiry = require('../models/Enquiry');
+const User = require('../models/User');
 
 // @desc    Submit a new enquiry (general message, partner, supplier, or quote cart)
 // @route   POST /api/enquiries
-// @access  Public
+// @access  Public (Optional auth, required for Cart Quote purchases)
 router.post('/', async (req, res) => {
   try {
     const { type, name, phone, email, address, message, items } = req.body;
+
+    // Check for authorization token
+    let user = null;
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      try {
+        const token = req.headers.authorization.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'niyansh_pharma_jwt_secret_key_2026');
+        user = await User.findById(decoded.id);
+      } catch (err) {
+        console.error('Token validation failed in enquiry:', err.message);
+      }
+    }
+
+    // Force authentication ONLY for Cart Quote (wholesale purchases)
+    if (type === 'Cart Quote' && !user) {
+      return res.status(401).json({ message: 'Authentication is required to request a wholesale quote.' });
+    }
 
     if (!name || !phone) {
       return res.status(400).json({ message: 'Name and Phone number are required' });
@@ -21,6 +40,10 @@ router.post('/', async (req, res) => {
       address,
       message,
     };
+
+    if (user) {
+      enquiryData.user = user._id;
+    }
 
     // If type is Cart Quote, we expect an array of items [{ product: id, quantity: number }]
     if (type === 'Cart Quote') {

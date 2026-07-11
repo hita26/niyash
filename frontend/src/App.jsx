@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import EnquiryCartModal from './components/EnquiryCartModal';
+import AuthModal from './components/AuthModal';
 import Home from './pages/Home';
 import Products from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
@@ -17,6 +18,25 @@ function App() {
   const [enquiryCart, setEnquiryCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Auth state
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState('');
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+
+  // Load user session on mount
+  useEffect(() => {
+    const savedUser = localStorage.getItem('niyansh_user');
+    const savedToken = localStorage.getItem('niyansh_token');
+    if (savedUser && savedToken) {
+      try {
+        setUser(JSON.parse(savedUser));
+        setToken(savedToken);
+      } catch (e) {
+        console.error('Error parsing saved session', e);
+      }
+    }
+  }, []);
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -35,6 +55,20 @@ function App() {
     localStorage.setItem('niyansh_enquiry_cart', JSON.stringify(enquiryCart));
   }, [enquiryCart]);
 
+  const handleLoginSuccess = (userData) => {
+    setUser(userData);
+    setToken(userData.token);
+    localStorage.setItem('niyansh_user', JSON.stringify(userData));
+    localStorage.setItem('niyansh_token', userData.token);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setToken('');
+    localStorage.removeItem('niyansh_user');
+    localStorage.removeItem('niyansh_token');
+  };
+
   const addToCart = (product, quantity = 1) => {
     setEnquiryCart((prevCart) => {
       const existingItem = prevCart.find((item) => item.product._id === product._id);
@@ -47,24 +81,23 @@ function App() {
       }
       return [...prevCart, { product, quantity }];
     });
-    // Auto open cart drawer to show items added
     setIsCartOpen(true);
   };
 
-  const removeFromCart = (productId) => {
-    setEnquiryCart((prevCart) => prevCart.filter((item) => item.product._id !== productId));
-  };
-
-  const updateQuantity = (productId, newQuantity) => {
-    if (newQuantity <= 0) {
+  const updateQuantity = (productId, quantity) => {
+    if (quantity <= 0) {
       removeFromCart(productId);
       return;
     }
     setEnquiryCart((prevCart) =>
       prevCart.map((item) =>
-        item.product._id === productId ? { ...item, quantity: newQuantity } : item
+        item.product._id === productId ? { ...item, quantity } : item
       )
     );
+  };
+
+  const removeFromCart = (productId) => {
+    setEnquiryCart((prevCart) => prevCart.filter((item) => item.product._id !== productId));
   };
 
   const clearCart = () => {
@@ -79,6 +112,9 @@ function App() {
           onOpenCart={() => setIsCartOpen(true)}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
+          user={user}
+          onLogout={handleLogout}
+          onOpenAuth={() => setIsAuthOpen(true)}
         />
         
         <main style={{ flex: 1 }}>
@@ -113,6 +149,15 @@ function App() {
           updateQuantity={updateQuantity}
           removeFromCart={removeFromCart}
           clearCart={clearCart}
+          user={user}
+          token={token}
+          onOpenAuth={() => setIsAuthOpen(true)}
+        />
+
+        <AuthModal 
+          isOpen={isAuthOpen}
+          onClose={() => setIsAuthOpen(false)}
+          onSuccess={handleLoginSuccess}
         />
       </div>
     </Router>

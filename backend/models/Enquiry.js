@@ -8,6 +8,10 @@ const enquirySchema = new mongoose.Schema(
       enum: ['Cart Quote', 'General Enquiry', 'Partner', 'Supplier', 'Manufacturing'],
       default: 'General Enquiry',
     },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
     name: {
       type: String,
       required: true,

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingBag, Search, Phone, Mail, ChevronDown, Menu, X } from 'lucide-react';
+import { ShoppingBag, Search, Phone, Mail, ChevronDown, Menu, X, User, LogOut, LogIn } from 'lucide-react';
 
-function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm }) {
+function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogout, onOpenAuth }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -65,10 +65,32 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm }) {
 
           {/* Header Action Buttons */}
           <div className="header-actions">
-            <Link to="/contact" className="btn btn-primary btn-sm" style={{ padding: '10px 20px', borderRadius: '30px' }}>
-              Enquiry Now
-            </Link>
-            
+            {user ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', borderRight: '1px solid var(--border-light)', paddingRight: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: '700', color: 'var(--primary-blue)' }}>
+                  <User size={16} />
+                  <span style={{ maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {user.name.split(' ')[0]}
+                  </span>
+                </div>
+                <button 
+                  onClick={onLogout} 
+                  title="Log Out"
+                  style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'none', border: 'none', color: 'var(--text-medium)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600' }}
+                >
+                  <LogOut size={15} />
+                </button>
+              </div>
+            ) : (
+              <button 
+                onClick={onOpenAuth}
+                className="btn btn-outline btn-sm"
+                style={{ padding: '8px 15px', borderRadius: '30px', fontWeight: '700', border: '1px solid var(--primary-blue)', color: 'var(--primary-blue)', cursor: 'pointer' }}
+              >
+                <LogIn size={13} style={{ marginRight: '4px' }} /> Log In
+              </button>
+            )}
+
             <button 
               className="cart-icon-btn" 
               onClick={onOpenCart} 
@@ -161,6 +183,36 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm }) {
           <Link to="/supplier" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9', fontWeight: '600' }}>Supplier Registration</Link>
           <Link to="/career" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9', fontWeight: '600' }}>Career With Us</Link>
           <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9', fontWeight: '600' }}>Contact Us</Link>
+
+          {user ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '15px', borderTop: '1px solid #f1f5f9', paddingTop: '15px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--primary-blue)', fontWeight: '600' }}>
+                <User size={18} />
+                <span>Logged in: {user.name}</span>
+              </div>
+              <button 
+                onClick={() => { onLogout(); setIsMobileMenuOpen(false); }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 15px',
+                  backgroundColor: '#f8fafc', border: '1px solid var(--border-light)', borderRadius: '6px',
+                  color: 'var(--text-medium)', fontWeight: '600', cursor: 'pointer', textAlign: 'left', width: '100%'
+                }}
+              >
+                <LogOut size={16} /> Log Out
+              </button>
+            </div>
+          ) : (
+            <button 
+              onClick={() => { onOpenAuth(); setIsMobileMenuOpen(false); }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 15px',
+                backgroundColor: 'var(--primary-blue)', color: '#ffffff', borderRadius: '6px',
+                fontWeight: '700', cursor: 'pointer', border: 'none', marginTop: '15px', width: '100%', justifyContent: 'center'
+              }}
+            >
+              <LogIn size={16} /> B2B Log In / Register
+            </button>
+          )}
         </div>
       )}
     </header>

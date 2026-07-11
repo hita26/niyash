@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Trash2, Plus, Minus, Send, CheckCircle } from 'lucide-react';
 
-function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFromCart, clearCart }) {
+function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFromCart, clearCart, user, token, onOpenAuth }) {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -9,6 +9,21 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  // Sync form fields with user profile details
+  useEffect(() => {
+    if (user) {
+      setName(user.name || '');
+      setPhone(user.phone || '');
+      setEmail(user.email || '');
+      setAddress(user.companyName || '');
+    } else {
+      setName('');
+      setPhone('');
+      setEmail('');
+      setAddress('');
+    }
+  }, [user]);
 
   if (!isOpen) return null;
 
@@ -27,11 +42,16 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
         quantity: item.quantity,
       }));
 
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch('/api/enquiries', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           type: 'Cart Quote',
           name,
@@ -50,11 +70,6 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
         setTimeout(() => {
           setIsSuccess(false);
           clearCart();
-          setName('');
-          setPhone('');
-          setEmail('');
-          setAddress('');
-          setMessage('');
           onClose();
         }, 3000);
       } else {
@@ -82,7 +97,7 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
               {cartItems.length} items
             </span>
           </h2>
-          <button onClick={onClose} style={{ color: 'var(--text-medium)' }} aria-label="Close">
+          <button onClick={onClose} style={{ color: 'var(--text-medium)', background: 'none', border: 'none', cursor: 'pointer' }} aria-label="Close">
             <X size={24} />
           </button>
         </div>
@@ -104,6 +119,7 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
               <button 
                 onClick={onClose} 
                 className="btn btn-primary btn-sm"
+                style={{ padding: '8px 15px', borderRadius: '6px', cursor: 'pointer' }}
               >
                 Browse Products
               </button>
@@ -142,7 +158,7 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
                       <button 
                         onClick={() => removeFromCart(item.product._id)} 
-                        style={{ color: '#ef4444' }}
+                        style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}
                         aria-label="Remove item"
                       >
                         <Trash2 size={16} />
@@ -151,7 +167,7 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                       <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #cbd5e1', borderRadius: '4px', overflow: 'hidden' }}>
                         <button 
                           onClick={() => updateQuantity(item.product._id, item.quantity - 1)}
-                          style={{ padding: '2px 6px', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center' }}
+                          style={{ padding: '2px 6px', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', border: 'none', cursor: 'pointer' }}
                           aria-label="Decrease quantity"
                         >
                           <Minus size={12} />
@@ -161,7 +177,7 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                         </span>
                         <button 
                           onClick={() => updateQuantity(item.product._id, item.quantity + 1)}
-                          style={{ padding: '2px 6px', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center' }}
+                          style={{ padding: '2px 6px', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', border: 'none', cursor: 'pointer' }}
                           aria-label="Increase quantity"
                         >
                           <Plus size={12} />
@@ -181,82 +197,101 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                 <span style={{ fontWeight: '800', color: 'var(--primary-blue)', fontSize: '1.1rem' }}>₹{totalPrice.toFixed(2)}</span>
               </div>
 
-              {/* Enquiry Form */}
-              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <h3 style={{ fontSize: '1.05rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '6px' }}>Provide Business Info</h3>
-                
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label htmlFor="name-input" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>Full Name *</label>
-                  <input 
-                    id="name-input"
-                    type="text" 
-                    required 
-                    placeholder="Enter name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
-                  />
-                </div>
+              {/* Enquiry Form or Auth Required Prompt */}
+              {user ? (
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <h3 style={{ fontSize: '1.05rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '6px', color: 'var(--text-dark)' }}>Confirm Business Details</h3>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <label htmlFor="name-input" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>Full Name *</label>
+                    <input 
+                      id="name-input"
+                      type="text" 
+                      required 
+                      placeholder="Enter name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
+                    />
+                  </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label htmlFor="phone-input" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>Phone Number *</label>
-                  <input 
-                    id="phone-input"
-                    type="tel" 
-                    required 
-                    placeholder="Enter mobile number"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
-                  />
-                </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <label htmlFor="phone-input" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>Phone Number *</label>
+                    <input 
+                      id="phone-input"
+                      type="tel" 
+                      required 
+                      placeholder="Enter mobile number"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
+                    />
+                  </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label htmlFor="email-input" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>Email ID (Optional)</label>
-                  <input 
-                    id="email-input"
-                    type="email" 
-                    placeholder="Enter email address"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
-                  />
-                </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <label htmlFor="email-input" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>Email ID (Optional)</label>
+                    <input 
+                      id="email-input"
+                      type="email" 
+                      placeholder="Enter email address"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
+                    />
+                  </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label htmlFor="address-input" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>Delivery Address / Medical Store Name</label>
-                  <input 
-                    id="address-input"
-                    type="text" 
-                    placeholder="Store name, address, city"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
-                  />
-                </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <label htmlFor="address-input" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>Company / Store Name</label>
+                    <input 
+                      id="address-input"
+                      type="text" 
+                      placeholder="Store name, address, city"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
+                    />
+                  </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label htmlFor="msg-input" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>Message / Instruction</label>
-                  <textarea 
-                    id="msg-input"
-                    rows="3" 
-                    placeholder="Enter special instructions or wholesale discount query..."
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem', resize: 'vertical' }}
-                  />
-                </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <label htmlFor="msg-input" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>Message / Instruction</label>
+                    <textarea 
+                      id="msg-input"
+                      rows="3" 
+                      placeholder="Enter special instructions or wholesale discount query..."
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem', resize: 'vertical' }}
+                    />
+                  </div>
 
-                <button 
-                  type="submit" 
-                  disabled={isSubmitting}
-                  className="btn btn-secondary" 
-                  style={{ width: '100%', marginTop: '10px', gap: '10px' }}
-                >
-                  <Send size={16} />
-                  {isSubmitting ? 'Sending Request...' : 'Send Quote Request'}
-                </button>
-              </form>
+                  <button 
+                    type="submit" 
+                    disabled={isSubmitting}
+                    className="btn btn-secondary" 
+                    style={{ width: '100%', marginTop: '10px', gap: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                  >
+                    <Send size={16} />
+                    {isSubmitting ? 'Sending Request...' : 'Send Quote Request'}
+                  </button>
+                </form>
+              ) : (
+                <div style={{
+                  padding: '25px 20px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px dashed #cbd5e1',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px', textAlign: 'center', marginTop: '10px'
+                }}>
+                  <p style={{ fontSize: '0.9rem', color: 'var(--text-medium)', fontWeight: '600', lineHeight: '1.5' }}>
+                    Please log in to your account to complete your B2B wholesale quote request.
+                  </p>
+                  <button 
+                    type="button" 
+                    onClick={() => { onClose(); onOpenAuth(); }}
+                    className="btn btn-primary"
+                    style={{ width: '100%', padding: '12px', borderRadius: '6px', fontWeight: '700', cursor: 'pointer' }}
+                  >
+                    Sign In / Register Store
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

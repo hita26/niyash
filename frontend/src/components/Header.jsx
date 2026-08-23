@@ -137,6 +137,11 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               </ul>
             </li>
             <li className="nav-item">
+              <Link to="/quick-order" className={`nav-link ${isActive('/quick-order') || isActive('/order')}`} style={{ color: 'var(--primary-blue)', fontWeight: '800', backgroundColor: '#eff6ff', padding: '5px 12px', borderRadius: '16px', border: '1px solid #bfdbfe' }}>
+                ⚡ Quick Order
+              </Link>
+            </li>
+            <li className="nav-item">
               <Link to="/news" className={`nav-link ${isActive('/news') || isActive('/schemes')}`} style={{ color: '#ea580c', fontWeight: '700' }}>
                 🔥 Schemes & News
               </Link>
@@ -183,6 +188,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             <Link to="/products?category=Surgical %26 Medical Supplies" onClick={() => setIsMobileMenuOpen(false)} style={{ fontSize: '0.9rem', color: 'var(--text-medium)' }}>Surgical & Medical Supplies</Link>
           </div>
 
+          <Link to="/quick-order" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9', fontWeight: '800', color: 'var(--primary-blue)', display: 'flex', alignItems: 'center', gap: '6px' }}>⚡ Quick B2B Order Booking</Link>
           <Link to="/news" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9', fontWeight: '700', color: '#ea580c' }}>🔥 Daily Schemes & News</Link>
           <Link to="/manufacturing" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9', fontWeight: '600' }}>Manufacturing</Link>
           <Link to="/partner" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9', fontWeight: '600' }}>Partner With Us</Link>

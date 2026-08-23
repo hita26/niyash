@@ -13,6 +13,7 @@ import Partner from './pages/Partner';
 import Supplier from './pages/Supplier';
 import Manufacturing from './pages/Manufacturing';
 import NewsFeed from './pages/NewsFeed';
+import QuickOrder from './pages/QuickOrder';
 import Admin from './pages/Admin';
 import NewsTicker from './components/NewsTicker';
 
@@ -136,6 +137,8 @@ function App() {
             <Route path="/products/:id" element={<ProductDetail addToCart={addToCart} />} />
             <Route path="/news" element={<NewsFeed />} />
             <Route path="/schemes" element={<NewsFeed />} />
+            <Route path="/quick-order" element={<QuickOrder />} />
+            <Route path="/order" element={<QuickOrder />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/career" element={<Career />} />
             <Route path="/partner" element={<Partner />} />

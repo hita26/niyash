@@ -147,6 +147,11 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               </Link>
             </li>
             <li className="nav-item">
+              <Link to="/ledger" className={`nav-link ${isActive('/ledger') || isActive('/outstanding')}`} style={{ color: 'var(--primary-blue)', fontWeight: '700' }}>
+                📊 Outstanding Ledger
+              </Link>
+            </li>
+            <li className="nav-item">
               <Link to="/manufacturing" className={`nav-link ${isActive('/manufacturing')}`}>Manufacturing</Link>
             </li>
             <li className="nav-item">
@@ -190,6 +195,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
 
           <Link to="/quick-order" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9', fontWeight: '800', color: 'var(--primary-blue)', display: 'flex', alignItems: 'center', gap: '6px' }}>⚡ Quick B2B Order Booking</Link>
           <Link to="/news" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9', fontWeight: '700', color: '#ea580c' }}>🔥 Daily Schemes & News</Link>
+          <Link to="/ledger" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9', fontWeight: '700', color: 'var(--primary-blue)', display: 'flex', alignItems: 'center', gap: '6px' }}>📊 Retailer Outstanding Ledger</Link>
           <Link to="/manufacturing" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9', fontWeight: '600' }}>Manufacturing</Link>
           <Link to="/partner" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9', fontWeight: '600' }}>Partner With Us</Link>
           <Link to="/supplier" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9', fontWeight: '600' }}>Supplier Registration</Link>

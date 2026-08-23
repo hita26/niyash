@@ -14,6 +14,7 @@ import Supplier from './pages/Supplier';
 import Manufacturing from './pages/Manufacturing';
 import NewsFeed from './pages/NewsFeed';
 import QuickOrder from './pages/QuickOrder';
+import OutstandingLedger from './pages/OutstandingLedger';
 import Admin from './pages/Admin';
 import NewsTicker from './components/NewsTicker';
 
@@ -139,6 +140,8 @@ function App() {
             <Route path="/schemes" element={<NewsFeed />} />
             <Route path="/quick-order" element={<QuickOrder />} />
             <Route path="/order" element={<QuickOrder />} />
+            <Route path="/ledger" element={<OutstandingLedger user={user} />} />
+            <Route path="/outstanding" element={<OutstandingLedger user={user} />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/career" element={<Career />} />
             <Route path="/partner" element={<Partner />} />

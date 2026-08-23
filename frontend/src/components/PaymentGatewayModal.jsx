@@ -127,6 +127,19 @@ export default function PaymentGatewayModal({
     }
   }, [payAmountType, customAmount, initialDue]);
 
+  // OTP Countdown timer
+  useEffect(() => {
+    let timer;
+    if (gatewayStage === 'otp' && otpCountdown > 0) {
+      timer = setInterval(() => {
+        setOtpCountdown((prev) => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [gatewayStage, otpCountdown]);
+
   // Card formatting helpers
   const handleCardNumberChange = (e) => {
     const raw = e.target.value.replace(/\D/g, '').slice(0, 16);

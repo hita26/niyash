@@ -29,10 +29,24 @@ app.use('/api/enquiries', require('./routes/enquiryRoutes'));
 app.use('/api/careers', require('./routes/careerRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 
-// Default API landing
-app.get('/', (req, res) => {
-  res.send('Niyansh Pharma API is running...');
-});
+// Serve static frontend build if available
+const fs = require('fs');
+const frontendDist = path.join(__dirname, '../frontend/dist');
+
+if (fs.existsSync(frontendDist)) {
+  app.use(express.static(frontendDist));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
+      return next();
+    }
+    res.sendFile(path.join(frontendDist, 'index.html'));
+  });
+} else {
+  // Default API landing in dev mode without frontend build
+  app.get('/', (req, res) => {
+    res.send('Niyansh Pharma API is running...');
+  });
+}
 
 // Error handling middleware
 app.use((err, req, res, next) => {

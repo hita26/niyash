@@ -137,6 +137,11 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               </ul>
             </li>
             <li className="nav-item">
+              <Link to="/news" className={`nav-link ${isActive('/news') || isActive('/schemes')}`} style={{ color: '#ea580c', fontWeight: '700' }}>
+                🔥 Schemes & News
+              </Link>
+            </li>
+            <li className="nav-item">
               <Link to="/manufacturing" className={`nav-link ${isActive('/manufacturing')}`}>Manufacturing</Link>
             </li>
             <li className="nav-item">
@@ -178,6 +183,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             <Link to="/products?category=Surgical %26 Medical Supplies" onClick={() => setIsMobileMenuOpen(false)} style={{ fontSize: '0.9rem', color: 'var(--text-medium)' }}>Surgical & Medical Supplies</Link>
           </div>
 
+          <Link to="/news" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9', fontWeight: '700', color: '#ea580c' }}>🔥 Daily Schemes & News</Link>
           <Link to="/manufacturing" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9', fontWeight: '600' }}>Manufacturing</Link>
           <Link to="/partner" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9', fontWeight: '600' }}>Partner With Us</Link>
           <Link to="/supplier" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9', fontWeight: '600' }}>Supplier Registration</Link>

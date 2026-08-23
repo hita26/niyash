@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const { attachDatabasePool } = require('@vercel/functions');
 
 let isConnected = false;
 
@@ -21,8 +20,9 @@ const connectDB = async () => {
     // If running in Vercel, attach native MongoClient to Vercel's database pool management
     if (process.env.VERCEL) {
       try {
+        const { attachDatabasePool } = require('@vercel/functions');
         const client = mongoose.connection.getClient();
-        if (client) {
+        if (client && attachDatabasePool) {
           attachDatabasePool(client);
           console.log('Successfully attached Mongoose MongoClient to Vercel Database Pool');
         }

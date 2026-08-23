@@ -12,11 +12,17 @@ const productSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    company: {
+      type: String,
+      required: true,
+      trim: true,
+      default: 'DAXIA',
+    },
     category: {
       type: String,
       required: true,
       trim: true,
-      // e.g., 'Pharma Products', 'OTC Products', 'Surgical & Medical Supplies', 'Injectables'
+      // e.g., 'Pharma Products', 'OTC Products', 'Surgical & Medical Supplies', 'Injectables', 'Ayurvedic Products', 'Dermatology & Topicals'
     },
     sku: {
       type: String,
@@ -26,6 +32,32 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: true,
       default: 0.0,
+    },
+    mrp: {
+      type: Number,
+      default: 0.0,
+    },
+    gstRate: {
+      type: Number,
+      default: 12,
+    },
+    minReorderQty: {
+      type: Number,
+      default: 1,
+    },
+    unitsPerBox: {
+      type: Number,
+      default: 10,
+    },
+    qualitySpecs: {
+      type: String,
+      default: 'WHO-GMP Certified',
+      trim: true,
+    },
+    scheme: {
+      type: String,
+      default: '',
+      trim: true,
     },
     inStock: {
       type: Boolean,
@@ -42,7 +74,22 @@ const productSchema = new mongoose.Schema(
     },
     form: {
       type: String,
-      trim: true, // e.g. "Tablet", "Capsule", "Injection", "Syrup"
+      enum: [
+        'Tablet',
+        'Capsule',
+        'Cream',
+        'Drops',
+        'Lotion',
+        'Soap',
+        'Spray',
+        'Oil',
+        'Ayurvedic',
+        'Injection',
+        'Syrup',
+        'IV Fluid',
+        'Surgical',
+      ],
+      trim: true,
     },
     manufacturer: {
       type: String,
@@ -62,7 +109,15 @@ const productSchema = new mongoose.Schema(
   }
 );
 
-// Add text search index for name, brand, composition, and description
-productSchema.index({ name: 'text', brand: 'text', composition: 'text', description: 'text' });
+// Add text search index for name, brand, company, composition, form, and description
+productSchema.index({
+  name: 'text',
+  brand: 'text',
+  company: 'text',
+  composition: 'text',
+  form: 'text',
+  description: 'text',
+});
 
 module.exports = mongoose.model('Product', productSchema);
+

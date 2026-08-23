@@ -1822,26 +1822,26 @@ _Helpline: +91 9316566894_`;
                       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
                         <thead>
                           <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid var(--border-light)', textAlign: 'left' }}>
-                            <th style={{ padding: '10px 12px' }}>Order #</th>
-                            <th style={{ padding: '10px 12px' }}>Store Name</th>
-                            <th style={{ padding: '10px 12px' }}>Date</th>
-                            <th style={{ padding: '10px 12px' }}>Grand Total</th>
-                            <th style={{ padding: '10px 12px' }}>Order Status</th>
-                            <th style={{ padding: '10px 12px' }}>Payment</th>
-                            <th style={{ padding: '10px 12px', textAlign: 'center' }}>Action</th>
+                            <th style={{ padding: '10px 12px', verticalAlign: 'middle' }}>Order #</th>
+                            <th style={{ padding: '10px 12px', verticalAlign: 'middle' }}>Store Name</th>
+                            <th style={{ padding: '10px 12px', verticalAlign: 'middle' }}>Date</th>
+                            <th style={{ padding: '10px 12px', verticalAlign: 'middle' }}>Grand Total</th>
+                            <th style={{ padding: '10px 12px', verticalAlign: 'middle' }}>Order Status</th>
+                            <th style={{ padding: '10px 12px', verticalAlign: 'middle' }}>Payment</th>
+                            <th style={{ padding: '10px 12px', textAlign: 'center', verticalAlign: 'middle' }}>Action</th>
                           </tr>
                         </thead>
                         <tbody>
                           {orders.slice(0, 4).map((ord) => (
                             <tr key={ord._id} style={{ borderBottom: '1px solid var(--border-light)' }}>
-                              <td style={{ padding: '10px 12px', fontWeight: '700', color: 'var(--primary-blue)' }}>{ord.orderNumber}</td>
-                              <td style={{ padding: '10px 12px' }}>
+                              <td style={{ padding: '10px 12px', fontWeight: '700', color: 'var(--primary-blue)', verticalAlign: 'middle' }}>{ord.orderNumber}</td>
+                              <td style={{ padding: '10px 12px', verticalAlign: 'middle' }}>
                                 <div style={{ fontWeight: '600' }}>{ord.shopName}</div>
                                 <div style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>{ord.retailerMobile}</div>
                               </td>
-                              <td style={{ padding: '10px 12px', color: 'var(--text-medium)' }}>{formatDate(ord.createdAt)}</td>
-                              <td style={{ padding: '10px 12px', fontWeight: '700' }}>{formatCurrency(ord.grandTotal)}</td>
-                              <td style={{ padding: '10px 12px' }}>
+                              <td style={{ padding: '10px 12px', color: 'var(--text-medium)', verticalAlign: 'middle' }}>{formatDate(ord.createdAt)}</td>
+                              <td style={{ padding: '10px 12px', fontWeight: '700', verticalAlign: 'middle' }}>{formatCurrency(ord.grandTotal)}</td>
+                              <td style={{ padding: '10px 12px', verticalAlign: 'middle' }}>
                                 <span style={{
                                   padding: '3px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '700',
                                   backgroundColor: ord.orderStatus === 'Delivered' ? 'rgba(34, 197, 94, 0.1)' : ord.orderStatus === 'Dispatched' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(245, 158, 11, 0.1)',
@@ -1850,7 +1850,7 @@ _Helpline: +91 9316566894_`;
                                   {ord.orderStatus || 'Booked'}
                                 </span>
                               </td>
-                              <td style={{ padding: '10px 12px' }}>
+                              <td style={{ padding: '10px 12px', verticalAlign: 'middle' }}>
                                 <span style={{
                                   padding: '3px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '700',
                                   backgroundColor: ord.paymentStatus === 'Paid' ? 'rgba(34, 197, 94, 0.1)' : ord.paymentStatus === 'Partially Paid' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(239, 68, 68, 0.1)',
@@ -1859,11 +1859,11 @@ _Helpline: +91 9316566894_`;
                                   {ord.paymentStatus || 'Pending'}
                                 </span>
                               </td>
-                              <td style={{ padding: '10px 12px', textAlign: 'center' }}>
+                              <td style={{ padding: '10px 12px', textAlign: 'center', verticalAlign: 'middle' }}>
                                 <button 
                                   onClick={() => setSelectedOrder(ord)} 
                                   className="btn btn-outline btn-sm"
-                                  style={{ padding: '4px 10px', fontSize: '0.75rem', gap: '4px' }}
+                                  style={{ padding: '4px 10px', fontSize: '0.75rem', gap: '4px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                                 >
                                   <Eye size={12} /> Details
                                 </button>
@@ -1894,14 +1894,14 @@ _Helpline: +91 9316566894_`;
                       <button 
                         onClick={handleDownloadOrdersCSV} 
                         className="btn btn-outline btn-sm" 
-                        style={{ gap: '6px' }}
+                        style={{ gap: '6px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                       >
                         <Download size={14} /> Export CSV
                       </button>
                       <button 
                         onClick={fetchDashboardData} 
                         className="btn btn-outline btn-sm" 
-                        style={{ gap: '6px' }}
+                        style={{ gap: '6px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                       >
                         <RefreshCw size={14} /> Refresh
                       </button>
@@ -1910,9 +1910,9 @@ _Helpline: +91 9316566894_`;
 
                   {/* Filter Toolbar */}
                   <div className="card" style={{ padding: '20px' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '15px', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'center' }}>
                       {/* Search */}
-                      <div style={{ position: 'relative' }}>
+                      <div style={{ position: 'relative', flex: 1, minWidth: '260px' }}>
                         <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
                         <input 
                           type="text"
@@ -1962,35 +1962,35 @@ _Helpline: +91 9316566894_`;
                       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left' }}>
                         <thead>
                           <tr style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid var(--border-light)' }}>
-                            <th style={{ padding: '12px 14px' }}>Order ID & Date</th>
-                            <th style={{ padding: '12px 14px' }}>Store & Retailer</th>
-                            <th style={{ padding: '12px 14px' }}>Items Summary</th>
-                            <th style={{ padding: '12px 14px' }}>Grand Total</th>
-                            <th style={{ padding: '12px 14px' }}>Order Status</th>
-                            <th style={{ padding: '12px 14px' }}>Payment Status</th>
-                            <th style={{ padding: '12px 14px', textAlign: 'center' }}>Actions</th>
+                            <th style={{ padding: '12px 14px', verticalAlign: 'middle' }}>Order ID & Date</th>
+                            <th style={{ padding: '12px 14px', verticalAlign: 'middle' }}>Store & Retailer</th>
+                            <th style={{ padding: '12px 14px', verticalAlign: 'middle' }}>Items Summary</th>
+                            <th style={{ padding: '12px 14px', verticalAlign: 'middle' }}>Grand Total</th>
+                            <th style={{ padding: '12px 14px', verticalAlign: 'middle' }}>Order Status</th>
+                            <th style={{ padding: '12px 14px', verticalAlign: 'middle' }}>Payment Status</th>
+                            <th style={{ padding: '12px 14px', textAlign: 'center', verticalAlign: 'middle' }}>Actions</th>
                           </tr>
                         </thead>
                         <tbody>
                           {filteredOrders.length === 0 ? (
                             <tr>
-                              <td colSpan={7} style={{ padding: '40px', textAlign: 'center', color: 'var(--text-light)' }}>
+                              <td colSpan={7} style={{ padding: '40px', textAlign: 'center', color: 'var(--text-light)', verticalAlign: 'middle' }}>
                                 No B2B orders match your current filters.
                               </td>
                             </tr>
                           ) : (
                             filteredOrders.map((ord) => (
                               <tr key={ord._id} style={{ borderBottom: '1px solid var(--border-light)' }}>
-                                <td style={{ padding: '12px 14px' }}>
+                                <td style={{ padding: '12px 14px', verticalAlign: 'middle' }}>
                                   <div style={{ fontWeight: '700', color: 'var(--primary-blue)' }}>{ord.orderNumber}</div>
                                   <div style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>{formatDate(ord.createdAt)}</div>
                                 </td>
-                                <td style={{ padding: '12px 14px' }}>
+                                <td style={{ padding: '12px 14px', verticalAlign: 'middle' }}>
                                   <div style={{ fontWeight: '600' }}>{ord.shopName}</div>
                                   <div style={{ fontSize: '0.8rem', color: 'var(--text-medium)' }}>📞 {ord.retailerMobile}</div>
                                   {ord.gstin && <div style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>GSTIN: {ord.gstin}</div>}
                                 </td>
-                                <td style={{ padding: '12px 14px' }}>
+                                <td style={{ padding: '12px 14px', verticalAlign: 'middle' }}>
                                   <div style={{ fontWeight: '600', fontSize: '0.85rem' }}>
                                     {(ord.items || []).length} Product Line{(ord.items || []).length > 1 ? 's' : ''}
                                   </div>
@@ -1998,10 +1998,10 @@ _Helpline: +91 9316566894_`;
                                     {(ord.items || []).map(i => `${i.productName} (${i.boxes}b)`).join(', ')}
                                   </div>
                                 </td>
-                                <td style={{ padding: '12px 14px', fontWeight: '700', color: 'var(--text-dark)' }}>
+                                <td style={{ padding: '12px 14px', fontWeight: '700', color: 'var(--text-dark)', verticalAlign: 'middle' }}>
                                   {formatCurrency(ord.grandTotal)}
                                 </td>
-                                <td style={{ padding: '12px 14px' }}>
+                                <td style={{ padding: '12px 14px', verticalAlign: 'middle' }}>
                                   <select 
                                     value={ord.orderStatus || 'Booked'}
                                     onChange={(e) => handleUpdateOrderStatus(ord._id, e.target.value, null)}
@@ -2018,7 +2018,7 @@ _Helpline: +91 9316566894_`;
                                     <option value="Delivered">Delivered</option>
                                   </select>
                                 </td>
-                                <td style={{ padding: '12px 14px' }}>
+                                <td style={{ padding: '12px 14px', verticalAlign: 'middle' }}>
                                   <select 
                                     value={ord.paymentStatus || 'Pending'}
                                     onChange={(e) => handleUpdateOrderStatus(ord._id, null, e.target.value)}
@@ -2034,12 +2034,12 @@ _Helpline: +91 9316566894_`;
                                     <option value="Paid">Paid</option>
                                   </select>
                                 </td>
-                                <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                                <td style={{ padding: '12px 14px', textAlign: 'center', verticalAlign: 'middle' }}>
                                   <div style={{ display: 'inline-flex', gap: '8px' }}>
                                     <button 
                                       onClick={() => setSelectedOrder(ord)} 
                                       className="btn btn-outline btn-sm"
-                                      style={{ padding: '4px 8px', fontSize: '0.75rem', gap: '4px' }}
+                                      style={{ padding: '4px 8px', fontSize: '0.75rem', gap: '4px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                                       title="View Breakdown"
                                     >
                                       <Eye size={13} /> View
@@ -2049,7 +2049,7 @@ _Helpline: +91 9316566894_`;
                                       target="_blank" 
                                       rel="noopener noreferrer"
                                       className="btn btn-primary btn-sm"
-                                      style={{ padding: '4px 8px', fontSize: '0.75rem', gap: '4px', backgroundColor: '#25D366', borderColor: '#25D366' }}
+                                      style={{ padding: '4px 8px', fontSize: '0.75rem', gap: '4px', backgroundColor: '#25D366', borderColor: '#25D366', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                                       title="Open WhatsApp Dispatch"
                                     >
                                       <Phone size={13} /> WhatsApp
@@ -2117,8 +2117,8 @@ _Helpline: +91 9316566894_`;
 
                   {/* Search & Filter Toolbar */}
                   <div className="card" style={{ padding: '20px' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '15px', alignItems: 'center' }}>
-                      <div style={{ position: 'relative' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'center' }}>
+                      <div style={{ position: 'relative', flex: 1, minWidth: '260px' }}>
                         <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
                         <input 
                           type="text"
@@ -2151,19 +2151,19 @@ _Helpline: +91 9316566894_`;
                       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left' }}>
                         <thead>
                           <tr style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid var(--border-light)' }}>
-                            <th style={{ padding: '12px 14px' }}>Retailer Shop & Mobile</th>
-                            <th style={{ padding: '12px 14px' }}>GSTIN</th>
-                            <th style={{ padding: '12px 14px' }}>Total Billed</th>
-                            <th style={{ padding: '12px 14px' }}>Total Paid</th>
-                            <th style={{ padding: '12px 14px' }}>Outstanding Dues</th>
-                            <th style={{ padding: '12px 14px' }}>Credit Limit</th>
-                            <th style={{ padding: '12px 14px', textAlign: 'center' }}>Actions</th>
+                            <th style={{ padding: '12px 14px', verticalAlign: 'middle' }}>Retailer Shop & Mobile</th>
+                            <th style={{ padding: '12px 14px', verticalAlign: 'middle' }}>GSTIN</th>
+                            <th style={{ padding: '12px 14px', verticalAlign: 'middle' }}>Total Billed</th>
+                            <th style={{ padding: '12px 14px', verticalAlign: 'middle' }}>Total Paid</th>
+                            <th style={{ padding: '12px 14px', verticalAlign: 'middle' }}>Outstanding Dues</th>
+                            <th style={{ padding: '12px 14px', verticalAlign: 'middle' }}>Credit Limit</th>
+                            <th style={{ padding: '12px 14px', textAlign: 'center', verticalAlign: 'middle' }}>Actions</th>
                           </tr>
                         </thead>
                         <tbody>
                           {filteredLedgers.length === 0 ? (
                             <tr>
-                              <td colSpan={7} style={{ padding: '40px', textAlign: 'center', color: 'var(--text-light)' }}>
+                              <td colSpan={7} style={{ padding: '40px', textAlign: 'center', color: 'var(--text-light)', verticalAlign: 'middle' }}>
                                 No retailer ledgers match your search.
                               </td>
                             </tr>
@@ -2180,7 +2180,7 @@ _Helpline: +91 9316566894_`;
                                     backgroundColor: hasOverdue ? 'rgba(239, 68, 68, 0.03)' : 'transparent'
                                   }}
                                 >
-                                  <td style={{ padding: '12px 14px' }}>
+                                  <td style={{ padding: '12px 14px', verticalAlign: 'middle' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                       <strong style={{ color: 'var(--text-dark)' }}>{ledger.shopName}</strong>
                                       {hasOverdue && (
@@ -2191,16 +2191,16 @@ _Helpline: +91 9316566894_`;
                                     </div>
                                     <div style={{ fontSize: '0.8rem', color: 'var(--text-medium)' }}>📞 {ledger.retailerMobile}</div>
                                   </td>
-                                  <td style={{ padding: '12px 14px', fontSize: '0.8rem', fontFamily: 'monospace', color: 'var(--text-medium)' }}>
+                                  <td style={{ padding: '12px 14px', fontSize: '0.8rem', fontFamily: 'monospace', color: 'var(--text-medium)', verticalAlign: 'middle' }}>
                                     {ledger.gstin || 'N/A'}
                                   </td>
-                                  <td style={{ padding: '12px 14px', fontWeight: '600' }}>
+                                  <td style={{ padding: '12px 14px', fontWeight: '600', verticalAlign: 'middle' }}>
                                     {formatCurrency(ledger.totalBilled)}
                                   </td>
-                                  <td style={{ padding: '12px 14px', color: 'var(--secondary-green)', fontWeight: '600' }}>
+                                  <td style={{ padding: '12px 14px', color: 'var(--secondary-green)', fontWeight: '600', verticalAlign: 'middle' }}>
                                     {formatCurrency(ledger.totalPaid)}
                                   </td>
-                                  <td style={{ padding: '12px 14px' }}>
+                                  <td style={{ padding: '12px 14px', verticalAlign: 'middle' }}>
                                     <span style={{
                                       fontWeight: '800',
                                       color: hasOverdue ? '#ef4444' : hasDues ? '#d97706' : 'var(--secondary-green)',
@@ -2209,7 +2209,7 @@ _Helpline: +91 9316566894_`;
                                       {formatCurrency(ledger.outstandingBalance)}
                                     </span>
                                   </td>
-                                  <td style={{ padding: '12px 14px', fontSize: '0.85rem' }}>
+                                  <td style={{ padding: '12px 14px', fontSize: '0.85rem', verticalAlign: 'middle' }}>
                                     <div>{formatCurrency(ledger.creditLimit || 100000)}</div>
                                     <div style={{ 
                                       height: '5px', width: '100px', backgroundColor: '#e2e8f0', borderRadius: '3px', marginTop: '4px', overflow: 'hidden' 
@@ -2221,12 +2221,12 @@ _Helpline: +91 9316566894_`;
                                       }}></div>
                                     </div>
                                   </td>
-                                  <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                                  <td style={{ padding: '12px 14px', textAlign: 'center', verticalAlign: 'middle' }}>
                                     <div style={{ display: 'inline-flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'center' }}>
                                       <button 
                                         onClick={() => setSelectedLedger(ledger)}
                                         className="btn btn-outline btn-sm"
-                                        style={{ padding: '4px 8px', fontSize: '0.75rem', gap: '4px' }}
+                                        style={{ padding: '4px 8px', fontSize: '0.75rem', gap: '4px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                                         title="View Full Invoices Statement"
                                       >
                                         <FileText size={12} /> Statement
@@ -2235,7 +2235,7 @@ _Helpline: +91 9316566894_`;
                                       <button 
                                         onClick={() => handleOpenPaymentModal(ledger)}
                                         className="btn btn-secondary btn-sm"
-                                        style={{ padding: '4px 8px', fontSize: '0.75rem', gap: '4px' }}
+                                        style={{ padding: '4px 8px', fontSize: '0.75rem', gap: '4px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                                         title="Record Manual Payment"
                                       >
                                         <Plus size={12} /> Pay
@@ -2244,7 +2244,7 @@ _Helpline: +91 9316566894_`;
                                       <button 
                                         onClick={() => handleSendStatementWhatsApp(ledger)}
                                         className="btn btn-primary btn-sm"
-                                        style={{ padding: '4px 8px', fontSize: '0.75rem', gap: '4px', backgroundColor: '#25D366', borderColor: '#25D366' }}
+                                        style={{ padding: '4px 8px', fontSize: '0.75rem', gap: '4px', backgroundColor: '#25D366', borderColor: '#25D366', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                                         title="Send WhatsApp Dues Reminder"
                                       >
                                         <Phone size={12} /> Dues

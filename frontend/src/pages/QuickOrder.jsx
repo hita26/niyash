@@ -1898,10 +1898,10 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                   <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '750px' }}>
                     <thead>
                       <tr style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid #e2e8f0', color: '#0c3d6c', fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                        <th style={{ padding: '12px 14px', width: '38%' }}>Product & Composition</th>
-                        <th style={{ padding: '12px 12px', width: '16%' }}>Pack & MOQ</th>
-                        <th style={{ padding: '12px 12px', width: '18%' }}>Wholesale PTR & Scheme</th>
-                        <th style={{ padding: '12px 12px', width: '28%' }}>Box Qty Stepper & Total</th>
+                        <th style={{ padding: '12px 14px', width: '38%', verticalAlign: 'middle' }}>Product & Composition</th>
+                        <th style={{ padding: '12px 12px', width: '16%', verticalAlign: 'middle' }}>Pack & MOQ</th>
+                        <th style={{ padding: '12px 12px', width: '18%', verticalAlign: 'middle' }}>Wholesale PTR & Scheme</th>
+                        <th style={{ padding: '12px 12px', width: '28%', verticalAlign: 'middle' }}>Box Qty Stepper & Total</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1926,7 +1926,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                             }}
                           >
                             {/* Column 1: Product & Composition */}
-                            <td style={{ padding: '12px 14px', verticalAlign: 'top' }}>
+                            <td style={{ padding: '14px 14px', verticalAlign: 'middle' }}>
                               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
                                 <input
                                   type="checkbox"
@@ -1938,7 +1938,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                                       setBoxQty(product._id, 0);
                                     }
                                   }}
-                                  style={{ marginTop: '4px', cursor: 'pointer', accentColor: '#0c3d6c' }}
+                                  style={{ marginTop: '3px', cursor: 'pointer', accentColor: '#0c3d6c' }}
                                 />
                                 <div>
                                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
@@ -1973,7 +1973,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                             </td>
 
                             {/* Column 2: Pack & MOQ */}
-                            <td style={{ padding: '12px 12px', verticalAlign: 'top' }}>
+                            <td style={{ padding: '14px 12px', verticalAlign: 'middle' }}>
                               <div style={{ fontSize: '0.82rem', fontWeight: '700', color: '#334155' }}>
                                 {product.packing || `${unitsPerBox} Units/Box`}
                               </div>
@@ -1998,7 +1998,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                             </td>
 
                             {/* Column 3: PTR & Schemes */}
-                            <td style={{ padding: '12px 12px', verticalAlign: 'top' }}>
+                            <td style={{ padding: '14px 12px', verticalAlign: 'middle' }}>
                               <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
                                 <span style={{ fontSize: '0.95rem', fontWeight: '800', color: '#0c3d6c' }}>
                                   ₹{product.price?.toFixed(2)}
@@ -2034,17 +2034,17 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                             </td>
 
                             {/* Column 4: Stepper & Calculated Total */}
-                            <td style={{ padding: '12px 12px', verticalAlign: 'top' }}>
+                            <td style={{ padding: '14px 12px', verticalAlign: 'middle' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                                 {/* Stepper Box */}
-                                <div style={{ display: 'inline-flex', alignItems: 'center', border: '1px solid #cbd5e1', borderRadius: '6px', overflow: 'hidden', backgroundColor: '#ffffff' }}>
+                                <div style={{ display: 'inline-flex', alignItems: 'center', border: '1px solid #cbd5e1', borderRadius: '6px', overflow: 'hidden', backgroundColor: '#ffffff', height: '30px' }}>
                                   <button
                                     onClick={() => decrementBoxQty(product._id)}
                                     disabled={boxQty === 0}
                                     style={{
                                       width: '28px',
                                       height: '30px',
-                                      display: 'flex',
+                                      display: 'inline-flex',
                                       alignItems: 'center',
                                       justifyContent: 'center',
                                       backgroundColor: boxQty === 0 ? '#f1f5f9' : '#e2e8f0',
@@ -2064,11 +2064,14 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                                     style={{
                                       width: '45px',
                                       height: '30px',
+                                      lineHeight: '30px',
                                       textAlign: 'center',
                                       border: 'none',
                                       fontSize: '0.88rem',
                                       fontWeight: '700',
                                       outline: 'none',
+                                      padding: 0,
+                                      margin: 0,
                                       color: boxQty > 0 ? '#0c3d6c' : '#94a3b8'
                                     }}
                                   />
@@ -2077,7 +2080,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                                     style={{
                                       width: '28px',
                                       height: '30px',
-                                      display: 'flex',
+                                      display: 'inline-flex',
                                       alignItems: 'center',
                                       justifyContent: 'center',
                                       backgroundColor: '#0c3d6c',
@@ -2095,14 +2098,18 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                                   onClick={() => incrementBoxQty(product._id, 5)}
                                   title="Add +5 Boxes"
                                   style={{
-                                    padding: '4px 8px',
-                                    borderRadius: '4px',
-                                    fontSize: '0.72rem',
+                                    height: '30px',
+                                    padding: '0 10px',
+                                    borderRadius: '6px',
+                                    fontSize: '0.75rem',
                                     fontWeight: '700',
                                     backgroundColor: '#f1f5f9',
                                     color: '#475569',
                                     border: '1px solid #cbd5e1',
-                                    cursor: 'pointer'
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
                                   }}
                                 >
                                   +5
@@ -2111,14 +2118,18 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                                   onClick={() => incrementBoxQty(product._id, 10)}
                                   title="Add +10 Boxes"
                                   style={{
-                                    padding: '4px 8px',
-                                    borderRadius: '4px',
-                                    fontSize: '0.72rem',
+                                    height: '30px',
+                                    padding: '0 10px',
+                                    borderRadius: '6px',
+                                    fontSize: '0.75rem',
                                     fontWeight: '700',
                                     backgroundColor: '#f1f5f9',
                                     color: '#475569',
                                     border: '1px solid #cbd5e1',
-                                    cursor: 'pointer'
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
                                   }}
                                 >
                                   +10
@@ -2127,14 +2138,18 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                                   onClick={() => setMoqQty(product)}
                                   title={`Set to MOQ (${product.minReorderQty || 1})`}
                                   style={{
-                                    padding: '4px 8px',
-                                    borderRadius: '4px',
-                                    fontSize: '0.72rem',
+                                    height: '30px',
+                                    padding: '0 10px',
+                                    borderRadius: '6px',
+                                    fontSize: '0.75rem',
                                     fontWeight: '700',
                                     backgroundColor: '#eff6ff',
                                     color: '#1b75bc',
                                     border: '1px solid #bfdbfe',
-                                    cursor: 'pointer'
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
                                   }}
                                 >
                                   MOQ

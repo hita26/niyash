@@ -373,16 +373,20 @@ button {
 
 .nav-links {
   display: flex;
+  align-items: center;
   list-style: none;
   gap: 4px;
 }
 
 .nav-item {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .nav-link {
-  display: block;
+  display: inline-flex;
+  align-items: center;
   padding: 18px 12px;
   font-weight: 600;
   color: var(--text-dark);

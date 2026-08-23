@@ -63,11 +63,11 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             </button>
           </form>
 
-          {/* Header Action Buttons */}
+            {/* Header Action Buttons */}
           <div className="header-actions">
             {user ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', borderRight: '1px solid var(--border-light)', paddingRight: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: '700', color: 'var(--primary-blue)' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: '700', color: 'var(--primary-blue)' }}>
                   <User size={16} />
                   <span style={{ maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {user.name.split(' ')[0]}
@@ -76,7 +76,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 <button 
                   onClick={onLogout} 
                   title="Log Out"
-                  style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'none', border: 'none', color: 'var(--text-medium)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600' }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'none', border: 'none', color: 'var(--text-medium)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600' }}
                 >
                   <LogOut size={15} />
                 </button>
@@ -85,9 +85,9 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               <button 
                 onClick={onOpenAuth}
                 className="btn btn-outline btn-sm"
-                style={{ padding: '8px 15px', borderRadius: '30px', fontWeight: '700', border: '1px solid var(--primary-blue)', color: 'var(--primary-blue)', cursor: 'pointer' }}
+                style={{ padding: '7px 16px', borderRadius: '30px', fontWeight: '700', border: '1.5px solid var(--primary-blue)', color: 'var(--primary-blue)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
               >
-                <LogIn size={13} style={{ marginRight: '4px' }} /> Log In
+                <LogIn size={14} /> <span>Log In</span>
               </button>
             )}
 
@@ -137,17 +137,17 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               </ul>
             </li>
             <li className="nav-item">
-              <Link to="/quick-order" className={`nav-link ${isActive('/quick-order') || isActive('/order')}`} style={{ color: 'var(--primary-blue)', fontWeight: '800', backgroundColor: '#eff6ff', padding: '5px 12px', borderRadius: '16px', border: '1px solid #bfdbfe' }}>
+              <Link to="/quick-order" className={`nav-link ${isActive('/quick-order') || isActive('/order')}`} style={{ color: 'var(--primary-blue)', fontWeight: '800', backgroundColor: '#eff6ff', padding: '6px 14px', borderRadius: '16px', border: '1px solid #bfdbfe', display: 'inline-flex', alignItems: 'center', gap: '4px', margin: 'auto 0' }}>
                 ⚡ Quick Order
               </Link>
             </li>
             <li className="nav-item">
-              <Link to="/news" className={`nav-link ${isActive('/news') || isActive('/schemes')}`} style={{ color: '#ea580c', fontWeight: '700' }}>
+              <Link to="/news" className={`nav-link ${isActive('/news') || isActive('/schemes')}`} style={{ color: '#ea580c', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                 🔥 Schemes & News
               </Link>
             </li>
             <li className="nav-item">
-              <Link to="/ledger" className={`nav-link ${isActive('/ledger') || isActive('/outstanding')}`} style={{ color: 'var(--primary-blue)', fontWeight: '700' }}>
+              <Link to="/ledger" className={`nav-link ${isActive('/ledger') || isActive('/outstanding')}`} style={{ color: 'var(--primary-blue)', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                 📊 Outstanding Ledger
               </Link>
             </li>

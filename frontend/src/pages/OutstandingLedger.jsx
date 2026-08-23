@@ -1298,14 +1298,14 @@ Rajkot, Gujarat`);
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
               <thead>
                 <tr style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid #e2e8f0', color: '#475569' }}>
-                  <th style={{ padding: '12px 14px', fontWeight: 700 }}>Invoice No</th>
-                  <th style={{ padding: '12px 14px', fontWeight: 700 }}>Invoice Date</th>
-                  <th style={{ padding: '12px 14px', fontWeight: 700 }}>Due Date</th>
-                  <th style={{ padding: '12px 14px', fontWeight: 700, textAlign: 'right' }}>Total Amount</th>
-                  <th style={{ padding: '12px 14px', fontWeight: 700, textAlign: 'right' }}>Paid Amount</th>
-                  <th style={{ padding: '12px 14px', fontWeight: 700, textAlign: 'right' }}>Balance Due</th>
-                  <th style={{ padding: '12px 14px', fontWeight: 700, textAlign: 'center' }}>Status</th>
-                  <th className="no-print" style={{ padding: '12px 14px', fontWeight: 700, textAlign: 'center' }}>Action</th>
+                  <th style={{ padding: '12px 14px', fontWeight: 700, verticalAlign: 'middle' }}>Invoice No</th>
+                  <th style={{ padding: '12px 14px', fontWeight: 700, verticalAlign: 'middle' }}>Invoice Date</th>
+                  <th style={{ padding: '12px 14px', fontWeight: 700, verticalAlign: 'middle' }}>Due Date</th>
+                  <th style={{ padding: '12px 14px', fontWeight: 700, textAlign: 'right', verticalAlign: 'middle' }}>Total Amount</th>
+                  <th style={{ padding: '12px 14px', fontWeight: 700, textAlign: 'right', verticalAlign: 'middle' }}>Paid Amount</th>
+                  <th style={{ padding: '12px 14px', fontWeight: 700, textAlign: 'right', verticalAlign: 'middle' }}>Balance Due</th>
+                  <th style={{ padding: '12px 14px', fontWeight: 700, textAlign: 'center', verticalAlign: 'middle' }}>Status</th>
+                  <th className="no-print" style={{ padding: '12px 14px', fontWeight: 700, textAlign: 'center', verticalAlign: 'middle' }}>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -1320,13 +1320,13 @@ Rajkot, Gujarat`);
                           backgroundColor: idx % 2 === 0 ? '#ffffff' : '#fafafa'
                         }}
                       >
-                        <td style={{ padding: '12px 14px', fontWeight: 700, color: '#0c3d6c', fontFamily: 'monospace' }}>
+                        <td style={{ padding: '12px 14px', fontWeight: 700, color: '#0c3d6c', fontFamily: 'monospace', verticalAlign: 'middle' }}>
                           {inv.invoiceNumber}
                         </td>
-                        <td style={{ padding: '12px 14px', color: '#64748b' }}>
+                        <td style={{ padding: '12px 14px', color: '#64748b', verticalAlign: 'middle' }}>
                           {formatDate(inv.date)}
                         </td>
-                        <td style={{ padding: '12px 14px', color: isOverdue ? '#dc2626' : '#64748b', fontWeight: isOverdue ? 700 : 500 }}>
+                        <td style={{ padding: '12px 14px', color: isOverdue ? '#dc2626' : '#64748b', fontWeight: isOverdue ? 700 : 500, verticalAlign: 'middle' }}>
                           {formatDate(inv.dueDate)}
                           {isOverdue && (
                             <span style={{ display: 'block', fontSize: '0.72rem', color: '#dc2626' }}>
@@ -1334,16 +1334,16 @@ Rajkot, Gujarat`);
                             </span>
                           )}
                         </td>
-                        <td style={{ padding: '12px 14px', textAlign: 'right', fontWeight: 700, color: '#1e293b' }}>
+                        <td style={{ padding: '12px 14px', textAlign: 'right', fontWeight: 700, color: '#1e293b', verticalAlign: 'middle' }}>
                           {formatINR(inv.amount)}
                         </td>
-                        <td style={{ padding: '12px 14px', textAlign: 'right', color: '#16a34a', fontWeight: 600 }}>
+                        <td style={{ padding: '12px 14px', textAlign: 'right', color: '#16a34a', fontWeight: 600, verticalAlign: 'middle' }}>
                           {formatINR(inv.paidAmount || 0)}
                         </td>
-                        <td style={{ padding: '12px 14px', textAlign: 'right', fontWeight: 800, color: inv.balance > 0 ? '#0c3d6c' : '#16a34a' }}>
+                        <td style={{ padding: '12px 14px', textAlign: 'right', fontWeight: 800, color: inv.balance > 0 ? '#0c3d6c' : '#16a34a', verticalAlign: 'middle' }}>
                           {formatINR(inv.balance)}
                         </td>
-                        <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                        <td style={{ padding: '12px 14px', textAlign: 'center', verticalAlign: 'middle' }}>
                           <span
                             style={{
                               padding: '4px 10px',
@@ -1371,7 +1371,7 @@ Rajkot, Gujarat`);
                             {inv.status === 'Paid' ? 'Paid' : isOverdue ? 'Overdue' : inv.status || 'Pending'}
                           </span>
                         </td>
-                        <td className="no-print" style={{ padding: '12px 14px', textAlign: 'center' }}>
+                        <td className="no-print" style={{ padding: '12px 14px', textAlign: 'center', verticalAlign: 'middle' }}>
                           {inv.balance > 0 ? (
                             <button
                               onClick={() => openPaymentModal(inv.balance, inv.invoiceNumber)}
@@ -1402,7 +1402,7 @@ Rajkot, Gujarat`);
                   })
                 ) : (
                   <tr>
-                    <td colSpan={8} style={{ padding: '30px', textAlign: 'center', color: '#94a3b8' }}>
+                    <td colSpan={8} style={{ padding: '30px', textAlign: 'center', color: '#94a3b8', verticalAlign: 'middle' }}>
                       No invoices found matching your filter criteria.
                     </td>
                   </tr>
@@ -1476,13 +1476,13 @@ Rajkot, Gujarat`);
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
               <thead>
                 <tr style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid #e2e8f0', color: '#475569' }}>
-                  <th style={{ padding: '12px 14px', fontWeight: 700 }}>Receipt / Payment ID</th>
-                  <th style={{ padding: '12px 14px', fontWeight: 700 }}>Payment Date</th>
-                  <th style={{ padding: '12px 14px', fontWeight: 700, textAlign: 'right' }}>Amount Paid</th>
-                  <th style={{ padding: '12px 14px', fontWeight: 700, textAlign: 'center' }}>Method</th>
-                  <th style={{ padding: '12px 14px', fontWeight: 700 }}>Reference / UTR No</th>
-                  <th style={{ padding: '12px 14px', fontWeight: 700 }}>Notes & Allocation</th>
-                  <th className="no-print" style={{ padding: '12px 14px', fontWeight: 700, textAlign: 'center' }}>Receipt</th>
+                  <th style={{ padding: '12px 14px', fontWeight: 700, verticalAlign: 'middle' }}>Receipt / Payment ID</th>
+                  <th style={{ padding: '12px 14px', fontWeight: 700, verticalAlign: 'middle' }}>Payment Date</th>
+                  <th style={{ padding: '12px 14px', fontWeight: 700, textAlign: 'right', verticalAlign: 'middle' }}>Amount Paid</th>
+                  <th style={{ padding: '12px 14px', fontWeight: 700, textAlign: 'center', verticalAlign: 'middle' }}>Method</th>
+                  <th style={{ padding: '12px 14px', fontWeight: 700, verticalAlign: 'middle' }}>Reference / UTR No</th>
+                  <th style={{ padding: '12px 14px', fontWeight: 700, verticalAlign: 'middle' }}>Notes & Allocation</th>
+                  <th className="no-print" style={{ padding: '12px 14px', fontWeight: 700, textAlign: 'center', verticalAlign: 'middle' }}>Receipt</th>
                 </tr>
               </thead>
               <tbody>
@@ -1495,16 +1495,16 @@ Rajkot, Gujarat`);
                         backgroundColor: idx % 2 === 0 ? '#ffffff' : '#fafafa'
                       }}
                     >
-                      <td style={{ padding: '12px 14px', fontWeight: 700, color: '#0c3d6c', fontFamily: 'monospace' }}>
+                      <td style={{ padding: '12px 14px', fontWeight: 700, color: '#0c3d6c', fontFamily: 'monospace', verticalAlign: 'middle' }}>
                         {pmt.paymentId}
                       </td>
-                      <td style={{ padding: '12px 14px', color: '#64748b' }}>
+                      <td style={{ padding: '12px 14px', color: '#64748b', verticalAlign: 'middle' }}>
                         {formatDate(pmt.date)}
                       </td>
-                      <td style={{ padding: '12px 14px', textAlign: 'right', fontWeight: 800, color: '#16a34a' }}>
+                      <td style={{ padding: '12px 14px', textAlign: 'right', fontWeight: 800, color: '#16a34a', verticalAlign: 'middle' }}>
                         {formatINR(pmt.amount)}
                       </td>
-                      <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                      <td style={{ padding: '12px 14px', textAlign: 'center', verticalAlign: 'middle' }}>
                         <span
                           style={{
                             padding: '4px 10px',
@@ -1518,13 +1518,13 @@ Rajkot, Gujarat`);
                           {pmt.method === 'UPI' ? '⚡ UPI' : pmt.method === 'Card' ? '💳 Card' : pmt.method === 'NetBanking' ? '🏛️ NetBank' : '📄 Cheque'}
                         </span>
                       </td>
-                      <td style={{ padding: '12px 14px', fontFamily: 'monospace', fontSize: '0.82rem', color: '#475569' }}>
+                      <td style={{ padding: '12px 14px', fontFamily: 'monospace', fontSize: '0.82rem', color: '#475569', verticalAlign: 'middle' }}>
                         {pmt.transactionRef || '-'}
                       </td>
-                      <td style={{ padding: '12px 14px', fontSize: '0.82rem', color: '#64748b' }}>
+                      <td style={{ padding: '12px 14px', fontSize: '0.82rem', color: '#64748b', verticalAlign: 'middle' }}>
                         {pmt.notes || 'Reconciled FIFO settlement'}
                       </td>
-                      <td className="no-print" style={{ padding: '12px 14px', textAlign: 'center' }}>
+                      <td className="no-print" style={{ padding: '12px 14px', textAlign: 'center', verticalAlign: 'middle' }}>
                         <button
                           onClick={() => setSelectedReceipt(pmt)}
                           style={{
@@ -1548,7 +1548,7 @@ Rajkot, Gujarat`);
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={7} style={{ padding: '30px', textAlign: 'center', color: '#94a3b8' }}>
+                    <td colSpan={7} style={{ padding: '30px', textAlign: 'center', color: '#94a3b8', verticalAlign: 'middle' }}>
                       No payment records found.
                     </td>
                   </tr>

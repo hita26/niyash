@@ -6,6 +6,8 @@ frontend/node_modules/
 # Local database storage
 backend/db_data/
 backend/mongod.log
+data/
+backend/scripts/extractedData.json
 
 # Build outputs
 dist/

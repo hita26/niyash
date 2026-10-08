@@ -1408,6 +1408,27 @@ Rajkot, Gujarat`);
                   </tr>
                 )}
               </tbody>
+              {filteredInvoices.length > 0 && (
+                <tfoot>
+                  <tr style={{ backgroundColor: '#f1f5f9', borderTop: '2px solid #cbd5e1', fontWeight: 800, color: '#0f172a' }}>
+                    <td colSpan={3} style={{ padding: '12px 14px', verticalAlign: 'middle' }}>
+                      Totals ({filteredInvoices.length} {filteredInvoices.length === 1 ? 'Invoice' : 'Invoices'})
+                    </td>
+                    <td style={{ padding: '12px 14px', textAlign: 'right', verticalAlign: 'middle' }} className="tabular-nums">
+                      {formatINR(filteredInvoices.reduce((sum, inv) => sum + (inv.amount || 0), 0))}
+                    </td>
+                    <td style={{ padding: '12px 14px', textAlign: 'right', color: '#16a34a', verticalAlign: 'middle' }} className="tabular-nums">
+                      {formatINR(filteredInvoices.reduce((sum, inv) => sum + (inv.paidAmount || 0), 0))}
+                    </td>
+                    <td style={{ padding: '12px 14px', textAlign: 'right', color: '#0c3d6c', verticalAlign: 'middle' }} className="tabular-nums">
+                      {formatINR(filteredInvoices.reduce((sum, inv) => sum + (inv.balance || 0), 0))}
+                    </td>
+                    <td colSpan={2} style={{ padding: '12px 14px', textAlign: 'center', color: '#64748b', fontSize: '0.8rem' }}>
+                      Reconciled Live
+                    </td>
+                  </tr>
+                </tfoot>
+              )}
             </table>
           </div>
         </div>
@@ -1554,6 +1575,21 @@ Rajkot, Gujarat`);
                   </tr>
                 )}
               </tbody>
+              {filteredPayments.length > 0 && (
+                <tfoot>
+                  <tr style={{ backgroundColor: '#f1f5f9', borderTop: '2px solid #cbd5e1', fontWeight: 800, color: '#0f172a' }}>
+                    <td colSpan={2} style={{ padding: '12px 14px', verticalAlign: 'middle' }}>
+                      Total Payments ({filteredPayments.length} {filteredPayments.length === 1 ? 'Transaction' : 'Transactions'})
+                    </td>
+                    <td style={{ padding: '12px 14px', textAlign: 'right', color: '#16a34a', verticalAlign: 'middle' }} className="tabular-nums">
+                      {formatINR(filteredPayments.reduce((sum, pmt) => sum + (pmt.amount || 0), 0))}
+                    </td>
+                    <td colSpan={4} style={{ padding: '12px 14px', textAlign: 'left', color: '#64748b', fontSize: '0.8rem' }}>
+                      Reconciled FIFO Payments
+                    </td>
+                  </tr>
+                </tfoot>
+              )}
             </table>
           </div>
         </div>

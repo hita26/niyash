@@ -41,37 +41,48 @@ function ProductCard({ product, addToCart }) {
 
       {/* Product Details */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
-        <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', fontWeight: '600', textTransform: 'uppercase' }}>
-          {product.category}
+        <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          {product.category || 'Pharmaceutical'}
         </span>
         <Link to={`/products/${product._id}`}>
           <h3 
             style={{
-              fontSize: '1rem', fontWeight: '700', color: 'var(--text-dark)', height: '40px',
+              fontSize: '0.98rem', fontWeight: '700', color: 'var(--text-dark)', minHeight: '2.6rem',
               overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-              lineHeight: '1.3', marginBottom: '8px'
+              lineHeight: '1.3', marginBottom: '4px'
             }}
           >
             {product.name}
           </h3>
         </Link>
         
-        <p style={{ fontSize: '0.85rem', color: 'var(--text-medium)', marginBottom: '5px' }}>
-          Packing: <strong style={{ color: 'var(--text-dark)' }}>{product.packing}</strong>
+        <p style={{ fontSize: '0.82rem', color: 'var(--text-medium)', marginBottom: '4px' }}>
+          Packing: <strong style={{ color: 'var(--text-dark)' }}>{product.packing || 'Standard'}</strong>
         </p>
 
         {product.composition && (
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-medium)', marginBottom: '5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={product.composition}>
-            Composition: <span style={{ fontStyle: 'italic' }}>{product.composition}</span>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={product.composition}>
+            Composition: <span style={{ fontStyle: 'italic', color: 'var(--text-medium)' }}>{product.composition}</span>
           </p>
         )}
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '10px 0' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 'auto', paddingTop: '10px' }}>
           <div>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', display: 'block' }}>Wholesale Estimate</span>
-            <span style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--primary-blue)' }}>
+            {product.mrp && product.mrp > product.price ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', textDecoration: 'line-through' }} className="tabular-nums">
+                  MRP ₹{product.mrp.toFixed(2)}
+                </span>
+                <span style={{ fontSize: '0.7rem', backgroundColor: '#ecfdf5', color: '#059669', fontWeight: '700', padding: '1px 6px', borderRadius: '4px' }}>
+                  {Math.round(((product.mrp - product.price) / product.mrp) * 100)}% MARGIN
+                </span>
+              </div>
+            ) : (
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', display: 'block' }}>Wholesale Rate</span>
+            )}
+            <span style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--primary-blue)' }} className="tabular-nums">
               ₹{product.price.toFixed(2)}
-              <span style={{ fontSize: '0.8rem', fontWeight: '400', color: 'var(--text-medium)' }}>/strip</span>
+              <span style={{ fontSize: '0.78rem', fontWeight: '400', color: 'var(--text-medium)' }}> /unit</span>
             </span>
           </div>
 

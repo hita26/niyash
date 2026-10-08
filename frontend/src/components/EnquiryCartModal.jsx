@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Trash2, Plus, Minus, Send, CheckCircle } from 'lucide-react';
+import { X, Trash2, Plus, Minus, Send, CheckCircle, ShoppingBag } from 'lucide-react';
 
 function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFromCart, clearCart, user, token, onOpenAuth }) {
   const [name, setName] = useState('');
@@ -114,7 +114,7 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
             </div>
           ) : cartItems.length === 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '15px', color: 'var(--text-light)' }}>
-              <ShoppingBagIcon size={64} />
+              <ShoppingBag size={64} strokeWidth={1.5} />
               <p>Your quote enquiry list is empty.</p>
               <button 
                 onClick={onClose} 
@@ -158,7 +158,7 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
                       <button 
                         onClick={() => removeFromCart(item.product._id)} 
-                        style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}
+                        style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}
                         aria-label="Remove item"
                       >
                         <Trash2 size={16} />
@@ -167,20 +167,20 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                       <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #cbd5e1', borderRadius: '4px', overflow: 'hidden' }}>
                         <button 
                           onClick={() => updateQuantity(item.product._id, item.quantity - 1)}
-                          style={{ padding: '2px 6px', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', border: 'none', cursor: 'pointer' }}
+                          style={{ minWidth: '32px', minHeight: '32px', padding: '6px 10px', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer' }}
                           aria-label="Decrease quantity"
                         >
-                          <Minus size={12} />
+                          <Minus size={13} />
                         </button>
-                        <span style={{ width: '30px', textAlign: 'center', fontSize: '0.85rem', fontWeight: '600' }}>
+                        <span style={{ minWidth: '32px', textAlign: 'center', fontSize: '0.85rem', fontWeight: '600' }} className="tabular-nums">
                           {item.quantity}
                         </span>
                         <button 
                           onClick={() => updateQuantity(item.product._id, item.quantity + 1)}
-                          style={{ padding: '2px 6px', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', border: 'none', cursor: 'pointer' }}
+                          style={{ minWidth: '32px', minHeight: '32px', padding: '6px 10px', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer' }}
                           aria-label="Increase quantity"
                         >
-                          <Plus size={12} />
+                          <Plus size={13} />
                         </button>
                       </div>
                     </div>
@@ -297,17 +297,6 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
         </div>
       </div>
     </div>
-  );
-}
-
-// Inline component for empty cart bag icon
-function ShoppingBagIcon({ size }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-      <line x1="3" y1="6" x2="21" y2="6" />
-      <path d="M16 10a4 4 0 0 1-8 0" />
-    </svg>
   );
 }
 

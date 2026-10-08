@@ -593,7 +593,7 @@ _Support: +91 9316566894_`;
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(4, 1fr)',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
                   gap: '8px',
                   marginBottom: '20px',
                   backgroundColor: '#f1f5f9',
@@ -728,7 +728,7 @@ _Support: +91 9316566894_`;
                   <div
                     style={{
                       display: 'grid',
-                      gridTemplateColumns: '1fr 1fr',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
                       gap: '20px',
                       backgroundColor: '#f8fafc',
                       padding: '20px',
@@ -1098,7 +1098,7 @@ _Support: +91 9316566894_`;
                   </div>
 
                   {/* Popular Banks Grid */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '10px' }}>
                     {TOP_BANKS.map((bank) => {
                       const isSelected = selectedBank === bank.id;
                       return (
@@ -1663,7 +1663,7 @@ _Support: +91 9316566894_`;
               </div>
 
               {/* Action Buttons */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px' }}>
                 <button
                   type="button"
                   onClick={shareReceiptWhatsApp}

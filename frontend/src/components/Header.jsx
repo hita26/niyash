@@ -137,38 +137,41 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               </ul>
             </li>
             <li className="nav-item">
-              <Link to="/quick-order" className={`nav-link ${isActive('/quick-order') || isActive('/order')}`} style={{ color: 'var(--primary-blue)', fontWeight: '800', backgroundColor: '#eff6ff', padding: '6px 14px', borderRadius: '16px', border: '1px solid #bfdbfe', display: 'inline-flex', alignItems: 'center', margin: 'auto 0' }}>
+              <Link 
+                to="/quick-order" 
+                className={`nav-pill-link nav-pill-order ${isActive('/quick-order') || isActive('/order') ? 'active' : ''}`}
+              >
                 Quick Order
               </Link>
             </li>
             <li className="nav-item">
-              <Link to="/news" className={`nav-link ${isActive('/news') || isActive('/schemes')}`} style={{ color: '#ea580c', fontWeight: '700', display: 'inline-flex', alignItems: 'center' }}>
+              <Link to="/news" className={`nav-link ${isActive('/news') || isActive('/schemes') ? 'active' : ''}`} style={{ color: '#ea580c', fontWeight: '700', display: 'inline-flex', alignItems: 'center' }}>
                 Schemes & News
               </Link>
             </li>
             <li className="nav-item">
-              <Link to="/ledger" className={`nav-link ${isActive('/ledger') || isActive('/outstanding')}`} style={{ color: 'var(--primary-blue)', fontWeight: '700', display: 'inline-flex', alignItems: 'center' }}>
+              <Link to="/ledger" className={`nav-link ${isActive('/ledger') || isActive('/outstanding') ? 'active' : ''}`} style={{ color: 'var(--primary-blue)', fontWeight: '700', display: 'inline-flex', alignItems: 'center' }}>
                 Outstanding Ledger
               </Link>
             </li>
             <li className="nav-item">
-              <Link to="/manufacturing" className={`nav-link ${isActive('/manufacturing')}`}>Manufacturing</Link>
+              <Link to="/manufacturing" className={`nav-link ${isActive('/manufacturing') ? 'active' : ''}`}>Manufacturing</Link>
             </li>
             <li className="nav-item">
-              <Link to="/partner" className={`nav-link ${isActive('/partner')}`}>Partner With Us</Link>
+              <Link to="/partner" className={`nav-link ${isActive('/partner') ? 'active' : ''}`}>Partner With Us</Link>
             </li>
             <li className="nav-item">
-              <Link to="/supplier" className={`nav-link ${isActive('/supplier')}`}>Supplier</Link>
+              <Link to="/supplier" className={`nav-link ${isActive('/supplier') ? 'active' : ''}`}>Supplier</Link>
             </li>
             <li className="nav-item">
-              <Link to="/career" className={`nav-link ${isActive('/career')}`}>Career With Us</Link>
+              <Link to="/career" className={`nav-link ${isActive('/career') ? 'active' : ''}`}>Career With Us</Link>
             </li>
             <li className="nav-item">
-              <Link to="/contact" className={`nav-link ${isActive('/contact')}`}>Contact Us</Link>
+              <Link to="/contact" className={`nav-link ${isActive('/contact') ? 'active' : ''}`}>Contact Us</Link>
             </li>
           </ul>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', fontWeight: '600', color: 'var(--secondary-green)' }}>
+          <div className="nav-tagline" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', fontWeight: '600', color: 'var(--secondary-green)' }}>
             <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--secondary-green)', display: 'inline-block' }}></span>
             Care • Quality • Trust
           </div>
@@ -178,11 +181,34 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
       {/* Mobile Drawer Navigation Menu */}
       {isMobileMenuOpen && (
         <div style={{
-          position: 'fixed', top: '120px', left: 0, width: '100%', height: 'calc(100vh - 120px)',
-          backgroundColor: '#ffffff', zIndex: 98, overflowY: 'auto', borderTop: '1px solid #eee',
-          padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px',
-          boxShadow: '0 10px 20px rgba(0,0,0,0.05)', animation: 'fadeIn 0.3s ease'
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          right: 0,
+          bottom: 0,
+          width: '100%', 
+          height: '100vh',
+          backgroundColor: '#ffffff', 
+          zIndex: 1000, 
+          overflowY: 'auto', 
+          padding: '24px 20px 40px', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: '12px',
+          boxShadow: '0 10px 40px rgba(0,0,0,0.15)', 
+          animation: 'fadeIn 0.25s ease'
         }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '14px', borderBottom: '1px solid #e2e8f0' }}>
+            <span style={{ fontWeight: '800', color: 'var(--primary-blue)', fontSize: '1.15rem' }}>Navigation Menu</span>
+            <button 
+              onClick={() => setIsMobileMenuOpen(false)} 
+              style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}
+              aria-label="Close menu"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
           <Link to="/" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9', fontWeight: '600' }}>Home</Link>
           <Link to="/products" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9', fontWeight: '600' }}>All Products</Link>
           

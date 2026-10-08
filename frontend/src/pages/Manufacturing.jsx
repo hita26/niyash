@@ -67,7 +67,7 @@ function Manufacturing() {
 
   return (
     <div className="section animate-fade-in" style={{ backgroundColor: 'var(--bg-main)' }}>
-      <div className="container" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '40px' }}>
+      <div className="container responsive-split-layout">
         
         {/* Info Column */}
         <div>
@@ -101,7 +101,7 @@ function Manufacturing() {
 
         {/* Form Column */}
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <div className="card" style={{ padding: '30px', position: 'sticky', top: '140px' }}>
+          <div className="card sticky-form-desktop" style={{ padding: '30px', position: 'sticky', top: '100px' }}>
             <h2 style={{ fontSize: '1.4rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '10px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
               <Layers size={22} color="var(--primary-blue)" /> Manufacturing Enquiry Form
             </h2>
@@ -117,7 +117,7 @@ function Manufacturing() {
             ) : (
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                     <label htmlFor="mfg-name" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>Your Name *</label>
                     <input 
@@ -144,7 +144,7 @@ function Manufacturing() {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                     <label htmlFor="mfg-email" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>Email ID *</label>
                     <input 

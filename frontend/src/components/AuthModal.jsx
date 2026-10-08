@@ -57,9 +57,9 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
 
   return (
     <div style={{
-      position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-      backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(5px)',
-      zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
+      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+      backgroundColor: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(5px)',
+      zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
     }}>
       <div className="card animate-fade-in" style={{
         width: '100%', maxWidth: isLogin ? '400px' : '550px', padding: '30px',
@@ -169,7 +169,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
 
           {!isLogin && (
             <>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Company/Store Name</label>
                   <div style={{ position: 'relative' }}>
@@ -201,7 +201,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>GSTIN (GST Number)</label>
                   <div style={{ position: 'relative' }}>

@@ -62,7 +62,7 @@ function Partner() {
 
   return (
     <div className="section animate-fade-in" style={{ backgroundColor: 'var(--bg-main)' }}>
-      <div className="container" style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '40px', alignItems: 'center' }}>
+      <div className="container responsive-split-layout">
         
         {/* Info Column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
@@ -114,7 +114,7 @@ function Partner() {
         </div>
 
         {/* Form Column */}
-        <div className="card" style={{ padding: '30px' }}>
+        <div className="card sticky-form-desktop" style={{ padding: '30px', position: 'sticky', top: '100px' }}>
           <h2 style={{ fontSize: '1.4rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '10px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Handshake size={22} color="var(--primary-blue)" /> Business Registration Form
           </h2>
@@ -130,7 +130,7 @@ function Partner() {
           ) : (
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="partner-store" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>Medical Store / Hospital Name *</label>
                   <input 
@@ -157,7 +157,7 @@ function Partner() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="partner-phone" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>Mobile Number *</label>
                   <input 

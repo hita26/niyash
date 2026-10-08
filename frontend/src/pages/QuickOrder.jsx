@@ -1837,7 +1837,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
         </div>
 
         {/* Main 2-Column Portal Grid: Matrix / Catalog + Live Commercial Sidebar */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 340px', gap: '22px', alignItems: 'start' }}>
+        <div className="quickorder-matrix-layout">
           
           {/* LEFT COLUMN: Product Catalog / Matrix Grid */}
           <div>
@@ -2303,7 +2303,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
           </div>
 
           {/* RIGHT COLUMN: Live Commercial Wholesale Billing Sidebar */}
-          <div style={{ position: 'sticky', top: '20px' }}>
+          <div className="sticky-form-desktop" style={{ position: 'sticky', top: '90px' }}>
             <div
               style={{
                 backgroundColor: '#ffffff',

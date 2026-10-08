@@ -1,8 +1,19 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { ShieldCheck, Truck, Percent, Headset, Globe, ShoppingCart, MessageSquare, PhoneCall, Mail } from 'lucide-react';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ShieldCheck, Truck, Percent, Headset, Globe, ShoppingCart, MessageSquare, PhoneCall, Mail, Search, ArrowRight, Award } from 'lucide-react';
 
 function Home({ addToCart }) {
+  const navigate = useNavigate();
+  const [heroSearch, setHeroSearch] = useState('');
+
+  const handleHeroSearchSubmit = (e) => {
+    e.preventDefault();
+    if (heroSearch.trim()) {
+      navigate(`/products?search=${encodeURIComponent(heroSearch.trim())}`);
+    } else {
+      navigate('/products');
+    }
+  };
   // Let's create static arrays of categories and top brands for rendering on home
   const categories = [
     {
@@ -84,49 +95,75 @@ function Home({ addToCart }) {
       
       {/* Hero Banner Section */}
       <section style={{
-        background: 'linear-gradient(135deg, rgba(12, 61, 108, 0.95), rgba(27, 117, 188, 0.85)), url("https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=1600&q=80")',
+        background: 'linear-gradient(135deg, rgba(12, 61, 108, 0.96), rgba(27, 117, 188, 0.88)), url("https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=1600&q=80")',
         backgroundSize: 'cover', backgroundPosition: 'center', color: '#ffffff',
-        padding: '120px 0', position: 'relative', overflow: 'hidden'
+        padding: '90px 0 100px 0', position: 'relative', overflow: 'hidden'
       }}>
-        <div className="container" style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '50px', alignItems: 'center' }}>
+        <div className="container hero-container-grid">
           <div>
             <span style={{
               backgroundColor: 'var(--secondary-green)', padding: '6px 14px',
-              borderRadius: '20px', fontSize: '0.85rem', fontWeight: '700', textTransform: 'uppercase',
-              letterSpacing: '1px', display: 'inline-block', marginBottom: '20px'
+              borderRadius: '20px', fontSize: '0.82rem', fontWeight: '700', textTransform: 'uppercase',
+              letterSpacing: '1px', display: 'inline-block', marginBottom: '18px'
             }}>
               Wholesale & Distribution • PAN Gujarat
             </span>
             
-            <h1 style={{ fontSize: '3.5rem', color: '#ffffff', lineHeight: '1.1', fontWeight: '800', marginBottom: '25px', fontFamily: 'Outfit' }}>
+            <h1 style={{ fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', color: '#ffffff', lineHeight: '1.15', fontWeight: '800', marginBottom: '20px', fontFamily: 'Outfit' }}>
               Your Trusted Partner in <br />
-              <span style={{ color: '#81c784' }}>Pharma, OTC & Surgical</span> Products
+              <span style={{ color: '#86efac' }}>Pharma, OTC & Surgical</span> Supplies
             </h1>
             
-            <p style={{ fontSize: '1.2rem', color: '#e2e8f0', marginBottom: '35px', maxWidth: '650px', fontWeight: '400', lineHeight: '1.6' }}>
-              Niyansh Pharma delivers genuine healthcare products, generic medicines, and hospital consumables with competitive pricing and fast delivery to pharmacies, hospitals, and clinics.
+            <p style={{ fontSize: '1.1rem', color: '#e2e8f0', marginBottom: '25px', maxWidth: '620px', fontWeight: '400', lineHeight: '1.6' }}>
+              Niyansh Pharma delivers 8,700+ genuine healthcare formulations, generic medicines, and hospital consumables with verified batch compliance and prompt delivery across Saurashtra & Gujarat.
             </p>
 
-            <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-              <Link to="/products" className="btn btn-secondary" style={{ padding: '14px 32px', fontSize: '1rem' }}>
-                Explore Products
+            {/* In-Banner Quick Medicine Search */}
+            <form onSubmit={handleHeroSearchSubmit} style={{ display: 'flex', gap: '8px', maxWidth: '540px', marginBottom: '25px' }}>
+              <div style={{ position: 'relative', flex: 1 }}>
+                <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                <input 
+                  type="text"
+                  placeholder="Search 8,700+ medicines, salts or companies..."
+                  value={heroSearch}
+                  onChange={(e) => setHeroSearch(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px 12px 42px',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(255,255,255,0.3)',
+                    backgroundColor: '#ffffff',
+                    color: '#0f172a',
+                    fontSize: '0.95rem',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+                  }}
+                />
+              </div>
+              <button type="submit" className="btn btn-secondary" style={{ padding: '12px 20px', fontSize: '0.95rem', whiteSpace: 'nowrap' }}>
+                Search
+              </button>
+            </form>
+
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <Link to="/products" className="btn btn-secondary" style={{ padding: '12px 26px', fontSize: '0.95rem' }}>
+                Browse Catalog
               </Link>
-              <button onClick={handleQuickWhatsApp} className="btn btn-outline" style={{ borderColor: '#ffffff', color: '#ffffff', padding: '14px 32px', fontSize: '1rem' }}>
-                Quick Order on WhatsApp
+              <button onClick={handleQuickWhatsApp} className="btn btn-outline" style={{ borderColor: '#ffffff', color: '#ffffff', padding: '12px 26px', fontSize: '0.95rem' }}>
+                WhatsApp Order
               </button>
             </div>
           </div>
 
           {/* Graphical floating panel for Quick Stats */}
           <div style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(10px)',
-            borderRadius: '16px', padding: '30px', border: '1px solid rgba(255, 255, 255, 0.15)',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.1)'
+            backgroundColor: 'rgba(255, 255, 255, 0.12)', backdropFilter: 'blur(12px)',
+            borderRadius: '16px', padding: '28px', border: '1px solid rgba(255, 255, 255, 0.2)',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.15)'
           }}>
-            <h3 style={{ color: '#ffffff', fontSize: '1.4rem', marginBottom: '20px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '10px' }}>
+            <h3 style={{ color: '#ffffff', fontSize: '1.3rem', marginBottom: '18px', borderBottom: '1px solid rgba(255, 255, 255, 0.15)', paddingBottom: '10px' }}>
               Quick Contact
             </h3>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '18px' }}>
               <li style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                 <span style={{ backgroundColor: 'var(--secondary-green)', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <PhoneCall size={18} />

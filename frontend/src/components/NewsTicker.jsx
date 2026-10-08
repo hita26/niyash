@@ -441,7 +441,7 @@ function NewsTicker() {
             </button>
 
             {/* Manual Navigation Arrows */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+            <div className="ticker-nav-arrows" style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
               <button
                 onClick={handlePrev}
                 aria-label="Previous announcement"
@@ -507,23 +507,15 @@ function NewsTicker() {
       {/* Full Scheme Announcement Modal */}
       {selectedNews && (
         <div 
-          className="sidebar-backdrop"
+          className="modal-backdrop-center"
           onClick={() => setSelectedNews(null)}
-          style={{
-            zIndex: 1100,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '20px'
-          }}
         >
           <div 
+            className="modal-content-card"
             onClick={(e) => e.stopPropagation()}
             style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '16px',
-              maxWidth: '560px',
-              width: '100%',
+              padding: '0',
+              overflow: 'hidden',
               maxHeight: '90vh',
               overflowY: 'auto',
               boxShadow: '0 25px 60px rgba(0,0,0,0.3)',

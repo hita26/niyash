@@ -1522,7 +1522,7 @@ _Helpline: +91 9316566894_`;
 
   return (
     <div className="section animate-fade-in" style={{ backgroundColor: 'var(--bg-main)', minHeight: '85vh', padding: '30px 0' }}>
-      <div className="container admin-layout" style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: '30px', alignItems: 'start' }}>
+      <div className="container admin-layout">
         
         {/* Sidebar Nav */}
         <aside className="card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px', position: 'sticky', top: '100px' }}>

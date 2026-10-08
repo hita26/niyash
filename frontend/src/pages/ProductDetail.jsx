@@ -101,11 +101,22 @@ function ProductDetail({ addToCart }) {
             {/* Price & Stock */}
             <div style={{
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              padding: '15px 20px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid var(--border-light)'
+              padding: '16px 20px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid var(--border-light)'
             }}>
               <div>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', display: 'block' }}>Wholesale Estimate</span>
-                <span style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--primary-blue)' }}>
+                {product.mrp && product.mrp > product.price ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-light)', textDecoration: 'line-through' }} className="tabular-nums">
+                      MRP ₹{product.mrp.toFixed(2)}
+                    </span>
+                    <span style={{ fontSize: '0.75rem', backgroundColor: '#ecfdf5', color: '#059669', fontWeight: '700', padding: '2px 8px', borderRadius: '4px' }}>
+                      {Math.round(((product.mrp - product.price) / product.mrp) * 100)}% MARGIN
+                    </span>
+                  </div>
+                ) : (
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', display: 'block' }}>Wholesale Rate</span>
+                )}
+                <span style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--primary-blue)' }} className="tabular-nums">
                   ₹{product.price.toFixed(2)}
                   <span style={{ fontSize: '0.9rem', fontWeight: '400', color: 'var(--text-medium)' }}> / strip</span>
                 </span>
@@ -169,17 +180,21 @@ function ProductDetail({ addToCart }) {
                 {/* Quantity */}
                 <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #cbd5e1', borderRadius: '6px', overflow: 'hidden', height: '45px' }}>
                   <button 
+                    type="button"
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    style={{ width: '40px', backgroundColor: '#f1f5f9', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ width: '44px', height: '100%', backgroundColor: '#f1f5f9', border: 'none', cursor: 'pointer', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    aria-label="Decrease quantity"
                   >
                     -
                   </button>
-                  <span style={{ width: '50px', textAlign: 'center', fontWeight: '700', fontSize: '1rem' }}>
+                  <span style={{ width: '50px', textAlign: 'center', fontWeight: '700', fontSize: '1rem' }} className="tabular-nums">
                     {quantity}
                   </span>
                   <button 
+                    type="button"
                     onClick={() => setQuantity(quantity + 1)}
-                    style={{ width: '40px', backgroundColor: '#f1f5f9', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ width: '44px', height: '100%', backgroundColor: '#f1f5f9', border: 'none', cursor: 'pointer', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    aria-label="Increase quantity"
                   >
                     +
                   </button>
@@ -189,7 +204,7 @@ function ProductDetail({ addToCart }) {
                 <button 
                   onClick={handleAddToCart}
                   className="btn btn-primary" 
-                  style={{ height: '45px', flex: 1, padding: '0 20px', gap: '8px' }}
+                  style={{ height: '45px', flex: 1, minWidth: '180px', padding: '0 20px', gap: '8px' }}
                 >
                   <ShoppingBag size={18} /> Add to Quote Cart
                 </button>
@@ -210,12 +225,12 @@ function ProductDetail({ addToCart }) {
         {/* Related Products Section */}
         {related.length > 0 && (
           <div>
-            <h2 style={{ fontSize: '1.6rem', marginBottom: '25px', position: 'relative', paddingBottom: '10px' }}>
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '22px', position: 'relative', paddingBottom: '10px' }}>
               Related Products
-              <span style={{ content: '""', display: 'block', width: '50px', height: '3px', backgroundColor: 'var(--secondary-green)', position: 'absolute', bottom: 0, left: 0 }}></span>
+              <span style={{ content: '""', display: 'block', width: '45px', height: '3px', backgroundColor: 'var(--secondary-green)', position: 'absolute', bottom: 0, left: 0 }}></span>
             </h2>
             
-            <div className="grid-4">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
               {related.map((relProd) => (
                 <ProductCard key={relProd._id} product={relProd} addToCart={addToCart} />
               ))}

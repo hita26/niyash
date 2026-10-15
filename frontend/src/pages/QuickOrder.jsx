@@ -993,7 +993,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
         gstRate: item.gstRate,
         itemTotal: item.lineSubtotal
       })),
-      discountAmount: commercialBilling.totalSchemeSavings,
+      discountAmount: 0, // Trade scheme bonus units are supplied as free goods, not cash deductions
       paymentStatus: 'Pending',
       orderStatus: 'Booked'
     };

@@ -21,9 +21,10 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [selectedForms, setSelectedForms] = useState([]);
-  const [maxPrice, setMaxPrice] = useState(100);
+  const MAX_PRICE_LIMIT = 2000;
+  const [maxPrice, setMaxPrice] = useState(MAX_PRICE_LIMIT);
 
-  const activeFilterCount = selectedCategories.length + selectedBrands.length + selectedForms.length + (maxPrice < 100 ? 1 : 0);
+  const activeFilterCount = selectedCategories.length + selectedBrands.length + selectedForms.length + (maxPrice < MAX_PRICE_LIMIT ? 1 : 0);
 
   const categories = [
     'Pharma Products',
@@ -43,17 +44,17 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
     'Tablet', 'Capsule', 'Injection', 'Powder', 'IV Fluid', 'Syrup', 'Gloves', 'Syringe'
   ];
 
-  // Sync state with search params on load or change
+  // Sync state with search params on load or URL change
   useEffect(() => {
     const searchVal = searchParams.get('search') || '';
     const catVal = searchParams.get('category') ? searchParams.get('category').split(',') : [];
     const brandVal = searchParams.get('brand') ? searchParams.get('brand').split(',') : [];
     const formVal = searchParams.get('form') ? searchParams.get('form').split(',') : [];
-    const priceVal = parseFloat(searchParams.get('maxPrice')) || 100;
+    const priceVal = parseFloat(searchParams.get('maxPrice')) || MAX_PRICE_LIMIT;
     const pageVal = parseInt(searchParams.get('page')) || 1;
     const sortVal = searchParams.get('sort') || 'popular';
 
-    setSearchTerm(searchVal);
+    if (searchTerm !== searchVal) setSearchTerm(searchVal);
     setSelectedCategories(catVal.filter(Boolean));
     setSelectedBrands(brandVal.filter(Boolean));
     setSelectedForms(formVal.filter(Boolean));
@@ -62,39 +63,58 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
     setSortOrder(sortVal);
   }, [searchParams]);
 
-  // Fetch products whenever filters or search terms change
+  // Fetch products whenever searchParams change (single source of truth)
   useEffect(() => {
+    let isCancelled = false;
     const fetchProducts = async () => {
       setLoading(true);
       try {
         const queryParams = new URLSearchParams();
         const searchVal = searchParams.get('search') || '';
-        
+        const catVal = searchParams.get('category') || '';
+        const brandVal = searchParams.get('brand') || '';
+        const formVal = searchParams.get('form') || '';
+        const maxPriceParam = searchParams.get('maxPrice');
+        const sortVal = searchParams.get('sort') || 'popular';
+        const pageVal = searchParams.get('page') || '1';
+
         if (searchVal) queryParams.append('search', searchVal);
-        if (selectedCategories.length > 0) queryParams.append('category', selectedCategories.join(','));
-        if (selectedBrands.length > 0) queryParams.append('brand', selectedBrands.join(','));
-        if (selectedForms.length > 0) queryParams.append('form', selectedForms.join(','));
-        if (maxPrice < 100) queryParams.append('maxPrice', maxPrice.toString());
-        if (sortOrder) queryParams.append('sort', sortOrder);
-        queryParams.append('page', page.toString());
+        if (catVal) queryParams.append('category', catVal);
+        if (brandVal) queryParams.append('brand', brandVal);
+        if (formVal) queryParams.append('form', formVal);
+        if (maxPriceParam && parseFloat(maxPriceParam) < MAX_PRICE_LIMIT) {
+          queryParams.append('maxPrice', maxPriceParam);
+        }
+        if (sortVal) queryParams.append('sort', sortVal);
+        queryParams.append('page', pageVal);
         queryParams.append('limit', '12');
 
         const response = await fetch(`/api/products?${queryParams.toString()}`);
         if (!response.ok) throw new Error('Failed to fetch products');
         
         const data = await response.json();
-        setProducts(data.products);
-        setPages(data.pages);
-        setTotal(data.total);
+        if (!isCancelled) {
+          setProducts(Array.isArray(data.products) ? data.products : []);
+          setPages(data.pages || 1);
+          setTotal(data.total || 0);
+        }
       } catch (error) {
-        console.error('Error fetching products:', error);
+        if (!isCancelled) {
+          console.error('Error fetching products:', error);
+          setProducts([]);
+        }
       } finally {
-        setLoading(false);
+        if (!isCancelled) {
+          setLoading(false);
+        }
       }
     };
 
     fetchProducts();
-  }, [searchParams, selectedCategories, selectedBrands, selectedForms, maxPrice, sortOrder, page]);
+    return () => {
+      isCancelled = true;
+    };
+  }, [searchParams]);
 
   // Update query params helper for arrays (checkboxes)
   const handleCheckboxChange = (key, list, setList, val) => {
@@ -120,7 +140,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
     const val = parseFloat(e.target.value);
     setMaxPrice(val);
     const newParams = new URLSearchParams(searchParams);
-    if (val < 100) {
+    if (val < MAX_PRICE_LIMIT) {
       newParams.set('maxPrice', val.toString());
     } else {
       newParams.delete('maxPrice');
@@ -144,7 +164,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
     setSelectedCategories([]);
     setSelectedBrands([]);
     setSelectedForms([]);
-    setMaxPrice(100);
+    setMaxPrice(MAX_PRICE_LIMIT);
     setSortOrder('popular');
     setPage(1);
   };
@@ -161,10 +181,17 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
     if (type === 'category') handleCheckboxChange('category', selectedCategories, setSelectedCategories, val);
     if (type === 'brand') handleCheckboxChange('brand', selectedBrands, setSelectedBrands, val);
     if (type === 'form') handleCheckboxChange('form', selectedForms, setSelectedForms, val);
-    if (type === 'price') setMaxPrice(100);
+    if (type === 'price') {
+      setMaxPrice(MAX_PRICE_LIMIT);
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('maxPrice');
+      newParams.set('page', '1');
+      setSearchParams(newParams);
+    }
     if (type === 'search') {
       const p = new URLSearchParams(searchParams);
       p.delete('search');
+      p.set('page', '1');
       setSearchParams(p);
       setSearchTerm('');
     }
@@ -246,16 +273,17 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
               </h4>
               <input 
                 type="range" 
-                min="2" 
-                max="100" 
+                min="5" 
+                max="2000" 
+                step="10"
                 value={maxPrice}
                 onChange={handlePriceChange}
                 style={{ width: '100%', accentColor: 'var(--primary-blue)', cursor: 'pointer' }}
                 aria-label="Price range filter"
               />
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-light)', marginTop: '4px' }}>
-                <span>₹2</span>
-                <span>₹100</span>
+                <span>₹5</span>
+                <span>₹2,000</span>
               </div>
             </div>
 
@@ -345,7 +373,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
           </div>
 
           {/* Active Filter Chips */}
-          {(selectedCategories.length > 0 || selectedBrands.length > 0 || selectedForms.length > 0 || maxPrice < 100 || searchParams.get('search')) && (
+          {(selectedCategories.length > 0 || selectedBrands.length > 0 || selectedForms.length > 0 || maxPrice < MAX_PRICE_LIMIT || searchParams.get('search')) && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', padding: '4px 0' }}>
               <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', fontWeight: '600' }}>Active:</span>
               {searchParams.get('search') && (
@@ -372,7 +400,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
                   <button onClick={() => removeFilterTag('form', form)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#b45309', display: 'flex', alignItems: 'center' }}><X size={12} /></button>
                 </span>
               ))}
-              {maxPrice < 100 && (
+              {maxPrice < MAX_PRICE_LIMIT && (
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', backgroundColor: '#f1f5f9', color: '#475569', padding: '3px 8px', borderRadius: '14px', fontSize: '0.78rem', fontWeight: '500' }}>
                   ≤ ₹{maxPrice}
                   <button onClick={() => removeFilterTag('price')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', display: 'flex', alignItems: 'center' }}><X size={12} /></button>

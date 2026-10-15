@@ -639,11 +639,25 @@ function Admin() {
     setTimeout(() => setToastMessage(null), 4000);
   };
 
+  const [adminToken, setAdminToken] = useState(localStorage.getItem('niyansh_admin_token') || '');
+
+  // Helper for auth headers
+  const getAuthHeaders = () => {
+    const token = adminToken || localStorage.getItem('niyansh_admin_token');
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  };
+
   // Check login on mount
   useEffect(() => {
     const adminSession = localStorage.getItem('niyansh_admin_session');
-    if (adminSession === 'active') {
+    const token = localStorage.getItem('niyansh_admin_token');
+    if (adminSession === 'active' || token) {
       setIsAuthenticated(true);
+      if (token) setAdminToken(token);
     }
   }, []);
 
@@ -741,21 +755,49 @@ function Admin() {
     }
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setLoginError('');
+    setIsLoading(true);
+
+    try {
+      const res = await fetch('/api/users/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), password: password.trim() })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.token) {
+        setIsAuthenticated(true);
+        setAdminToken(data.token);
+        localStorage.setItem('niyansh_admin_session', 'active');
+        localStorage.setItem('niyansh_admin_token', data.token);
+        showToast('Welcome back, Admin! Live console connected.');
+        return;
+      }
+    } catch (err) {
+      console.warn('Backend login attempt failed, checking local credentials fallback:', err);
+    } finally {
+      setIsLoading(false);
+    }
+
+    // Demo fallback login if backend unreachable
     if (email === 'admin@niyanshpharma.com' && password === 'admin123') {
       setIsAuthenticated(true);
       localStorage.setItem('niyansh_admin_session', 'active');
       setLoginError('');
-      showToast('Welcome back, Admin! Live console connected.');
+      showToast('Welcome back, Admin! (Offline demo session active)');
     } else {
-      setLoginError('Invalid email or password. Use demo credentials below.');
+      setLoginError('Invalid email or password. Use demo credentials: admin@niyanshpharma.com / admin123');
     }
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
+    setAdminToken('');
     localStorage.removeItem('niyansh_admin_session');
+    localStorage.removeItem('niyansh_admin_token');
   };
 
   // ==========================================
@@ -770,9 +812,10 @@ function Admin() {
 
       const res = await fetch(`/api/orders/${orderId}/status`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify(payload)
       });
+
 
       if (res.ok) {
         const data = await res.json();
@@ -938,7 +981,7 @@ _For assistance: +91 9316566894_`;
 
       const res = await fetch('/api/ledger/payment', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify(payload)
       });
 
@@ -1108,13 +1151,13 @@ _Helpline: +91 9316566894_`;
       if (editingNews) {
         res = await fetch(`/api/news/${editingNews._id}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAuthHeaders(),
           body: JSON.stringify(payload)
         });
       } else {
         res = await fetch('/api/news', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAuthHeaders(),
           body: JSON.stringify(payload)
         });
       }
@@ -1164,7 +1207,7 @@ _Helpline: +91 9316566894_`;
     try {
       const res = await fetch(`/api/news/${item._id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ isTickerActive: newStatus })
       });
 
@@ -1184,7 +1227,8 @@ _Helpline: +91 9316566894_`;
     if (!window.confirm('Are you sure you want to delete this scheme/announcement?')) return;
 
     try {
-      const res = await fetch(`/api/news/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/news/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+
       if (res.ok) {
         setNews(prev => prev.filter(n => n._id !== id));
         showToast('Announcement deleted successfully.');
@@ -1257,13 +1301,13 @@ _Helpline: +91 9316566894_`;
       if (editingProduct) {
         response = await fetch(`/api/products/${editingProduct._id}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAuthHeaders(),
           body: JSON.stringify(payload)
         });
       } else {
         response = await fetch('/api/products', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAuthHeaders(),
           body: JSON.stringify(payload)
         });
       }
@@ -1296,7 +1340,7 @@ _Helpline: +91 9316566894_`;
     if (!window.confirm('Are you sure you want to delete this product?')) return;
 
     try {
-      const response = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+      const response = await fetch(`/api/products/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
       if (response.ok) {
         setProducts(prev => prev.filter(p => p._id !== id));
         showToast('Product deleted successfully');
@@ -1315,7 +1359,7 @@ _Helpline: +91 9316566894_`;
     try {
       await fetch(`/api/products/${product._id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ inStock: newStock })
       });
       setProducts(prev => prev.map(p => p._id === product._id ? { ...p, inStock: newStock } : p));
@@ -1333,7 +1377,7 @@ _Helpline: +91 9316566894_`;
     try {
       await fetch(`/api/enquiries/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ status })
       });
       setEnquiries(prev => prev.map(e => e._id === id ? { ...e, status } : e));
@@ -1347,7 +1391,7 @@ _Helpline: +91 9316566894_`;
   const handleDeleteEnquiry = async (id) => {
     if (!window.confirm('Delete this enquiry record?')) return;
     try {
-      await fetch(`/api/enquiries/${id}`, { method: 'DELETE' });
+      await fetch(`/api/enquiries/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
       setEnquiries(prev => prev.filter(e => e._id !== id));
       showToast('Enquiry deleted');
     } catch {
@@ -1359,7 +1403,7 @@ _Helpline: +91 9316566894_`;
   const handleDeleteCareer = async (id) => {
     if (!window.confirm('Delete this job application record?')) return;
     try {
-      await fetch(`/api/careers/${id}`, { method: 'DELETE' });
+      await fetch(`/api/careers/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
       setCareers(prev => prev.filter(c => c._id !== id));
       showToast('Applicant record deleted');
     } catch {
@@ -1367,6 +1411,7 @@ _Helpline: +91 9316566894_`;
       showToast('Applicant record deleted');
     }
   };
+
 
   // ==========================================
   // FILTERED DATA COMPUTATIONS

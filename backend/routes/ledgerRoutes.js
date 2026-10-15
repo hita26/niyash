@@ -2,6 +2,30 @@ const express = require('express');
 const router = express.Router();
 const Ledger = require('../models/Ledger');
 
+// Helper to escape special regex characters
+const escapeRegex = (str) => {
+  if (!str) return '';
+  return str.toString().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+};
+
+// Helper to normalize phone numbers to standard 10-digit format
+const cleanMobileDigits = (num) => {
+  if (!num) return '';
+  return num.toString().replace(/\D/g, '').replace(/^91/, '').slice(-10);
+};
+
+// Helper to find ledger matching raw or normalized 10-digit mobile
+const findLedgerByMobile = async (mobileInput) => {
+  const raw = (mobileInput || '').toString().trim();
+  const clean = cleanMobileDigits(raw);
+  return await Ledger.findOne({
+    $or: [
+      { retailerMobile: raw },
+      { retailerMobile: clean },
+    ],
+  });
+};
+
 // Helper to format currency in Indian format
 const formatINR = (val) => {
   const num = Number(val) || 0;
@@ -67,11 +91,8 @@ _Support / Accounts: +91 9316566894_`;
 
 // Helper for WhatsApp link
 const buildWhatsAppUrl = (mobile, message) => {
-  const cleanPhone = (mobile || '9316566894')
-    .toString()
-    .replace(/\D/g, '')
-    .replace(/^91/, '');
-  const targetPhone = '91' + (cleanPhone || '9316566894');
+  const cleanPhone = cleanMobileDigits(mobile) || '9316566894';
+  const targetPhone = '91' + cleanPhone;
   return `https://api.whatsapp.com/send?phone=${targetPhone}&text=${encodeURIComponent(message)}`;
 };
 
@@ -83,11 +104,12 @@ router.get('/', async (req, res) => {
     const { search, sortBy = 'updatedAt', order = 'desc', page = 1, limit = 50 } = req.query;
 
     const query = {};
-    if (search) {
+    if (search && search.trim()) {
+      const escaped = escapeRegex(search.trim());
       query.$or = [
-        { shopName: { $regex: search, $options: 'i' } },
-        { retailerMobile: { $regex: search, $options: 'i' } },
-        { gstin: { $regex: search, $options: 'i' } },
+        { shopName: { $regex: escaped, $options: 'i' } },
+        { retailerMobile: { $regex: escaped, $options: 'i' } },
+        { gstin: { $regex: escaped, $options: 'i' } },
       ];
     }
 
@@ -130,7 +152,7 @@ router.post('/payment', async (req, res) => {
       date,
     } = req.body;
 
-    const targetMobile = (retailerMobile || mobile || '').trim();
+    const targetMobile = (retailerMobile || mobile || '').toString().trim();
     if (!targetMobile) {
       return res.status(400).json({ message: 'Retailer mobile number is required' });
     }
@@ -140,7 +162,7 @@ router.post('/payment', async (req, res) => {
       return res.status(400).json({ message: 'Valid positive payment amount is required' });
     }
 
-    let ledger = await Ledger.findOne({ retailerMobile: targetMobile });
+    let ledger = await findLedgerByMobile(targetMobile);
     if (!ledger) {
       return res.status(404).json({ message: `Ledger not found for retailer mobile: ${targetMobile}` });
     }
@@ -157,11 +179,12 @@ router.post('/payment', async (req, res) => {
       notes,
     };
 
-    // FIFO Invoice Deduction: Deduct from oldest unpaid/partial invoices
-    let remainingPayment = payAmount;
+    // FIFO Invoice Deduction: Sort unpaid invoices by date ascending
+    ledger.invoices.sort((a, b) => new Date(a.date) - new Date(b.date));
 
+    let remainingPayment = payAmount;
     for (const inv of ledger.invoices) {
-      if (inv.balance > 0) {
+      if (inv.balance > 0 && remainingPayment > 0) {
         const unpaid = inv.balance;
         if (remainingPayment >= unpaid) {
           inv.paidAmount = Math.round(((inv.paidAmount || 0) + unpaid) * 100) / 100;
@@ -180,13 +203,17 @@ router.post('/payment', async (req, res) => {
 
     // Update totals
     ledger.totalPaid = Math.round(((ledger.totalPaid || 0) + payAmount) * 100) / 100;
-    
-    // Recalculate outstanding balance from invoices (or totalBilled - totalPaid)
-    const sumInvoiceBalances = ledger.invoices.reduce(
-      (acc, inv) => acc + (inv.balance || 0),
-      0
-    );
-    ledger.outstandingBalance = Math.round(sumInvoiceBalances * 100) / 100;
+
+    // Recalculate outstanding balance from invoices if invoices exist, else deduct from balance
+    if (ledger.invoices && ledger.invoices.length > 0) {
+      const sumInvoiceBalances = ledger.invoices.reduce(
+        (acc, inv) => acc + (inv.balance || 0),
+        0
+      );
+      ledger.outstandingBalance = Math.round(sumInvoiceBalances * 100) / 100;
+    } else {
+      ledger.outstandingBalance = Math.max(0, Math.round(((ledger.outstandingBalance || 0) - payAmount) * 100) / 100);
+    }
 
     ledger.payments.push(newPayment);
     const updatedLedger = await ledger.save();
@@ -219,12 +246,12 @@ router.post('/send-statement', async (req, res) => {
   try {
     const { retailerMobile, mobile, channel = 'whatsapp' } = req.body;
 
-    const targetMobile = (retailerMobile || mobile || '').trim();
+    const targetMobile = (retailerMobile || mobile || '').toString().trim();
     if (!targetMobile) {
       return res.status(400).json({ message: 'Retailer mobile number is required' });
     }
 
-    const ledger = await Ledger.findOne({ retailerMobile: targetMobile });
+    const ledger = await findLedgerByMobile(targetMobile);
     if (!ledger) {
       return res.status(404).json({ message: `Ledger not found for retailer mobile: ${targetMobile}` });
     }
@@ -256,37 +283,109 @@ router.post('/send-statement', async (req, res) => {
 // @access  Public
 router.get('/:mobile', async (req, res) => {
   try {
-    const mobile = req.params.mobile.trim();
-    let ledger = await Ledger.findOne({ retailerMobile: mobile });
+    const rawMobile = req.params.mobile.trim();
+    const cleanMobile = cleanMobileDigits(rawMobile) || rawMobile;
+
+    let ledger = await findLedgerByMobile(rawMobile);
 
     if (!ledger) {
-      // Auto-create initial ledger for this retailer
-      const shopName = req.query.shopName || `Retailer ${mobile}`;
-      const email = req.query.email || '';
-      const gstin = req.query.gstin || '';
-      const creditLimit = parseFloat(req.query.creditLimit) || 100000;
+      // If mobile matches standard demo accounts, provide rich fixtures
+      if (cleanMobile === '9825012345') {
+        ledger = new Ledger({
+          retailerMobile: '9825012345',
+          shopName: 'Shanti Medico',
+          email: 'shanti.medico@gmail.com',
+          gstin: '24AAACS1234F1Z5',
+          totalBilled: 145200,
+          totalPaid: 98000,
+          outstandingBalance: 47200,
+          creditLimit: 150000,
+          invoices: [
+            {
+              invoiceNumber: 'INV-2026-0801',
+              date: new Date('2026-07-15'),
+              dueDate: new Date('2026-08-05'),
+              amount: 32000,
+              paidAmount: 32000,
+              balance: 0,
+              status: 'Paid',
+            },
+            {
+              invoiceNumber: 'INV-2026-0824',
+              date: new Date('2026-07-28'),
+              dueDate: new Date('2026-08-18'),
+              amount: 66000,
+              paidAmount: 66000,
+              balance: 0,
+              status: 'Paid',
+            },
+            {
+              invoiceNumber: 'INV-2026-0872',
+              date: new Date('2026-08-05'),
+              dueDate: new Date('2026-08-26'),
+              amount: 28500,
+              paidAmount: 0,
+              balance: 28500,
+              status: 'Pending',
+            },
+            {
+              invoiceNumber: 'INV-2026-0899',
+              date: new Date('2026-08-14'),
+              dueDate: new Date('2026-09-04'),
+              amount: 18700,
+              paidAmount: 0,
+              balance: 18700,
+              status: 'Pending',
+            },
+          ],
+          payments: [
+            {
+              paymentId: 'PMT-1001',
+              date: new Date('2026-07-25T14:30:00Z'),
+              amount: 32000,
+              method: 'UPI',
+              transactionRef: 'UPI/260725183921',
+              notes: 'Cleared against INV-2026-0801',
+            },
+            {
+              paymentId: 'PMT-1002',
+              date: new Date('2026-08-10T11:15:00Z'),
+              amount: 66000,
+              method: 'NetBanking',
+              transactionRef: 'NEFT/HDFC26081029',
+              notes: 'Full payment INV-2026-0824',
+            },
+          ],
+        });
+      } else {
+        // Auto-create initial ledger for this retailer
+        const shopName = req.query.shopName || `Retailer ${cleanMobile}`;
+        const email = req.query.email || '';
+        const gstin = req.query.gstin || '';
+        const creditLimit = parseFloat(req.query.creditLimit) || 100000;
 
-      ledger = new Ledger({
-        retailerMobile: mobile,
-        shopName,
-        email,
-        gstin,
-        totalBilled: 0,
-        totalPaid: 0,
-        outstandingBalance: 0,
-        creditLimit,
-        invoices: [],
-        payments: [],
-      });
+        ledger = new Ledger({
+          retailerMobile: cleanMobile,
+          shopName,
+          email,
+          gstin,
+          totalBilled: 0,
+          totalPaid: 0,
+          outstandingBalance: 0,
+          creditLimit,
+          invoices: [],
+          payments: [],
+        });
+      }
 
       await ledger.save();
     }
 
     // Sort invoices and payments by date descending for UI clarity
-    const sortedInvoices = [...ledger.invoices].sort(
+    const sortedInvoices = [...(ledger.invoices || [])].sort(
       (a, b) => new Date(b.date) - new Date(a.date)
     );
-    const sortedPayments = [...ledger.payments].sort(
+    const sortedPayments = [...(ledger.payments || [])].sort(
       (a, b) => new Date(b.date) - new Date(a.date)
     );
 

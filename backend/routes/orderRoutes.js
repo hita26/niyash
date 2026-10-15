@@ -2,6 +2,12 @@ const express = require('express');
 const router = express.Router();
 const Order = require('../models/Order');
 
+// Helper to escape special regex characters
+const escapeRegex = (str) => {
+  if (!str) return '';
+  return str.toString().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+};
+
 // Helper to generate WhatsApp B2B order text payload
 const generateWhatsAppOrderMessage = (order) => {
   const dateStr = new Date(order.createdAt || Date.now()).toLocaleDateString('en-IN', {
@@ -182,26 +188,39 @@ router.get('/', async (req, res) => {
 
     const query = {};
 
-    if (retailerMobile) {
-      query.retailerMobile = retailerMobile.trim();
+    if (retailerMobile && retailerMobile.trim()) {
+      const rawMobile = retailerMobile.trim();
+      const cleanDigits = rawMobile.replace(/\D/g, '').replace(/^91/, '').slice(-10);
+      query.$or = [
+        { retailerMobile: rawMobile },
+        { retailerMobile: cleanDigits }
+      ];
     }
 
-    if (orderStatus) {
+    if (orderStatus && orderStatus !== 'All') {
       query.orderStatus = orderStatus;
     }
 
-    if (paymentStatus) {
+    if (paymentStatus && paymentStatus !== 'All') {
       query.paymentStatus = paymentStatus;
     }
 
-    if (search) {
-      query.$or = [
-        { orderNumber: { $regex: search, $options: 'i' } },
-        { shopName: { $regex: search, $options: 'i' } },
-        { retailerMobile: { $regex: search, $options: 'i' } },
-        { 'items.productName': { $regex: search, $options: 'i' } },
+    if (search && search.trim()) {
+      const escaped = escapeRegex(search.trim());
+      const searchOr = [
+        { orderNumber: { $regex: escaped, $options: 'i' } },
+        { shopName: { $regex: escaped, $options: 'i' } },
+        { retailerMobile: { $regex: escaped, $options: 'i' } },
+        { 'items.productName': { $regex: escaped, $options: 'i' } },
       ];
+      if (query.$or) {
+        query.$and = [{ $or: query.$or }, { $or: searchOr }];
+        delete query.$or;
+      } else {
+        query.$or = searchOr;
+      }
     }
+
 
     const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
     const total = await Order.countDocuments(query);

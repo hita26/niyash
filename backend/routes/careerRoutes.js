@@ -26,28 +26,47 @@ const storage = multer.diskStorage({
 });
 
 function checkFileType(file, cb) {
-  const filetypes = /pdf|doc|docx/;
-  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = filetypes.test(file.mimetype);
+  const allowedExtensions = /pdf|doc|docx/;
+  const extname = allowedExtensions.test(path.extname(file.originalname).toLowerCase());
+  const allowedMimeTypes = [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/octet-stream',
+  ];
+  const mimetype = allowedMimeTypes.includes(file.mimetype) || /pdf|msword|wordprocessingml/i.test(file.mimetype);
 
   if (extname && mimetype) {
     return cb(null, true);
   } else {
-    cb('Error: PDF or Word Documents Only!');
+    cb(new Error('Only PDF and Word documents (.pdf, .doc, .docx) are allowed!'));
   }
 }
 
 const upload = multer({
   storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
   fileFilter: function (req, file, cb) {
     checkFileType(file, cb);
   },
 });
 
+// Middleware to handle multer errors gracefully
+const handleUpload = (req, res, next) => {
+  upload.single('resume')(req, res, function (err) {
+    if (err instanceof multer.MulterError) {
+      return res.status(400).json({ message: `Upload error: ${err.message}` });
+    } else if (err) {
+      return res.status(400).json({ message: err.message || 'File upload failed' });
+    }
+    next();
+  });
+};
+
 // @desc    Submit a job application
 // @route   POST /api/careers
 // @access  Public
-router.post('/', upload.single('resume'), async (req, res) => {
+router.post('/', handleUpload, async (req, res) => {
   try {
     const { name, email, phone, position, experience, coverLetter } = req.body;
 
@@ -101,11 +120,14 @@ router.delete('/:id', async (req, res) => {
     }
     
     if (career.resumePath) {
-      const fs = require('fs');
-      const path = require('path');
-      const filePath = path.join(__dirname, '..', career.resumePath);
+      const filename = path.basename(career.resumePath);
+      const filePath = path.join(uploadDir, filename);
       if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
+        try {
+          fs.unlinkSync(filePath);
+        } catch (e) {
+          console.warn('Could not remove file:', filePath, e.message);
+        }
       }
     }
     

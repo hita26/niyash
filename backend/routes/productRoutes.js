@@ -2,6 +2,12 @@ const express = require('express');
 const router = express.Router();
 const Product = require('../models/Product');
 
+// Helper to escape special regex characters to prevent syntax crashes and ReDoS
+const escapeRegex = (str) => {
+  if (!str) return '';
+  return str.toString().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+};
+
 // @desc    Get metadata filters (distinct companies, forms, categories)
 // @route   GET /api/products/meta/filters
 // @access  Public
@@ -59,7 +65,8 @@ router.get('/', async (req, res) => {
 
     // Search filter across text fields
     if (search && search.trim() !== '') {
-      const searchRegex = { $regex: search.trim(), $options: 'i' };
+      const escapedSearch = escapeRegex(search.trim());
+      const searchRegex = { $regex: escapedSearch, $options: 'i' };
       query.$or = [
         { name: searchRegex },
         { brand: searchRegex },
@@ -74,38 +81,39 @@ router.get('/', async (req, res) => {
     // Company filter (supports comma-separated list)
     if (company && company.trim() !== '') {
       if (company.includes(',')) {
-        query.company = { $in: company.split(',').map((c) => new RegExp(`^${c.trim()}$`, 'i')) };
+        query.company = { $in: company.split(',').map((c) => new RegExp(`^${escapeRegex(c.trim())}$`, 'i')) };
       } else {
-        query.company = { $regex: `^${company.trim()}$`, $options: 'i' };
+        query.company = { $regex: `^${escapeRegex(company.trim())}$`, $options: 'i' };
       }
     }
 
     // Category filter (supports comma-separated list)
     if (category && category.trim() !== '') {
       if (category.includes(',')) {
-        query.category = { $in: category.split(',').map((c) => new RegExp(`^${c.trim()}$`, 'i')) };
+        query.category = { $in: category.split(',').map((c) => new RegExp(`^${escapeRegex(c.trim())}$`, 'i')) };
       } else {
-        query.category = { $regex: `^${category.trim()}$`, $options: 'i' };
+        query.category = { $regex: `^${escapeRegex(category.trim())}$`, $options: 'i' };
       }
     }
 
     // Brand filter (supports comma-separated list)
     if (brand && brand.trim() !== '') {
       if (brand.includes(',')) {
-        query.brand = { $in: brand.split(',').map((b) => new RegExp(`^${b.trim()}$`, 'i')) };
+        query.brand = { $in: brand.split(',').map((b) => new RegExp(`^${escapeRegex(b.trim())}$`, 'i')) };
       } else {
-        query.brand = { $regex: `^${brand.trim()}$`, $options: 'i' };
+        query.brand = { $regex: `^${escapeRegex(brand.trim())}$`, $options: 'i' };
       }
     }
 
     // Form filter (supports comma-separated list)
     if (form && form.trim() !== '') {
       if (form.includes(',')) {
-        query.form = { $in: form.split(',').map((f) => new RegExp(`^${f.trim()}$`, 'i')) };
+        query.form = { $in: form.split(',').map((f) => new RegExp(`^${escapeRegex(f.trim())}$`, 'i')) };
       } else {
-        query.form = { $regex: `^${form.trim()}$`, $options: 'i' };
+        query.form = { $regex: `^${escapeRegex(form.trim())}$`, $options: 'i' };
       }
     }
+
 
     // Price range filters
     if (minPrice || maxPrice) {

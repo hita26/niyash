@@ -1,14 +1,18 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
+const initDefaults = require('./config/initDefaults');
 
 // Load environment variables
 dotenv.config();
 
-// Connect to Database
-connectDB();
+// Connect to Database and initialize defaults asynchronously
+connectDB()
+  .then(() => initDefaults())
+  .catch((err) => console.error('Database initialization error:', err.message));
 
 const app = express();
 
@@ -17,8 +21,29 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Static Folders
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Uploads Static Folder (use /tmp/uploads on Vercel)
+const uploadDir = process.env.VERCEL ? path.join('/tmp', 'uploads') : path.join(__dirname, 'uploads');
+try {
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+} catch (e) {
+  // Ignore in read-only environments
+}
+app.use('/uploads', express.static(uploadDir));
+
+// Database readiness middleware for all /api routes
+app.use(async (req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    try {
+      await connectDB();
+      await initDefaults();
+    } catch (err) {
+      return res.status(503).json({ message: 'Database unavailable', error: err.message });
+    }
+  }
+  next();
+});
 
 // Routes
 app.use('/api/products', require('./routes/productRoutes'));
@@ -29,8 +54,8 @@ app.use('/api/enquiries', require('./routes/enquiryRoutes'));
 app.use('/api/careers', require('./routes/careerRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 
+
 // Serve static frontend build if available
-const fs = require('fs');
 const frontendDist = path.join(__dirname, '../frontend/dist');
 
 if (fs.existsSync(frontendDist)) {

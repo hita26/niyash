@@ -2,12 +2,18 @@ const express = require('express');
 const router = express.Router();
 const NewsUpdate = require('../models/NewsUpdate');
 
-// @desc    Get all news updates (supports ?ticker=true, category, company)
+// Helper to escape special regex characters
+const escapeRegex = (str) => {
+  if (!str) return '';
+  return str.toString().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+};
+
+// @desc    Get all news updates (supports ?ticker=true, category, company, search)
 // @route   GET /api/news
 // @access  Public
 router.get('/', async (req, res) => {
   try {
-    const { ticker, category, company, limit } = req.query;
+    const { ticker, category, company, search, limit } = req.query;
 
     const query = {};
 
@@ -21,13 +27,29 @@ router.get('/', async (req, res) => {
       ];
     }
 
-    if (category) {
+    if (category && category !== 'All') {
       query.category = category;
     }
 
     if (company && company !== 'All') {
-      query.company = { $regex: company, $options: 'i' };
+      query.company = { $regex: escapeRegex(company.trim()), $options: 'i' };
     }
+
+    if (search && search.trim()) {
+      const escaped = escapeRegex(search.trim());
+      const searchCondition = [
+        { title: { $regex: escaped, $options: 'i' } },
+        { content: { $regex: escaped, $options: 'i' } },
+        { company: { $regex: escaped, $options: 'i' } },
+      ];
+      if (query.$or) {
+        query.$and = [{ $or: query.$or }, { $or: searchCondition }];
+        delete query.$or;
+      } else {
+        query.$or = searchCondition;
+      }
+    }
+
 
     let newsQuery = NewsUpdate.find(query).sort({ priority: 1, createdAt: -1 });
 

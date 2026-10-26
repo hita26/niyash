@@ -25,7 +25,8 @@ import {
   ChevronUp,
   RefreshCw,
   Flame,
-  QrCode
+  QrCode,
+  Trash2
 } from 'lucide-react';
 
 // Extensive mock fallback products covering all 14 formulation forms & all major pharma companies
@@ -203,7 +204,7 @@ const FALLBACK_PRODUCTS = [
     composition: 'Ketoconazole IP 2.0% w/w Soap Base',
     form: 'Soap',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1607006314352-87009405d475?auto=format&fit=crop&w=400&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=400&q=80',
     description: 'Antifungal cleanser soap bar for skin hygiene and dandruff prevention.'
   },
   {
@@ -401,7 +402,7 @@ const FALLBACK_PRODUCTS = [
     composition: 'Sodium Chloride IP 0.9% w/v',
     form: 'IV Fluid',
     manufacturer: 'Biochem Healthcare',
-    imageUrl: 'https://images.unsplash.com/photo-1579684389782-64d84b5e901a?auto=format&fit=crop&w=400&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=400&q=80',
     description: 'Sterile solution for fluid replenishment and drug infusion.'
   },
   {
@@ -621,6 +622,9 @@ function QuickOrder() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successModalData, setSuccessModalData] = useState(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+  const [isMobileSummaryOpen, setIsMobileSummaryOpen] = useState(false);
 
   // Retailer Ledger Modal State
   const [isLedgerOpen, setIsLedgerOpen] = useState(false);
@@ -801,6 +805,32 @@ function QuickOrder() {
       return true;
     });
   }, [products, showOnlySelected, selectedCompany, selectedForm, searchQuery, boxQuantities]);
+
+  // Reset pagination to page 1 whenever filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCompany, selectedForm, showOnlySelected, pageSize]);
+
+  const totalFilteredCount = filteredProducts.length;
+  const totalPages = pageSize === 'all' ? 1 : Math.ceil(totalFilteredCount / pageSize);
+  const paginatedProducts = useMemo(() => {
+    if (pageSize === 'all') return filteredProducts;
+    const start = (currentPage - 1) * pageSize;
+    return filteredProducts.slice(start, start + pageSize);
+  }, [filteredProducts, currentPage, pageSize]);
+
+  const getPaginationNumbers = () => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (currentPage <= 4) {
+      return [1, 2, 3, 4, 5, '...', totalPages];
+    }
+    if (currentPage >= totalPages - 3) {
+      return [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    }
+    return [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+  };
 
   // Real-Time Commercial Wholesale Billing Calculations
   const commercialBilling = useMemo(() => {
@@ -1150,7 +1180,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
     const orderNo = `NP-ORD-${Date.now().toString().slice(-6)}`;
     const subject = encodeURIComponent(`B2B Order Booking: ${shopName || 'Retailer'} - ${orderNo}`);
     const body = encodeURIComponent(generateWhatsAppText(orderNo).replace(/\*/g, ''));
-    const mailtoUrl = `mailto:NiyanshPharma@gmail.com?cc=${encodeURIComponent(retailerEmail || '')}&subject=${subject}&body=${body}`;
+    const mailtoUrl = `mailto:niyanshpharma@gmail.com?cc=${encodeURIComponent(retailerEmail || '')}&subject=${subject}&body=${body}`;
     window.location.href = mailtoUrl;
   };
 
@@ -1418,63 +1448,43 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
   };
 
   return (
-    <div style={{ backgroundColor: '#f8fafc', minHeight: '100vh', paddingBottom: '80px' }}>
+    <div style={{ backgroundColor: '#f8fafc', minHeight: '100vh', paddingBottom: '90px' }}>
       {/* Top Breadcrumb & Quick Portal Hero */}
       <div
         style={{
           background: 'linear-gradient(135deg, #0c3d6c 0%, #1b75bc 100%)',
           color: '#ffffff',
-          padding: '30px 0 25px 0',
+          padding: '16px 0 14px 0',
           borderBottom: '1px solid rgba(255, 255, 255, 0.15)',
-          boxShadow: '0 4px 20px rgba(12, 61, 108, 0.15)'
+          boxShadow: '0 4px 15px rgba(12, 61, 108, 0.12)'
         }}
       >
         <div className="container">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
             <div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(8px)', padding: '4px 12px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', color: '#ffedd5' }}>
-                <Flame size={14} color="#f97316" /> High-Speed B2B Commercial Booking
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(8px)', padding: '3px 10px', borderRadius: '20px', fontSize: '0.74rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px', color: '#ffedd5' }}>
+                <Flame size={13} color="#f97316" /> Wholesale Quick Booking
               </div>
-              <h1 style={{ color: '#ffffff', fontSize: '1.9rem', fontWeight: '800', margin: 0, letterSpacing: '-0.5px' }}>
+              <h1 style={{ color: '#ffffff', fontSize: '1.5rem', fontWeight: '800', margin: 0, letterSpacing: '-0.3px', lineHeight: 1.2 }}>
                 Wholesale Quick Order Matrix
               </h1>
-              <p style={{ color: '#e0f2fe', fontSize: '0.92rem', margin: '6px 0 0 0', maxWidth: '650px' }}>
-                Live PTR pricing, trade scheme bonuses, instant GST calculation, multi-channel WhatsApp dispatch & commercial CSV export.
+              <p style={{ color: '#e0f2fe', fontSize: '0.82rem', margin: '3px 0 0 0', maxWidth: '620px' }}>
+                Live PTR pricing, trade scheme bonuses, instant GST calculation & multi-channel WhatsApp dispatch.
               </p>
             </div>
 
-            {/* View Mode Switcher & Ledger Button */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-              <button
-                onClick={() => handleOpenLedger()}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                  color: '#ffffff',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  padding: '9px 16px',
-                  borderRadius: '8px',
-                  fontSize: '0.85rem',
-                  fontWeight: '700',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <CreditCard size={15} /> Outstanding Ledger
-              </button>
-
-              <div style={{ display: 'flex', backgroundColor: 'rgba(0, 0, 0, 0.2)', padding: '3px', borderRadius: '8px' }}>
+            {/* View Mode Switcher */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', backgroundColor: 'rgba(0, 0, 0, 0.25)', padding: '3px', borderRadius: '8px' }}>
                 <button
                   onClick={() => setViewMode('table')}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '6px',
-                    padding: '8px 14px',
+                    gap: '5px',
+                    padding: '6px 12px',
                     borderRadius: '6px',
-                    fontSize: '0.85rem',
+                    fontSize: '0.8rem',
                     fontWeight: '700',
                     border: 'none',
                     cursor: 'pointer',
@@ -1483,17 +1493,17 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                     transition: 'all 0.2s ease'
                   }}
                 >
-                  <Table size={15} /> Matrix Grid
+                  <Table size={14} /> Matrix Grid
                 </button>
                 <button
                   onClick={() => setViewMode('card')}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '6px',
-                    padding: '8px 14px',
+                    gap: '5px',
+                    padding: '6px 12px',
                     borderRadius: '6px',
-                    fontSize: '0.85rem',
+                    fontSize: '0.8rem',
                     fontWeight: '700',
                     border: 'none',
                     cursor: 'pointer',
@@ -1502,7 +1512,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                     transition: 'all 0.2s ease'
                   }}
                 >
-                  <Grid size={15} /> Card View
+                  <Grid size={14} /> Cards
                 </button>
               </div>
             </div>
@@ -1510,25 +1520,25 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
         </div>
       </div>
 
-      <div className="container" style={{ marginTop: '25px' }}>
+      <div className="container" style={{ marginTop: '16px' }}>
         {/* Retailer Information Bar */}
         <div
           style={{
             backgroundColor: '#ffffff',
-            borderRadius: '12px',
-            padding: '16px 20px',
-            marginBottom: '20px',
-            boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
+            borderRadius: '10px',
+            padding: '10px 16px',
+            marginBottom: '14px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
             border: '1px solid #e2e8f0'
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
               <div
                 style={{
-                  width: '42px',
-                  height: '42px',
-                  borderRadius: '10px',
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '8px',
                   backgroundColor: '#eff6ff',
                   display: 'flex',
                   alignItems: 'center',
@@ -1537,19 +1547,19 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                   border: '1px solid #bfdbfe'
                 }}
               >
-                <Store size={22} />
+                <Store size={18} />
               </div>
 
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '1.05rem', fontWeight: '800', color: '#0f172a' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontSize: '0.95rem', fontWeight: '800', color: '#0f172a' }}>
                     {shopName.trim() ? shopName : 'Set Retailer Store Profile'}
                   </span>
-                  <span style={{ fontSize: '0.75rem', backgroundColor: '#dcfce7', color: '#15803d', fontWeight: '700', padding: '2px 8px', borderRadius: '12px' }}>
+                  <span style={{ fontSize: '0.7rem', backgroundColor: '#dcfce7', color: '#15803d', fontWeight: '700', padding: '1px 6px', borderRadius: '10px' }}>
                     Wholesale B2B
                   </span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px', fontSize: '0.82rem', color: '#64748b', marginTop: '2px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.78rem', color: '#64748b', marginTop: '1px', flexWrap: 'wrap' }}>
                   <span>📱 <strong>Mobile:</strong> {retailerMobile || 'Not configured'}</span>
                   {gstin && <span>🏛️ <strong>GSTIN:</strong> {gstin}</span>}
                   <span>🚀 <strong>Dispatch Desk:</strong> +91 {destinationWhatsApp}</span>
@@ -1557,16 +1567,16 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <button
                 onClick={() => setShowConfig(!showConfig)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '6px',
-                  padding: '7px 14px',
+                  gap: '5px',
+                  padding: '6px 12px',
                   borderRadius: '6px',
-                  fontSize: '0.82rem',
+                  fontSize: '0.78rem',
                   fontWeight: '700',
                   backgroundColor: showConfig ? '#e2e8f0' : '#f1f5f9',
                   color: '#334155',
@@ -1574,7 +1584,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                   cursor: 'pointer'
                 }}
               >
-                {showConfig ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                {showConfig ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
                 {showConfig ? 'Hide Profile Fields' : 'Edit Booking Details'}
               </button>
             </div>
@@ -1638,7 +1648,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                   type="email"
                   placeholder="e.g. pharmacy@gmail.com"
                   value={retailerEmail}
-                  onChange={(e) => setRetailerEmail(e.target.value)}
+                  onChange={(e) => setRetailerEmail(e.target.value.toLowerCase())}
                   style={{
                     width: '100%',
                     padding: '8px 12px',
@@ -1806,10 +1816,20 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
 
           {/* Formulation Form Filter Pills */}
           <div>
-            <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>
+            <div style={{ fontSize: '0.74rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>
               Filter by Formulation Form:
             </div>
-            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+            <div
+              className="touch-scroll-row no-scrollbar"
+              style={{
+                display: 'flex',
+                gap: '6px',
+                overflowX: 'auto',
+                paddingBottom: '4px',
+                WebkitOverflowScrolling: 'touch',
+                whiteSpace: 'nowrap'
+              }}
+            >
               {formsList.map((formName) => {
                 const isSelected = selectedForm.toLowerCase() === formName.toLowerCase();
                 return (
@@ -1817,6 +1837,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                     key={formName}
                     onClick={() => setSelectedForm(formName)}
                     style={{
+                      flexShrink: 0,
                       padding: '5px 12px',
                       borderRadius: '20px',
                       fontSize: '0.78rem',
@@ -1840,11 +1861,11 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
         <div className="quickorder-matrix-layout">
           
           {/* LEFT COLUMN: Product Catalog / Matrix Grid */}
-          <div>
+          <div id="quickorder-catalog-anchor">
             {/* Filter Count Subtitle */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
               <div style={{ fontSize: '0.85rem', color: '#475569', fontWeight: '600' }}>
-                Showing <strong>{filteredProducts.length}</strong> products
+                Showing <strong>{pageSize === 'all' ? totalFilteredCount : `${(currentPage - 1) * pageSize + 1} - ${Math.min(currentPage * pageSize, totalFilteredCount)} of ${totalFilteredCount}`}</strong> products
                 {selectedCompany !== 'All' && <span> • Company: <strong>{selectedCompany}</strong></span>}
                 {selectedForm !== 'All' && <span> • Form: <strong>{selectedForm}</strong></span>}
               </div>
@@ -1894,7 +1915,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                   border: '1px solid #e2e8f0'
                 }}
               >
-                <div style={{ overflowX: 'auto' }}>
+                <div className="table-responsive" style={{ overflowX: 'auto' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '750px' }}>
                     <thead>
                       <tr style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid #e2e8f0', color: '#0c3d6c', fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
@@ -1905,7 +1926,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredProducts.map((product) => {
+                      {paginatedProducts.map((product) => {
                         const boxQty = getBoxQty(product._id);
                         const isSelected = boxQty > 0;
                         const unitsPerBox = product.unitsPerBox || 10;
@@ -2180,7 +2201,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
             {/* CARD VIEW MODE */}
             {viewMode === 'card' && filteredProducts.length > 0 && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
-                {filteredProducts.map((product) => {
+                {paginatedProducts.map((product) => {
                   const boxQty = getBoxQty(product._id);
                   const isSelected = boxQty > 0;
                   const unitsPerBox = product.unitsPerBox || 10;
@@ -2298,6 +2319,145 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                     </div>
                   );
                 })}
+              </div>
+            )}
+
+            {/* SMART PAGINATION BAR */}
+            {filteredProducts.length > 0 && (
+              <div
+                id="quickorder-pagination-bar"
+                style={{
+                  marginTop: '18px',
+                  padding: '12px 18px',
+                  backgroundColor: '#ffffff',
+                  borderRadius: '10px',
+                  border: '1px solid #e2e8f0',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '12px'
+                }}
+              >
+                {/* Item range info & Page Size Selector */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.84rem', color: '#475569', fontWeight: '600' }}>
+                    {pageSize === 'all' ? (
+                      <>Showing all <strong>{totalFilteredCount}</strong> medicines</>
+                    ) : (
+                      <>
+                        Showing <strong>{(currentPage - 1) * pageSize + 1}</strong> – <strong>{Math.min(currentPage * pageSize, totalFilteredCount)}</strong> of <strong>{totalFilteredCount}</strong> medicines
+                      </>
+                    )}
+                  </span>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Show:</span>
+                    <select
+                      value={pageSize}
+                      onChange={(e) => {
+                        const val = e.target.value === 'all' ? 'all' : Number(e.target.value);
+                        setPageSize(val);
+                        setCurrentPage(1);
+                      }}
+                      style={{
+                        padding: '4px 8px',
+                        borderRadius: '6px',
+                        border: '1px solid #cbd5e1',
+                        backgroundColor: '#f8fafc',
+                        fontSize: '0.82rem',
+                        fontWeight: '700',
+                        color: '#0c3d6c',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <option value={25}>25 / page</option>
+                      <option value={50}>50 / page</option>
+                      <option value={100}>100 / page</option>
+                      <option value="all">All ({totalFilteredCount})</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Page number buttons (if not 'all' and totalPages > 1) */}
+                {pageSize !== 'all' && totalPages > 1 && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <button
+                      onClick={() => {
+                        setCurrentPage((prev) => Math.max(prev - 1, 1));
+                        const el = document.getElementById('quickorder-catalog-anchor');
+                        if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      disabled={currentPage === 1}
+                      style={{
+                        padding: '5px 10px',
+                        borderRadius: '6px',
+                        border: '1px solid #cbd5e1',
+                        backgroundColor: currentPage === 1 ? '#f8fafc' : '#ffffff',
+                        color: currentPage === 1 ? '#94a3b8' : '#0c3d6c',
+                        fontWeight: '700',
+                        fontSize: '0.8rem',
+                        cursor: currentPage === 1 ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      ‹ Prev
+                    </button>
+
+                    {getPaginationNumbers().map((num, idx) => {
+                      if (num === '...') {
+                        return <span key={`ellipsis-${idx}`} style={{ padding: '0 4px', color: '#94a3b8', fontSize: '0.85rem' }}>…</span>;
+                      }
+                      const isCur = num === currentPage;
+                      return (
+                        <button
+                          key={num}
+                          onClick={() => {
+                            setCurrentPage(num);
+                            const el = document.getElementById('quickorder-catalog-anchor');
+                            if (el) el.scrollIntoView({ behavior: 'smooth' });
+                          }}
+                          style={{
+                            minWidth: '32px',
+                            height: '32px',
+                            padding: '0 6px',
+                            borderRadius: '6px',
+                            border: isCur ? '1px solid #0c3d6c' : '1px solid #e2e8f0',
+                            backgroundColor: isCur ? '#0c3d6c' : '#ffffff',
+                            color: isCur ? '#ffffff' : '#334155',
+                            fontWeight: isCur ? '800' : '600',
+                            fontSize: '0.8rem',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          {num}
+                        </button>
+                      );
+                    })}
+
+                    <button
+                      onClick={() => {
+                        setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+                        const el = document.getElementById('quickorder-catalog-anchor');
+                        if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      disabled={currentPage === totalPages}
+                      style={{
+                        padding: '5px 10px',
+                        borderRadius: '6px',
+                        border: '1px solid #cbd5e1',
+                        backgroundColor: currentPage === totalPages ? '#f8fafc' : '#ffffff',
+                        color: currentPage === totalPages ? '#94a3b8' : '#0c3d6c',
+                        fontWeight: '700',
+                        fontSize: '0.8rem',
+                        cursor: currentPage === totalPages ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      Next ›
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -2558,6 +2718,292 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
         </div>
       </div>
 
+      {/* FLOATING STICKY MOBILE ACTION BAR (Screens <= 992px) */}
+      {commercialBilling.totalSelectedItems > 0 && (
+        <div className="quickorder-mobile-sticky-bar">
+          <div className="quickorder-mobile-bar-content">
+            <div
+              onClick={() => setIsMobileSummaryOpen(true)}
+              style={{ cursor: 'pointer', flex: 1, minWidth: 0 }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '0.72rem', backgroundColor: '#dcfce7', color: '#166534', fontWeight: '800', padding: '2px 7px', borderRadius: '4px' }}>
+                  {commercialBilling.totalSelectedItems} Items
+                </span>
+                <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '600' }}>
+                  ({commercialBilling.totalBoxes} Boxes)
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginTop: '2px' }}>
+                <span style={{ fontSize: '1.15rem', fontWeight: '900', color: '#0c3d6c' }}>
+                  ₹{commercialBilling.grandTotal.toFixed(2)}
+                </span>
+                <span style={{ fontSize: '0.68rem', color: '#16a34a', fontWeight: '700' }}>
+                  inc. GST
+                </span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <button
+                onClick={() => setIsMobileSummaryOpen(true)}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  backgroundColor: '#f1f5f9',
+                  color: '#0c3d6c',
+                  border: '1px solid #cbd5e1',
+                  fontWeight: '700',
+                  fontSize: '0.78rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                <ShoppingCart size={14} /> Bill
+              </button>
+              <button
+                onClick={handleWhatsAppBooking}
+                disabled={isSubmitting}
+                style={{
+                  padding: '9px 14px',
+                  borderRadius: '8px',
+                  backgroundColor: '#16a34a',
+                  color: '#ffffff',
+                  border: 'none',
+                  fontWeight: '800',
+                  fontSize: '0.82rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 3px 10px rgba(22, 163, 74, 0.3)'
+                }}
+              >
+                <Send size={14} /> WhatsApp Order
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MOBILE SUMMARY BOTTOM SHEET DRAWER MODAL */}
+      {isMobileSummaryOpen && (
+        <div
+          className="quickorder-bottom-sheet-overlay"
+          onClick={() => setIsMobileSummaryOpen(false)}
+        >
+          <div
+            className="quickorder-bottom-sheet-panel"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Drawer Header */}
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <ShoppingCart size={18} color="#0c3d6c" />
+                <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: '800', color: '#0c3d6c' }}>
+                  Commercial Order Summary
+                </h3>
+                <span style={{ fontSize: '0.72rem', backgroundColor: '#e0f2fe', color: '#0369a1', fontWeight: '800', padding: '2px 8px', borderRadius: '10px' }}>
+                  {commercialBilling.totalSelectedItems} Items
+                </span>
+              </div>
+              <button
+                onClick={() => setIsMobileSummaryOpen(false)}
+                style={{ border: 'none', background: 'none', color: '#64748b', cursor: 'pointer', padding: '4px' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Retailer Store Badge */}
+            <div style={{ padding: '8px 20px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #e2e8f0', fontSize: '0.76rem', color: '#475569', display: 'flex', justifyContent: 'space-between' }}>
+              <span>Store: <strong>{shopName || 'Retail Chemist'}</strong> ({retailerMobile || 'No mobile'})</span>
+              <span>WhatsApp: +91 {destinationWhatsApp}</span>
+            </div>
+
+            {/* Line Items Scrollable List */}
+            <div style={{ overflowY: 'auto', padding: '12px 20px', flex: 1, maxHeight: '42vh' }}>
+              {commercialBilling.lineItems.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '30px 0', color: '#94a3b8' }}>
+                  No items in order
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {commercialBilling.lineItems.map((item) => (
+                    <div
+                      key={item.product}
+                      style={{
+                        padding: '10px 12px',
+                        backgroundColor: '#f8fafc',
+                        borderRadius: '8px',
+                        border: '1px solid #e2e8f0',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        gap: '10px'
+                      }}
+                    >
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {item.productName}
+                        </div>
+                        <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px' }}>
+                          {item.company} • {item.packing || `${item.unitsPerBox} Units/Box`}
+                        </div>
+                        <div style={{ fontSize: '0.74rem', color: '#16a34a', fontWeight: '600' }}>
+                          ₹{item.unitPrice.toFixed(2)}/unit × {item.totalUnits} = ₹{item.lineTotal.toFixed(2)}
+                        </div>
+                        {item.bonusUnits > 0 && (
+                          <div style={{ fontSize: '0.7rem', color: '#ea580c', fontWeight: '700' }}>
+                            🎁 +{item.bonusUnits} Free Bonus Units
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Stepper controls */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', border: '1px solid #cbd5e1', borderRadius: '6px', overflow: 'hidden', backgroundColor: '#ffffff' }}>
+                          <button
+                            onClick={() => decrementBoxQty(item.product)}
+                            style={{ width: '26px', height: '28px', border: 'none', backgroundColor: '#e2e8f0', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                          >
+                            <Minus size={12} />
+                          </button>
+                          <span style={{ width: '32px', textAlign: 'center', fontSize: '0.82rem', fontWeight: '700' }}>
+                            {item.boxes}
+                          </span>
+                          <button
+                            onClick={() => incrementBoxQty(item.product)}
+                            style={{ width: '26px', height: '28px', border: 'none', backgroundColor: '#0c3d6c', color: '#ffffff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                          >
+                            <Plus size={12} />
+                          </button>
+                        </div>
+                        <button
+                          onClick={() => setBoxQty(item.product, 0)}
+                          title="Remove item"
+                          style={{ border: 'none', background: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Financial Summary & Action Panel */}
+            <div style={{ borderTop: '1px solid #e2e8f0', padding: '14px 20px', backgroundColor: '#ffffff' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#64748b', marginBottom: '4px' }}>
+                <span>Taxable PTR Subtotal:</span>
+                <span style={{ fontWeight: '700', color: '#0f172a' }}>₹{commercialBilling.taxableSubtotal.toFixed(2)}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#64748b', marginBottom: '8px' }}>
+                <span>Total GST (12% & 18%):</span>
+                <span>+₹{commercialBilling.totalGstAmount.toFixed(2)}</span>
+              </div>
+
+              {commercialBilling.totalSchemeSavings > 0 && (
+                <div style={{ backgroundColor: '#ecfdf5', padding: '6px 10px', borderRadius: '6px', fontSize: '0.75rem', color: '#065f46', marginBottom: '10px', display: 'flex', justifyContent: 'space-between' }}>
+                  <span>🎁 Free Scheme Benefit:</span>
+                  <span style={{ fontWeight: '800' }}>+{commercialBilling.totalSchemeBonusUnits} Units (₹{commercialBilling.totalSchemeSavings.toFixed(2)})</span>
+                </div>
+              )}
+
+              {/* Grand Total */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', backgroundColor: '#f0fdf4', border: '1px solid #86efac', borderRadius: '8px', marginBottom: '12px' }}>
+                <div>
+                  <div style={{ fontSize: '0.72rem', color: '#166534', fontWeight: '800', textTransform: 'uppercase' }}>Grand Commercial Total</div>
+                  <div style={{ fontSize: '0.68rem', color: '#15803d' }}>{commercialBilling.totalBoxes} Boxes ({commercialBilling.totalUnits} Units)</div>
+                </div>
+                <div style={{ fontSize: '1.35rem', fontWeight: '900', color: '#15803d' }}>
+                  ₹{commercialBilling.grandTotal.toFixed(2)}
+                </div>
+              </div>
+
+              {/* WhatsApp Action */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <button
+                  onClick={() => {
+                    handleWhatsAppBooking();
+                    setIsMobileSummaryOpen(false);
+                  }}
+                  disabled={isSubmitting || commercialBilling.totalSelectedItems === 0}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    borderRadius: '8px',
+                    backgroundColor: '#16a34a',
+                    color: '#ffffff',
+                    border: 'none',
+                    fontWeight: '800',
+                    fontSize: '0.9rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 12px rgba(22, 163, 74, 0.25)'
+                  }}
+                >
+                  <Send size={16} /> Confirm & Send WhatsApp Order
+                </button>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                  <button
+                    onClick={() => {
+                      handleExportCSV();
+                      setIsMobileSummaryOpen(false);
+                    }}
+                    style={{
+                      padding: '8px',
+                      borderRadius: '6px',
+                      backgroundColor: '#f1f5f9',
+                      border: '1px solid #cbd5e1',
+                      color: '#0c3d6c',
+                      fontWeight: '700',
+                      fontSize: '0.78rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <FileSpreadsheet size={13} /> Export CSV
+                  </button>
+                  <button
+                    onClick={() => {
+                      handlePrintInvoice();
+                      setIsMobileSummaryOpen(false);
+                    }}
+                    style={{
+                      padding: '8px',
+                      borderRadius: '6px',
+                      backgroundColor: '#f1f5f9',
+                      border: '1px solid #cbd5e1',
+                      color: '#334155',
+                      fontWeight: '700',
+                      fontSize: '0.78rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <Printer size={13} /> Print Invoice
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* MODAL 1: ORDER BOOKING SUCCESS MODAL */}
       {successModalData && (
         <div
@@ -2715,29 +3161,6 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                   <Printer size={14} /> Print Invoice
                 </button>
               </div>
-
-              <button
-                onClick={() => {
-                  setSuccessModalData(null);
-                  handleOpenLedger(successModalData.retailerMobile);
-                }}
-                style={{
-                  padding: '10px',
-                  borderRadius: '8px',
-                  fontSize: '0.85rem',
-                  fontWeight: '700',
-                  backgroundColor: '#eff6ff',
-                  color: '#1b75bc',
-                  border: '1px solid #bfdbfe',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px'
-                }}
-              >
-                <CreditCard size={15} /> View Retailer Outstanding Ledger
-              </button>
             </div>
           </div>
         </div>

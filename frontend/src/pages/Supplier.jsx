@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, CheckCircle2, Factory, ShieldCheck, TrendingUp } from 'lucide-react';
+import { Send, CheckCircle2, Factory, ShieldCheck, TrendingUp, AlertCircle } from 'lucide-react';
 
 function Supplier() {
   const [companyName, setCompanyName] = useState('');
@@ -12,13 +12,22 @@ function Supplier() {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage('');
+
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.length < 10) {
+      setErrorMessage('Please enter a valid 10-digit mobile number.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const fullMessage = `Company: ${companyName}\nGSTIN: ${gstNumber}\n\nPortfolio details: ${message}`;
+      const fullMessage = `Company: ${companyName.trim()}\nGSTIN: ${gstNumber.trim()}\n\nPortfolio details: ${message.trim()}`;
 
       const response = await fetch('/api/enquiries', {
         method: 'POST',
@@ -27,10 +36,10 @@ function Supplier() {
         },
         body: JSON.stringify({
           type: 'Supplier',
-          name: contactName,
-          phone,
-          email,
-          address,
+          name: contactName.trim(),
+          phone: cleanPhone,
+          email: email.trim(),
+          address: address.trim(),
           message: fullMessage,
         }),
       });
@@ -46,13 +55,13 @@ function Supplier() {
         setGstNumber('');
         setAddress('');
         setMessage('');
-        setTimeout(() => setIsSuccess(false), 5000);
+        setTimeout(() => setIsSuccess(false), 6000);
       } else {
-        alert(data.message || 'Failed to submit supplier details.');
+        setErrorMessage(data.message || 'Failed to submit supplier details.');
       }
     } catch (error) {
       console.error('Error submitting supplier form:', error);
-      alert('Network error. Please try again.');
+      setErrorMessage('Network connection error. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -127,8 +136,14 @@ function Supplier() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              {errorMessage && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', color: '#b91c1c', fontSize: '0.88rem' }} role="alert">
+                  <AlertCircle size={16} style={{ flexShrink: 0 }} aria-hidden="true" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
               
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="supplier-company" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>Company / Entity Name *</label>
                   <input 
@@ -176,7 +191,7 @@ function Supplier() {
                     required
                     placeholder="sales@company.com"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => setEmail(e.target.value.toLowerCase())}
                     style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
                   />
                 </div>

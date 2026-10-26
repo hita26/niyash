@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, CheckCircle2, ShieldCheck, Award, Handshake } from 'lucide-react';
+import { Send, CheckCircle2, ShieldCheck, Award, Handshake, AlertCircle } from 'lucide-react';
 
 function Partner() {
   const [storeName, setStoreName] = useState('');
@@ -13,13 +13,22 @@ function Partner() {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage('');
+
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.length < 10) {
+      setErrorMessage('Please enter a valid 10-digit mobile number.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const fullMessage = `Store/Hospital Name: ${storeName}\nDrug License: ${drugLicense}\nGSTIN: ${gstNumber}\n\nMessage: ${message}`;
+      const fullMessage = `Store/Hospital Name: ${storeName.trim()}\nDrug License: ${drugLicense.trim()}\nGSTIN: ${gstNumber.trim()}\n\nMessage: ${message.trim()}`;
 
       const response = await fetch('/api/enquiries', {
         method: 'POST',
@@ -28,10 +37,10 @@ function Partner() {
         },
         body: JSON.stringify({
           type: 'Partner',
-          name: ownerName,
-          phone,
-          email,
-          address,
+          name: ownerName.trim(),
+          phone: cleanPhone,
+          email: email.trim(),
+          address: address.trim(),
           message: fullMessage,
         }),
       });
@@ -48,13 +57,13 @@ function Partner() {
         setGstNumber('');
         setAddress('');
         setMessage('');
-        setTimeout(() => setIsSuccess(false), 5000);
+        setTimeout(() => setIsSuccess(false), 6000);
       } else {
-        alert(data.message || 'Failed to submit registration request.');
+        setErrorMessage(data.message || 'Failed to submit registration request.');
       }
     } catch (error) {
       console.error('Error submitting partner form:', error);
-      alert('Network error. Please try again.');
+      setErrorMessage('Network connection error. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -129,6 +138,12 @@ function Partner() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              {errorMessage && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', color: '#b91c1c', fontSize: '0.88rem' }} role="alert">
+                  <AlertCircle size={16} style={{ flexShrink: 0 }} aria-hidden="true" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
               
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
@@ -177,7 +192,7 @@ function Partner() {
                     type="email" 
                     placeholder="store@example.com"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => setEmail(e.target.value.toLowerCase())}
                     style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
                   />
                 </div>

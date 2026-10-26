@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import EnquiryCartModal from './components/EnquiryCartModal';
 import AuthModal from './components/AuthModal';
 import Home from './pages/Home';
+import About from './pages/About';
 import Products from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
 import Contact from './pages/Contact';
@@ -16,7 +17,11 @@ import NewsFeed from './pages/NewsFeed';
 import QuickOrder from './pages/QuickOrder';
 import OutstandingLedger from './pages/OutstandingLedger';
 import Admin from './pages/Admin';
+import CompanyDirectory from './pages/CompanyDirectory';
+import CompanyDetail from './pages/CompanyDetail';
 import NewsTicker from './components/NewsTicker';
+import ScrollToTop from './components/ScrollToTop';
+import MobileBottomNav from './components/MobileBottomNav';
 
 function App() {
   const [enquiryCart, setEnquiryCart] = useState([]);
@@ -110,6 +115,7 @@ function App() {
 
   return (
     <Router>
+      <ScrollToTop />
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <Header 
           cartCount={enquiryCart.reduce((total, item) => total + item.quantity, 0)} 
@@ -125,6 +131,8 @@ function App() {
         <main style={{ flex: 1 }}>
           <Routes>
             <Route path="/" element={<Home addToCart={addToCart} />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/about-us" element={<About />} />
             <Route 
               path="/products" 
               element={
@@ -136,12 +144,17 @@ function App() {
               } 
             />
             <Route path="/products/:id" element={<ProductDetail addToCart={addToCart} />} />
+            <Route path="/companies" element={<CompanyDirectory />} />
+            <Route path="/companies/:id" element={<CompanyDetail addToCart={addToCart} />} />
+            <Route path="/manufacturers" element={<Navigate to="/companies" replace />} />
+            <Route path="/brands" element={<Navigate to="/companies" replace />} />
             <Route path="/news" element={<NewsFeed />} />
             <Route path="/schemes" element={<NewsFeed />} />
             <Route path="/quick-order" element={<QuickOrder />} />
             <Route path="/order" element={<QuickOrder />} />
-            <Route path="/ledger" element={<OutstandingLedger user={user} />} />
-            <Route path="/outstanding" element={<OutstandingLedger user={user} />} />
+            <Route path="/ledger" element={<Navigate to="/admin" replace />} />
+            <Route path="/outstanding" element={<Navigate to="/admin" replace />} />
+            <Route path="/outstanding-ledger" element={<Navigate to="/admin" replace />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/career" element={<Career />} />
             <Route path="/partner" element={<Partner />} />
@@ -152,6 +165,11 @@ function App() {
         </main>
 
         <Footer />
+
+        <MobileBottomNav 
+          cartCount={enquiryCart.reduce((total, item) => total + item.quantity, 0)} 
+          onOpenCart={() => setIsCartOpen(true)} 
+        />
 
         <EnquiryCartModal 
           isOpen={isCartOpen} 

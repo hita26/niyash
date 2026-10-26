@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShieldCheck, Truck, Percent, Headset, Globe, ShoppingCart, MessageSquare, PhoneCall, Mail, Search, ArrowRight, Award } from 'lucide-react';
+import { 
+  ShieldCheck, Truck, Percent, Headset, Globe, ShoppingCart, MessageSquare, 
+  PhoneCall, Mail, Search, ArrowRight, Award, Building2, Package, CheckCircle2, Sparkles 
+} from 'lucide-react';
 
 function Home({ addToCart }) {
   const navigate = useNavigate();
@@ -14,34 +17,33 @@ function Home({ addToCart }) {
       navigate('/products');
     }
   };
-  // Let's create static arrays of categories and top brands for rendering on home
   const categories = [
     {
       name: 'Pharma Products',
       title: 'Pharma Medicines',
       desc: 'Tablets, Capsules, Syrups, Ointments & more.',
-      image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80',
+      image: '/pharma-products.jpg',
       link: '/products?category=Pharma Products'
     },
     {
       name: 'OTC Products',
       title: 'OTC Products',
       desc: 'Over-the-counter medicines & wellness supplies.',
-      image: 'https://images.unsplash.com/photo-1616671276441-2f2c277b8bf4?auto=format&fit=crop&w=400&q=80',
+      image: '/otc-products.jpg',
       link: '/products?category=OTC Products'
     },
     {
       name: 'Injectables',
       title: 'Injectables',
       desc: 'Critical care vials, ampoules, and IV infusions.',
-      image: 'https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?auto=format&fit=crop&w=400&q=80',
+      image: '/injectables.jpg',
       link: '/products?category=Injectables'
     },
     {
       name: 'Surgical & Medical Supplies',
       title: 'Surgical & Medical',
       desc: 'Gloves, syringes, needles, dressings & consumables.',
-      image: 'https://images.unsplash.com/photo-1581594693702-fbdc51b2763b?auto=format&fit=crop&w=400&q=80',
+      image: '/surgical-supplies.jpg',
       link: '/products?category=Surgical %26 Medical Supplies'
     }
   ];
@@ -80,9 +82,19 @@ function Home({ addToCart }) {
   ];
 
   const brands = [
-    'Cipla', 'Abbott', 'Sun Pharma', 'Intas', 'Alkem', 'Zydus', 
-    'Leeford Healthcare', 'Troikaa Pharmaceuticals', 'Biochem', 
-    'Namcare Pharma', 'Healing Pharma', 'Steris Pharma', 'Dr. Morepen'
+    'Abbott',
+    'Alkem',
+    'Biochem',
+    'Cipla',
+    'Dr. Morepen',
+    'Healing Pharma',
+    'Intas',
+    'Leeford Healthcare',
+    'Namcare Pharma',
+    'Steris Pharma',
+    'Sun Pharma',
+    'Troikaa Pharmaceuticals',
+    'Zydus'
   ];
 
   const handleQuickWhatsApp = () => {
@@ -95,96 +107,100 @@ function Home({ addToCart }) {
       
       {/* Hero Banner Section */}
       <section style={{
-        background: 'linear-gradient(135deg, rgba(12, 61, 108, 0.96), rgba(27, 117, 188, 0.88)), url("https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=1600&q=80")',
+        background: 'linear-gradient(135deg, rgba(10, 48, 86, 0.97), rgba(20, 83, 138, 0.92)), url("https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=1600&q=80")',
         backgroundSize: 'cover', backgroundPosition: 'center', color: '#ffffff',
-        padding: '90px 0 100px 0', position: 'relative', overflow: 'hidden'
+        padding: '70px 0 85px 0', position: 'relative', overflow: 'hidden'
       }}>
         <div className="container hero-container-grid">
           <div>
-            <span style={{
-              backgroundColor: 'var(--secondary-green)', padding: '6px 14px',
-              borderRadius: '20px', fontSize: '0.82rem', fontWeight: '700', textTransform: 'uppercase',
-              letterSpacing: '1px', display: 'inline-block', marginBottom: '18px'
-            }}>
-              Wholesale & Distribution • PAN Gujarat
-            </span>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: 'rgba(34, 197, 94, 0.15)', border: '1px solid rgba(74, 222, 128, 0.35)', padding: '6px 14px', borderRadius: '30px', fontSize: '0.82rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.8px', color: '#86efac', marginBottom: '16px' }}>
+              <ShieldCheck size={15} /> Authorized Wholesale & Distribution • PAN Gujarat
+            </div>
             
-            <h1 style={{ fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', color: '#ffffff', lineHeight: '1.15', fontWeight: '800', marginBottom: '20px', fontFamily: 'Outfit' }}>
+            <h1 style={{ fontSize: 'clamp(2.1rem, 4.5vw, 3.2rem)', color: '#ffffff', lineHeight: '1.18', fontWeight: '800', marginBottom: '18px', fontFamily: 'Outfit' }}>
               Your Trusted Partner in <br />
-              <span style={{ color: '#86efac' }}>Pharma, OTC & Surgical</span> Supplies
+              <span style={{ color: '#86efac' }}>9,500+ Pharma, OTC & Surgical</span> Supplies
             </h1>
             
-            <p style={{ fontSize: '1.1rem', color: '#e2e8f0', marginBottom: '25px', maxWidth: '620px', fontWeight: '400', lineHeight: '1.6' }}>
-              Niyansh Pharma delivers 8,700+ genuine healthcare formulations, generic medicines, and hospital consumables with verified batch compliance and prompt delivery across Saurashtra & Gujarat.
+            <p style={{ fontSize: '1.08rem', color: '#e2e8f0', marginBottom: '28px', maxWidth: '620px', fontWeight: '400', lineHeight: '1.65' }}>
+              Niyansh Pharma delivers 9,500+ genuine healthcare formulations, generic medicines, and hospital consumables from 252+ certified manufacturers with verified batch compliance and prompt delivery across Saurashtra & Gujarat.
             </p>
 
-            {/* In-Banner Quick Medicine Search */}
-            <form onSubmit={handleHeroSearchSubmit} style={{ display: 'flex', gap: '8px', maxWidth: '540px', marginBottom: '25px' }}>
-              <div style={{ position: 'relative', flex: 1 }}>
-                <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                <input 
-                  type="text"
-                  placeholder="Search 8,700+ medicines, salts or companies..."
-                  value={heroSearch}
-                  onChange={(e) => setHeroSearch(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '12px 14px 12px 42px',
-                    borderRadius: '8px',
-                    border: '1px solid rgba(255,255,255,0.3)',
-                    backgroundColor: '#ffffff',
-                    color: '#0f172a',
-                    fontSize: '0.95rem',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
-                  }}
-                />
-              </div>
-              <button type="submit" className="btn btn-secondary" style={{ padding: '12px 20px', fontSize: '0.95rem', whiteSpace: 'nowrap' }}>
-                Search
-              </button>
-            </form>
-
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-              <Link to="/products" className="btn btn-secondary" style={{ padding: '12px 26px', fontSize: '0.95rem' }}>
-                Browse Catalog
+            {/* High-Impact Action CTAs for Chemists */}
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '25px' }}>
+              <Link to="/companies" className="btn btn-secondary" style={{ padding: '13px 24px', fontSize: '0.96rem', fontWeight: '700', borderRadius: '30px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <Building2 size={18} /> Browse 252+ Companies
               </Link>
-              <button onClick={handleQuickWhatsApp} className="btn btn-outline" style={{ borderColor: '#ffffff', color: '#ffffff', padding: '12px 26px', fontSize: '0.95rem' }}>
-                WhatsApp Order
+              <Link to="/quick-order" className="btn btn-primary" style={{ padding: '13px 24px', fontSize: '0.96rem', fontWeight: '700', borderRadius: '30px', display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#ffffff', color: 'var(--primary-blue)' }}>
+                <Package size={18} /> Fast Quick Order ⚡
+              </Link>
+              <button onClick={handleQuickWhatsApp} className="btn btn-outline" style={{ borderColor: 'rgba(255,255,255,0.7)', color: '#ffffff', padding: '13px 22px', fontSize: '0.96rem', fontWeight: '600', borderRadius: '30px' }}>
+                <MessageSquare size={17} /> WhatsApp Order
               </button>
+            </div>
+
+            {/* Quick Formulation Filter Shortcuts */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Quick Jump:</span>
+              <Link to="/products?category=Pharma Products" style={{ fontSize: '0.8rem', color: '#e2e8f0', backgroundColor: 'rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: '15px', textDecoration: 'none', transition: 'all 0.2s' }}>Tablets & Capsules</Link>
+              <Link to="/products?category=Injectables" style={{ fontSize: '0.8rem', color: '#e2e8f0', backgroundColor: 'rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: '15px', textDecoration: 'none', transition: 'all 0.2s' }}>Critical Care Injectables</Link>
+              <Link to="/products?category=OTC Products" style={{ fontSize: '0.8rem', color: '#e2e8f0', backgroundColor: 'rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: '15px', textDecoration: 'none', transition: 'all 0.2s' }}>OTC & Wellness</Link>
+              <Link to="/products?category=Surgical %26 Medical Supplies" style={{ fontSize: '0.8rem', color: '#e2e8f0', backgroundColor: 'rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: '15px', textDecoration: 'none', transition: 'all 0.2s' }}>Surgical & Medical</Link>
             </div>
           </div>
 
-          {/* Graphical floating panel for Quick Stats */}
+          {/* Wholesale Trust & Statistics Card */}
           <div style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.12)', backdropFilter: 'blur(12px)',
-            borderRadius: '16px', padding: '28px', border: '1px solid rgba(255, 255, 255, 0.2)',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.15)'
+            backgroundColor: 'rgba(255, 255, 255, 0.12)', backdropFilter: 'blur(16px)',
+            borderRadius: '20px', padding: '30px', border: '1px solid rgba(255, 255, 255, 0.25)',
+            boxShadow: '0 25px 60px rgba(0,0,0,0.2)'
           }}>
-            <h3 style={{ color: '#ffffff', fontSize: '1.3rem', marginBottom: '18px', borderBottom: '1px solid rgba(255, 255, 255, 0.15)', paddingBottom: '10px' }}>
-              Quick Contact
-            </h3>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '18px' }}>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                <span style={{ backgroundColor: 'var(--secondary-green)', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <PhoneCall size={18} />
-                </span>
-                <div>
-                  <span style={{ display: 'block', fontSize: '0.8rem', color: '#cbd5e1' }}>Call for Orders</span>
-                  <a href="tel:+919909923130" style={{ fontSize: '1.1rem', fontWeight: '700', color: '#ffffff' }}>+91 99099 23130</a>
-                </div>
-              </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                <span style={{ backgroundColor: 'var(--accent-blue)', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Mail size={18} />
-                </span>
-                <div>
-                  <span style={{ display: 'block', fontSize: '0.8rem', color: '#cbd5e1' }}>Email Us</span>
-                  <a href="mailto:NiyanshPharma@gmail.com" style={{ fontSize: '1.05rem', fontWeight: '700', color: '#ffffff' }}>NiyanshPharma@gmail.com</a>
-                </div>
-              </li>
-            </ul>
-            <div style={{ marginTop: '25px', padding: '15px', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '8px', fontSize: '0.85rem', color: '#cbd5e1', textAlign: 'center' }}>
-              📍 Block no. 52B, Panchayat Nagar-3, University Rd, Rajkot, Gujarat
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', borderBottom: '1px solid rgba(255, 255, 255, 0.15)', paddingBottom: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Sparkles size={18} color="#86efac" />
+                <h3 style={{ color: '#ffffff', fontSize: '1.2rem', fontWeight: '700', margin: 0 }}>
+                  Wholesale Advantage
+                </h3>
+              </div>
+              <span style={{ fontSize: '0.72rem', backgroundColor: '#22c55e', color: '#ffffff', fontWeight: '800', padding: '2px 8px', borderRadius: '10px' }}>
+                LIVE B2B
+              </span>
+            </div>
+
+            {/* Stat Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '22px' }}>
+              <div style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '14px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div style={{ fontSize: '1.65rem', fontWeight: '800', color: '#ffffff', lineHeight: 1.1 }}>9,500+</div>
+                <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '4px' }}>Genuine Formulations</div>
+              </div>
+              <div style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '14px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div style={{ fontSize: '1.65rem', fontWeight: '800', color: '#86efac', lineHeight: 1.1 }}>252+</div>
+                <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '4px' }}>Pharma Companies</div>
+              </div>
+              <div style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '14px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#ffffff', lineHeight: 1.1 }}>WHO-GMP</div>
+                <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '4px' }}>Certified Supply Chain</div>
+              </div>
+              <div style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '14px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#93c5fd', lineHeight: 1.1 }}>Same-Day</div>
+                <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '4px' }}>Dispatch in Saurashtra</div>
+              </div>
+            </div>
+
+            {/* Direct Order Help */}
+            <div style={{ padding: '14px', backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+              <div>
+                <span style={{ fontSize: '0.74rem', color: '#cbd5e1', display: 'block' }}>Call Wholesale Desk:</span>
+                <a href="tel:+919909923130" style={{ color: '#ffffff', fontWeight: '700', fontSize: '1.02rem', textDecoration: 'none' }}>+91 99099 23130</a>
+              </div>
+              <a 
+                href="https://wa.me/919909923130?text=Hello%20Niyansh%20Pharma%2C%20I%20would%20like%20to%20place%20a%20wholesale%20order." 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{ backgroundColor: '#22c55e', color: '#ffffff', padding: '8px 14px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '5px', textDecoration: 'none' }}
+              >
+                <MessageSquare size={14} /> WhatsApp
+              </a>
             </div>
           </div>
         </div>
@@ -210,6 +226,10 @@ function Home({ addToCart }) {
                   <img 
                     src={cat.image} 
                     alt={cat.title} 
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = '/pharma-products.jpg';
+                    }}
                     style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'var(--transition-smooth)' }}
                     onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.08)'}
                     onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
@@ -332,20 +352,36 @@ function Home({ addToCart }) {
           <p className="section-subtitle">We distribute high-quality medical supplies from reputed pharmaceutical corporations.</p>
           
           <div style={{
-            display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '15px',
+            display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '12px',
             marginTop: '20px'
           }}>
             {brands.map((brand, i) => (
-              <span 
+              <Link 
                 key={i} 
+                to={`/products?brand=${encodeURIComponent(brand)}`}
+                title={`Browse medicines manufactured by ${brand}`}
                 style={{
-                  padding: '12px 25px', backgroundColor: '#f8fafc', borderRadius: '30px',
-                  fontWeight: '600', color: 'var(--text-medium)', border: '1px solid var(--border-light)',
-                  fontSize: '0.9rem', boxShadow: '0 2px 5px rgba(0,0,0,0.01)'
+                  padding: '10px 22px', backgroundColor: '#f8fafc', borderRadius: '30px',
+                  fontWeight: '600', color: 'var(--primary-blue)', border: '1px solid var(--border-light)',
+                  fontSize: '0.9rem', boxShadow: '0 2px 5px rgba(0,0,0,0.02)',
+                  textDecoration: 'none', transition: 'all 0.2s ease',
+                  display: 'inline-flex', alignItems: 'center'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--primary-blue)';
+                  e.currentTarget.style.color = '#ffffff';
+                  e.currentTarget.style.borderColor = 'var(--primary-blue)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f8fafc';
+                  e.currentTarget.style.color = 'var(--primary-blue)';
+                  e.currentTarget.style.borderColor = 'var(--border-light)';
+                  e.currentTarget.style.transform = 'translateY(0)';
                 }}
               >
                 {brand}
-              </span>
+              </Link>
             ))}
           </div>
         </div>

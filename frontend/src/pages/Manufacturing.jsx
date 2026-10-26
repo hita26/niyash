@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, CheckCircle2, ShieldAlert, CheckSquare, Layers } from 'lucide-react';
+import { Send, CheckCircle2, ShieldAlert, CheckSquare, Layers, AlertCircle } from 'lucide-react';
 
 function Manufacturing() {
   const [name, setName] = useState('');
@@ -12,13 +12,22 @@ function Manufacturing() {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage('');
+
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.length < 10) {
+      setErrorMessage('Please enter a valid 10-digit mobile number.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const fullMessage = `Company: ${company}\nRequested Formulations: ${formulations}\nEstimated Batch Size: ${batchSize}\n\nNotes: ${message}`;
+      const fullMessage = `Company: ${company.trim()}\nRequested Formulations: ${formulations.trim()}\nEstimated Batch Size: ${batchSize.trim()}\n\nNotes: ${message.trim()}`;
 
       const response = await fetch('/api/enquiries', {
         method: 'POST',
@@ -27,10 +36,10 @@ function Manufacturing() {
         },
         body: JSON.stringify({
           type: 'Manufacturing',
-          name,
-          phone,
-          email,
-          address: company,
+          name: name.trim(),
+          phone: cleanPhone,
+          email: email.trim(),
+          address: company.trim(),
           message: fullMessage,
         }),
       });
@@ -46,13 +55,13 @@ function Manufacturing() {
         setFormulations('');
         setBatchSize('');
         setMessage('');
-        setTimeout(() => setIsSuccess(false), 5000);
+        setTimeout(() => setIsSuccess(false), 6000);
       } else {
-        alert(data.message || 'Failed to submit manufacturing enquiry.');
+        setErrorMessage(data.message || 'Failed to submit manufacturing enquiry.');
       }
     } catch (error) {
       console.error('Error submitting manufacturing form:', error);
-      alert('Network error. Please try again.');
+      setErrorMessage('Network connection error. Please check your internet and try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -116,6 +125,12 @@ function Manufacturing() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                {errorMessage && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', color: '#b91c1c', fontSize: '0.88rem' }} role="alert">
+                    <AlertCircle size={16} style={{ flexShrink: 0 }} aria-hidden="true" />
+                    <span>{errorMessage}</span>
+                  </div>
+                )}
                 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
@@ -126,7 +141,7 @@ function Manufacturing() {
                       required 
                       placeholder="Enter name"
                       value={name}
-                      onChange={(e) => setName(e.target.value)}
+                      onChange={(e) => { setName(e.target.value); if (errorMessage) setErrorMessage(''); }}
                       style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
                     />
                   </div>
@@ -138,7 +153,7 @@ function Manufacturing() {
                       required 
                       placeholder="Enter mobile"
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
+                      onChange={(e) => { setPhone(e.target.value); if (errorMessage) setErrorMessage(''); }}
                       style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
                     />
                   </div>
@@ -153,7 +168,7 @@ function Manufacturing() {
                       required
                       placeholder="name@company.com"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => { setEmail(e.target.value.toLowerCase()); if (errorMessage) setErrorMessage(''); }}
                       style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
                     />
                   </div>
@@ -165,13 +180,13 @@ function Manufacturing() {
                       required 
                       placeholder="Enter firm name"
                       value={company}
-                      onChange={(e) => setCompany(e.target.value)}
+                      onChange={(e) => { setCompany(e.target.value); if (errorMessage) setErrorMessage(''); }}
                       style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
                     />
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '15px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                     <label htmlFor="mfg-formulations" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>Formulation Type *</label>
                     <select 

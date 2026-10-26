@@ -140,6 +140,25 @@ export default function PaymentGatewayModal({
     };
   }, [gatewayStage, otpCountdown]);
 
+  // Lock body scroll and listen for Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && gatewayStage !== 'processing') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, gatewayStage, onClose]);
+
   // Card formatting helpers
   const handleCardNumberChange = (e) => {
     const raw = e.target.value.replace(/\D/g, '').slice(0, 16);
@@ -367,6 +386,11 @@ _Support: +91 9316566894_`;
 
   return (
     <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget && gatewayStage !== 'processing') {
+          onClose();
+        }
+      }}
       style={{
         position: 'fixed',
         top: 0,
@@ -384,6 +408,9 @@ _Support: +91 9316566894_`;
       }}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Wholesale Payment Gateway"
         className="card animate-fade-in"
         style={{
           width: '100%',

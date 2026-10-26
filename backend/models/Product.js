@@ -18,6 +18,10 @@ const productSchema = new mongoose.Schema(
       trim: true,
       default: 'DAXIA',
     },
+    companyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Company',
+    },
     category: {
       type: String,
       required: true,
@@ -105,9 +109,45 @@ const productSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    images: {
+      type: [String],
+      default: [],
+    },
+    stockQuantity: {
+      type: Number,
+      default: 100,
+    },
+    featured: {
+      type: Boolean,
+      default: false,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+    subCategory: {
+      type: String,
+      default: '',
+      trim: true,
+    },
     description: {
       type: String,
       trim: true,
+    },
+    specifications: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    sourceUrl: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    verificationStatus: {
+      type: String,
+      enum: ['Verified', 'Needs Review', 'Pending'],
+      default: 'Verified',
     },
   },
   {
@@ -115,13 +155,28 @@ const productSchema = new mongoose.Schema(
   }
 );
 
-// Add text search index for name, brand, company, composition, form, and description
+// Pre-save synchronization for main image and stock
+productSchema.pre('save', function (next) {
+  if (this.images && this.images.length > 0 && (!this.imageUrl || this.imageUrl.trim() === '')) {
+    this.imageUrl = this.images[0];
+  }
+  if (this.imageUrl && this.imageUrl.trim() !== '' && (!this.images || this.images.length === 0)) {
+    this.images = [this.imageUrl];
+  }
+  if (this.stockQuantity !== undefined && this.stockQuantity <= 0) {
+    this.inStock = false;
+  }
+  if (typeof next === 'function') next();
+});
+
+// Add text search index for name, brand, company, composition, form, sku, and description
 productSchema.index({
   name: 'text',
   brand: 'text',
   company: 'text',
   composition: 'text',
   form: 'text',
+  sku: 'text',
   description: 'text',
 });
 

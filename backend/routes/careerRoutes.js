@@ -76,7 +76,7 @@ router.post('/', handleUpload, async (req, res) => {
 
     const careerData = {
       name,
-      email,
+      email: email.toLowerCase().trim(),
       phone,
       position,
       experience,

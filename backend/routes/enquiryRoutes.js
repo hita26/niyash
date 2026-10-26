@@ -36,7 +36,7 @@ router.post('/', async (req, res) => {
       type,
       name,
       phone,
-      email,
+      email: email ? email.toLowerCase().trim() : '',
       address,
       message,
     };

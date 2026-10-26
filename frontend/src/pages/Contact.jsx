@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Phone, Mail, MapPin, Send, CheckCircle2, Clock } from 'lucide-react';
+import { Phone, Mail, MapPin, Send, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 
 function Contact() {
   const [name, setName] = useState('');
@@ -9,9 +9,19 @@ function Contact() {
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage('');
+
+    // Phone validation
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.length < 10) {
+      setErrorMessage('Please enter a valid 10-digit mobile number.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -22,10 +32,10 @@ function Contact() {
         },
         body: JSON.stringify({
           type: 'General Enquiry',
-          name,
-          phone,
-          email,
-          message: `Subject: ${subject}\n\n${message}`,
+          name: name.trim(),
+          phone: cleanPhone,
+          email: email.trim(),
+          message: `Subject: ${subject.trim()}\n\n${message.trim()}`,
         }),
       });
 
@@ -38,13 +48,13 @@ function Contact() {
         setEmail('');
         setSubject('');
         setMessage('');
-        setTimeout(() => setIsSuccess(false), 5000);
+        setTimeout(() => setIsSuccess(false), 6000);
       } else {
-        alert(data.message || 'Failed to send message. Please try again.');
+        setErrorMessage(data.message || 'Failed to send message. Please try again.');
       }
     } catch (error) {
       console.error('Error submitting contact form:', error);
-      alert('Network error. Please try again.');
+      setErrorMessage('Network connection error. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -98,7 +108,7 @@ function Contact() {
                   <div>
                     <h3 style={{ fontSize: '1.05rem', marginBottom: '4px' }}>Email Address</h3>
                     <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem' }}>
-                      General: <a href="mailto:NiyanshPharma@gmail.com" style={{ color: 'var(--text-dark)', fontWeight: '600' }}>NiyanshPharma@gmail.com</a>
+                      General: <a href="mailto:niyanshpharma@gmail.com" style={{ color: 'var(--text-dark)', fontWeight: '600' }}>niyanshpharma@gmail.com</a>
                     </p>
                   </div>
                 </li>
@@ -149,6 +159,12 @@ function Contact() {
               </div>
             ) : (
               <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px', flex: 1 }}>
+                {errorMessage && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', color: '#b91c1c', fontSize: '0.88rem' }} role="alert">
+                    <AlertCircle size={16} style={{ flexShrink: 0 }} aria-hidden="true" />
+                    <span>{errorMessage}</span>
+                  </div>
+                )}
                 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
@@ -184,7 +200,7 @@ function Contact() {
                     type="email" 
                     placeholder="name@example.com"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => setEmail(e.target.value.toLowerCase())}
                     style={{ padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
                   />
                 </div>

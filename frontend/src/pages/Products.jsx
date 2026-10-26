@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
-import { Filter, SlidersHorizontal, ArrowUpDown, RefreshCcw, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Filter, SlidersHorizontal, ArrowUpDown, RefreshCcw, X, ChevronLeft, ChevronRight, Building2, Search } from 'lucide-react';
 
 function Products({ addToCart, searchTerm, setSearchTerm }) {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -20,11 +20,13 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
   // Filtering states (arrays for checkboxes)
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedBrands, setSelectedBrands] = useState([]);
+  const [selectedCompanies, setSelectedCompanies] = useState([]);
   const [selectedForms, setSelectedForms] = useState([]);
+  const [companySearchTerm, setCompanySearchTerm] = useState('');
   const MAX_PRICE_LIMIT = 2000;
   const [maxPrice, setMaxPrice] = useState(MAX_PRICE_LIMIT);
 
-  const activeFilterCount = selectedCategories.length + selectedBrands.length + selectedForms.length + (maxPrice < MAX_PRICE_LIMIT ? 1 : 0);
+  const activeFilterCount = selectedCategories.length + selectedBrands.length + selectedCompanies.length + selectedForms.length + (maxPrice < MAX_PRICE_LIMIT ? 1 : 0);
 
   const categories = [
     'Pharma Products',
@@ -33,12 +35,65 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
     'Surgical & Medical Supplies'
   ];
 
-  const brands = [
-    'Cipla', 'Abbott', 'Sun Pharma', 'Intas', 'Alkem', 'Zydus', 
-    'Leeford Healthcare', 'Troikaa Pharmaceuticals', 'Biochem', 
-    'Namcare Pharma', 'Healing Pharma', 'Steris Pharma', 'Dr. Morepen',
-    'Lucid Pharma', 'Elder Pharmaceuticals'
+  // Default brands sorted strictly in alphabetical order (A to Z)
+  const defaultBrands = [
+    'Abbott',
+    'Alkem',
+    'Biochem',
+    'Cipla',
+    'Dr. Morepen',
+    'Elder Pharmaceuticals',
+    'Healing Pharma',
+    'Intas',
+    'Leeford Healthcare',
+    'Lucid Pharma',
+    'Namcare Pharma',
+    'Steris Pharma',
+    'Sun Pharma',
+    'Troikaa Pharmaceuticals',
+    'Zydus'
   ];
+
+  const [availableBrands, setAvailableBrands] = useState(defaultBrands);
+  const [availableCompanies, setAvailableCompanies] = useState([]);
+
+  // Fetch dynamic brands & companies from backend
+  useEffect(() => {
+    let isCancelled = false;
+    const fetchMetaFilters = async () => {
+      try {
+        const res = await fetch('/api/products/meta/filters');
+        if (res.ok) {
+          const data = await res.json();
+          if (!isCancelled) {
+            if (data.brands && data.brands.length > 0) {
+              const merged = [...new Set([...defaultBrands, ...data.brands])]
+                .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+              setAvailableBrands(merged);
+            }
+            if (data.companies && data.companies.length > 0) {
+              setAvailableCompanies(data.companies.sort((a, b) => a.localeCompare(b)));
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to fetch filter metadata:', err);
+      }
+    };
+    fetchMetaFilters();
+    return () => { isCancelled = true; };
+  }, []);
+
+  const brands = useMemo(() => {
+    return [...availableBrands].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+  }, [availableBrands]);
+
+  const filteredCompaniesList = useMemo(() => {
+    if (!companySearchTerm.trim()) return availableCompanies.slice(0, 50);
+    return availableCompanies
+      .filter(c => c.toLowerCase().includes(companySearchTerm.toLowerCase().trim()))
+      .slice(0, 50);
+  }, [availableCompanies, companySearchTerm]);
 
   const forms = [
     'Tablet', 'Capsule', 'Injection', 'Powder', 'IV Fluid', 'Syrup', 'Gloves', 'Syringe'
@@ -49,6 +104,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
     const searchVal = searchParams.get('search') || '';
     const catVal = searchParams.get('category') ? searchParams.get('category').split(',') : [];
     const brandVal = searchParams.get('brand') ? searchParams.get('brand').split(',') : [];
+    const compVal = searchParams.get('company') ? searchParams.get('company').split(',') : [];
     const formVal = searchParams.get('form') ? searchParams.get('form').split(',') : [];
     const priceVal = parseFloat(searchParams.get('maxPrice')) || MAX_PRICE_LIMIT;
     const pageVal = parseInt(searchParams.get('page')) || 1;
@@ -57,11 +113,38 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
     if (searchTerm !== searchVal) setSearchTerm(searchVal);
     setSelectedCategories(catVal.filter(Boolean));
     setSelectedBrands(brandVal.filter(Boolean));
+    setSelectedCompanies(compVal.filter(Boolean));
     setSelectedForms(formVal.filter(Boolean));
     setMaxPrice(priceVal);
     setPage(pageVal);
     setSortOrder(sortVal);
   }, [searchParams]);
+
+  // Lock body scroll when mobile filter drawer is open
+  useEffect(() => {
+    if (showMobileFilters) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+    };
+  }, [showMobileFilters]);
+
+  // Handle Escape key to close mobile filters
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && showMobileFilters) {
+        setShowMobileFilters(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showMobileFilters]);
 
   // Fetch products whenever searchParams change (single source of truth)
   useEffect(() => {
@@ -73,6 +156,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
         const searchVal = searchParams.get('search') || '';
         const catVal = searchParams.get('category') || '';
         const brandVal = searchParams.get('brand') || '';
+        const compVal = searchParams.get('company') || '';
         const formVal = searchParams.get('form') || '';
         const maxPriceParam = searchParams.get('maxPrice');
         const sortVal = searchParams.get('sort') || 'popular';
@@ -81,6 +165,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
         if (searchVal) queryParams.append('search', searchVal);
         if (catVal) queryParams.append('category', catVal);
         if (brandVal) queryParams.append('brand', brandVal);
+        if (compVal) queryParams.append('company', compVal);
         if (formVal) queryParams.append('form', formVal);
         if (maxPriceParam && parseFloat(maxPriceParam) < MAX_PRICE_LIMIT) {
           queryParams.append('maxPrice', maxPriceParam);
@@ -163,6 +248,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
     setSearchTerm('');
     setSelectedCategories([]);
     setSelectedBrands([]);
+    setSelectedCompanies([]);
     setSelectedForms([]);
     setMaxPrice(MAX_PRICE_LIMIT);
     setSortOrder('popular');
@@ -180,6 +266,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
   const removeFilterTag = (type, val) => {
     if (type === 'category') handleCheckboxChange('category', selectedCategories, setSelectedCategories, val);
     if (type === 'brand') handleCheckboxChange('brand', selectedBrands, setSelectedBrands, val);
+    if (type === 'company') handleCheckboxChange('company', selectedCompanies, setSelectedCompanies, val);
     if (type === 'form') handleCheckboxChange('form', selectedForms, setSelectedForms, val);
     if (type === 'price') {
       setMaxPrice(MAX_PRICE_LIMIT);
@@ -222,6 +309,15 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
     <div className="section animate-fade-in" style={{ backgroundColor: 'var(--bg-main)', minHeight: '80vh' }}>
       <div className="container products-layout">
         
+        {/* Mobile Filter Drawer Backdrop */}
+        {showMobileFilters && (
+          <div 
+            className="mobile-filter-backdrop" 
+            onClick={() => setShowMobileFilters(false)}
+            aria-hidden="true"
+          />
+        )}
+
         {/* Left Filters Sidebar */}
         <aside className={`catalog-filter-sidebar ${showMobileFilters ? 'open' : ''}`}>
           <div className="card" style={{ padding: '20px' }}>
@@ -260,6 +356,51 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
                       style={{ accentColor: 'var(--primary-blue)', width: '15px', height: '15px', cursor: 'pointer' }}
                     />
                     <span>{cat}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Companies filter */}
+            <div style={{ marginBottom: '22px', borderBottom: '1px solid #f1f5f9', paddingBottom: '18px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <h4 style={{ fontSize: '0.92rem', color: 'var(--text-dark)', fontWeight: '700', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Building2 size={15} color="var(--primary-blue)" /> Pharma Companies
+                </h4>
+                <Link to="/companies" style={{ fontSize: '0.74rem', color: 'var(--primary-blue)', fontWeight: '700', textDecoration: 'none' }}>
+                  All 252 →
+                </Link>
+              </div>
+
+              {/* Quick Search inside company filter */}
+              <div style={{ position: 'relative', marginBottom: '10px' }}>
+                <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                <input 
+                  type="text"
+                  placeholder="Search 252 companies..."
+                  value={companySearchTerm}
+                  onChange={(e) => setCompanySearchTerm(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '7px 10px 7px 30px',
+                    fontSize: '0.82rem',
+                    borderRadius: '6px',
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: '#f8fafc'
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '180px', overflowY: 'auto', paddingRight: '5px' }}>
+                {filteredCompaniesList.map((comp, i) => (
+                  <label key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.86rem', cursor: 'pointer', color: selectedCompanies.includes(comp) ? 'var(--primary-blue)' : 'var(--text-dark)', fontWeight: selectedCompanies.includes(comp) ? '700' : '400' }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedCompanies.includes(comp)}
+                      onChange={() => handleCheckboxChange('company', selectedCompanies, setSelectedCompanies, comp)}
+                      style={{ accentColor: 'var(--primary-blue)', width: '15px', height: '15px', cursor: 'pointer' }}
+                    />
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{comp}</span>
                   </label>
                 ))}
               </div>
@@ -373,7 +514,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
           </div>
 
           {/* Active Filter Chips */}
-          {(selectedCategories.length > 0 || selectedBrands.length > 0 || selectedForms.length > 0 || maxPrice < MAX_PRICE_LIMIT || searchParams.get('search')) && (
+          {(selectedCategories.length > 0 || selectedBrands.length > 0 || selectedCompanies.length > 0 || selectedForms.length > 0 || maxPrice < MAX_PRICE_LIMIT || searchParams.get('search')) && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', padding: '4px 0' }}>
               <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', fontWeight: '600' }}>Active:</span>
               {searchParams.get('search') && (
@@ -382,6 +523,12 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
                   <button onClick={() => removeFilterTag('search')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#0369a1', display: 'flex', alignItems: 'center' }}><X size={12} /></button>
                 </span>
               )}
+              {selectedCompanies.map((comp) => (
+                <span key={comp} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', backgroundColor: '#e0f2fe', color: 'var(--primary-blue)', padding: '3px 8px', borderRadius: '14px', fontSize: '0.78rem', fontWeight: '600' }}>
+                  <Building2 size={11} /> {comp}
+                  <button onClick={() => removeFilterTag('company', comp)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary-blue)', display: 'flex', alignItems: 'center' }}><X size={12} /></button>
+                </span>
+              ))}
               {selectedCategories.map((cat) => (
                 <span key={cat} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', backgroundColor: '#eff6ff', color: 'var(--primary-blue)', padding: '3px 8px', borderRadius: '14px', fontSize: '0.78rem', fontWeight: '500' }}>
                   {cat}

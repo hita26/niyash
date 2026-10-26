@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Briefcase, Upload, Send, CheckCircle2, Clock } from 'lucide-react';
+import { Briefcase, Upload, Send, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 
 function Career() {
   const [name, setName] = useState('');
@@ -12,6 +12,7 @@ function Career() {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const positions = [
     { title: 'Sales Executive (Rajkot / Gondal)', dept: 'Field Sales', type: 'Full Time', desc: 'Promote products to medical stores and collect orders.' },
@@ -22,12 +23,21 @@ function Career() {
 
   const handleFileChange = (e) => {
     setResumeFile(e.target.files[0]);
+    setErrorMessage('');
   };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage('');
+
     if (!resumeFile) {
-      alert('Please upload your resume (PDF/Word).');
+      setErrorMessage('Please upload your resume (PDF or Word document).');
+      return;
+    }
+
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.length < 10) {
+      setErrorMessage('Please enter a valid 10-digit mobile number.');
       return;
     }
 
@@ -63,13 +73,13 @@ function Career() {
         const fileInput = document.getElementById('career-resume');
         if (fileInput) fileInput.value = '';
         
-        setTimeout(() => setIsSuccess(false), 5000);
+        setTimeout(() => setIsSuccess(false), 6000);
       } else {
-        alert(data.message || 'Failed to submit application.');
+        setErrorMessage(data.message || 'Failed to submit application. Please check your details.');
       }
     } catch (error) {
       console.error('Error submitting career form:', error);
-      alert('Network error. Please try again.');
+      setErrorMessage('Network connection error. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -131,6 +141,12 @@ function Career() {
               </div>
             ) : (
               <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                {errorMessage && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', color: '#b91c1c', fontSize: '0.88rem' }} role="alert">
+                    <AlertCircle size={16} style={{ flexShrink: 0 }} aria-hidden="true" />
+                    <span>{errorMessage}</span>
+                  </div>
+                )}
                 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="career-name" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>Full Name *</label>
@@ -154,7 +170,7 @@ function Career() {
                       required 
                       placeholder="name@example.com"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => setEmail(e.target.value.toLowerCase())}
                       style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
                     />
                   </div>

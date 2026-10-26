@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Trash2, Plus, Minus, Send, CheckCircle, ShoppingBag } from 'lucide-react';
+import { X, Trash2, Plus, Minus, Send, CheckCircle, ShoppingBag, AlertCircle } from 'lucide-react';
 
 function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFromCart, clearCart, user, token, onOpenAuth }) {
   const [name, setName] = useState('');
@@ -9,6 +9,24 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  // Lock body scroll and listen for Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   // Sync form fields with user profile details
   useEffect(() => {
@@ -29,8 +47,16 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage('');
+
     if (cartItems.length === 0) {
-      alert('Your quote list is empty.');
+      setErrorMessage('Your quote list is empty.');
+      return;
+    }
+
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.length < 10) {
+      setErrorMessage('Please enter a valid 10-digit mobile number.');
       return;
     }
 
@@ -54,11 +80,11 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
         headers,
         body: JSON.stringify({
           type: 'Cart Quote',
-          name,
-          phone,
-          email,
-          address,
-          message,
+          name: name.trim(),
+          phone: cleanPhone,
+          email: email.trim(),
+          address: address.trim(),
+          message: message.trim(),
           items: itemsPayload,
         }),
       });
@@ -73,11 +99,11 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
           onClose();
         }, 3000);
       } else {
-        alert(data.message || 'Failed to submit enquiry. Please try again.');
+        setErrorMessage(data.message || 'Failed to submit enquiry. Please try again.');
       }
     } catch (error) {
       console.error('Error submitting enquiry:', error);
-      alert('Network error. Please try again.');
+      setErrorMessage('Network connection error. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -87,7 +113,13 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
 
   return (
     <div className="sidebar-backdrop" onClick={onClose}>
-      <div className="sidebar-panel" onClick={(e) => e.stopPropagation()}>
+      <div 
+        role="dialog"
+        aria-modal="true"
+        aria-label="Wholesale Quote Enquiry Drawer"
+        className="sidebar-panel" 
+        onClick={(e) => e.stopPropagation()}
+      >
         
         {/* Header */}
         <div className="sidebar-header">
@@ -138,8 +170,12 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                     }}
                   >
                     <img 
-                      src={item.product.imageUrl || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80'} 
+                      src={item.product.imageUrl || '/pharma-products.jpg'} 
                       alt={item.product.name} 
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = '/pharma-products.jpg';
+                      }}
                       style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }}
                     />
                     
@@ -202,6 +238,13 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <h3 style={{ fontSize: '1.05rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '6px', color: 'var(--text-dark)' }}>Confirm Business Details</h3>
                   
+                  {errorMessage && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', color: '#b91c1c', fontSize: '0.85rem' }} role="alert">
+                      <AlertCircle size={16} style={{ flexShrink: 0 }} aria-hidden="true" />
+                      <span>{errorMessage}</span>
+                    </div>
+                  )}
+
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <label htmlFor="name-input" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>Full Name *</label>
                     <input 
@@ -235,7 +278,7 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                       type="email" 
                       placeholder="Enter email address"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => setEmail(e.target.value.toLowerCase())}
                       style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
                     />
                   </div>

@@ -384,7 +384,7 @@ const sampleProducts = [
     composition: 'Ketoconazole IP 2.0% w/w Soap Base',
     form: 'Soap',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1607006314352-87009405d475?auto=format&fit=crop&w=400&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=400&q=80',
     description: 'Antifungal cleanser soap bar for pityriasis versicolor, dandruff prevention, and fungal skin hygiene.',
   },
   {
@@ -405,7 +405,7 @@ const sampleProducts = [
     composition: 'Pure Neem Oil 5% + Aloe Vera Extract 10% + Tulsi Oil 2%',
     form: 'Soap',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1607006314352-87009405d475?auto=format&fit=crop&w=400&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=400&q=80',
     description: 'Pure herbal Ayurvedic bathing bar for deep pore cleansing, acne control, and skin rejuvenation.',
   },
   {
@@ -615,7 +615,7 @@ const sampleProducts = [
     composition: 'Sodium Chloride IP 0.9% w/v',
     form: 'IV Fluid',
     manufacturer: 'Biochem Healthcare',
-    imageUrl: 'https://images.unsplash.com/photo-1579684389782-64d84b5e901a?auto=format&fit=crop&w=400&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=400&q=80',
     description: 'Sterile, non-pyrogenic solution for fluid and electrolyte replenishment, dilution of compatible drugs, and wound irrigation.',
   },
   {

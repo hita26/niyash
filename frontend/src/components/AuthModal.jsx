@@ -17,10 +17,28 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
     phone: '',
   });
 
+  // Lock body scroll and listen for Escape key
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const val = e.target.name === 'email' ? e.target.value.toLowerCase() : e.target.value;
+    setFormData({ ...formData, [e.target.name]: val });
   };
 
   const handleSubmit = async (e) => {
@@ -29,9 +47,10 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
     setLoading(true);
 
     const url = isLogin ? '/api/users/login' : '/api/users/register';
+    const cleanEmail = formData.email.toLowerCase().trim();
     const body = isLogin 
-      ? { email: formData.email, password: formData.password }
-      : formData;
+      ? { email: cleanEmail, password: formData.password }
+      : { ...formData, email: cleanEmail };
 
     try {
       const response = await fetch(url, {
@@ -56,19 +75,28 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
   };
 
   return (
-    <div style={{
-      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      backgroundColor: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(5px)',
-      zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
-    }}>
-      <div className="card animate-fade-in" style={{
-        width: '100%', maxWidth: isLogin ? '400px' : '550px', padding: '30px',
-        position: 'relative', backgroundColor: '#ffffff', maxHeight: '90vh', overflowY: 'auto'
-      }}>
+    <div 
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      style={{
+        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+        backgroundColor: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(5px)',
+        zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
+      }}
+    >
+      <div 
+        role="dialog"
+        aria-modal="true"
+        aria-label={isLogin ? 'Retailer Account Login' : 'Retailer Wholesale Registration'}
+        className="card animate-fade-in" 
+        style={{
+          width: '100%', maxWidth: isLogin ? '400px' : '550px', padding: '30px',
+          position: 'relative', backgroundColor: '#ffffff', maxHeight: '90vh', overflowY: 'auto'
+        }}
+      >
         {/* Close Button */}
         <button 
           onClick={onClose}
-          style={{ position: 'absolute', top: '20px', right: '20px', color: 'var(--text-light)', background: 'none', border: 'none', cursor: 'pointer' }}
+          style={{ position: 'absolute', top: '20px', right: '20px', color: 'var(--text-light)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}
           aria-label="Close dialog"
         >
           <X size={20} />

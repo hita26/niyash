@@ -4,11 +4,13 @@ import {
   Building2, MapPin, Globe, ExternalLink, ShieldCheck, 
   Search, Package, ArrowLeft, Filter, CheckCircle2,
   AlertTriangle, Star, Image as ImageIcon, ChevronRight,
-  Plus, Check, ShoppingBag, List, Grid
+  Plus, Check, ShoppingBag, List, Grid, Lock
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 function CompanyDetail({ addToCart }) {
   const { id } = useParams();
+  const { isLoggedIn, openAuth } = useAuth();
   const [company, setCompany] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -386,23 +388,58 @@ function CompanyDetail({ addToCart }) {
 
                     <div style={{ marginTop: 'auto', paddingTop: '10px', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div>
-                        {p.mrp && p.mrp > p.price && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px', flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: '0.72rem', color: 'var(--text-light)', textDecoration: 'line-through' }} className="tabular-nums">
-                              MRP: {formatCurrency(p.mrp)}
+                        {isLoggedIn ? (
+                          <>
+                            {p.mrp && p.mrp > p.price && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px', flexWrap: 'wrap' }}>
+                                <span style={{ fontSize: '0.72rem', color: 'var(--text-light)', textDecoration: 'line-through' }} className="tabular-nums">
+                                  MRP: {formatCurrency(p.mrp)}
+                                </span>
+                                <span style={{ fontSize: '0.68rem', backgroundColor: '#ecfdf5', color: '#059669', fontWeight: '800', padding: '1px 5px', borderRadius: '4px' }}>
+                                  {Math.round(((p.mrp - p.price) / p.mrp) * 100)}% MARGIN
+                                </span>
+                              </div>
+                            )}
+                            <span style={{ fontSize: '0.68rem', color: 'var(--primary-blue)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'block' }}>
+                              PTR (Wholesale):
                             </span>
-                            <span style={{ fontSize: '0.68rem', backgroundColor: '#ecfdf5', color: '#059669', fontWeight: '800', padding: '1px 5px', borderRadius: '4px' }}>
-                              {Math.round(((p.mrp - p.price) / p.mrp) * 100)}% MARGIN
+                            <div style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--primary-blue)' }} className="tabular-nums">
+                              {formatCurrency(p.price)}
+                              <span style={{ fontSize: '0.75rem', fontWeight: '500', color: 'var(--text-medium)' }}> /unit</span>
+                            </div>
+                          </>
+                        ) : (
+                          <div>
+                            <span style={{ fontSize: '0.68rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'block' }}>
+                              MRP (Retail Price):
                             </span>
+                            <div style={{ fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-dark)' }} className="tabular-nums">
+                              {formatCurrency(p.mrp || p.price)}
+                              <span style={{ fontSize: '0.75rem', fontWeight: '500', color: 'var(--text-medium)' }}> /unit</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={openAuth}
+                              style={{
+                                marginTop: '3px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '3px',
+                                fontSize: '0.7rem',
+                                fontWeight: '700',
+                                color: 'var(--primary-blue)',
+                                background: 'rgba(37, 99, 235, 0.08)',
+                                border: '1px solid rgba(37, 99, 235, 0.25)',
+                                borderRadius: '4px',
+                                padding: '2px 6px',
+                                cursor: 'pointer'
+                              }}
+                              title="Sign in to view wholesale PTR rate"
+                            >
+                              <Lock size={10} /> Login for PTR
+                            </button>
                           </div>
                         )}
-                        <span style={{ fontSize: '0.68rem', color: 'var(--primary-blue)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'block' }}>
-                          PTR (Wholesale):
-                        </span>
-                        <div style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--primary-blue)' }} className="tabular-nums">
-                          {formatCurrency(p.price)}
-                          <span style={{ fontSize: '0.75rem', fontWeight: '500', color: 'var(--text-medium)' }}> /unit</span>
-                        </div>
                       </div>
 
                       <button
@@ -412,7 +449,7 @@ function CompanyDetail({ addToCart }) {
                         style={{ padding: '6px 12px', fontSize: '0.8rem', gap: '4px' }}
                       >
                         {isAdded ? <Check size={14} /> : <Plus size={14} />}
-                        {isAdded ? 'Added' : 'Quote'}
+                        {isAdded ? 'Added' : 'Add to Cart'}
                       </button>
                     </div>
                   </div>
@@ -477,11 +514,34 @@ function CompanyDetail({ addToCart }) {
                         </td>
 
                         <td style={{ padding: '10px 16px', verticalAlign: 'middle', fontWeight: '700', color: 'var(--primary-blue)' }}>
-                          {formatCurrency(p.price)}
+                          {isLoggedIn ? (
+                            formatCurrency(p.price)
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={openAuth}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                fontSize: '0.74rem',
+                                fontWeight: '700',
+                                color: 'var(--primary-blue)',
+                                background: 'rgba(37, 99, 235, 0.08)',
+                                border: '1px solid rgba(37, 99, 235, 0.25)',
+                                borderRadius: '4px',
+                                padding: '3px 8px',
+                                cursor: 'pointer'
+                              }}
+                              title="Sign in to view wholesale PTR rate"
+                            >
+                              <Lock size={11} /> Login for PTR
+                            </button>
+                          )}
                         </td>
 
-                        <td style={{ padding: '10px 16px', verticalAlign: 'middle', color: 'var(--text-medium)', fontSize: '0.85rem' }}>
-                          {formatCurrency(p.mrp)}
+                        <td style={{ padding: '10px 16px', verticalAlign: 'middle', color: 'var(--text-dark)', fontWeight: '600', fontSize: '0.85rem' }} className="tabular-nums">
+                          {formatCurrency(p.mrp || p.price)}
                         </td>
 
                         <td style={{ padding: '10px 16px', verticalAlign: 'middle' }}>
@@ -502,7 +562,7 @@ function CompanyDetail({ addToCart }) {
                             style={{ padding: '4px 10px', fontSize: '0.75rem', gap: '4px' }}
                           >
                             {isAdded ? <Check size={13} /> : <Plus size={13} />}
-                            {isAdded ? 'Added' : 'Add to Quote'}
+                            {isAdded ? 'Added' : 'Add to Cart'}
                           </button>
                         </td>
                       </tr>

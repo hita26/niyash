@@ -50,7 +50,7 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
     setErrorMessage('');
 
     if (cartItems.length === 0) {
-      setErrorMessage('Your quote list is empty.');
+      setErrorMessage('Your cart is empty.');
       return;
     }
 
@@ -109,14 +109,17 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
     }
   };
 
-  const totalPrice = cartItems.reduce((total, item) => total + item.product.price * item.quantity, 0);
+  const totalValuation = cartItems.reduce(
+    (total, item) => total + (user ? item.product.price : (item.product.mrp || item.product.price)) * item.quantity,
+    0
+  );
 
   return (
     <div className="sidebar-backdrop" onClick={onClose}>
       <div 
         role="dialog"
         aria-modal="true"
-        aria-label="Wholesale Quote Enquiry Drawer"
+        aria-label="Wholesale Cart Drawer"
         className="sidebar-panel" 
         onClick={(e) => e.stopPropagation()}
       >
@@ -124,7 +127,7 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
         {/* Header */}
         <div className="sidebar-header">
           <h2 style={{ fontSize: '1.3rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            Quote Enquiry List
+            Wholesale Cart
             <span style={{ fontSize: '0.85rem', padding: '2px 8px', borderRadius: '10px', backgroundColor: 'var(--primary-blue)', color: '#fff' }}>
               {cartItems.length} items
             </span>
@@ -147,7 +150,7 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
           ) : cartItems.length === 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '15px', color: 'var(--text-light)' }}>
               <ShoppingBag size={64} strokeWidth={1.5} />
-              <p>Your quote enquiry list is empty.</p>
+              <p>Your cart is empty.</p>
               <button 
                 onClick={onClose} 
                 className="btn btn-primary btn-sm"
@@ -187,7 +190,7 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                         Brand: {item.product.brand} | {item.product.packing}
                       </p>
                       <p style={{ fontSize: '0.85rem', color: 'var(--primary-blue)', fontWeight: '600', marginTop: '3px' }}>
-                        Est. Price: ₹{item.product.price.toFixed(2)} / Strip
+                        {user ? `PTR (Wholesale): ₹${item.product.price.toFixed(2)} / Strip` : `MRP: ₹${(item.product.mrp || item.product.price).toFixed(2)} / Strip`}
                       </p>
                     </div>
 
@@ -229,8 +232,8 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                 padding: '15px', backgroundColor: '#f8fafc', borderRadius: '8px',
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--border-light)'
               }}>
-                <span style={{ fontWeight: '600', color: 'var(--text-medium)', fontSize: '0.9rem' }}>Estimated List Value:</span>
-                <span style={{ fontWeight: '800', color: 'var(--primary-blue)', fontSize: '1.1rem' }}>₹{totalPrice.toFixed(2)}</span>
+                <span style={{ fontWeight: '600', color: 'var(--text-medium)', fontSize: '0.9rem' }}>{user ? 'Estimated Wholesale Value:' : 'Estimated Retail Value (MRP):'}</span>
+                <span style={{ fontWeight: '800', color: 'var(--primary-blue)', fontSize: '1.1rem' }}>₹{totalValuation.toFixed(2)}</span>
               </div>
 
               {/* Enquiry Form or Auth Required Prompt */}
@@ -314,7 +317,7 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                     style={{ width: '100%', marginTop: '10px', gap: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                   >
                     <Send size={16} />
-                    {isSubmitting ? 'Sending Request...' : 'Send Quote Request'}
+                    {isSubmitting ? 'Submitting Order...' : 'Submit Order Enquiry'}
                   </button>
                 </form>
               ) : (
@@ -323,7 +326,7 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px', textAlign: 'center', marginTop: '10px'
                 }}>
                   <p style={{ fontSize: '0.9rem', color: 'var(--text-medium)', fontWeight: '600', lineHeight: '1.5' }}>
-                    Please log in to your account to complete your B2B wholesale quote request.
+                    Please log in to your account to complete your B2B wholesale order enquiry.
                   </p>
                   <button 
                     type="button" 

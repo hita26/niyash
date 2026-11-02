@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
+import { useAuth } from '../context/AuthContext';
 import { 
   ShoppingBag, ArrowLeft, CheckCircle2, AlertTriangle, 
   Check, Truck, ShieldCheck, FileText, MessageSquare, 
   Sparkles, ChevronRight, Plus, Minus, Share2, 
   Building2, Package, Tag, Pill, Factory, Receipt, 
-  Clock, Info
+  Clock, Info, Lock, LogIn
 } from 'lucide-react';
 
 function ProductDetail({ addToCart }) {
   const { id } = useParams();
+  const { isLoggedIn, openAuth } = useAuth();
   const [product, setProduct] = useState(null);
   const [related, setRelated] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -81,7 +83,11 @@ function ProductDetail({ addToCart }) {
   const totalChemistProfit = unitSavings * quantity;
 
   const handleWhatsAppOrder = () => {
-    const message = `Hello Niyansh Pharma,\nI would like to place a wholesale order enquiry for:\n\n*Product:* ${product.name}\n*Brand / Company:* ${product.brand || product.company || 'Niyansh Pharma'}\n*Packing:* ${product.packing || 'Standard'}\n*Composition:* ${product.composition || 'N/A'}\n*Quantity:* ${quantity} units\n*Est. Rate (PTR):* ₹${unitPrice.toFixed(2)} / unit\n*Est. Total Value:* ₹${totalOrderValue.toFixed(2)}\n*SKU:* ${product.sku || 'N/A'}\n\nPlease confirm availability and dispatch schedule.`;
+    const rateLine = isLoggedIn
+      ? `*Est. Rate (PTR):* ₹${unitPrice.toFixed(2)} / unit\n*Est. Total Value:* ₹${totalOrderValue.toFixed(2)}`
+      : `*MRP (Retail):* ₹${unitMrp.toFixed(2)} / unit\n*Rate Request:* Please share wholesale PTR quote`;
+
+    const message = `Hello Niyansh Pharma,\nI would like to place a wholesale order enquiry for:\n\n*Product:* ${product.name}\n*Brand / Company:* ${product.brand || product.company || 'Niyansh Pharma'}\n*Packing:* ${product.packing || 'Standard'}\n*Composition:* ${product.composition || 'N/A'}\n*Quantity:* ${quantity} units\n${rateLine}\n*SKU:* ${product.sku || 'N/A'}\n\nPlease confirm availability and dispatch schedule.`;
     const whatsappUrl = `https://wa.me/919909923130?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
@@ -373,31 +379,49 @@ function ProductDetail({ addToCart }) {
               {/* Price & Stock Header */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
                 <div>
-                  {hasMargin && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: '0.85rem', color: 'var(--text-light)', textDecoration: 'line-through' }} className="tabular-nums">
-                        MRP ₹{unitMrp.toFixed(2)}
+                  {isLoggedIn ? (
+                    <>
+                      {hasMargin && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '0.85rem', color: 'var(--text-light)', textDecoration: 'line-through' }} className="tabular-nums">
+                            MRP ₹{unitMrp.toFixed(2)}
+                          </span>
+                          <span style={{ fontSize: '0.78rem', backgroundColor: '#ecfdf5', color: '#059669', fontWeight: '800', padding: '2px 8px', borderRadius: '6px' }}>
+                            {marginPercent}% MARGIN
+                          </span>
+                          <span style={{ fontSize: '0.75rem', color: '#059669', fontWeight: '600' }}>
+                            (Save ₹{unitSavings.toFixed(2)}/unit)
+                          </span>
+                        </div>
+                      )}
+
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+                        <span style={{ fontSize: '0.76rem', color: 'var(--primary-blue)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                          PTR (Wholesale):
+                        </span>
+                        <span style={{ fontSize: '1.85rem', fontWeight: '800', color: 'var(--primary-blue)' }} className="tabular-nums">
+                          ₹{unitPrice.toFixed(2)}
+                        </span>
+                        <span style={{ fontSize: '0.85rem', fontWeight: '500', color: 'var(--text-medium)' }}>
+                          / {product.packing ? 'unit' : 'strip'}
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <div>
+                      <span style={{ fontSize: '0.76rem', color: 'var(--text-light)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '2px' }}>
+                        MRP (Retail Price):
                       </span>
-                      <span style={{ fontSize: '0.78rem', backgroundColor: '#ecfdf5', color: '#059669', fontWeight: '800', padding: '2px 8px', borderRadius: '6px' }}>
-                        {marginPercent}% MARGIN
-                      </span>
-                      <span style={{ fontSize: '0.75rem', color: '#059669', fontWeight: '600' }}>
-                        (Save ₹{unitSavings.toFixed(2)}/unit)
-                      </span>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+                        <span style={{ fontSize: '1.85rem', fontWeight: '800', color: 'var(--text-dark)' }} className="tabular-nums">
+                          ₹{unitMrp.toFixed(2)}
+                        </span>
+                        <span style={{ fontSize: '0.85rem', fontWeight: '500', color: 'var(--text-medium)' }}>
+                          / {product.packing ? 'unit' : 'strip'}
+                        </span>
+                      </div>
                     </div>
                   )}
-
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-                    <span style={{ fontSize: '0.76rem', color: 'var(--primary-blue)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                      PTR (Wholesale):
-                    </span>
-                    <span style={{ fontSize: '1.85rem', fontWeight: '800', color: 'var(--primary-blue)' }} className="tabular-nums">
-                      ₹{unitPrice.toFixed(2)}
-                    </span>
-                    <span style={{ fontSize: '0.85rem', fontWeight: '500', color: 'var(--text-medium)' }}>
-                      / {product.packing ? 'unit' : 'strip'}
-                    </span>
-                  </div>
                 </div>
 
                 {/* Stock Status Badge */}
@@ -417,6 +441,43 @@ function ProductDetail({ addToCart }) {
                   )}
                 </div>
               </div>
+
+              {/* Protected Wholesale Callout for Logged-Out Users */}
+              {!isLoggedIn && (
+                <div style={{
+                  backgroundColor: '#eff6ff',
+                  border: '1.5px dashed #3b82f6',
+                  borderRadius: '10px',
+                  padding: '12px 16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '12px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: '#dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <Lock size={18} color="var(--primary-blue)" />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.88rem', fontWeight: '800', color: 'var(--primary-blue)' }}>
+                        Wholesale PTR Rate Protected
+                      </div>
+                      <div style={{ fontSize: '0.78rem', color: '#475569' }}>
+                        Special wholesale PTR rates and chemist trade margins are visible only to verified accounts.
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={openAuth}
+                    className="btn btn-primary btn-sm"
+                    style={{ padding: '7px 16px', fontSize: '0.82rem', fontWeight: '700', borderRadius: '6px', gap: '6px' }}
+                  >
+                    <LogIn size={14} /> Login to View PTR
+                  </button>
+                </div>
+              )}
 
               {/* Quantity Stepper & Bulk Ordering Presets */}
               {product.inStock && (
@@ -496,16 +557,36 @@ function ProductDetail({ addToCart }) {
                     fontSize: '0.85rem',
                     gap: '8px'
                   }}>
-                    <div>
-                      <span>Total Quote Value: </span>
-                      <strong style={{ fontSize: '1rem', fontWeight: '800' }} className="tabular-nums">
-                        ₹{totalOrderValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </strong>
-                    </div>
-                    {hasMargin && (
-                      <div style={{ fontSize: '0.8rem', color: '#047857', fontWeight: '700' }}>
-                        Est. Chemist Profit: ₹{totalChemistProfit.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </div>
+                    {isLoggedIn ? (
+                      <>
+                        <div>
+                          <span>Total Cart Value (PTR): </span>
+                          <strong style={{ fontSize: '1rem', fontWeight: '800' }} className="tabular-nums">
+                            ₹{totalOrderValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </strong>
+                        </div>
+                        {hasMargin && (
+                          <div style={{ fontSize: '0.8rem', color: '#047857', fontWeight: '700' }}>
+                            Est. Chemist Profit: ₹{totalChemistProfit.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <div>
+                          <span>Estimated Retail Value (MRP): </span>
+                          <strong style={{ fontSize: '1rem', fontWeight: '800' }} className="tabular-nums">
+                            ₹{totalRetailValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </strong>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={openAuth}
+                          style={{ background: 'none', border: 'none', color: '#0369a1', fontSize: '0.8rem', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                        >
+                          <Lock size={12} /> Login to unlock wholesale PTR rates
+                        </button>
+                      </>
                     )}
                   </div>
 
@@ -534,7 +615,7 @@ function ProductDetail({ addToCart }) {
                         </>
                       ) : (
                         <>
-                          <ShoppingBag size={18} /> Add to Quote Cart
+                          <ShoppingBag size={18} /> Add to Cart
                         </>
                       )}
                     </button>

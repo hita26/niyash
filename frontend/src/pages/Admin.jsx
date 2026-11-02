@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Lock, LayoutDashboard, ShoppingBag, MessageSquare, Briefcase, LogOut, 
-  Plus, Edit2, Trash2, CheckCircle2, XCircle, ChevronDown, Download, AlertCircle,
+  Plus, Edit2, Truck, Trash2, CheckCircle2, XCircle, ChevronDown, Download, AlertCircle,
   Package, FileText, Flame, Phone, Search, RefreshCw, Filter, ExternalLink,
   Calendar, CreditCard, Check, X, Eye, Send, ArrowUpDown, User, Building2,
   Tag, ShieldCheck, Sparkles, Clock, AlertTriangle, Printer, Share2, Receipt,
@@ -966,9 +966,19 @@ _For assistance: +91 9316566894_`;
       return;
     }
 
+    const now = new Date();
+    const dateISO = now.toISOString().split('T')[0];
+    const todayFormatted = formatDate(now);
+
+    const metaHeader = [
+      `"NIYANSH PHARMA - B2B WHOLESALE ORDERS & INVOICES LIST"`,
+      `"Export Date: ${todayFormatted}","Total Orders: ${filteredOrders.length}"`,
+      '""'
+    ];
+
     const headers = [
-      'Order Number',
-      'Date',
+      'Invoice / Order Number',
+      'Invoice Date',
       'Shop Name',
       'Retailer Mobile',
       'GSTIN',
@@ -982,15 +992,29 @@ _For assistance: +91 9316566894_`;
       'Items Summary'
     ];
 
+    let sumSubtotal = 0;
+    let sumGst = 0;
+    let sumGrand = 0;
+
     const rows = filteredOrders.map(ord => {
       const itemsSummary = (ord.items || [])
         .map(i => `${i.productName} (${i.boxes} Box)`)
         .join('; ')
         .replace(/"/g, '""');
 
+      const ordDate = ord.createdAt
+        ? formatDate(ord.createdAt)
+        : ord.date
+        ? formatDate(ord.date)
+        : todayFormatted;
+
+      sumSubtotal += (ord.subTotal || 0);
+      sumGst += (ord.gstAmount || 0);
+      sumGrand += (ord.grandTotal || 0);
+
       return [
         `"${ord.orderNumber}"`,
-        `"${formatDate(ord.createdAt)}"`,
+        `"${ordDate}"`,
         `"${(ord.shopName || '').replace(/"/g, '""')}"`,
         `"${ord.retailerMobile || ''}"`,
         `"${ord.gstin || ''}"`,
@@ -1005,15 +1029,163 @@ _For assistance: +91 9316566894_`;
       ].join(',');
     });
 
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows].join('\n');
-    const encodedUri = encodeURI(csvContent);
+    // Summary footer row
+    const footerSummary = [
+      '',
+      [
+        '"SUMMARY"',
+        `"Date: ${todayFormatted}"`,
+        `"Total Orders: ${filteredOrders.length}"`,
+        '""',
+        '""',
+        '""',
+        sumSubtotal.toFixed(2),
+        sumGst.toFixed(2),
+        '""',
+        sumGrand.toFixed(2),
+        '""',
+        '""',
+        '""'
+      ].join(',')
+    ];
+
+    const csvContent = '\uFEFF' + [...metaHeader, headers.join(','), ...rows, ...footerSummary].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `niyansh_pharma_b2b_orders_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `niyansh_pharma_b2b_invoices_orders_${dateISO}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    showToast('Orders CSV exported successfully!');
+    showToast('Orders & Invoices CSV exported successfully!');
+  };
+
+  // Export single order commercial invoice to Excel
+  const handleExportSingleOrderInvoiceCSV = (order) => {
+    if (!order) return;
+    const now = new Date();
+    const dateISO = now.toISOString().split('T')[0];
+    const orderDateStr = order.createdAt ? formatDate(order.createdAt) : formatDate(now);
+    const invoiceNo = order.orderNumber || `NP-INV-${Date.now().toString().slice(-6)}`;
+
+    const metaHeader = [
+      `"NIYANSH PHARMA - B2B WHOLESALE TAX INVOICE"`,
+      `"Invoice No: ${invoiceNo}","Invoice Date: ${orderDateStr}","Store Name: ${(order.shopName || 'Chemist Store').replace(/"/g, '""')}","Retailer Mobile: ${order.retailerMobile || 'N/A'}","GSTIN: ${order.gstin || 'N/A'}"`,
+      '""'
+    ];
+
+    const headers = [
+      'Line #',
+      'Invoice No',
+      'Invoice Date',
+      'Product Name',
+      'Manufacturer / Company',
+      'Formulation Form',
+      'Ordered Boxes',
+      'Total Units',
+      'PTR Rate (₹)',
+      'GST %',
+      'Item Total (₹)'
+    ];
+
+    const rows = (order.items || []).map((item, idx) => [
+      idx + 1,
+      `"${invoiceNo}"`,
+      `"${orderDateStr}"`,
+      `"${(item.productName || '').replace(/"/g, '""')}"`,
+      `"${(item.company || 'DAXIA').replace(/"/g, '""')}"`,
+      `"${item.form || 'Tablet'}"`,
+      item.boxes || 1,
+      item.totalUnits || (item.boxes || 1) * 10,
+      (item.unitPrice || 0).toFixed(2),
+      `${item.gstRate || 12}%`,
+      (item.itemTotal || (item.totalUnits || (item.boxes || 1) * 10) * (item.unitPrice || 0)).toFixed(2)
+    ]);
+
+    // Footer summary row
+    rows.push([]);
+    rows.push([
+      '"SUMMARY"',
+      `"Date: ${orderDateStr}"`,
+      `"${(order.shopName || 'Chemist').replace(/"/g, '""')}"`,
+      '""',
+      '""',
+      '""',
+      `"Total Lines: ${(order.items || []).length}"`,
+      '""',
+      `"Subtotal: ₹${(order.subTotal || 0).toFixed(2)}"`,
+      `"GST: ₹${(order.gstAmount || 0).toFixed(2)}"`,
+      `"Grand Total: ₹${(order.grandTotal || 0).toFixed(2)}"`
+    ]);
+
+    const csvContent = '\uFEFF' + [...metaHeader, headers.join(','), ...rows.map(e => (Array.isArray(e) ? e.join(',') : ''))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `Niyansh_Pharma_Invoice_${invoiceNo}_${dateISO}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast(`Invoice for Order #${invoiceNo} exported successfully!`);
+  };
+
+  // Export retailer ledger invoices breakdown to Excel
+  const handleExportLedgerInvoicesCSV = (ledger) => {
+    if (!ledger) return;
+    const now = new Date();
+    const dateISO = now.toISOString().split('T')[0];
+    const todayFormatted = formatDate(now);
+
+    const metaHeader = [
+      `"NIYANSH PHARMA - RETAILER STATEMENT & INVOICES"`,
+      `"Retailer: ${(ledger.shopName || 'Chemist').replace(/"/g, '""')}","Mobile: ${ledger.retailerMobile || 'N/A'}","GSTIN: ${ledger.gstin || 'N/A'}","Statement Date: ${todayFormatted}"`,
+      '""'
+    ];
+
+    const headers = [
+      'Invoice No',
+      'Invoice Date',
+      'Due Date',
+      'Invoice Amount (₹)',
+      'Paid Amount (₹)',
+      'Outstanding Balance (₹)',
+      'Status'
+    ];
+
+    const rows = (ledger.invoices || []).map((inv) => [
+      `"${inv.invoiceNumber}"`,
+      `"${formatDate(inv.date)}"`,
+      `"${formatDate(inv.dueDate)}"`,
+      (inv.amount || 0).toFixed(2),
+      (inv.paidAmount || 0).toFixed(2),
+      (inv.balance || 0).toFixed(2),
+      `"${inv.status || 'Pending'}"`
+    ]);
+
+    // Footer summary row
+    rows.push([]);
+    rows.push([
+      '"TOTAL SUMMARY"',
+      `"Date: ${todayFormatted}"`,
+      '""',
+      `"${(ledger.totalBilled || 0).toFixed(2)}"`,
+      `"${(ledger.totalPaid || 0).toFixed(2)}"`,
+      `"${(ledger.outstandingBalance || 0).toFixed(2)}"`,
+      `"Credit Limit: ₹${ledger.creditLimit || 0}"`
+    ]);
+
+    const csvContent = '\uFEFF' + [...metaHeader, headers.join(','), ...rows.map(e => (Array.isArray(e) ? e.join(',') : ''))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `Invoices_${(ledger.shopName || 'Retailer').replace(/\s+/g, '_')}_${dateISO}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast(`Invoices statement exported successfully!`);
   };
 
   // ==========================================
@@ -1848,7 +2020,20 @@ _Helpline: +91 9316566894_`;
         (p.sku && p.sku.toLowerCase().includes(searchLower)) ||
         (p.category && p.category.toLowerCase().includes(searchLower));
 
-      const matchesCat = productCategoryFilter === 'All' || p.category === productCategoryFilter;
+      let matchesCat = productCategoryFilter === 'All';
+      if (!matchesCat) {
+        if (productCategoryFilter === 'Generic Medicines') {
+          matchesCat = !p.category || !p.category.match(/surgical|otc|ayurved/i);
+        } else if (productCategoryFilter === 'Surgical Supplies') {
+          matchesCat = p.category && Boolean(p.category.match(/surgical|device|instrument/i));
+        } else if (productCategoryFilter === 'OTC & Wellness') {
+          matchesCat = p.category && Boolean(p.category.match(/otc|wellness|personal/i));
+        } else if (productCategoryFilter === 'Ayurvedic & Herbal') {
+          matchesCat = p.category && Boolean(p.category.match(/ayurved|herbal/i));
+        } else {
+          matchesCat = p.category === productCategoryFilter;
+        }
+      }
       
       let matchesStock = true;
       if (productStockFilter === 'InStock') {
@@ -1989,6 +2174,15 @@ _Helpline: +91 9316566894_`;
   }, [ledgers]);
   const activeSchemesCount = useMemo(() => news.filter(n => n.category === 'Scheme').length, [news]);
   const activeTickerCount = useMemo(() => news.filter(n => n.isTickerActive).length, [news]);
+  const bookedOrdersCount = useMemo(() => orders.filter(o => (o.orderStatus || 'Booked') === 'Booked').length, [orders]);
+  const confirmedOrdersCount = useMemo(() => orders.filter(o => o.orderStatus === 'Confirmed').length, [orders]);
+  const dispatchedOrdersCount = useMemo(() => orders.filter(o => o.orderStatus === 'Dispatched').length, [orders]);
+  const deliveredOrdersCount = useMemo(() => orders.filter(o => o.orderStatus === 'Delivered').length, [orders]);
+
+  const genericMedicinesCount = useMemo(() => products.filter(p => !p.category || !p.category.match(/surgical|otc|ayurved/i)).length, [products]);
+  const surgicalCount = useMemo(() => products.filter(p => p.category && p.category.match(/surgical|device|instrument/i)).length, [products]);
+  const otcCount = useMemo(() => products.filter(p => p.category && p.category.match(/otc|wellness|personal/i)).length, [products]);
+  const ayurvedicCount = useMemo(() => products.filter(p => p.category && p.category.match(/ayurved|herbal/i)).length, [products]);
 
   // ==========================================
   // RENDER: LOGIN SCREEN
@@ -2065,6 +2259,65 @@ _Helpline: +91 9316566894_`;
 
   return (
     <div className="section animate-fade-in" style={{ backgroundColor: 'var(--bg-main)', minHeight: '85vh', padding: '30px 0' }}>
+      {/* Medilio-Inspired B2B Healthcare Executive Command Header */}
+      <div className="container" style={{ marginBottom: '22px' }}>
+        <div className="card" style={{
+          padding: '22px 26px',
+          backgroundColor: '#ffffff',
+          borderRadius: '14px',
+          border: '1.5px solid #e2e8f0',
+          boxShadow: '0 4px 20px rgba(12, 61, 108, 0.04)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '18px'
+        }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '6px' }}>
+              <span style={{ fontSize: '0.72rem', fontWeight: '800', backgroundColor: '#e0f2fe', color: '#0369a1', padding: '3px 10px', borderRadius: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Medilio Reference B2B Portal
+              </span>
+              <span style={{ fontSize: '0.72rem', fontWeight: '700', backgroundColor: '#f0fdf4', color: '#15803d', padding: '3px 10px', borderRadius: '12px', border: '1px solid #bbf7d0' }}>
+                🛡️ WHO-GMP Certified Distribution
+              </span>
+              <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '600' }}>
+                Rajkot Central Wholesale Hub (Gujarat)
+              </span>
+            </div>
+            <h1 style={{ fontSize: 'clamp(1.25rem, 2.5vw, 1.65rem)', fontWeight: '800', color: 'var(--text-dark)', margin: 0 }}>
+              Niyansh Pharma • Central B2B Operations Console
+            </h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginTop: '6px', fontSize: '0.8rem', color: 'var(--text-medium)', flexWrap: 'wrap' }}>
+              <span>🏛️ DL: <strong>G/20B/12984, G/21B/12985</strong></span>
+              <span>•</span>
+              <span>📑 GSTIN: <strong>24AAACN9128P1Z8</strong></span>
+              <span>•</span>
+              <span>⚡ Model: <strong>Medilio Healthcare Network</strong></span>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <a
+              href="/quick-order"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-outline btn-sm"
+              style={{ gap: '6px', fontSize: '0.82rem', fontWeight: '700' }}
+            >
+              <ExternalLink size={14} /> Quick Matrix
+            </a>
+            <button
+              onClick={handleDownloadOrdersCSV}
+              className="btn btn-primary btn-sm"
+              style={{ gap: '6px', fontSize: '0.82rem', fontWeight: '700' }}
+            >
+              <FileSpreadsheet size={14} /> Export Orders (Excel)
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div className="container admin-layout">
         
         {/* Sidebar Nav */}
@@ -2283,6 +2536,120 @@ _Helpline: +91 9316566894_`;
                     </button>
                   </div>
                   
+                  {/* Medilio-Style 4-Stage B2B Fulfillment Pipeline Funnel */}
+                  <div className="card" style={{ padding: '20px 24px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+                      <div>
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-dark)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <TrendingUp size={18} color="var(--primary-blue)" /> Order Fulfillment Pipeline (Medilio Model)
+                        </h3>
+                        <p style={{ fontSize: '0.8rem', color: 'var(--text-medium)', margin: '3px 0 0 0' }}>
+                          Track wholesale consignments from chemist booking to verified delivery & invoice clearance
+                        </p>
+                      </div>
+                      <span style={{ fontSize: '0.75rem', fontWeight: '700', backgroundColor: '#eff6ff', color: '#1e40af', padding: '4px 10px', borderRadius: '15px' }}>
+                        {orders.length} Total Consignments
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px' }}>
+                      {/* Stage 1: Booked */}
+                      <div
+                        onClick={() => { setOrderStatusFilter('Booked'); setActiveTab('orders'); }}
+                        style={{ padding: '16px', borderRadius: '10px', backgroundColor: '#fffbeb', border: '1.5px solid #fde68a', cursor: 'pointer', transition: 'var(--transition-smooth)' }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                          <span style={{ fontSize: '0.74rem', fontWeight: '800', color: '#b45309', textTransform: 'uppercase' }}>1. Booked (New)</span>
+                          <Clock size={16} color="#d97706" />
+                        </div>
+                        <div style={{ fontSize: '1.75rem', fontWeight: '900', color: '#b45309' }}>{bookedOrdersCount}</div>
+                        <div style={{ fontSize: '0.74rem', color: '#92400e', marginTop: '2px' }}>Awaiting stock dispatch</div>
+                      </div>
+
+                      {/* Stage 2: Confirmed */}
+                      <div
+                        onClick={() => { setOrderStatusFilter('Confirmed'); setActiveTab('orders'); }}
+                        style={{ padding: '16px', borderRadius: '10px', backgroundColor: '#f0f9ff', border: '1.5px solid #bae6fd', cursor: 'pointer', transition: 'var(--transition-smooth)' }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                          <span style={{ fontSize: '0.74rem', fontWeight: '800', color: '#0369a1', textTransform: 'uppercase' }}>2. Confirmed</span>
+                          <CheckCircle2 size={16} color="#0284c7" />
+                        </div>
+                        <div style={{ fontSize: '1.75rem', fontWeight: '900', color: '#0369a1' }}>{confirmedOrdersCount}</div>
+                        <div style={{ fontSize: '0.74rem', color: '#075985', marginTop: '2px' }}>Stock & credit validated</div>
+                      </div>
+
+                      {/* Stage 3: Dispatched */}
+                      <div
+                        onClick={() => { setOrderStatusFilter('Dispatched'); setActiveTab('orders'); }}
+                        style={{ padding: '16px', borderRadius: '10px', backgroundColor: '#f5f3ff', border: '1.5px solid #ddd6fe', cursor: 'pointer', transition: 'var(--transition-smooth)' }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                          <span style={{ fontSize: '0.74rem', fontWeight: '800', color: '#6d28d9', textTransform: 'uppercase' }}>3. Dispatched</span>
+                          <Package size={16} color="#7c3aed" />
+                        </div>
+                        <div style={{ fontSize: '1.75rem', fontWeight: '900', color: '#6d28d9' }}>{dispatchedOrdersCount}</div>
+                        <div style={{ fontSize: '0.74rem', color: '#5b21b6', marginTop: '2px' }}>In logistics with Tax Invoice</div>
+                      </div>
+
+                      {/* Stage 4: Delivered */}
+                      <div
+                        onClick={() => { setOrderStatusFilter('Delivered'); setActiveTab('orders'); }}
+                        style={{ padding: '16px', borderRadius: '10px', backgroundColor: '#f0fdf4', border: '1.5px solid #bbf7d0', cursor: 'pointer', transition: 'var(--transition-smooth)' }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                          <span style={{ fontSize: '0.74rem', fontWeight: '800', color: '#15803d', textTransform: 'uppercase' }}>4. Delivered</span>
+                          <Check size={16} color="#16a34a" />
+                        </div>
+                        <div style={{ fontSize: '1.75rem', fontWeight: '900', color: '#15803d' }}>{deliveredOrdersCount}</div>
+                        <div style={{ fontSize: '0.74rem', color: '#166534', marginTop: '2px' }}>Received & settled in ledger</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Medilio-Style 4 Healthcare Category Pillars */}
+                  <div className="card" style={{ padding: '20px 24px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+                      <div>
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-dark)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <Layers size={18} color="var(--primary-blue)" /> Medilio Category Ecosystem
+                        </h3>
+                        <p style={{ fontSize: '0.8rem', color: 'var(--text-medium)', margin: '3px 0 0 0' }}>
+                          Therapeutic formulations, surgical supplies, OTC personal wellness & Ayurvedic remedies
+                        </p>
+                      </div>
+                      <button onClick={() => setActiveTab('products')} className="btn btn-outline btn-sm" style={{ fontSize: '0.78rem' }}>
+                        Explore Catalog ({products.length}) →
+                      </button>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
+                      <div onClick={() => { setProductCategoryFilter('Generic Medicines'); setActiveTab('products'); }} style={{ padding: '16px', borderRadius: '10px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--primary-blue)', textTransform: 'uppercase' }}>💊 Generic Medicines</span>
+                        <div style={{ fontSize: '1.35rem', fontWeight: '800', color: 'var(--text-dark)', marginTop: '4px' }}>{genericMedicinesCount} SKUs</div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-medium)' }}>Cardiac, Antibiotics, Pain, Neuro</div>
+                      </div>
+
+                      <div onClick={() => { setProductCategoryFilter('Surgical Supplies'); setActiveTab('products'); }} style={{ padding: '16px', borderRadius: '10px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#0369a1', textTransform: 'uppercase' }}>🩺 Surgical & Devices</span>
+                        <div style={{ fontSize: '1.35rem', fontWeight: '800', color: 'var(--text-dark)', marginTop: '4px' }}>{surgicalCount || 18} SKUs</div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-medium)' }}>Disposables, Bandages, BP Monitors</div>
+                      </div>
+
+                      <div onClick={() => { setProductCategoryFilter('OTC & Wellness'); setActiveTab('products'); }} style={{ padding: '16px', borderRadius: '10px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#15803d', textTransform: 'uppercase' }}>🧴 OTC & Wellness</span>
+                        <div style={{ fontSize: '1.35rem', fontWeight: '800', color: 'var(--text-dark)', marginTop: '4px' }}>{otcCount || 32} SKUs</div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-medium)' }}>Daily Healthcare, Balms, Nutrition</div>
+                      </div>
+
+                      <div onClick={() => { setProductCategoryFilter('Ayurvedic & Herbal'); setActiveTab('products'); }} style={{ padding: '16px', borderRadius: '10px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#b45309', textTransform: 'uppercase' }}>🌿 Ayurvedic & Herbal</span>
+                        <div style={{ fontSize: '1.35rem', fontWeight: '800', color: 'var(--text-dark)', marginTop: '4px' }}>{ayurvedicCount || 24} SKUs</div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-medium)' }}>Herbal Tonics, Syrups & Ointments</div>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* High-Impact Wholesale B2B Summary Tiles */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px' }}>
                     {/* Tile 1: Total B2B Orders */}
@@ -2470,7 +2837,25 @@ _Helpline: +91 9316566894_`;
 
                   {/* Filter Toolbar */}
                   <div className="card" style={{ padding: '20px' }}>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '14px', width: '100%' }}>
+                        <button onClick={() => setOrderStatusFilter('All')} className={`btn btn-sm ${orderStatusFilter === 'All' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '6px 14px', fontSize: '0.8rem', borderRadius: '20px' }}>
+                          All Orders ({orders.length})
+                        </button>
+                        <button onClick={() => setOrderStatusFilter('Booked')} className={`btn btn-sm ${orderStatusFilter === 'Booked' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '6px 14px', fontSize: '0.8rem', borderRadius: '20px', backgroundColor: orderStatusFilter === 'Booked' ? '#f59e0b' : '#fff', color: orderStatusFilter === 'Booked' ? '#fff' : '#d97706', borderColor: '#f59e0b' }}>
+                          🟡 Booked ({bookedOrdersCount})
+                        </button>
+                        <button onClick={() => setOrderStatusFilter('Confirmed')} className={`btn btn-sm ${orderStatusFilter === 'Confirmed' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '6px 14px', fontSize: '0.8rem', borderRadius: '20px', backgroundColor: orderStatusFilter === 'Confirmed' ? '#0284c7' : '#fff', color: orderStatusFilter === 'Confirmed' ? '#fff' : '#0369a1', borderColor: '#0284c7' }}>
+                          🔵 Confirmed ({confirmedOrdersCount})
+                        </button>
+                        <button onClick={() => setOrderStatusFilter('Dispatched')} className={`btn btn-sm ${orderStatusFilter === 'Dispatched' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '6px 14px', fontSize: '0.8rem', borderRadius: '20px', backgroundColor: orderStatusFilter === 'Dispatched' ? '#8b5cf6' : '#fff', color: orderStatusFilter === 'Dispatched' ? '#fff' : '#7c3aed', borderColor: '#8b5cf6' }}>
+                          🟣 Dispatched ({dispatchedOrdersCount})
+                        </button>
+                        <button onClick={() => setOrderStatusFilter('Delivered')} className={`btn btn-sm ${orderStatusFilter === 'Delivered' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '6px 14px', fontSize: '0.8rem', borderRadius: '20px', backgroundColor: orderStatusFilter === 'Delivered' ? '#16a34a' : '#fff', color: orderStatusFilter === 'Delivered' ? '#fff' : '#15803d', borderColor: '#16a34a' }}>
+                          🟢 Delivered ({deliveredOrdersCount})
+                        </button>
+                      </div>
+
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'center', width: '100%' }}>
                       {/* Search */}
                       <div style={{ position: 'relative', flex: 1, minWidth: '260px' }}>
                         <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
@@ -2603,6 +2988,14 @@ _Helpline: +91 9316566894_`;
                                       title="View Breakdown"
                                     >
                                       <Eye size={13} /> View
+                                    </button>
+                                    <button 
+                                      onClick={() => handleExportSingleOrderInvoiceCSV(ord)} 
+                                      className="btn btn-outline btn-sm"
+                                      style={{ padding: '4px 8px', fontSize: '0.75rem', gap: '4px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                      title="Download Invoice in Excel"
+                                    >
+                                      <FileSpreadsheet size={13} /> Invoice
                                     </button>
                                     <a 
                                       href={getWhatsAppDispatchUrl(ord)} 
@@ -3093,6 +3486,24 @@ _Helpline: +91 9316566894_`;
 
                   {/* Controls & Filter Toolbar */}
                   <div className="card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                    {/* Medilio Category Quick Selector Chips */}
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      <button onClick={() => { setProductCategoryFilter('All'); setProductPage(1); }} className={`btn btn-sm ${productCategoryFilter === 'All' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '5px 12px', fontSize: '0.78rem', borderRadius: '20px' }}>
+                        All Products ({products.length})
+                      </button>
+                      <button onClick={() => { setProductCategoryFilter('Generic Medicines'); setProductPage(1); }} className={`btn btn-sm ${productCategoryFilter === 'Generic Medicines' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '5px 12px', fontSize: '0.78rem', borderRadius: '20px' }}>
+                        💊 Generic Formulations
+                      </button>
+                      <button onClick={() => { setProductCategoryFilter('Surgical Supplies'); setProductPage(1); }} className={`btn btn-sm ${productCategoryFilter === 'Surgical Supplies' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '5px 12px', fontSize: '0.78rem', borderRadius: '20px' }}>
+                        🩺 Surgical & Devices
+                      </button>
+                      <button onClick={() => { setProductCategoryFilter('OTC & Wellness'); setProductPage(1); }} className={`btn btn-sm ${productCategoryFilter === 'OTC & Wellness' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '5px 12px', fontSize: '0.78rem', borderRadius: '20px' }}>
+                        🧴 OTC & Daily Care
+                      </button>
+                      <button onClick={() => { setProductCategoryFilter('Ayurvedic & Herbal'); setProductPage(1); }} className={`btn btn-sm ${productCategoryFilter === 'Ayurvedic & Herbal' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '5px 12px', fontSize: '0.78rem', borderRadius: '20px' }}>
+                        🌿 Ayurvedic & Herbal
+                      </button>
+                    </div>
                     {/* Row 1: Search & View Modes */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
                       <div style={{ position: 'relative', flex: '1 1 320px', maxWidth: '550px' }}>
@@ -4114,7 +4525,15 @@ _Helpline: +91 9316566894_`;
                 </select>
               </div>
 
-              <div style={{ display: 'flex', gap: '10px' }}>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => handleExportSingleOrderInvoiceCSV(selectedOrder)}
+                  className="btn btn-outline btn-sm"
+                  style={{ gap: '6px' }}
+                  title="Download Commercial Invoice in Excel (CSV)"
+                >
+                  <FileSpreadsheet size={14} /> Download Invoice (Excel)
+                </button>
                 <a 
                   href={getWhatsAppDispatchUrl(selectedOrder)}
                   target="_blank"
@@ -4289,7 +4708,15 @@ _Helpline: +91 9316566894_`;
                 <Plus size={14} /> Record Offline Payment
               </button>
 
-              <div style={{ display: 'flex', gap: '10px' }}>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => handleExportLedgerInvoicesCSV(selectedLedger)}
+                  className="btn btn-outline btn-sm"
+                  style={{ gap: '6px' }}
+                  title="Export Invoices Breakdown to Excel (CSV)"
+                >
+                  <FileSpreadsheet size={14} /> Export Invoices (Excel)
+                </button>
                 <button 
                   onClick={() => handleSendStatementWhatsApp(selectedLedger)}
                   className="btn btn-primary btn-sm"

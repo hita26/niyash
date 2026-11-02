@@ -1,12 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingBag, Eye, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { ShoppingBag, Eye, CheckCircle2, AlertTriangle, Lock, Check } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 function ProductCard({ product, addToCart }) {
+  const { isLoggedIn, openAuth } = useAuth();
+  const [isAdded, setIsAdded] = useState(false);
+
   const handleWhatsAppOrder = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const message = `Hello Niyansh Pharma, I would like to enquire about this product:\n\n*Product Name:* ${product.name}\n*Brand:* ${product.brand}\n*Packing:* ${product.packing}\n*Price:* ₹${product.price.toFixed(2)}\n*SKU:* ${product.sku || 'N/A'}`;
+    const priceText = isLoggedIn 
+      ? `*PTR (Wholesale):* ₹${product.price.toFixed(2)}`
+      : `*MRP:* ₹${(product.mrp || product.price || 0).toFixed(2)}\n*Note:* Please share wholesale PTR quote`;
+
+    const message = `Hello Niyansh Pharma, I would like to enquire about this product:\n\n*Product Name:* ${product.name}\n*Brand:* ${product.brand}\n*Packing:* ${product.packing}\n${priceText}\n*SKU:* ${product.sku || 'N/A'}`;
     const whatsappUrl = `https://wa.me/919909923130?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
@@ -14,8 +22,18 @@ function ProductCard({ product, addToCart }) {
   const onAddCartClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!product.inStock) return;
     addToCart(product, 1);
+    setIsAdded(true);
+    setTimeout(() => {
+      setIsAdded(false);
+    }, 1500);
   };
+
+  const displayMrp = Number(product.mrp && product.mrp > 0 ? product.mrp : product.price || 0);
+  const displayPrice = Number(product.price || 0);
+  const hasMargin = product.mrp && product.mrp > product.price;
+  const marginPercent = hasMargin ? Math.round(((product.mrp - product.price) / product.mrp) * 100) : 0;
 
   return (
     <div className="card" style={{ padding: '15px', display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -81,27 +99,70 @@ function ProductCard({ product, addToCart }) {
           </p>
         )}
 
+        {/* Pricing Block: MRP visible to everyone, PTR visible ONLY when logged in */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 'auto', paddingTop: '10px' }}>
           <div>
-            {product.mrp && product.mrp > product.price ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.74rem', color: 'var(--text-light)', textDecoration: 'line-through' }} className="tabular-nums">
-                  MRP ₹{product.mrp.toFixed(2)}
-                </span>
-                <span style={{ fontSize: '0.7rem', backgroundColor: '#ecfdf5', color: '#059669', fontWeight: '800', padding: '1px 6px', borderRadius: '4px' }}>
-                  {Math.round(((product.mrp - product.price) / product.mrp) * 100)}% MARGIN
-                </span>
+            {isLoggedIn ? (
+              <>
+                {hasMargin && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '0.74rem', color: 'var(--text-light)', textDecoration: 'line-through' }} className="tabular-nums">
+                      MRP ₹{displayMrp.toFixed(2)}
+                    </span>
+                    <span style={{ fontSize: '0.7rem', backgroundColor: '#ecfdf5', color: '#059669', fontWeight: '800', padding: '1px 6px', borderRadius: '4px' }}>
+                      {marginPercent}% MARGIN
+                    </span>
+                  </div>
+                )}
+                <div>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--primary-blue)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'block' }}>
+                    PTR (Wholesale):
+                  </span>
+                  <span style={{ fontSize: '1.28rem', fontWeight: '800', color: 'var(--primary-blue)' }} className="tabular-nums">
+                    ₹{displayPrice.toFixed(2)}
+                    <span style={{ fontSize: '0.75rem', fontWeight: '500', color: 'var(--text-medium)' }}> /unit</span>
+                  </span>
+                </div>
+              </>
+            ) : (
+              <div>
+                <div style={{ marginBottom: '3px' }}>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'block' }}>
+                    MRP (Retail Price):
+                  </span>
+                  <span style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--text-dark)' }} className="tabular-nums">
+                    ₹{displayMrp.toFixed(2)}
+                    <span style={{ fontSize: '0.75rem', fontWeight: '500', color: 'var(--text-medium)' }}> /unit</span>
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openAuth();
+                  }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    backgroundColor: '#eff6ff',
+                    border: '1px dashed #3b82f6',
+                    color: 'var(--primary-blue)',
+                    padding: '3px 8px',
+                    borderRadius: '5px',
+                    fontSize: '0.74rem',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    transition: 'var(--transition-smooth)'
+                  }}
+                  title="Login as verified chemist to view Wholesale PTR Rate"
+                >
+                  <Lock size={12} color="var(--primary-blue)" />
+                  <span>Login for PTR Rate</span>
+                </button>
               </div>
-            ) : null}
-            <div>
-              <span style={{ fontSize: '0.72rem', color: 'var(--primary-blue)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'block' }}>
-                PTR (Wholesale):
-              </span>
-              <span style={{ fontSize: '1.28rem', fontWeight: '800', color: 'var(--primary-blue)' }} className="tabular-nums">
-                ₹{product.price.toFixed(2)}
-                <span style={{ fontSize: '0.75rem', fontWeight: '500', color: 'var(--text-medium)' }}> /unit</span>
-              </span>
-            </div>
+            )}
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', fontWeight: '600', paddingBottom: '4px' }}>
@@ -125,11 +186,12 @@ function ProductCard({ product, addToCart }) {
         <button 
           onClick={onAddCartClick}
           disabled={!product.inStock}
-          className="btn btn-primary btn-sm"
+          className={`btn ${isAdded ? 'btn-secondary' : 'btn-primary'} btn-sm`}
           style={{ padding: '8px 10px', borderRadius: '6px', fontSize: '0.8rem', opacity: product.inStock ? 1 : 0.6 }}
-          title={product.inStock ? 'Add to Quote Enquiry' : 'Product Out of Stock'}
+          title={product.inStock ? 'Add to Cart' : 'Product Out of Stock'}
         >
-          <ShoppingBag size={14} /> Add Quote
+          {isAdded ? <Check size={14} /> : <ShoppingBag size={14} />}
+          {isAdded ? ' Added' : ' Add to Cart'}
         </button>
 
         <button 

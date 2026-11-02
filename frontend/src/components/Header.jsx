@@ -164,7 +164,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             <button 
               className="cart-icon-btn" 
               onClick={onOpenCart} 
-              aria-label={`Open Quote Enquiry Cart containing ${cartCount} items`}
+              aria-label={`Open Cart containing ${cartCount} items`}
             >
               <ShoppingBag size={20} aria-hidden="true" />
               {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}

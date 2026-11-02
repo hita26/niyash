@@ -559,7 +559,7 @@ Rajkot, Gujarat`);
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Statement_${ledgerData.shopName.replace(/\s+/g, '_')}_${ledgerData.retailerMobile}.csv`);
+    link.setAttribute('download', `Statement_${ledgerData.shopName.replace(/\s+/g, '_')}_${ledgerData.retailerMobile}_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

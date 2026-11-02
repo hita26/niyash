@@ -289,7 +289,7 @@ function Home({ addToCart }) {
           <div className="grid-4" style={{ position: 'relative' }}>
             {[
               { step: '01', title: 'Search Products', desc: 'Browse our wholesale list of medicines and select required quantities.' },
-              { step: '02', title: 'Add to Enquiry', desc: 'Add selected items to the Quote Cart. Include prescription if needed.' },
+              { step: '02', title: 'Add to Cart', desc: 'Add selected items to your Cart. Include prescription if needed.' },
               { step: '03', title: 'Submit Details', desc: 'Provide your pharmacy or clinic info and send the enquiry.' },
               { step: '04', title: 'Get Fast Quote', desc: 'Our team will contact you with wholesale pricing and dispatch details.' }
             ].map((step, i) => (

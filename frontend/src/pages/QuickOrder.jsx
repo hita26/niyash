@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import {
   Search,
   ShoppingCart,
@@ -26,7 +27,8 @@ import {
   RefreshCw,
   Flame,
   QrCode,
-  Trash2
+  Trash2,
+  Lock
 } from 'lucide-react';
 
 // Extensive mock fallback products covering all 14 formulation forms & all major pharma companies
@@ -597,6 +599,7 @@ const DEFAULT_COMPANIES = [
 ];
 
 function QuickOrder() {
+  const { isLoggedIn, openAuth } = useAuth();
   // Retailer Header Info State
   const [shopName, setShopName] = useState('');
   const [retailerMobile, setRetailerMobile] = useState('');
@@ -936,6 +939,10 @@ function QuickOrder() {
 
   // Validation before ordering
   const validateOrder = () => {
+    if (!isLoggedIn) {
+      openAuth();
+      return false;
+    }
     if (!shopName.trim()) {
       alert('Please enter your Medical Store / Chemist Name.');
       setShowConfig(true);
@@ -1080,12 +1087,24 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
       return;
     }
 
-    const orderNo = `NP-ORD-${Date.now().toString().slice(-6)}`;
-    const dateStr = new Date().toISOString().split('T')[0];
+    const orderNo = `NP-INV-${Date.now().toString().slice(-6)}`;
+    const now = new Date();
+    const dateISO = now.toISOString().split('T')[0];
+    const dateFormatted = now.toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+
+    const metaHeader = [
+      `"NIYANSH PHARMA - B2B WHOLESALE TAX INVOICE"`,
+      `"Invoice No: ${orderNo}","Invoice Date: ${dateFormatted}","Store Name: ${(shopName || 'Chemist Store').replace(/"/g, '""')}","Retailer Mobile: ${retailerMobile || 'N/A'}","GSTIN: ${gstin || 'N/A'}"`,
+      '""'
+    ];
 
     const headers = [
-      'Order No',
-      'Order Date',
+      'Invoice No',
+      'Invoice Date',
       'Store Name',
       'Retailer Mobile',
       'GSTIN',
@@ -1110,8 +1129,8 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
 
     const rows = commercialBilling.lineItems.map((item) => [
       `"${orderNo}"`,
-      `"${dateStr}"`,
-      `"${shopName.replace(/"/g, '""') || 'Chemist'}"`,
+      `"${dateFormatted}"`,
+      `"${(shopName || 'Chemist').replace(/"/g, '""')}"`,
       `"${retailerMobile || ''}"`,
       `"${gstin || ''}"`,
       `"${item.product || ''}"`,
@@ -1137,8 +1156,8 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
     rows.push([]);
     rows.push([
       '"SUMMARY"',
-      '""',
-      '""',
+      `"Date: ${dateFormatted}"`,
+      `"${(shopName || 'Chemist').replace(/"/g, '""')}"`,
       '""',
       '""',
       '""',
@@ -1160,12 +1179,12 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
       '""'
     ]);
 
-    const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((e) => (Array.isArray(e) ? e.join(',') : ''))].join('\n');
+    const csvContent = '\uFEFF' + [...metaHeader, headers.join(','), ...rows.map((e) => (Array.isArray(e) ? e.join(',') : ''))].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', `Niyansh_Pharma_Order_${orderNo}.csv`);
+    link.setAttribute('download', `Niyansh_Pharma_Invoice_${orderNo}_${dateISO}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -2020,17 +2039,51 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
 
                             {/* Column 3: PTR & Schemes */}
                             <td style={{ padding: '14px 12px', verticalAlign: 'middle' }}>
-                              <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-                                <span style={{ fontSize: '0.95rem', fontWeight: '800', color: '#0c3d6c' }}>
-                                  ₹{product.price?.toFixed(2)}
-                                </span>
-                                <span style={{ fontSize: '0.75rem', color: '#94a3b8', textDecoration: 'line-through' }}>
-                                  ₹{product.mrp?.toFixed(2)}
-                                </span>
-                              </div>
-                              <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
-                                GST: {product.gstRate || 12}%
-                              </div>
+                              {isLoggedIn ? (
+                                <>
+                                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+                                    <span style={{ fontSize: '0.95rem', fontWeight: '800', color: '#0c3d6c' }}>
+                                      ₹{product.price?.toFixed(2)}
+                                    </span>
+                                    <span style={{ fontSize: '0.75rem', color: '#94a3b8', textDecoration: 'line-through' }}>
+                                      ₹{product.mrp?.toFixed(2)}
+                                    </span>
+                                  </div>
+                                  <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+                                    GST: {product.gstRate || 12}%
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+                                    <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '700' }}>MRP:</span>
+                                    <span style={{ fontSize: '0.95rem', fontWeight: '800', color: '#1e293b' }}>
+                                      ₹{(product.mrp || product.price)?.toFixed(2)}
+                                    </span>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={openAuth}
+                                    style={{
+                                      marginTop: '4px',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '3px',
+                                      fontSize: '0.7rem',
+                                      fontWeight: '700',
+                                      color: '#0c3d6c',
+                                      backgroundColor: '#eff6ff',
+                                      border: '1px solid #bfdbfe',
+                                      borderRadius: '4px',
+                                      padding: '2px 6px',
+                                      cursor: 'pointer'
+                                    }}
+                                    title="Login to view wholesale PTR rate"
+                                  >
+                                    <Lock size={10} /> Login for PTR
+                                  </button>
+                                </>
+                              )}
 
                               {product.scheme && (
                                 <div style={{ marginTop: '4px' }}>
@@ -2180,12 +2233,20 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                               {/* Calculated Total for line */}
                               {isSelected && (
                                 <div style={{ marginTop: '6px', fontSize: '0.78rem' }}>
-                                  <span style={{ color: '#475569' }}>
-                                    {totalUnits} Units = <strong>₹{lineTotal.toFixed(2)}</strong>
-                                  </span>
-                                  <span style={{ fontSize: '0.7rem', color: '#64748b', marginLeft: '4px' }}>
-                                    (incl. GST)
-                                  </span>
+                                  {isLoggedIn ? (
+                                    <>
+                                      <span style={{ color: '#475569' }}>
+                                        {totalUnits} Units = <strong>₹{lineTotal.toFixed(2)}</strong>
+                                      </span>
+                                      <span style={{ fontSize: '0.7rem', color: '#64748b', marginLeft: '4px' }}>
+                                        (incl. GST)
+                                      </span>
+                                    </>
+                                  ) : (
+                                    <span style={{ color: '#475569' }}>
+                                      {totalUnits} Units · <button onClick={openAuth} style={{ border: 'none', background: 'transparent', color: '#0c3d6c', fontWeight: '700', cursor: 'pointer', padding: 0 }}>Login for Wholesale Total</button>
+                                    </span>
+                                  )}
                                 </div>
                               )}
                             </td>
@@ -2250,14 +2311,41 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                         </div>
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                          <div>
-                            <span style={{ fontSize: '1.15rem', fontWeight: '800', color: '#0c3d6c' }}>
-                              ₹{product.price?.toFixed(2)}
-                            </span>
-                            <span style={{ fontSize: '0.78rem', color: '#94a3b8', textDecoration: 'line-through', marginLeft: '6px' }}>
-                              ₹{product.mrp?.toFixed(2)}
-                            </span>
-                          </div>
+                          {isLoggedIn ? (
+                            <div>
+                              <span style={{ fontSize: '1.15rem', fontWeight: '800', color: '#0c3d6c' }}>
+                                ₹{product.price?.toFixed(2)}
+                              </span>
+                              <span style={{ fontSize: '0.78rem', color: '#94a3b8', textDecoration: 'line-through', marginLeft: '6px' }}>
+                                ₹{product.mrp?.toFixed(2)}
+                              </span>
+                            </div>
+                          ) : (
+                            <div>
+                              <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '700', marginRight: '4px' }}>MRP:</span>
+                              <span style={{ fontSize: '1.1rem', fontWeight: '800', color: '#1e293b' }}>
+                                ₹{(product.mrp || product.price)?.toFixed(2)}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={openAuth}
+                                style={{
+                                  display: 'block',
+                                  marginTop: '3px',
+                                  fontSize: '0.7rem',
+                                  fontWeight: '700',
+                                  color: '#0c3d6c',
+                                  backgroundColor: '#eff6ff',
+                                  border: '1px solid #bfdbfe',
+                                  borderRadius: '4px',
+                                  padding: '2px 6px',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                🔒 Login for PTR
+                              </button>
+                            </div>
+                          )}
                           {product.scheme && (
                             <span style={{ fontSize: '0.72rem', fontWeight: '800', backgroundColor: '#ffedd5', color: '#ea580c', padding: '2px 6px', borderRadius: '4px' }}>
                               🔥 {product.scheme}
@@ -2312,7 +2400,13 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                         {isSelected && (
                           <div style={{ marginTop: '8px', fontSize: '0.8rem', fontWeight: '700', color: '#15803d', display: 'flex', justifyContent: 'space-between' }}>
                             <span>{totalUnits} Units</span>
-                            <span>₹{lineTotal.toFixed(2)} (inc. GST)</span>
+                            {isLoggedIn ? (
+                              <span>₹{lineTotal.toFixed(2)} (inc. GST)</span>
+                            ) : (
+                              <button onClick={openAuth} style={{ border: 'none', background: 'transparent', color: '#0c3d6c', fontWeight: '700', cursor: 'pointer', padding: 0 }}>
+                                🔒 Login for Total
+                              </button>
+                            )}
                           </div>
                         )}
                       </div>
@@ -2601,9 +2695,15 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                   </div>
                   <div style={{ fontSize: '0.7rem', color: '#4ade80' }}>Inclusive of all Taxes</div>
                 </div>
-                <div style={{ fontSize: '1.45rem', fontWeight: '900', color: '#15803d' }}>
-                  ₹{commercialBilling.grandTotal.toFixed(2)}
-                </div>
+                <div style={{ fontSize: isLoggedIn ? '1.45rem' : '1.05rem', fontWeight: '900', color: '#15803d' }}>
+                    {isLoggedIn ? (
+                      `₹${commercialBilling.grandTotal.toFixed(2)}`
+                    ) : (
+                      <button onClick={openAuth} style={{ border: 'none', background: '#dcfce7', color: '#166534', padding: '4px 10px', borderRadius: '6px', fontSize: '0.78rem', fontWeight: '800', cursor: 'pointer' }}>
+                        🔒 Login for PTR Total
+                      </button>
+                    )}
+                  </div>
               </div>
 
               {/* Multi-Channel Action Buttons */}
@@ -2735,8 +2835,14 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                 </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginTop: '2px' }}>
-                <span style={{ fontSize: '1.15rem', fontWeight: '900', color: '#0c3d6c' }}>
-                  ₹{commercialBilling.grandTotal.toFixed(2)}
+                <span style={{ fontSize: isLoggedIn ? '1.15rem' : '0.85rem', fontWeight: '900', color: '#0c3d6c' }}>
+                  {isLoggedIn ? (
+                    `₹${commercialBilling.grandTotal.toFixed(2)}`
+                  ) : (
+                    <button onClick={openAuth} style={{ border: 'none', background: '#eff6ff', color: '#0c3d6c', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '800', cursor: 'pointer' }}>
+                      🔒 Login for Total
+                    </button>
+                  )}
                 </span>
                 <span style={{ fontSize: '0.68rem', color: '#16a34a', fontWeight: '700' }}>
                   inc. GST
@@ -2919,8 +3025,14 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                   <div style={{ fontSize: '0.72rem', color: '#166534', fontWeight: '800', textTransform: 'uppercase' }}>Grand Commercial Total</div>
                   <div style={{ fontSize: '0.68rem', color: '#15803d' }}>{commercialBilling.totalBoxes} Boxes ({commercialBilling.totalUnits} Units)</div>
                 </div>
-                <div style={{ fontSize: '1.35rem', fontWeight: '900', color: '#15803d' }}>
-                  ₹{commercialBilling.grandTotal.toFixed(2)}
+                <div style={{ fontSize: isLoggedIn ? '1.35rem' : '0.95rem', fontWeight: '900', color: '#15803d' }}>
+                  {isLoggedIn ? (
+                    `₹${commercialBilling.grandTotal.toFixed(2)}`
+                  ) : (
+                    <button onClick={openAuth} style={{ border: 'none', background: '#dcfce7', color: '#166534', padding: '4px 10px', borderRadius: '6px', fontSize: '0.78rem', fontWeight: '800', cursor: 'pointer' }}>
+                      🔒 Login for Total
+                    </button>
+                  )}
                 </div>
               </div>
 

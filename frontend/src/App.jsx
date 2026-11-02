@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import EnquiryCartModal from './components/EnquiryCartModal';
@@ -23,29 +24,13 @@ import NewsTicker from './components/NewsTicker';
 import ScrollToTop from './components/ScrollToTop';
 import MobileBottomNav from './components/MobileBottomNav';
 
-function App() {
+function AppContent() {
   const [enquiryCart, setEnquiryCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   
-  // Auth state
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState('');
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
-
-  // Load user session on mount
-  useEffect(() => {
-    const savedUser = localStorage.getItem('niyansh_user');
-    const savedToken = localStorage.getItem('niyansh_token');
-    if (savedUser && savedToken) {
-      try {
-        setUser(JSON.parse(savedUser));
-        setToken(savedToken);
-      } catch (e) {
-        console.error('Error parsing saved session', e);
-      }
-    }
-  }, []);
+  // Auth state from centralized context
+  const { user, token, login, logout, isAuthOpen, openAuth, closeAuth } = useAuth();
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -63,20 +48,6 @@ function App() {
   useEffect(() => {
     localStorage.setItem('niyansh_enquiry_cart', JSON.stringify(enquiryCart));
   }, [enquiryCart]);
-
-  const handleLoginSuccess = (userData) => {
-    setUser(userData);
-    setToken(userData.token);
-    localStorage.setItem('niyansh_user', JSON.stringify(userData));
-    localStorage.setItem('niyansh_token', userData.token);
-  };
-
-  const handleLogout = () => {
-    setUser(null);
-    setToken('');
-    localStorage.removeItem('niyansh_user');
-    localStorage.removeItem('niyansh_token');
-  };
 
   const addToCart = (product, quantity = 1) => {
     setEnquiryCart((prevCart) => {
@@ -123,8 +94,8 @@ function App() {
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
           user={user}
-          onLogout={handleLogout}
-          onOpenAuth={() => setIsAuthOpen(true)}
+          onLogout={logout}
+          onOpenAuth={openAuth}
         />
         <NewsTicker />
         
@@ -180,16 +151,24 @@ function App() {
           clearCart={clearCart}
           user={user}
           token={token}
-          onOpenAuth={() => setIsAuthOpen(true)}
+          onOpenAuth={openAuth}
         />
 
         <AuthModal 
           isOpen={isAuthOpen}
-          onClose={() => setIsAuthOpen(false)}
-          onSuccess={handleLoginSuccess}
+          onClose={closeAuth}
+          onSuccess={login}
         />
       </div>
     </Router>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 

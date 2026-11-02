@@ -83,7 +83,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
+if (process.env.NODE_ENV !== 'test') {
   const PORT = process.env.PORT || 5001;
   app.listen(PORT, () => {
     console.log(`Server running in development mode on port ${PORT}`);

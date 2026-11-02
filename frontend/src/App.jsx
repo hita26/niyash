@@ -123,9 +123,9 @@ function AppContent() {
             <Route path="/schemes" element={<NewsFeed />} />
             <Route path="/quick-order" element={<QuickOrder />} />
             <Route path="/order" element={<QuickOrder />} />
-            <Route path="/ledger" element={<Navigate to="/admin" replace />} />
-            <Route path="/outstanding" element={<Navigate to="/admin" replace />} />
-            <Route path="/outstanding-ledger" element={<Navigate to="/admin" replace />} />
+            <Route path="/ledger" element={<OutstandingLedger />} />
+            <Route path="/outstanding" element={<OutstandingLedger />} />
+            <Route path="/outstanding-ledger" element={<OutstandingLedger />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/career" element={<Career />} />
             <Route path="/partner" element={<Partner />} />

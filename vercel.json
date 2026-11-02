@@ -19,15 +19,21 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "service": "backend"
+      "destination": {
+        "service": "backend"
+      }
     },
     {
       "source": "/uploads/(.*)",
-      "service": "backend"
+      "destination": {
+        "service": "backend"
+      }
     },
     {
       "source": "/(.*)",
-      "service": "frontend"
+      "destination": {
+        "service": "frontend"
+      }
     }
   ]
 }

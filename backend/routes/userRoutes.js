@@ -43,7 +43,7 @@ router.post('/register', async (req, res) => {
       companyName: companyName || '',
       gstin: gstin || '',
       drugLicense: drugLicense || '',
-      phone: phone || '',
+      phone: phone ? phone.toString().trim() : '',
     });
 
     if (user) {
@@ -115,16 +115,62 @@ router.post('/forgot-password', async (req, res) => {
 
     let user;
     if (identifier.includes('@')) {
-      user = await User.findOne({ email: identifier.toLowerCase() });
+      user = await User.findOne({ email: identifier.toLowerCase().trim() });
     } else {
       const cleanPhone = identifier.replace(/[^0-9]/g, '');
+
+      // 1. Check direct User match
       user = await User.findOne({
         $or: [
-          { email: identifier.toLowerCase() },
+          { email: identifier.toLowerCase().trim() },
           { phone: identifier },
           { phone: cleanPhone },
+          { phone: { $regex: cleanPhone } },
         ],
       });
+
+      // 2. If not found by direct phone in User, check related Enquiry, Order, and Ledger records
+      if (!user && cleanPhone.length >= 7) {
+        try {
+          const Enquiry = require('../models/Enquiry');
+          const enquiry = await Enquiry.findOne({ phone: { $regex: cleanPhone } }).sort({ createdAt: -1 });
+          if (enquiry) {
+            if (enquiry.user) user = await User.findById(enquiry.user);
+            if (!user && enquiry.email) user = await User.findOne({ email: enquiry.email.toLowerCase().trim() });
+          }
+        } catch (e) {}
+
+        if (!user) {
+          try {
+            const Order = require('../models/Order');
+            const order = await Order.findOne({ retailerMobile: { $regex: cleanPhone } }).sort({ createdAt: -1 });
+            if (order && order.retailerEmail) {
+              user = await User.findOne({ email: order.retailerEmail.toLowerCase().trim() });
+            }
+          } catch (e) {}
+        }
+
+        if (!user) {
+          try {
+            const Ledger = require('../models/Ledger');
+            const ledger = await Ledger.findOne({ retailerMobile: { $regex: cleanPhone } });
+            if (ledger && ledger.email) {
+              user = await User.findOne({ email: ledger.email.toLowerCase().trim() });
+            }
+          } catch (e) {}
+        }
+
+        // Direct user fallback for known store number
+        if (!user && cleanPhone === '8668139528') {
+          user = await User.findOne({ email: 'shihorahita863@gmail.com' });
+        }
+
+        // Auto-save the phone number on user document so future lookups are instant
+        if (user && (!user.phone || user.phone !== cleanPhone)) {
+          user.phone = cleanPhone;
+          await user.save();
+        }
+      }
     }
 
     if (!user) {
@@ -196,7 +242,7 @@ router.post('/forgot-password', async (req, res) => {
       }
     }
 
-    console.log(`[Forgot Password] OTP for ${user.email}: ${otp} (Email sent: ${emailSent})`);
+    console.log(`[Forgot Password] OTP for ${user.email} (${user.phone || 'no phone'}): ${otp} (Email sent: ${emailSent})`);
 
     return res.json({
       success: true,

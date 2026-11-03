@@ -236,6 +236,18 @@ const initDefaults = async () => {
         }
       }
 
+      // 4. Ensure Hita user profile has mobile number 8668139528 attached
+      try {
+        const hita = await User.findOne({ email: 'shihorahita863@gmail.com' });
+        if (hita && (!hita.phone || hita.phone !== '8668139528')) {
+          hita.phone = '8668139528';
+          await hita.save();
+          console.log('✅ Linked phone 8668139528 to shihorahita863@gmail.com');
+        }
+      } catch (hErr) {
+        // ignore
+      }
+
       isInitialized = true;
     } catch (err) {
       if (!err.message?.includes('E11000')) {

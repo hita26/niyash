@@ -723,7 +723,7 @@ Rajkot, Gujarat`);
                   maxLength={10}
                   placeholder="Enter 10-digit Retailer Mobile Number (e.g. 9825012345)"
                   value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value.replace(/\D/g, ''))}
+                  onChange={(e) => setSearchInput(e.target.value.replace(/\D/g, '').slice(0, 10))}
                   style={{
                     width: '100%',
                     padding: '10px 12px 10px 38px',

@@ -36,6 +36,13 @@ export default function ForgotPasswordModal({
       setError('Please provide your registered email address or mobile number.');
       return;
     }
+    if (!cleanInput.includes('@')) {
+      const numericOnly = cleanInput.replace(/\D/g, '');
+      if (numericOnly.length !== 10) {
+        setError('Phone number must contain exactly 10 numeric digits.');
+        return;
+      }
+    }
 
     setError('');
     setIsLoading(true);

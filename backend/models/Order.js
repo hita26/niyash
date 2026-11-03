@@ -63,6 +63,12 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      validate: {
+        validator: function(v) {
+          return /^\d{10}$/.test(v);
+        },
+        message: props => `${props.value} is not a valid 10-digit mobile number!`
+      }
     },
     retailerEmail: {
       type: String,

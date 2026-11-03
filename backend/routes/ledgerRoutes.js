@@ -152,9 +152,9 @@ router.post('/payment', async (req, res) => {
       date,
     } = req.body;
 
-    const targetMobile = (retailerMobile || mobile || '').toString().trim();
-    if (!targetMobile) {
-      return res.status(400).json({ message: 'Retailer mobile number is required' });
+    const targetMobile = (retailerMobile || mobile || '').toString().replace(/\D/g, '');
+    if (!targetMobile || targetMobile.length !== 10) {
+      return res.status(400).json({ message: 'Retailer mobile number must contain exactly 10 numeric digits' });
     }
 
     const payAmount = parseFloat(amount);
@@ -246,9 +246,9 @@ router.post('/send-statement', async (req, res) => {
   try {
     const { retailerMobile, mobile, channel = 'whatsapp' } = req.body;
 
-    const targetMobile = (retailerMobile || mobile || '').toString().trim();
-    if (!targetMobile) {
-      return res.status(400).json({ message: 'Retailer mobile number is required' });
+    const targetMobile = (retailerMobile || mobile || '').toString().replace(/\D/g, '');
+    if (!targetMobile || targetMobile.length !== 10) {
+      return res.status(400).json({ message: 'Retailer mobile number must contain exactly 10 numeric digits' });
     }
 
     const ledger = await findLedgerByMobile(targetMobile);
@@ -284,7 +284,10 @@ router.post('/send-statement', async (req, res) => {
 router.get('/:mobile', async (req, res) => {
   try {
     const rawMobile = req.params.mobile.trim();
-    const cleanMobile = cleanMobileDigits(rawMobile) || rawMobile;
+    const cleanMobile = rawMobile.replace(/\D/g, '');
+    if (cleanMobile.length !== 10) {
+      return res.status(400).json({ message: 'Retailer mobile number must contain exactly 10 numeric digits' });
+    }
 
     let ledger = await findLedgerByMobile(rawMobile);
 

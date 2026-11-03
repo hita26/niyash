@@ -32,10 +32,15 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ message: 'Name and Phone number are required' });
     }
 
+    const cleanPhone = phone.toString().replace(/\D/g, '');
+    if (cleanPhone.length !== 10) {
+      return res.status(400).json({ message: 'Phone number must contain exactly 10 numeric digits' });
+    }
+
     const enquiryData = {
       type,
       name,
-      phone,
+      phone: cleanPhone,
       email: email ? email.toLowerCase().trim() : '',
       address,
       message,

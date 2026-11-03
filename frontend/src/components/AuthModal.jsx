@@ -79,7 +79,10 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
   const isRegister = authMode === 'register';
 
   const handleChange = (e) => {
-    const val = e.target.name === 'email' ? e.target.value.toLowerCase() : e.target.value;
+    let val = e.target.name === 'email' ? e.target.value.toLowerCase() : e.target.value;
+    if (e.target.name === 'phone') {
+      val = e.target.value.replace(/\D/g, '').slice(0, 10);
+    }
     setFormData({ ...formData, [e.target.name]: val });
   };
 
@@ -100,6 +103,15 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
     setError('');
     setInfoMessage('');
     setLoading(true);
+
+    if (isRegister) {
+      const cleanPhone = (formData.phone || '').replace(/\D/g, '');
+      if (cleanPhone.length !== 10) {
+        setError('Phone number must contain exactly 10 numeric digits.');
+        setLoading(false);
+        return;
+      }
+    }
 
     const url = isLogin ? '/api/users/login' : '/api/users/register';
     const cleanEmail = formData.email.toLowerCase().trim();
@@ -136,6 +148,13 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
     if (!identifier) {
       setError('Please enter your registered email address or phone number');
       return;
+    }
+    if (!identifier.includes('@')) {
+      const cleanP = identifier.replace(/\D/g, '');
+      if (cleanP.length !== 10) {
+        setError('Phone number must contain exactly 10 numeric digits.');
+        return;
+      }
     }
 
     setError('');
@@ -459,15 +478,17 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                    <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Phone Number</label>
+                    <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Phone Number *</label>
                     <div style={{ position: 'relative' }}>
                       <Phone size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
                       <input 
-                        type="text" 
+                        type="tel" 
                         name="phone" 
+                        required
+                        maxLength={10}
                         value={formData.phone} 
                         onChange={handleChange}
-                        placeholder="99099xxxxx"
+                        placeholder="10-digit mobile number"
                         style={{ width: '100%', padding: '10px 10px 10px 38px', borderRadius: '6px', border: '1px solid var(--border-light)', fontSize: '0.85rem' }}
                       />
                     </div>

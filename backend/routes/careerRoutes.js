@@ -74,10 +74,15 @@ router.post('/', handleUpload, async (req, res) => {
       return res.status(400).json({ message: 'Please fill in all required fields' });
     }
 
+    const cleanPhone = phone.toString().replace(/\D/g, '');
+    if (cleanPhone.length !== 10) {
+      return res.status(400).json({ message: 'Phone number must contain exactly 10 numeric digits' });
+    }
+
     const careerData = {
       name,
       email: email.toLowerCase().trim(),
-      phone,
+      phone: cleanPhone,
       position,
       experience,
       coverLetter,

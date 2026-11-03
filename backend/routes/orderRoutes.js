@@ -85,6 +85,11 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ message: 'Shop name and retailer mobile are required' });
     }
 
+    const cleanMobile = retailerMobile.toString().replace(/\D/g, '');
+    if (cleanMobile.length !== 10) {
+      return res.status(400).json({ message: 'Retailer mobile number must contain exactly 10 numeric digits' });
+    }
+
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ message: 'Order must contain at least one item' });
     }
@@ -142,7 +147,7 @@ router.post('/', async (req, res) => {
     const order = new Order({
       orderNumber: generatedOrderNumber,
       shopName,
-      retailerMobile: retailerMobile.trim(),
+      retailerMobile: cleanMobile,
       retailerEmail: retailerEmail ? retailerEmail.trim() : '',
       gstin: gstin ? gstin.trim() : '',
       destinationWhatsApp: destinationWhatsApp.trim(),

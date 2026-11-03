@@ -948,8 +948,9 @@ function QuickOrder() {
       setShowConfig(true);
       return false;
     }
-    if (!retailerMobile.trim() || retailerMobile.replace(/\D/g, '').length < 10) {
-      alert('Please provide a valid 10-digit Retailer Mobile Number.');
+    const cleanMobile = retailerMobile.replace(/\D/g, '');
+    if (!cleanMobile || cleanMobile.length !== 10) {
+      alert('Retailer mobile number must contain exactly 10 numeric digits.');
       setShowConfig(true);
       return false;
     }
@@ -1378,8 +1379,9 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
   // 5. Fetch & Open Retailer Outstanding Ledger
   const handleOpenLedger = async (mobileNumberToFetch) => {
     const targetMobile = (mobileNumberToFetch || retailerMobile || '').trim();
-    if (!targetMobile) {
-      alert('Please enter a valid Retailer Mobile Number to view Outstanding Ledger.');
+    const cleanMobile = targetMobile.replace(/\D/g, '');
+    if (!cleanMobile || cleanMobile.length !== 10) {
+      alert('Retailer mobile number must contain exactly 10 numeric digits.');
       setShowConfig(true);
       return;
     }
@@ -1645,10 +1647,11 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                   Retailer Mobile Number <span style={{ color: '#ef4444' }}>*</span>
                 </label>
                 <input
-                  type="text"
-                  placeholder="e.g. 9825012345"
+                  type="tel"
+                  maxLength={10}
+                  placeholder="10-digit mobile number"
                   value={retailerMobile}
-                  onChange={(e) => setRetailerMobile(e.target.value)}
+                  onChange={(e) => setRetailerMobile(e.target.value.replace(/\D/g, '').slice(0, 10))}
                   style={{
                     width: '100%',
                     padding: '8px 12px',

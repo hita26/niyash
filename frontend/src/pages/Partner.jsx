@@ -20,8 +20,8 @@ function Partner() {
     setErrorMessage('');
 
     const cleanPhone = phone.replace(/\D/g, '');
-    if (cleanPhone.length < 10) {
-      setErrorMessage('Please enter a valid 10-digit mobile number.');
+    if (cleanPhone.length !== 10) {
+      setErrorMessage('Phone number must contain exactly 10 numeric digits.');
       return;
     }
 
@@ -179,9 +179,10 @@ function Partner() {
                     id="partner-phone"
                     type="tel" 
                     required 
-                    placeholder="99099 XXXXX"
+                    maxLength={10}
+                    placeholder="10-digit mobile number"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                     style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
                   />
                 </div>

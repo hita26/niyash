@@ -31,6 +31,14 @@ router.post('/register', async (req, res) => {
 
     const normalizedEmail = email.toLowerCase().trim();
 
+    let sanitizedPhone = '';
+    if (phone) {
+      sanitizedPhone = phone.toString().replace(/\D/g, '');
+      if (sanitizedPhone.length !== 10) {
+        return res.status(400).json({ message: 'Phone number must contain exactly 10 numeric digits' });
+      }
+    }
+
     const userExists = await User.findOne({ email: normalizedEmail });
     if (userExists) {
       return res.status(400).json({ message: 'User already exists with this email' });
@@ -43,7 +51,7 @@ router.post('/register', async (req, res) => {
       companyName: companyName || '',
       gstin: gstin || '',
       drugLicense: drugLicense || '',
-      phone: phone ? phone.toString().trim() : '',
+      phone: sanitizedPhone,
     });
 
     if (user) {
@@ -117,7 +125,10 @@ router.post('/forgot-password', async (req, res) => {
     if (identifier.includes('@')) {
       user = await User.findOne({ email: identifier.toLowerCase().trim() });
     } else {
-      const cleanPhone = identifier.replace(/[^0-9]/g, '');
+      const cleanPhone = identifier.replace(/\D/g, '');
+      if (cleanPhone.length !== 10) {
+        return res.status(400).json({ message: 'Phone number must contain exactly 10 numeric digits' });
+      }
 
       // 1. Check direct User match
       user = await User.findOne({
@@ -394,7 +405,13 @@ router.put('/profile', protect, async (req, res) => {
       user.companyName = req.body.companyName !== undefined ? req.body.companyName : user.companyName;
       user.gstin = req.body.gstin !== undefined ? req.body.gstin : user.gstin;
       user.drugLicense = req.body.drugLicense !== undefined ? req.body.drugLicense : user.drugLicense;
-      user.phone = req.body.phone !== undefined ? req.body.phone : user.phone;
+      if (req.body.phone !== undefined) {
+        const cleanP = req.body.phone ? req.body.phone.toString().replace(/\D/g, '') : '';
+        if (cleanP && cleanP.length !== 10) {
+          return res.status(400).json({ message: 'Phone number must contain exactly 10 numeric digits' });
+        }
+        user.phone = cleanP;
+      }
 
       if (req.body.password) {
         user.password = req.body.password;

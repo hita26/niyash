@@ -160,8 +160,27 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
               </button>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               
+              {/* Free Cold-Chain Delivery Progress Bar */}
+              {totalValuation > 0 && (
+                <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: '800', color: totalValuation >= 10000 ? '#15803d' : '#166534' }}>
+                      {totalValuation >= 10000 
+                        ? '🎉 Free Cold-Chain Dispatch across Gujarat Unlocked!' 
+                        : `🚚 Add ₹${(10000 - totalValuation).toFixed(2)} more for Free Dispatch`}
+                    </span>
+                    <span style={{ fontSize: '0.74rem', fontWeight: '800', color: '#15803d' }}>
+                      {Math.min(100, Math.round((totalValuation / 10000) * 100))}%
+                    </span>
+                  </div>
+                  <div style={{ height: '7px', backgroundColor: '#dcfce7', borderRadius: '4px', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${Math.min(100, Math.round((totalValuation / 10000) * 100))}%`, backgroundColor: '#10b981', borderRadius: '4px', transition: 'width 0.4s ease' }} />
+                  </div>
+                </div>
+              )}
+
               {/* Cart Items list */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {cartItems.map((item) => (

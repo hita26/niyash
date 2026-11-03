@@ -36,7 +36,8 @@ function AppContent() {
   const { user, token, login, logout, isAuthOpen, openAuth, closeAuth } = useAuth();
 
   // Detect whether current view is within the B2B Chemist Workstation
-  const isB2BPortal = location.pathname.startsWith('/dashboard') || 
+  const isB2BPortal = location.pathname.startsWith('/admin') || 
+                      location.pathname.startsWith('/dashboard') || 
                       location.pathname.startsWith('/portal') || 
                       location.pathname.startsWith('/retailer-dashboard') ||
                       location.pathname.startsWith('/quick-order') || 

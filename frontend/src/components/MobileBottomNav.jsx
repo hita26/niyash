@@ -7,6 +7,11 @@ function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
   const location = useLocation();
   const { isLoggedIn, user } = useAuth();
 
+  // Maximize workspace on Admin panel
+  if (location.pathname.startsWith('/admin')) {
+    return null;
+  }
+
   const isB2B = typeof isB2BPortal === 'boolean' 
     ? isB2BPortal 
     : (location.pathname.startsWith('/dashboard') || 

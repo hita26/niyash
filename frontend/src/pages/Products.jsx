@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
+import SkeletonLoader from '../components/SkeletonLoader';
 import { Filter, SlidersHorizontal, ArrowUpDown, RefreshCcw, X, ChevronLeft, ChevronRight, Building2, Search } from 'lucide-react';
 
 function Products({ addToCart, searchTerm, setSearchTerm }) {
@@ -564,10 +565,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
 
           {/* Products Grid */}
           {loading ? (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
-              <div style={{ border: '4px solid #cbd5e1', borderTop: '4px solid var(--primary-blue)', borderRadius: '50%', width: '40px', height: '40px', animation: 'spin 1s linear infinite' }}></div>
-              <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
-            </div>
+            <SkeletonLoader variant="product-grid" count={8} />
           ) : products.length === 0 ? (
             <div className="card" style={{ padding: '70px 20px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
               <SlidersHorizontal size={44} color="var(--text-light)" />

@@ -2262,7 +2262,7 @@ _Helpline: +91 9316566894_`;
       {/* Medilio-Inspired B2B Healthcare Executive Command Header */}
       <div className="container" style={{ marginBottom: '22px' }}>
         <div className="card" style={{
-          padding: '22px 26px',
+          padding: 'clamp(16px, 2.5vw, 24px)',
           backgroundColor: '#ffffff',
           borderRadius: '14px',
           border: '1.5px solid #e2e8f0',
@@ -2318,10 +2318,10 @@ _Helpline: +91 9316566894_`;
         </div>
       </div>
 
-      <div className="container admin-layout">
+      <div className="container admin-layout-container">
         
         {/* Sidebar Nav */}
-        <aside className="card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px', position: 'sticky', top: '100px' }}>
+        <aside className="card admin-desktop-sidebar" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ borderBottom: '1px solid var(--border-light)', paddingBottom: '15px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#22c55e', animation: 'pulse 2s infinite' }}></div>
@@ -2490,6 +2490,62 @@ _Helpline: +91 9316566894_`;
 
         {/* Main Content Area */}
         <main style={{ minWidth: 0 }}>
+          {/* Mobile & Tablet Responsive Horizontal Tab Bar */}
+          <div className="admin-mobile-tabs-bar" style={{ marginBottom: '18px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ width: '9px', height: '9px', borderRadius: '50%', backgroundColor: '#22c55e', animation: 'pulse 2s infinite' }}></div>
+                <strong style={{ fontSize: '0.92rem', color: 'var(--text-dark)' }}>Admin Console</strong>
+                <span style={{ fontSize: '0.72rem', backgroundColor: '#e0f2fe', color: '#0369a1', padding: '2px 8px', borderRadius: '10px', fontWeight: '700' }}>
+                  Live B2B
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button
+                  onClick={fetchDashboardData}
+                  className="btn btn-outline btn-sm"
+                  style={{ padding: '4px 10px', fontSize: '0.75rem', gap: '4px', height: '30px' }}
+                  title="Refresh Live Data"
+                >
+                  <RefreshCw size={12} className={isLoading ? 'animate-spin' : ''} /> Refresh
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="btn btn-sm"
+                  style={{ padding: '4px 10px', fontSize: '0.75rem', color: '#ef4444', backgroundColor: '#fee2e2', border: 'none', borderRadius: '6px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '4px', height: '30px' }}
+                >
+                  <LogOut size={12} /> Exit
+                </button>
+              </div>
+            </div>
+
+            <div className="admin-mobile-tabs-scroll">
+              <button onClick={() => setActiveTab('overview')} className={`admin-tab-chip ${activeTab === 'overview' ? 'active' : ''}`}>
+                <LayoutDashboard size={14} /> Overview
+              </button>
+              <button onClick={() => setActiveTab('orders')} className={`admin-tab-chip ${activeTab === 'orders' ? 'active' : ''}`}>
+                <Package size={14} /> Orders ({orders.length})
+              </button>
+              <button onClick={() => setActiveTab('ledgers')} className={`admin-tab-chip ${activeTab === 'ledgers' ? 'active' : ''}`}>
+                <CreditCard size={14} /> Ledgers {overdueLedgersCount > 0 ? `(${overdueLedgersCount} Due)` : `(${ledgers.length})`}
+              </button>
+              <button onClick={() => setActiveTab('news')} className={`admin-tab-chip ${activeTab === 'news' ? 'active' : ''}`}>
+                <Flame size={14} /> Schemes ({news.length})
+              </button>
+              <button onClick={() => setActiveTab('products')} className={`admin-tab-chip ${activeTab === 'products' ? 'active' : ''}`}>
+                <ShoppingBag size={14} /> Products ({products.length})
+              </button>
+              <button onClick={() => setActiveTab('companies')} className={`admin-tab-chip ${activeTab === 'companies' ? 'active' : ''}`}>
+                <Building2 size={14} /> Companies ({companies.length})
+              </button>
+              <button onClick={() => setActiveTab('enquiries')} className={`admin-tab-chip ${activeTab === 'enquiries' ? 'active' : ''}`}>
+                <MessageSquare size={14} /> Enquiries ({enquiries.length})
+              </button>
+              <button onClick={() => setActiveTab('careers')} className={`admin-tab-chip ${activeTab === 'careers' ? 'active' : ''}`}>
+                <Briefcase size={14} /> Careers ({careers.length})
+              </button>
+            </div>
+          </div>
           {/* Toast Notification Banner */}
           {toastMessage && (
             <div style={{
@@ -2552,7 +2608,7 @@ _Helpline: +91 9316566894_`;
                       </span>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px' }}>
+                    <div className="admin-funnel-grid">
                       {/* Stage 1: Booked */}
                       <div
                         onClick={() => { setOrderStatusFilter('Booked'); setActiveTab('orders'); }}
@@ -2623,7 +2679,7 @@ _Helpline: +91 9316566894_`;
                       </button>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
+                    <div className="admin-category-grid">
                       <div onClick={() => { setProductCategoryFilter('Generic Medicines'); setActiveTab('products'); }} style={{ padding: '16px', borderRadius: '10px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
                         <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--primary-blue)', textTransform: 'uppercase' }}>💊 Generic Medicines</span>
                         <div style={{ fontSize: '1.35rem', fontWeight: '800', color: 'var(--text-dark)', marginTop: '4px' }}>{genericMedicinesCount} SKUs</div>
@@ -2651,7 +2707,7 @@ _Helpline: +91 9316566894_`;
                   </div>
 
                   {/* High-Impact Wholesale B2B Summary Tiles */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px' }}>
+                  <div className="admin-stat-tiles-grid">
                     {/* Tile 1: Total B2B Orders */}
                     <div 
                       className="card" 
@@ -2745,8 +2801,8 @@ _Helpline: +91 9316566894_`;
                       </button>
                     </div>
 
-                    <div style={{ overflowX: 'auto' }}>
-                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                    <div className="admin-table-container">
+                      <table style={{ width: '100%', minWidth: '650px', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
                         <thead>
                           <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid var(--border-light)', textAlign: 'left' }}>
                             <th style={{ padding: '10px 12px', verticalAlign: 'middle' }}>Order #</th>
@@ -2855,9 +2911,9 @@ _Helpline: +91 9316566894_`;
                         </button>
                       </div>
 
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'center', width: '100%' }}>
+                      <div className="admin-filter-bar" style={{ width: '100%' }}>
                       {/* Search */}
-                      <div style={{ position: 'relative', flex: 1, minWidth: '260px' }}>
+                      <div className="admin-filter-search" style={{ position: 'relative' }}>
                         <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
                         <input 
                           type="text"
@@ -2903,8 +2959,8 @@ _Helpline: +91 9316566894_`;
 
                   {/* Orders Table */}
                   <div className="card" style={{ padding: '20px' }}>
-                    <div style={{ overflowX: 'auto' }}>
-                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left' }}>
+                    <div className="admin-table-container">
+                      <table style={{ width: '100%', minWidth: '780px', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left' }}>
                         <thead>
                           <tr style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid var(--border-light)' }}>
                             <th style={{ padding: '12px 14px', verticalAlign: 'middle' }}>Order ID & Date</th>
@@ -3038,7 +3094,7 @@ _Helpline: +91 9316566894_`;
                   </div>
 
                   {/* Summary Metric Cards for Ledgers */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+                  <div className="admin-stat-tiles-grid">
                     <div className="card" style={{ padding: '18px', borderLeft: '4px solid var(--primary-blue)' }}>
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase' }}>Total Billed (All Time)</span>
                       <div style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--primary-blue)', marginTop: '4px' }}>
@@ -3100,8 +3156,8 @@ _Helpline: +91 9316566894_`;
 
                   {/* Ledgers Table */}
                   <div className="card" style={{ padding: '20px' }}>
-                    <div style={{ overflowX: 'auto' }}>
-                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left' }}>
+                    <div className="admin-table-container">
+                      <table style={{ width: '100%', minWidth: '820px', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left' }}>
                         <thead>
                           <tr style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid var(--border-light)' }}>
                             <th style={{ padding: '12px 14px', verticalAlign: 'middle' }}>Retailer Shop & Mobile</th>
@@ -3432,7 +3488,7 @@ _Helpline: +91 9316566894_`;
                   </div>
 
                   {/* Stat Cards Metrics Row */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+                  <div className="admin-stat-5-grid">
                     <div className="card" style={{ padding: '18px 20px', display: 'flex', alignItems: 'center', gap: '15px', borderLeft: '4px solid var(--primary-blue)' }}>
                       <div style={{ width: '44px', height: '44px', borderRadius: '10px', backgroundColor: 'rgba(26, 86, 160, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary-blue)' }}>
                         <Package size={22} />
@@ -3690,8 +3746,8 @@ _Helpline: +91 9316566894_`;
                        TABLE VIEW
                        ========================================== */
                     <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
-                      <div style={{ overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left' }}>
+                      <div className="admin-table-container">
+                        <table style={{ width: '100%', minWidth: '920px', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left' }}>
                           <thead>
                             <tr style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid var(--border-light)' }}>
                               <th style={{ padding: '14px 16px', width: '70px' }}>Photo</th>
@@ -4092,7 +4148,7 @@ _Helpline: +91 9316566894_`;
                   </div>
 
                   {/* Summary Metric Tiles */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+                  <div className="admin-stat-tiles-grid">
                     <div className="card" style={{ padding: '18px 20px', borderLeft: '4px solid var(--primary-blue)' }}>
                       <div style={{ fontSize: '0.8rem', color: 'var(--text-medium)', textTransform: 'uppercase', fontWeight: '600' }}>Total Companies</div>
                       <div style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--text-dark)' }}>{companies.length}</div>
@@ -4142,8 +4198,8 @@ _Helpline: +91 9316566894_`;
 
                   {/* Companies Table */}
                   <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                    <div style={{ overflowX: 'auto' }}>
-                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left' }}>
+                    <div className="admin-table-container">
+                      <table style={{ width: '100%', minWidth: '700px', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left' }}>
                         <thead>
                           <tr style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid var(--border-light)' }}>
                             <th style={{ padding: '14px 16px', width: '60px' }}>Logo</th>
@@ -4318,7 +4374,7 @@ _Helpline: +91 9316566894_`;
                           </div>
 
                           {/* Row 2: Details */}
-                          <div style={{ display: 'grid', gridTemplateColumns: '250px 1fr', gap: '20px' }}>
+                          <div className="admin-form-grid-2-1" style={{ gap: '18px' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.85rem' }}>
                               <div>📞 Phone: <a href={`tel:${enq.phone}`} style={{ fontWeight: '600', color: 'var(--primary-blue)' }}>{enq.phone}</a></div>
                               {enq.email && <div>✉️ Email: <a href={`mailto:${enq.email}`} style={{ color: 'var(--text-dark)' }}>{enq.email}</a></div>}
@@ -4390,7 +4446,7 @@ _Helpline: +91 9316566894_`;
                             </button>
                           </div>
 
-                          <div style={{ display: 'grid', gridTemplateColumns: '250px 1fr', gap: '20px' }}>
+                          <div className="admin-form-grid-2-1" style={{ gap: '18px' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.85rem' }}>
                               <div>📞 Phone: <a href={`tel:${app.phone}`} style={{ fontWeight: '600' }}>{app.phone}</a></div>
                               <div>✉️ Email: <a href={`mailto:${app.email}`} style={{ color: 'var(--primary-blue)' }}>{app.email}</a></div>
@@ -4434,7 +4490,7 @@ _Helpline: +91 9316566894_`;
           backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', zIndex: 1000,
           display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px'
         }}>
-          <div className="card" style={{ width: '100%', maxWidth: '750px', maxHeight: '90vh', overflowY: 'auto', padding: '30px' }}>
+          <div className="card admin-modal-card" style={{ maxWidth: '780px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light)', paddingBottom: '15px', marginBottom: '20px' }}>
               <div>
                 <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--primary-blue)', textTransform: 'uppercase' }}>B2B Wholesale Order Details</span>
@@ -4446,7 +4502,7 @@ _Helpline: +91 9316566894_`;
             </div>
 
             {/* Store & Customer Info */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', backgroundColor: '#f8fafc', padding: '16px', borderRadius: '8px', marginBottom: '20px' }}>
+            <div className="admin-form-grid-2" style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '8px', marginBottom: '20px' }}>
               <div>
                 <strong style={{ fontSize: '1rem', display: 'block', color: 'var(--primary-blue)' }}>{selectedOrder.shopName}</strong>
                 <div style={{ fontSize: '0.85rem', color: 'var(--text-medium)', marginTop: '4px' }}>📞 Mobile: {selectedOrder.retailerMobile}</div>
@@ -4561,7 +4617,7 @@ _Helpline: +91 9316566894_`;
           backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', zIndex: 1000,
           display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px'
         }}>
-          <div className="card" style={{ width: '100%', maxWidth: '850px', maxHeight: '90vh', overflowY: 'auto', padding: '30px' }}>
+          <div className="card admin-modal-card" style={{ maxWidth: '850px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light)', paddingBottom: '15px', marginBottom: '20px' }}>
               <div>
                 <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--primary-blue)', textTransform: 'uppercase' }}>Retailer Statement of Account</span>
@@ -4573,7 +4629,7 @@ _Helpline: +91 9316566894_`;
             </div>
 
             {/* Account Summary Strip */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '15px', backgroundColor: '#f8fafc', padding: '16px', borderRadius: '8px', marginBottom: '20px', textAlign: 'center' }}>
+            <div className="admin-form-grid-4" style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '8px', marginBottom: '20px', textAlign: 'center' }}>
               <div>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', display: 'block' }}>Total Billed</span>
                 <strong style={{ fontSize: '1.1rem', color: 'var(--primary-blue)' }}>{formatCurrency(selectedLedger.totalBilled)}</strong>
@@ -4742,7 +4798,7 @@ _Helpline: +91 9316566894_`;
           backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', zIndex: 1000,
           display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px'
         }}>
-          <div className="card" style={{ width: '100%', maxWidth: '500px', padding: '30px' }}>
+          <div className="card admin-modal-card" style={{ maxWidth: '520px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light)', paddingBottom: '15px', marginBottom: '20px' }}>
               <div>
                 <h3 style={{ fontSize: '1.2rem', color: 'var(--text-dark)', margin: 0 }}>Record Offline / Manual Payment</h3>
@@ -4848,7 +4904,7 @@ _Helpline: +91 9316566894_`;
           backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', zIndex: 1000,
           display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px'
         }}>
-          <div className="card" style={{ width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', padding: '30px' }}>
+          <div className="card admin-modal-card" style={{ maxWidth: '640px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light)', paddingBottom: '15px', marginBottom: '20px' }}>
               <h2 style={{ fontSize: '1.3rem', color: 'var(--text-dark)', margin: 0 }}>
                 {editingNews ? 'Edit Scheme / Announcement' : 'Create New Scheme / Announcement'}
@@ -4979,7 +5035,7 @@ _Helpline: +91 9316566894_`;
           backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', zIndex: 1000,
           display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px'
         }}>
-          <div className="card" style={{ width: '100%', maxWidth: '800px', maxHeight: '92vh', overflowY: 'auto', padding: '30px' }}>
+          <div className="card admin-modal-card" style={{ maxWidth: '820px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light)', paddingBottom: '15px', marginBottom: '20px' }}>
               <div>
                 <h2 style={{ fontSize: '1.4rem', color: 'var(--text-dark)', margin: 0 }}>
@@ -5156,7 +5212,7 @@ _Helpline: +91 9316566894_`;
               </div>
 
               {/* SECTION 2: PRODUCT IDENTITY & COMPANY */}
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '15px' }}>
+              <div className="admin-form-grid-2-1">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <label htmlFor="modal-name" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Product Name *</label>
                   <input 
@@ -5261,7 +5317,7 @@ _Helpline: +91 9316566894_`;
               </div>
 
               {/* SECTION 3: PRICING & INVENTORY */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px' }}>
+              <div className="admin-form-grid-3">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <label htmlFor="modal-price" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Wholesale Price / PTR (₹) *</label>
                   <input 
@@ -5419,7 +5475,7 @@ _Helpline: +91 9316566894_`;
           backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', zIndex: 1100,
           display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px'
         }}>
-          <div className="card" style={{ width: '100%', maxWidth: '460px', padding: '25px', textAlign: 'center' }}>
+          <div className="card admin-modal-card" style={{ maxWidth: '460px', textAlign: 'center' }}>
             <div style={{ width: '50px', height: '50px', borderRadius: '50%', backgroundColor: '#fee2e2', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 15px' }}>
               <AlertTriangle size={26} />
             </div>
@@ -5449,7 +5505,7 @@ _Helpline: +91 9316566894_`;
           backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', zIndex: 1000,
           display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px'
         }}>
-          <div className="card" style={{ width: '100%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto', padding: '30px' }}>
+          <div className="card admin-modal-card" style={{ maxWidth: '720px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light)', paddingBottom: '15px', marginBottom: '15px' }}>
               <div>
                 <h3 style={{ fontSize: '1.25rem', color: 'var(--text-dark)', margin: 0 }}>Bulk Import Products (CSV)</h3>
@@ -5531,7 +5587,7 @@ _Helpline: +91 9316566894_`;
           backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', zIndex: 1000,
           display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px'
         }}>
-          <div className="card" style={{ width: '100%', maxWidth: '650px', maxHeight: '90vh', overflowY: 'auto', padding: '30px' }}>
+          <div className="card admin-modal-card" style={{ maxWidth: '660px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light)', paddingBottom: '15px', marginBottom: '20px' }}>
               <div>
                 <h2 style={{ fontSize: '1.3rem', color: 'var(--text-dark)', margin: 0 }}>

@@ -17,6 +17,63 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
   const location = useLocation();
   const dropdownRef = useRef(null);
   const moreDropdownRef = useRef(null);
+  const searchInputRef = useRef(null);
+  const searchContainerRef = useRef(null);
+  const [suggestions, setSuggestions] = useState([]);
+  const [matchedCompanies, setMatchedCompanies] = useState([]);
+  const [isTypeaheadOpen, setIsTypeaheadOpen] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+
+  // Global Keyboard Shortcut: Ctrl+K or Cmd+K focuses search
+  useEffect(() => {
+    const handleGlobalKbd = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+        if (searchTerm && searchTerm.trim().length >= 2) {
+          setIsTypeaheadOpen(true);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKbd);
+    return () => window.removeEventListener('keydown', handleGlobalKbd);
+  }, [searchTerm]);
+
+  // Debounced Typeahead Autocomplete Search
+  useEffect(() => {
+    if (!searchTerm || searchTerm.trim().length < 2) {
+      setSuggestions([]);
+      setMatchedCompanies([]);
+      setIsTypeaheadOpen(false);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const res = await fetch(`/api/products?search=${encodeURIComponent(searchTerm.trim())}&limit=6`);
+        if (res.ok) {
+          const data = await res.json();
+          const prods = data.products || [];
+          setSuggestions(prods);
+
+          // Extract unique matching companies
+          const term = searchTerm.toLowerCase().trim();
+          const comps = [...new Set(prods.map(p => p.company || p.brand).filter(Boolean))]
+            .filter(c => c.toLowerCase().includes(term))
+            .slice(0, 4);
+          setMatchedCompanies(comps);
+          setIsTypeaheadOpen(true);
+        }
+      } catch (err) {
+        console.warn('Typeahead fetch error:', err);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   // Fallback: If not passed from props, compute directly from location
   const isB2B = typeof isB2BPortal === 'boolean' 
@@ -55,6 +112,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
         setIsDropdownOpen(false);
         setIsMoreOpen(false);
         setIsUserMenuOpen(false);
+        setIsTypeaheadOpen(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -80,6 +138,9 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
       }
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
         setIsUserMenuOpen(false);
+      }
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+        setIsTypeaheadOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -132,55 +193,178 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             </div>
 
             {/* Center: Fast Wholesale Medicine Search */}
-            <form 
-              onSubmit={handleSearchSubmit} 
-              style={{ 
-                flex: '1 1 320px', 
-                maxWidth: '540px', 
-                display: 'flex', 
-                alignItems: 'center', 
-                backgroundColor: '#f8fafc', 
-                border: '1.5px solid #cbd5e1', 
-                borderRadius: '30px', 
-                padding: '4px 6px 4px 16px',
-                transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
-              }}
-              role="search"
-            >
-              <Search size={16} color="#64748b" style={{ marginRight: '8px', flexShrink: 0 }} />
-              <input
-                type="text"
-                placeholder="Search Wholesale Medicines, Compositions, Brands (Dolo, Cipla)..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{
-                  border: 'none',
-                  background: 'transparent',
-                  outline: 'none',
-                  width: '100%',
-                  fontSize: '0.85rem',
-                  color: 'var(--text-dark)',
-                  fontWeight: '500'
-                }}
-                aria-label="Fast search for wholesale medicines"
-              />
-              <button 
-                type="submit" 
+            <div ref={searchContainerRef} style={{ position: 'relative', flex: '1 1 320px', maxWidth: '540px' }}>
+              <form 
+                onSubmit={handleSearchSubmit} 
                 style={{ 
-                  backgroundColor: '#0c3d6c', 
-                  color: '#ffffff', 
-                  border: 'none', 
-                  borderRadius: '20px', 
-                  padding: '6px 14px', 
-                  fontSize: '0.78rem', 
-                  fontWeight: '700', 
-                  cursor: 'pointer',
-                  flexShrink: 0 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  backgroundColor: '#f8fafc', 
+                  border: '1.5px solid #cbd5e1', 
+                  borderRadius: '30px', 
+                  padding: '4px 6px 4px 16px',
+                  transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
                 }}
+                role="search"
               >
-                Search PTR
-              </button>
-            </form>
+                <Search size={16} color="#64748b" style={{ marginRight: '8px', flexShrink: 0 }} />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Search Wholesale Medicines, Compositions (Ctrl+K)..."
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    if (e.target.value.trim().length >= 2) setIsTypeaheadOpen(true);
+                  }}
+                  onFocus={() => {
+                    if (searchTerm && searchTerm.trim().length >= 2) setIsTypeaheadOpen(true);
+                  }}
+                  style={{
+                    border: 'none',
+                    background: 'transparent',
+                    outline: 'none',
+                    width: '100%',
+                    fontSize: '0.85rem',
+                    color: 'var(--text-dark)',
+                    fontWeight: '500'
+                  }}
+                  aria-label="Fast search for wholesale medicines"
+                />
+                <span className="kbd-shortcut hide-mobile" style={{ marginRight: '6px' }}>Ctrl K</span>
+                <button 
+                  type="submit" 
+                  style={{ 
+                    backgroundColor: '#0c3d6c', 
+                    color: '#ffffff', 
+                    border: 'none', 
+                    borderRadius: '20px', 
+                    padding: '6px 14px', 
+                    fontSize: '0.78rem', 
+                    fontWeight: '700', 
+                    cursor: 'pointer',
+                    flexShrink: 0 
+                  }}
+                >
+                  Search
+                </button>
+              </form>
+
+              {isTypeaheadOpen && searchTerm && searchTerm.trim().length >= 2 && (
+                <div 
+                  className="animate-slide-up"
+                  style={{
+                    position: 'absolute',
+                    top: 'calc(100% + 6px)',
+                    left: 0,
+                    right: 0,
+                    backgroundColor: 'var(--bg-card, #ffffff)',
+                    border: '1px solid var(--border-light, #e2e8f0)',
+                    borderRadius: '14px',
+                    boxShadow: '0 12px 30px -5px rgba(0, 0, 0, 0.15)',
+                    zIndex: 1100,
+                    overflow: 'hidden',
+                    maxHeight: '440px',
+                    overflowY: 'auto'
+                  }}
+                >
+                  {matchedCompanies.length > 0 && (
+                    <div style={{ padding: '8px 14px', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '0.72rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' }}>Companies:</span>
+                      {matchedCompanies.map(comp => (
+                        <button
+                          key={comp}
+                          type="button"
+                          onClick={() => {
+                            navigate(isB2B ? `/quick-order?search=${encodeURIComponent(comp)}` : `/products?search=${encodeURIComponent(comp)}`);
+                            setIsTypeaheadOpen(false);
+                          }}
+                          style={{
+                            padding: '2px 8px',
+                            borderRadius: '12px',
+                            backgroundColor: '#eff6ff',
+                            color: '#1d4ed8',
+                            border: '1px solid #bfdbfe',
+                            fontSize: '0.74rem',
+                            fontWeight: '700',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {comp} ➔
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {isSearching ? (
+                    <div style={{ padding: '20px', textAlign: 'center', color: '#64748b', fontSize: '0.84rem' }}>
+                      Searching wholesale catalog...
+                    </div>
+                  ) : suggestions.length === 0 ? (
+                    <div style={{ padding: '20px', textAlign: 'center', color: '#64748b', fontSize: '0.84rem' }}>
+                      No exact medicines matched "{searchTerm}". Press Enter to view all results.
+                    </div>
+                  ) : (
+                    <div>
+                      <div style={{ padding: '8px 14px 4px 14px', fontSize: '0.72rem', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        Matched Medicines ({suggestions.length})
+                      </div>
+                      {suggestions.map(prod => (
+                        <div
+                          key={prod._id}
+                          onClick={() => {
+                            navigate(isB2B ? `/quick-order?search=${encodeURIComponent(prod.name)}` : `/products/${prod._id}`);
+                            setIsTypeaheadOpen(false);
+                          }}
+                          style={{
+                            padding: '10px 14px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '12px',
+                            cursor: 'pointer',
+                            borderBottom: '1px solid #f1f5f9',
+                            transition: 'background-color 0.15s ease'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                        >
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{ fontSize: '0.88rem', fontWeight: '800', color: 'var(--text-dark, #0f172a)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {prod.name}
+                              </span>
+                              {prod.scheme && (
+                                <span style={{ fontSize: '0.68rem', fontWeight: '800', padding: '1px 6px', borderRadius: '4px', backgroundColor: '#fff7ed', color: '#ea580c' }}>
+                                  🎁 {prod.scheme}
+                                </span>
+                              )}
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {prod.composition || prod.company || prod.form || 'Pharma formulation'} • {prod.packing || 'Strip/Box'}
+                            </div>
+                          </div>
+
+                          <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                            <div style={{ fontSize: '0.86rem', fontWeight: '800', color: 'var(--primary-blue, #0c3d6c)' }}>
+                              ₹{Number(prod.ptr || prod.price || 0).toFixed(2)}
+                            </div>
+                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', textDecoration: 'line-through' }}>
+                              MRP ₹{Number(prod.mrp || (prod.ptr ? prod.ptr * 1.3 : prod.price * 1.3) || 0).toFixed(2)}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div style={{ padding: '8px 14px', backgroundColor: '#f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.74rem', color: '#64748b' }}>
+                    <span>Press <strong>Enter</strong> to view all results</span>
+                    <span className="kbd-shortcut">ESC to close</span>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Right: Operational Controls & Store Profile */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -625,19 +809,143 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             />
           </Link>
 
-          {/* Search Form */}
-          <form className="search-bar" onSubmit={handleSearchSubmit} role="search">
-            <input
-              type="text"
-              placeholder="Search 9,500+ medicines, companies, compositions (e.g. Dolo, Cipla, Paracetamol)..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              aria-label="Search pharmaceutical products"
-            />
-            <button type="submit" className="search-button" aria-label="Submit search">
-              <Search size={18} aria-hidden="true" />
-            </button>
-          </form>
+          {/* Search Form with Typeahead */}
+          <div style={{ position: 'relative', flex: '1 1 300px', maxWidth: '580px' }}>
+            <form className="search-bar" onSubmit={handleSearchSubmit} role="search" style={{ position: 'relative' }}>
+              <input
+                type="text"
+                placeholder="Search 9,500+ medicines, companies, compositions (Ctrl+K)..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  if (e.target.value.trim().length >= 2) setIsTypeaheadOpen(true);
+                }}
+                onFocus={() => {
+                  if (searchTerm && searchTerm.trim().length >= 2) setIsTypeaheadOpen(true);
+                }}
+                aria-label="Search pharmaceutical products"
+              />
+              <span className="kbd-shortcut hide-mobile" style={{ position: 'absolute', right: '48px', top: '50%', transform: 'translateY(-50%)' }}>Ctrl K</span>
+              <button type="submit" className="search-button" aria-label="Submit search">
+                <Search size={18} aria-hidden="true" />
+              </button>
+            </form>
+
+              {isTypeaheadOpen && searchTerm && searchTerm.trim().length >= 2 && (
+                <div 
+                  className="animate-slide-up"
+                  style={{
+                    position: 'absolute',
+                    top: 'calc(100% + 6px)',
+                    left: 0,
+                    right: 0,
+                    backgroundColor: 'var(--bg-card, #ffffff)',
+                    border: '1px solid var(--border-light, #e2e8f0)',
+                    borderRadius: '14px',
+                    boxShadow: '0 12px 30px -5px rgba(0, 0, 0, 0.15)',
+                    zIndex: 1100,
+                    overflow: 'hidden',
+                    maxHeight: '440px',
+                    overflowY: 'auto'
+                  }}
+                >
+                  {matchedCompanies.length > 0 && (
+                    <div style={{ padding: '8px 14px', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '0.72rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' }}>Companies:</span>
+                      {matchedCompanies.map(comp => (
+                        <button
+                          key={comp}
+                          type="button"
+                          onClick={() => {
+                            navigate(isB2B ? `/quick-order?search=${encodeURIComponent(comp)}` : `/products?search=${encodeURIComponent(comp)}`);
+                            setIsTypeaheadOpen(false);
+                          }}
+                          style={{
+                            padding: '2px 8px',
+                            borderRadius: '12px',
+                            backgroundColor: '#eff6ff',
+                            color: '#1d4ed8',
+                            border: '1px solid #bfdbfe',
+                            fontSize: '0.74rem',
+                            fontWeight: '700',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {comp} ➔
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {isSearching ? (
+                    <div style={{ padding: '20px', textAlign: 'center', color: '#64748b', fontSize: '0.84rem' }}>
+                      Searching wholesale catalog...
+                    </div>
+                  ) : suggestions.length === 0 ? (
+                    <div style={{ padding: '20px', textAlign: 'center', color: '#64748b', fontSize: '0.84rem' }}>
+                      No exact medicines matched "{searchTerm}". Press Enter to view all results.
+                    </div>
+                  ) : (
+                    <div>
+                      <div style={{ padding: '8px 14px 4px 14px', fontSize: '0.72rem', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        Matched Medicines ({suggestions.length})
+                      </div>
+                      {suggestions.map(prod => (
+                        <div
+                          key={prod._id}
+                          onClick={() => {
+                            navigate(isB2B ? `/quick-order?search=${encodeURIComponent(prod.name)}` : `/products/${prod._id}`);
+                            setIsTypeaheadOpen(false);
+                          }}
+                          style={{
+                            padding: '10px 14px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '12px',
+                            cursor: 'pointer',
+                            borderBottom: '1px solid #f1f5f9',
+                            transition: 'background-color 0.15s ease'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                        >
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{ fontSize: '0.88rem', fontWeight: '800', color: 'var(--text-dark, #0f172a)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {prod.name}
+                              </span>
+                              {prod.scheme && (
+                                <span style={{ fontSize: '0.68rem', fontWeight: '800', padding: '1px 6px', borderRadius: '4px', backgroundColor: '#fff7ed', color: '#ea580c' }}>
+                                  🎁 {prod.scheme}
+                                </span>
+                              )}
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {prod.composition || prod.company || prod.form || 'Pharma formulation'} • {prod.packing || 'Strip/Box'}
+                            </div>
+                          </div>
+
+                          <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                            <div style={{ fontSize: '0.86rem', fontWeight: '800', color: 'var(--primary-blue, #0c3d6c)' }}>
+                              ₹{Number(prod.ptr || prod.price || 0).toFixed(2)}
+                            </div>
+                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', textDecoration: 'line-through' }}>
+                              MRP ₹{Number(prod.mrp || (prod.ptr ? prod.ptr * 1.3 : prod.price * 1.3) || 0).toFixed(2)}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div style={{ padding: '8px 14px', backgroundColor: '#f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.74rem', color: '#64748b' }}>
+                    <span>Press <strong>Enter</strong> to view all results</span>
+                    <span className="kbd-shortcut">ESC to close</span>
+                  </div>
+                </div>
+              )}
+          </div>
 
           {/* Header Action Buttons */}
           <div className="header-actions">

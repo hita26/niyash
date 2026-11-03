@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingBag, Eye, CheckCircle2, AlertTriangle, Lock, Check } from 'lucide-react';
+import { ShoppingBag, Eye, CheckCircle2, AlertTriangle, Lock, Check, Plus, Minus, Sparkles, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 function ProductCard({ product, addToCart }) {
   const { isLoggedIn, openAuth } = useAuth();
+  const [quantity, setQuantity] = useState(0);
   const [isAdded, setIsAdded] = useState(false);
 
   const handleWhatsAppOrder = (e) => {
@@ -23,11 +24,34 @@ function ProductCard({ product, addToCart }) {
     e.preventDefault();
     e.stopPropagation();
     if (!product.inStock) return;
+    const nextQty = 1;
+    setQuantity(nextQty);
     addToCart(product, 1);
     setIsAdded(true);
     setTimeout(() => {
       setIsAdded(false);
-    }, 1500);
+    }, 1200);
+  };
+
+  const handleIncrement = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const nextQty = quantity + 1;
+    setQuantity(nextQty);
+    addToCart(product, 1);
+  };
+
+  const handleDecrement = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (quantity <= 1) {
+      setQuantity(0);
+      addToCart(product, -1);
+    } else {
+      const nextQty = quantity - 1;
+      setQuantity(nextQty);
+      addToCart(product, -1);
+    }
   };
 
   const displayMrp = Number(product.mrp && product.mrp > 0 ? product.mrp : product.price || 0);
@@ -38,7 +62,19 @@ function ProductCard({ product, addToCart }) {
   const hasValidImage = Boolean(product.imageUrl && product.imageUrl.trim() !== '' && product.imageUrl !== '/pharma-products.jpg');
 
   return (
-    <div className="card" style={{ padding: '15px', display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div 
+      className="card card-hover-lift" 
+      style={{ 
+        padding: '16px', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        height: '100%',
+        borderRadius: '14px',
+        border: '1px solid var(--border-light)',
+        position: 'relative',
+        transition: 'all 0.25s ease'
+      }}
+    >
       {/* Product Image Container */}
       <Link 
         to={`/products/${product._id}`} 
@@ -48,8 +84,8 @@ function ProductCard({ product, addToCart }) {
           justifyContent: 'center',
           position: 'relative', 
           overflow: 'hidden', 
-          borderRadius: '8px', 
-          marginBottom: '15px', 
+          borderRadius: '10px', 
+          marginBottom: '14px', 
           backgroundColor: 'var(--bg-main)',
           height: '180px',
           border: '1px solid var(--border-light)'
@@ -60,7 +96,6 @@ function ProductCard({ product, addToCart }) {
             src={product.imageUrl} 
             alt={product.name}
             onError={(e) => {
-              // Hide image completely on load error to leave section empty per instructions
               e.target.style.display = 'none';
             }}
             style={{ width: '100%', height: '100%', objectFit: 'contain', transition: 'var(--transition-smooth)' }}
@@ -68,22 +103,35 @@ function ProductCard({ product, addToCart }) {
             onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
           />
         ) : (
-          /* Missing photograph left completely empty per strict instructions */
           <div 
             style={{ width: '100%', height: '100%' }} 
             aria-label="No photograph available"
           />
         )}
+
+        {/* Brand Tag */}
         <span 
           style={{
             position: 'absolute', top: '10px', left: '10px', backgroundColor: 'rgba(12, 61, 108, 0.1)',
-            color: 'var(--primary-blue)', fontSize: '0.75rem', fontWeight: '700', padding: '4px 10px',
-            borderRadius: '20px', border: '1px solid rgba(12, 61, 108, 0.2)'
+            color: 'var(--primary-blue)', fontSize: '0.74rem', fontWeight: '800', padding: '3px 9px',
+            borderRadius: '20px', border: '1px solid rgba(12, 61, 108, 0.2)', backdropFilter: 'blur(4px)'
           }}
         >
           {product.brand}
         </span>
-        {product.featured && (
+
+        {/* Featured / Scheme Badge */}
+        {product.scheme ? (
+          <span 
+            style={{
+              position: 'absolute', top: '10px', right: '10px', backgroundColor: '#fff7ed',
+              color: '#ea580c', fontSize: '0.7rem', fontWeight: '800', padding: '3px 8px',
+              borderRadius: '12px', border: '1px solid #fed7aa', display: 'flex', alignItems: 'center', gap: '3px'
+            }}
+          >
+            <Sparkles size={11} /> {product.scheme}
+          </span>
+        ) : product.featured ? (
           <span 
             style={{
               position: 'absolute', top: '10px', right: '10px', backgroundColor: '#fef3c7',
@@ -93,20 +141,26 @@ function ProductCard({ product, addToCart }) {
           >
             ★ Featured
           </span>
-        )}
+        ) : null}
       </Link>
 
       {/* Product Details */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
-        <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-          {product.category || 'Pharmaceutical'}
-        </span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: '0.72rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            {product.category || 'Pharmaceutical'}
+          </span>
+          <span style={{ fontSize: '0.68rem', color: '#059669', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '3px' }}>
+            <ShieldCheck size={12} /> WHO-GMP
+          </span>
+        </div>
+
         <Link to={`/products/${product._id}`}>
           <h3 
             style={{
-              fontSize: '0.98rem', fontWeight: '700', color: 'var(--text-dark)', minHeight: '2.6rem',
+              fontSize: '0.98rem', fontWeight: '800', color: 'var(--text-dark)', minHeight: '2.6rem',
               overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-              lineHeight: '1.3', marginBottom: '4px'
+              lineHeight: '1.3', margin: '2px 0 4px 0'
             }}
           >
             {product.name}
@@ -118,13 +172,13 @@ function ProductCard({ product, addToCart }) {
         </p>
 
         {product.composition && (
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={product.composition}>
-            Composition: <span style={{ fontStyle: 'italic', color: 'var(--text-medium)' }}>{product.composition}</span>
+          <p style={{ fontSize: '0.78rem', color: 'var(--text-light)', marginBottom: '6px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={product.composition}>
+            Molecule: <span style={{ fontStyle: 'italic', color: 'var(--text-medium)' }}>{product.composition}</span>
           </p>
         )}
 
-        {/* Pricing Block: MRP visible to everyone, PTR visible ONLY when logged in */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 'auto', paddingTop: '10px' }}>
+        {/* Pricing Block */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 'auto', paddingTop: '10px', borderTop: '1px solid var(--border-light)' }}>
           <div>
             {isLoggedIn ? (
               <>
@@ -139,24 +193,24 @@ function ProductCard({ product, addToCart }) {
                   </div>
                 )}
                 <div>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--primary-blue)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'block' }}>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--primary-blue)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'block' }}>
                     PTR (Wholesale):
                   </span>
-                  <span style={{ fontSize: '1.28rem', fontWeight: '800', color: 'var(--primary-blue)' }} className="tabular-nums">
+                  <span style={{ fontSize: '1.3rem', fontWeight: '900', color: 'var(--primary-blue)' }} className="tabular-nums">
                     ₹{displayPrice.toFixed(2)}
-                    <span style={{ fontSize: '0.75rem', fontWeight: '500', color: 'var(--text-medium)' }}> /unit</span>
+                    <span style={{ fontSize: '0.74rem', fontWeight: '500', color: 'var(--text-medium)' }}> /unit</span>
                   </span>
                 </div>
               </>
             ) : (
               <div>
                 <div style={{ marginBottom: '3px' }}>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'block' }}>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'block' }}>
                     MRP (Retail Price):
                   </span>
-                  <span style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--text-dark)' }} className="tabular-nums">
+                  <span style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--text-dark)' }} className="tabular-nums">
                     ₹{displayMrp.toFixed(2)}
-                    <span style={{ fontSize: '0.75rem', fontWeight: '500', color: 'var(--text-medium)' }}> /unit</span>
+                    <span style={{ fontSize: '0.74rem', fontWeight: '500', color: 'var(--text-medium)' }}> /unit</span>
                   </span>
                 </div>
                 <button
@@ -205,23 +259,66 @@ function ProductCard({ product, addToCart }) {
         </div>
       </div>
 
-      {/* Actions */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px' }}>
-        <button 
-          onClick={onAddCartClick}
-          disabled={!product.inStock}
-          className={`btn ${isAdded ? 'btn-secondary' : 'btn-primary'} btn-sm`}
-          style={{ padding: '8px 10px', borderRadius: '6px', fontSize: '0.8rem', opacity: product.inStock ? 1 : 0.6 }}
-          title={product.inStock ? 'Add to Cart' : 'Product Out of Stock'}
-        >
-          {isAdded ? <Check size={14} /> : <ShoppingBag size={14} />}
-          {isAdded ? ' Added' : ' Add to Cart'}
-        </button>
+      {/* Actions: Inline Stepper when qty > 0 */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '12px' }}>
+        {quantity > 0 ? (
+          <div 
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'space-between', 
+              backgroundColor: '#ecfdf5', 
+              border: '1.5px solid #10b981', 
+              borderRadius: '8px', 
+              padding: '3px 6px',
+              animation: 'fadeIn 0.2s ease'
+            }}
+          >
+            <button 
+              onClick={handleDecrement}
+              style={{ 
+                width: '28px', height: '28px', borderRadius: '6px', 
+                backgroundColor: '#ffffff', color: '#047857', border: '1px solid #a7f3d0', 
+                display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' 
+              }}
+              title="Decrease quantity"
+              aria-label="Decrease quantity"
+            >
+              <Minus size={13} />
+            </button>
+            <span style={{ fontWeight: '800', fontSize: '0.84rem', color: '#064e3b' }}>
+              {quantity} Box{quantity > 1 ? 'es' : ''}
+            </span>
+            <button 
+              onClick={handleIncrement}
+              style={{ 
+                width: '28px', height: '28px', borderRadius: '6px', 
+                backgroundColor: '#059669', color: '#ffffff', border: 'none', 
+                display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' 
+              }}
+              title="Add another box"
+              aria-label="Add another box"
+            >
+              <Plus size={13} />
+            </button>
+          </div>
+        ) : (
+          <button 
+            onClick={onAddCartClick}
+            disabled={!product.inStock}
+            className={`btn ${isAdded ? 'btn-secondary' : 'btn-primary'} btn-sm`}
+            style={{ padding: '8px 10px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: '700', opacity: product.inStock ? 1 : 0.6 }}
+            title={product.inStock ? 'Add to Cart' : 'Product Out of Stock'}
+          >
+            {isAdded ? <Check size={14} /> : <ShoppingBag size={14} />}
+            {isAdded ? ' Added' : ' Add to Cart'}
+          </button>
+        )}
 
         <button 
           onClick={handleWhatsAppOrder}
           className="btn btn-secondary btn-sm"
-          style={{ padding: '8px 10px', borderRadius: '6px', fontSize: '0.8rem' }}
+          style={{ padding: '8px 10px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: '700' }}
         >
           WhatsApp
         </button>

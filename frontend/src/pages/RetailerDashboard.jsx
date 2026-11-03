@@ -33,6 +33,7 @@ import {
   BadgeCheck
 } from 'lucide-react';
 import PaymentGatewayModal from '../components/PaymentGatewayModal';
+import SkeletonLoader from '../components/SkeletonLoader';
 
 export default function RetailerDashboard() {
   const { user, token, logout, openAuth, isLoggedIn } = useAuth();
@@ -851,7 +852,9 @@ export default function RetailerDashboard() {
             </div>
 
             {/* Orders List / Table */}
-            {filteredOrders.length === 0 ? (
+            {loadingOrders ? (
+              <SkeletonLoader variant="table" rows={4} />
+            ) : filteredOrders.length === 0 ? (
               <div style={{ 
                 textAlign: 'center', 
                 padding: '60px 24px', 
@@ -1099,7 +1102,9 @@ export default function RetailerDashboard() {
             </div>
 
             {/* Invoices List */}
-            {!ledger?.invoices || ledger.invoices.length === 0 ? (
+            {loadingLedger ? (
+              <SkeletonLoader variant="table" rows={4} />
+            ) : !ledger?.invoices || ledger.invoices.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '50px 20px', backgroundColor: '#ffffff', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
                 <FileText size={44} color="#94a3b8" style={{ marginBottom: '10px' }} />
                 <h4 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-dark)', margin: 0 }}>No Outstanding Invoices</h4>

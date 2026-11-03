@@ -35,21 +35,45 @@ function ProductCard({ product, addToCart }) {
   const hasMargin = product.mrp && product.mrp > product.price;
   const marginPercent = hasMargin ? Math.round(((product.mrp - product.price) / product.mrp) * 100) : 0;
 
+  const hasValidImage = Boolean(product.imageUrl && product.imageUrl.trim() !== '' && product.imageUrl !== '/pharma-products.jpg');
+
   return (
     <div className="card" style={{ padding: '15px', display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Product Image */}
-      <Link to={`/products/${product._id}`} style={{ display: 'block', position: 'relative', overflow: 'hidden', borderRadius: '8px', marginBottom: '15px', backgroundColor: '#f8fafc' }}>
-        <img 
-          src={product.imageUrl || '/pharma-products.jpg'} 
-          alt={product.name}
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = '/pharma-products.jpg';
-          }}
-          style={{ width: '100%', height: '180px', objectFit: 'contain', transition: 'var(--transition-smooth)' }}
-          onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-          onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-        />
+      {/* Product Image Container */}
+      <Link 
+        to={`/products/${product._id}`} 
+        style={{ 
+          display: 'flex', 
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative', 
+          overflow: 'hidden', 
+          borderRadius: '8px', 
+          marginBottom: '15px', 
+          backgroundColor: 'var(--bg-main)',
+          height: '180px',
+          border: '1px solid var(--border-light)'
+        }}
+      >
+        {hasValidImage ? (
+          <img 
+            src={product.imageUrl} 
+            alt={product.name}
+            onError={(e) => {
+              // Hide image completely on load error to leave section empty per instructions
+              e.target.style.display = 'none';
+            }}
+            style={{ width: '100%', height: '100%', objectFit: 'contain', transition: 'var(--transition-smooth)' }}
+            onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+            onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          />
+        ) : (
+          /* Missing photograph left completely empty per strict instructions */
+          <div 
+            style={{ width: '100%', height: '100%' }} 
+            aria-label="No photograph available"
+          />
+        )}
         <span 
           style={{
             position: 'absolute', top: '10px', left: '10px', backgroundColor: 'rgba(12, 61, 108, 0.1)',

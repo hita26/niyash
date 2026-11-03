@@ -52,7 +52,7 @@ const FALLBACK_PRODUCTS = [
     composition: 'Acetylcysteine Effervescent 600mg',
     form: 'Tablet',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Mucolytic effervescent formulation indicated for respiratory conditions.'
   },
   {
@@ -74,7 +74,7 @@ const FALLBACK_PRODUCTS = [
     composition: 'Amlodipine Besylate IP 2.5mg',
     form: 'Tablet',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'First-line calcium channel blocker for hypertension management.'
   },
   {
@@ -96,7 +96,7 @@ const FALLBACK_PRODUCTS = [
     composition: 'Benidipine Hydrochloride 4mg',
     form: 'Tablet',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Triple calcium channel blocker for renal protective therapy.'
   },
   {
@@ -118,7 +118,7 @@ const FALLBACK_PRODUCTS = [
     composition: 'Clobetasol Propionate 0.05% + Neomycin 0.5% + Miconazole 2.0%',
     form: 'Cream',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Triple-action anti-inflammatory and antifungal dermatological cream.'
   },
   {
@@ -140,7 +140,7 @@ const FALLBACK_PRODUCTS = [
     composition: 'Luliconazole IP 1.0% w/w',
     form: 'Cream',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Broad-spectrum imidazole antifungal cream for persistent dermatophytes.'
   },
   {
@@ -162,7 +162,7 @@ const FALLBACK_PRODUCTS = [
     composition: 'Moxifloxacin HCl 0.5% + Dexamethasone 0.1% w/v',
     form: 'Drops',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Sterile ophthalmic solution for bacterial conjunctivitis and ocular surgery.'
   },
   {
@@ -184,7 +184,7 @@ const FALLBACK_PRODUCTS = [
     composition: 'Calamine 8% + Diphenhydramine 1% + Camphor 0.1%',
     form: 'Lotion',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Soothing antiseptic anti-pruritic lotion for heat and contact allergies.'
   },
   {
@@ -206,7 +206,7 @@ const FALLBACK_PRODUCTS = [
     composition: 'Ketoconazole IP 2.0% w/w Soap Base',
     form: 'Soap',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Antifungal cleanser soap bar for skin hygiene and dandruff prevention.'
   },
   {
@@ -228,7 +228,7 @@ const FALLBACK_PRODUCTS = [
     composition: 'Diclofenac 1.16% + Methyl Salicylate 10% + Menthol 5%',
     form: 'Spray',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Micro-fine pain relief aerosol spray with rapid skin penetration.'
   },
   {
@@ -250,7 +250,7 @@ const FALLBACK_PRODUCTS = [
     composition: 'Classical Mahavishgarbha Taila, Dhatura, Kupilu & Til Taila',
     form: 'Oil',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Classical Ayurvedic medicated oil for joint stiffness and sciatica.'
   },
   {
@@ -272,7 +272,7 @@ const FALLBACK_PRODUCTS = [
     composition: 'Ashwagandha 500mg + Shatavari 250mg + Safed Musli 100mg',
     form: 'Ayurvedic',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Immunity revitalizer and adaptogenic herbal tonic.'
   },
   {
@@ -294,7 +294,7 @@ const FALLBACK_PRODUCTS = [
     composition: 'Prasugrel Hydrochloride 75mg',
     form: 'Capsule',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Potent thienopyridine antiplatelet agent for acute coronary syndrome.'
   },
   {
@@ -316,7 +316,7 @@ const FALLBACK_PRODUCTS = [
     composition: 'Diclofenac Sodium 75mg / ml',
     form: 'Injection',
     manufacturer: 'Troikaa Pharmaceuticals Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Fast-acting analgesic and anti-inflammatory injection.'
   },
   {
@@ -338,7 +338,7 @@ const FALLBACK_PRODUCTS = [
     composition: 'Pantoprazole Sodium IP 40mg',
     form: 'Injection',
     manufacturer: 'Lucid Pharma',
-    imageUrl: 'https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Proton pump inhibitor injection for acute gastric ulceration.'
   },
   {
@@ -360,7 +360,7 @@ const FALLBACK_PRODUCTS = [
     composition: 'Ceftriaxone Sodium IP 1g',
     form: 'Injection',
     manufacturer: 'Namcare Pharma',
-    imageUrl: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Broad-spectrum cephalosporin antibiotic injection.'
   },
   {
@@ -382,7 +382,7 @@ const FALLBACK_PRODUCTS = [
     composition: 'Ambroxol HCl 30mg + Levosalbutamol 1mg + Guaiphenesin 50mg / 5ml',
     form: 'Syrup',
     manufacturer: 'Leeford Healthcare Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Bronchodilator and mucolytic syrup for productive cough.'
   },
   {
@@ -404,7 +404,7 @@ const FALLBACK_PRODUCTS = [
     composition: 'Sodium Chloride IP 0.9% w/v',
     form: 'IV Fluid',
     manufacturer: 'Biochem Healthcare',
-    imageUrl: 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Sterile solution for fluid replenishment and drug infusion.'
   },
   {
@@ -426,7 +426,7 @@ const FALLBACK_PRODUCTS = [
     composition: 'Natural Rubber Latex Hypoallergenic',
     form: 'Surgical',
     manufacturer: 'Steris Pharma',
-    imageUrl: 'https://images.unsplash.com/photo-1581594693702-fbdc51b2763b?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Micro-textured sterile surgical gloves for clinical handling.'
   },
   {
@@ -448,7 +448,7 @@ const FALLBACK_PRODUCTS = [
     composition: 'Paracetamol IP 500mg',
     form: 'Tablet',
     manufacturer: 'Cipla Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Antipyretic and analgesic for fever and mild to moderate pain.'
   },
   {
@@ -470,7 +470,7 @@ const FALLBACK_PRODUCTS = [
     composition: 'Amoxicillin Trihydrate IP 250mg',
     form: 'Capsule',
     manufacturer: 'Sun Pharmaceutical Industries Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Antibiotic for bacterial infections of respiratory and urinary tract.'
   },
   {
@@ -492,7 +492,7 @@ const FALLBACK_PRODUCTS = [
     composition: 'Azithromycin Dihydrate IP 500mg',
     form: 'Tablet',
     manufacturer: 'Abbott India Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Broad-spectrum macrolide antibiotic for respiratory and throat infections.'
   },
   {
@@ -514,7 +514,7 @@ const FALLBACK_PRODUCTS = [
     composition: 'Paracetamol IP 650mg',
     form: 'Tablet',
     manufacturer: 'Healing Pharma',
-    imageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Fast-acting paracetamol formulation for high fever and body ache.'
   },
   {
@@ -536,7 +536,7 @@ const FALLBACK_PRODUCTS = [
     composition: 'Montelukast Sodium 10mg + Levocetirizine HCl 5mg',
     form: 'Tablet',
     manufacturer: 'Intas Pharmaceuticals Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Antihistamine and leukotriene receptor antagonist for allergic rhinitis.'
   },
   {
@@ -558,7 +558,7 @@ const FALLBACK_PRODUCTS = [
     composition: 'Rabeprazole Sodium 20mg + Domperidone 30mg SR',
     form: 'Capsule',
     manufacturer: 'Alkem Laboratories Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Proton pump inhibitor with prokinetic agent for GERD and acid reflux.'
   }
 ];

@@ -334,16 +334,17 @@ function CompanyDetail({ addToCart }) {
                 <div key={p._id} className="card" style={{ padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                   
                   {/* Photo Box */}
-                  <Link to={`/products/${p._id}`} style={{ position: 'relative', width: '100%', height: '170px', backgroundColor: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', textDecoration: 'none' }}>
+                  <Link to={`/products/${p._id}`} style={{ position: 'relative', width: '100%', height: '170px', backgroundColor: 'var(--bg-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', textDecoration: 'none' }}>
                     {photoUrl ? (
                       <img 
                         src={photoUrl} 
                         alt={p.name} 
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                         onError={(e) => { e.target.style.display = 'none'; }}
                       />
                     ) : (
-                      <ImageIcon size={36} color="#cbd5e1" />
+                      /* Leave completely empty when original manufacturer photograph is unavailable */
+                      <div style={{ width: '100%', height: '100%' }} aria-label="No photograph available" />
                     )}
 
                     {p.images && p.images.length > 1 && (
@@ -486,10 +487,8 @@ function CompanyDetail({ addToCart }) {
                         <td style={{ padding: '10px 16px', verticalAlign: 'middle' }}>
                           <div style={{ width: '44px', height: '44px', borderRadius: '6px', overflow: 'hidden', backgroundColor: '#f1f5f9', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             {photoUrl ? (
-                              <img src={photoUrl} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none'; }} />
-                            ) : (
-                              <ImageIcon size={18} color="#94a3b8" />
-                            )}
+                              <img src={photoUrl} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none'; }} />
+                            ) : null}
                           </div>
                         </td>
 

@@ -112,10 +112,12 @@ function ProductDetail({ addToCart }) {
     setQuantity(prev => Math.max(1, prev + amount));
   };
 
-  const gallery = (product.images && product.images.length > 0)
+  const rawGallery = (product.images && product.images.length > 0)
     ? product.images
-    : (product.imageUrl ? [product.imageUrl] : ['/pharma-products.jpg']);
-  const currentPhoto = gallery[activeImageIndex] || gallery[0] || '/pharma-products.jpg';
+    : (product.imageUrl ? [product.imageUrl] : []);
+  const gallery = rawGallery.filter(img => img && typeof img === 'string' && img.trim() !== '' && img !== '/pharma-products.jpg');
+  const hasPhotos = gallery.length > 0;
+  const currentPhoto = hasPhotos ? (gallery[activeImageIndex] || gallery[0]) : null;
 
   return (
     <div className="section animate-fade-in" style={{ backgroundColor: 'var(--bg-main)', paddingTop: '20px', paddingBottom: '70px' }}>
@@ -206,22 +208,36 @@ function ProductDetail({ addToCart }) {
                 </span>
               )}
 
-              <img 
-                src={currentPhoto} 
-                alt={`${product.name} photo`} 
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = '/pharma-products.jpg';
-                }}
-                style={{
-                  maxWidth: '100%',
-                  maxHeight: '320px',
-                  objectFit: 'contain',
-                  transition: 'transform 0.3s ease'
-                }}
-                onMouseOver={(e) => { e.currentTarget.style.transform = 'scale(1.04)'; }}
-                onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
-              />
+              {currentPhoto ? (
+                <img 
+                  src={currentPhoto} 
+                  alt={`${product.name} photo`} 
+                  onError={(e) => {
+                    // Hide image completely on failure to leave section empty per instructions
+                    e.target.style.display = 'none';
+                  }}
+                  style={{
+                    maxWidth: '100%',
+                    maxHeight: '320px',
+                    objectFit: 'contain',
+                    transition: 'transform 0.3s ease'
+                  }}
+                  onMouseOver={(e) => { e.currentTarget.style.transform = 'scale(1.04)'; }}
+                  onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+                />
+              ) : (
+                /* Completely empty image area when authentic photograph is unavailable */
+                <div 
+                  style={{ 
+                    minHeight: '280px', 
+                    width: '100%', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center' 
+                  }}
+                  aria-label="No photograph available"
+                />
+              )}
             </div>
 
             {/* Multiple Photo Thumbnails Row */}
@@ -248,9 +264,9 @@ function ProductDetail({ addToCart }) {
                       borderRadius: '10px',
                       flexShrink: 0,
                       padding: '4px',
-                      backgroundColor: '#ffffff',
+                      backgroundColor: 'var(--bg-card)',
                       cursor: 'pointer',
-                      border: activeImageIndex === idx ? '2.5px solid var(--primary-blue)' : '1px solid #cbd5e1',
+                      border: activeImageIndex === idx ? '2.5px solid var(--primary-blue)' : '1px solid var(--border-light)',
                       boxShadow: activeImageIndex === idx ? '0 0 0 3px rgba(12, 61, 108, 0.15)' : 'none',
                       opacity: activeImageIndex === idx ? 1 : 0.65,
                       transition: 'all 0.2s ease',
@@ -264,7 +280,7 @@ function ProductDetail({ addToCart }) {
                     <img 
                       src={imgUrl} 
                       alt={`Thumbnail ${idx + 1}`} 
-                      onError={(e) => { e.target.onerror = null; e.target.src = '/pharma-products.jpg'; }}
+                      onError={(e) => { e.target.style.display = 'none'; }}
                       style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                     />
                   </button>

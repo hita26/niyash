@@ -27,7 +27,7 @@ const sampleProducts = [
     composition: 'Acetylcysteine Effervescent 600mg',
     form: 'Tablet',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Mucolytic effervescent formulation indicated for respiratory conditions associated with excessive mucus secretion.',
   },
   {
@@ -48,7 +48,7 @@ const sampleProducts = [
     composition: 'Amlodipine Besylate IP 2.5mg',
     form: 'Tablet',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'First-line calcium channel blocker for hypertension management and coronary artery disease prophylaxis.',
   },
   {
@@ -69,7 +69,7 @@ const sampleProducts = [
     composition: 'Benidipine Hydrochloride 4mg',
     form: 'Tablet',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Triple L-, T-, and N-type calcium channel blocker for renal protective anti-hypertensive therapy.',
   },
   {
@@ -90,7 +90,7 @@ const sampleProducts = [
     composition: 'Cilnidipine 50mg',
     form: 'Tablet',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Dual L/N-type calcium channel blocker providing effective blood pressure reduction without reflex tachycardia.',
   },
   {
@@ -111,7 +111,7 @@ const sampleProducts = [
     composition: 'Acenocoumarol IP 1mg',
     form: 'Tablet',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Oral anticoagulant for the prevention and treatment of thromboembolic diseases and deep vein thrombosis.',
   },
   {
@@ -132,7 +132,7 @@ const sampleProducts = [
     composition: 'Eplerenone IP 25mg',
     form: 'Tablet',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Selective aldosterone receptor antagonist used to reduce cardiovascular mortality in heart failure patients.',
   },
   {
@@ -153,7 +153,7 @@ const sampleProducts = [
     composition: 'Prasugrel Hydrochloride 75mg',
     form: 'Capsule',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Potent thienopyridine antiplatelet agent for acute coronary syndrome managed with percutaneous coronary intervention.',
   },
   {
@@ -174,7 +174,7 @@ const sampleProducts = [
     composition: 'Labetalol Hydrochloride IP 100mg',
     form: 'Tablet',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Dual alpha- and beta-adrenergic blocker indicated for severe hypertension and gestational hypertension.',
   },
   {
@@ -195,7 +195,7 @@ const sampleProducts = [
     composition: 'Nitroglycerin Controlled Release 2.6mg',
     form: 'Tablet',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Controlled release vasodilator for prophylaxis and management of angina pectoris episodes.',
   },
   {
@@ -216,7 +216,7 @@ const sampleProducts = [
     composition: 'Isosorbide Dinitrate 20mg + Hydralazine HCl 37.5mg',
     form: 'Tablet',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Synergistic combination of vasodilator and nitrate for adjunct therapy in chronic heart failure.',
   },
   {
@@ -237,7 +237,7 @@ const sampleProducts = [
     composition: 'Telmisartan 40mg + Amlodipine 5mg + Hydrochlorothiazide 12.5mg',
     form: 'Tablet',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Triple drug single-pill combination for patients with resistant hypertension requiring multi-pathway control.',
   },
   {
@@ -258,7 +258,7 @@ const sampleProducts = [
     composition: 'Clobetasol Propionate 0.05% + Neomycin 0.5% + Miconazole 2.0% w/w',
     form: 'Cream',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Triple-action anti-inflammatory, antibacterial, and antifungal cream for mixed infectious dermatoses.',
   },
   {
@@ -279,7 +279,7 @@ const sampleProducts = [
     composition: 'Luliconazole IP 1.0% w/w',
     form: 'Cream',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Broad-spectrum imidazole antifungal cream for tinea pedis, tinea cruris, and tinea corporis.',
   },
   {
@@ -300,7 +300,7 @@ const sampleProducts = [
     composition: 'Moxifloxacin HCl 0.5% + Dexamethasone Sodium Phosphate 0.1% w/v',
     form: 'Drops',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Sterile ophthalmic solution for bacterial conjunctivitis, ocular inflammation, and post-operative care.',
   },
   {
@@ -321,7 +321,7 @@ const sampleProducts = [
     composition: 'Paradichlorobenzene 2% + Benzocaine 2.7% + Chlorbutol 5% + Turpentine Oil 15%',
     form: 'Drops',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Cerumenolytic ear drops for painless removal of impacted ear wax and localized ear ache relief.',
   },
   {
@@ -342,7 +342,7 @@ const sampleProducts = [
     composition: 'Calamine 8% + Diphenhydramine HCl 1% + Camphor 0.1%',
     form: 'Lotion',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Soothing antiseptic anti-pruritic lotion for prickly heat, insect bites, contact dermatitis, and sunburn.',
   },
   {
@@ -363,7 +363,7 @@ const sampleProducts = [
     composition: 'Permethrin IP 5.0% w/v',
     form: 'Lotion',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Topical scabicidal formulation for single-application eradication of Sarcoptes scabiei mites.',
   },
   {
@@ -384,7 +384,7 @@ const sampleProducts = [
     composition: 'Ketoconazole IP 2.0% w/w Soap Base',
     form: 'Soap',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Antifungal cleanser soap bar for pityriasis versicolor, dandruff prevention, and fungal skin hygiene.',
   },
   {
@@ -405,7 +405,7 @@ const sampleProducts = [
     composition: 'Pure Neem Oil 5% + Aloe Vera Extract 10% + Tulsi Oil 2%',
     form: 'Soap',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Pure herbal Ayurvedic bathing bar for deep pore cleansing, acne control, and skin rejuvenation.',
   },
   {
@@ -426,7 +426,7 @@ const sampleProducts = [
     composition: 'Diclofenac Diethylamine 1.16% + Methyl Salicylate 10% + Menthol 5% + Linseed Oil 3%',
     form: 'Spray',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Micro-fine pain relief aerosol spray with rapid transdermal penetration for sprains, muscle aches, and sports injuries.',
   },
   {
@@ -447,7 +447,7 @@ const sampleProducts = [
     composition: 'Classical Mahavishgarbha Taila, Dhatura, Vatsanabha, Kupilu & Til Taila',
     form: 'Oil',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Classical Ayurvedic medicated oil formulated for chronic neuromuscular disorders, sciatica, and joint stiffness.',
   },
   {
@@ -468,7 +468,7 @@ const sampleProducts = [
     composition: 'Gandhapura Oil 20% + Nilgiri Oil 5% + Shallaki Extract 5% + Mahanarayan Taila',
     form: 'Oil',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Fast-absorbing herbal liniment for knee osteoarthritis, neck strain, and morning joint mobility.',
   },
   {
@@ -489,7 +489,7 @@ const sampleProducts = [
     composition: 'Ashwagandha (Withania somnifera) 500mg + Shatavari 250mg + Safed Musli 100mg per 10ml',
     form: 'Ayurvedic',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Immunity revitalizer, adaptogenic tonic, and general debility restorative for all age groups.',
   },
   {
@@ -510,7 +510,7 @@ const sampleProducts = [
     composition: '5 Types of Tulsi Extracts (Shyama, Rama, Van, Vishnu, Surasa) 85% + Curcumin 95% 15%',
     form: 'Ayurvedic',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Concentrated Pancha Tulsi liquid extract with Curcumin for daily antioxidant protection and upper respiratory immunity.',
   },
   {
@@ -531,7 +531,7 @@ const sampleProducts = [
     composition: 'Bhumi Amla 300mg + Punarnava 200mg + Kalmegh 150mg + Kasani 100mg per 10ml',
     form: 'Ayurvedic',
     manufacturer: 'Daxia Healthcare Pvt. Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Hepatoprotective herbal syrup formula for fatty liver, sluggish digestion, and liver enzyme normalisation.',
   },
   {
@@ -552,7 +552,7 @@ const sampleProducts = [
     composition: 'Diclofenac Sodium 75mg / ml',
     form: 'Injection',
     manufacturer: 'Troikaa Pharmaceuticals Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Fast-acting analgesic and anti-inflammatory injection for severe arthritis, gout, renal colic, and post-operative pain management.',
   },
   {
@@ -573,7 +573,7 @@ const sampleProducts = [
     composition: 'Pantoprazole Sodium IP 40mg',
     form: 'Injection',
     manufacturer: 'Lucid Pharma',
-    imageUrl: 'https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Proton pump inhibitor (PPI) injection for short-term treatment of acid-reflux disease, gastric ulcers, and erosive esophagitis.',
   },
   {
@@ -594,7 +594,7 @@ const sampleProducts = [
     composition: 'Ceftriaxone Sodium IP 1g',
     form: 'Injection',
     manufacturer: 'Namcare Pharma',
-    imageUrl: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Broad-spectrum cephalosporin antibiotic injection for treating bacterial meningitis, respiratory tract infections, and surgical prophylaxis.',
   },
   {
@@ -615,7 +615,7 @@ const sampleProducts = [
     composition: 'Sodium Chloride IP 0.9% w/v',
     form: 'IV Fluid',
     manufacturer: 'Biochem Healthcare',
-    imageUrl: 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Sterile, non-pyrogenic solution for fluid and electrolyte replenishment, dilution of compatible drugs, and wound irrigation.',
   },
   {
@@ -636,7 +636,7 @@ const sampleProducts = [
     composition: 'Paracetamol IP 500mg',
     form: 'Tablet',
     manufacturer: 'Cipla Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Paracetamol 500mg is used for temporary relief of mild-to-moderate pain and reduction of fever.',
   },
   {
@@ -657,7 +657,7 @@ const sampleProducts = [
     composition: 'Amoxicillin Trihydrate IP 250mg',
     form: 'Capsule',
     manufacturer: 'Sun Pharmaceutical Industries Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'An antibiotic used to treat bacterial infections of the throat, respiratory tract, urinary tract, and skin.',
   },
   {
@@ -678,7 +678,7 @@ const sampleProducts = [
     composition: 'Azithromycin Dihydrate IP 500mg',
     form: 'Tablet',
     manufacturer: 'Abbott India Ltd.',
-    imageUrl: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Azithromycin is an antibiotic used for various bacterial infections including ear, throat, and respiratory tract.',
   },
   {
@@ -699,7 +699,7 @@ const sampleProducts = [
     composition: 'Paracetamol IP 650mg',
     form: 'Tablet',
     manufacturer: 'Healing Pharma',
-    imageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Dolo 650 is widely recommended for relief from fever, body aches, joint pain, and cold symptoms.',
   },
   {
@@ -720,7 +720,7 @@ const sampleProducts = [
     composition: 'Natural Rubber Latex Hypoallergenic',
     form: 'Surgical',
     manufacturer: 'Steris Pharma',
-    imageUrl: 'https://images.unsplash.com/photo-1581594693702-fbdc51b2763b?auto=format&fit=crop&w=400&q=80',
+    imageUrl: '',
     description: 'Premium quality sterile surgical gloves with micro-rough textured grip for precision surgical handling.',
   },
 ];

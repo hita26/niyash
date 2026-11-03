@@ -172,15 +172,16 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                       borderRadius: '8px', position: 'relative', alignItems: 'center'
                     }}
                   >
-                    <img 
-                      src={item.product.imageUrl || '/pharma-products.jpg'} 
-                      alt={item.product.name} 
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = '/pharma-products.jpg';
-                      }}
-                      style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }}
-                    />
+                    {item.product.imageUrl && item.product.imageUrl !== '/pharma-products.jpg' ? (
+                      <img 
+                        src={item.product.imageUrl} 
+                        alt={item.product.name} 
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
+                        style={{ width: '50px', height: '50px', objectFit: 'contain', borderRadius: '4px', backgroundColor: 'var(--bg-main)' }}
+                      />
+                    ) : null}
                     
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <h4 style={{ fontSize: '0.9rem', color: 'var(--text-dark)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
-  ShoppingBag, Search, Phone, Mail, ChevronDown, Menu, X, User, LogOut, LogIn,
+  ShoppingBag, Search, Phone, Mail, ChevronDown, Menu, X, User, LogOut, LogIn, ShieldCheck, FileText, Zap,
   Package, Flame, CreditCard, Factory, Handshake, Users, PhoneCall, Shield,
   ArrowRight, MessageCircle, ExternalLink, Lock, Info, Building2
 } from 'lucide-react';
@@ -11,6 +11,8 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
   const dropdownRef = useRef(null);
@@ -138,21 +140,104 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             <ThemeToggle />
 
             {user ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', borderRight: '1px solid var(--border-light)', paddingRight: '12px' }}>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: '700', color: 'var(--primary-blue)' }}>
-                  <User size={16} aria-hidden="true" />
-                  <span style={{ maxWidth: '95px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {user.name.split(' ')[0]}
-                  </span>
-                </div>
-                <button 
-                  onClick={onLogout} 
-                  title="Log Out"
-                  aria-label="Log Out"
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'none', border: 'none', color: 'var(--text-medium)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600', padding: '6px' }}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderRight: '1px solid var(--border-light)', paddingRight: '12px', position: 'relative' }}>
+                <Link
+                  to="/dashboard"
+                  style={{
+                    backgroundColor: '#ecfdf5',
+                    color: '#065f46',
+                    border: '1.5px solid #a7f3d0',
+                    padding: '5px 12px',
+                    borderRadius: '20px',
+                    fontSize: '0.78rem',
+                    fontWeight: '800',
+                    textDecoration: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px'
+                  }}
+                  title="Open Chemist B2B Headquarters"
                 >
-                  <LogOut size={16} aria-hidden="true" />
-                </button>
+                  <ShieldCheck size={14} color="#059669" />
+                  <span>Chemist Portal</span>
+                </Link>
+
+                <div 
+                  style={{ position: 'relative' }}
+                  onMouseEnter={() => setIsUserMenuOpen(true)}
+                  onMouseLeave={() => setIsUserMenuOpen(false)}
+                >
+                  <button 
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      background: '#f1f5f9',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '20px',
+                      padding: '5px 10px',
+                      cursor: 'pointer',
+                      fontSize: '0.82rem',
+                      fontWeight: '700',
+                      color: 'var(--primary-blue)'
+                    }}
+                  >
+                    <User size={14} />
+                    <span style={{ maxWidth: '85px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {user.companyName ? user.companyName.split(' ')[0] : user.name.split(' ')[0]}
+                    </span>
+                    <ChevronDown size={12} />
+                  </button>
+
+                  {isUserMenuOpen && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '100%',
+                      right: 0,
+                      marginTop: '6px',
+                      backgroundColor: '#ffffff',
+                      borderRadius: '10px',
+                      boxShadow: '0 10px 25px -5px rgba(0,0,0,0.15)',
+                      border: '1px solid #e2e8f0',
+                      minWidth: '210px',
+                      zIndex: 1000,
+                      overflow: 'hidden'
+                    }}>
+                      <div style={{ padding: '10px 14px', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                        <div style={{ fontSize: '0.72rem', color: '#059669', fontWeight: '800', textTransform: 'uppercase' }}>✓ Verified Chemist</div>
+                        <div style={{ fontSize: '0.86rem', fontWeight: '800', color: 'var(--text-dark)' }}>{user.companyName || user.name}</div>
+                      </div>
+                      <Link 
+                        to="/dashboard" 
+                        onClick={() => setIsUserMenuOpen(false)}
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', fontSize: '0.84rem', color: 'var(--text-dark)', textDecoration: 'none', fontWeight: '600' }}
+                      >
+                        <ShieldCheck size={16} color="#059669" /> Chemist Dashboard
+                      </Link>
+                      <Link 
+                        to="/quick-order" 
+                        onClick={() => setIsUserMenuOpen(false)}
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', fontSize: '0.84rem', color: 'var(--text-dark)', textDecoration: 'none', fontWeight: '600' }}
+                      >
+                        <Zap size={16} color="#ea580c" /> Quick Order Matrix
+                      </Link>
+                      <Link 
+                        to="/outstanding" 
+                        onClick={() => setIsUserMenuOpen(false)}
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', fontSize: '0.84rem', color: 'var(--text-dark)', textDecoration: 'none', fontWeight: '600' }}
+                      >
+                        <FileText size={16} color="#3b82f6" /> Ledger & Invoices
+                      </Link>
+                      <button 
+                        onClick={() => { setIsUserMenuOpen(false); onLogout(); }}
+                        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', fontSize: '0.84rem', color: '#dc2626', background: 'none', border: 'none', borderTop: '1px solid #f1f5f9', cursor: 'pointer', fontWeight: '600', textAlign: 'left' }}
+                      >
+                        <LogOut size={16} /> Sign Out
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             ) : (
               <button 
@@ -229,6 +314,26 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 <li><Link to="/products?category=Surgical %26 Medical Supplies" className="dropdown-link">Surgical & Medical Supplies</Link></li>
               </ul>
             </li>
+            {user && (
+              <li className="nav-item">
+                <Link 
+                  to="/dashboard" 
+                  className={`nav-pill-link ${isActive('/dashboard') || isActive('/portal') ? 'active' : ''}`}
+                  style={{
+                    backgroundColor: '#ecfdf5',
+                    color: '#065f46',
+                    border: '1.5px solid #a7f3d0',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    fontWeight: '800'
+                  }}
+                >
+                  <ShieldCheck size={14} color="#059669" />
+                  <span>Chemist Dashboard</span>
+                </Link>
+              </li>
+            )}
             <li className="nav-item">
               <Link 
                 to="/quick-order" 
@@ -372,6 +477,33 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               </button>
             </div>
 
+            {/* Chemist Mobile Card */}
+            {user && (
+              <div style={{ backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '10px', padding: '12px', marginBottom: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', fontWeight: '800', color: '#047857', textTransform: 'uppercase' }}>
+                  <ShieldCheck size={14} /> Verified B2B Chemist
+                </div>
+                <div style={{ fontSize: '0.98rem', fontWeight: '800', color: '#064e3b', margin: '2px 0 8px 0' }}>
+                  {user.companyName || user.name}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                  <Link 
+                    to="/dashboard"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    style={{ backgroundColor: '#059669', color: '#ffffff', padding: '7px 10px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '700', textAlign: 'center', textDecoration: 'none' }}
+                  >
+                    Dashboard
+                  </Link>
+                  <Link 
+                    to="/outstanding"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    style={{ backgroundColor: '#ffffff', border: '1px solid #a7f3d0', color: '#047857', padding: '7px 10px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '700', textAlign: 'center', textDecoration: 'none' }}
+                  >
+                    My Ledger
+                  </Link>
+                </div>
+              </div>
+            )}
             {/* Quick Action Highlights for Retailers */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', padding: '4px 0 8px' }}>
               <Link 

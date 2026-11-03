@@ -1,9 +1,11 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Package, Building2, Zap, ShoppingBag } from 'lucide-react';
+import { Home, Package, Building2, Zap, ShoppingBag, ShieldCheck } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 function MobileBottomNav({ cartCount, onOpenCart }) {
   const location = useLocation();
+  const { isLoggedIn, user } = useAuth();
 
   const isActive = (path) => {
     if (path === '/' && location.pathname === '/') return true;
@@ -73,27 +75,53 @@ function MobileBottomNav({ cartCount, onOpenCart }) {
         <span>Medicines</span>
       </Link>
 
-      {/* 252+ Companies */}
-      <Link 
-        to="/companies" 
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '3px',
-          flex: 1,
-          color: isActive('/companies') ? 'var(--primary-blue)' : '#64748b',
-          fontWeight: isActive('/companies') ? '700' : '500',
-          fontSize: '0.72rem',
-          textDecoration: 'none',
-          padding: '4px 0',
-          position: 'relative',
-        }}
-      >
-        <Building2 size={20} strokeWidth={isActive('/companies') ? 2.5 : 2} />
-        <span>Companies</span>
-      </Link>
+      {/* B2B Dashboard (When logged in) OR Companies Directory */}
+      {isLoggedIn || user ? (
+        <Link 
+          to="/dashboard" 
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '3px',
+            flex: 1,
+            color: isActive('/dashboard') ? '#059669' : '#047857',
+            fontWeight: isActive('/dashboard') ? '800' : '600',
+            fontSize: '0.72rem',
+            textDecoration: 'none',
+            padding: '4px 0',
+            position: 'relative',
+          }}
+        >
+          <div style={{ position: 'relative' }}>
+            <ShieldCheck size={20} strokeWidth={isActive('/dashboard') ? 2.5 : 2} color={isActive('/dashboard') ? '#059669' : '#047857'} />
+            <span style={{ position: 'absolute', top: '-2px', right: '-4px', width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#10b981' }}></span>
+          </div>
+          <span>B2B Portal</span>
+        </Link>
+      ) : (
+        <Link 
+          to="/companies" 
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '3px',
+            flex: 1,
+            color: isActive('/companies') ? 'var(--primary-blue)' : '#64748b',
+            fontWeight: isActive('/companies') ? '700' : '500',
+            fontSize: '0.72rem',
+            textDecoration: 'none',
+            padding: '4px 0',
+            position: 'relative',
+          }}
+        >
+          <Building2 size={20} strokeWidth={isActive('/companies') ? 2.5 : 2} />
+          <span>Companies</span>
+        </Link>
+      )}
 
       {/* Quick Order */}
       <Link 
@@ -118,7 +146,7 @@ function MobileBottomNav({ cartCount, onOpenCart }) {
 
       {/* Quote Cart */}
       <button 
-        onClick={onOpenCart}
+        onClick={onOpenCart} 
         style={{
           display: 'flex',
           flexDirection: 'column',
@@ -138,25 +166,23 @@ function MobileBottomNav({ cartCount, onOpenCart }) {
         aria-label={`Open Cart with ${cartCount} items`}
       >
         <div style={{ position: 'relative' }}>
-          <ShoppingBag size={20} strokeWidth={cartCount > 0 ? 2.5 : 2} />
+          <ShoppingBag size={20} strokeWidth={2} />
           {cartCount > 0 && (
             <span 
               style={{
                 position: 'absolute',
                 top: '-5px',
                 right: '-8px',
-                backgroundColor: 'var(--secondary-green)',
+                backgroundColor: 'var(--primary-blue)',
                 color: '#ffffff',
-                fontSize: '0.65rem',
-                fontWeight: '800',
-                minWidth: '16px',
+                borderRadius: '50%',
+                width: '16px',
                 height: '16px',
-                borderRadius: '8px',
+                fontSize: '0.65rem',
+                fontWeight: '700',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '0 3px',
-                border: '1.5px solid #ffffff'
               }}
             >
               {cartCount}

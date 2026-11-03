@@ -18,6 +18,7 @@ import Manufacturing from './pages/Manufacturing';
 import NewsFeed from './pages/NewsFeed';
 import QuickOrder from './pages/QuickOrder';
 import OutstandingLedger from './pages/OutstandingLedger';
+import RetailerDashboard from './pages/RetailerDashboard';
 import Admin from './pages/Admin';
 import CompanyDirectory from './pages/CompanyDirectory';
 import CompanyDetail from './pages/CompanyDetail';
@@ -122,6 +123,9 @@ function AppContent() {
             <Route path="/brands" element={<Navigate to="/companies" replace />} />
             <Route path="/news" element={<NewsFeed />} />
             <Route path="/schemes" element={<NewsFeed />} />
+            <Route path="/dashboard" element={<RetailerDashboard />} />
+            <Route path="/portal" element={<RetailerDashboard />} />
+            <Route path="/retailer-dashboard" element={<RetailerDashboard />} />
             <Route path="/quick-order" element={<QuickOrder />} />
             <Route path="/order" element={<QuickOrder />} />
             <Route path="/ledger" element={<OutstandingLedger />} />

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   X, Lock, Mail, User, ShieldAlert, FileText, Phone, Building, 
   KeyRound, CheckCircle2, ArrowLeft, Eye, EyeOff, MessageCircle, RotateCcw 
 } from 'lucide-react';
 
 function AuthModal({ isOpen, onClose, onSuccess }) {
+  const navigate = useNavigate();
   // Modes: 'login' | 'register' | 'forgot-request' | 'forgot-verify' | 'forgot-success'
   const [authMode, setAuthMode] = useState('login');
   const [error, setError] = useState('');

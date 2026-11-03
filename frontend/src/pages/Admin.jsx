@@ -2260,7 +2260,7 @@ _Helpline: +91 9316566894_`;
   return (
     <div className="section animate-fade-in" style={{ backgroundColor: 'var(--bg-main)', minHeight: '85vh', padding: '30px 0' }}>
       {/* Medilio-Inspired B2B Healthcare Executive Command Header */}
-      <div className="container" style={{ marginBottom: '22px' }}>
+      <div className="admin-workspace-container" style={{ marginBottom: '22px' }}>
         <div className="card" style={{
           padding: 'clamp(16px, 2.5vw, 24px)',
           backgroundColor: '#ffffff',
@@ -2318,7 +2318,7 @@ _Helpline: +91 9316566894_`;
         </div>
       </div>
 
-      <div className="container admin-layout-container">
+      <div className="admin-workspace-container admin-layout-container">
         
         {/* Sidebar Nav */}
         <aside className="card admin-desktop-sidebar" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -2802,16 +2802,16 @@ _Helpline: +91 9316566894_`;
                     </div>
 
                     <div className="admin-table-container">
-                      <table style={{ width: '100%', minWidth: '650px', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                      <table className="admin-table" style={{ width: '100%', minWidth: '780px' }}>
                         <thead>
-                          <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid var(--border-light)', textAlign: 'left' }}>
-                            <th style={{ padding: '10px 12px', verticalAlign: 'middle' }}>Order #</th>
-                            <th style={{ padding: '10px 12px', verticalAlign: 'middle' }}>Store Name</th>
-                            <th style={{ padding: '10px 12px', verticalAlign: 'middle' }}>Date</th>
-                            <th style={{ padding: '10px 12px', verticalAlign: 'middle' }}>Grand Total</th>
-                            <th style={{ padding: '10px 12px', verticalAlign: 'middle' }}>Order Status</th>
-                            <th style={{ padding: '10px 12px', verticalAlign: 'middle' }}>Payment</th>
-                            <th style={{ padding: '10px 12px', textAlign: 'center', verticalAlign: 'middle' }}>Action</th>
+                          <tr>
+                            <th style={{ minWidth: '140px', whiteSpace: 'nowrap' }}>Order #</th>
+                            <th style={{ minWidth: '180px' }}>Store Name</th>
+                            <th style={{ minWidth: '110px', whiteSpace: 'nowrap' }}>Date</th>
+                            <th style={{ minWidth: '110px', whiteSpace: 'nowrap' }}>Grand Total</th>
+                            <th style={{ minWidth: '110px' }}>Order Status</th>
+                            <th style={{ minWidth: '110px' }}>Payment</th>
+                            <th style={{ minWidth: '90px', textAlign: 'center' }}>Action</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -2960,16 +2960,16 @@ _Helpline: +91 9316566894_`;
                   {/* Orders Table */}
                   <div className="card" style={{ padding: '20px' }}>
                     <div className="admin-table-container">
-                      <table style={{ width: '100%', minWidth: '780px', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left' }}>
+                      <table className="admin-table" style={{ width: '100%', minWidth: '1050px' }}>
                         <thead>
-                          <tr style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid var(--border-light)' }}>
-                            <th style={{ padding: '12px 14px', verticalAlign: 'middle' }}>Order ID & Date</th>
-                            <th style={{ padding: '12px 14px', verticalAlign: 'middle' }}>Store & Retailer</th>
-                            <th style={{ padding: '12px 14px', verticalAlign: 'middle' }}>Items Summary</th>
-                            <th style={{ padding: '12px 14px', verticalAlign: 'middle' }}>Grand Total</th>
-                            <th style={{ padding: '12px 14px', verticalAlign: 'middle' }}>Order Status</th>
-                            <th style={{ padding: '12px 14px', verticalAlign: 'middle' }}>Payment Status</th>
-                            <th style={{ padding: '12px 14px', textAlign: 'center', verticalAlign: 'middle' }}>Actions</th>
+                          <tr>
+                            <th style={{ minWidth: '140px', whiteSpace: 'nowrap' }}>Order ID & Date</th>
+                            <th style={{ minWidth: '180px' }}>Store & Retailer</th>
+                            <th style={{ minWidth: '220px' }}>Items Summary</th>
+                            <th style={{ minWidth: '110px', whiteSpace: 'nowrap' }}>Grand Total</th>
+                            <th style={{ minWidth: '130px' }}>Order Status</th>
+                            <th style={{ minWidth: '130px' }}>Payment Status</th>
+                            <th style={{ minWidth: '240px', textAlign: 'center', whiteSpace: 'nowrap' }}>Actions</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -3035,8 +3035,8 @@ _Helpline: +91 9316566894_`;
                                     <option value="Paid">Paid</option>
                                   </select>
                                 </td>
-                                <td style={{ padding: '12px 14px', textAlign: 'center', verticalAlign: 'middle' }}>
-                                  <div style={{ display: 'inline-flex', gap: '8px' }}>
+                                <td style={{ padding: '12px 14px', textAlign: 'center', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                                    <div style={{ display: 'inline-flex', gap: '6px', alignItems: 'center' }}>
                                     <button 
                                       onClick={() => setSelectedOrder(ord)} 
                                       className="btn btn-outline btn-sm"
@@ -3157,16 +3157,16 @@ _Helpline: +91 9316566894_`;
                   {/* Ledgers Table */}
                   <div className="card" style={{ padding: '20px' }}>
                     <div className="admin-table-container">
-                      <table style={{ width: '100%', minWidth: '820px', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left' }}>
+                      <table className="admin-table" style={{ width: '100%', minWidth: '1050px' }}>
                         <thead>
-                          <tr style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid var(--border-light)' }}>
-                            <th style={{ padding: '12px 14px', verticalAlign: 'middle' }}>Retailer Shop & Mobile</th>
-                            <th style={{ padding: '12px 14px', verticalAlign: 'middle' }}>GSTIN</th>
-                            <th style={{ padding: '12px 14px', verticalAlign: 'middle' }}>Total Billed</th>
-                            <th style={{ padding: '12px 14px', verticalAlign: 'middle' }}>Total Paid</th>
-                            <th style={{ padding: '12px 14px', verticalAlign: 'middle' }}>Outstanding Dues</th>
-                            <th style={{ padding: '12px 14px', verticalAlign: 'middle' }}>Credit Limit</th>
-                            <th style={{ padding: '12px 14px', textAlign: 'center', verticalAlign: 'middle' }}>Actions</th>
+                          <tr>
+                            <th style={{ minWidth: '200px' }}>Retailer Shop & Mobile</th>
+                            <th style={{ minWidth: '150px', whiteSpace: 'nowrap' }}>GSTIN</th>
+                            <th style={{ minWidth: '120px', whiteSpace: 'nowrap' }}>Total Billed</th>
+                            <th style={{ minWidth: '120px', whiteSpace: 'nowrap' }}>Total Paid</th>
+                            <th style={{ minWidth: '130px', whiteSpace: 'nowrap' }}>Outstanding Dues</th>
+                            <th style={{ minWidth: '140px' }}>Credit Limit</th>
+                            <th style={{ minWidth: '240px', textAlign: 'center', whiteSpace: 'nowrap' }}>Actions</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -3230,8 +3230,8 @@ _Helpline: +91 9316566894_`;
                                       }}></div>
                                     </div>
                                   </td>
-                                  <td style={{ padding: '12px 14px', textAlign: 'center', verticalAlign: 'middle' }}>
-                                    <div style={{ display: 'inline-flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                                  <td style={{ padding: '12px 14px', textAlign: 'center', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                                    <div style={{ display: 'inline-flex', gap: '6px', alignItems: 'center', whiteSpace: 'nowrap' }}>
                                       <button 
                                         onClick={() => setSelectedLedger(ledger)}
                                         className="btn btn-outline btn-sm"
@@ -3747,17 +3747,17 @@ _Helpline: +91 9316566894_`;
                        ========================================== */
                     <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
                       <div className="admin-table-container">
-                        <table style={{ width: '100%', minWidth: '920px', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left' }}>
+                        <table className="admin-table" style={{ width: '100%', minWidth: '1150px' }}>
                           <thead>
-                            <tr style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid var(--border-light)' }}>
-                              <th style={{ padding: '14px 16px', width: '70px' }}>Photo</th>
-                              <th style={{ padding: '14px 16px' }}>Product Details & SKU</th>
-                              <th style={{ padding: '14px 16px' }}>Category</th>
-                              <th style={{ padding: '14px 16px' }}>Brand & Form</th>
-                              <th style={{ padding: '14px 16px' }}>Pricing (PTR / MRP)</th>
-                              <th style={{ padding: '14px 16px' }}>Stock & Units</th>
-                              <th style={{ padding: '14px 16px', textAlign: 'center' }}>Live Status</th>
-                              <th style={{ padding: '14px 16px', textAlign: 'center' }}>Actions</th>
+                            <tr>
+                              <th style={{ width: '68px', minWidth: '68px', textAlign: 'center' }}>Photo</th>
+                              <th style={{ minWidth: '280px' }}>Product Details & SKU</th>
+                              <th style={{ minWidth: '140px', whiteSpace: 'nowrap' }}>Category</th>
+                              <th style={{ minWidth: '140px' }}>Brand & Form</th>
+                              <th style={{ minWidth: '130px', whiteSpace: 'nowrap' }}>Pricing (PTR / MRP)</th>
+                              <th style={{ minWidth: '120px', whiteSpace: 'nowrap' }}>Stock & Units</th>
+                              <th style={{ minWidth: '110px', textAlign: 'center', whiteSpace: 'nowrap' }}>Live Status</th>
+                              <th style={{ minWidth: '100px', textAlign: 'center', whiteSpace: 'nowrap' }}>Actions</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -4199,16 +4199,15 @@ _Helpline: +91 9316566894_`;
                   {/* Companies Table */}
                   <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
                     <div className="admin-table-container">
-                      <table style={{ width: '100%', minWidth: '700px', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left' }}>
+                      <table className="admin-table" style={{ width: '100%', minWidth: '780px' }}>
                         <thead>
-                          <tr style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid var(--border-light)' }}>
-                            <th style={{ padding: '14px 16px', width: '60px' }}>Logo</th>
-                            <th style={{ padding: '14px 16px' }}>Company Name</th>
-                            <th style={{ padding: '14px 16px' }}>Category</th>
-                            <th style={{ padding: '14px 16px' }}>Location</th>
-                            <th style={{ padding: '14px 16px' }}>Catalog Products</th>
-                            <th style={{ padding: '14px 16px', textAlign: 'center' }}>Live Status</th>
-                            <th style={{ padding: '14px 16px', textAlign: 'center' }}>Actions</th>
+                          <tr>
+                            <th style={{ width: '68px', minWidth: '68px', textAlign: 'center' }}>Logo</th>
+                            <th style={{ minWidth: '220px' }}>Company Name</th>
+                            <th style={{ minWidth: '160px' }}>Category</th>
+                            <th style={{ minWidth: '160px' }}>Location</th>
+                            <th style={{ minWidth: '110px', textAlign: 'center' }}>Status</th>
+                            <th style={{ minWidth: '110px', textAlign: 'center' }}>Actions</th>
                           </tr>
                         </thead>
                         <tbody>

@@ -85,6 +85,13 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
     setResetData({ ...resetData, [e.target.name]: e.target.value });
   };
 
+  const openForgotPassword = () => {
+    setForgotEmail(formData.email || '');
+    setAuthMode('forgot-request');
+    setError('');
+    setInfoMessage('');
+  };
+
   // 1. Submit Login or Register
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -321,7 +328,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
           </div>
         )}
 
-        {/* Error Alert */}
+        {/* Error Alert with embedded Forgot Password link */}
         {error && (
           <div style={{
             display: 'flex', gap: '10px', alignItems: 'flex-start', backgroundColor: '#fef2f2',
@@ -329,7 +336,23 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
             fontSize: '0.85rem', border: '1px solid #fee2e2', lineHeight: '1.4'
           }}>
             <ShieldAlert size={17} style={{ flexShrink: 0, marginTop: '2px' }} />
-            <span>{error}</span>
+            <div style={{ flex: 1 }}>
+              <span>{error}</span>
+              {isLogin && (
+                <div style={{ marginTop: '5px' }}>
+                  <button
+                    type="button"
+                    onClick={openForgotPassword}
+                    style={{
+                      color: '#b91c1c', fontWeight: '700', textDecoration: 'underline',
+                      background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: '0.82rem'
+                    }}
+                  >
+                    Forgot your password? Click here to reset it.
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -391,12 +414,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                 {isLogin && (
                   <button
                     type="button"
-                    onClick={() => {
-                      setForgotEmail(formData.email || '');
-                      setAuthMode('forgot-request');
-                      setError('');
-                      setInfoMessage('');
-                    }}
+                    onClick={openForgotPassword}
                     style={{
                       background: 'none', border: 'none', color: 'var(--primary-blue)',
                       fontSize: '0.8rem', fontWeight: '700', cursor: 'pointer', padding: '0',
@@ -432,6 +450,23 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                   {showLoginPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
+
+              {/* Explicit Forgot Password Link right below password box */}
+              {isLogin && (
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '2px' }}>
+                  <button
+                    type="button"
+                    onClick={openForgotPassword}
+                    style={{
+                      background: 'none', border: 'none', color: 'var(--primary-blue)',
+                      fontSize: '0.82rem', fontWeight: '700', cursor: 'pointer', padding: '2px 0',
+                      textDecoration: 'underline'
+                    }}
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
+              )}
             </div>
 
             {isRegister && (
@@ -513,20 +548,32 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
           </form>
         )}
 
-        {/* Bottom Switch between Login / Register */}
+        {/* Bottom Switch between Login / Register and Forgot Password */}
         {(isLogin || isRegister) && (
           <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '0.85rem', color: 'var(--text-medium)' }}>
             {isLogin ? (
-              <span>
-                New B2B buyer?{' '}
-                <button 
-                  type="button"
-                  onClick={() => { setAuthMode('register'); setError(''); setInfoMessage(''); }}
-                  style={{ color: 'var(--primary-blue)', fontWeight: '700', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
-                >
-                  Register Store
-                </button>
-              </span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div>
+                  New B2B buyer?{' '}
+                  <button 
+                    type="button"
+                    onClick={() => { setAuthMode('register'); setError(''); setInfoMessage(''); }}
+                    style={{ color: 'var(--primary-blue)', fontWeight: '700', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
+                  >
+                    Register Store
+                  </button>
+                </div>
+                <div>
+                  Trouble logging in?{' '}
+                  <button 
+                    type="button"
+                    onClick={openForgotPassword}
+                    style={{ color: 'var(--primary-blue)', fontWeight: '700', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
+              </div>
             ) : (
               <span>
                 Already have an account?{' '}

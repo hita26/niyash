@@ -36,6 +36,14 @@ const userSchema = new mongoose.Schema({
   role: { 
     type: String, 
     default: 'user' 
+  },
+  resetPasswordOtp: {
+    type: String,
+    default: null
+  },
+  resetPasswordExpires: {
+    type: Date,
+    default: null
   }
 }, { timestamps: true });
 
@@ -47,7 +55,6 @@ userSchema.pre('save', async function() {
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
-
 
 // Method to compare passwords
 userSchema.methods.comparePassword = async function(enteredPassword) {

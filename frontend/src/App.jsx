@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Header from './components/Header';
@@ -30,9 +30,19 @@ function AppContent() {
   const [enquiryCart, setEnquiryCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const location = useLocation();
   
   // Auth state from centralized context
   const { user, token, login, logout, isAuthOpen, openAuth, closeAuth } = useAuth();
+
+  // Detect whether current view is within the B2B Chemist Workstation
+  const isB2BPortal = location.pathname.startsWith('/dashboard') || 
+                      location.pathname.startsWith('/portal') || 
+                      location.pathname.startsWith('/retailer-dashboard') ||
+                      location.pathname.startsWith('/quick-order') || 
+                      location.pathname.startsWith('/order') || 
+                      location.pathname.startsWith('/outstanding') || 
+                      location.pathname.startsWith('/ledger');
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -87,7 +97,7 @@ function AppContent() {
   };
 
   return (
-    <Router>
+    <>
       <ScrollToTop />
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <Header 
@@ -98,8 +108,11 @@ function AppContent() {
           user={user}
           onLogout={logout}
           onOpenAuth={openAuth}
+          isB2BPortal={isB2BPortal}
         />
-        <NewsTicker />
+
+        {/* Clean layout: Hide public consumer marquee ticker on B2B Workstation pages */}
+        {!isB2BPortal && <NewsTicker />}
         
         <main style={{ flex: 1 }}>
           <Routes>
@@ -140,11 +153,12 @@ function AppContent() {
           </Routes>
         </main>
 
-        <Footer />
+        <Footer compact={isB2BPortal} />
 
         <MobileBottomNav 
           cartCount={enquiryCart.reduce((total, item) => total + item.quantity, 0)} 
           onOpenCart={() => setIsCartOpen(true)} 
+          isB2BPortal={isB2BPortal}
         />
 
         <EnquiryCartModal 
@@ -165,17 +179,19 @@ function AppContent() {
           onSuccess={login}
         />
       </div>
-    </Router>
+    </>
   );
 }
 
 function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </ThemeProvider>
+    <Router>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </ThemeProvider>
+    </Router>
   );
 }
 

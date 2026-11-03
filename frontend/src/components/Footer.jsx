@@ -1,11 +1,33 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, Mail, MapPin, Send, Facebook, Twitter, Instagram, Linkedin, CheckCircle2, Lock } from 'lucide-react';
+import { Phone, Mail, MapPin, Send, Facebook, Twitter, Instagram, Linkedin, CheckCircle2, Lock, ShieldCheck } from 'lucide-react';
 
-function Footer() {
+function Footer({ compact = false }) {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // If in compact B2B Workstation mode, display a sleek status footer to keep the workstation uncluttered
+  if (compact) {
+    return (
+      <footer style={{ backgroundColor: '#0f172a', color: '#94a3b8', padding: '16px 20px', borderTop: '1px solid #1e293b', fontSize: '0.82rem' }}>
+        <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ color: '#4ade80' }}>●</span>
+            <span>WHO-GMP Certified B2B Pharma Wholesale • Rajkot, Gujarat</span>
+          </div>
+          <div>
+            © {new Date().getFullYear()} Niyansh Pharma B2B Portal • Direct Helpline: <a href="tel:+919909923130" style={{ color: '#38bdf8', fontWeight: '700' }}>+91 99099 23130</a>
+          </div>
+          <div style={{ display: 'flex', gap: '14px' }}>
+            <Link to="/" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Public Website</Link>
+            <Link to="/products" style={{ color: '#cbd5e1', textDecoration: 'none' }}>All Medicines</Link>
+            <Link to="/quick-order" style={{ color: '#ea580c', textDecoration: 'none', fontWeight: '700' }}>Quick Order Pad</Link>
+          </div>
+        </div>
+      </footer>
+    );
+  }
 
   const handleNewsletterSubmit = async (e) => {
     e.preventDefault();
@@ -13,7 +35,6 @@ function Footer() {
 
     setLoading(true);
     try {
-      // Connect newsletter subscription to backend enquiries
       await fetch('/api/enquiries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -61,78 +82,62 @@ function Footer() {
 
           {/* Quick Links */}
           <div className="footer-widget">
-            <h3>Quick Links</h3>
+            <h3 className="widget-title">Quick Links</h3>
             <ul className="footer-links">
               <li><Link to="/">Home</Link></li>
               <li><Link to="/about">About Us</Link></li>
               <li><Link to="/products">All Products</Link></li>
               <li><Link to="/companies">Companies Directory</Link></li>
-              <li><Link to="/quick-order" style={{ color: '#ffffff', fontWeight: '600' }}>📦 Quick Order Portal</Link></li>
-              <li><Link to="/news" style={{ color: '#ea580c', fontWeight: '600' }}>🔥 Schemes & News</Link></li>
-              <li><Link to="/manufacturing">Manufacturing</Link></li>
-              <li><Link to="/contact">Contact & Support</Link></li>
+              <li><Link to="/quick-order">⚡ Quick Bulk Order</Link></li>
+              <li><Link to="/news">🔥 Schemes & PTR Deals</Link></li>
+              <li><Link to="/contact">Contact & Dispatch</Link></li>
             </ul>
           </div>
 
-          {/* Partnerships & Business Forms */}
+          {/* Contact Details */}
           <div className="footer-widget">
-            <h3>Business & Careers</h3>
-            <ul className="footer-links">
-              <li><Link to="/partner">Partner With Us (Retailers)</Link></li>
-              <li><Link to="/supplier">Become a Supplier</Link></li>
-              <li><Link to="/career">Career Opportunities</Link></li>
-              <li><Link to="/admin" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: '#94a3b8' }}><Lock size={12} /> Admin Portal</Link></li>
-            </ul>
-          </div>
-
-          {/* Contact & Newsletter */}
-          <div className="footer-widget">
-            <h3>Get In Touch</h3>
-            <ul className="footer-contact-info" style={{ listStyle: 'none', padding: 0 }}>
-              <li style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-                <MapPin size={18} style={{ flexShrink: 0, marginTop: '2px', color: 'var(--secondary-green)' }} aria-hidden="true" />
-                <span style={{ fontSize: '0.88rem', color: '#cbd5e1', lineHeight: '1.5' }}>
-                  Block no. 52B, Panchayat Nagar-3,<br />
-                  Ram Park Main Rd, University Rd,<br />
-                  Above Jan Aarogya Sevao,<br />
-                  Rajkot, Gujarat - 360005.
-                </span>
-              </li>
-              <li>
-                <Phone size={16} style={{ color: 'var(--secondary-green)' }} aria-hidden="true" />
-                <a href="tel:+919909923130" style={{ fontSize: '0.9rem', color: '#ffffff', fontWeight: '600' }}>+91 99099 23130</a>
-              </li>
-              <li>
-                <Mail size={16} style={{ color: 'var(--secondary-green)' }} aria-hidden="true" />
-                <a href="mailto:niyanshpharma@gmail.com" style={{ fontSize: '0.9rem', color: '#cbd5e1' }}>niyanshpharma@gmail.com</a>
-              </li>
-            </ul>
-            
-            {/* Dynamic Newsletter Form */}
-            <div style={{ marginTop: '15px' }}>
-              <span style={{ fontSize: '0.82rem', color: '#94a3b8', display: 'block', marginBottom: '8px' }}>
-                Subscribe for price drop alerts & schemes:
-              </span>
-              {subscribed ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#4ade80', fontSize: '0.85rem', fontWeight: '600', padding: '8px', backgroundColor: 'rgba(74, 222, 128, 0.1)', borderRadius: '6px' }}>
-                  <CheckCircle2 size={16} /> Thank you for subscribing!
-                </div>
-              ) : (
-                <form className="newsletter-form" onSubmit={handleNewsletterSubmit}>
-                  <input 
-                    type="email" 
-                    value={newsletterEmail}
-                    onChange={(e) => setNewsletterEmail(e.target.value.toLowerCase())}
-                    placeholder="Enter your email address..." 
-                    required 
-                    aria-label="Newsletter email address" 
-                  />
-                  <button type="submit" disabled={loading} aria-label="Subscribe to newsletter">
-                    <Send size={16} aria-hidden="true" />
-                  </button>
-                </form>
-              )}
+            <h3 className="widget-title">Dispatch Desk</h3>
+            <div className="footer-contact">
+              <div className="contact-item">
+                <MapPin size={18} className="contact-icon" aria-hidden="true" />
+                <span>Niyansh Pharma Wholesale Hub, Rajkot, Gujarat - 360001</span>
+              </div>
+              <div className="contact-item">
+                <Phone size={18} className="contact-icon" aria-hidden="true" />
+                <a href="tel:+919909923130">+91 99099 23130</a>
+              </div>
+              <div className="contact-item">
+                <Mail size={18} className="contact-icon" aria-hidden="true" />
+                <a href="mailto:niyanshpharma@gmail.com">niyanshpharma@gmail.com</a>
+              </div>
             </div>
+          </div>
+
+          {/* Wholesale Trade Bulletin */}
+          <div className="footer-widget">
+            <h3 className="widget-title">Trade Bulletins</h3>
+            <p style={{ fontSize: '0.88rem', color: '#cbd5e1', marginBottom: '15px' }}>
+              Subscribe to get instant WhatsApp & email alerts for weekly PTR price revisions, 10+1 schemes, and stock arrivals.
+            </p>
+            {subscribed ? (
+              <div style={{ backgroundColor: 'rgba(56, 142, 60, 0.2)', color: '#4ade80', padding: '10px 14px', borderRadius: '6px', fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <CheckCircle2 size={16} /> Subscribed to trade alerts!
+              </div>
+            ) : (
+              <form className="newsletter-form" onSubmit={handleNewsletterSubmit}>
+                <input 
+                  type="email" 
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value.toLowerCase())}
+                  placeholder="Enter your email address..." 
+                  required 
+                  aria-label="Newsletter email address" 
+                />
+                <button type="submit" disabled={loading} aria-label="Subscribe to newsletter">
+                  <Send size={16} aria-hidden="true" />
+                </button>
+              </form>
+            )}
           </div>
         </div>
 

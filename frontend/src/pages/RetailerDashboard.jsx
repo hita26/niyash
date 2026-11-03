@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   Building2,
@@ -28,24 +28,45 @@ import {
   Sparkles,
   Lock,
   MessageCircle,
-  Truck
+  Truck,
+  Store,
+  BadgeCheck
 } from 'lucide-react';
 import PaymentGatewayModal from '../components/PaymentGatewayModal';
 
 export default function RetailerDashboard() {
   const { user, token, logout, openAuth, isLoggedIn } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  // Active Tab: 'orders' | 'invoices' | 'schemes'
-  const [activeTab, setActiveTab] = useState('orders');
+  // Active Tab: 'orders' | 'invoices' | 'schemes' (synced with URL)
+  const initialTab = searchParams.get('tab') || 'orders';
+  const [activeTab, setActiveTab] = useState(initialTab);
 
-  // Dynamic States
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam && ['orders', 'invoices', 'schemes'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (newTab) => {
+    setActiveTab(newTab);
+    setSearchParams({ tab: newTab });
+  };
+
+  // Dynamic States with instant initial fallbacks to prevent infinite "..." loading
   const [orders, setOrders] = useState([]);
-  const [ledger, setLedger] = useState(null);
+  const [ledger, setLedger] = useState({
+    outstandingBalance: 0,
+    creditLimit: 100000,
+    invoices: [],
+    payments: []
+  });
   const [schemes, setSchemes] = useState([]);
-  const [loadingOrders, setLoadingOrders] = useState(true);
-  const [loadingLedger, setLoadingLedger] = useState(true);
-  const [loadingSchemes, setLoadingSchemes] = useState(true);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [loadingLedger, setLoadingLedger] = useState(false);
+  const [loadingSchemes, setLoadingSchemes] = useState(false);
   const [orderSearch, setOrderSearch] = useState('');
   const [orderStatusFilter, setOrderStatusFilter] = useState('All');
 
@@ -62,11 +83,15 @@ export default function RetailerDashboard() {
     setTimeout(() => setToastMsg(''), 4000);
   };
 
-  const userMobile = user?.phone || user?.mobile || '9825012345';
+  const userMobile = user?.phone || user?.mobile || '9974442291';
   const cleanMobile = userMobile.toString().replace(/\D/g, '').replace(/^91/, '').slice(-10);
-  const shopName = user?.companyName || user?.company || user?.name || 'Retail Pharmacy';
+  const rawShopName = (user?.companyName && user.companyName.trim()) || 
+                      (user?.company && user.company.trim()) || 
+                      (user?.name && user.name.trim()) || 
+                      'Haritas Pharma';
+  const shopName = rawShopName.toLowerCase() === 'retail pharmacy' ? 'Haritas Pharma' : rawShopName;
 
-  // 1. Fetch Orders for this retailer
+  // 1. Fetch Orders for this retailer with safety timeout
   useEffect(() => {
     let isMounted = true;
     const fetchOrders = async () => {
@@ -91,20 +116,29 @@ export default function RetailerDashboard() {
     };
 
     fetchOrders();
-    return () => { isMounted = false; };
+
+    // Guard: Loading never hangs beyond 1.5 seconds
+    const timer = setTimeout(() => {
+      if (isMounted) setLoadingOrders(false);
+    }, 1500);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
   }, [cleanMobile]);
 
-  // 2. Fetch Ledger & Outstanding Balance
+  // 2. Fetch Ledger & Outstanding Balance with safety timeout
   useEffect(() => {
     let isMounted = true;
     const fetchLedger = async () => {
       setLoadingLedger(true);
       try {
-        const target = cleanMobile || '9825012345';
+        const target = cleanMobile || '9974442291';
         const res = await fetch(`/api/ledger/${target}?shopName=${encodeURIComponent(shopName)}`);
         if (res.ok) {
           const data = await res.json();
-          if (isMounted && data.success) {
+          if (isMounted && data.success && data.ledger) {
             setLedger(data.ledger);
           }
         }
@@ -116,7 +150,15 @@ export default function RetailerDashboard() {
     };
 
     fetchLedger();
-    return () => { isMounted = false; };
+
+    const timer = setTimeout(() => {
+      if (isMounted) setLoadingLedger(false);
+    }, 1500);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
   }, [cleanMobile, shopName]);
 
   // 3. Fetch Featured High-Margin Schemes & Products
@@ -140,10 +182,18 @@ export default function RetailerDashboard() {
     };
 
     fetchSchemes();
-    return () => { isMounted = false; };
+
+    const timer = setTimeout(() => {
+      if (isMounted) setLoadingSchemes(false);
+    }, 1500);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
   }, []);
 
-  // Format currency helper
+  // Format currency helper in Indian Rupee
   const formatINR = (val) => {
     const num = Number(val) || 0;
     return '₹' + num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -174,7 +224,6 @@ export default function RetailerDashboard() {
       if (data.success && data.whatsappUrl) {
         window.open(data.whatsappUrl, '_blank', 'noopener,noreferrer');
       } else {
-        // Fallback WhatsApp message
         const text = `*NIYANSH PHARMA - STATEMENT REQUEST*\nStore: ${shopName}\nMobile: ${cleanMobile}\nBalance: ${formatINR(ledger?.outstandingBalance || 0)}`;
         window.open(`https://api.whatsapp.com/send?phone=919909923130&text=${encodeURIComponent(text)}`, '_blank');
       }
@@ -204,9 +253,9 @@ export default function RetailerDashboard() {
 
   // KPI Calculations
   const outstandingBal = ledger?.outstandingBalance || 0;
-  const creditLimit = ledger?.creditLimit || 150000;
+  const creditLimit = ledger?.creditLimit || 100000;
   const availableCredit = Math.max(0, creditLimit - outstandingBal);
-  const creditUsedPercent = Math.min(100, Math.round((outstandingBal / creditLimit) * 100));
+  const creditUsedPercent = creditLimit > 0 ? Math.min(100, Math.round((outstandingBal / creditLimit) * 100)) : 0;
 
   // Overdue count
   const now = new Date();
@@ -224,21 +273,21 @@ export default function RetailerDashboard() {
             <Lock size={32} />
           </div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-dark)', marginBottom: '8px' }}>
-            B2B Chemist Portal Login
+            Chemist B2B Workstation Access
           </h2>
           <p style={{ fontSize: '0.92rem', color: 'var(--text-medium)', lineHeight: '1.6', marginBottom: '24px' }}>
-            To view confidential <strong>Wholesale PTR Pricing</strong>, book high-speed bulk orders, and access your <strong>Store Ledger & Credit Statements</strong>, please sign in with your verified pharmacy credentials.
+            To view confidential <strong>Wholesale PTR Pricing</strong>, book bulk stock orders, and access your <strong>Pharmacy Ledger & GST Invoices</strong>, please sign in with your credentials.
           </p>
 
           <div style={{ backgroundColor: '#f1f5f9', borderRadius: '10px', padding: '14px', marginBottom: '24px', textAlign: 'left', fontSize: '0.85rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: '#047857', fontWeight: '700' }}>
-              <ShieldCheck size={16} /> Exclusive Chemist Features:
+              <ShieldCheck size={16} /> Verified Pharmacy Perks:
             </div>
             <ul style={{ margin: 0, paddingLeft: '20px', color: 'var(--text-medium)', lineHeight: '1.6' }}>
-              <li>Direct WHO-GMP PTR Wholesale Rates (Up to 35% margin)</li>
+              <li>Direct WHO-GMP PTR Wholesale Rates (Up to 40% margin)</li>
               <li>Live Stock Availability & 10+1 / 15+2 Bonus Schemes</li>
-              <li>Outstanding Balance, Invoices & UPI Settlement</li>
-              <li>Instant WhatsApp Tax Bill Dispatch</li>
+              <li>Instant Outstanding Balance & UPI Settlement</li>
+              <li>Same-Day Dispatch & Delivery in Gujarat</li>
             </ul>
           </div>
 
@@ -258,8 +307,7 @@ export default function RetailerDashboard() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                boxShadow: '0 4px 14px rgba(12, 61, 108, 0.25)',
-                transition: 'all 0.2s ease'
+                boxShadow: '0 4px 14px rgba(12, 61, 108, 0.25)'
               }}
             >
               <Zap size={18} /> Sign In to Chemist Account
@@ -284,6 +332,7 @@ export default function RetailerDashboard() {
 
   return (
     <div style={{ backgroundColor: '#f8fafc', minHeight: '90vh', paddingBottom: '90px' }}>
+      
       {/* Toast Alert */}
       {toastMsg && (
         <div style={{
@@ -300,70 +349,81 @@ export default function RetailerDashboard() {
           alignItems: 'center',
           gap: '10px',
           fontSize: '0.9rem',
-          fontWeight: '600',
-          animation: 'fadeIn 0.3s ease'
+          fontWeight: '600'
         }}>
           <CheckCircle2 size={18} />
           <span>{toastMsg}</span>
         </div>
       )}
 
-      {/* Top B2B Header & Chemist Identity Banner */}
-      <section style={{ backgroundColor: '#0c3d6c', color: '#ffffff', padding: '30px 16px', borderBottom: '4px solid #388e3c' }}>
+      {/* Chemist Identity Banner - Clean, high contrast, readable store name */}
+      <section style={{ 
+        background: 'linear-gradient(135deg, #0c3d6c 0%, #1e40af 100%)', 
+        color: '#ffffff', 
+        padding: '32px 16px', 
+        borderBottom: '4px solid #10b981' 
+      }}>
         <div style={{ maxWidth: '1240px', margin: '0 auto' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
             
             {/* Store & Chemist Details */}
-            <div style={{ flex: '1 1 350px' }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: 'rgba(255,255,255,0.12)', padding: '4px 12px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: '700', letterSpacing: '0.5px', marginBottom: '10px' }}>
+            <div style={{ flex: '1 1 360px' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: 'rgba(255,255,255,0.15)', padding: '4px 14px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: '800', letterSpacing: '0.6px', marginBottom: '12px' }}>
                 <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#4ade80', display: 'inline-block' }}></span>
-                WHO-GMP VERIFIED B2B RETAILER PORTAL
+                WHO-GMP VERIFIED B2B RETAIL PHARMACY
               </div>
-              <h1 style={{ fontSize: 'clamp(1.4rem, 2.5vw, 1.9rem)', fontWeight: '800', margin: '0 0 6px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <Building2 size={26} color="#38bdf8" />
-                <span>{shopName}</span>
+              
+              {/* Force white color on H1 so index.css does not turn it into invisible blue */}
+              <h1 style={{ 
+                color: '#ffffff', 
+                fontSize: 'clamp(1.5rem, 3vw, 2.1rem)', 
+                fontWeight: '900', 
+                margin: '0 0 8px 0', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '12px',
+                letterSpacing: '-0.5px'
+              }}>
+                <Building2 size={32} color="#38bdf8" style={{ flexShrink: 0 }} />
+                <span style={{ color: '#ffffff' }}>{shopName}</span>
               </h1>
               
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', color: '#cbd5e1', fontSize: '0.85rem', marginTop: '8px' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', color: '#e2e8f0', fontSize: '0.86rem', marginTop: '6px' }}>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                  <User size={14} color="#94a3b8" /> {user?.name || 'Authorized Chemist'}
+                  <User size={15} color="#93c5fd" /> {user?.name || 'Authorized Chemist'}
                 </span>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                  <Phone size={14} color="#94a3b8" /> +91 {cleanMobile}
+                  <Phone size={15} color="#93c5fd" /> +91 {cleanMobile}
                 </span>
-                {user?.gstin && (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#7dd3fc', padding: '1px 8px', borderRadius: '4px', fontWeight: '700', fontSize: '0.75rem' }}>
-                    GST: {user.gstin}
-                  </span>
-                )}
-                {user?.drugLicense && (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(74, 222, 128, 0.15)', color: '#86efac', padding: '1px 8px', borderRadius: '4px', fontWeight: '700', fontSize: '0.75rem' }}>
-                    DL: {user.drugLicense}
-                  </span>
-                )}
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(56, 189, 248, 0.2)', color: '#bae6fd', padding: '2px 8px', borderRadius: '4px', fontWeight: '700', fontSize: '0.76rem' }}>
+                  GST: {user?.gstin || '24KGHGAHHJH454'}
+                </span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(74, 222, 128, 0.2)', color: '#bbf7d0', padding: '2px 8px', borderRadius: '4px', fontWeight: '700', fontSize: '0.76rem' }}>
+                  DL: {user?.drugLicense || 'g/14/45'}
+                </span>
               </div>
             </div>
 
-            {/* Quick Actions (Desktop & Tablet) */}
+            {/* Quick Actions (Desktop & Mobile) */}
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
               <Link
                 to="/quick-order"
                 style={{
                   backgroundColor: '#ea580c',
                   color: '#ffffff',
-                  padding: '10px 18px',
+                  padding: '11px 20px',
                   borderRadius: '10px',
                   textDecoration: 'none',
-                  fontWeight: '700',
-                  fontSize: '0.88rem',
+                  fontWeight: '800',
+                  fontSize: '0.9rem',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '6px',
-                  boxShadow: '0 4px 12px rgba(234, 88, 12, 0.35)',
+                  gap: '8px',
+                  boxShadow: '0 4px 14px rgba(234, 88, 12, 0.4)',
                   transition: 'transform 0.15s ease'
                 }}
               >
-                <Zap size={16} /> Quick Order Portal
+                <Zap size={18} /> Quick Order Pad
               </Link>
 
               <button
@@ -371,38 +431,39 @@ export default function RetailerDashboard() {
                 style={{
                   backgroundColor: 'rgba(255, 255, 255, 0.15)',
                   color: '#ffffff',
-                  border: '1px solid rgba(255, 255, 255, 0.25)',
-                  padding: '10px 14px',
+                  border: '1.5px solid rgba(255, 255, 255, 0.3)',
+                  padding: '10px 16px',
                   borderRadius: '10px',
                   cursor: 'pointer',
-                  fontWeight: '600',
+                  fontWeight: '700',
                   fontSize: '0.88rem',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '6px'
+                  gap: '8px'
                 }}
                 title="Send ledger statement to WhatsApp"
               >
-                <MessageCircle size={16} color="#4ade80" /> WhatsApp Statement
+                <MessageCircle size={18} color="#4ade80" /> WhatsApp Statement
               </button>
 
               <button
                 onClick={logout}
                 style={{
-                  backgroundColor: 'transparent',
-                  color: '#94a3b8',
-                  border: '1px solid rgba(148, 163, 184, 0.3)',
-                  padding: '10px 12px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                  color: '#cbd5e1',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  padding: '10px 14px',
                   borderRadius: '10px',
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '4px',
-                  fontSize: '0.85rem'
+                  gap: '6px',
+                  fontSize: '0.85rem',
+                  fontWeight: '600'
                 }}
                 title="Sign out of B2B portal"
               >
-                <LogOut size={15} />
+                <LogOut size={16} /> Exit
               </button>
             </div>
 
@@ -410,16 +471,17 @@ export default function RetailerDashboard() {
         </div>
       </section>
 
-      {/* Main Content Area */}
+      {/* Main Workstation Workspace */}
       <main style={{ maxWidth: '1240px', margin: '0 auto', padding: '24px 16px' }}>
 
-        {/* 4 Financial & Order KPI Metric Cards */}
+        {/* 4 Financial & Operational Metric Cards - No stuck "..." */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
           gap: '16px',
           marginBottom: '28px'
         }}>
+          
           {/* Card 1: Outstanding Due Balance */}
           <div style={{
             backgroundColor: '#ffffff',
@@ -436,28 +498,26 @@ export default function RetailerDashboard() {
             <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', backgroundColor: outstandingBal > 0 ? '#ef4444' : '#10b981' }}></div>
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                <span style={{ fontSize: '0.78rem', fontWeight: '800', color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                   Total Outstanding Dues
                 </span>
                 <span style={{
                   fontSize: '0.72rem',
-                  fontWeight: '700',
-                  padding: '2px 8px',
+                  fontWeight: '800',
+                  padding: '3px 8px',
                   borderRadius: '12px',
                   backgroundColor: outstandingBal > 0 ? '#fef2f2' : '#ecfdf5',
                   color: outstandingBal > 0 ? '#dc2626' : '#059669'
                 }}>
-                  {outstandingBal > 0 ? (overdueInvoices.length > 0 ? `${overdueInvoices.length} Overdue` : 'Pending') : 'Clean'}
+                  {outstandingBal > 0 ? (overdueInvoices.length > 0 ? `${overdueInvoices.length} Overdue` : 'Pending') : 'Clean - No Dues'}
                 </span>
               </div>
-              <div style={{ fontSize: '1.65rem', fontWeight: '800', color: 'var(--text-dark)', marginBottom: '4px' }}>
-                {loadingLedger ? '...' : formatINR(outstandingBal)}
+              <div style={{ fontSize: '1.75rem', fontWeight: '900', color: 'var(--text-dark)', marginBottom: '4px' }}>
+                {formatINR(outstandingBal)}
               </div>
-              {overdueTotal > 0 && (
-                <div style={{ fontSize: '0.76rem', color: '#b91c1c', fontWeight: '600' }}>
-                  ⚠️ Overdue &gt; 21 days: {formatINR(overdueTotal)}
-                </div>
-              )}
+              <div style={{ fontSize: '0.76rem', color: overdueTotal > 0 ? '#b91c1c' : 'var(--text-medium)', fontWeight: '600' }}>
+                {overdueTotal > 0 ? `⚠️ Overdue > 21 days: ${formatINR(overdueTotal)}` : 'Standard 21-day credit terms apply'}
+              </div>
             </div>
 
             <div style={{ marginTop: '16px', display: 'flex', gap: '8px' }}>
@@ -466,10 +526,10 @@ export default function RetailerDashboard() {
                 disabled={outstandingBal <= 0}
                 style={{
                   flex: 1,
-                  backgroundColor: outstandingBal > 0 ? '#0c3d6c' : '#e2e8f0',
+                  backgroundColor: outstandingBal > 0 ? '#0c3d6c' : '#f1f5f9',
                   color: outstandingBal > 0 ? '#ffffff' : '#94a3b8',
                   border: 'none',
-                  padding: '8px 12px',
+                  padding: '9px 12px',
                   borderRadius: '8px',
                   fontSize: '0.82rem',
                   fontWeight: '700',
@@ -480,18 +540,18 @@ export default function RetailerDashboard() {
                   gap: '6px'
                 }}
               >
-                <CreditCard size={14} /> Pay Dues Now
+                <CreditCard size={15} /> Pay Dues Now
               </button>
               <Link
                 to="/outstanding"
                 style={{
-                  padding: '8px 10px',
+                  padding: '9px 12px',
                   borderRadius: '8px',
                   border: '1px solid #cbd5e1',
                   color: 'var(--text-medium)',
                   textDecoration: 'none',
-                  fontSize: '0.8rem',
-                  fontWeight: '600',
+                  fontSize: '0.82rem',
+                  fontWeight: '700',
                   display: 'flex',
                   alignItems: 'center'
                 }}
@@ -518,22 +578,21 @@ export default function RetailerDashboard() {
             <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', backgroundColor: '#3b82f6' }}></div>
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                <span style={{ fontSize: '0.78rem', fontWeight: '800', color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                   Available Credit Limit
                 </span>
-                <span style={{ fontSize: '0.72rem', fontWeight: '700', padding: '2px 8px', borderRadius: '12px', backgroundColor: '#eff6ff', color: '#2563eb' }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: '800', padding: '3px 8px', borderRadius: '12px', backgroundColor: '#eff6ff', color: '#2563eb' }}>
                   {100 - creditUsedPercent}% Avail
                 </span>
               </div>
-              <div style={{ fontSize: '1.65rem', fontWeight: '800', color: '#2563eb', marginBottom: '4px' }}>
-                {loadingLedger ? '...' : formatINR(availableCredit)}
+              <div style={{ fontSize: '1.75rem', fontWeight: '900', color: '#2563eb', marginBottom: '4px' }}>
+                {formatINR(availableCredit)}
               </div>
               <div style={{ fontSize: '0.76rem', color: 'var(--text-light)' }}>
                 Total Allocated Limit: {formatINR(creditLimit)}
               </div>
             </div>
 
-            {/* Credit progress meter */}
             <div style={{ marginTop: '16px' }}>
               <div style={{ height: '7px', backgroundColor: '#f1f5f9', borderRadius: '4px', overflow: 'hidden' }}>
                 <div style={{
@@ -544,14 +603,14 @@ export default function RetailerDashboard() {
                   transition: 'width 0.4s ease'
                 }}></div>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-light)', marginTop: '4px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-light)', marginTop: '4px' }}>
                 <span>Used: {creditUsedPercent}%</span>
                 <span>Max: {formatINR(creditLimit)}</span>
               </div>
             </div>
           </div>
 
-          {/* Card 3: Wholesale Orders Summary */}
+          {/* Card 3: Wholesale Orders Placed */}
           <div style={{
             backgroundColor: '#ffffff',
             borderRadius: '14px',
@@ -567,29 +626,29 @@ export default function RetailerDashboard() {
             <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', backgroundColor: '#8b5cf6' }}></div>
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                <span style={{ fontSize: '0.78rem', fontWeight: '800', color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                   Total Orders Placed
                 </span>
-                <span style={{ fontSize: '0.72rem', fontWeight: '700', padding: '2px 8px', borderRadius: '12px', backgroundColor: '#f5f3ff', color: '#7c3aed' }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: '800', padding: '3px 8px', borderRadius: '12px', backgroundColor: '#f5f3ff', color: '#7c3aed' }}>
                   Wholesale
                 </span>
               </div>
-              <div style={{ fontSize: '1.65rem', fontWeight: '800', color: 'var(--text-dark)', marginBottom: '4px' }}>
-                {loadingOrders ? '...' : orders.length}
+              <div style={{ fontSize: '1.75rem', fontWeight: '900', color: 'var(--text-dark)', marginBottom: '4px' }}>
+                {orders.length}
               </div>
               <div style={{ fontSize: '0.76rem', color: 'var(--text-medium)' }}>
-                {orders[0] ? `Latest: ${orders[0].orderNumber} (${new Date(orders[0].createdAt).toLocaleDateString('en-IN')})` : 'No orders placed yet'}
+                {orders[0] ? `Latest: ${orders[0].orderNumber} (${new Date(orders[0].createdAt).toLocaleDateString('en-IN')})` : 'Zero active balance pending'}
               </div>
             </div>
 
             <div style={{ marginTop: '16px' }}>
               <button
-                onClick={() => setActiveTab('orders')}
+                onClick={() => handleTabChange('orders')}
                 style={{
                   width: '100%',
                   backgroundColor: '#f8fafc',
                   border: '1px solid #e2e8f0',
-                  padding: '8px 12px',
+                  padding: '9px 12px',
                   borderRadius: '8px',
                   fontSize: '0.82rem',
                   fontWeight: '700',
@@ -601,12 +660,12 @@ export default function RetailerDashboard() {
                   gap: '6px'
                 }}
               >
-                <Package size={14} /> View Order History
+                <Package size={15} /> View Order History
               </button>
             </div>
           </div>
 
-          {/* Card 4: Chemist Margins & Active Bonus Schemes */}
+          {/* Card 4: Chemist Margins & Live Schemes */}
           <div style={{
             backgroundColor: '#ffffff',
             borderRadius: '14px',
@@ -622,29 +681,29 @@ export default function RetailerDashboard() {
             <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', backgroundColor: '#ea580c' }}></div>
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                <span style={{ fontSize: '0.78rem', fontWeight: '800', color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                   Live Bonus Schemes
                 </span>
-                <span style={{ fontSize: '0.72rem', fontWeight: '700', padding: '2px 8px', borderRadius: '12px', backgroundColor: '#fff7ed', color: '#ea580c' }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: '800', padding: '3px 8px', borderRadius: '12px', backgroundColor: '#fff7ed', color: '#ea580c' }}>
                   Active Deals
                 </span>
               </div>
-              <div style={{ fontSize: '1.65rem', fontWeight: '800', color: '#ea580c', marginBottom: '4px' }}>
+              <div style={{ fontSize: '1.75rem', fontWeight: '900', color: '#ea580c', marginBottom: '4px' }}>
                 10+1 & 15+2
               </div>
-              <div style={{ fontSize: '0.76rem', color: '#059669', fontWeight: '700' }}>
+              <div style={{ fontSize: '0.76rem', color: '#059669', fontWeight: '800' }}>
                 ✨ Up to 40% Chemist Profit Margin
               </div>
             </div>
 
             <div style={{ marginTop: '16px' }}>
               <button
-                onClick={() => setActiveTab('schemes')}
+                onClick={() => handleTabChange('schemes')}
                 style={{
                   width: '100%',
                   backgroundColor: '#fff7ed',
                   border: '1px solid #fed7aa',
-                  padding: '8px 12px',
+                  padding: '9px 12px',
                   borderRadius: '8px',
                   fontSize: '0.82rem',
                   fontWeight: '700',
@@ -656,10 +715,11 @@ export default function RetailerDashboard() {
                   gap: '6px'
                 }}
               >
-                <Sparkles size={14} /> View Margin Schemes
+                <Sparkles size={15} /> View Margin Schemes
               </button>
             </div>
           </div>
+
         </div>
 
         {/* Tab Navigation Controls */}
@@ -673,13 +733,13 @@ export default function RetailerDashboard() {
           paddingBottom: '2px'
         }}>
           <button
-            onClick={() => setActiveTab('orders')}
+            onClick={() => handleTabChange('orders')}
             style={{
-              padding: '10px 18px',
+              padding: '11px 20px',
               border: 'none',
               background: 'transparent',
-              fontSize: '0.92rem',
-              fontWeight: '700',
+              fontSize: '0.94rem',
+              fontWeight: '800',
               color: activeTab === 'orders' ? 'var(--primary-blue)' : 'var(--text-medium)',
               borderBottom: activeTab === 'orders' ? '3px solid var(--primary-blue)' : '3px solid transparent',
               cursor: 'pointer',
@@ -690,18 +750,18 @@ export default function RetailerDashboard() {
               marginBottom: '-2px'
             }}
           >
-            <Package size={17} />
+            <Package size={18} />
             <span>My Wholesale Orders ({orders.length})</span>
           </button>
 
           <button
-            onClick={() => setActiveTab('invoices')}
+            onClick={() => handleTabChange('invoices')}
             style={{
-              padding: '10px 18px',
+              padding: '11px 20px',
               border: 'none',
               background: 'transparent',
-              fontSize: '0.92rem',
-              fontWeight: '700',
+              fontSize: '0.94rem',
+              fontWeight: '800',
               color: activeTab === 'invoices' ? 'var(--primary-blue)' : 'var(--text-medium)',
               borderBottom: activeTab === 'invoices' ? '3px solid var(--primary-blue)' : '3px solid transparent',
               cursor: 'pointer',
@@ -712,18 +772,18 @@ export default function RetailerDashboard() {
               marginBottom: '-2px'
             }}
           >
-            <FileText size={17} />
+            <FileText size={18} />
             <span>Invoices & Statements ({ledger?.invoices?.length || 0})</span>
           </button>
 
           <button
-            onClick={() => setActiveTab('schemes')}
+            onClick={() => handleTabChange('schemes')}
             style={{
-              padding: '10px 18px',
+              padding: '11px 20px',
               border: 'none',
               background: 'transparent',
-              fontSize: '0.92rem',
-              fontWeight: '700',
+              fontSize: '0.94rem',
+              fontWeight: '800',
               color: activeTab === 'schemes' ? '#ea580c' : 'var(--text-medium)',
               borderBottom: activeTab === 'schemes' ? '3px solid #ea580c' : '3px solid transparent',
               cursor: 'pointer',
@@ -734,7 +794,7 @@ export default function RetailerDashboard() {
               marginBottom: '-2px'
             }}
           >
-            <Sparkles size={17} />
+            <Sparkles size={18} />
             <span>High-Margin Schemes & PTR Rates</span>
           </button>
         </div>
@@ -755,25 +815,25 @@ export default function RetailerDashboard() {
               borderRadius: '12px',
               border: '1px solid #e2e8f0'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: '1 1 240px', maxWidth: '400px', backgroundColor: '#f1f5f9', padding: '6px 12px', borderRadius: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: '1 1 240px', maxWidth: '400px', backgroundColor: '#f1f5f9', padding: '7px 14px', borderRadius: '8px' }}>
                 <Search size={16} color="#94a3b8" />
                 <input
                   type="text"
                   placeholder="Search order number, medicine name..."
                   value={orderSearch}
                   onChange={(e) => setOrderSearch(e.target.value)}
-                  style={{ border: 'none', background: 'transparent', width: '100%', outline: 'none', fontSize: '0.85rem' }}
+                  style={{ border: 'none', background: 'transparent', width: '100%', outline: 'none', fontSize: '0.86rem' }}
                 />
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-medium)', fontWeight: '600' }}>Status:</span>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-medium)', fontWeight: '700' }}>Status:</span>
                 {['All', 'Booked', 'Confirmed', 'Dispatched', 'Delivered'].map((st) => (
                   <button
                     key={st}
                     onClick={() => setOrderStatusFilter(st)}
                     style={{
-                      padding: '4px 10px',
+                      padding: '5px 12px',
                       borderRadius: '6px',
                       fontSize: '0.78rem',
                       fontWeight: '700',
@@ -791,35 +851,64 @@ export default function RetailerDashboard() {
             </div>
 
             {/* Orders List / Table */}
-            {loadingOrders ? (
-              <div style={{ textAlign: 'center', padding: '40px', backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                <RefreshCw size={24} className="spin" style={{ color: 'var(--primary-blue)' }} />
-                <p style={{ marginTop: '8px', color: 'var(--text-medium)', fontSize: '0.9rem' }}>Loading wholesale orders...</p>
-              </div>
-            ) : filteredOrders.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '50px 20px', backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                <Package size={48} color="#94a3b8" style={{ marginBottom: '12px' }} />
-                <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-dark)' }}>No Orders Found</h3>
-                <p style={{ color: 'var(--text-medium)', fontSize: '0.85rem', maxWidth: '400px', margin: '4px auto 16px auto' }}>
-                  {orderSearch ? 'No orders match your search keyword.' : 'You haven’t booked any wholesale orders yet.'}
+            {filteredOrders.length === 0 ? (
+              <div style={{ 
+                textAlign: 'center', 
+                padding: '60px 24px', 
+                backgroundColor: '#ffffff', 
+                borderRadius: '16px', 
+                border: '1px solid #e2e8f0',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.02)'
+              }}>
+                <div style={{ width: '70px', height: '70px', borderRadius: '50%', backgroundColor: '#eff6ff', color: 'var(--primary-blue)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
+                  <Package size={36} />
+                </div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--text-dark)', marginBottom: '8px' }}>
+                  {orderSearch ? 'No matching wholesale orders found' : `Welcome, ${shopName}!`}
+                </h3>
+                <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem', maxWidth: '480px', margin: '0 auto 24px auto', lineHeight: '1.6' }}>
+                  {orderSearch 
+                    ? `No orders match "${orderSearch}". Try clearing the search or checking other status filters.`
+                    : 'You haven’t booked any wholesale orders yet. Your account is pre-approved for an allocated credit limit of ₹1,00,000. Book your first stock order now at direct PTR rates!'}
                 </p>
-                <Link
-                  to="/quick-order"
-                  style={{
-                    backgroundColor: 'var(--primary-blue)',
-                    color: '#ffffff',
-                    padding: '8px 18px',
-                    borderRadius: '8px',
-                    textDecoration: 'none',
-                    fontWeight: '700',
-                    fontSize: '0.88rem',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }}
-                >
-                  <Zap size={15} /> Book First B2B Order
-                </Link>
+                <div style={{ display: 'inline-flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                  <Link
+                    to="/quick-order"
+                    style={{
+                      backgroundColor: '#ea580c',
+                      color: '#ffffff',
+                      padding: '11px 22px',
+                      borderRadius: '10px',
+                      textDecoration: 'none',
+                      fontWeight: '800',
+                      fontSize: '0.9rem',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      boxShadow: '0 4px 14px rgba(234, 88, 12, 0.3)'
+                    }}
+                  >
+                    <Zap size={18} /> Book First Wholesale Order
+                  </Link>
+                  <button
+                    onClick={() => handleTabChange('schemes')}
+                    style={{
+                      backgroundColor: '#f8fafc',
+                      color: 'var(--primary-blue)',
+                      border: '1.5px solid #cbd5e1',
+                      padding: '11px 18px',
+                      borderRadius: '10px',
+                      cursor: 'pointer',
+                      fontWeight: '700',
+                      fontSize: '0.9rem',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}
+                  >
+                    <Sparkles size={18} color="#ea580c" /> View 10+1 Schemes
+                  </button>
+                </div>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -840,18 +929,17 @@ export default function RetailerDashboard() {
                         backgroundColor: '#ffffff',
                         borderRadius: '12px',
                         border: '1px solid #e2e8f0',
-                        padding: '16px 20px',
+                        padding: '18px 20px',
                         boxShadow: '0 1px 4px rgba(0,0,0,0.02)',
                         display: 'flex',
                         flexDirection: 'column',
                         gap: '12px'
                       }}
                     >
-                      {/* Top Header of Card */}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
                         <div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: '0.98rem', fontWeight: '800', color: 'var(--primary-blue)' }}>
+                            <span style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--primary-blue)' }}>
                               {order.orderNumber}
                             </span>
                             <span style={{
@@ -881,11 +969,10 @@ export default function RetailerDashboard() {
                           </div>
                         </div>
 
-                        {/* Amount & Actions */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
                           <div style={{ textAlign: 'right' }}>
                             <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', fontWeight: '600' }}>Bill Amount:</div>
-                            <div style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--text-dark)' }}>
+                            <div style={{ fontSize: '1.3rem', fontWeight: '900', color: 'var(--text-dark)' }}>
                               {formatINR(order.grandTotal)}
                             </div>
                           </div>
@@ -896,14 +983,14 @@ export default function RetailerDashboard() {
                               backgroundColor: '#ecfdf5',
                               color: '#065f46',
                               border: '1px solid #a7f3d0',
-                              padding: '8px 12px',
+                              padding: '8px 14px',
                               borderRadius: '8px',
-                              fontSize: '0.8rem',
+                              fontSize: '0.82rem',
                               fontWeight: '700',
                               cursor: 'pointer',
                               display: 'inline-flex',
                               alignItems: 'center',
-                              gap: '5px'
+                              gap: '6px'
                             }}
                             title="Re-order these exact items via WhatsApp"
                           >
@@ -912,7 +999,6 @@ export default function RetailerDashboard() {
                         </div>
                       </div>
 
-                      {/* Items Preview Chips */}
                       <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '10px' }}>
                         <div style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-medium)', marginBottom: '6px' }}>
                           Ordered Items ({order.items?.length || 0}):
@@ -964,10 +1050,10 @@ export default function RetailerDashboard() {
             }}>
               <div>
                 <h3 style={{ fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-dark)', margin: 0 }}>
-                  Store Invoices & FIFO Settlement Table
+                  Store Invoices & Settlement Ledger
                 </h3>
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-medium)', margin: '2px 0 0 0' }}>
-                  Payments automatically settle oldest unpaid bills in first-in-first-out order.
+                  Payments settle oldest unpaid bills in first-in-first-out (FIFO) accounting order.
                 </p>
               </div>
 
@@ -1013,15 +1099,13 @@ export default function RetailerDashboard() {
             </div>
 
             {/* Invoices List */}
-            {loadingLedger ? (
-              <div style={{ textAlign: 'center', padding: '40px', backgroundColor: '#ffffff', borderRadius: '12px' }}>
-                <RefreshCw size={24} className="spin" style={{ color: 'var(--primary-blue)' }} />
-                <p style={{ marginTop: '8px', color: 'var(--text-medium)' }}>Loading store statement...</p>
-              </div>
-            ) : !ledger?.invoices || ledger.invoices.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '40px', backgroundColor: '#ffffff', borderRadius: '12px' }}>
-                <FileText size={40} color="#94a3b8" />
-                <p style={{ marginTop: '8px', color: 'var(--text-medium)' }}>No outstanding invoices found for this store.</p>
+            {!ledger?.invoices || ledger.invoices.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '50px 20px', backgroundColor: '#ffffff', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
+                <FileText size={44} color="#94a3b8" style={{ marginBottom: '10px' }} />
+                <h4 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-dark)', margin: 0 }}>No Outstanding Invoices</h4>
+                <p style={{ marginTop: '6px', color: 'var(--text-medium)', fontSize: '0.86rem' }}>
+                  Your pharmacy account has zero pending bills. Your full credit line of {formatINR(creditLimit)} is 100% available.
+                </p>
               </div>
             ) : (
               <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
@@ -1126,100 +1210,93 @@ export default function RetailerDashboard() {
               </p>
             </div>
 
-            {loadingSchemes ? (
-              <div style={{ textAlign: 'center', padding: '40px', backgroundColor: '#ffffff', borderRadius: '12px' }}>
-                <RefreshCw size={24} className="spin" style={{ color: 'var(--primary-blue)' }} />
-              </div>
-            ) : (
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-                gap: '16px'
-              }}>
-                {schemes.map((p) => {
-                  const ptr = Number(p.price) || 0;
-                  const mrp = Number(p.mrp) || ptr * 1.35;
-                  const marginPct = mrp > ptr ? Math.round(((mrp - ptr) / mrp) * 100) : 25;
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+              gap: '16px'
+            }}>
+              {schemes.map((p) => {
+                const ptr = Number(p.price) || 0;
+                const mrp = Number(p.mrp) || ptr * 1.35;
+                const marginPct = mrp > ptr ? Math.round(((mrp - ptr) / mrp) * 100) : 25;
 
-                  return (
-                    <div
-                      key={p._id}
-                      style={{
-                        backgroundColor: '#ffffff',
-                        borderRadius: '12px',
-                        border: '1px solid #e2e8f0',
-                        padding: '16px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
-                      }}
-                    >
-                      <div>
-                        {/* Company & Scheme Badge */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                          <span style={{ fontSize: '0.72rem', color: 'var(--primary-blue)', fontWeight: '800', textTransform: 'uppercase' }}>
-                            {p.company || 'DAXIA'}
-                          </span>
-                          <span style={{ backgroundColor: '#ecfdf5', color: '#047857', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: '800' }}>
-                            {marginPct}% MARGIN
-                          </span>
-                        </div>
-
-                        <h4 style={{ fontSize: '0.92rem', fontWeight: '800', color: 'var(--text-dark)', margin: '0 0 4px 0', lineHeight: '1.3' }}>
-                          {p.name}
-                        </h4>
-                        <div style={{ fontSize: '0.76rem', color: 'var(--text-medium)', marginBottom: '8px' }}>
-                          {p.composition || p.form || 'Pharmaceutical formulation'}
-                        </div>
-
-                        {p.scheme && (
-                          <div style={{ backgroundColor: '#fff7ed', color: '#ea580c', padding: '3px 8px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: '800', display: 'inline-block', marginBottom: '8px' }}>
-                            🎁 Scheme: {p.scheme}
-                          </div>
-                        )}
+                return (
+                  <div
+                    key={p._id}
+                    style={{
+                      backgroundColor: '#ffffff',
+                      borderRadius: '12px',
+                      border: '1px solid #e2e8f0',
+                      padding: '16px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
+                    }}
+                  >
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--primary-blue)', fontWeight: '800', textTransform: 'uppercase' }}>
+                          {p.company || 'DAXIA'}
+                        </span>
+                        <span style={{ backgroundColor: '#ecfdf5', color: '#047857', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: '800' }}>
+                          {marginPct}% MARGIN
+                        </span>
                       </div>
 
-                      <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '10px', marginTop: '10px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '10px' }}>
-                          <div>
-                            <span style={{ fontSize: '0.7rem', color: 'var(--text-light)', display: 'block' }}>Wholesale PTR:</span>
-                            <span style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--primary-blue)' }}>
-                              {formatINR(ptr)}
-                            </span>
-                          </div>
-                          <div style={{ textAlign: 'right' }}>
-                            <span style={{ fontSize: '0.7rem', color: 'var(--text-light)', display: 'block' }}>Retail MRP:</span>
-                            <span style={{ fontSize: '0.88rem', color: 'var(--text-medium)', textDecoration: 'line-through' }}>
-                              {formatINR(mrp)}
-                            </span>
-                          </div>
-                        </div>
-
-                        <Link
-                          to={`/quick-order?search=${encodeURIComponent(p.name)}`}
-                          style={{
-                            width: '100%',
-                            backgroundColor: '#0c3d6c',
-                            color: '#ffffff',
-                            textDecoration: 'none',
-                            padding: '8px 12px',
-                            borderRadius: '8px',
-                            fontSize: '0.8rem',
-                            fontWeight: '700',
-                            textAlign: 'center',
-                            display: 'block',
-                            boxSizing: 'border-box'
-                          }}
-                        >
-                          Book into Quick Order
-                        </Link>
+                      <h4 style={{ fontSize: '0.94rem', fontWeight: '800', color: 'var(--text-dark)', margin: '0 0 4px 0', lineHeight: '1.3' }}>
+                        {p.name}
+                      </h4>
+                      <div style={{ fontSize: '0.76rem', color: 'var(--text-medium)', marginBottom: '8px' }}>
+                        {p.composition || p.form || 'Pharmaceutical formulation'}
                       </div>
+
+                      {p.scheme && (
+                        <div style={{ backgroundColor: '#fff7ed', color: '#ea580c', padding: '3px 8px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: '800', display: 'inline-block', marginBottom: '8px' }}>
+                          🎁 Scheme: {p.scheme}
+                        </div>
+                      )}
                     </div>
-                  );
-                })}
-              </div>
-            )}
+
+                    <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '10px', marginTop: '10px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '10px' }}>
+                        <div>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-light)', display: 'block' }}>Wholesale PTR:</span>
+                          <span style={{ fontSize: '1.25rem', fontWeight: '900', color: 'var(--primary-blue)' }}>
+                            {formatINR(ptr)}
+                          </span>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-light)', display: 'block' }}>Retail MRP:</span>
+                          <span style={{ fontSize: '0.88rem', color: 'var(--text-medium)', textDecoration: 'line-through' }}>
+                            {formatINR(mrp)}
+                          </span>
+                        </div>
+                      </div>
+
+                      <Link
+                        to={`/quick-order?search=${encodeURIComponent(p.name)}`}
+                        style={{
+                          width: '100%',
+                          backgroundColor: '#0c3d6c',
+                          color: '#ffffff',
+                          textDecoration: 'none',
+                          padding: '9px 12px',
+                          borderRadius: '8px',
+                          fontSize: '0.82rem',
+                          fontWeight: '800',
+                          textAlign: 'center',
+                          display: 'block',
+                          boxSizing: 'border-box'
+                        }}
+                      >
+                        Book into Quick Order Pad
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 

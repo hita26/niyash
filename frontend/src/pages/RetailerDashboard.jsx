@@ -273,7 +273,7 @@ export default function RetailerDashboard() {
             <Lock size={32} />
           </div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-dark)', marginBottom: '8px' }}>
-            Chemist B2B Workstation Access
+            B2B Workstation Access
           </h2>
           <p style={{ fontSize: '0.92rem', color: 'var(--text-medium)', lineHeight: '1.6', marginBottom: '24px' }}>
             To view confidential <strong>Wholesale PTR Pricing</strong>, book bulk stock orders, and access your <strong>Pharmacy Ledger & GST Invoices</strong>, please sign in with your credentials.
@@ -310,7 +310,7 @@ export default function RetailerDashboard() {
                 boxShadow: '0 4px 14px rgba(12, 61, 108, 0.25)'
               }}
             >
-              <Zap size={18} /> Sign In to Chemist Account
+              <Zap size={18} /> Sign In to B2B Account
             </button>
             <Link
               to="/products"
@@ -390,7 +390,7 @@ export default function RetailerDashboard() {
               
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', color: '#e2e8f0', fontSize: '0.86rem', marginTop: '6px' }}>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                  <User size={15} color="#93c5fd" /> {user?.name || 'Authorized Chemist'}
+                  <User size={15} color="#93c5fd" /> {user?.name || 'Authorized B2B Partner'}
                 </span>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
                   <Phone size={15} color="#93c5fd" /> +91 {cleanMobile}

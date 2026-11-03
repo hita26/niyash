@@ -116,7 +116,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             
             {/* Left: Brand Logo & B2B Workstation Chip */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <Link to="/dashboard" aria-label="Niyansh Pharma Chemist Dashboard" style={{ display: 'flex', alignItems: 'center' }}>
+              <Link to="/dashboard" aria-label="Niyansh Pharma B2B Dashboard" style={{ display: 'flex', alignItems: 'center' }}>
                 <img 
                   src="/logo.jpg" 
                   alt="Niyansh Pharma B2B" 
@@ -126,7 +126,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', padding: '3px 10px', borderRadius: '20px' }}>
                 <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981', display: 'inline-block' }}></span>
                 <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#065f46', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-                  Chemist B2B Portal
+                  B2B Portal
                 </span>
               </div>
             </div>
@@ -276,7 +276,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                   }}>
                     <div style={{ padding: '12px 16px', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
                       <div style={{ fontSize: '0.72rem', color: '#059669', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                        ● Verified B2B Chemist
+                        ● Verified B2B Partner
                       </div>
                       <div style={{ fontSize: '0.92rem', fontWeight: '800', color: 'var(--text-dark)', marginTop: '2px' }}>
                         {chemistName}
@@ -296,7 +296,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                       onClick={() => setIsUserMenuOpen(false)}
                       style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', fontSize: '0.85rem', color: 'var(--text-dark)', textDecoration: 'none', fontWeight: '600', borderBottom: '1px solid #f1f5f9' }}
                     >
-                      <ShieldCheck size={16} color="#059669" /> Chemist Dashboard
+                      <ShieldCheck size={16} color="#059669" /> B2B Dashboard
                     </Link>
                     <Link 
                       to="/quick-order" 
@@ -382,7 +382,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
         </div>
 
         {/* Dedicated B2B Navigation Tab Bar */}
-        <nav style={{ backgroundColor: '#0c3d6c', color: '#ffffff', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }} aria-label="B2B Chemist Workstation Navigation">
+        <nav style={{ backgroundColor: '#0c3d6c', color: '#ffffff', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }} aria-label="B2B Workstation Navigation">
           <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', overflowX: 'auto', whiteSpace: 'nowrap', padding: '4px 0' }}>
@@ -486,7 +486,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             {/* Direct WhatsApp Ordering Desk */}
             <div style={{ flexShrink: 0, padding: '4px 0' }}>
               <a 
-                href="https://wa.me/919909923130?text=Hello%20Niyansh%20Pharma%20Wholesale%20Desk%2C%20I%20am%20ordering%20from%20Chemist%20Portal."
+                href="https://wa.me/919909923130?text=Hello%20Niyansh%20Pharma%20Wholesale%20Desk%2C%20I%20am%20ordering%20from%20B2B%20Portal."
                 target="_blank" 
                 rel="noopener noreferrer"
                 style={{
@@ -501,7 +501,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                   fontWeight: '700',
                   textDecoration: 'none'
                 }}
-                title="Direct Chemist Dispatch Helpline"
+                title="Direct B2B Dispatch Helpline"
               >
                 <MessageCircle size={14} />
                 <span>Wholesale Desk</span>
@@ -532,7 +532,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               overflowY: 'auto'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '14px', borderBottom: '1px solid #e2e8f0' }}>
-                <span style={{ fontWeight: '800', color: '#0c3d6c', fontSize: '1rem' }}>Chemist Workstation</span>
+                <span style={{ fontWeight: '800', color: '#0c3d6c', fontSize: '1rem' }}>B2B Workstation</span>
                 <button onClick={() => setIsMobileMenuOpen(false)} style={{ border: 'none', background: 'none', cursor: 'pointer' }}><X size={22} /></button>
               </div>
 
@@ -545,7 +545,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px', borderRadius: '8px', fontWeight: '700', color: '#0c3d6c', textDecoration: 'none', backgroundColor: '#eff6ff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <ShieldCheck size={18} color="#2563eb" /> Chemist Dashboard
+                  <ShieldCheck size={18} color="#2563eb" /> B2B Dashboard
                 </Link>
                 <Link to="/quick-order" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px', borderRadius: '8px', fontWeight: '700', color: '#ea580c', textDecoration: 'none', backgroundColor: '#fff7ed', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Zap size={18} color="#ea580c" /> Quick Order Pad
@@ -662,10 +662,10 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                     alignItems: 'center',
                     gap: '6px'
                   }}
-                  title="Open Chemist B2B Workstation"
+                  title="Open B2B Portal"
                 >
                   <ShieldCheck size={15} color="#059669" />
-                  <span>Chemist Portal ➔</span>
+                  <span>B2B Portal ➔</span>
                 </Link>
 
                 <div style={{ position: 'relative' }}>
@@ -707,7 +707,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                       overflow: 'hidden'
                     }}>
                       <div style={{ padding: '10px 14px', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                        <div style={{ fontSize: '0.72rem', color: '#059669', fontWeight: '800', textTransform: 'uppercase' }}>● Verified Chemist</div>
+                        <div style={{ fontSize: '0.72rem', color: '#059669', fontWeight: '800', textTransform: 'uppercase' }}>● Verified B2B Partner</div>
                         <div style={{ fontSize: '0.88rem', fontWeight: '800', color: 'var(--text-dark)' }}>{chemistName}</div>
                       </div>
                       <Link 
@@ -715,7 +715,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                         onClick={() => setIsUserMenuOpen(false)}
                         style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', fontSize: '0.84rem', color: 'var(--text-dark)', textDecoration: 'none', fontWeight: '600' }}
                       >
-                        <ShieldCheck size={16} color="#059669" /> Chemist Dashboard
+                        <ShieldCheck size={16} color="#059669" /> B2B Dashboard
                       </Link>
                       <Link 
                         to="/quick-order" 
@@ -748,7 +748,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 style={{ padding: '8px 18px', borderRadius: '30px', fontWeight: '800', border: '1.5px solid var(--primary-blue)', color: 'var(--primary-blue)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                 aria-label="Open B2B login and registration modal"
               >
-                <LogIn size={15} aria-hidden="true" /> <span>Chemist Login</span>
+                <LogIn size={15} aria-hidden="true" /> <span>B2B Login</span>
               </button>
             )}
 
@@ -957,7 +957,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             {user && (
               <div style={{ backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '10px', padding: '12px', marginBottom: '10px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', fontWeight: '800', color: '#047857', textTransform: 'uppercase' }}>
-                  <ShieldCheck size={14} /> Verified B2B Chemist
+                  <ShieldCheck size={14} /> Verified B2B Partner
                 </div>
                 <div style={{ fontSize: '0.98rem', fontWeight: '800', color: '#064e3b', margin: '2px 0 8px 0' }}>
                   {chemistName}
@@ -968,7 +968,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                     onClick={() => setIsMobileMenuOpen(false)}
                     style={{ backgroundColor: '#059669', color: '#ffffff', padding: '7px 10px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '700', textAlign: 'center', textDecoration: 'none' }}
                   >
-                    Chemist Portal
+                    B2B Portal
                   </Link>
                   <Link 
                     to="/quick-order"
@@ -1009,7 +1009,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                   onClick={() => { onOpenAuth(); setIsMobileMenuOpen(false); }}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px 15px', backgroundColor: 'var(--primary-blue)', color: '#ffffff', borderRadius: '8px', fontWeight: '700', cursor: 'pointer', border: 'none', width: '100%' }}
                 >
-                  <LogIn size={16} /> Chemist Login / Register
+                  <LogIn size={16} /> B2B Login / Register
                 </button>
               )}
             </div>

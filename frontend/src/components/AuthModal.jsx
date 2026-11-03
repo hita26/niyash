@@ -328,31 +328,15 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
           </div>
         )}
 
-        {/* Error Alert with embedded Forgot Password link */}
+        {/* Error Alert */}
         {error && (
           <div style={{
-            display: 'flex', gap: '10px', alignItems: 'flex-start', backgroundColor: '#fef2f2',
+            display: 'flex', gap: '10px', alignItems: 'center', backgroundColor: '#fef2f2',
             color: '#b91c1c', padding: '12px 14px', borderRadius: '8px', marginBottom: '18px',
             fontSize: '0.85rem', border: '1px solid #fee2e2', lineHeight: '1.4'
           }}>
-            <ShieldAlert size={17} style={{ flexShrink: 0, marginTop: '2px' }} />
-            <div style={{ flex: 1 }}>
-              <span>{error}</span>
-              {isLogin && (
-                <div style={{ marginTop: '5px' }}>
-                  <button
-                    type="button"
-                    onClick={openForgotPassword}
-                    style={{
-                      color: '#b91c1c', fontWeight: '700', textDecoration: 'underline',
-                      background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: '0.82rem'
-                    }}
-                  >
-                    Forgot your password? Click here to reset it.
-                  </button>
-                </div>
-              )}
-            </div>
+            <ShieldAlert size={17} style={{ flexShrink: 0 }} />
+            <span>{error}</span>
           </div>
         )}
 
@@ -409,22 +393,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Password *</label>
-                {isLogin && (
-                  <button
-                    type="button"
-                    onClick={openForgotPassword}
-                    style={{
-                      background: 'none', border: 'none', color: 'var(--primary-blue)',
-                      fontSize: '0.8rem', fontWeight: '700', cursor: 'pointer', padding: '0',
-                      textDecoration: 'underline'
-                    }}
-                  >
-                    Forgot password?
-                  </button>
-                )}
-              </div>
+              <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Password *</label>
               <div style={{ position: 'relative' }}>
                 <Lock size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
                 <input 
@@ -451,9 +420,9 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                 </button>
               </div>
 
-              {/* Explicit Forgot Password Link right below password box */}
+              {/* ONLY ONE Forgot Password link: right below the password field */}
               {isLogin && (
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '2px' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
                   <button
                     type="button"
                     onClick={openForgotPassword}
@@ -548,32 +517,20 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
           </form>
         )}
 
-        {/* Bottom Switch between Login / Register and Forgot Password */}
+        {/* Bottom Switch between Login / Register */}
         {(isLogin || isRegister) && (
           <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '0.85rem', color: 'var(--text-medium)' }}>
             {isLogin ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div>
-                  New B2B buyer?{' '}
-                  <button 
-                    type="button"
-                    onClick={() => { setAuthMode('register'); setError(''); setInfoMessage(''); }}
-                    style={{ color: 'var(--primary-blue)', fontWeight: '700', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
-                  >
-                    Register Store
-                  </button>
-                </div>
-                <div>
-                  Trouble logging in?{' '}
-                  <button 
-                    type="button"
-                    onClick={openForgotPassword}
-                    style={{ color: 'var(--primary-blue)', fontWeight: '700', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
-                  >
-                    Forgot Password?
-                  </button>
-                </div>
-              </div>
+              <span>
+                New B2B buyer?{' '}
+                <button 
+                  type="button"
+                  onClick={() => { setAuthMode('register'); setError(''); setInfoMessage(''); }}
+                  style={{ color: 'var(--primary-blue)', fontWeight: '700', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
+                >
+                  Register Store
+                </button>
+              </span>
             ) : (
               <span>
                 Already have an account?{' '}

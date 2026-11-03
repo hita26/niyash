@@ -5,6 +5,7 @@ import {
   Package, Flame, CreditCard, Factory, Handshake, Users, PhoneCall, Shield,
   ArrowRight, MessageCircle, ExternalLink, Lock, Info, Building2
 } from 'lucide-react';
+import ThemeToggle from './ThemeToggle';
 
 function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogout, onOpenAuth }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -133,6 +134,9 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
 
           {/* Header Action Buttons */}
           <div className="header-actions">
+            {/* Dark / Light Mode Toggle */}
+            <ThemeToggle />
+
             {user ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', borderRight: '1px solid var(--border-light)', paddingRight: '12px' }}>
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: '700', color: 'var(--primary-blue)' }}>
@@ -326,6 +330,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
 
           {/* Drawer Sidebar */}
           <div 
+            className="mobile-nav-drawer"
             style={{
               position: 'fixed', 
               top: 0, 
@@ -333,13 +338,15 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               bottom: 0,
               width: 'min(88vw, 380px)', 
               height: '100vh',
-              backgroundColor: '#ffffff', 
+              backgroundColor: 'var(--bg-card)', 
+              color: 'var(--text-dark)',
               zIndex: 9999, 
               overflowY: 'auto', 
               padding: '20px 18px 40px', 
               display: 'flex', 
               flexDirection: 'column', 
               gap: '12px',
+              borderLeft: '1px solid var(--border-light)',
               boxShadow: '-8px 0 35px rgba(0,0,0,0.22)', 
               animation: 'slideInRight 0.25s ease forwards'
             }}
@@ -348,17 +355,17 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             aria-label="Mobile Navigation Menu"
           >
             {/* Drawer Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '14px', borderBottom: '1px solid #e2e8f0' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '14px', borderBottom: '1px solid var(--border-light)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <img src="/logo.jpg" alt="" style={{ height: '36px', width: 'auto', borderRadius: '4px' }} />
+                <img src="/logo.jpg" alt="" style={{ height: '36px', width: 'auto', borderRadius: '4px', backgroundColor: '#ffffff', padding: '2px 4px' }} />
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontWeight: '800', color: 'var(--primary-blue)', fontSize: '1.02rem', lineHeight: '1.2' }}>Niyansh Pharma</span>
+                  <span style={{ fontWeight: '800', color: 'var(--text-dark)', fontSize: '1.02rem', lineHeight: '1.2' }}>Niyansh Pharma</span>
                   <span style={{ fontSize: '0.74rem', color: 'var(--secondary-green)', fontWeight: '700' }}>Care • Quality • Trust</span>
                 </div>
               </div>
               <button 
                 onClick={() => setIsMobileMenuOpen(false)} 
-                style={{ width: '38px', height: '38px', borderRadius: '50%', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', cursor: 'pointer' }}
+                style={{ width: '38px', height: '38px', borderRadius: '50%', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-medium)', cursor: 'pointer' }}
                 aria-label="Close navigation menu"
               >
                 <X size={20} aria-hidden="true" />
@@ -389,6 +396,12 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               >
                 <Flame size={16} /> Schemes
               </Link>
+            </div>
+
+            {/* Mobile Theme Toggle Switch Bar */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', borderRadius: '8px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)' }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>Theme Mode</span>
+              <ThemeToggle variant="pill" />
             </div>
 
             {/* Core Nav Links */}
@@ -468,7 +481,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             </div>
 
             {/* Direct Instant Contact Buttons */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px', padding: '12px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px', padding: '12px', backgroundColor: 'var(--bg-main)', borderRadius: '10px', border: '1px solid var(--border-light)' }}>
               <span style={{ fontSize: '0.78rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 Direct Dispatch Desk
               </span>
@@ -489,7 +502,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             </div>
 
             {/* User Session / Auth / Admin Link */}
-            <div style={{ marginTop: 'auto', paddingTop: '15px', borderTop: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ marginTop: 'auto', paddingTop: '15px', borderTop: '1px solid var(--border-light)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {user ? (
                 <>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--primary-blue)', fontWeight: '600', fontSize: '0.9rem' }}>
@@ -500,7 +513,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                     onClick={() => { onLogout(); setIsMobileMenuOpen(false); }}
                     style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px 15px',
-                      backgroundColor: '#f1f5f9', border: '1px solid var(--border-light)', borderRadius: '8px',
+                      backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)', borderRadius: '8px',
                       color: 'var(--text-medium)', fontWeight: '600', cursor: 'pointer', width: '100%', minHeight: '44px'
                     }}
                   >
@@ -526,8 +539,8 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 onClick={() => setIsMobileMenuOpen(false)}
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                  fontSize: '0.8rem', color: '#64748b', padding: '8px', borderRadius: '6px',
-                  backgroundColor: '#f8fafc', border: '1px dashed #cbd5e1', textDecoration: 'none'
+                  fontSize: '0.8rem', color: 'var(--text-light)', padding: '8px', borderRadius: '6px',
+                  backgroundColor: 'var(--bg-main)', border: '1px dashed var(--border-light)', textDecoration: 'none'
                 }}
               >
                 <Lock size={13} /> Admin Console

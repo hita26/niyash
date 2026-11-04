@@ -636,7 +636,7 @@ Rajkot, Gujarat`);
             <h1 style={{ margin: 0, fontSize: '1.8rem', color: '#0c3d6c', display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span>📊 Retailer Outstanding Ledger</span>
               <span style={{ fontSize: '0.8rem', backgroundColor: '#e0f2fe', color: '#0369a1', padding: '4px 10px', borderRadius: '20px', fontWeight: 700 }}>
-                Live B2B Portal
+                Live Chemist Portal
               </span>
             </h1>
           </div>

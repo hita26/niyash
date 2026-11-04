@@ -187,7 +187,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', padding: '3px 10px', borderRadius: '20px' }}>
                 <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981', display: 'inline-block' }}></span>
                 <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#065f46', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-                  B2B Portal
+                  Chemist Portal
                 </span>
               </div>
             </div>
@@ -970,10 +970,10 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                     alignItems: 'center',
                     gap: '6px'
                   }}
-                  title="Open B2B Portal"
+                  title="Open Chemist Portal"
                 >
                   <ShieldCheck size={15} color="#059669" />
-                  <span>B2B Portal ➔</span>
+                  <span>Chemist Portal ➔</span>
                 </Link>
 
                 <div style={{ position: 'relative' }}>
@@ -1276,7 +1276,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                     onClick={() => setIsMobileMenuOpen(false)}
                     style={{ backgroundColor: '#059669', color: '#ffffff', padding: '7px 10px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '700', textAlign: 'center', textDecoration: 'none' }}
                   >
-                    B2B Portal
+                    Chemist Portal
                   </Link>
                   <Link 
                     to="/quick-order"

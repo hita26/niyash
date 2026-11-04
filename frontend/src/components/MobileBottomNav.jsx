@@ -243,7 +243,7 @@ function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
             }}
           >
             <ShieldCheck size={20} strokeWidth={2.5} color="#059669" />
-            <span>B2B Portal</span>
+            <span>Chemist Portal</span>
           </Link>
 
           {/* Quick Order */}

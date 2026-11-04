@@ -17,7 +17,7 @@ function Footer({ compact = false }) {
             <span>WHO-GMP Certified B2B Pharma Wholesale • Rajkot, Gujarat</span>
           </div>
           <div>
-            © {new Date().getFullYear()} Niyansh Pharma B2B Portal • Direct Helpline: <a href="tel:+919909923130" style={{ color: '#38bdf8', fontWeight: '700' }}>+91 99099 23130</a>
+            © {new Date().getFullYear()} Niyansh Pharma Chemist Portal • Direct Helpline: <a href="tel:+919909923130" style={{ color: '#38bdf8', fontWeight: '700' }}>+91 99099 23130</a>
           </div>
           <div style={{ display: 'flex', gap: '14px' }}>
             <Link to="/" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Public Website</Link>

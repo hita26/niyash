@@ -23,11 +23,43 @@ const userSchema = new mongoose.Schema({
   },
   gstin: { 
     type: String, 
-    default: '' 
+    default: '',
+    uppercase: true,
+    trim: true
+  },
+  pan: {
+    type: String,
+    default: '',
+    uppercase: true,
+    trim: true
   },
   drugLicense: { 
     type: String, 
     default: '' 
+  },
+  drugLicense1: { 
+    type: String, 
+    default: '' 
+  },
+  drugLicense2: { 
+    type: String, 
+    default: '' 
+  },
+  gstinDoc: {
+    type: String,
+    default: ''
+  },
+  panDoc: {
+    type: String,
+    default: ''
+  },
+  drugLicense1Doc: {
+    type: String,
+    default: ''
+  },
+  drugLicense2Doc: {
+    type: String,
+    default: ''
   },
   phone: { 
     type: String, 

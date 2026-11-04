@@ -1054,9 +1054,9 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 onClick={onOpenAuth}
                 className="btn btn-outline btn-sm"
                 style={{ padding: '8px 18px', borderRadius: '30px', fontWeight: '800', border: '1.5px solid var(--primary-blue)', color: 'var(--primary-blue)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
-                aria-label="Open B2B login and registration modal"
+                aria-label="Open Chemist login and registration modal"
               >
-                <LogIn size={15} aria-hidden="true" /> <span>B2B Login</span>
+                <LogIn size={15} aria-hidden="true" /> <span>Chemist Login / Register</span>
               </button>
             )}
 
@@ -1317,7 +1317,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                   onClick={() => { onOpenAuth(); setIsMobileMenuOpen(false); }}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px 15px', backgroundColor: 'var(--primary-blue)', color: '#ffffff', borderRadius: '8px', fontWeight: '700', cursor: 'pointer', border: 'none', width: '100%' }}
                 >
-                  <LogIn size={16} /> B2B Login / Register
+                  <LogIn size={16} /> Chemist Login / Register
                 </button>
               )}
             </div>

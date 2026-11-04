@@ -311,7 +311,7 @@ export default function RetailerDashboard() {
                 boxShadow: '0 4px 14px rgba(12, 61, 108, 0.25)'
               }}
             >
-              <Zap size={18} /> Sign In to B2B Account
+              <Zap size={18} /> Sign In to Chemist Account
             </button>
             <Link
               to="/products"

@@ -75,7 +75,7 @@ export default function ForgotPasswordModal({
 
         if (!isMatched && !cleanInput.includes('@example.com')) {
           setError(
-            'No registered B2B account found with this email or phone. Please verify your details or register a new store.'
+            'No registered Chemist account found with this email or phone. Please verify your details or register a new store.'
           );
           setIsLoading(false);
           return;
@@ -89,7 +89,7 @@ export default function ForgotPasswordModal({
       }
     } catch {
       setError(
-        'No registered B2B account found with this email or phone. Please verify your details or register a new store.'
+        'No registered Chemist account found with this email or phone. Please verify your details or register a new store.'
       );
     } finally {
       setIsLoading(false);

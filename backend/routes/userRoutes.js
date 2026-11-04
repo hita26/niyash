@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const User = require('../models/User');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -11,6 +14,44 @@ try {
   nodemailer = null;
 }
 
+// Multer Storage Configuration for Chemist Document Uploads
+const uploadDir = process.env.VERCEL ? path.join('/tmp', 'uploads') : path.join(__dirname, '../uploads');
+try {
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+} catch (err) {
+  console.warn('Warning: Could not create upload directory:', err.message);
+}
+
+const storage = multer.diskStorage({
+  destination(req, file, cb) {
+    cb(null, uploadDir);
+  },
+  filename(req, file, cb) {
+    const cleanExt = path.extname(file.originalname).toLowerCase();
+    cb(null, `doc-${Date.now()}-${Math.round(Math.random() * 1e9)}${cleanExt}`);
+  },
+});
+
+function checkDocType(file, cb) {
+  const allowedExts = /jpeg|jpg|png|webp|pdf/;
+  const ext = allowedExts.test(path.extname(file.originalname).toLowerCase());
+  const mime = /image|pdf/.test(file.mimetype);
+  if (ext || mime) {
+    return cb(null, true);
+  }
+  cb(new Error('Only JPG, PNG, WEBP and PDF document files are allowed!'));
+}
+
+const docUpload = multer({
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  fileFilter(req, file, cb) {
+    checkDocType(file, cb);
+  },
+});
+
 // Helper to generate JWT token
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET || 'niyansh_pharma_jwt_secret_key_2026', {
@@ -18,18 +59,68 @@ const generateToken = (id) => {
   });
 };
 
-// @desc    Register a new user
+// @desc    Upload Chemist verification document (GST, PAN, Drug License 1 & 2)
+// @route   POST /api/users/upload-doc
+// @access  Public
+router.post('/upload-doc', (req, res) => {
+  docUpload.single('file')(req, res, function (err) {
+    if (err instanceof multer.MulterError) {
+      return res.status(400).json({ success: false, message: `Upload error: ${err.message}` });
+    } else if (err) {
+      return res.status(400).json({ success: false, message: err.message || 'File upload failed' });
+    }
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No file uploaded' });
+    }
+    const fileUrl = `/uploads/${req.file.filename}`;
+    return res.json({ success: true, url: fileUrl, filename: req.file.originalname });
+  });
+});
+
+// @desc    Register a new user / chemist
 // @route   POST /api/users/register
 // @access  Public
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, companyName, gstin, drugLicense, phone } = req.body;
+    const { 
+      name, 
+      email, 
+      password, 
+      companyName, 
+      gstin, 
+      pan,
+      drugLicense, 
+      drugLicense1, 
+      drugLicense2,
+      gstinDoc,
+      panDoc,
+      drugLicense1Doc,
+      drugLicense2Doc,
+      phone 
+    } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'Please provide name, email and password' });
     }
 
     const normalizedEmail = email.toLowerCase().trim();
+    const normalizedGstin = (gstin || '').trim().toUpperCase();
+    const normalizedPan = (pan || '').trim().toUpperCase();
+
+    // Validation rule: If GSTIN is not provided, PAN number is required
+    if (!normalizedGstin && !normalizedPan) {
+      return res.status(400).json({ 
+        message: 'Please provide either GSTIN or PAN Number. If you do not have a GSTIN, PAN is required.' 
+      });
+    }
+
+    // Drug License validation: at least Drug License No 1 is required
+    const dl1 = (drugLicense1 || drugLicense || '').trim();
+    const dl2 = (drugLicense2 || '').trim();
+
+    if (!dl1) {
+      return res.status(400).json({ message: 'Drug License No 1 is required for chemist registration.' });
+    }
 
     let sanitizedPhone = '';
     if (phone) {
@@ -44,13 +135,23 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'User already exists with this email' });
     }
 
+    // Auto-derive PAN from GSTIN if GSTIN given and PAN left blank
+    const derivedPan = normalizedPan || (normalizedGstin.length >= 12 ? normalizedGstin.substring(2, 12) : '');
+
     const user = await User.create({
       name,
       email: normalizedEmail,
       password,
       companyName: companyName || '',
-      gstin: gstin || '',
-      drugLicense: drugLicense || '',
+      gstin: normalizedGstin,
+      pan: derivedPan,
+      drugLicense: dl1,
+      drugLicense1: dl1,
+      drugLicense2: dl2,
+      gstinDoc: gstinDoc || '',
+      panDoc: panDoc || '',
+      drugLicense1Doc: drugLicense1Doc || '',
+      drugLicense2Doc: drugLicense2Doc || '',
       phone: sanitizedPhone,
     });
 
@@ -61,7 +162,14 @@ router.post('/register', async (req, res) => {
         email: user.email,
         companyName: user.companyName,
         gstin: user.gstin,
+        pan: user.pan,
         drugLicense: user.drugLicense,
+        drugLicense1: user.drugLicense1 || user.drugLicense,
+        drugLicense2: user.drugLicense2 || '',
+        gstinDoc: user.gstinDoc || '',
+        panDoc: user.panDoc || '',
+        drugLicense1Doc: user.drugLicense1Doc || '',
+        drugLicense2Doc: user.drugLicense2Doc || '',
         phone: user.phone,
         role: user.role,
         token: generateToken(user._id),
@@ -95,7 +203,14 @@ router.post('/login', async (req, res) => {
         email: user.email,
         companyName: user.companyName,
         gstin: user.gstin,
+        pan: user.pan || '',
         drugLicense: user.drugLicense,
+        drugLicense1: user.drugLicense1 || user.drugLicense,
+        drugLicense2: user.drugLicense2 || '',
+        gstinDoc: user.gstinDoc || '',
+        panDoc: user.panDoc || '',
+        drugLicense1Doc: user.drugLicense1Doc || '',
+        drugLicense2Doc: user.drugLicense2Doc || '',
         phone: user.phone,
         role: user.role,
         token: generateToken(user._id),
@@ -186,7 +301,7 @@ router.post('/forgot-password', async (req, res) => {
 
     if (!user) {
       return res.status(404).json({
-        message: 'No registered B2B account found with this email or phone. Please verify your details or register a new store.',
+        message: 'No registered Chemist account found with this email or phone. Please verify your details or register a new store.',
       });
     }
 
@@ -229,7 +344,7 @@ router.post('/forgot-password', async (req, res) => {
               <div style="border-top: 1px solid #f1f5f9; padding-top: 20px;">
                 <p style="color: #1e293b; font-size: 15px; margin-bottom: 12px;">Hello <strong>${user.name || 'Valued Retailer'}</strong>,</p>
                 <p style="color: #475569; font-size: 14px; line-height: 1.6; margin-bottom: 20px;">
-                  We received a request to reset your password for your Niyansh Pharma B2B Wholesale account (<strong>${user.email}</strong>).
+                  We received a request to reset your password for your Niyansh Pharma Chemist Wholesale account (<strong>${user.email}</strong>).
                 </p>
                 <div style="background-color: #f0f7ff; border: 1px dashed #0c3d6c; border-radius: 8px; padding: 18px; text-align: center; margin: 24px 0;">
                   <div style="color: #64748b; font-size: 12px; text-transform: uppercase; font-weight: 600; letter-spacing: 1px; margin-bottom: 8px;">Your 6-Digit Verification Code</div>
@@ -355,7 +470,14 @@ router.post('/reset-password', async (req, res) => {
       email: updatedUser.email,
       companyName: updatedUser.companyName,
       gstin: updatedUser.gstin,
+      pan: updatedUser.pan || '',
       drugLicense: updatedUser.drugLicense,
+      drugLicense1: updatedUser.drugLicense1 || updatedUser.drugLicense,
+      drugLicense2: updatedUser.drugLicense2 || '',
+      gstinDoc: updatedUser.gstinDoc || '',
+      panDoc: updatedUser.panDoc || '',
+      drugLicense1Doc: updatedUser.drugLicense1Doc || '',
+      drugLicense2Doc: updatedUser.drugLicense2Doc || '',
       phone: updatedUser.phone,
       role: updatedUser.role,
       token: generateToken(updatedUser._id),
@@ -380,7 +502,14 @@ router.get('/profile', protect, async (req, res) => {
         email: user.email,
         companyName: user.companyName,
         gstin: user.gstin,
+        pan: user.pan || '',
         drugLicense: user.drugLicense,
+        drugLicense1: user.drugLicense1 || user.drugLicense,
+        drugLicense2: user.drugLicense2 || '',
+        gstinDoc: user.gstinDoc || '',
+        panDoc: user.panDoc || '',
+        drugLicense1Doc: user.drugLicense1Doc || '',
+        drugLicense2Doc: user.drugLicense2Doc || '',
         phone: user.phone,
         role: user.role,
       });
@@ -404,7 +533,15 @@ router.put('/profile', protect, async (req, res) => {
       user.name = req.body.name || user.name;
       user.companyName = req.body.companyName !== undefined ? req.body.companyName : user.companyName;
       user.gstin = req.body.gstin !== undefined ? req.body.gstin : user.gstin;
+      if (req.body.pan !== undefined) user.pan = req.body.pan;
       user.drugLicense = req.body.drugLicense !== undefined ? req.body.drugLicense : user.drugLicense;
+      if (req.body.drugLicense1 !== undefined) user.drugLicense1 = req.body.drugLicense1;
+      if (req.body.drugLicense2 !== undefined) user.drugLicense2 = req.body.drugLicense2;
+      if (req.body.gstinDoc !== undefined) user.gstinDoc = req.body.gstinDoc;
+      if (req.body.panDoc !== undefined) user.panDoc = req.body.panDoc;
+      if (req.body.drugLicense1Doc !== undefined) user.drugLicense1Doc = req.body.drugLicense1Doc;
+      if (req.body.drugLicense2Doc !== undefined) user.drugLicense2Doc = req.body.drugLicense2Doc;
+
       if (req.body.phone !== undefined) {
         const cleanP = req.body.phone ? req.body.phone.toString().replace(/\D/g, '') : '';
         if (cleanP && cleanP.length !== 10) {
@@ -425,7 +562,14 @@ router.put('/profile', protect, async (req, res) => {
         email: updatedUser.email,
         companyName: updatedUser.companyName,
         gstin: updatedUser.gstin,
+        pan: updatedUser.pan || '',
         drugLicense: updatedUser.drugLicense,
+        drugLicense1: updatedUser.drugLicense1 || updatedUser.drugLicense,
+        drugLicense2: updatedUser.drugLicense2 || '',
+        gstinDoc: updatedUser.gstinDoc || '',
+        panDoc: updatedUser.panDoc || '',
+        drugLicense1Doc: updatedUser.drugLicense1Doc || '',
+        drugLicense2Doc: updatedUser.drugLicense2Doc || '',
         phone: updatedUser.phone,
         role: updatedUser.role,
         token: generateToken(updatedUser._id),

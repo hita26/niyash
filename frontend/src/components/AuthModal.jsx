@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   X, Lock, Mail, User, ShieldAlert, FileText, Phone, Building, 
-  KeyRound, CheckCircle2, ArrowLeft, Eye, EyeOff, MessageCircle, RotateCcw 
+  KeyRound, CheckCircle2, ArrowLeft, Eye, EyeOff, MessageCircle, RotateCcw,
+  Upload, Check, Paperclip
 } from 'lucide-react';
 
 function AuthModal({ isOpen, onClose, onSuccess }) {
@@ -20,8 +21,23 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
     password: '',
     companyName: '',
     gstin: '',
+    pan: '',
     drugLicense: '',
+    drugLicense1: '',
+    drugLicense2: '',
     phone: '',
+    gstinDoc: '',
+    panDoc: '',
+    drugLicense1Doc: '',
+    drugLicense2Doc: '',
+  });
+
+  // Uploaded Document Files State
+  const [docFiles, setDocFiles] = useState({
+    gstin: null,
+    pan: null,
+    drugLicense1: null,
+    drugLicense2: null,
   });
 
   // Forgot Password & Reset State
@@ -79,11 +95,94 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
   const isRegister = authMode === 'register';
 
   const handleChange = (e) => {
-    let val = e.target.name === 'email' ? e.target.value.toLowerCase() : e.target.value;
-    if (e.target.name === 'phone') {
-      val = e.target.value.replace(/\D/g, '').slice(0, 10);
+    const { name, value } = e.target;
+    let val = value;
+
+    if (name === 'email') {
+      val = val.toLowerCase();
+      setFormData(prev => ({ ...prev, [name]: val }));
+    } else if (name === 'phone') {
+      val = val.replace(/\D/g, '').slice(0, 10);
+      setFormData(prev => ({ ...prev, [name]: val }));
+    } else if (name === 'gstin') {
+      val = val.toUpperCase().trim();
+      // Auto-extract PAN from GSTIN if PAN is not explicitly entered
+      let derivedPan = formData.pan;
+      if (val.length >= 12) {
+        const panCandidate = val.substring(2, 12).replace(/[^A-Z0-9]/g, '');
+        if (panCandidate.length === 10 && !formData.pan) {
+          derivedPan = panCandidate;
+        }
+      }
+      setFormData(prev => ({ ...prev, gstin: val, pan: derivedPan }));
+    } else if (name === 'pan') {
+      val = val.toUpperCase().trim().slice(0, 10);
+      setFormData(prev => ({ ...prev, [name]: val }));
+    } else if (name === 'drugLicense1') {
+      val = val.toUpperCase();
+      setFormData(prev => ({ ...prev, drugLicense1: val, drugLicense: val }));
+    } else if (name === 'drugLicense2') {
+      val = val.toUpperCase();
+      setFormData(prev => ({ ...prev, [name]: val }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: val }));
     }
-    setFormData({ ...formData, [e.target.name]: val });
+  };
+
+  const handleFileUpload = async (e, field) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      setError(`File "${file.name}" exceeds the 10MB size limit.`);
+      return;
+    }
+
+    // Local instant preview & fallback
+    const reader = new FileReader();
+    reader.onload = (loadEvt) => {
+      const dataUrl = loadEvt.target.result;
+      setDocFiles(prev => ({
+        ...prev,
+        [field]: { name: file.name, url: dataUrl, uploading: true }
+      }));
+      setFormData(prev => ({ ...prev, [`${field}Doc`]: dataUrl }));
+    };
+    reader.readAsDataURL(file);
+
+    // Try server upload endpoint
+    try {
+      const uploadData = new FormData();
+      uploadData.append('file', file);
+      const res = await fetch('/api/users/upload-doc', {
+        method: 'POST',
+        body: uploadData,
+      });
+      const result = await res.json();
+      if (res.ok && result.url) {
+        setDocFiles(prev => ({
+          ...prev,
+          [field]: { name: file.name, url: result.url, uploading: false }
+        }));
+        setFormData(prev => ({ ...prev, [`${field}Doc`]: result.url }));
+      } else {
+        setDocFiles(prev => ({
+          ...prev,
+          [field]: { ...prev[field], uploading: false }
+        }));
+      }
+    } catch (err) {
+      // Offline fallback: retained base64 dataUrl
+      setDocFiles(prev => ({
+        ...prev,
+        [field]: { ...prev[field], uploading: false }
+      }));
+    }
+  };
+
+  const handleRemoveFile = (field) => {
+    setDocFiles(prev => ({ ...prev, [field]: null }));
+    setFormData(prev => ({ ...prev, [`${field}Doc`]: '' }));
   };
 
   const handleResetChange = (e) => {
@@ -111,13 +210,40 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
         setLoading(false);
         return;
       }
+
+      const cleanGstin = (formData.gstin || '').trim();
+      const cleanPan = (formData.pan || '').trim();
+
+      // Rule: If GSTIN is not provided, PAN number is mandatory
+      if (!cleanGstin && !cleanPan) {
+        setError('Please provide either GSTIN or PAN Number. If you do not have a GSTIN, PAN Number is required.');
+        setLoading(false);
+        return;
+      }
+
+      if (cleanPan && cleanPan.length !== 10) {
+        setError('PAN Number must contain exactly 10 alphanumeric characters (e.g. ABCDE1234F).');
+        setLoading(false);
+        return;
+      }
+
+      const dl1 = (formData.drugLicense1 || formData.drugLicense || '').trim();
+      if (!dl1) {
+        setError('Drug License No 1 is required for chemist registration.');
+        setLoading(false);
+        return;
+      }
     }
 
     const url = isLogin ? '/api/users/login' : '/api/users/register';
     const cleanEmail = formData.email.toLowerCase().trim();
     const body = isLogin 
       ? { email: cleanEmail, password: formData.password }
-      : { ...formData, email: cleanEmail };
+      : { 
+          ...formData, 
+          email: cleanEmail,
+          drugLicense: formData.drugLicense1 || formData.drugLicense 
+        };
 
     try {
       const response = await fetch(url, {
@@ -259,13 +385,13 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
           isLogin 
             ? 'Retailer Account Login' 
             : isRegister 
-            ? 'Retailer Wholesale Registration' 
+            ? 'Chemist Wholesale Registration' 
             : 'Reset Account Password'
         }
         className="card animate-fade-in" 
         style={{
           width: '100%', 
-          maxWidth: isRegister ? '560px' : '430px', 
+          maxWidth: isRegister ? '620px' : '430px', 
           padding: '28px',
           position: 'relative', 
           backgroundColor: '#ffffff', 
@@ -318,7 +444,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                 transition: 'var(--transition-smooth)'
               }}
             >
-              B2B Register
+              Chemist Register
             </button>
           </div>
         )}
@@ -461,9 +587,10 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
 
             {isRegister && (
               <>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+                {/* Store Name & Mobile Number */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '15px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                    <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Company/Store Name</label>
+                    <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Chemist / Store Name</label>
                     <div style={{ position: 'relative' }}>
                       <Building size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
                       <input 
@@ -495,35 +622,230 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                    <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>GSTIN (GST Number)</label>
-                    <div style={{ position: 'relative' }}>
-                      <FileText size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
-                      <input 
-                        type="text" 
-                        name="gstin" 
-                        value={formData.gstin} 
-                        onChange={handleChange}
-                        placeholder="24AAAAA0000A1Z"
-                        style={{ width: '100%', padding: '10px 10px 10px 38px', borderRadius: '6px', border: '1px solid var(--border-light)', fontSize: '0.85rem' }}
-                      />
-                    </div>
+                {/* Tax Credentials Section: GSTIN or PAN */}
+                <div style={{ 
+                  backgroundColor: '#f8fafc', 
+                  padding: '14px', 
+                  borderRadius: '10px', 
+                  border: '1px solid #e2e8f0', 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: '12px' 
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
+                    <span style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--primary-blue)' }}>
+                      Tax Credentials (GSTIN / PAN)
+                    </span>
+                    <span style={{ fontSize: '0.74rem', color: '#475569', backgroundColor: '#e2e8f0', padding: '2px 8px', borderRadius: '12px' }}>
+                      GSTIN na hoy to PAN Number jaruri chhe
+                    </span>
                   </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                    <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Drug License Number</label>
-                    <div style={{ position: 'relative' }}>
-                      <FileText size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
-                      <input 
-                        type="text" 
-                        name="drugLicense" 
-                        value={formData.drugLicense} 
-                        onChange={handleChange}
-                        placeholder="G/25/1234"
-                        style={{ width: '100%', padding: '10px 10px 10px 38px', borderRadius: '6px', border: '1px solid var(--border-light)', fontSize: '0.85rem' }}
-                      />
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+                    
+                    {/* GSTIN Field with Upload Button */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <label style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                          GSTIN Number
+                        </label>
+                        <label style={{
+                          display: 'inline-flex', alignItems: 'center', gap: '4px',
+                          fontSize: '0.72rem', fontWeight: '700', color: '#0c3d6c',
+                          backgroundColor: '#eff6ff', border: '1px solid #bfdbfe',
+                          padding: '2px 8px', borderRadius: '4px', cursor: 'pointer',
+                          transition: 'background-color 0.2s'
+                        }}>
+                          <Upload size={12} />
+                          <span>{docFiles.gstin ? 'Change' : 'Upload (JPG/PNG)'}</span>
+                          <input 
+                            type="file" 
+                            accept="image/png, image/jpeg, image/jpg, .pdf" 
+                            style={{ display: 'none' }} 
+                            onChange={(e) => handleFileUpload(e, 'gstin')} 
+                          />
+                        </label>
+                      </div>
+                      <div style={{ position: 'relative' }}>
+                        <FileText size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
+                        <input 
+                          type="text" 
+                          name="gstin" 
+                          maxLength={15}
+                          value={formData.gstin} 
+                          onChange={handleChange}
+                          placeholder="24AAAAA0000A1Z"
+                          style={{ width: '100%', padding: '9px 10px 9px 36px', borderRadius: '6px', border: '1px solid var(--border-light)', fontSize: '0.84rem' }}
+                        />
+                      </div>
+                      {docFiles.gstin && (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', backgroundColor: '#ecfdf5', color: '#065f46', padding: '3px 8px', borderRadius: '4px', border: '1px solid #a7f3d0' }}>
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '170px' }}>
+                            ✓ {docFiles.gstin.name}
+                          </span>
+                          <button type="button" onClick={() => handleRemoveFile('gstin')} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', padding: '0 2px' }}>✕</button>
+                        </div>
+                      )}
                     </div>
+
+                    {/* PAN Card Field with Upload Button */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <label style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                          PAN Number {!formData.gstin && <span style={{ color: '#dc2626' }}>*</span>}
+                        </label>
+                        <label style={{
+                          display: 'inline-flex', alignItems: 'center', gap: '4px',
+                          fontSize: '0.72rem', fontWeight: '700', color: '#0c3d6c',
+                          backgroundColor: '#eff6ff', border: '1px solid #bfdbfe',
+                          padding: '2px 8px', borderRadius: '4px', cursor: 'pointer',
+                          transition: 'background-color 0.2s'
+                        }}>
+                          <Upload size={12} />
+                          <span>{docFiles.pan ? 'Change' : 'Upload (JPG/PNG)'}</span>
+                          <input 
+                            type="file" 
+                            accept="image/png, image/jpeg, image/jpg, .pdf" 
+                            style={{ display: 'none' }} 
+                            onChange={(e) => handleFileUpload(e, 'pan')} 
+                          />
+                        </label>
+                      </div>
+                      <div style={{ position: 'relative' }}>
+                        <FileText size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
+                        <input 
+                          type="text" 
+                          name="pan" 
+                          maxLength={10}
+                          value={formData.pan} 
+                          onChange={handleChange}
+                          placeholder="ABCDE1234F"
+                          style={{ width: '100%', padding: '9px 10px 9px 36px', borderRadius: '6px', border: '1px solid var(--border-light)', fontSize: '0.84rem' }}
+                        />
+                      </div>
+                      {docFiles.pan && (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', backgroundColor: '#ecfdf5', color: '#065f46', padding: '3px 8px', borderRadius: '4px', border: '1px solid #a7f3d0' }}>
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '170px' }}>
+                            ✓ {docFiles.pan.name}
+                          </span>
+                          <button type="button" onClick={() => handleRemoveFile('pan')} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', padding: '0 2px' }}>✕</button>
+                        </div>
+                      )}
+                    </div>
+
+                  </div>
+                </div>
+
+                {/* Drug Licenses Section: Drug License 1 & Drug License 2 */}
+                <div style={{ 
+                  backgroundColor: '#f8fafc', 
+                  padding: '14px', 
+                  borderRadius: '10px', 
+                  border: '1px solid #e2e8f0', 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: '12px' 
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
+                    <span style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--primary-blue)' }}>
+                      Drug Licenses (Form 20 / Form 21)
+                    </span>
+                    <span style={{ fontSize: '0.74rem', color: '#475569', backgroundColor: '#e2e8f0', padding: '2px 8px', borderRadius: '12px' }}>
+                      Drug License No 1 is mandatory *
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+                    
+                    {/* Drug License No 1 Field with Upload Button */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <label style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                          Drug License No 1 <span style={{ color: '#dc2626' }}>*</span>
+                        </label>
+                        <label style={{
+                          display: 'inline-flex', alignItems: 'center', gap: '4px',
+                          fontSize: '0.72rem', fontWeight: '700', color: '#0c3d6c',
+                          backgroundColor: '#eff6ff', border: '1px solid #bfdbfe',
+                          padding: '2px 8px', borderRadius: '4px', cursor: 'pointer',
+                          transition: 'background-color 0.2s'
+                        }}>
+                          <Upload size={12} />
+                          <span>{docFiles.drugLicense1 ? 'Change' : 'Upload (JPG/PNG)'}</span>
+                          <input 
+                            type="file" 
+                            accept="image/png, image/jpeg, image/jpg, .pdf" 
+                            style={{ display: 'none' }} 
+                            onChange={(e) => handleFileUpload(e, 'drugLicense1')} 
+                          />
+                        </label>
+                      </div>
+                      <div style={{ position: 'relative' }}>
+                        <FileText size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
+                        <input 
+                          type="text" 
+                          name="drugLicense1" 
+                          required
+                          value={formData.drugLicense1} 
+                          onChange={handleChange}
+                          placeholder="e.g. 20B/1234 or G/20/1234"
+                          style={{ width: '100%', padding: '9px 10px 9px 36px', borderRadius: '6px', border: '1px solid var(--border-light)', fontSize: '0.84rem' }}
+                        />
+                      </div>
+                      {docFiles.drugLicense1 && (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', backgroundColor: '#ecfdf5', color: '#065f46', padding: '3px 8px', borderRadius: '4px', border: '1px solid #a7f3d0' }}>
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '170px' }}>
+                            ✓ {docFiles.drugLicense1.name}
+                          </span>
+                          <button type="button" onClick={() => handleRemoveFile('drugLicense1')} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', padding: '0 2px' }}>✕</button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Drug License No 2 Field with Upload Button */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <label style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                          Drug License No 2
+                        </label>
+                        <label style={{
+                          display: 'inline-flex', alignItems: 'center', gap: '4px',
+                          fontSize: '0.72rem', fontWeight: '700', color: '#0c3d6c',
+                          backgroundColor: '#eff6ff', border: '1px solid #bfdbfe',
+                          padding: '2px 8px', borderRadius: '4px', cursor: 'pointer',
+                          transition: 'background-color 0.2s'
+                        }}>
+                          <Upload size={12} />
+                          <span>{docFiles.drugLicense2 ? 'Change' : 'Upload (JPG/PNG)'}</span>
+                          <input 
+                            type="file" 
+                            accept="image/png, image/jpeg, image/jpg, .pdf" 
+                            style={{ display: 'none' }} 
+                            onChange={(e) => handleFileUpload(e, 'drugLicense2')} 
+                          />
+                        </label>
+                      </div>
+                      <div style={{ position: 'relative' }}>
+                        <FileText size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
+                        <input 
+                          type="text" 
+                          name="drugLicense2" 
+                          value={formData.drugLicense2} 
+                          onChange={handleChange}
+                          placeholder="e.g. 21B/5678 or G/21/5678"
+                          style={{ width: '100%', padding: '9px 10px 9px 36px', borderRadius: '6px', border: '1px solid var(--border-light)', fontSize: '0.84rem' }}
+                        />
+                      </div>
+                      {docFiles.drugLicense2 && (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', backgroundColor: '#ecfdf5', color: '#065f46', padding: '3px 8px', borderRadius: '4px', border: '1px solid #a7f3d0' }}>
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '170px' }}>
+                            ✓ {docFiles.drugLicense2.name}
+                          </span>
+                          <button type="button" onClick={() => handleRemoveFile('drugLicense2')} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', padding: '0 2px' }}>✕</button>
+                        </div>
+                      )}
+                    </div>
+
                   </div>
                 </div>
               </>
@@ -535,7 +857,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
               className="btn btn-primary"
               style={{ width: '100%', padding: '12px', marginTop: '10px', borderRadius: '6px', fontWeight: '700' }}
             >
-              {loading ? 'Authenticating...' : isLogin ? 'Sign In to Account' : 'Create B2B Account'}
+              {loading ? 'Authenticating...' : isLogin ? 'Sign In to Account' : 'Create Chemist Account'}
             </button>
           </form>
         )}
@@ -545,13 +867,13 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
           <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '0.85rem', color: 'var(--text-medium)' }}>
             {isLogin ? (
               <span>
-                New B2B buyer?{' '}
+                New Chemist / Retailer?{' '}
                 <button 
                   type="button"
                   onClick={() => { setAuthMode('register'); setError(''); setInfoMessage(''); }}
                   style={{ color: 'var(--primary-blue)', fontWeight: '700', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
                 >
-                  Register Store
+                  Chemist Register
                 </button>
               </span>
             ) : (

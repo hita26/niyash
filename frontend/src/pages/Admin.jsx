@@ -4305,7 +4305,7 @@ _Helpline: +91 9316566894_`;
               {activeTab === 'enquiries' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
-                    <h2 style={{ fontSize: '1.6rem', color: 'var(--primary-blue)', margin: 0 }}>Enquiries & B2B Registrations</h2>
+                    <h2 style={{ fontSize: '1.6rem', color: 'var(--primary-blue)', margin: 0 }}>Enquiries & Chemist Registrations</h2>
                     
                     {/* Filters */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>

@@ -16,7 +16,7 @@ function Career() {
 
   const positions = [
     { title: 'Sales Manager', dept: 'Sales & Business Development', type: 'Full Time', desc: 'Lead institutional pharma sales, wholesale distributor relations, and territory expansion across Gujarat.' },
-    { title: 'Sales Executive (Rajkot / Gondal)', dept: 'Field Sales', type: 'Full Time', desc: 'Promote products to medical stores and collect orders.' },
+    { title: 'Sales Executive', dept: 'Field Sales', type: 'Full Time', desc: 'Promote products to medical stores and collect orders.' },
     { title: 'Warehouse In-charge', dept: 'Logistics & Inventory', type: 'Full Time', desc: 'Manage pharmaceutical stocks, batch details, and packaging.' },
     { title: 'Delivery Partner (Local)', dept: 'Distribution', type: 'Full Time / Part Time', desc: 'Deliver products safely and timely to local hospitals and pharmacies.' },
     { title: 'Telecaller / Order Clerk', dept: 'Customer Support', type: 'Full Time', desc: 'Call medical stores, book wholesale orders, and handle general enquiries.' }

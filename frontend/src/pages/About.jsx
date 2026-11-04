@@ -330,7 +330,7 @@ function About() {
         <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '30px' }}>
           <div>
             <h2 style={{ color: '#ffffff', fontSize: '2rem', marginBottom: '8px' }}>
-              Ready to Partner with Niyansh Pharma?
+              Ready to do Business with Niyansh Pharma?
             </h2>
             <p style={{ color: '#e2e8f0', fontSize: '1.05rem', maxWidth: '680px' }}>
               Connect with our business development desk to unlock verified wholesale trade margins, credit terms, and reliable formulation dispatches.
@@ -343,7 +343,7 @@ function About() {
               className="btn btn-secondary" 
               style={{ backgroundColor: 'var(--secondary-green)', padding: '14px 28px', fontSize: '1rem', gap: '8px' }}
             >
-              <HeartHandshake size={18} /> Partner With Us
+              <HeartHandshake size={18} /> Business With Us
             </Link>
             <Link 
               to="/contact" 

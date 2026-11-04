@@ -9,7 +9,7 @@ const User = require('../models/User');
 // @access  Public (Optional auth, required for Cart Quote purchases)
 router.post('/', async (req, res) => {
   try {
-    const { type, name, phone, email, address, message, items } = req.body;
+    const { type, name, phone, email, address, message, items, designation, attachment } = req.body;
 
     // Check for authorization token
     let user = null;
@@ -43,6 +43,8 @@ router.post('/', async (req, res) => {
       phone: cleanPhone,
       email: email ? email.toLowerCase().trim() : '',
       address,
+      designation: designation ? designation.trim() : '',
+      attachment: attachment ? attachment.trim() : '',
       message,
     };
 

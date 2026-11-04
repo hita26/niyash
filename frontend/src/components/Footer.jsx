@@ -100,7 +100,7 @@ function Footer({ compact = false }) {
             <div className="footer-contact">
               <div className="contact-item">
                 <MapPin size={18} className="contact-icon" aria-hidden="true" />
-                <span>Niyansh Pharma Wholesale Hub, Rajkot, Gujarat - 360001</span>
+                <span>Niyansh Pharma Wholesale Hub, Rajkot, Gujarat - 360005</span>
               </div>
               <div className="contact-item">
                 <Phone size={18} className="contact-icon" aria-hidden="true" />

@@ -6,6 +6,7 @@ function Manufacturing() {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [company, setCompany] = useState('');
+  const [designation, setDesignation] = useState('');
   const [formulations, setFormulations] = useState('');
   const [batchSize, setBatchSize] = useState('');
   const [message, setMessage] = useState('');
@@ -27,7 +28,7 @@ function Manufacturing() {
     setIsSubmitting(true);
 
     try {
-      const fullMessage = `Company: ${company.trim()}\nRequested Formulations: ${formulations.trim()}\nEstimated Batch Size: ${batchSize.trim()}\n\nNotes: ${message.trim()}`;
+      const fullMessage = `Company: ${company.trim()}\nDesignation: ${designation.trim()}\nRequested Formulations: ${formulations.trim()}\nEstimated Batch Size: ${batchSize.trim()}\n\nNotes: ${message.trim()}`;
 
       const response = await fetch('/api/enquiries', {
         method: 'POST',
@@ -40,6 +41,7 @@ function Manufacturing() {
           phone: cleanPhone,
           email: email.trim(),
           address: company.trim(),
+          designation: designation.trim(),
           message: fullMessage,
         }),
       });
@@ -52,6 +54,7 @@ function Manufacturing() {
         setPhone('');
         setEmail('');
         setCompany('');
+        setDesignation('');
         setFormulations('');
         setBatchSize('');
         setMessage('');

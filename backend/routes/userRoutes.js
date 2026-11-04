@@ -35,9 +35,9 @@ const storage = multer.diskStorage({
 });
 
 function checkDocType(file, cb) {
-  const allowedExts = /jpeg|jpg|png|webp|pdf/;
+  const allowedExts = /jpeg|jpg|png|webp|pdf|xls|xlsx|csv/;
   const ext = allowedExts.test(path.extname(file.originalname).toLowerCase());
-  const mime = /image|pdf/.test(file.mimetype);
+  const mime = /image|pdf|excel|spreadsheet|csv|officedocument/.test(file.mimetype) || allowedExts.test(path.extname(file.originalname).toLowerCase());
   if (ext || mime) {
     return cb(null, true);
   }
@@ -47,7 +47,7 @@ function checkDocType(file, cb) {
 // Document Upload limited to 500 KB as requested
 const docUpload = multer({
   storage,
-  limits: { fileSize: 500 * 1024 }, // 500 KB limit
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit (specific register limits enforced on client/register endpoint)
   fileFilter(req, file, cb) {
     checkDocType(file, cb);
   },

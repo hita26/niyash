@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { Send, CheckCircle2, ShieldCheck, Award, Handshake, AlertCircle } from 'lucide-react';
+import { Send, CheckCircle2, ShieldCheck, Award, Handshake, AlertCircle, Building, User, Briefcase } from 'lucide-react';
 
 function Partner() {
+  const [distributorName, setDistributorName] = useState('');
   const [storeName, setStoreName] = useState('');
   const [ownerName, setOwnerName] = useState('');
+  const [designation, setDesignation] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [drugLicense, setDrugLicense] = useState('');
@@ -28,7 +30,7 @@ function Partner() {
     setIsSubmitting(true);
 
     try {
-      const fullMessage = `Store/Hospital Name: ${storeName.trim()}\nDrug License: ${drugLicense.trim()}\nGSTIN: ${gstNumber.trim()}\n\nMessage: ${message.trim()}`;
+      const fullMessage = `Distributor Name: ${distributorName.trim()}\nStore/Hospital Name: ${storeName.trim()}\nOwner/Contact Person: ${ownerName.trim()}\nDesignation: ${designation.trim()}\nDrug License: ${drugLicense.trim()}\nGSTIN: ${gstNumber.trim()}\n\nMessage: ${message.trim()}`;
 
       const response = await fetch('/api/enquiries', {
         method: 'POST',
@@ -41,6 +43,7 @@ function Partner() {
           phone: cleanPhone,
           email: email.trim(),
           address: address.trim(),
+          designation: designation.trim(),
           message: fullMessage,
         }),
       });
@@ -49,8 +52,10 @@ function Partner() {
 
       if (response.ok) {
         setIsSuccess(true);
+        setDistributorName('');
         setStoreName('');
         setOwnerName('');
+        setDesignation('');
         setPhone('');
         setEmail('');
         setDrugLicense('');
@@ -81,11 +86,11 @@ function Partner() {
               padding: '6px 14px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: '700',
               textTransform: 'uppercase', display: 'inline-block', marginBottom: '15px'
             }}>
-              Retailer & Hospital Partnership
+              Retailer & Healthcare Business Partnership
             </span>
-            <h1 style={{ fontSize: '2.5rem', marginBottom: '20px', lineHeight: '1.2' }}>Partner With Niyansh Pharma</h1>
+            <h1 style={{ fontSize: '2.5rem', marginBottom: '20px', lineHeight: '1.2' }}>Business With Niyansh Pharma</h1>
             <p style={{ color: 'var(--text-medium)', fontSize: '1.05rem', lineHeight: '1.6' }}>
-              Are you a medical store owner, hospital procurement manager, or private clinic administrator? Partner with Niyansh Pharma to secure reliable, bulk supplies of genuine medicines and surgical items at highly competitive wholesale rates.
+              Are you a distributor, medical store owner, hospital procurement manager, or healthcare provider? Do business with Niyansh Pharma to secure reliable, bulk supplies of genuine WHO-GMP certified medicines and surgical formulations at highly competitive wholesale trade rates.
             </p>
           </div>
 
@@ -95,8 +100,8 @@ function Partner() {
                 <Award size={20} />
               </div>
               <div>
-                <h3 style={{ fontSize: '1.1rem', marginBottom: '4px' }}>Reputed Brands</h3>
-                <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem' }}>Direct access to product portfolios of Cipla, Abbott, Sun Pharma, and 20+ top brands.</p>
+                <h3 style={{ fontSize: '1.1rem', marginBottom: '4px' }}>Reputed Brands & Direct Supply</h3>
+                <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem' }}>Direct access to product portfolios of Daxia Healthcare, Cipla, Abbott, Sun Pharma, and 250+ certified manufacturers.</p>
               </div>
             </div>
 
@@ -106,7 +111,7 @@ function Partner() {
               </div>
               <div>
                 <h3 style={{ fontSize: '1.1rem', marginBottom: '4px' }}>Compliance Assured</h3>
-                <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem' }}>All deliveries are backed by proper tax invoices and verified drug licenses.</p>
+                <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem' }}>All deliveries are backed by proper tax invoices, verified drug licenses (20B/21B), and stringent batch QR tracking.</p>
               </div>
             </div>
 
@@ -116,7 +121,7 @@ function Partner() {
               </div>
               <div>
                 <h3 style={{ fontSize: '1.1rem', marginBottom: '4px' }}>Dedicated Account Manager</h3>
-                <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem' }}>Get personalized order support and credit terms based on transaction volumes.</p>
+                <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem' }}>Get personalized order support, credit facilities, and express dispatch across Rajkot, Saurashtra, and PAN Gujarat.</p>
               </div>
             </div>
           </div>
@@ -133,7 +138,7 @@ function Partner() {
               <CheckCircle2 size={54} color="var(--secondary-green)" />
               <h3 style={{ color: 'var(--secondary-green)' }}>Application Received!</h3>
               <p style={{ color: 'var(--text-medium)', fontSize: '0.95rem' }}>
-                Thank you for choosing Niyansh Pharma. Our sales head will verify your license details and contact you to establish your wholesale account.
+                Thank you for choosing Niyansh Pharma. Our wholesale sales head will verify your license details and contact you to establish your trade account.
               </p>
             </div>
           ) : (
@@ -145,21 +150,44 @@ function Partner() {
                 </div>
               )}
               
+              {/* Row 1: Distributor Name & Medical Store / Hospital Name */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                  <label htmlFor="partner-store" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>Medical Store / Hospital Name *</label>
+                  <label htmlFor="partner-distributor" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                    Distributor Name *
+                  </label>
+                  <input 
+                    id="partner-distributor"
+                    type="text" 
+                    required 
+                    placeholder="E.g., Saurashtra Pharma Agency"
+                    value={distributorName}
+                    onChange={(e) => setDistributorName(e.target.value)}
+                    style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label htmlFor="partner-store" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                    Medical Store / Hospital Name *
+                  </label>
                   <input 
                     id="partner-store"
                     type="text" 
                     required 
-                    placeholder="E.g., Care Pharmacy"
+                    placeholder="E.g., Care Pharmacy / Apex Hospital"
                     value={storeName}
                     onChange={(e) => setStoreName(e.target.value)}
                     style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
                   />
                 </div>
+              </div>
+
+              {/* Row 2: Owner / Contact Person & Designation */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                  <label htmlFor="partner-owner" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>Owner / Purchaser Name *</label>
+                  <label htmlFor="partner-owner" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                    Owner / Purchaser Name *
+                  </label>
                   <input 
                     id="partner-owner"
                     type="text" 
@@ -170,11 +198,28 @@ function Partner() {
                     style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
                   />
                 </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label htmlFor="partner-designation" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                    Designation *
+                  </label>
+                  <input 
+                    id="partner-designation"
+                    type="text" 
+                    required 
+                    placeholder="E.g., Proprietor, Purchase Manager, Distributor Head"
+                    value={designation}
+                    onChange={(e) => setDesignation(e.target.value)}
+                    style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
+                  />
+                </div>
               </div>
 
+              {/* Row 3: Mobile Number & Email Address */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                  <label htmlFor="partner-phone" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>Mobile Number *</label>
+                  <label htmlFor="partner-phone" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                    Mobile Number *
+                  </label>
                   <input 
                     id="partner-phone"
                     type="tel" 
@@ -187,7 +232,9 @@ function Partner() {
                   />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                  <label htmlFor="partner-email" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>Email Address</label>
+                  <label htmlFor="partner-email" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                    Email Address
+                  </label>
                   <input 
                     id="partner-email"
                     type="email" 
@@ -199,9 +246,12 @@ function Partner() {
                 </div>
               </div>
 
+              {/* Row 4: Drug License Number & GSTIN */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                  <label htmlFor="partner-license" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>Drug License Number (20B/21B) *</label>
+                  <label htmlFor="partner-license" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                    Drug License Number (20B/21B) *
+                  </label>
                   <input 
                     id="partner-license"
                     type="text" 
@@ -213,7 +263,9 @@ function Partner() {
                   />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                  <label htmlFor="partner-gst" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>GSTIN (GST Number)</label>
+                  <label htmlFor="partner-gst" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                    GSTIN (GST Number)
+                  </label>
                   <input 
                     id="partner-gst"
                     type="text" 
@@ -225,21 +277,27 @@ function Partner() {
                 </div>
               </div>
 
+              {/* Row 5: Shop / Entity Address */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <label htmlFor="partner-address" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>Shop Address *</label>
+                <label htmlFor="partner-address" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                  Shop / Business Address *
+                </label>
                 <input 
                   id="partner-address"
                   type="text" 
                   required 
-                  placeholder="Address, City, Pincode"
+                  placeholder="Address, City, Pincode (e.g. Rajkot - 360005)"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
                 />
               </div>
 
+              {/* Row 6: Message / Query Details */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <label htmlFor="partner-msg" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>Message / Query Details</label>
+                <label htmlFor="partner-msg" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                  Message / Query Details
+                </label>
                 <textarea 
                   id="partner-msg"
                   rows="3" 
@@ -253,11 +311,11 @@ function Partner() {
               <button 
                 type="submit" 
                 disabled={isSubmitting}
-                className="btn btn-primary" 
+                className="btn btn-secondary" 
                 style={{ width: '100%', height: '45px', gap: '10px', marginTop: '10px' }}
               >
                 <Send size={16} />
-                {isSubmitting ? 'Submitting Form...' : 'Submit Partnership Query'}
+                {isSubmitting ? 'Submitting query...' : 'Submit Business Query'}
               </button>
             </form>
           )}

@@ -36,6 +36,16 @@ const enquirySchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    designation: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    attachment: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     message: {
       type: String,
       trim: true,

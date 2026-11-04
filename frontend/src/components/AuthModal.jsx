@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { 
   X, Lock, Mail, User, ShieldAlert, FileText, Phone, Building, 
   KeyRound, CheckCircle2, ArrowLeft, Eye, EyeOff, MessageCircle, RotateCcw,
-  Upload, Check, Paperclip
+  Upload, Check, Paperclip, ExternalLink
 } from 'lucide-react';
+
+const MAX_DOC_SIZE_KB = 500; // Required maximum document size in KB
 
 function AuthModal({ isOpen, onClose, onSuccess }) {
   const navigate = useNavigate();
@@ -106,7 +108,6 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
       setFormData(prev => ({ ...prev, [name]: val }));
     } else if (name === 'gstin') {
       val = val.toUpperCase().trim();
-      // Auto-extract PAN from GSTIN if PAN is not explicitly entered
       let derivedPan = formData.pan;
       if (val.length >= 12) {
         const panCandidate = val.substring(2, 12).replace(/[^A-Z0-9]/g, '');
@@ -133,18 +134,24 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
 
-    if (file.size > 10 * 1024 * 1024) {
-      setError(`File "${file.name}" exceeds the 10MB size limit.`);
+    const sizeInKB = Math.round(file.size / 1024);
+
+    // Enforce specific 500 KB limit
+    if (file.size > MAX_DOC_SIZE_KB * 1024) {
+      setError(`File "${file.name}" is ${sizeInKB} KB, which exceeds the required ${MAX_DOC_SIZE_KB} KB limit. Please compress it using the free image compressor link at the bottom.`);
+      e.target.value = '';
       return;
     }
 
-    // Local instant preview & fallback
+    setError('');
+
+    // Local instant preview & fallback Data URL
     const reader = new FileReader();
     reader.onload = (loadEvt) => {
       const dataUrl = loadEvt.target.result;
       setDocFiles(prev => ({
         ...prev,
-        [field]: { name: file.name, url: dataUrl, uploading: true }
+        [field]: { name: file.name, sizeKB: sizeInKB, url: dataUrl, uploading: true }
       }));
       setFormData(prev => ({ ...prev, [`${field}Doc`]: dataUrl }));
     };
@@ -162,10 +169,13 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
       if (res.ok && result.url) {
         setDocFiles(prev => ({
           ...prev,
-          [field]: { name: file.name, url: result.url, uploading: false }
+          [field]: { name: file.name, sizeKB: result.sizeKB || sizeInKB, url: result.url, uploading: false }
         }));
         setFormData(prev => ({ ...prev, [`${field}Doc`]: result.url }));
       } else {
+        if (result.message) {
+          setError(result.message);
+        }
         setDocFiles(prev => ({
           ...prev,
           [field]: { ...prev[field], uploading: false }
@@ -204,32 +214,79 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
     setLoading(true);
 
     if (isRegister) {
+      // All fields are strictly required
+      if (!formData.name || !formData.name.trim()) {
+        setError('Contact Name is required.');
+        setLoading(false);
+        return;
+      }
+      if (!formData.email || !formData.email.trim()) {
+        setError('Email Address is required.');
+        setLoading(false);
+        return;
+      }
+      if (!formData.password || formData.password.length < 6) {
+        setError('Password is required and must be at least 6 characters.');
+        setLoading(false);
+        return;
+      }
+      if (!formData.companyName || !formData.companyName.trim()) {
+        setError('Chemist / Store Name is required.');
+        setLoading(false);
+        return;
+      }
       const cleanPhone = (formData.phone || '').replace(/\D/g, '');
       if (cleanPhone.length !== 10) {
-        setError('Phone number must contain exactly 10 numeric digits.');
+        setError('Phone number is required and must contain exactly 10 digits.');
         setLoading(false);
         return;
       }
-
       const cleanGstin = (formData.gstin || '').trim();
-      const cleanPan = (formData.pan || '').trim();
-
-      // Rule: If GSTIN is not provided, PAN number is mandatory
-      if (!cleanGstin && !cleanPan) {
-        setError('Please provide either GSTIN or PAN Number. If you do not have a GSTIN, PAN Number is required.');
+      if (!cleanGstin) {
+        setError('GSTIN Number is required.');
         setLoading(false);
         return;
       }
-
-      if (cleanPan && cleanPan.length !== 10) {
+      if (!formData.gstinDoc) {
+        setError('Please upload your GSTIN Certificate document (JPG/PNG, Max 500 KB).');
+        setLoading(false);
+        return;
+      }
+      const cleanPan = (formData.pan || '').trim();
+      if (!cleanPan) {
+        setError('PAN Number is required.');
+        setLoading(false);
+        return;
+      }
+      if (cleanPan.length !== 10) {
         setError('PAN Number must contain exactly 10 alphanumeric characters (e.g. ABCDE1234F).');
         setLoading(false);
         return;
       }
-
+      if (!formData.panDoc) {
+        setError('Please upload your PAN Card document (JPG/PNG, Max 500 KB).');
+        setLoading(false);
+        return;
+      }
       const dl1 = (formData.drugLicense1 || formData.drugLicense || '').trim();
       if (!dl1) {
-        setError('Drug License No 1 is required for chemist registration.');
+        setError('Drug License No 1 is required.');
+        setLoading(false);
+        return;
+      }
+      if (!formData.drugLicense1Doc) {
+        setError('Please upload your Drug License No 1 document (JPG/PNG, Max 500 KB).');
+        setLoading(false);
+        return;
+      }
+      const dl2 = (formData.drugLicense2 || '').trim();
+      if (!dl2) {
+        setError('Drug License No 2 is required.');
+        setLoading(false);
+        return;
+      }
+      if (!formData.drugLicense2Doc) {
+        setError('Please upload your Drug License No 2 document (JPG/PNG, Max 500 KB).');
         setLoading(false);
         return;
       }
@@ -374,7 +431,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
       style={{
         position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-        backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(5px)',
+        backgroundColor: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(5px)',
         zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
       }}
     >
@@ -391,10 +448,10 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
         className="card animate-fade-in" 
         style={{
           width: '100%', 
-          maxWidth: isRegister ? '620px' : '430px', 
+          maxWidth: isRegister ? '640px' : '430px', 
           padding: '28px',
           position: 'relative', 
-          backgroundColor: '#ffffff', 
+          backgroundColor: 'var(--card-bg, #ffffff)', 
           maxHeight: '92vh', 
           overflowY: 'auto',
           borderRadius: '16px',
@@ -406,8 +463,8 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
           onClick={onClose}
           style={{ 
             position: 'absolute', top: '18px', right: '18px', 
-            color: 'var(--text-light)', background: '#f8fafc', 
-            border: '1px solid var(--border-light)', 
+            color: 'var(--text-light)', background: 'var(--bg-main, #f8fafc)', 
+            border: '1px solid var(--border-light, #e2e8f0)', 
             borderRadius: '50%', cursor: 'pointer', padding: '6px',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             transition: 'var(--transition-smooth)'
@@ -419,14 +476,14 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
 
         {/* Top Navigation Tabs (Only in Login / Register mode) */}
         {(isLogin || isRegister) && (
-          <div style={{ display: 'flex', borderBottom: '1px solid var(--border-light)', marginBottom: '22px' }}>
+          <div style={{ display: 'flex', borderBottom: '1px solid var(--border-light, #e2e8f0)', marginBottom: '22px' }}>
             <button 
               type="button"
               onClick={() => { setAuthMode('login'); setError(''); setInfoMessage(''); }}
               style={{
                 flex: 1, padding: '12px', fontWeight: '700', fontSize: '1rem',
-                color: isLogin ? 'var(--primary-blue)' : 'var(--text-medium)',
-                borderBottom: isLogin ? '3px solid var(--primary-blue)' : '3px solid transparent',
+                color: isLogin ? 'var(--primary-blue, #2563eb)' : 'var(--text-medium, #64748b)',
+                borderBottom: isLogin ? '3px solid var(--primary-blue, #2563eb)' : '3px solid transparent',
                 background: 'none', border: 'none', cursor: 'pointer',
                 transition: 'var(--transition-smooth)'
               }}
@@ -438,8 +495,8 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
               onClick={() => { setAuthMode('register'); setError(''); setInfoMessage(''); }}
               style={{
                 flex: 1, padding: '12px', fontWeight: '700', fontSize: '1rem',
-                color: isRegister ? 'var(--primary-blue)' : 'var(--text-medium)',
-                borderBottom: isRegister ? '3px solid var(--primary-blue)' : '3px solid transparent',
+                color: isRegister ? 'var(--primary-blue, #2563eb)' : 'var(--text-medium, #64748b)',
+                borderBottom: isRegister ? '3px solid var(--primary-blue, #2563eb)' : '3px solid transparent',
                 background: 'none', border: 'none', cursor: 'pointer',
                 transition: 'var(--transition-smooth)'
               }}
@@ -465,7 +522,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
               }}
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: '6px',
-                color: 'var(--primary-blue)', fontSize: '0.85rem', fontWeight: '600',
+                color: 'var(--primary-blue, #2563eb)', fontSize: '0.85rem', fontWeight: '600',
                 background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0'
               }}
             >
@@ -507,7 +564,9 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
             
             {isRegister && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Contact Name *</label>
+                <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                  Contact Name <span style={{ color: '#ef4444' }}>*</span>
+                </label>
                 <div style={{ position: 'relative' }}>
                   <User size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
                   <input 
@@ -524,7 +583,9 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
             )}
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Email Address *</label>
+              <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                Email Address <span style={{ color: '#ef4444' }}>*</span>
+              </label>
               <div style={{ position: 'relative' }}>
                 <Mail size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
                 <input 
@@ -540,7 +601,9 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Password *</label>
+              <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                Password <span style={{ color: '#ef4444' }}>*</span>
+              </label>
               <div style={{ position: 'relative' }}>
                 <Lock size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
                 <input 
@@ -587,15 +650,18 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
 
             {isRegister && (
               <>
-                {/* Store Name & Mobile Number */}
+                {/* Store Name & Mobile Number (Both Required) */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '15px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                    <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Chemist / Store Name</label>
+                    <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                      Chemist / Store Name <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
                     <div style={{ position: 'relative' }}>
                       <Building size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
                       <input 
                         type="text" 
                         name="companyName" 
+                        required
                         value={formData.companyName} 
                         onChange={handleChange}
                         placeholder="Niyansh Medicals"
@@ -605,7 +671,9 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                    <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Phone Number *</label>
+                    <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                      Phone Number <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
                     <div style={{ position: 'relative' }}>
                       <Phone size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
                       <input 
@@ -622,42 +690,42 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                   </div>
                 </div>
 
-                {/* Tax Credentials Section: GSTIN or PAN */}
+                {/* Tax Credentials Section: GSTIN & PAN (Both Required with Upload ≤ 500 KB) */}
                 <div style={{ 
-                  backgroundColor: '#f8fafc', 
+                  backgroundColor: 'var(--bg-main, #f8fafc)', 
                   padding: '14px', 
                   borderRadius: '10px', 
-                  border: '1px solid #e2e8f0', 
+                  border: '1px solid var(--border-light, #e2e8f0)', 
                   display: 'flex', 
                   flexDirection: 'column', 
                   gap: '12px' 
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
-                    <span style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--primary-blue)' }}>
-                      Tax Credentials (GSTIN / PAN)
+                    <span style={{ fontSize: '0.84rem', fontWeight: '800', color: 'var(--primary-blue, #2563eb)' }}>
+                      Tax Credentials (GSTIN & PAN) <span style={{ color: '#ef4444' }}>*</span>
                     </span>
-                    <span style={{ fontSize: '0.74rem', color: '#475569', backgroundColor: '#e2e8f0', padding: '2px 8px', borderRadius: '12px' }}>
-                      GSTIN na hoy to PAN Number jaruri chhe
+                    <span style={{ fontSize: '0.74rem', color: '#0369a1', backgroundColor: '#e0f2fe', padding: '2px 8px', borderRadius: '12px', fontWeight: '700' }}>
+                      Required • Max 500 KB per document
                     </span>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
                     
                     {/* GSTIN Field with Upload Button */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <label style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                          GSTIN Number
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
+                        <label style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-dark)', whiteSpace: 'nowrap' }}>
+                          GSTIN Number <span style={{ color: '#ef4444' }}>*</span>
                         </label>
                         <label style={{
-                          display: 'inline-flex', alignItems: 'center', gap: '4px',
-                          fontSize: '0.72rem', fontWeight: '700', color: '#0c3d6c',
-                          backgroundColor: '#eff6ff', border: '1px solid #bfdbfe',
-                          padding: '2px 8px', borderRadius: '4px', cursor: 'pointer',
-                          transition: 'background-color 0.2s'
+                          display: 'inline-flex', alignItems: 'center', gap: '5px',
+                          fontSize: '0.72rem', fontWeight: '700', color: '#ffffff',
+                          backgroundColor: docFiles.gstin ? '#10b981' : '#0284c7',
+                          padding: '3px 8px', borderRadius: '5px', cursor: 'pointer',
+                          whiteSpace: 'nowrap', flexShrink: 0
                         }}>
                           <Upload size={12} />
-                          <span>{docFiles.gstin ? 'Change' : 'Upload (JPG/PNG)'}</span>
+                          <span>{docFiles.gstin ? 'Change File' : 'Upload (≤500 KB)'}</span>
                           <input 
                             type="file" 
                             accept="image/png, image/jpeg, image/jpg, .pdf" 
@@ -671,6 +739,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                         <input 
                           type="text" 
                           name="gstin" 
+                          required
                           maxLength={15}
                           value={formData.gstin} 
                           onChange={handleChange}
@@ -680,29 +749,29 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                       </div>
                       {docFiles.gstin && (
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', backgroundColor: '#ecfdf5', color: '#065f46', padding: '3px 8px', borderRadius: '4px', border: '1px solid #a7f3d0' }}>
-                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '170px' }}>
-                            ✓ {docFiles.gstin.name}
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '180px', fontWeight: '600' }}>
+                            ✓ {docFiles.gstin.name} ({docFiles.gstin.sizeKB} KB)
                           </span>
-                          <button type="button" onClick={() => handleRemoveFile('gstin')} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', padding: '0 2px' }}>✕</button>
+                          <button type="button" onClick={() => handleRemoveFile('gstin')} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', padding: '0 2px', fontWeight: '800' }}>✕</button>
                         </div>
                       )}
                     </div>
 
                     {/* PAN Card Field with Upload Button */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <label style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                          PAN Number {!formData.gstin && <span style={{ color: '#dc2626' }}>*</span>}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
+                        <label style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-dark)', whiteSpace: 'nowrap' }}>
+                          PAN Number <span style={{ color: '#ef4444' }}>*</span>
                         </label>
                         <label style={{
-                          display: 'inline-flex', alignItems: 'center', gap: '4px',
-                          fontSize: '0.72rem', fontWeight: '700', color: '#0c3d6c',
-                          backgroundColor: '#eff6ff', border: '1px solid #bfdbfe',
-                          padding: '2px 8px', borderRadius: '4px', cursor: 'pointer',
-                          transition: 'background-color 0.2s'
+                          display: 'inline-flex', alignItems: 'center', gap: '5px',
+                          fontSize: '0.72rem', fontWeight: '700', color: '#ffffff',
+                          backgroundColor: docFiles.pan ? '#10b981' : '#0284c7',
+                          padding: '3px 8px', borderRadius: '5px', cursor: 'pointer',
+                          whiteSpace: 'nowrap', flexShrink: 0
                         }}>
                           <Upload size={12} />
-                          <span>{docFiles.pan ? 'Change' : 'Upload (JPG/PNG)'}</span>
+                          <span>{docFiles.pan ? 'Change File' : 'Upload (≤500 KB)'}</span>
                           <input 
                             type="file" 
                             accept="image/png, image/jpeg, image/jpg, .pdf" 
@@ -716,6 +785,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                         <input 
                           type="text" 
                           name="pan" 
+                          required
                           maxLength={10}
                           value={formData.pan} 
                           onChange={handleChange}
@@ -725,10 +795,10 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                       </div>
                       {docFiles.pan && (
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', backgroundColor: '#ecfdf5', color: '#065f46', padding: '3px 8px', borderRadius: '4px', border: '1px solid #a7f3d0' }}>
-                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '170px' }}>
-                            ✓ {docFiles.pan.name}
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '180px', fontWeight: '600' }}>
+                            ✓ {docFiles.pan.name} ({docFiles.pan.sizeKB} KB)
                           </span>
-                          <button type="button" onClick={() => handleRemoveFile('pan')} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', padding: '0 2px' }}>✕</button>
+                          <button type="button" onClick={() => handleRemoveFile('pan')} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', padding: '0 2px', fontWeight: '800' }}>✕</button>
                         </div>
                       )}
                     </div>
@@ -736,42 +806,42 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                   </div>
                 </div>
 
-                {/* Drug Licenses Section: Drug License 1 & Drug License 2 */}
+                {/* Drug Licenses Section: Drug License 1 & Drug License 2 (Both Required with Upload ≤ 500 KB) */}
                 <div style={{ 
-                  backgroundColor: '#f8fafc', 
+                  backgroundColor: 'var(--bg-main, #f8fafc)', 
                   padding: '14px', 
                   borderRadius: '10px', 
-                  border: '1px solid #e2e8f0', 
+                  border: '1px solid var(--border-light, #e2e8f0)', 
                   display: 'flex', 
                   flexDirection: 'column', 
                   gap: '12px' 
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
-                    <span style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--primary-blue)' }}>
-                      Drug Licenses (Form 20 / Form 21)
+                    <span style={{ fontSize: '0.84rem', fontWeight: '800', color: 'var(--primary-blue, #2563eb)' }}>
+                      Drug Licenses (Form 20 & 21) <span style={{ color: '#ef4444' }}>*</span>
                     </span>
-                    <span style={{ fontSize: '0.74rem', color: '#475569', backgroundColor: '#e2e8f0', padding: '2px 8px', borderRadius: '12px' }}>
-                      Drug License No 1 is mandatory *
+                    <span style={{ fontSize: '0.74rem', color: '#0369a1', backgroundColor: '#e0f2fe', padding: '2px 8px', borderRadius: '12px', fontWeight: '700' }}>
+                      Required • Max 500 KB per document
                     </span>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
                     
                     {/* Drug License No 1 Field with Upload Button */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <label style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                          Drug License No 1 <span style={{ color: '#dc2626' }}>*</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
+                        <label style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-dark)', whiteSpace: 'nowrap' }}>
+                          Drug License No 1 <span style={{ color: '#ef4444' }}>*</span>
                         </label>
                         <label style={{
-                          display: 'inline-flex', alignItems: 'center', gap: '4px',
-                          fontSize: '0.72rem', fontWeight: '700', color: '#0c3d6c',
-                          backgroundColor: '#eff6ff', border: '1px solid #bfdbfe',
-                          padding: '2px 8px', borderRadius: '4px', cursor: 'pointer',
-                          transition: 'background-color 0.2s'
+                          display: 'inline-flex', alignItems: 'center', gap: '5px',
+                          fontSize: '0.72rem', fontWeight: '700', color: '#ffffff',
+                          backgroundColor: docFiles.drugLicense1 ? '#10b981' : '#0284c7',
+                          padding: '3px 8px', borderRadius: '5px', cursor: 'pointer',
+                          whiteSpace: 'nowrap', flexShrink: 0
                         }}>
                           <Upload size={12} />
-                          <span>{docFiles.drugLicense1 ? 'Change' : 'Upload (JPG/PNG)'}</span>
+                          <span>{docFiles.drugLicense1 ? 'Change File' : 'Upload (≤500 KB)'}</span>
                           <input 
                             type="file" 
                             accept="image/png, image/jpeg, image/jpg, .pdf" 
@@ -794,29 +864,29 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                       </div>
                       {docFiles.drugLicense1 && (
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', backgroundColor: '#ecfdf5', color: '#065f46', padding: '3px 8px', borderRadius: '4px', border: '1px solid #a7f3d0' }}>
-                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '170px' }}>
-                            ✓ {docFiles.drugLicense1.name}
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '180px', fontWeight: '600' }}>
+                            ✓ {docFiles.drugLicense1.name} ({docFiles.drugLicense1.sizeKB} KB)
                           </span>
-                          <button type="button" onClick={() => handleRemoveFile('drugLicense1')} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', padding: '0 2px' }}>✕</button>
+                          <button type="button" onClick={() => handleRemoveFile('drugLicense1')} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', padding: '0 2px', fontWeight: '800' }}>✕</button>
                         </div>
                       )}
                     </div>
 
                     {/* Drug License No 2 Field with Upload Button */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <label style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                          Drug License No 2
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
+                        <label style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-dark)', whiteSpace: 'nowrap' }}>
+                          Drug License No 2 <span style={{ color: '#ef4444' }}>*</span>
                         </label>
                         <label style={{
-                          display: 'inline-flex', alignItems: 'center', gap: '4px',
-                          fontSize: '0.72rem', fontWeight: '700', color: '#0c3d6c',
-                          backgroundColor: '#eff6ff', border: '1px solid #bfdbfe',
-                          padding: '2px 8px', borderRadius: '4px', cursor: 'pointer',
-                          transition: 'background-color 0.2s'
+                          display: 'inline-flex', alignItems: 'center', gap: '5px',
+                          fontSize: '0.72rem', fontWeight: '700', color: '#ffffff',
+                          backgroundColor: docFiles.drugLicense2 ? '#10b981' : '#0284c7',
+                          padding: '3px 8px', borderRadius: '5px', cursor: 'pointer',
+                          whiteSpace: 'nowrap', flexShrink: 0
                         }}>
                           <Upload size={12} />
-                          <span>{docFiles.drugLicense2 ? 'Change' : 'Upload (JPG/PNG)'}</span>
+                          <span>{docFiles.drugLicense2 ? 'Change File' : 'Upload (≤500 KB)'}</span>
                           <input 
                             type="file" 
                             accept="image/png, image/jpeg, image/jpg, .pdf" 
@@ -830,6 +900,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                         <input 
                           type="text" 
                           name="drugLicense2" 
+                          required
                           value={formData.drugLicense2} 
                           onChange={handleChange}
                           placeholder="e.g. 21B/5678 or G/21/5678"
@@ -838,10 +909,10 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                       </div>
                       {docFiles.drugLicense2 && (
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', backgroundColor: '#ecfdf5', color: '#065f46', padding: '3px 8px', borderRadius: '4px', border: '1px solid #a7f3d0' }}>
-                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '170px' }}>
-                            ✓ {docFiles.drugLicense2.name}
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '180px', fontWeight: '600' }}>
+                            ✓ {docFiles.drugLicense2.name} ({docFiles.drugLicense2.sizeKB} KB)
                           </span>
-                          <button type="button" onClick={() => handleRemoveFile('drugLicense2')} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', padding: '0 2px' }}>✕</button>
+                          <button type="button" onClick={() => handleRemoveFile('drugLicense2')} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', padding: '0 2px', fontWeight: '800' }}>✕</button>
                         </div>
                       )}
                     </div>
@@ -888,6 +959,74 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                 </button>
               </span>
             )}
+          </div>
+        )}
+
+        {/* Free Online Image Compressor Tool Link (At bottom of "Already have an account?") */}
+        {isRegister && (
+          <div style={{
+            marginTop: '18px',
+            padding: '12px 16px',
+            borderRadius: '10px',
+            backgroundColor: 'var(--bg-main, #f8fafc)',
+            border: '1.5px dashed var(--border-light, #cbd5e1)',
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            <div style={{ fontSize: '0.82rem', fontWeight: '800', color: 'var(--text-dark, #1e293b)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <FileText size={15} style={{ color: '#2563eb' }} />
+              <span>Document Size Limit: Max 500 KB</span>
+            </div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-medium, #64748b)', lineHeight: '1.4' }}>
+              Need to compress your document photo under 500 KB? Use these free online tools:
+            </div>
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center', marginTop: '2px' }}>
+              <a 
+                href="https://www.iloveimg.com/compress-image" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  fontSize: '0.78rem',
+                  fontWeight: '700',
+                  color: '#ffffff',
+                  backgroundColor: '#2563eb',
+                  padding: '6px 14px',
+                  borderRadius: '6px',
+                  textDecoration: 'none',
+                  boxShadow: '0 2px 4px rgba(37,99,235,0.2)'
+                }}
+              >
+                <ExternalLink size={13} />
+                <span>iLoveIMG Compressor ↗</span>
+              </a>
+              <a 
+                href="https://tinypng.com/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  fontSize: '0.78rem',
+                  fontWeight: '700',
+                  color: 'var(--text-dark, #1e293b)',
+                  backgroundColor: 'var(--card-bg, #ffffff)',
+                  border: '1px solid var(--border-light, #cbd5e1)',
+                  padding: '6px 14px',
+                  borderRadius: '6px',
+                  textDecoration: 'none'
+                }}
+              >
+                <ExternalLink size={13} />
+                <span>TinyPNG Compressor ↗</span>
+              </a>
+            </div>
           </div>
         )}
 

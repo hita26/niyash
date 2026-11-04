@@ -44,9 +44,10 @@ function checkDocType(file, cb) {
   cb(new Error('Only JPG, PNG, WEBP and PDF document files are allowed!'));
 }
 
+// Document Upload limited to 500 KB as requested
 const docUpload = multer({
   storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  limits: { fileSize: 500 * 1024 }, // 500 KB limit
   fileFilter(req, file, cb) {
     checkDocType(file, cb);
   },
@@ -65,6 +66,12 @@ const generateToken = (id) => {
 router.post('/upload-doc', (req, res) => {
   docUpload.single('file')(req, res, function (err) {
     if (err instanceof multer.MulterError) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({
+          success: false,
+          message: 'File size exceeds 500 KB limit. Please compress the file before uploading.',
+        });
+      }
       return res.status(400).json({ success: false, message: `Upload error: ${err.message}` });
     } else if (err) {
       return res.status(400).json({ success: false, message: err.message || 'File upload failed' });
@@ -73,7 +80,13 @@ router.post('/upload-doc', (req, res) => {
       return res.status(400).json({ success: false, message: 'No file uploaded' });
     }
     const fileUrl = `/uploads/${req.file.filename}`;
-    return res.json({ success: true, url: fileUrl, filename: req.file.originalname });
+    const sizeKB = Math.round(req.file.size / 1024);
+    return res.json({ 
+      success: true, 
+      url: fileUrl, 
+      filename: req.file.originalname,
+      sizeKB: sizeKB
+    });
   });
 });
 
@@ -99,35 +112,60 @@ router.post('/register', async (req, res) => {
       phone 
     } = req.body;
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ message: 'Please provide name, email and password' });
+    if (!name || !name.trim()) {
+      return res.status(400).json({ message: 'Contact Name is required' });
+    }
+    if (!email || !email.trim()) {
+      return res.status(400).json({ message: 'Email Address is required' });
+    }
+    if (!password || password.length < 6) {
+      return res.status(400).json({ message: 'Password is required and must be at least 6 characters' });
+    }
+    if (!companyName || !companyName.trim()) {
+      return res.status(400).json({ message: 'Chemist / Store Name is required' });
+    }
+
+    let sanitizedPhone = '';
+    if (phone) {
+      sanitizedPhone = phone.toString().replace(/\D/g, '');
+    }
+    if (sanitizedPhone.length !== 10) {
+      return res.status(400).json({ message: 'Phone number is required and must contain exactly 10 digits' });
     }
 
     const normalizedEmail = email.toLowerCase().trim();
     const normalizedGstin = (gstin || '').trim().toUpperCase();
     const normalizedPan = (pan || '').trim().toUpperCase();
 
-    // Validation rule: If GSTIN is not provided, PAN number is required
-    if (!normalizedGstin && !normalizedPan) {
-      return res.status(400).json({ 
-        message: 'Please provide either GSTIN or PAN Number. If you do not have a GSTIN, PAN is required.' 
-      });
+    if (!normalizedGstin) {
+      return res.status(400).json({ message: 'GSTIN Number is required' });
+    }
+    if (!normalizedPan) {
+      return res.status(400).json({ message: 'PAN Number is required' });
     }
 
-    // Drug License validation: at least Drug License No 1 is required
     const dl1 = (drugLicense1 || drugLicense || '').trim();
     const dl2 = (drugLicense2 || '').trim();
 
     if (!dl1) {
-      return res.status(400).json({ message: 'Drug License No 1 is required for chemist registration.' });
+      return res.status(400).json({ message: 'Drug License No 1 is required' });
+    }
+    if (!dl2) {
+      return res.status(400).json({ message: 'Drug License No 2 is required' });
     }
 
-    let sanitizedPhone = '';
-    if (phone) {
-      sanitizedPhone = phone.toString().replace(/\D/g, '');
-      if (sanitizedPhone.length !== 10) {
-        return res.status(400).json({ message: 'Phone number must contain exactly 10 numeric digits' });
-      }
+    // Document Upload Verification (Max 500 KB each)
+    if (!gstinDoc) {
+      return res.status(400).json({ message: 'GSTIN Certificate document upload is required (Max 500 KB)' });
+    }
+    if (!panDoc) {
+      return res.status(400).json({ message: 'PAN Card document upload is required (Max 500 KB)' });
+    }
+    if (!drugLicense1Doc) {
+      return res.status(400).json({ message: 'Drug License No 1 document upload is required (Max 500 KB)' });
+    }
+    if (!drugLicense2Doc) {
+      return res.status(400).json({ message: 'Drug License No 2 document upload is required (Max 500 KB)' });
     }
 
     const userExists = await User.findOne({ email: normalizedEmail });
@@ -135,16 +173,13 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'User already exists with this email' });
     }
 
-    // Auto-derive PAN from GSTIN if GSTIN given and PAN left blank
-    const derivedPan = normalizedPan || (normalizedGstin.length >= 12 ? normalizedGstin.substring(2, 12) : '');
-
     const user = await User.create({
-      name,
+      name: name.trim(),
       email: normalizedEmail,
       password,
-      companyName: companyName || '',
+      companyName: companyName.trim(),
       gstin: normalizedGstin,
-      pan: derivedPan,
+      pan: normalizedPan,
       drugLicense: dl1,
       drugLicense1: dl1,
       drugLicense2: dl2,

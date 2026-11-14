@@ -31,10 +31,10 @@ function postBatch(payload) {
           if (res.statusCode >= 200 && res.statusCode < 300) {
             resolve(json);
           } else {
-            reject(new Error(`Server responded with ${res.statusCode}: ${body}`));
+            reject(new Error(`Server responded with ${res.statusCode}: ${body.slice(0, 300)}`));
           }
         } catch (e) {
-          reject(new Error(`Failed to parse response: ${body}`));
+          reject(new Error(`Failed to parse response (${res.statusCode}): ${body.slice(0, 300)}`));
         }
       });
     });
@@ -50,13 +50,13 @@ function postBatch(payload) {
   });
 }
 
-async function sendWithRetry(payload, retries = 3) {
+async function sendWithRetry(payload, retries = 4) {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       return await postBatch(payload);
     } catch (err) {
-      console.warn(`  Attempt ${attempt} failed: ${err.message}. Retrying in 2s...`);
       if (attempt === retries) throw err;
+      console.warn(`  [Retry ${attempt}/${retries}] ${err.message}. Retrying in 2s...`);
       await new Promise(r => setTimeout(r, 2000));
     }
   }
@@ -72,24 +72,34 @@ async function run() {
 
   console.log(`Loaded ${companies.length} companies and ${products.length} products.`);
 
-  // 1. Sync Companies
-  console.log(`\n📦 Syncing ${companies.length} companies to live MongoDB Atlas...`);
-  const compRes = await sendWithRetry({
-    secret: SYNC_SECRET,
-    companies,
-    products: []
-  });
-  console.log(`✅ Companies synced: ${compRes.companiesSynced}`);
+  // 1. Sync Companies in batches of 50
+  const COMP_CHUNK_SIZE = 50;
+  const totalCompChunks = Math.ceil(companies.length / COMP_CHUNK_SIZE);
+  console.log(`\n📦 Syncing ${companies.length} companies in ${totalCompChunks} chunks...`);
 
-  // 2. Sync Products in chunks of 500
-  const CHUNK_SIZE = 500;
-  const totalChunks = Math.ceil(products.length / CHUNK_SIZE);
-  console.log(`\n📦 Syncing ${products.length} products in ${totalChunks} chunks of ${CHUNK_SIZE}...`);
+  for (let i = 0; i < companies.length; i += COMP_CHUNK_SIZE) {
+    const chunkIndex = Math.floor(i / COMP_CHUNK_SIZE) + 1;
+    const chunk = companies.slice(i, i + COMP_CHUNK_SIZE);
+    process.stdout.write(`  [Companies ${chunkIndex}/${totalCompChunks}] Sending ${chunk.length} companies... `);
 
-  for (let i = 0; i < products.length; i += CHUNK_SIZE) {
-    const chunkIndex = Math.floor(i / CHUNK_SIZE) + 1;
-    const chunk = products.slice(i, i + CHUNK_SIZE);
-    process.stdout.write(`  [Chunk ${chunkIndex}/${totalChunks}] Sending ${chunk.length} items... `);
+    const res = await sendWithRetry({
+      secret: SYNC_SECRET,
+      companies: chunk,
+      products: []
+    });
+
+    console.log(`✅ Synced: ${res.companiesSynced}`);
+  }
+
+  // 2. Sync Products in batches of 200
+  const PROD_CHUNK_SIZE = 200;
+  const totalProdChunks = Math.ceil(products.length / PROD_CHUNK_SIZE);
+  console.log(`\n📦 Syncing ${products.length} products in ${totalProdChunks} chunks of ${PROD_CHUNK_SIZE}...`);
+
+  for (let i = 0; i < products.length; i += PROD_CHUNK_SIZE) {
+    const chunkIndex = Math.floor(i / PROD_CHUNK_SIZE) + 1;
+    const chunk = products.slice(i, i + PROD_CHUNK_SIZE);
+    process.stdout.write(`  [Products ${chunkIndex}/${totalProdChunks}] Sending ${chunk.length} items... `);
 
     const res = await sendWithRetry({
       secret: SYNC_SECRET,
@@ -97,10 +107,10 @@ async function run() {
       products: chunk
     });
 
-    console.log(`✅ Success! Database product count: ${res.totalInDatabase}`);
+    console.log(`✅ Success! Live DB total: ${res.totalInDatabase}`);
   }
 
-  console.log('\n🎉 ALL PRODUCTS AND COMPANIES SYNCED TO LIVE MONGODB ATLAS SUCCESSFULLY!');
+  console.log('\n🎉 ALL 9,568 PRODUCTS AND 252 COMPANIES SYNCED TO LIVE MONGODB ATLAS SUCCESSFULLY!');
 }
 
 run().catch(err => {

@@ -257,12 +257,29 @@ const initDefaults = async () => {
         const productCount = await Product.countDocuments();
         if (productCount < 500) {
           console.log(`Current product count (${productCount}) is below full catalog threshold. Starting automatic catalog sync...`);
-          const companiesFile = path.join(__dirname, '../data/companies.json');
-          const productsFile = path.join(__dirname, '../data/products.json');
+          let companiesData = null;
+          let productsData = null;
 
-          if (fs.existsSync(companiesFile)) {
+          try {
+            companiesData = require('../data/companies.json');
+          } catch (e) {
+            const companiesFile = path.join(__dirname, '../data/companies.json');
+            if (fs.existsSync(companiesFile)) {
+              companiesData = JSON.parse(fs.readFileSync(companiesFile, 'utf8'));
+            }
+          }
+
+          try {
+            productsData = require('../data/products.json');
+          } catch (e) {
+            const productsFile = path.join(__dirname, '../data/products.json');
+            if (fs.existsSync(productsFile)) {
+              productsData = JSON.parse(fs.readFileSync(productsFile, 'utf8'));
+            }
+          }
+
+          if (companiesData && companiesData.length > 0) {
             try {
-              const companiesData = JSON.parse(fs.readFileSync(companiesFile, 'utf8'));
               const compOps = companiesData.map(c => ({
                 updateOne: {
                   filter: { name: c.name },
@@ -277,9 +294,8 @@ const initDefaults = async () => {
             }
           }
 
-          if (fs.existsSync(productsFile)) {
+          if (productsData && productsData.length > 0) {
             try {
-              const productsData = JSON.parse(fs.readFileSync(productsFile, 'utf8'));
               const BATCH_SIZE = 1500;
               for (let i = 0; i < productsData.length; i += BATCH_SIZE) {
                 const chunk = productsData.slice(i, i + BATCH_SIZE);

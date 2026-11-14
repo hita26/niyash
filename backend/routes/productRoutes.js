@@ -596,17 +596,34 @@ router.post('/bulk', protect, adminOnly, async (req, res) => {
 // @access  Public / Admin
 router.all('/sync-catalog', async (req, res) => {
   try {
-    const productsFile = path.join(__dirname, '../data/products.json');
-    const companiesFile = path.join(__dirname, '../data/companies.json');
+    let productsData = null;
+    let companiesData = null;
 
-    if (!fs.existsSync(productsFile)) {
-      return res.status(404).json({ success: false, message: 'products.json file not found on server' });
+    try {
+      productsData = require('../data/products.json');
+    } catch (e) {
+      const pPath = path.join(__dirname, '../data/products.json');
+      if (fs.existsSync(pPath)) {
+        productsData = JSON.parse(fs.readFileSync(pPath, 'utf8'));
+      }
+    }
+
+    try {
+      companiesData = require('../data/companies.json');
+    } catch (e) {
+      const cPath = path.join(__dirname, '../data/companies.json');
+      if (fs.existsSync(cPath)) {
+        companiesData = JSON.parse(fs.readFileSync(cPath, 'utf8'));
+      }
+    }
+
+    if (!productsData || productsData.length === 0) {
+      return res.status(404).json({ success: false, message: 'products.json file not found or empty on server' });
     }
 
     let compCount = 0;
-    if (fs.existsSync(companiesFile)) {
+    if (companiesData && companiesData.length > 0) {
       try {
-        const companiesData = JSON.parse(fs.readFileSync(companiesFile, 'utf8'));
         const compOps = companiesData.map(c => ({
           updateOne: {
             filter: { name: c.name },
@@ -621,7 +638,6 @@ router.all('/sync-catalog', async (req, res) => {
       }
     }
 
-    const productsData = JSON.parse(fs.readFileSync(productsFile, 'utf8'));
     const BATCH_SIZE = 1500;
     for (let i = 0; i < productsData.length; i += BATCH_SIZE) {
       const chunk = productsData.slice(i, i + BATCH_SIZE);

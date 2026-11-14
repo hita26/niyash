@@ -1,9 +1,9 @@
-const fs = require('fs');
-const path = require('path');
+const mongoose = require('mongoose');
 const https = require('https');
 
 const LIVE_URL = 'https://pharma-bay-two.vercel.app/api/products/sync-batch';
 const SYNC_SECRET = 'niyansh_sync_2026';
+const LOCAL_MONGO_URI = 'mongodb://127.0.0.1:27017/niyanshPharma';
 
 function postBatch(payload) {
   return new Promise((resolve, reject) => {
@@ -63,23 +63,23 @@ async function sendWithRetry(payload, retries = 4) {
 }
 
 async function run() {
-  console.log('🚀 Loading catalog files from local backend/data...');
-  const companiesPath = path.join(__dirname, '../data/companies.json');
-  const productsPath = path.join(__dirname, '../data/products.json');
+  console.log('🚀 Connecting to local MongoDB to read the exact 9560 products...');
+  await mongoose.connect(LOCAL_MONGO_URI);
+  console.log('✅ Connected to local MongoDB.');
 
-  const companies = JSON.parse(fs.readFileSync(companiesPath, 'utf8'));
-  const products = JSON.parse(fs.readFileSync(productsPath, 'utf8'));
+  const localCompanies = await mongoose.connection.collection('companies').find({}).toArray();
+  const localProducts = await mongoose.connection.collection('products').find({}).toArray();
 
-  console.log(`Loaded ${companies.length} companies and ${products.length} products.`);
+  console.log(`Loaded from local DB: ${localCompanies.length} companies and ${localProducts.length} products.`);
 
   // 1. Sync Companies in batches of 50
   const COMP_CHUNK_SIZE = 50;
-  const totalCompChunks = Math.ceil(companies.length / COMP_CHUNK_SIZE);
-  console.log(`\n📦 Syncing ${companies.length} companies in ${totalCompChunks} chunks...`);
+  const totalCompChunks = Math.ceil(localCompanies.length / COMP_CHUNK_SIZE);
+  console.log(`\n📦 Syncing ${localCompanies.length} companies in ${totalCompChunks} chunks...`);
 
-  for (let i = 0; i < companies.length; i += COMP_CHUNK_SIZE) {
+  for (let i = 0; i < localCompanies.length; i += COMP_CHUNK_SIZE) {
     const chunkIndex = Math.floor(i / COMP_CHUNK_SIZE) + 1;
-    const chunk = companies.slice(i, i + COMP_CHUNK_SIZE);
+    const chunk = localCompanies.slice(i, i + COMP_CHUNK_SIZE);
     process.stdout.write(`  [Companies ${chunkIndex}/${totalCompChunks}] Sending ${chunk.length} companies... `);
 
     const res = await sendWithRetry({
@@ -91,18 +91,19 @@ async function run() {
     console.log(`✅ Synced: ${res.companiesSynced}`);
   }
 
-  // 2. Sync Products in batches of 200
+  // 2. Sync Products in batches of 200 with clearProducts on first chunk
   const PROD_CHUNK_SIZE = 200;
-  const totalProdChunks = Math.ceil(products.length / PROD_CHUNK_SIZE);
-  console.log(`\n📦 Syncing ${products.length} products in ${totalProdChunks} chunks of ${PROD_CHUNK_SIZE}...`);
+  const totalProdChunks = Math.ceil(localProducts.length / PROD_CHUNK_SIZE);
+  console.log(`\n📦 Syncing ${localProducts.length} products in ${totalProdChunks} chunks of ${PROD_CHUNK_SIZE}...`);
 
-  for (let i = 0; i < products.length; i += PROD_CHUNK_SIZE) {
+  for (let i = 0; i < localProducts.length; i += PROD_CHUNK_SIZE) {
     const chunkIndex = Math.floor(i / PROD_CHUNK_SIZE) + 1;
-    const chunk = products.slice(i, i + PROD_CHUNK_SIZE);
+    const chunk = localProducts.slice(i, i + PROD_CHUNK_SIZE);
     process.stdout.write(`  [Products ${chunkIndex}/${totalProdChunks}] Sending ${chunk.length} items... `);
 
     const res = await sendWithRetry({
       secret: SYNC_SECRET,
+      clearProducts: chunkIndex === 1, // Only clear on first batch to make it exactly match local
       companies: [],
       products: chunk
     });
@@ -110,7 +111,8 @@ async function run() {
     console.log(`✅ Success! Live DB total: ${res.totalInDatabase}`);
   }
 
-  console.log('\n🎉 ALL 9,568 PRODUCTS AND 252 COMPANIES SYNCED TO LIVE MONGODB ATLAS SUCCESSFULLY!');
+  console.log('\n🎉 ALL PRODUCTS SYNCED! Live database now has the EXACT SAME products as Localhost!');
+  await mongoose.disconnect();
 }
 
 run().catch(err => {

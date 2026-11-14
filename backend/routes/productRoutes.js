@@ -596,21 +596,31 @@ router.post('/bulk', protect, adminOnly, async (req, res) => {
 // @access  Public / Admin
 router.post('/sync-batch', async (req, res) => {
   try {
-    const { companies, products, secret } = req.body;
+    const { companies, products, secret, clearProducts } = req.body;
     if (secret !== 'niyansh_sync_2026') {
       return res.status(401).json({ success: false, message: 'Invalid sync secret' });
+    }
+
+    if (clearProducts) {
+      await Product.deleteMany({});
+      console.log('Cleared existing products for exact catalog sync');
     }
 
     let compCount = 0;
     if (Array.isArray(companies) && companies.length > 0) {
       try {
-        const compOps = companies.map(c => ({
-          updateOne: {
-            filter: { name: c.name },
-            update: { $set: { ...c, isPublished: true, isVerified: true } },
-            upsert: true
-          }
-        }));
+        const compOps = companies.map(c => {
+          const compData = { ...c };
+          const compId = compData._id;
+          delete compData._id;
+          return {
+            updateOne: {
+              filter: compId ? { _id: compId } : { name: c.name },
+              update: { $set: { ...compData, isPublished: true, isVerified: true } },
+              upsert: true
+            }
+          };
+        });
         await Company.bulkWrite(compOps, { ordered: false });
         compCount = companies.length;
       } catch (cErr) {
@@ -621,13 +631,18 @@ router.post('/sync-batch', async (req, res) => {
     let prodCount = 0;
     if (Array.isArray(products) && products.length > 0) {
       try {
-        const prodOps = products.map(p => ({
-          updateOne: {
-            filter: { sku: p.sku },
-            update: { $set: p },
-            upsert: true
-          }
-        }));
+        const prodOps = products.map(p => {
+          const prodData = { ...p };
+          const prodId = prodData._id;
+          delete prodData._id;
+          return {
+            updateOne: {
+              filter: prodId ? { _id: prodId } : { name: p.name, company: p.company },
+              update: { $set: prodData },
+              upsert: true
+            }
+          };
+        });
         await Product.bulkWrite(prodOps, { ordered: false });
         prodCount = products.length;
       } catch (pErr) {

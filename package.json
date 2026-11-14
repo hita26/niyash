@@ -12,7 +12,8 @@
     "server": "nodemon backend/server.js",
     "client": "npm run dev --prefix frontend",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "seed": "node backend/scripts/seedData.js"
+    "seed": "node backend/scripts/seedData.js",
+    "push": "git add -A && git commit -m \"update\" && git push origin main"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",

@@ -598,17 +598,31 @@ router.all('/sync-catalog', async (req, res) => {
   try {
     let productsData = [];
     let companiesData = [];
+    let errorDetails = null;
 
     try {
       const catalog = require('../data/catalogData');
       productsData = catalog.products || [];
       companiesData = catalog.companies || [];
     } catch (e) {
+      errorDetails = {
+        message: e.message,
+        stack: e.stack
+      };
       console.warn('Could not load catalogData.js:', e.message);
     }
 
     if (!productsData || productsData.length === 0) {
-      return res.status(404).json({ success: false, message: 'catalogData.js could not be loaded on server' });
+      let debugInfo = {};
+      try { debugInfo.cwd = process.cwd(); } catch(e){}
+      try { debugInfo.dirname = __dirname; } catch(e){}
+      try { debugInfo.dirContents = fs.readdirSync(path.join(__dirname, '../data')); } catch(e){ debugInfo.dirErr = e.message; }
+      return res.status(404).json({
+        success: false,
+        message: 'catalogData.js could not be loaded on server',
+        loadError: errorDetails,
+        debug: debugInfo
+      });
     }
 
     let compCount = 0;

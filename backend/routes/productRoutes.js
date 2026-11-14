@@ -135,14 +135,14 @@ router.get('/admin/all', protect, adminOnly, async (req, res) => {
 
     const [products, total, totalProductsCount, activeCount, outOfStockCount, categoriesList, featuredCount, recentProducts] =
       await Promise.all([
-        Product.find(query).sort(sortOptions).skip(skip).limit(limitNum),
+        Product.find(query).sort(sortOptions).skip(skip).limit(limitNum).lean(),
         Product.countDocuments(query),
         Product.countDocuments(),
         Product.countDocuments({ isActive: { $ne: false } }),
         Product.countDocuments({ $or: [{ inStock: false }, { stockQuantity: { $lte: 0 } }] }),
         Product.distinct('category'),
         Product.countDocuments({ featured: true }),
-        Product.find().sort({ createdAt: -1 }).limit(5),
+        Product.find().sort({ createdAt: -1 }).limit(5).lean(),
       ]);
 
     res.json({
@@ -308,7 +308,8 @@ router.get('/', async (req, res) => {
     const products = await Product.find(query)
       .sort(sortOptions)
       .skip(skip)
-      .limit(limitNum);
+      .limit(limitNum)
+      .lean();
 
     res.json({
       success: true,

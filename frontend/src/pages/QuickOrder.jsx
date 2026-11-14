@@ -682,7 +682,7 @@ function QuickOrder() {
   const fetchCatalog = useCallback(async () => {
     try {
       // Fetch products
-      const prodRes = await fetch('/api/products?limit=1000');
+      const prodRes = await fetch('/api/products?limit=15000');
       if (prodRes.ok) {
         const data = await prodRes.json();
         if (data.products && data.products.length > 0) {

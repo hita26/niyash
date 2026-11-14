@@ -598,10 +598,12 @@ router.all('/sync-catalog', async (req, res) => {
   try {
     let productsData = null;
     let companiesData = null;
+    let reqErr = null;
 
     try {
       productsData = require('../data/products.json');
     } catch (e) {
+      reqErr = e.message;
       const pPath = path.join(__dirname, '../data/products.json');
       if (fs.existsSync(pPath)) {
         productsData = JSON.parse(fs.readFileSync(pPath, 'utf8'));
@@ -618,7 +620,12 @@ router.all('/sync-catalog', async (req, res) => {
     }
 
     if (!productsData || productsData.length === 0) {
-      return res.status(404).json({ success: false, message: 'products.json file not found or empty on server' });
+      let debugDirs = {};
+      try { debugDirs.cwd = process.cwd(); } catch(e){}
+      try { debugDirs.dirname = __dirname; } catch(e){}
+      try { debugDirs.filesInDirname = fs.readdirSync(__dirname); } catch(e){}
+      try { debugDirs.filesInParent = fs.readdirSync(path.join(__dirname, '..')); } catch(e){}
+      return res.status(404).json({ success: false, message: 'products.json file not found or empty on server', requireError: reqErr, debug: debugDirs });
     }
 
     let compCount = 0;

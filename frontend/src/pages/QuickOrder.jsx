@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLiveSync, SYNC_EVENTS } from '../utils/liveSync';
 import {
   Search,
   ShoppingCart,
@@ -678,38 +679,62 @@ function QuickOrder() {
   }, [shopName, retailerMobile, retailerEmail, gstin, destinationWhatsApp]);
 
   // Fetch live products & metadata filters
-  useEffect(() => {
-    const fetchCatalog = async () => {
-      try {
-        // Fetch products
-        const prodRes = await fetch('/api/products?limit=1000');
-        if (prodRes.ok) {
-          const data = await prodRes.json();
-          if (data.products && data.products.length > 0) {
-            setProducts(data.products);
-          }
+  const fetchCatalog = useCallback(async () => {
+    try {
+      // Fetch products
+      const prodRes = await fetch('/api/products?limit=1000');
+      if (prodRes.ok) {
+        const data = await prodRes.json();
+        if (data.products && data.products.length > 0) {
+          setProducts(data.products);
         }
-
-        // Fetch meta filters
-        const metaRes = await fetch('/api/products/meta/filters');
-        if (metaRes.ok) {
-          const metaData = await metaRes.json();
-          if (metaData.companies && metaData.companies.length > 0) {
-            const combinedComp = ['All', ...new Set([...DEFAULT_COMPANIES.slice(1), ...metaData.companies])];
-            setCompaniesList(combinedComp);
-          }
-          if (metaData.forms && metaData.forms.length > 0) {
-            const combinedForms = ['All', ...new Set([...ALL_FORMS.slice(1), ...metaData.forms])];
-            setFormsList(combinedForms);
-          }
-        }
-      } catch (err) {
-        console.warn('Using offline mock products for Quick Order matrix:', err);
       }
-    };
 
-    fetchCatalog();
+      // Fetch meta filters
+      const metaRes = await fetch('/api/products/meta/filters');
+      if (metaRes.ok) {
+        const metaData = await metaRes.json();
+        if (metaData.companies && metaData.companies.length > 0) {
+          const combinedComp = ['All', ...new Set([...DEFAULT_COMPANIES.slice(1), ...metaData.companies])];
+          setCompaniesList(combinedComp);
+        }
+        if (metaData.forms && metaData.forms.length > 0) {
+          const combinedForms = ['All', ...new Set([...ALL_FORMS.slice(1), ...metaData.forms])];
+          setFormsList(combinedForms);
+        }
+      }
+    } catch (err) {
+      console.warn('Using offline mock products for Quick Order matrix:', err);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchCatalog();
+  }, [fetchCatalog]);
+
+  // Live multi-tab sync for Quick Order Pad
+  useLiveSync((event) => {
+    if (event.type === SYNC_EVENTS.PRODUCT_DELETED) {
+      const deletedId = event.payload?.id;
+      if (deletedId) {
+        setProducts((prev) => prev.filter((p) => p._id !== deletedId && p.id !== deletedId));
+        setBoxQuantities((prev) => {
+          if (!prev[deletedId]) return prev;
+          const copy = { ...prev };
+          delete copy[deletedId];
+          return copy;
+        });
+      }
+      fetchCatalog();
+    } else if (
+      event.type === SYNC_EVENTS.PRODUCT_UPDATED ||
+      event.type === SYNC_EVENTS.PRODUCT_CREATED ||
+      event.type === SYNC_EVENTS.PRODUCT_BULK_IMPORTED ||
+      event.type === 'TAB_FOCUSED_REVALIDATE'
+    ) {
+      fetchCatalog();
+    }
+  }, [fetchCatalog]);
 
   // Quantity Mutators
   const getBoxQty = (id) => boxQuantities[id] || 0;

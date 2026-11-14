@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Flame, 
@@ -18,6 +18,7 @@ import {
   ArrowRight,
   Radio
 } from 'lucide-react';
+import { useLiveSync, SYNC_EVENTS } from '../utils/liveSync';
 
 const FALLBACK_TICKER_ITEMS = [
   {
@@ -86,40 +87,36 @@ function NewsTicker() {
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Fetch news ticker announcements
-  useEffect(() => {
-    let isMounted = true;
-    const fetchTickerNews = async () => {
-      try {
-        const response = await fetch('/api/news?ticker=true&limit=10');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        if (isMounted) {
-          if (data && data.success && Array.isArray(data.news) && data.news.length > 0) {
-            setNewsList(data.news);
-          } else {
-            setNewsList(FALLBACK_TICKER_ITEMS);
-          }
-        }
-      } catch (err) {
-        console.warn('News ticker API offline or unreachable, using default announcements:', err.message);
-        if (isMounted) {
-          setNewsList(FALLBACK_TICKER_ITEMS);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+  const fetchTickerNews = useCallback(async () => {
+    try {
+      const response = await fetch('/api/news?ticker=true&limit=10');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    };
-
-    fetchTickerNews();
-
-    return () => {
-      isMounted = false;
-    };
+      const data = await response.json();
+      if (data && data.success && Array.isArray(data.news) && data.news.length > 0) {
+        setNewsList(data.news);
+      } else {
+        setNewsList(FALLBACK_TICKER_ITEMS);
+      }
+    } catch (err) {
+      console.warn('News ticker API offline or unreachable, using default announcements:', err.message);
+      setNewsList(FALLBACK_TICKER_ITEMS);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchTickerNews();
+  }, [fetchTickerNews]);
+
+  // Live multi-tab sync for schemes and ticker updates
+  useLiveSync((event) => {
+    if (event.type === SYNC_EVENTS.SCHEME_MUTATED || event.type === 'TAB_FOCUSED_REVALIDATE') {
+      fetchTickerNews();
+    }
+  }, [fetchTickerNews]);
 
   // Auto-advance ticker every 5.5 seconds unless paused or modal open
   useEffect(() => {

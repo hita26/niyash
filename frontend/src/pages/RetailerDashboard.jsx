@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLiveSync, SYNC_EVENTS } from '../utils/liveSync';
 import {
   Building2,
   User,
@@ -163,36 +164,41 @@ export default function RetailerDashboard() {
   }, [cleanMobile, shopName]);
 
   // 3. Fetch Featured High-Margin Schemes & Products
-  useEffect(() => {
-    let isMounted = true;
-    const fetchSchemes = async () => {
-      setLoadingSchemes(true);
-      try {
-        const res = await fetch('/api/products?limit=12&sort=featured');
-        if (res.ok) {
-          const data = await res.json();
-          if (isMounted) {
-            setSchemes(data.products || []);
-          }
-        }
-      } catch (err) {
-        console.error('Error fetching schemes:', err);
-      } finally {
-        if (isMounted) setLoadingSchemes(false);
+  const fetchSchemes = useCallback(async (isSilent = false) => {
+    if (!isSilent) setLoadingSchemes(true);
+    try {
+      const res = await fetch('/api/products?limit=12&sort=featured');
+      if (res.ok) {
+        const data = await res.json();
+        setSchemes(data.products || []);
       }
-    };
-
-    fetchSchemes();
-
-    const timer = setTimeout(() => {
-      if (isMounted) setLoadingSchemes(false);
-    }, 1500);
-
-    return () => {
-      isMounted = false;
-      clearTimeout(timer);
-    };
+    } catch (err) {
+      console.error('Error fetching schemes:', err);
+    } finally {
+      if (!isSilent) setLoadingSchemes(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchSchemes();
+  }, [fetchSchemes]);
+
+  // Live multi-tab sync for Retailer Dashboard
+  useLiveSync((event) => {
+    if (event.type === SYNC_EVENTS.PRODUCT_DELETED) {
+      const deletedId = event.payload?.id;
+      if (deletedId) {
+        setSchemes((prev) => prev.filter((p) => p._id !== deletedId && p.id !== deletedId));
+      }
+      fetchSchemes(true);
+    } else if (
+      event.type === SYNC_EVENTS.PRODUCT_UPDATED ||
+      event.type === SYNC_EVENTS.PRODUCT_CREATED ||
+      event.type === 'TAB_FOCUSED_REVALIDATE'
+    ) {
+      fetchSchemes(true);
+    }
+  }, [fetchSchemes]);
 
   // Format currency helper in Indian Rupee
   const formatINR = (val) => {

@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { useLiveSync, SYNC_EVENTS } from '../utils/liveSync';
 import { 
   Building2, Search, ExternalLink, ShieldCheck, MapPin, 
   Layers, Package, ChevronLeft, ChevronRight, X, ArrowUpDown,
@@ -45,45 +46,50 @@ function CompanyDirectory() {
   };
 
   // Fetch companies from backend
-  useEffect(() => {
-    let isCancelled = false;
-    const fetchCompanies = async () => {
-      setLoading(true);
-      try {
-        const queryParams = new URLSearchParams({
-          page,
-          limit,
-          sort: sortOrder === 'priority' ? 'newest' : sortOrder,
-        });
-        if (searchTerm.trim()) queryParams.set('search', searchTerm.trim());
-        if (selectedCategory !== 'All') queryParams.set('category', selectedCategory);
+  const fetchCompanies = useCallback(async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
+    try {
+      const queryParams = new URLSearchParams({
+        page,
+        limit,
+        sort: sortOrder === 'priority' ? 'newest' : sortOrder,
+      });
+      if (searchTerm.trim()) queryParams.set('search', searchTerm.trim());
+      if (selectedCategory !== 'All') queryParams.set('category', selectedCategory);
 
-        const res = await fetch(`/api/companies?${queryParams.toString()}`);
-        const data = await res.json();
+      const res = await fetch(`/api/companies?${queryParams.toString()}`);
+      const data = await res.json();
 
-        if (!isCancelled && data.success) {
-          let comps = data.companies || [];
-          if (sortOrder === 'productsDesc') {
-            comps.sort((a, b) => (b.productCount || 0) - (a.productCount || 0));
-          } else if (sortOrder === 'nameAsc') {
-            comps.sort((a, b) => a.name.localeCompare(b.name));
-          } else if (sortOrder === 'nameDesc') {
-            comps.sort((a, b) => b.name.localeCompare(a.name));
-          }
-          setCompanies(comps);
-          setTotal(data.total || comps.length);
-          setTotalPages(data.pages || 1);
+      if (data.success) {
+        let comps = data.companies || [];
+        if (sortOrder === 'productsDesc') {
+          comps.sort((a, b) => (b.productCount || 0) - (a.productCount || 0));
+        } else if (sortOrder === 'nameAsc') {
+          comps.sort((a, b) => a.name.localeCompare(b.name));
+        } else if (sortOrder === 'nameDesc') {
+          comps.sort((a, b) => b.name.localeCompare(a.name));
         }
-      } catch (err) {
-        console.error('Error fetching company directory:', err);
-      } finally {
-        if (!isCancelled) setLoading(false);
+        setCompanies(comps);
+        setTotal(data.total || comps.length);
+        setTotalPages(data.pages || 1);
       }
-    };
-
-    fetchCompanies();
-    return () => { isCancelled = true; };
+    } catch (err) {
+      console.error('Error fetching company directory:', err);
+    } finally {
+      if (!isSilent) setLoading(false);
+    }
   }, [page, limit, sortOrder, selectedCategory, searchTerm]);
+
+  useEffect(() => {
+    fetchCompanies();
+  }, [fetchCompanies]);
+
+  // Live multi-tab sync for companies directory
+  useLiveSync((event) => {
+    if (event.type === SYNC_EVENTS.COMPANY_MUTATED || event.type === 'TAB_FOCUSED_REVALIDATE') {
+      fetchCompanies(true);
+    }
+  }, [fetchCompanies]);
 
   return (
     <div style={{ backgroundColor: 'var(--bg-light)', minHeight: '80vh', padding: '40px 0 60px' }}>

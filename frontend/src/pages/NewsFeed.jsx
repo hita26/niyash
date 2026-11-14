@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { useLiveSync, SYNC_EVENTS } from '../utils/liveSync';
 import { 
   Flame, 
   TrendingDown, 
@@ -130,7 +131,7 @@ function NewsFeed() {
   const [copiedId, setCopiedId] = useState(null);
 
   // Fetch all news updates
-  const fetchNews = async () => {
+  const fetchNews = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -150,11 +151,18 @@ function NewsFeed() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchNews();
-  }, []);
+  }, [fetchNews]);
+
+  // Live multi-tab sync for news and schemes
+  useLiveSync((event) => {
+    if (event.type === SYNC_EVENTS.SCHEME_MUTATED || event.type === 'TAB_FOCUSED_REVALIDATE') {
+      fetchNews();
+    }
+  }, [fetchNews]);
 
   // Compute unique company list dynamically
   const companies = useMemo(() => {

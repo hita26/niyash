@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import { useAuth } from '../context/AuthContext';
+import { useLiveSync, SYNC_EVENTS } from '../utils/liveSync';
 import { 
   ShoppingBag, ArrowLeft, CheckCircle2, AlertTriangle, 
   Check, Truck, ShieldCheck, FileText, MessageSquare, 
@@ -21,31 +22,42 @@ function ProductDetail({ addToCart }) {
   const [isAdded, setIsAdded] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    let isCancelled = false;
-    const fetchProduct = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(`/api/products/${id}`);
-        if (!response.ok) throw new Error('Product not found');
-        const data = await response.json();
-        if (!isCancelled) {
-          setProduct(data.product);
-          setRelated(data.related || []);
-        }
-      } catch (error) {
-        console.error('Error fetching product detail:', error);
-      } finally {
-        if (!isCancelled) setLoading(false);
+  const fetchProduct = useCallback(async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
+    try {
+      const response = await fetch(`/api/products/${id}`);
+      if (!response.ok) {
+        setProduct(null);
+        return;
       }
-    };
+      const data = await response.json();
+      setProduct(data.product);
+      setRelated(data.related || []);
+    } catch (error) {
+      console.error('Error fetching product detail:', error);
+    } finally {
+      if (!isSilent) setLoading(false);
+    }
+  }, [id]);
 
+  useEffect(() => {
     fetchProduct();
     setQuantity(1);
     setActiveImageIndex(0);
     setIsAdded(false);
-    return () => { isCancelled = true; };
-  }, [id]);
+  }, [fetchProduct]);
+
+  // Live sync for single product view
+  useLiveSync((event) => {
+    if (event.type === SYNC_EVENTS.PRODUCT_DELETED && (event.payload?.id === id || !event.payload?.id)) {
+      setProduct(null);
+    } else if (
+      event.type === SYNC_EVENTS.PRODUCT_UPDATED ||
+      event.type === 'TAB_FOCUSED_REVALIDATE'
+    ) {
+      fetchProduct(true);
+    }
+  }, [fetchProduct, id]);
 
   if (loading) {
     return (

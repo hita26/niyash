@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import SkeletonLoader from '../components/SkeletonLoader';
 import { Filter, SlidersHorizontal, ArrowUpDown, RefreshCcw, X, ChevronLeft, ChevronRight, Building2, Search } from 'lucide-react';
+import { useLiveSync, SYNC_EVENTS } from '../utils/liveSync';
 
 function Products({ addToCart, searchTerm, setSearchTerm }) {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -147,60 +148,76 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [showMobileFilters]);
 
+  // Fetch products query handler with silent background refresh support
+  const fetchProducts = useCallback(async (isSilent = false) => {
+    if (!isSilent) {
+      setLoading(true);
+    }
+    try {
+      const queryParams = new URLSearchParams();
+      const searchVal = searchParams.get('search') || '';
+      const catVal = searchParams.get('category') || '';
+      const brandVal = searchParams.get('brand') || '';
+      const compVal = searchParams.get('company') || '';
+      const formVal = searchParams.get('form') || '';
+      const maxPriceParam = searchParams.get('maxPrice');
+      const sortVal = searchParams.get('sort') || 'popular';
+      const pageVal = searchParams.get('page') || '1';
+
+      if (searchVal) queryParams.append('search', searchVal);
+      if (catVal) queryParams.append('category', catVal);
+      if (brandVal) queryParams.append('brand', brandVal);
+      if (compVal) queryParams.append('company', compVal);
+      if (formVal) queryParams.append('form', formVal);
+      if (maxPriceParam && parseFloat(maxPriceParam) < MAX_PRICE_LIMIT) {
+        queryParams.append('maxPrice', maxPriceParam);
+      }
+      if (sortVal) queryParams.append('sort', sortVal);
+      queryParams.append('page', pageVal);
+      queryParams.append('limit', '12');
+
+      const response = await fetch(`/api/products?${queryParams.toString()}`);
+      if (!response.ok) throw new Error('Failed to fetch products');
+      
+      const data = await response.json();
+      setProducts(Array.isArray(data.products) ? data.products : []);
+      setPages(data.pages || 1);
+      setTotal(data.total || 0);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    } finally {
+      if (!isSilent) {
+        setLoading(false);
+      }
+    }
+  }, [searchParams]);
+
   // Fetch products whenever searchParams change (single source of truth)
   useEffect(() => {
-    let isCancelled = false;
-    const fetchProducts = async () => {
-      setLoading(true);
-      try {
-        const queryParams = new URLSearchParams();
-        const searchVal = searchParams.get('search') || '';
-        const catVal = searchParams.get('category') || '';
-        const brandVal = searchParams.get('brand') || '';
-        const compVal = searchParams.get('company') || '';
-        const formVal = searchParams.get('form') || '';
-        const maxPriceParam = searchParams.get('maxPrice');
-        const sortVal = searchParams.get('sort') || 'popular';
-        const pageVal = searchParams.get('page') || '1';
-
-        if (searchVal) queryParams.append('search', searchVal);
-        if (catVal) queryParams.append('category', catVal);
-        if (brandVal) queryParams.append('brand', brandVal);
-        if (compVal) queryParams.append('company', compVal);
-        if (formVal) queryParams.append('form', formVal);
-        if (maxPriceParam && parseFloat(maxPriceParam) < MAX_PRICE_LIMIT) {
-          queryParams.append('maxPrice', maxPriceParam);
-        }
-        if (sortVal) queryParams.append('sort', sortVal);
-        queryParams.append('page', pageVal);
-        queryParams.append('limit', '12');
-
-        const response = await fetch(`/api/products?${queryParams.toString()}`);
-        if (!response.ok) throw new Error('Failed to fetch products');
-        
-        const data = await response.json();
-        if (!isCancelled) {
-          setProducts(Array.isArray(data.products) ? data.products : []);
-          setPages(data.pages || 1);
-          setTotal(data.total || 0);
-        }
-      } catch (error) {
-        if (!isCancelled) {
-          console.error('Error fetching products:', error);
-          setProducts([]);
-        }
-      } finally {
-        if (!isCancelled) {
-          setLoading(false);
-        }
-      }
-    };
-
     fetchProducts();
-    return () => {
-      isCancelled = true;
-    };
-  }, [searchParams]);
+  }, [fetchProducts]);
+
+  // Real-time enterprise multi-tab synchronization and focus revalidation
+  useLiveSync((event) => {
+    if (event.type === SYNC_EVENTS.PRODUCT_DELETED) {
+      const deletedId = event.payload?.id;
+      if (deletedId) {
+        // Immediate optimistic removal from view without page reload
+        setProducts((prev) => prev.filter((p) => p._id !== deletedId && p.id !== deletedId));
+        setTotal((prev) => Math.max(0, prev - 1));
+      }
+      // Background silent refetch to sync pagination & totals
+      fetchProducts(true);
+    } else if (
+      event.type === SYNC_EVENTS.PRODUCT_UPDATED ||
+      event.type === SYNC_EVENTS.PRODUCT_CREATED ||
+      event.type === SYNC_EVENTS.PRODUCT_BULK_IMPORTED ||
+      event.type === 'TAB_FOCUSED_REVALIDATE'
+    ) {
+      // Re-fetch products silently in the background
+      fetchProducts(true);
+    }
+  }, [fetchProducts]);
 
   // Update query params helper for arrays (checkboxes)
   const handleCheckboxChange = (key, list, setList, val) => {

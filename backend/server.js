@@ -32,9 +32,14 @@ try {
 }
 app.use('/uploads', express.static(uploadDir));
 
-// Database readiness middleware for all /api routes
+// Database readiness & cache-busting middleware for all /api routes
 app.use(async (req, res, next) => {
   if (req.path.startsWith('/api')) {
+    // Ensure all API responses return fresh data and are never cached by browser or CDN
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+    res.set('Surrogate-Control', 'no-store');
     try {
       await connectDB();
       await initDefaults();

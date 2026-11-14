@@ -9,6 +9,7 @@ import {
   FileSpreadsheet, ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Layers,
   Copy, CheckCheck
 } from 'lucide-react';
+import { broadcastLiveEvent, SYNC_EVENTS } from '../utils/liveSync';
 
 // ==========================================
 // FALLBACK DATASETS FOR OFFLINE / ROBUST DEMO
@@ -1411,6 +1412,7 @@ _Helpline: +91 9316566894_`;
         } else {
           setNews(prev => [data.news, ...prev]);
         }
+        broadcastLiveEvent(SYNC_EVENTS.SCHEME_MUTATED, { action: editingNews ? 'update' : 'create', news: data.news });
         showToast(editingNews ? 'Scheme/News announcement updated!' : 'New scheme created and published!');
       } else {
         // Fallback local update
@@ -1424,6 +1426,7 @@ _Helpline: +91 9316566894_`;
           };
           setNews(prev => [newItem, ...prev]);
         }
+        broadcastLiveEvent(SYNC_EVENTS.SCHEME_MUTATED, { action: editingNews ? 'update' : 'create', payload });
         showToast(editingNews ? 'Announcement updated!' : 'Announcement created!');
       }
     } catch (err) {
@@ -1438,6 +1441,7 @@ _Helpline: +91 9316566894_`;
         };
         setNews(prev => [newItem, ...prev]);
       }
+      broadcastLiveEvent(SYNC_EVENTS.SCHEME_MUTATED, { action: editingNews ? 'update' : 'create', payload });
       showToast('Announcement saved!');
     } finally {
       setIsNewsModalOpen(false);
@@ -1462,6 +1466,7 @@ _Helpline: +91 9316566894_`;
     } catch {
       setNews(prev => prev.map(n => n._id === item._id ? { ...n, isTickerActive: newStatus } : n));
     }
+    broadcastLiveEvent(SYNC_EVENTS.SCHEME_MUTATED, { action: 'toggle', id: item._id, isTickerActive: newStatus });
     showToast(`Ticker visibility ${newStatus ? 'enabled' : 'disabled'} for announcement!`);
   };
 
@@ -1520,6 +1525,8 @@ _Helpline: +91 9316566894_`;
         if (response.ok && data.success) {
           setProducts(prev => prev.filter(p => p._id !== id));
           showToast(`"${name}" deleted successfully`);
+          // Real-time broadcast: inform all browser tabs and storefront pages immediately
+          broadcastLiveEvent(SYNC_EVENTS.PRODUCT_DELETED, { id, name });
           fetchDashboardData();
         } else {
           showToast(data.message || 'Failed to delete product', 'error');
@@ -1533,6 +1540,7 @@ _Helpline: +91 9316566894_`;
         if (res.ok && data.success) {
           setCompanies(prev => prev.filter(c => c._id !== id));
           showToast(`"${name}" removed from directory`);
+          broadcastLiveEvent(SYNC_EVENTS.COMPANY_MUTATED, { action: 'delete', id, name });
           fetchDashboardData();
         } else {
           showToast(data.message || 'Failed to delete company', 'error');
@@ -1541,6 +1549,7 @@ _Helpline: +91 9316566894_`;
         const res = await fetch(`/api/news/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
         setNews(prev => prev.filter(n => n._id !== id));
         showToast('Announcement deleted successfully.');
+        broadcastLiveEvent(SYNC_EVENTS.SCHEME_MUTATED, { action: 'delete', id });
       } else if (type === 'enquiry') {
         await fetch(`/api/enquiries/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
         setEnquiries(prev => prev.filter(e => e._id !== id));
@@ -1757,6 +1766,10 @@ _Helpline: +91 9316566894_`;
       if (response.ok && data.success) {
         setIsProductModalOpen(false);
         await fetchDashboardData();
+        broadcastLiveEvent(
+          editingProduct ? SYNC_EVENTS.PRODUCT_UPDATED : SYNC_EVENTS.PRODUCT_CREATED,
+          { product: data.product || payload }
+        );
         showToast(editingProduct ? 'Product updated successfully!' : 'New product created with all photos!');
       } else {
         showToast(data.message || 'Error saving product', 'error');
@@ -1781,9 +1794,11 @@ _Helpline: +91 9316566894_`;
         body: JSON.stringify({ inStock: newStock, stockQuantity: newQuantity })
       });
       setProducts(prev => prev.map(p => p._id === product._id ? { ...p, inStock: newStock, stockQuantity: newQuantity } : p));
+      broadcastLiveEvent(SYNC_EVENTS.PRODUCT_UPDATED, { id: product._id, inStock: newStock, stockQuantity: newQuantity });
       showToast(`Product marked as ${newStock ? 'In Stock' : 'Out of Stock'}`);
     } catch {
       setProducts(prev => prev.map(p => p._id === product._id ? { ...p, inStock: newStock, stockQuantity: newQuantity } : p));
+      broadcastLiveEvent(SYNC_EVENTS.PRODUCT_UPDATED, { id: product._id, inStock: newStock, stockQuantity: newQuantity });
       showToast(`Product stock updated`);
     }
   };
@@ -1797,9 +1812,11 @@ _Helpline: +91 9316566894_`;
         body: JSON.stringify({ isActive: newActive })
       });
       setProducts(prev => prev.map(p => p._id === product._id ? { ...p, isActive: newActive } : p));
+      broadcastLiveEvent(SYNC_EVENTS.PRODUCT_UPDATED, { id: product._id, isActive: newActive });
       showToast(`Product visibility set to ${newActive ? 'Active (Live)' : 'Inactive (Hidden)'}`);
     } catch {
       setProducts(prev => prev.map(p => p._id === product._id ? { ...p, isActive: newActive } : p));
+      broadcastLiveEvent(SYNC_EVENTS.PRODUCT_UPDATED, { id: product._id, isActive: newActive });
       showToast(`Product visibility updated`);
     }
   };
@@ -1813,9 +1830,11 @@ _Helpline: +91 9316566894_`;
         body: JSON.stringify({ featured: newFeatured })
       });
       setProducts(prev => prev.map(p => p._id === product._id ? { ...p, featured: newFeatured } : p));
+      broadcastLiveEvent(SYNC_EVENTS.PRODUCT_UPDATED, { id: product._id, featured: newFeatured });
       showToast(`Product ${newFeatured ? 'featured on homepage' : 'removed from featured'}`);
     } catch {
       setProducts(prev => prev.map(p => p._id === product._id ? { ...p, featured: newFeatured } : p));
+      broadcastLiveEvent(SYNC_EVENTS.PRODUCT_UPDATED, { id: product._id, featured: newFeatured });
     }
   };
 
@@ -1930,6 +1949,7 @@ _Helpline: +91 9316566894_`;
       if (res.ok && data.success) {
         setBulkImportResults(data);
         showToast(`Successfully imported ${data.successCount} products!`);
+        broadcastLiveEvent(SYNC_EVENTS.PRODUCT_BULK_IMPORTED, { count: data.successCount });
         fetchDashboardData();
       } else {
         showToast(data.message || 'Bulk import failed', 'error');
@@ -2012,6 +2032,7 @@ _Helpline: +91 9316566894_`;
       if (res.ok && data.success) {
         setIsCompanyModalOpen(false);
         await fetchDashboardData();
+        broadcastLiveEvent(SYNC_EVENTS.COMPANY_MUTATED, { action: editingCompany ? 'update' : 'create', company: data.company });
         showToast(editingCompany ? 'Company updated successfully!' : 'New company added to directory!');
       } else {
         showToast(data.message || 'Error saving company', 'error');
@@ -2034,9 +2055,11 @@ _Helpline: +91 9316566894_`;
         body: JSON.stringify({ isPublished: newStatus })
       });
       setCompanies(prev => prev.map(c => c._id === company._id ? { ...c, isPublished: newStatus } : c));
+      broadcastLiveEvent(SYNC_EVENTS.COMPANY_MUTATED, { action: 'toggle', id: company._id, isPublished: newStatus });
       showToast(`Company visibility set to ${newStatus ? 'Published (Live)' : 'Unpublished (Hidden)'}`);
     } catch {
       setCompanies(prev => prev.map(c => c._id === company._id ? { ...c, isPublished: newStatus } : c));
+      broadcastLiveEvent(SYNC_EVENTS.COMPANY_MUTATED, { action: 'toggle', id: company._id, isPublished: newStatus });
     }
   };
 

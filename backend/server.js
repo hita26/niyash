@@ -54,6 +54,7 @@ app.use('/api/news', require('./routes/newsRoutes'));
 app.use('/api/enquiries', require('./routes/enquiryRoutes'));
 app.use('/api/careers', require('./routes/careerRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/ai', require('./routes/aiRoutes'));
 
 
 // Serve static frontend build if available

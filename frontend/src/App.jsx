@@ -25,6 +25,7 @@ import CompanyDetail from './pages/CompanyDetail';
 import NewsTicker from './components/NewsTicker';
 import ScrollToTop from './components/ScrollToTop';
 import MobileBottomNav from './components/MobileBottomNav';
+import AIAssistant from './components/AIAssistant';
 
 function AppContent() {
   const [enquiryCart, setEnquiryCart] = useState([]);
@@ -178,6 +179,8 @@ function AppContent() {
           isOpen={isAuthOpen}
           onClose={closeAuth}
           onSuccess={login}
+        />
+        <AIAssistant addToCart={addToCart}
         />
       </div>
     </>

@@ -13,6 +13,7 @@
     "client": "npm run dev --prefix frontend",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "seed": "node backend/scripts/seedData.js",
+    "pull": "git pull origin main",
     "push": "git add -A && git commit -m \"update\" && git push origin main"
   },
   "devDependencies": {

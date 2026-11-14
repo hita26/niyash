@@ -211,7 +211,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 <input
                   ref={searchInputRef}
                   type="text"
-                  placeholder="Search Wholesale Medicines, Compositions (Ctrl+K)..."
+                  placeholder="Search Wholesale Medicines, Compositions..."
                   value={searchTerm}
                   onChange={(e) => {
                     setSearchTerm(e.target.value);
@@ -231,7 +231,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                   }}
                   aria-label="Fast search for wholesale medicines"
                 />
-                <span className="kbd-shortcut hide-mobile" style={{ marginRight: '6px' }}>Ctrl K</span>
+                <span className="kbd-shortcut hide-mobile" style={{ marginRight: '8px', whiteSpace: 'nowrap', flexShrink: 0 }}>Ctrl K</span>
                 <button 
                   type="submit" 
                   style={{ 
@@ -814,7 +814,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             <form className="search-bar" onSubmit={handleSearchSubmit} role="search" style={{ position: 'relative' }}>
               <input
                 type="text"
-                placeholder="Search 9,500+ medicines, companies, compositions (Ctrl+K)..."
+                placeholder="Search 9,500+ medicines, companies, compositions..."
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
@@ -825,7 +825,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 }}
                 aria-label="Search pharmaceutical products"
               />
-              <span className="kbd-shortcut hide-mobile" style={{ position: 'absolute', right: '48px', top: '50%', transform: 'translateY(-50%)' }}>Ctrl K</span>
+              <span className="kbd-shortcut hide-mobile" style={{ position: 'absolute', right: '48px', top: '50%', transform: 'translateY(-50%)', whiteSpace: 'nowrap', flexShrink: 0 }}>Ctrl K</span>
               <button type="submit" className="search-button" aria-label="Submit search">
                 <Search size={18} aria-hidden="true" />
               </button>

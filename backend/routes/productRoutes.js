@@ -592,40 +592,23 @@ router.post('/bulk', protect, adminOnly, async (req, res) => {
 });
 
 // @route   ALL /api/products/sync-catalog
-// @desc    Synchronize full 9,560+ catalog from backend/data into MongoDB
+// @desc    Synchronize full 9,560+ catalog into MongoDB
 // @access  Public / Admin
 router.all('/sync-catalog', async (req, res) => {
   try {
-    let productsData = null;
-    let companiesData = null;
-    let reqErr = null;
+    let productsData = [];
+    let companiesData = [];
 
     try {
-      productsData = require('../data/products.json');
+      const catalog = require('../data/catalogData');
+      productsData = catalog.products || [];
+      companiesData = catalog.companies || [];
     } catch (e) {
-      reqErr = e.message;
-      const pPath = path.join(__dirname, '../data/products.json');
-      if (fs.existsSync(pPath)) {
-        productsData = JSON.parse(fs.readFileSync(pPath, 'utf8'));
-      }
-    }
-
-    try {
-      companiesData = require('../data/companies.json');
-    } catch (e) {
-      const cPath = path.join(__dirname, '../data/companies.json');
-      if (fs.existsSync(cPath)) {
-        companiesData = JSON.parse(fs.readFileSync(cPath, 'utf8'));
-      }
+      console.warn('Could not load catalogData.js:', e.message);
     }
 
     if (!productsData || productsData.length === 0) {
-      let debugDirs = {};
-      try { debugDirs.cwd = process.cwd(); } catch(e){}
-      try { debugDirs.dirname = __dirname; } catch(e){}
-      try { debugDirs.filesInDirname = fs.readdirSync(__dirname); } catch(e){}
-      try { debugDirs.filesInParent = fs.readdirSync(path.join(__dirname, '..')); } catch(e){}
-      return res.status(404).json({ success: false, message: 'products.json file not found or empty on server', requireError: reqErr, debug: debugDirs });
+      return res.status(404).json({ success: false, message: 'catalogData.js could not be loaded on server' });
     }
 
     let compCount = 0;

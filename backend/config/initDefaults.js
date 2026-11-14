@@ -261,20 +261,26 @@ const initDefaults = async () => {
           let productsData = null;
 
           try {
-            companiesData = require('../data/companies.json');
+            const catalog = require('../data/catalogData');
+            companiesData = catalog.companies || null;
+            productsData = catalog.products || null;
           } catch (e) {
-            const companiesFile = path.join(__dirname, '../data/companies.json');
-            if (fs.existsSync(companiesFile)) {
-              companiesData = JSON.parse(fs.readFileSync(companiesFile, 'utf8'));
+            try {
+              companiesData = require('../data/companies.json');
+            } catch (e1) {
+              const companiesFile = path.join(__dirname, '../data/companies.json');
+              if (fs.existsSync(companiesFile)) {
+                companiesData = JSON.parse(fs.readFileSync(companiesFile, 'utf8'));
+              }
             }
-          }
 
-          try {
-            productsData = require('../data/products.json');
-          } catch (e) {
-            const productsFile = path.join(__dirname, '../data/products.json');
-            if (fs.existsSync(productsFile)) {
-              productsData = JSON.parse(fs.readFileSync(productsFile, 'utf8'));
+            try {
+              productsData = require('../data/products.json');
+            } catch (e2) {
+              const productsFile = path.join(__dirname, '../data/products.json');
+              if (fs.existsSync(productsFile)) {
+                productsData = JSON.parse(fs.readFileSync(productsFile, 'utf8'));
+              }
             }
           }
 

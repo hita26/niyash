@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 const Product = require('../models/Product');
+const Company = require('../models/Company');
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 
 // Upload directory setup
@@ -587,6 +588,63 @@ router.post('/bulk', protect, adminOnly, async (req, res) => {
   } catch (error) {
     console.error('Bulk import error:', error);
     res.status(500).json({ success: false, message: 'Server error during bulk import', error: error.message });
+  }
+});
+
+// @route   ALL /api/products/sync-catalog
+// @desc    Synchronize full 9,560+ catalog from backend/data into MongoDB
+// @access  Public / Admin
+router.all('/sync-catalog', async (req, res) => {
+  try {
+    const productsFile = path.join(__dirname, '../data/products.json');
+    const companiesFile = path.join(__dirname, '../data/companies.json');
+
+    if (!fs.existsSync(productsFile)) {
+      return res.status(404).json({ success: false, message: 'products.json file not found on server' });
+    }
+
+    let compCount = 0;
+    if (fs.existsSync(companiesFile)) {
+      try {
+        const companiesData = JSON.parse(fs.readFileSync(companiesFile, 'utf8'));
+        const compOps = companiesData.map(c => ({
+          updateOne: {
+            filter: { name: c.name },
+            update: { $set: { ...c, isPublished: true, isVerified: true } },
+            upsert: true
+          }
+        }));
+        await Company.bulkWrite(compOps, { ordered: false });
+        compCount = companiesData.length;
+      } catch (cErr) {
+        console.warn('Sync companies notice:', cErr.message);
+      }
+    }
+
+    const productsData = JSON.parse(fs.readFileSync(productsFile, 'utf8'));
+    const BATCH_SIZE = 1500;
+    for (let i = 0; i < productsData.length; i += BATCH_SIZE) {
+      const chunk = productsData.slice(i, i + BATCH_SIZE);
+      const bulkOps = chunk.map(p => ({
+        updateOne: {
+          filter: { sku: p.sku },
+          update: { $set: p },
+          upsert: true
+        }
+      }));
+      await Product.bulkWrite(bulkOps, { ordered: false });
+    }
+
+    const totalCount = await Product.countDocuments();
+    res.json({
+      success: true,
+      message: `Full catalog synced: ${productsData.length} records processed. Current database total: ${totalCount} products.`,
+      companiesSynced: compCount,
+      totalProducts: totalCount
+    });
+  } catch (error) {
+    console.error('Catalog sync error:', error);
+    res.status(500).json({ success: false, message: 'Server error during catalog sync', error: error.message });
   }
 });
 

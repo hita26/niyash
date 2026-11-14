@@ -1,0 +1,5350 @@
+[
+  {
+    "name": "Abbott Healthcare",
+    "slug": "abbott-healthcare",
+    "logoUrl": "/logos/abbott.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "https://www.abbott.co.in",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 101,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "ABBOT PHARMA"
+    ]
+  },
+  {
+    "name": "Abbott Healthcare (XL Division)",
+    "slug": "abbott-healthcare-xl-division",
+    "logoUrl": "/logos/abbott.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "https://www.abbott.co.in",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 102,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "AX \tABBOTT XL"
+    ]
+  },
+  {
+    "name": "Achet Healthcare",
+    "slug": "achet-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 103,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "ACHET"
+    ]
+  },
+  {
+    "name": "Agat Healthcare",
+    "slug": "agat-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 104,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "AGAT"
+    ]
+  },
+  {
+    "name": "Agate Medicare",
+    "slug": "agate-medicare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 105,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "AGATE MEDICARE"
+    ]
+  },
+  {
+    "name": "Agofix Healthcare",
+    "slug": "agofix-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 106,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "AGOFIX"
+    ]
+  },
+  {
+    "name": "Ajanta Pharma",
+    "slug": "ajanta-pharma",
+    "logoUrl": "/logos/ajanta-pharma.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Ophthalmology & Dermatology",
+    "description": "Specialty generic manufacturer with market-leading franchises in therapeutic ophthalmology and clinical dermatology.",
+    "location": "Mumbai, Maharashtra",
+    "websiteUrl": "https://www.ajantapharma.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 7,
+    "specialties": [
+      "Ophthalmology (Eye Drops)",
+      "Dermatology",
+      "Cardiology",
+      "Pain Management"
+    ],
+    "rawHeaders": [
+      "AJANTA",
+      "AJANTA PHARMA"
+    ]
+  },
+  {
+    "name": "Akumentis Healthcare",
+    "slug": "akumentis-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 108,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "AKUMENTIS HEALTHCARE LTD",
+      "AKUMENTIS"
+    ]
+  },
+  {
+    "name": "Al-Der Pharmaceuticals",
+    "slug": "al-der-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 109,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "AL-DER PHARMACEUTICAL"
+    ]
+  },
+  {
+    "name": "Alembic Pharmaceuticals",
+    "slug": "alembic-pharmaceuticals",
+    "logoUrl": "/logos/alembic-pharmaceuticals.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "https://www.alembicpharmaceuticals.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 110,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "AL \tALEMBIC LIMITED"
+    ]
+  },
+  {
+    "name": "Alister Healthcare",
+    "slug": "alister-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 111,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "ALISTER"
+    ]
+  },
+  {
+    "name": "Alive Healthcare",
+    "slug": "alive-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 112,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "ALIVE"
+    ]
+  },
+  {
+    "name": "Alkem Laboratories",
+    "slug": "alkem-laboratories",
+    "logoUrl": "/logos/alkem-laboratories.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Anti-infectives & Gastro",
+    "description": "India's highest-ranking antibiotic formulation powerhouse with extensive presence across domestic pharmacy retail networks.",
+    "location": "Mumbai, Maharashtra",
+    "websiteUrl": "https://www.alkemlabs.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 13,
+    "specialties": [
+      "Anti-infectives (Clavam, Taxim)",
+      "Gastroenterology (Pan)",
+      "Cardiology",
+      "Nutraceuticals"
+    ],
+    "rawHeaders": [
+      "ALKEM"
+    ]
+  },
+  {
+    "name": "Alkem Laboratories (Novokem)",
+    "slug": "alkem-laboratories-novokem",
+    "logoUrl": "/logos/alkem-laboratories.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "https://www.alkemlabs.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 114,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "AN \tALKEM NOVOKEM"
+    ]
+  },
+  {
+    "name": "Amanta Healthcare",
+    "slug": "amanta-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 115,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "AMANTA"
+    ]
+  },
+  {
+    "name": "American Remedies",
+    "slug": "american-remedies",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 116,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "AMERICAN REMIDIES"
+    ]
+  },
+  {
+    "name": "Antonica Lifesciences",
+    "slug": "antonica-lifesciences",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 117,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "ANTONICA LIFESCIENCES"
+    ]
+  },
+  {
+    "name": "Apex Laboratories",
+    "slug": "apex-laboratories",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 118,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "APEX"
+    ]
+  },
+  {
+    "name": "Aristo Pharmaceuticals",
+    "slug": "aristo-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Anti-infectives & Gynecology",
+    "description": "Nationally acclaimed pharmaceuticals manufacturer celebrated for flagship hospital antibiotics and respiratory medications.",
+    "location": "Mumbai, Maharashtra",
+    "websiteUrl": "https://www.aristopharma.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 19,
+    "specialties": [
+      "Monocef (Ceftriaxone)",
+      "Antimicrobials",
+      "Corticosteroids",
+      "Gynecology"
+    ],
+    "rawHeaders": [
+      "ARISTO PHARMA LTD."
+    ]
+  },
+  {
+    "name": "Astha Healthcare",
+    "slug": "astha-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 120,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "ASTHA"
+    ]
+  },
+  {
+    "name": "Astra IDL Ltd",
+    "slug": "astra-idl-ltd",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 121,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "ASTRA IDL LIMITED"
+    ]
+  },
+  {
+    "name": "Austro Labs",
+    "slug": "austro-labs",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 122,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "AUSTRO"
+    ]
+  },
+  {
+    "name": "Axalade Healthcare (GPP)",
+    "slug": "axalade-healthcare-gpp",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 123,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "GPP AXALADE"
+    ]
+  },
+  {
+    "name": "Azine Healthcare",
+    "slug": "azine-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 124,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "AZINE HEALTH CARE PVT LTD"
+    ]
+  },
+  {
+    "name": "B. Bharatkumar & Sons",
+    "slug": "b-bharatkumar-sons",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 125,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "B.BHARATKUMAR & SONS"
+    ]
+  },
+  {
+    "name": "Bayer Pharmaceuticals",
+    "slug": "bayer-pharmaceuticals",
+    "logoUrl": "/logos/bayer.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "https://www.bayer.in",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 126,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "BAYER"
+    ]
+  },
+  {
+    "name": "BB & Sons",
+    "slug": "bb-sons",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 127,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "BB &SONS"
+    ]
+  },
+  {
+    "name": "Becton Dickinson (BD)",
+    "slug": "becton-dickinson-bd",
+    "logoUrl": "/logos/becton-dickinson.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "https://www.bd.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 128,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "BD"
+    ]
+  },
+  {
+    "name": "Bigh Healthcare",
+    "slug": "bigh-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 129,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "BIGH"
+    ]
+  },
+  {
+    "name": "Biochem Pharmaceutical Industries",
+    "slug": "biochem-pharmaceutical-industries",
+    "logoUrl": "/logos/zydus-lifesciences.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "IV Fluids & Antibiotics",
+    "description": "Historical pharma brand specializing in life-saving intravenous fluid therapy, electrolytes, and core antibiotic injections.",
+    "location": "Mumbai / Ahmedabad, Gujarat",
+    "websiteUrl": "https://www.zyduslife.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 30,
+    "specialties": [
+      "Large Volume Parenterals (IV Fluids)",
+      "Antibiotics",
+      "Critical Hospital Solutions"
+    ],
+    "rawHeaders": [
+      "BIOCHEM",
+      "BIOCHEM PHARMA",
+      "BP \tBIOCHEM PHARMA"
+    ]
+  },
+  {
+    "name": "Bios Healthcare",
+    "slug": "bios-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 131,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "BIOS"
+    ]
+  },
+  {
+    "name": "Bisco Surgical",
+    "slug": "bisco-surgical",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 132,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "BISCO"
+    ]
+  },
+  {
+    "name": "Bless Me Pharmaceuticals",
+    "slug": "bless-me-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 133,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "BLESS ME"
+    ]
+  },
+  {
+    "name": "Breathgard Healthcare",
+    "slug": "breathgard-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 134,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "BREATHGARD"
+    ]
+  },
+  {
+    "name": "BTMC Manufacturing Co",
+    "slug": "btmc-manufacturing-co",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 135,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "BTMC MFG CO"
+    ]
+  },
+  {
+    "name": "BVU Healthcare",
+    "slug": "bvu-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 136,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "BVU"
+    ]
+  },
+  {
+    "name": "Byres Healthcare",
+    "slug": "byres-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 137,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "BYRES"
+    ]
+  },
+  {
+    "name": "Cadila Pharmaceuticals",
+    "slug": "cadila-pharmaceuticals",
+    "logoUrl": "/logos/cadila-pharmaceuticals.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Cardiovascular & Biologicals",
+    "description": "One of India's largest privately held pharmaceutical corporations with extensive manufacturing and clinical care portfolios across Gujarat.",
+    "location": "Ahmedabad, Gujarat",
+    "websiteUrl": "https://www.cadilapharma.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 38,
+    "specialties": [
+      "Cardiovascular Care",
+      "Gastroenterology",
+      "Biologicals & Vaccines",
+      "APIs"
+    ],
+    "rawHeaders": [
+      "CADILA PHARMACEUTICALS LTD",
+      "CP \tCADILA PHARMA"
+    ]
+  },
+  {
+    "name": "Camon Healthcare",
+    "slug": "camon-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 139,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "CAMON"
+    ]
+  },
+  {
+    "name": "Century Drugs",
+    "slug": "century-drugs",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 140,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "CENTURY DRUGS"
+    ]
+  },
+  {
+    "name": "Cernoxy Healthcare",
+    "slug": "cernoxy-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 141,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "CERNOXY"
+    ]
+  },
+  {
+    "name": "Chiron Behring",
+    "slug": "chiron-behring",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 142,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "CHIRON"
+    ]
+  },
+  {
+    "name": "Cipla Ltd",
+    "slug": "cipla-ltd",
+    "logoUrl": "/logos/cipla.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Respiratory & Multi-Specialty",
+    "description": "Global pharmaceutical pioneer in respiratory medicine, accessible antiretroviral treatments, and leading consumer healthcare brands.",
+    "location": "Mumbai, Maharashtra",
+    "websiteUrl": "https://www.cipla.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 43,
+    "specialties": [
+      "Respiratory & Inhalation",
+      "Antiretrovirals",
+      "Cardiovascular",
+      "Oncology",
+      "OTC Healthcare"
+    ],
+    "rawHeaders": [
+      "CIPLA LTD."
+    ]
+  },
+  {
+    "name": "Corona Remedies",
+    "slug": "corona-remedies",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 144,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "CORONA"
+    ]
+  },
+  {
+    "name": "Cueris Healthcare",
+    "slug": "cueris-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 145,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "CUERIS"
+    ]
+  },
+  {
+    "name": "Cure N Care Surgicals",
+    "slug": "cure-n-care-surgicals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 146,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "CURE N CARE"
+    ]
+  },
+  {
+    "name": "Curewell Drugs & Pharmaceuticals",
+    "slug": "curewell-drugs-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 147,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "CUREWELL"
+    ]
+  },
+  {
+    "name": "Danish Healthcare",
+    "slug": "danish-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 148,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "DANISH HEALTHCARE",
+      "DHC \tDANISH HEALTHCARE"
+    ]
+  },
+  {
+    "name": "Daxia Healthcare Pvt Ltd",
+    "slug": "daxia-healthcare-pvt-ltd",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceuticals & Ayurveda",
+    "description": "Flagship formulation partner featuring WHO-GMP certified effervescent respiratory strips, cardiology lines, and dermatological ointments.",
+    "location": "Rajkot / Ahmedabad, Gujarat",
+    "websiteUrl": "https://www.daxiahealthcare.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 49,
+    "specialties": [
+      "Effervescent Formulations",
+      "Cardiovascular Care",
+      "Dermatology Topicals",
+      "Classical Ayurveda"
+    ],
+    "rawHeaders": [
+      "DAXIA",
+      "DAXIA HEALTHCARE",
+      "DH \tDAXIA HEALTHCARE"
+    ]
+  },
+  {
+    "name": "Delleich Lifescience LLP",
+    "slug": "delleich-lifescience-llp",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 150,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "DELLEICH LIFESCIENCE LLP"
+    ]
+  },
+  {
+    "name": "Denish Pharma",
+    "slug": "denish-pharma",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 151,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "DENISH"
+    ]
+  },
+  {
+    "name": "Dispocan Healthcare",
+    "slug": "dispocan-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 152,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "DISPOCAN"
+    ]
+  },
+  {
+    "name": "Divine Laboratories",
+    "slug": "divine-laboratories",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 153,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "DIVINE LABORATORIES"
+    ]
+  },
+  {
+    "name": "Dr. Morepen Laboratories",
+    "slug": "dr-morepen-laboratories",
+    "logoUrl": "/logos/morepen-laboratories.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "https://www.morepen.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 154,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "DR MORPEN",
+      "DR. MOREPEN"
+    ]
+  },
+  {
+    "name": "Dr. Reddy's Laboratories",
+    "slug": "dr-reddy-s-laboratories",
+    "logoUrl": "/logos/dr-reddys.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Gastroenterology & Generics",
+    "description": "Global pharmaceutical leader providing accessible and innovative medicines across gastroenterology, oncology, and cardiovascular segments.",
+    "location": "Hyderabad, Telangana",
+    "websiteUrl": "https://www.drreddys.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 55,
+    "specialties": [
+      "Omez",
+      "Nise",
+      "Stamlo",
+      "Complex Generics",
+      "Biosimilars"
+    ],
+    "rawHeaders": [
+      "DR. REDDY'S LABORATORIES LTD.",
+      "DR.REDDY"
+    ]
+  },
+  {
+    "name": "Easy Healthcare",
+    "slug": "easy-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 156,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "EASY"
+    ]
+  },
+  {
+    "name": "Elcare India",
+    "slug": "elcare-india",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 157,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "ELCARE INDIA"
+    ]
+  },
+  {
+    "name": "Elder Pharmaceuticals",
+    "slug": "elder-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 158,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "ELDER"
+    ]
+  },
+  {
+    "name": "Elikem Pharmaceuticals",
+    "slug": "elikem-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 159,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "ELIKEM"
+    ]
+  },
+  {
+    "name": "Elitech Pharma",
+    "slug": "elitech-pharma",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 160,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "ELITECH PHARMA"
+    ]
+  },
+  {
+    "name": "Elsons Pharmaceuticals",
+    "slug": "elsons-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 161,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "ELSONS"
+    ]
+  },
+  {
+    "name": "Emcure Pharmaceuticals",
+    "slug": "emcure-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 162,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "EMCURE"
+    ]
+  },
+  {
+    "name": "Eris Lifesciences",
+    "slug": "eris-lifesciences",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 163,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "ERIS"
+    ]
+  },
+  {
+    "name": "Essity (Hansaplast)",
+    "slug": "essity-hansaplast",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 164,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "ESSITY OP"
+    ]
+  },
+  {
+    "name": "FDC Limited",
+    "slug": "fdc-limited",
+    "logoUrl": "/logos/fdc-limited.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "https://www.fdcindia.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 165,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "FDC"
+    ]
+  },
+  {
+    "name": "Fluent Life Sciences",
+    "slug": "fluent-life-sciences",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 166,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "FLUENT"
+    ]
+  },
+  {
+    "name": "Fronius Biotech",
+    "slug": "fronius-biotech",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 167,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "FRONIUS BIOTECH"
+    ]
+  },
+  {
+    "name": "Galderma India",
+    "slug": "galderma-india",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 168,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "GALDERMA INDIA"
+    ]
+  },
+  {
+    "name": "Genicks Healthcare",
+    "slug": "genicks-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 169,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "GENICKS"
+    ]
+  },
+  {
+    "name": "Genius Health & Homecare",
+    "slug": "genius-health-homecare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 170,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "GENIUS HEALTH & HOMECARE"
+    ]
+  },
+  {
+    "name": "German Remedies",
+    "slug": "german-remedies",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 171,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "GERMAN",
+      "GERMEN",
+      "GR \tGERMAN REMEDIES"
+    ]
+  },
+  {
+    "name": "Gids Healthcare",
+    "slug": "gids-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 172,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "GIDS"
+    ]
+  },
+  {
+    "name": "Glenmark Pharmaceuticals",
+    "slug": "glenmark-pharmaceuticals",
+    "logoUrl": "/logos/glenmark-pharmaceuticals.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "https://www.glenmarkpharma.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 173,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "GLENMARK"
+    ]
+  },
+  {
+    "name": "Glensmith Labs",
+    "slug": "glensmith-labs",
+    "logoUrl": "/logos/glenmark-pharmaceuticals.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "https://www.glenmarkpharma.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 174,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "GLENSMITH"
+    ]
+  },
+  {
+    "name": "Global Healthcare",
+    "slug": "global-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 175,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "GLOBAL"
+    ]
+  },
+  {
+    "name": "GM Exim",
+    "slug": "gm-exim",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 176,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "GM EXIM"
+    ]
+  },
+  {
+    "name": "Godrej Healthcare",
+    "slug": "godrej-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 177,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "GODJ"
+    ]
+  },
+  {
+    "name": "Good Lifecare",
+    "slug": "good-lifecare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 178,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "GOOD LIFECARE"
+    ]
+  },
+  {
+    "name": "GP  GUJARAT PHARMACIA",
+    "slug": "gp-gujarat-pharmacia",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 179,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "GP \tGUJARAT PHARMACIA"
+    ]
+  },
+  {
+    "name": "Gujarat Pharmacialogics",
+    "slug": "gujarat-pharmacialogics",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 180,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "GUJRAT PHARMA"
+    ]
+  },
+  {
+    "name": "Hacks & Slacks Healthcare",
+    "slug": "hacks-slacks-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 181,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "HACKS & SLACKS"
+    ]
+  },
+  {
+    "name": "Haniya Enterprise",
+    "slug": "haniya-enterprise",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 182,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "HANIYA ENTERPRISE"
+    ]
+  },
+  {
+    "name": "Harsh Medicose",
+    "slug": "harsh-medicose",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 183,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "HARSH MEDICOSE"
+    ]
+  },
+  {
+    "name": "Harvest Pharmaceuticals",
+    "slug": "harvest-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 184,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "HP \tHARVEST PHARMA"
+    ]
+  },
+  {
+    "name": "Healing Pharma (Procare)",
+    "slug": "healing-pharma-procare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 185,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "HEALING PHARMA PROCARE"
+    ]
+  },
+  {
+    "name": "Healing Pharma India",
+    "slug": "healing-pharma-india",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 186,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "HEALING PHARMA",
+      "HP \tHEALING PHARMA"
+    ]
+  },
+  {
+    "name": "Heel Anti Crack",
+    "slug": "heel-anti-crack",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 187,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "HEEL ANTI"
+    ]
+  },
+  {
+    "name": "Hemant Surgical Industries",
+    "slug": "hemant-surgical-industries",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 188,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "HEMANT SURGICAL"
+    ]
+  },
+  {
+    "name": "Hetero Healthcare",
+    "slug": "hetero-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 189,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "HETRO HEALTHCARE"
+    ]
+  },
+  {
+    "name": "Hi-Tech Surgicals",
+    "slug": "hi-tech-surgicals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 190,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "HI-TECH"
+    ]
+  },
+  {
+    "name": "Hilton Lifesciences",
+    "slug": "hilton-lifesciences",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 191,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "HILTON LIFESCIENCES",
+      "HL \tHILTON LIFESCIENCES"
+    ]
+  },
+  {
+    "name": "Hindustan Syringes & Medical Devices (Dispo Van)",
+    "slug": "hindustan-syringes-medical-devices-dispo-van",
+    "logoUrl": "/products/dispovan-pen-needle.jpg",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "https://www.hmdhealthcare.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 192,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "DISPO VAN"
+    ]
+  },
+  {
+    "name": "HMD (Hindustan Syringes & Medical Devices)",
+    "slug": "hmd-hindustan-syringes-medical-devices",
+    "logoUrl": "/products/dispovan-pen-needle.jpg",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "https://www.hmdhealthcare.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 193,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "HINDUSTAN",
+      "HMD"
+    ]
+  },
+  {
+    "name": "Horizon Healthcare",
+    "slug": "horizon-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 194,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "HORIZON"
+    ]
+  },
+  {
+    "name": "Human Biologicals Institute",
+    "slug": "human-biologicals-institute",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 195,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "HUMAN BIOLOGICALS"
+    ]
+  },
+  {
+    "name": "Ind-Swift Ltd",
+    "slug": "ind-swift-ltd",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 196,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "IND SWIFT"
+    ]
+  },
+  {
+    "name": "Insight Eye Care Pvt Ltd",
+    "slug": "insight-eye-care-pvt-ltd",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 197,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "INSIGHT EYE CAREPVT LTD"
+    ]
+  },
+  {
+    "name": "Intas Pharmaceuticals",
+    "slug": "intas-pharmaceuticals",
+    "logoUrl": "/logos/intas-pharmaceuticals.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Biosimilars & Critical Care",
+    "description": "Multinational biopharmaceutical powerhouse leading in affordable biosimilars, oncology therapies, and neuro-psychiatric medications.",
+    "location": "Ahmedabad, Gujarat",
+    "websiteUrl": "https://www.intaspharma.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 98,
+    "specialties": [
+      "Biosimilars",
+      "Oncology Injectables",
+      "CNS & Neuropsychiatry",
+      "Hospital Injectables"
+    ],
+    "rawHeaders": [
+      "INTAS PHARMACEIUTICAL",
+      "INTAS PHARMACEUTICAL"
+    ]
+  },
+  {
+    "name": "IPCA Laboratories",
+    "slug": "ipca-laboratories",
+    "logoUrl": "/logos/ipca-laboratories.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "https://www.ipca.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 199,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "IPCA"
+    ]
+  },
+  {
+    "name": "Jay Kay Ayu Pharmacy",
+    "slug": "jay-kay-ayu-pharmacy",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 200,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "JAY KAY AYU PHARMACY"
+    ]
+  },
+  {
+    "name": "JB Chemicals & Pharmaceuticals",
+    "slug": "jb-chemicals-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 201,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "JB PHARMA"
+    ]
+  },
+  {
+    "name": "Jenburkt Pharmaceuticals",
+    "slug": "jenburkt-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 202,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "JENBURKT PHARMA"
+    ]
+  },
+  {
+    "name": "Jina Cosmetics",
+    "slug": "jina-cosmetics",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 203,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "JINA COSMETICS PVT LTD"
+    ]
+  },
+  {
+    "name": "Johnlee Pharmaceuticals",
+    "slug": "johnlee-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 204,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "JOHNLEE"
+    ]
+  },
+  {
+    "name": "K-Life Health Care",
+    "slug": "k-life-health-care",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 205,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "K LIFE"
+    ]
+  },
+  {
+    "name": "KAML Healthcare",
+    "slug": "kaml-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 206,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "KAML"
+    ]
+  },
+  {
+    "name": "Kaplife Healthcare",
+    "slug": "kaplife-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 207,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "KAPLIFE"
+    ]
+  },
+  {
+    "name": "Karnani Pharmaceuticals",
+    "slug": "karnani-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 208,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "KARNANI PHARMA"
+    ]
+  },
+  {
+    "name": "Kayvee Aeropham",
+    "slug": "kayvee-aeropham",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 209,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "KAYVEE AEROPHAM PVT LTD"
+    ]
+  },
+  {
+    "name": "Knoll Healthcare",
+    "slug": "knoll-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 210,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "knoll health"
+    ]
+  },
+  {
+    "name": "Kohinoor Healthcare",
+    "slug": "kohinoor-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 211,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "KOHINOOR"
+    ]
+  },
+  {
+    "name": "Laborate Pharmaceuticals",
+    "slug": "laborate-pharmaceuticals",
+    "logoUrl": "/logos/laborate-pharmaceuticals.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "https://www.laborate.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 212,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "LABORATE PHARMA",
+      "LP \tLABORATE PHARMA"
+    ]
+  },
+  {
+    "name": "Laborate Pharmaceuticals (GPP)",
+    "slug": "laborate-pharmaceuticals-gpp",
+    "logoUrl": "/logos/laborate-pharmaceuticals.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "https://www.laborate.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 213,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "LG \tLABORATE GPP"
+    ]
+  },
+  {
+    "name": "Leeford Healthcare",
+    "slug": "leeford-healthcare",
+    "logoUrl": "/logos/leeford-healthcare.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Formulations & Cosmeceuticals",
+    "description": "Rapidly growing multi-specialty pharmaceutical and dermatological formulation company offering premium healthcare and wellness products.",
+    "location": "Ludhiana, Punjab",
+    "websiteUrl": "https://www.leeford.in",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 114,
+    "specialties": [
+      "Dermatology & Cosmeceuticals",
+      "Nutraceuticals",
+      "Critical Care",
+      "Pain Management"
+    ],
+    "rawHeaders": [
+      "LEEFORD HEALTHCARE",
+      "LH \tLEEFORD HEALTHCARE"
+    ]
+  },
+  {
+    "name": "Leeford Healthcare (Cosmacia)",
+    "slug": "leeford-healthcare-cosmacia",
+    "logoUrl": "/logos/leeford-healthcare.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "https://www.leeford.in",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 215,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "LCL \tLEEFORD COSMACIA"
+    ]
+  },
+  {
+    "name": "Leeford Healthcare (Wellness)",
+    "slug": "leeford-healthcare-wellness",
+    "logoUrl": "/logos/leeford-healthcare.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "https://www.leeford.in",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 216,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "LW \tLEEFORD WELLNESS"
+    ]
+  },
+  {
+    "name": "Leo Pharmaceuticals",
+    "slug": "leo-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 217,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "LEO"
+    ]
+  },
+  {
+    "name": "Lichies Surgical & Health",
+    "slug": "lichies-surgical-health",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 218,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "LICHIES"
+    ]
+  },
+  {
+    "name": "Lifesurge Healthcare",
+    "slug": "lifesurge-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 219,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "LIFESURGE"
+    ]
+  },
+  {
+    "name": "Litchi Healthcare",
+    "slug": "litchi-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 220,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "LITCHI"
+    ]
+  },
+  {
+    "name": "Little Angel (Godrej Consumer)",
+    "slug": "little-angel-godrej-consumer",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 221,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "LITTLE ANGLE"
+    ]
+  },
+  {
+    "name": "Livine Healthcare",
+    "slug": "livine-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 222,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "LIVINE"
+    ]
+  },
+  {
+    "name": "Lordcent and Torcent",
+    "slug": "lordcent-and-torcent",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 223,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "LORDCENT AND TORCENT"
+    ]
+  },
+  {
+    "name": "Lucid Pharmaceuticals",
+    "slug": "lucid-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 224,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "lucid pharmaceuticals"
+    ]
+  },
+  {
+    "name": "Lupin Limited",
+    "slug": "lupin-limited",
+    "logoUrl": "/logos/lupin.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "https://www.lupin.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 225,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "LUPIN"
+    ]
+  },
+  {
+    "name": "Macleods Pharmaceuticals",
+    "slug": "macleods-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 226,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "MACLEODS"
+    ]
+  },
+  {
+    "name": "Macmillon Pharmaceuticals",
+    "slug": "macmillon-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 227,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "MACMILLON PHARMACEUTICALS"
+    ]
+  },
+  {
+    "name": "Manish Pharma",
+    "slug": "manish-pharma",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 228,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "MANISH PHARMA"
+    ]
+  },
+  {
+    "name": "Mankind Pharma",
+    "slug": "mankind-pharma",
+    "logoUrl": "/logos/mankind-pharma.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Formulations & Consumer Health",
+    "description": "Top domestic healthcare brand delivering affordable prescription formulations and household consumer health essentials.",
+    "location": "New Delhi, Delhi",
+    "websiteUrl": "https://www.mankindpharma.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 129,
+    "specialties": [
+      "Moxikind-CV",
+      "Manforce",
+      "Prega News",
+      "Cardiology & Diabetology"
+    ],
+    "rawHeaders": [
+      "MANKIND"
+    ]
+  },
+  {
+    "name": "Medicamen Biotech Ltd",
+    "slug": "medicamen-biotech-ltd",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 230,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "MB \tMEDICAMEN BIOTECH LTD.",
+      "MEDICAMEN PHARMA"
+    ]
+  },
+  {
+    "name": "Medicare Hygiene Ltd",
+    "slug": "medicare-hygiene-ltd",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 231,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "MEDICARE HYGINE LTD"
+    ]
+  },
+  {
+    "name": "Medimetro Healthcare",
+    "slug": "medimetro-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 232,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "MEDIMETRO"
+    ]
+  },
+  {
+    "name": "Medisum Healthcare",
+    "slug": "medisum-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 233,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "MEDISUM"
+    ]
+  },
+  {
+    "name": "Meditek Lifesciences",
+    "slug": "meditek-lifesciences",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 234,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "MEDITEK"
+    ]
+  },
+  {
+    "name": "Medoz Lifecare",
+    "slug": "medoz-lifecare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 235,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "MEDOZ LIFECARE"
+    ]
+  },
+  {
+    "name": "Medtech Life Pvt Ltd",
+    "slug": "medtech-life-pvt-ltd",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 236,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "MEDTECH"
+    ]
+  },
+  {
+    "name": "Medwin Biotech",
+    "slug": "medwin-biotech",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 237,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "MEDWIN BIOTECH"
+    ]
+  },
+  {
+    "name": "Medwin Pharmatech",
+    "slug": "medwin-pharmatech",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 238,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "MEDWIN PHARMATECH"
+    ]
+  },
+  {
+    "name": "Merck India / Procter & Gamble Health",
+    "slug": "merck-india-procter-gamble-health",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 239,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "MERCK"
+    ]
+  },
+  {
+    "name": "Metacine Pharmaceuticals",
+    "slug": "metacine-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 240,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "METACINE PHARMACEUTICALS"
+    ]
+  },
+  {
+    "name": "Micro Labs Ltd",
+    "slug": "micro-labs-ltd",
+    "logoUrl": "/logos/micro-labs.jpg",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "https://www.microlabsltd.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 241,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "MICRO LABS LIMITED"
+    ]
+  },
+  {
+    "name": "Modi Healthcare",
+    "slug": "modi-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 242,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "MODI"
+    ]
+  },
+  {
+    "name": "Modi Lifecare Industries",
+    "slug": "modi-lifecare-industries",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 243,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "MODI LIFECARE INDUSTRIES L."
+    ]
+  },
+  {
+    "name": "Morepen Laboratories",
+    "slug": "morepen-laboratories",
+    "logoUrl": "/logos/morepen-laboratories.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Diagnostics & Formulations",
+    "description": "Leading healthcare and diagnostic enterprise known for GlucoOne monitors, active pharmaceutical ingredients, and trusted OTC brands.",
+    "location": "New Delhi, Delhi",
+    "websiteUrl": "https://www.morepen.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 144,
+    "specialties": [
+      "Home Health Diagnostics",
+      "APIs",
+      "OTC Healthcare",
+      "Solid Dosage Formulations"
+    ],
+    "rawHeaders": [
+      "ML \tMOREPEN LABS LTD.",
+      "morepen"
+    ]
+  },
+  {
+    "name": "Moruf Life Sciences",
+    "slug": "moruf-life-sciences",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 245,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "MORUF LIFE SCIENCES"
+    ]
+  },
+  {
+    "name": "Namcare Biotech",
+    "slug": "namcare-biotech",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Critical Care & Injectables",
+    "description": "Premier parenteral formulations manufacturer offering WHO-compliant sterile antibiotics and critical hospital injectables.",
+    "location": "Ahmedabad, Gujarat",
+    "websiteUrl": "https://www.namcarepharma.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 146,
+    "specialties": [
+      "Lyophilized Injectables",
+      "Broad-Spectrum Antibiotics",
+      "Critical Care Vials",
+      "Pediatric Drops"
+    ],
+    "rawHeaders": [
+      "NAMCARE",
+      "NAMCARE BIOTECH",
+      "NB \tNAMCARE BIOTECH"
+    ]
+  },
+  {
+    "name": "Naulakha Surgicals",
+    "slug": "naulakha-surgicals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 247,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "NAULAKHA"
+    ]
+  },
+  {
+    "name": "ND Pharma",
+    "slug": "nd-pharma",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 248,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "ND PHARMA"
+    ]
+  },
+  {
+    "name": "Nectar Lifesciences",
+    "slug": "nectar-lifesciences",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 249,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "NECTAR"
+    ]
+  },
+  {
+    "name": "Netola Fitness & Healthcare",
+    "slug": "netola-fitness-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 250,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "NETOLA FITNESS"
+    ]
+  },
+  {
+    "name": "Neulife Surgi Plast",
+    "slug": "neulife-surgi-plast",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 251,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "NEULIFE SURGI PLAST"
+    ]
+  },
+  {
+    "name": "Nipro Medical India",
+    "slug": "nipro-medical-india",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 252,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "NIPRO"
+    ]
+  },
+  {
+    "name": "Niyansh Pharma OTC Range",
+    "slug": "niyansh-pharma-otc-range",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 253,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "OTC"
+    ]
+  },
+  {
+    "name": "Novelty Healthcare",
+    "slug": "novelty-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 254,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "NOVELTY HEALTH"
+    ]
+  },
+  {
+    "name": "Novul Healthcare",
+    "slug": "novul-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 255,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "NOVUL"
+    ]
+  },
+  {
+    "name": "Nukind Healthcare",
+    "slug": "nukind-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 256,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "NUKIND"
+    ]
+  },
+  {
+    "name": "Omega Biotech",
+    "slug": "omega-biotech",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 257,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "OMEGA",
+      "OMEGA BIOTECH"
+    ]
+  },
+  {
+    "name": "Osam Surgi Pharma",
+    "slug": "osam-surgi-pharma",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 258,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "OSAM SURGI PHARMA"
+    ]
+  },
+  {
+    "name": "Parijat Surgical",
+    "slug": "parijat-surgical",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 259,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "PARIJAT SURGICAL"
+    ]
+  },
+  {
+    "name": "Parth Pharmaceuticals",
+    "slug": "parth-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 260,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "PARTH"
+    ]
+  },
+  {
+    "name": "Piramal Pharma Ltd",
+    "slug": "piramal-pharma-ltd",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 261,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "PIRAMAL"
+    ]
+  },
+  {
+    "name": "Plethico Pharmaceuticals",
+    "slug": "plethico-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 262,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "PLETHICO"
+    ]
+  },
+  {
+    "name": "PM Life Sciences",
+    "slug": "pm-life-sciences",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 263,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "PM LIFE SCIENCE"
+    ]
+  },
+  {
+    "name": "POCT Services Pvt Ltd",
+    "slug": "poct-services-pvt-ltd",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 264,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "POCT"
+    ]
+  },
+  {
+    "name": "Precision Coating Products (Medigrip)",
+    "slug": "precision-coating-products-medigrip",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 265,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "PC \tPRECISION COATING",
+      "PRECISION COATING"
+    ]
+  },
+  {
+    "name": "Prevego Healthcare & Research",
+    "slug": "prevego-healthcare-research",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 266,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "PH \tPREVEGOHEALTHCARERESEARC",
+      "PREVEGO PHARMA"
+    ]
+  },
+  {
+    "name": "Prime Life Sciences",
+    "slug": "prime-life-sciences",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 267,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "PRIME LIFE SCIENCE"
+    ]
+  },
+  {
+    "name": "Princecare Pharma",
+    "slug": "princecare-pharma",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 268,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "PC \tPRINCECARE PHARMA"
+    ]
+  },
+  {
+    "name": "Pro Laboratories Pvt Ltd",
+    "slug": "pro-laboratories-pvt-ltd",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 269,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "PRO LABORATORIES PVT. LTD."
+    ]
+  },
+  {
+    "name": "Pro Pharma Care",
+    "slug": "pro-pharma-care",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 270,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "PRO PHARMA CARE"
+    ]
+  },
+  {
+    "name": "Psychotropics India Ltd (PIL)",
+    "slug": "psychotropics-india-ltd-pil",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 271,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "PI \tPSYCOTROPICS",
+      "PILL",
+      "PSYCHOTROPICS INDIA LTD"
+    ]
+  },
+  {
+    "name": "Rain Pharma",
+    "slug": "rain-pharma",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 272,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "RAIN PHARMA"
+    ]
+  },
+  {
+    "name": "Rajasthan Medical Agency",
+    "slug": "rajasthan-medical-agency",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 273,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "RAJASTHAN MEDICAL AGENCY"
+    ]
+  },
+  {
+    "name": "Ratnam Medicare",
+    "slug": "ratnam-medicare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 274,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "RM \tRATNAM MEDICARE"
+    ]
+  },
+  {
+    "name": "Ravi Healthcare",
+    "slug": "ravi-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 275,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "RAVI HEALTHCARE"
+    ]
+  },
+  {
+    "name": "Raxia Pharmaceuticals",
+    "slug": "raxia-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 276,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "RAXIA PHARMACEUTICALS PVT LTD."
+    ]
+  },
+  {
+    "name": "Rayne Healthcare",
+    "slug": "rayne-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 277,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "RAYNE"
+    ]
+  },
+  {
+    "name": "Reckitt Benckiser (Dettol)",
+    "slug": "reckitt-benckiser-dettol",
+    "logoUrl": "/logos/reckitt-benckiser.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "https://www.reckitt.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 278,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "DETTOL"
+    ]
+  },
+  {
+    "name": "Reckitt Benckiser (Moov)",
+    "slug": "reckitt-benckiser-moov",
+    "logoUrl": "/logos/reckitt-benckiser.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "https://www.reckitt.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 279,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "MOOV"
+    ]
+  },
+  {
+    "name": "Reckitt Benckiser Group",
+    "slug": "reckitt-benckiser-group",
+    "logoUrl": "/logos/reckitt-benckiser.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "https://www.reckitt.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 280,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "RECKITT & BENCKISER"
+    ]
+  },
+  {
+    "name": "RHD Healthcare",
+    "slug": "rhd-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 281,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "RHD"
+    ]
+  },
+  {
+    "name": "Rhombus Pharma",
+    "slug": "rhombus-pharma",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 282,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "RHOMBUS PHARMA PRIVATE LTD."
+    ]
+  },
+  {
+    "name": "Rhon-Poulenc / Sanofi India",
+    "slug": "rhon-poulenc-sanofi-india",
+    "logoUrl": "/logos/sanofi.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "https://www.sanofi.in",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 283,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "RHON-POULE"
+    ]
+  },
+  {
+    "name": "Ridal Healthcare",
+    "slug": "ridal-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 284,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "RIDAL"
+    ]
+  },
+  {
+    "name": "Rite Labs",
+    "slug": "rite-labs",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 285,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "RL \tRITE LABS"
+    ]
+  },
+  {
+    "name": "RPG Life Sciences",
+    "slug": "rpg-life-sciences",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 286,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "RPG LIFE SCIENCES"
+    ]
+  },
+  {
+    "name": "RPL Healthcare",
+    "slug": "rpl-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 287,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "RPL"
+    ]
+  },
+  {
+    "name": "Sai Kripa Products",
+    "slug": "sai-kripa-products",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 288,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "SAI KRIPA PRODUCTS"
+    ]
+  },
+  {
+    "name": "Salman Pharmaceuticals",
+    "slug": "salman-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 289,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "SALMAN"
+    ]
+  },
+  {
+    "name": "Samkem Healthcare",
+    "slug": "samkem-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 290,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "SAMKEM"
+    ]
+  },
+  {
+    "name": "Sanity Healthcare",
+    "slug": "sanity-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 291,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "SANITY"
+    ]
+  },
+  {
+    "name": "Sarian Healthcare",
+    "slug": "sarian-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 292,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "SARIAN HEALTHCARE"
+    ]
+  },
+  {
+    "name": "Scott Morrison Healthcare",
+    "slug": "scott-morrison-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 293,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "SCOTT MORRISON"
+    ]
+  },
+  {
+    "name": "Scott-Edil Pharmacia",
+    "slug": "scott-edil-pharmacia",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 294,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "SCOTT EDIL"
+    ]
+  },
+  {
+    "name": "SD Biosensor Healthcare",
+    "slug": "sd-biosensor-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 295,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "SD BIOSENSOR"
+    ]
+  },
+  {
+    "name": "Searle Interphar",
+    "slug": "searle-interphar",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 296,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "SEARLE",
+      "SERLE",
+      "SI \tSEARLE INTERPHAR"
+    ]
+  },
+  {
+    "name": "Shantam Healthcare",
+    "slug": "shantam-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 297,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "SHANTAM"
+    ]
+  },
+  {
+    "name": "Silicon Pharma",
+    "slug": "silicon-pharma",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 298,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "SILICON PHARMA"
+    ]
+  },
+  {
+    "name": "Skymap Pharmaceuticals",
+    "slug": "skymap-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 299,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "SKYMAP PHARMA"
+    ]
+  },
+  {
+    "name": "SMB Women Care",
+    "slug": "smb-women-care",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 300,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "SMB WOMEN CARE PVT. LTD."
+    ]
+  },
+  {
+    "name": "SMIC Medical Instruments",
+    "slug": "smic-medical-instruments",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 301,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "SMIC"
+    ]
+  },
+  {
+    "name": "Smith & Nephew Healthcare",
+    "slug": "smith-nephew-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 302,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "SMITH&NEPHEW"
+    ]
+  },
+  {
+    "name": "SPL Healthcare",
+    "slug": "spl-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 303,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "SPL"
+    ]
+  },
+  {
+    "name": "Sterimed Medical Devices",
+    "slug": "sterimed-medical-devices",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 304,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "STERIMED"
+    ]
+  },
+  {
+    "name": "Steris Healthcare",
+    "slug": "steris-healthcare",
+    "logoUrl": "/logos/steris-healthcare.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Hospital Care & Generics",
+    "description": "Specialized generic formulations provider focusing on high-efficacy hospital consumables, nephrology, and surgical care.",
+    "location": "Ahmedabad, Gujarat",
+    "websiteUrl": "https://www.sterishealthcare.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 205,
+    "specialties": [
+      "Critical Care & Hospital Injections",
+      "Nephrology & Dialysis Care",
+      "Urology",
+      "Sterile Surgicals"
+    ],
+    "rawHeaders": [
+      "STERIS",
+      "STRIES"
+    ]
+  },
+  {
+    "name": "Sun Pharma (Ranbaxy)",
+    "slug": "sun-pharma-ranbaxy",
+    "logoUrl": "/logos/sun-pharma.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "https://www.sunpharma.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 306,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "RANBAXY"
+    ]
+  },
+  {
+    "name": "Sun Pharmaceutical Industries Ltd",
+    "slug": "sun-pharmaceutical-industries-ltd",
+    "logoUrl": "/logos/sun-pharma.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "https://www.sunpharma.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 307,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "SUN",
+      "SUN PHARMA"
+    ]
+  },
+  {
+    "name": "Super Healthcare",
+    "slug": "super-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 308,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "SUPER"
+    ]
+  },
+  {
+    "name": "Suraksha Pharma",
+    "slug": "suraksha-pharma",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 309,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "SURAKSHA"
+    ]
+  },
+  {
+    "name": "Surgical Healthcare Supplies",
+    "slug": "surgical-healthcare-supplies",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 310,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "SURGICAL"
+    ]
+  },
+  {
+    "name": "Surgical Supplies",
+    "slug": "surgical-supplies",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 311,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "SURG"
+    ]
+  },
+  {
+    "name": "Tesla Lab Pvt Ltd",
+    "slug": "tesla-lab-pvt-ltd",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 312,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "TESLA LAB PRIVATE LIMITED"
+    ]
+  },
+  {
+    "name": "Tesla Pharmaceuticals",
+    "slug": "tesla-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 313,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "TESLA"
+    ]
+  },
+  {
+    "name": "The Himalaya Drug Company",
+    "slug": "the-himalaya-drug-company",
+    "logoUrl": "/logos/himalaya-wellness.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "https://himalayawellness.in",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 314,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "HIMALAYA"
+    ]
+  },
+  {
+    "name": "Themis Medicare Ltd",
+    "slug": "themis-medicare-ltd",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pain Management & Anesthesia",
+    "description": "Pioneering Indian pharma house recognized for innovation in pain relief injections and synthetic active drug substances.",
+    "location": "Mumbai, Maharashtra",
+    "websiteUrl": "https://www.themismedicare.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 215,
+    "specialties": [
+      "Specialty Analgesia",
+      "Anesthesia",
+      "Anti-malarials",
+      "Fermentation APIs"
+    ],
+    "rawHeaders": [
+      "THEMIS PHARMA"
+    ]
+  },
+  {
+    "name": "Theon Pharmaceuticals",
+    "slug": "theon-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 316,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "THEOGEN",
+      "THEON"
+    ]
+  },
+  {
+    "name": "Topmost Pharmaceuticals",
+    "slug": "topmost-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 317,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "TOPMOST PHARMACEUTICALS"
+    ]
+  },
+  {
+    "name": "Torque Pharmaceuticals",
+    "slug": "torque-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 318,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "TORQUE"
+    ]
+  },
+  {
+    "name": "Torrent Pharmaceuticals",
+    "slug": "torrent-pharmaceuticals",
+    "logoUrl": "/logos/torrent-pharmaceuticals.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Cardiovascular & CNS",
+    "description": "Flagship company of Torrent Group dominating Indian cardiology, neurology, and psychiatric formulation therapies.",
+    "location": "Ahmedabad, Gujarat",
+    "websiteUrl": "https://www.torrentpharma.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 219,
+    "specialties": [
+      "Cardiovascular (Nebicard, Losar)",
+      "CNS (Nexito)",
+      "Gastroenterology",
+      "Diabetology"
+    ],
+    "rawHeaders": [
+      "TORRENT PHARMA"
+    ]
+  },
+  {
+    "name": "Tridoss Laboratories",
+    "slug": "tridoss-laboratories",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 320,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "TL \tTRIDOSS LABORATORIES"
+    ]
+  },
+  {
+    "name": "Troikaa Pharmaceuticals",
+    "slug": "troikaa-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "NDDS & Pain Management",
+    "description": "Research-driven innovator renowned worldwide for pioneering sub-micron injectable technologies and patented pain therapeutics.",
+    "location": "Ahmedabad, Gujarat",
+    "websiteUrl": "https://www.troikaa.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 221,
+    "specialties": [
+      "Novel Drug Delivery Systems (NDDS)",
+      "Dynapar AQ Painless Injection",
+      "Critical Care & Anesthesia"
+    ],
+    "rawHeaders": [
+      "TROIKAA",
+      "TROIKAA PHARMA LTD.]"
+    ]
+  },
+  {
+    "name": "Truemaid Hygiene Products",
+    "slug": "truemaid-hygiene-products",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 322,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "TRUEMAID HYGIENE PRODUCTS"
+    ]
+  },
+  {
+    "name": "Tynor Orthotics Pvt Ltd",
+    "slug": "tynor-orthotics-pvt-ltd",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 323,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "TYNOR ORTHOTICS PVT LTD"
+    ]
+  },
+  {
+    "name": "Unicure Remedies",
+    "slug": "unicure-remedies",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 324,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "UNICURE"
+    ]
+  },
+  {
+    "name": "Uniprime Healthcare",
+    "slug": "uniprime-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 325,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "UNIPRIME"
+    ]
+  },
+  {
+    "name": "Unique Surgical",
+    "slug": "unique-surgical",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 326,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "UNIQUE"
+    ]
+  },
+  {
+    "name": "Unison Pharmaceuticals",
+    "slug": "unison-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 327,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "UNISON PHARMACEUTICALS"
+    ]
+  },
+  {
+    "name": "United Drug Company",
+    "slug": "united-drug-company",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 328,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "UNITED DRUG"
+    ]
+  },
+  {
+    "name": "Universal Healthcare",
+    "slug": "universal-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 329,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "UNIVERSAL"
+    ]
+  },
+  {
+    "name": "Universal Life Sciences",
+    "slug": "universal-life-sciences",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 330,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "ULS UNIVERSAL LIFE SCIENCE"
+    ]
+  },
+  {
+    "name": "Uroline Healthcare",
+    "slug": "uroline-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 331,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "UROLINE"
+    ]
+  },
+  {
+    "name": "USV Private Limited",
+    "slug": "usv-private-limited",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 332,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "USV"
+    ]
+  },
+  {
+    "name": "Veritas Life Sciences",
+    "slug": "veritas-life-sciences",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 333,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "VERITAS LIFE SCIENCES LTD"
+    ]
+  },
+  {
+    "name": "Verna Healthcare",
+    "slug": "verna-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 334,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "VERNA HEALTHCARE",
+      "VH \tVERNA HEALTHCARE"
+    ]
+  },
+  {
+    "name": "Vernoxy Healthcare",
+    "slug": "vernoxy-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 335,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "VERNOXY"
+    ]
+  },
+  {
+    "name": "Vish Crish Healthcare",
+    "slug": "vish-crish-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 336,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "VISH CRISH"
+    ]
+  },
+  {
+    "name": "Vissco Rehabilitation Aids",
+    "slug": "vissco-rehabilitation-aids",
+    "logoUrl": "/logos/vissco-rehabilitation.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "https://www.vissco.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 337,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "VISSCO REHABILITATION"
+    ]
+  },
+  {
+    "name": "Volant Pharmaceuticals",
+    "slug": "volant-pharmaceuticals",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 338,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "VOLANT PHARMACEUTICALS"
+    ]
+  },
+  {
+    "name": "Welable Healthcare",
+    "slug": "welable-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 339,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "WELABLE HEALTHCARE"
+    ]
+  },
+  {
+    "name": "Will Impex Healthcare",
+    "slug": "will-impex-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Surgical & Medical Supplies",
+    "description": "Comprehensive medical supplies and hospital consumables provider supporting surgical centers and clinics across Gujarat.",
+    "location": "Ahmedabad / Surat, Gujarat",
+    "websiteUrl": "https://www.willimpex.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 240,
+    "specialties": [
+      "Surgical Consumables",
+      "Orthopedic Implants",
+      "Latex / Nitrile Examination Gloves",
+      "Hospital Disposables"
+    ],
+    "rawHeaders": [
+      "WI \tWILL IMPEX",
+      "WILL IMPEX"
+    ]
+  },
+  {
+    "name": "Wilson Tape & Adhesives",
+    "slug": "wilson-tape-adhesives",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 341,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "WT \tWILSON TAPE"
+    ]
+  },
+  {
+    "name": "Windlas Biotech",
+    "slug": "windlas-biotech",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 342,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "WINDLAS"
+    ]
+  },
+  {
+    "name": "Wings Biotech",
+    "slug": "wings-biotech",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 343,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "WINGS BIOTECH"
+    ]
+  },
+  {
+    "name": "Wings Pharmaceuticals (Novitas)",
+    "slug": "wings-pharmaceuticals-novitas",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 344,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "WINGS NOVITAS"
+    ]
+  },
+  {
+    "name": "Wipax Healthcare",
+    "slug": "wipax-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 345,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "WIPAX"
+    ]
+  },
+  {
+    "name": "Wipro Consumer Care (Santoor)",
+    "slug": "wipro-consumer-care-santoor",
+    "logoUrl": "/logos/wipro-consumer-care.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "https://wiproconsumercare.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 346,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "SANTOOR"
+    ]
+  },
+  {
+    "name": "Wockhardt Ltd",
+    "slug": "wockhardt-ltd",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 347,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "WOCKHARDT PHARMA"
+    ]
+  },
+  {
+    "name": "Wtalin Healthcare",
+    "slug": "wtalin-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 348,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "WTALIN"
+    ]
+  },
+  {
+    "name": "Wyalin Healthcare",
+    "slug": "wyalin-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 349,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "WYALIN"
+    ]
+  },
+  {
+    "name": "Xsense Healthcare",
+    "slug": "xsense-healthcare",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Pharmaceutical Formulations",
+    "description": "Authorized pharmaceutical distributor and healthcare manufacturer supplying quality healthcare products to Niyansh Pharma.",
+    "location": "India",
+    "websiteUrl": "",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 350,
+    "specialties": [
+      "Formulations",
+      "Generic Medicines",
+      "Hospital Supplies"
+    ],
+    "rawHeaders": [
+      "XSENSE"
+    ]
+  },
+  {
+    "name": "Zee Laboratories",
+    "slug": "zee-laboratories",
+    "logoUrl": "",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Generics & Topicals",
+    "description": "Extensive generic pharmaceuticals producer specializing in cost-effective formulations, eye drops, and dermatological solutions.",
+    "location": "Karnal, Haryana",
+    "websiteUrl": "https://www.zeelaboratories.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 251,
+    "specialties": [
+      "Affordable Finished Generics",
+      "Ophthalmic Drops",
+      "Topical Dermal Formulations",
+      "Medicated Soaps"
+    ],
+    "rawHeaders": [
+      "ZEE DRUG",
+      "ZL \tZEE LABORATORIES"
+    ]
+  },
+  {
+    "name": "Zydus Lifesciences (Cadila)",
+    "slug": "zydus-lifesciences-cadila",
+    "logoUrl": "/logos/zydus-lifesciences.png",
+    "coverImageUrl": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    "category": "Biologics & Formulations",
+    "description": "Global life sciences enterprise dedicated to innovative healthcare solutions, novel vaccines, and premier consumer wellness brands.",
+    "location": "Ahmedabad, Gujarat",
+    "websiteUrl": "https://www.zyduslife.com",
+    "isVerified": true,
+    "isPublished": true,
+    "orderPriority": 252,
+    "specialties": [
+      "Biologics & Vaccines",
+      "Cardiovascular",
+      "Lipaglyn",
+      "Zydus Wellness (Everyuth, Sugar Free)"
+    ],
+    "rawHeaders": [
+      "zydus cadila"
+    ]
+  }
+]

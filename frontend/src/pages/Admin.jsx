@@ -624,6 +624,7 @@ function Admin() {
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
+  const [isSyncingCatalog, setIsSyncingCatalog] = useState(false);
   const [isSavingProduct, setIsSavingProduct] = useState(false);
   const [isUploadingPhotos, setIsUploadingPhotos] = useState(false);
   const [photoDragActive, setPhotoDragActive] = useState(false);
@@ -1895,6 +1896,29 @@ _Helpline: +91 9316566894_`;
     link.click();
     document.body.removeChild(link);
     showToast('Product catalog exported to CSV successfully');
+  };
+
+  const handleSyncFullCatalog = async () => {
+    setIsSyncingCatalog(true);
+    showToast('Syncing full 9,560 catalog into cloud database... This may take a few seconds.');
+    try {
+      const res = await fetch('/api/products/sync-catalog', {
+        method: 'POST',
+        headers: getAuthHeaders()
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast(data.message || 'Full catalog synced successfully!');
+        await fetchDashboardData();
+        broadcastLiveEvent(SYNC_EVENTS.PRODUCT_BULK_IMPORTED, { total: data.totalProducts });
+      } else {
+        showToast(data.message || 'Catalog sync failed', 'error');
+      }
+    } catch (err) {
+      showToast('Error syncing catalog: ' + err.message, 'error');
+    } finally {
+      setIsSyncingCatalog(false);
+    }
   };
 
   const handleExecuteBulkImport = async () => {
@@ -3660,6 +3684,19 @@ _Helpline: +91 9316566894_`;
                         <FileSpreadsheet size={14} /> Import CSV
                       </button>
 
+                      {productStats.totalProducts < 500 && (
+                        <button 
+                          onClick={handleSyncFullCatalog} 
+                          disabled={isSyncingCatalog}
+                          className="btn btn-sm"
+                          style={{ gap: '6px', backgroundColor: '#0284c7', color: '#fff', border: 'none', fontWeight: '700' }}
+                          title="Populate full 9,560 catalog into database"
+                        >
+                          <RefreshCw size={14} className={isSyncingCatalog ? 'animate-spin' : ''} /> 
+                          {isSyncingCatalog ? 'Syncing...' : 'Sync Full 9,560 Catalog'}
+                        </button>
+                      )}
+
                       <button 
                         onClick={() => handleOpenProductModal(null)} 
                         className="btn btn-primary btn-sm" 
@@ -3669,6 +3706,27 @@ _Helpline: +91 9316566894_`;
                       </button>
                     </div>
                   </div>
+
+                  {/* Cloud Database Alert Banner if catalog is underpopulated */}
+                  {productStats.totalProducts < 500 && (
+                    <div style={{ padding: '14px 20px', backgroundColor: '#fef3c7', border: '1.5px solid #fde68a', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.88rem', color: '#92400e' }}>
+                        <AlertTriangle size={20} color="#d97706" style={{ flexShrink: 0 }} />
+                        <span>
+                          <strong>Database sync notice:</strong> This environment currently has only <strong>{productStats.totalProducts}</strong> products in its database. Click to load all <strong>9,560</strong> wholesale medicines into this database.
+                        </span>
+                      </div>
+                      <button 
+                        onClick={handleSyncFullCatalog}
+                        disabled={isSyncingCatalog}
+                        className="btn btn-sm"
+                        style={{ backgroundColor: '#d97706', color: '#fff', border: 'none', padding: '7px 16px', fontWeight: '700', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
+                      >
+                        <RefreshCw size={14} className={isSyncingCatalog ? 'animate-spin' : ''} />
+                        {isSyncingCatalog ? 'Syncing 9,560 Products...' : 'Sync 9,560 Products to Cloud Now'}
+                      </button>
+                    </div>
+                  )}
 
                   {/* Stat Cards Metrics Row */}
                   <div className="admin-stat-5-grid">

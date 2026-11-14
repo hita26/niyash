@@ -1,6 +1,10 @@
 const User = require('../models/User');
 const NewsUpdate = require('../models/NewsUpdate');
 const Ledger = require('../models/Ledger');
+const Product = require('../models/Product');
+const Company = require('../models/Company');
+const fs = require('fs');
+const path = require('path');
 
 let isInitialized = false;
 
@@ -246,6 +250,57 @@ const initDefaults = async () => {
         }
       } catch (hErr) {
         // ignore
+      }
+
+      // 5. Ensure Full Catalog (9,500+ products & companies) is synced
+      try {
+        const productCount = await Product.countDocuments();
+        if (productCount < 500) {
+          console.log(`Current product count (${productCount}) is below full catalog threshold. Starting automatic catalog sync...`);
+          const companiesFile = path.join(__dirname, '../data/companies.json');
+          const productsFile = path.join(__dirname, '../data/products.json');
+
+          if (fs.existsSync(companiesFile)) {
+            try {
+              const companiesData = JSON.parse(fs.readFileSync(companiesFile, 'utf8'));
+              const compOps = companiesData.map(c => ({
+                updateOne: {
+                  filter: { name: c.name },
+                  update: { $set: { ...c, isPublished: true, isVerified: true } },
+                  upsert: true
+                }
+              }));
+              await Company.bulkWrite(compOps, { ordered: false });
+              console.log(`✅ ${companiesData.length} companies synced.`);
+            } catch (cErr) {
+              console.warn('Company sync notice:', cErr.message);
+            }
+          }
+
+          if (fs.existsSync(productsFile)) {
+            try {
+              const productsData = JSON.parse(fs.readFileSync(productsFile, 'utf8'));
+              const BATCH_SIZE = 1500;
+              for (let i = 0; i < productsData.length; i += BATCH_SIZE) {
+                const chunk = productsData.slice(i, i + BATCH_SIZE);
+                const bulkOps = chunk.map(p => ({
+                  updateOne: {
+                    filter: { sku: p.sku },
+                    update: { $set: p },
+                    upsert: true
+                  }
+                }));
+                await Product.bulkWrite(bulkOps, { ordered: false });
+              }
+              const finalCount = await Product.countDocuments();
+              console.log(`✅ Full catalog seeded successfully. Total products: ${finalCount}`);
+            } catch (pErr) {
+              console.warn('Product sync notice:', pErr.message);
+            }
+          }
+        }
+      } catch (catErr) {
+        console.warn('Catalog check notice:', catErr.message);
       }
 
       isInitialized = true;

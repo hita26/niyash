@@ -5333,7 +5333,7 @@ _Helpline: +91 9316566894_`;
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          padding: '16px'
+          padding: '20px'
         }}>
           <div className="card admin-modal-workspace" role="dialog" aria-modal="true">
             <form onSubmit={handleSaveProduct} style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
@@ -5341,32 +5341,32 @@ _Helpline: +91 9316566894_`;
               {/* STICKY HEADER */}
               <div className="admin-workspace-header">
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <h2 style={{ fontSize: '1.2rem', color: 'var(--text-dark)', margin: 0, fontWeight: '700' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <h2 style={{ fontSize: '1.3rem', color: 'var(--text-dark)', margin: 0, fontWeight: '700' }}>
                       {editingProduct ? 'Edit Product Details & Photos' : 'Add New Product to Catalog'}
                     </h2>
                     <span style={{ 
-                      fontSize: '0.72rem', 
+                      fontSize: '0.78rem', 
                       backgroundColor: editingProduct ? '#eff6ff' : '#ecfdf5', 
                       color: editingProduct ? '#2563eb' : '#059669', 
-                      padding: '2px 8px', 
-                      borderRadius: '12px', 
+                      padding: '3px 10px', 
+                      borderRadius: '14px', 
                       fontWeight: '700' 
                     }}>
                       {editingProduct ? (prodSku || 'Editing SKU') : 'New SKU'}
                     </span>
                   </div>
-                  <p style={{ margin: '2px 0 0', fontSize: '0.8rem', color: 'var(--text-medium)' }}>
+                  <p style={{ margin: '4px 0 0', fontSize: '0.86rem', color: 'var(--text-medium)' }}>
                     Upload photos, configure wholesale PTR & MRP pricing, track stock inventory and active molecules
                   </p>
                 </div>
                 <button 
                   type="button"
                   onClick={() => setIsProductModalOpen(false)} 
-                  style={{ color: 'var(--text-medium)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }} 
+                  style={{ color: 'var(--text-medium)', background: 'none', border: 'none', cursor: 'pointer', padding: '6px' }} 
                   aria-label="Close"
                 >
-                  <XCircle size={22} />
+                  <XCircle size={24} />
                 </button>
               </div>
 
@@ -5374,20 +5374,20 @@ _Helpline: +91 9316566894_`;
               <div className="admin-workspace-body">
                 
                 {/* ================= LEFT COLUMN: MEDIA & STATUS ================= */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   
                   {/* Photo Upload & Gallery Card */}
-                  <div className="admin-workspace-panel" style={{ padding: '12px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                      <label style={{ fontSize: '0.84rem', fontWeight: '700', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <ImageIcon size={16} color="var(--primary-blue)" /> Product Photos ({prodImages.length})
+                  <div className="admin-workspace-panel" style={{ padding: '16px', backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                      <label style={{ fontSize: '0.92rem', fontWeight: '700', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <ImageIcon size={18} color="var(--primary-blue)" /> Product Photos ({prodImages.length})
                       </label>
-                      <span style={{ fontSize: '0.7rem', color: 'var(--text-medium)' }}>
+                      <span style={{ fontSize: '0.76rem', color: 'var(--text-medium)' }}>
                         ★ First photo is Primary
                       </span>
                     </div>
 
-                    {/* Compact Drag-and-drop dropzone */}
+                    {/* Drag-and-drop dropzone */}
                     <div
                       onDragOver={(e) => { e.preventDefault(); setPhotoDragActive(true); }}
                       onDragLeave={() => setPhotoDragActive(false)}
@@ -5396,12 +5396,12 @@ _Helpline: +91 9316566894_`;
                       style={{
                         border: `2px dashed ${photoDragActive ? 'var(--primary-blue)' : '#cbd5e1'}`,
                         backgroundColor: photoDragActive ? '#eff6ff' : '#ffffff',
-                        borderRadius: '8px',
-                        padding: '12px 10px',
+                        borderRadius: '10px',
+                        padding: '16px 14px',
                         textAlign: 'center',
                         cursor: 'pointer',
                         transition: 'all 0.2s ease',
-                        marginBottom: '8px'
+                        marginBottom: '12px'
                       }}
                     >
                       <input 
@@ -5413,45 +5413,45 @@ _Helpline: +91 9316566894_`;
                         style={{ display: 'none' }}
                       />
                       {isUploadingPhotos ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                          <div className="spinner" style={{ width: '18px', height: '18px' }}></div>
-                          <span style={{ fontSize: '0.76rem', color: 'var(--primary-blue)', fontWeight: '600' }}>Uploading...</span>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+                          <div className="spinner" style={{ width: '22px', height: '22px' }}></div>
+                          <span style={{ fontSize: '0.84rem', color: 'var(--primary-blue)', fontWeight: '600' }}>Uploading photos...</span>
                         </div>
                       ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}>
-                          <Upload size={18} color="var(--primary-blue)" />
-                          <div style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                            Click to upload or drag photos
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
+                          <Upload size={22} color="var(--primary-blue)" />
+                          <div style={{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                            Click to upload or drag & drop photos
                           </div>
-                          <div style={{ fontSize: '0.68rem', color: 'var(--text-light)' }}>
-                            JPG, PNG, WebP up to 10MB each
+                          <div style={{ fontSize: '0.76rem', color: 'var(--text-light)' }}>
+                            JPG, PNG, WebP up to 10MB each (Batch uploads supported)
                           </div>
                         </div>
                       )}
                     </div>
 
                     {/* Or enter photo URL */}
-                    <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
                       <input 
                         type="url"
                         placeholder="Or enter image URL (https://...)"
                         value={newImageUrlInput}
                         onChange={(e) => setNewImageUrlInput(e.target.value)}
-                        style={{ flex: 1, padding: '5px 8px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.78rem' }}
+                        style={{ flex: 1, padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '7px', fontSize: '0.88rem' }}
                       />
                       <button 
                         type="button" 
                         onClick={handleAddImageUrl}
                         className="btn btn-outline btn-sm"
-                        style={{ whiteSpace: 'nowrap', padding: '5px 8px', fontSize: '0.74rem' }}
+                        style={{ whiteSpace: 'nowrap', padding: '8px 14px', fontSize: '0.84rem', fontWeight: '600' }}
                       >
-                        + Add
+                        + Add URL
                       </button>
                     </div>
 
                     {/* Photo Gallery Grid */}
                     {prodImages.length > 0 && (
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', maxHeight: '140px', overflowY: 'auto', paddingRight: '2px' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', maxHeight: '160px', overflowY: 'auto', paddingRight: '2px' }}>
                         {prodImages.map((img, idx) => {
                           const isMain = idx === 0 || img === prodImageUrl;
                           return (
@@ -5459,8 +5459,8 @@ _Helpline: +91 9316566894_`;
                               key={idx}
                               style={{
                                 position: 'relative',
-                                height: '65px',
-                                borderRadius: '6px',
+                                height: '80px',
+                                borderRadius: '8px',
                                 overflow: 'hidden',
                                 border: isMain ? '2px solid #f59e0b' : '1px solid #cbd5e1',
                                 backgroundColor: '#fff',
@@ -5476,7 +5476,7 @@ _Helpline: +91 9316566894_`;
 
                               {/* Main Badge */}
                               {isMain && (
-                                <span style={{ position: 'absolute', top: '2px', left: '2px', backgroundColor: '#f59e0b', color: '#fff', fontSize: '0.58rem', fontWeight: '800', padding: '1px 3px', borderRadius: '2px' }}>
+                                <span style={{ position: 'absolute', top: '3px', left: '3px', backgroundColor: '#f59e0b', color: '#fff', fontSize: '0.64rem', fontWeight: '800', padding: '1px 5px', borderRadius: '3px' }}>
                                   ★ Main
                                 </span>
                               )}
@@ -5484,25 +5484,25 @@ _Helpline: +91 9316566894_`;
                               {/* Thumbnail Controls */}
                               <div style={{
                                 position: 'absolute', bottom: 0, left: 0, right: 0,
-                                backgroundColor: 'rgba(0,0,0,0.75)', padding: '1px 3px',
+                                backgroundColor: 'rgba(0,0,0,0.72)', padding: '2px 4px',
                                 display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                               }}>
                                 {!isMain && (
                                   <button
                                     type="button"
                                     onClick={() => handleSetMainPhoto(img)}
-                                    style={{ background: 'none', border: 'none', color: '#fef08a', fontSize: '0.6rem', cursor: 'pointer', padding: '0 2px' }}
+                                    style={{ background: 'none', border: 'none', color: '#fef08a', fontSize: '0.66rem', cursor: 'pointer', padding: '1px' }}
                                     title="Set as primary photo"
                                   >
                                     Main
                                   </button>
                                 )}
-                                <div style={{ display: 'flex', gap: '2px', marginLeft: 'auto' }}>
+                                <div style={{ display: 'flex', gap: '3px', marginLeft: 'auto' }}>
                                   {idx > 0 && (
                                     <button
                                       type="button"
                                       onClick={() => handleMovePhoto(idx, -1)}
-                                      style={{ background: 'none', border: 'none', color: '#fff', fontSize: '0.65rem', cursor: 'pointer', padding: '0 2px' }}
+                                      style={{ background: 'none', border: 'none', color: '#fff', fontSize: '0.7rem', cursor: 'pointer', padding: '1px 3px' }}
                                       title="Move Left"
                                     >
                                       ◀
@@ -5512,7 +5512,7 @@ _Helpline: +91 9316566894_`;
                                     <button
                                       type="button"
                                       onClick={() => handleMovePhoto(idx, 1)}
-                                      style={{ background: 'none', border: 'none', color: '#fff', fontSize: '0.65rem', cursor: 'pointer', padding: '0 2px' }}
+                                      style={{ background: 'none', border: 'none', color: '#fff', fontSize: '0.7rem', cursor: 'pointer', padding: '1px 3px' }}
                                       title="Move Right"
                                     >
                                       ▶
@@ -5521,7 +5521,7 @@ _Helpline: +91 9316566894_`;
                                   <button
                                     type="button"
                                     onClick={() => handleRemovePhoto(img)}
-                                    style={{ background: 'none', border: 'none', color: '#fca5a5', fontSize: '0.7rem', cursor: 'pointer', padding: '0 2px' }}
+                                    style={{ background: 'none', border: 'none', color: '#fca5a5', fontSize: '0.75rem', cursor: 'pointer', padding: '1px 3px' }}
                                     title="Remove photo"
                                   >
                                     ✕
@@ -5536,63 +5536,63 @@ _Helpline: +91 9316566894_`;
                   </div>
 
                   {/* Publishing Flags & Status */}
-                  <div className="admin-workspace-panel" style={{ padding: '10px 12px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <div style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-dark)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  <div className="admin-workspace-panel" style={{ padding: '14px', backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ fontSize: '0.84rem', fontWeight: '700', color: 'var(--text-dark)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                       Publishing & Visibility
                     </div>
 
-                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600' }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: prodInStock ? '#10b981' : '#94a3b8' }}></span>
+                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', fontSize: '0.88rem', fontWeight: '600' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: prodInStock ? '#10b981' : '#94a3b8' }}></span>
                         Publish as &ldquo;In Stock&rdquo;
                       </span>
                       <input 
                         type="checkbox"
                         checked={prodInStock}
                         onChange={(e) => setProdInStock(e.target.checked)}
-                        style={{ accentColor: '#10b981', width: '15px', height: '15px' }}
+                        style={{ accentColor: '#10b981', width: '18px', height: '18px' }}
                       />
                     </label>
 
-                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600' }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: prodFeatured ? '#f59e0b' : '#94a3b8' }}></span>
+                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', fontSize: '0.88rem', fontWeight: '600' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: prodFeatured ? '#f59e0b' : '#94a3b8' }}></span>
                         Featured Showcase
                       </span>
                       <input 
                         type="checkbox"
                         checked={prodFeatured}
                         onChange={(e) => setProdFeatured(e.target.checked)}
-                        style={{ accentColor: '#f59e0b', width: '15px', height: '15px' }}
+                        style={{ accentColor: '#f59e0b', width: '18px', height: '18px' }}
                       />
                     </label>
 
-                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600' }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: prodIsActive ? '#2563eb' : '#94a3b8' }}></span>
+                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', fontSize: '0.88rem', fontWeight: '600' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: prodIsActive ? '#2563eb' : '#94a3b8' }}></span>
                         Live on Public Website
                       </span>
                       <input 
                         type="checkbox"
                         checked={prodIsActive}
                         onChange={(e) => setProdIsActive(e.target.checked)}
-                        style={{ accentColor: '#2563eb', width: '15px', height: '15px' }}
+                        style={{ accentColor: '#2563eb', width: '18px', height: '18px' }}
                       />
                     </label>
                   </div>
 
                   {/* Commercial Margin Calculation Card */}
                   {prodPrice && prodMrp && parseFloat(prodMrp) > 0 && (
-                    <div style={{ padding: '8px 12px', borderRadius: '8px', backgroundColor: 'rgba(34, 197, 94, 0.08)', border: '1px solid rgba(34, 197, 94, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ padding: '12px 14px', borderRadius: '10px', backgroundColor: 'rgba(34, 197, 94, 0.08)', border: '1px solid rgba(34, 197, 94, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <div>
-                        <div style={{ fontSize: '0.68rem', color: '#15803d', fontWeight: '700', textTransform: 'uppercase' }}>Chemist Profit Margin</div>
-                        <div style={{ fontSize: '1rem', fontWeight: '800', color: '#16a34a' }}>
+                        <div style={{ fontSize: '0.74rem', color: '#15803d', fontWeight: '700', textTransform: 'uppercase' }}>Chemist Profit Margin</div>
+                        <div style={{ fontSize: '1.2rem', fontWeight: '800', color: '#16a34a' }}>
                           {parseFloat(prodMrp) > parseFloat(prodPrice)
                             ? `${Math.round(((parseFloat(prodMrp) - parseFloat(prodPrice)) / parseFloat(prodMrp)) * 100)}% Profit`
                             : '0% Margin'}
                         </div>
                       </div>
-                      <div style={{ textAlign: 'right', fontSize: '0.72rem', color: 'var(--text-medium)' }}>
+                      <div style={{ textAlign: 'right', fontSize: '0.8rem', color: 'var(--text-medium)' }}>
                         <div>PTR: ₹{parseFloat(prodPrice).toFixed(2)}</div>
                         <div>MRP: ₹{parseFloat(prodMrp).toFixed(2)}</div>
                       </div>
@@ -5602,44 +5602,44 @@ _Helpline: +91 9316566894_`;
                 </div>
 
                 {/* ================= RIGHT COLUMN: PRODUCT FORM DETAILS ================= */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   
                   {/* Row 1: Product Name & SKU */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '10px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                      <label htmlFor="modal-name" style={{ fontSize: '0.78rem', fontWeight: '600', color: 'var(--text-dark)' }}>Product Name *</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                      <label htmlFor="modal-name" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Product Name *</label>
                       <input 
                         id="modal-name"
                         type="text" required placeholder="E.g., Paracetamol Tablet IP 500mg" 
                         value={prodName} onChange={(e) => setProdName(e.target.value)}
-                        style={{ padding: '6px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.84rem' }}
+                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.92rem' }}
                       />
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <label htmlFor="modal-sku" style={{ fontSize: '0.78rem', fontWeight: '600', color: 'var(--text-dark)' }}>SKU / ID</label>
+                        <label htmlFor="modal-sku" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>SKU / ID</label>
                         <button 
                           type="button"
                           onClick={() => setProdSku(`NP-${Date.now().toString().slice(-6)}`)}
-                          style={{ background: 'none', border: 'none', color: 'var(--primary-blue)', fontSize: '0.7rem', cursor: 'pointer', fontWeight: '700' }}
+                          style={{ background: 'none', border: 'none', color: 'var(--primary-blue)', fontSize: '0.78rem', cursor: 'pointer', fontWeight: '700' }}
                         >
-                          Generate
+                          ⚡ Generate
                         </button>
                       </div>
                       <input 
                         id="modal-sku"
                         type="text" placeholder="E.g., NP-PT-500" 
                         value={prodSku} onChange={(e) => setProdSku(e.target.value)}
-                        style={{ padding: '6px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.84rem', fontFamily: 'monospace' }}
+                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.92rem', fontFamily: 'monospace' }}
                       />
                     </div>
                   </div>
 
                   {/* Row 2: Manufacturer & Category */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                      <label htmlFor="modal-comp" style={{ fontSize: '0.78rem', fontWeight: '600', color: 'var(--text-dark)' }}>Manufacturer / Company *</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                      <label htmlFor="modal-comp" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Manufacturer / Company *</label>
                       <select 
                         id="modal-comp"
                         value={prodCompany} 
@@ -5648,7 +5648,7 @@ _Helpline: +91 9316566894_`;
                           setProdManufacturer(e.target.value);
                           setProdBrand(e.target.value);
                         }}
-                        style={{ padding: '6px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.82rem' }}
+                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem' }}
                       >
                         <option value="DAXIA">Daxia Healthcare</option>
                         {companies.map(c => (
@@ -5657,13 +5657,13 @@ _Helpline: +91 9316566894_`;
                       </select>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                      <label htmlFor="modal-cat" style={{ fontSize: '0.78rem', fontWeight: '600', color: 'var(--text-dark)' }}>Category *</label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                      <label htmlFor="modal-cat" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Category *</label>
                       <select 
                         id="modal-cat"
                         value={prodCategory} 
                         onChange={(e) => setProdCategory(e.target.value)}
-                        style={{ padding: '6px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.82rem' }}
+                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem' }}
                       >
                         <option value="Pharma Products">Pharma Products</option>
                         <option value="OTC Products">OTC Products</option>
@@ -5680,76 +5680,76 @@ _Helpline: +91 9316566894_`;
                           placeholder="Enter custom category name..."
                           value={prodCustomCategory}
                           onChange={(e) => setProdCustomCategory(e.target.value)}
-                          style={{ marginTop: '3px', padding: '5px 8px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.8rem' }}
+                          style={{ marginTop: '4px', padding: '7px 10px', border: '1px solid #cbd5e1', borderRadius: '7px', fontSize: '0.85rem' }}
                         />
                       )}
                     </div>
                   </div>
 
                   {/* Row 3: Brand & Subcategory */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                      <label htmlFor="modal-brand" style={{ fontSize: '0.78rem', fontWeight: '600', color: 'var(--text-dark)' }}>Brand Name</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                      <label htmlFor="modal-brand" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Brand Name</label>
                       <input 
                         id="modal-brand"
                         type="text" placeholder="E.g., Daxia Healthcare" 
                         value={prodBrand} onChange={(e) => setProdBrand(e.target.value)}
-                        style={{ padding: '6px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.82rem' }}
+                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem' }}
                       />
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                      <label htmlFor="modal-subcat" style={{ fontSize: '0.78rem', fontWeight: '600', color: 'var(--text-dark)' }}>Subcategory / Variant</label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                      <label htmlFor="modal-subcat" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Subcategory / Variant</label>
                       <input 
                         id="modal-subcat"
                         type="text" placeholder="E.g., Effervescent, Pain Relief, Pediatric" 
                         value={prodSubCategory} onChange={(e) => setProdSubCategory(e.target.value)}
-                        style={{ padding: '6px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.82rem' }}
+                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem' }}
                       />
                     </div>
                   </div>
 
                   {/* Row 4: Commercial Matrix (Price, MRP, Stock) */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', padding: '8px 10px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }} className="admin-workspace-panel">
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                      <label htmlFor="modal-price" style={{ fontSize: '0.76rem', fontWeight: '700', color: 'var(--text-dark)' }}>Wholesale PTR (₹) *</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', padding: '12px 14px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }} className="admin-workspace-panel">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label htmlFor="modal-price" style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>Wholesale PTR (₹) *</label>
                       <input 
                         id="modal-price"
                         type="number" step="0.01" required placeholder="E.g., 28.50" 
                         value={prodPrice} onChange={(e) => setProdPrice(e.target.value)}
-                        style={{ padding: '5px 8px', border: '1px solid #cbd5e1', borderRadius: '5px', fontSize: '0.84rem', fontWeight: '600' }}
+                        style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '7px', fontSize: '0.95rem', fontWeight: '700' }}
                       />
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                      <label htmlFor="modal-mrp" style={{ fontSize: '0.76rem', fontWeight: '700', color: 'var(--text-dark)' }}>Retail MRP (₹)</label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label htmlFor="modal-mrp" style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>Retail MRP (₹)</label>
                       <input 
                         id="modal-mrp"
                         type="number" step="0.01" placeholder="E.g., 45.00" 
                         value={prodMrp} onChange={(e) => setProdMrp(e.target.value)}
-                        style={{ padding: '5px 8px', border: '1px solid #cbd5e1', borderRadius: '5px', fontSize: '0.84rem' }}
+                        style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '7px', fontSize: '0.95rem' }}
                       />
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                      <label htmlFor="modal-stockqty" style={{ fontSize: '0.76rem', fontWeight: '700', color: 'var(--text-dark)' }}>Stock Units *</label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label htmlFor="modal-stockqty" style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>Stock Units *</label>
                       <input 
                         id="modal-stockqty"
                         type="number" required placeholder="E.g., 100" 
                         value={prodStockQuantity} onChange={(e) => setProdStockQuantity(e.target.value)}
-                        style={{ padding: '5px 8px', border: '1px solid #cbd5e1', borderRadius: '5px', fontSize: '0.84rem' }}
+                        style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '7px', fontSize: '0.95rem' }}
                       />
                     </div>
                   </div>
 
                   {/* Row 5: Formulation Form & Packing Specs */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                      <label htmlFor="modal-form" style={{ fontSize: '0.78rem', fontWeight: '600', color: 'var(--text-dark)' }}>Formulation Form</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                      <label htmlFor="modal-form" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Formulation Form</label>
                       <select 
                         id="modal-form"
                         value={prodForm} onChange={(e) => setProdForm(e.target.value)}
-                        style={{ padding: '6px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.82rem' }}
+                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem' }}
                       >
                         <option value="Tablet">Tablet</option>
                         <option value="Capsule">Capsule</option>
@@ -5769,48 +5769,48 @@ _Helpline: +91 9316566894_`;
                       </select>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                      <label htmlFor="modal-packing" style={{ fontSize: '0.78rem', fontWeight: '600', color: 'var(--text-dark)' }}>Packing Specifications</label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                      <label htmlFor="modal-packing" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Packing Specifications</label>
                       <input 
                         id="modal-packing"
                         type="text" placeholder="E.g., 10 x 10 Tablets or 100ml" 
                         value={prodPacking} onChange={(e) => setProdPacking(e.target.value)}
-                        style={{ padding: '6px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.82rem' }}
+                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem' }}
                       />
                     </div>
                   </div>
 
                   {/* Row 6: Chemical Composition & Manufacturer */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                      <label htmlFor="modal-composition" style={{ fontSize: '0.78rem', fontWeight: '600', color: 'var(--text-dark)' }}>Chemical / Active Composition</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                      <label htmlFor="modal-composition" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Chemical / Active Composition</label>
                       <input 
                         id="modal-composition"
                         type="text" placeholder="E.g., Paracetamol IP 500mg" 
                         value={prodComposition} onChange={(e) => setProdComposition(e.target.value)}
-                        style={{ padding: '6px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.82rem' }}
+                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem' }}
                       />
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                      <label htmlFor="modal-mfg" style={{ fontSize: '0.78rem', fontWeight: '600', color: 'var(--text-dark)' }}>Manufacturer Details</label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                      <label htmlFor="modal-mfg" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Manufacturer Details</label>
                       <input 
                         id="modal-mfg"
                         type="text" placeholder="E.g., Daxia Healthcare Pvt. Ltd." 
                         value={prodManufacturer} onChange={(e) => setProdManufacturer(e.target.value)}
-                        style={{ padding: '6px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.82rem' }}
+                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem' }}
                       />
                     </div>
                   </div>
 
                   {/* Row 7: Description */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                    <label htmlFor="modal-desc" style={{ fontSize: '0.78rem', fontWeight: '600', color: 'var(--text-dark)' }}>Product Description & Indications</label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                    <label htmlFor="modal-desc" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Product Description & Indications</label>
                     <textarea 
                       id="modal-desc"
-                      rows="2" placeholder="Provide product indication, therapeutic dosage, age advisory or usage..." 
+                      rows="3" placeholder="Provide product indication, therapeutic dosage, age advisory or usage..." 
                       value={prodDescription} onChange={(e) => setProdDescription(e.target.value)}
-                      style={{ padding: '6px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.82rem', resize: 'vertical' }}
+                      style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', resize: 'vertical' }}
                     />
                   </div>
 
@@ -5819,30 +5819,30 @@ _Helpline: +91 9316566894_`;
 
               {/* DOCKED STICKY FOOTER ACTIONS (ALWAYS VISIBLE AT BOTTOM) */}
               <div className="admin-workspace-footer">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '0.78rem', color: 'var(--text-medium)', fontWeight: '500' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '0.88rem', color: 'var(--text-medium)', fontWeight: '600' }}>
                     {prodName ? <strong style={{ color: 'var(--text-dark)' }}>{prodName}</strong> : 'New Product Formulation'}
                   </span>
-                  <span style={{ fontSize: '0.7rem', color: 'var(--text-light)' }}>•</span>
-                  <span style={{ fontSize: '0.75rem', color: prodInStock ? '#16a34a' : '#dc2626', fontWeight: '600' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>•</span>
+                  <span style={{ fontSize: '0.82rem', color: prodInStock ? '#16a34a' : '#dc2626', fontWeight: '700' }}>
                     {prodInStock ? '✓ In Stock' : '✕ Out of Stock'}
                   </span>
                   {prodPrice && (
                     <>
-                      <span style={{ fontSize: '0.7rem', color: 'var(--text-light)' }}>•</span>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-medium)', fontWeight: '600' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>•</span>
+                      <span style={{ fontSize: '0.84rem', color: 'var(--text-dark)', fontWeight: '700' }}>
                         PTR: ₹{parseFloat(prodPrice).toFixed(2)}
                       </span>
                     </>
                   )}
                 </div>
 
-                <div style={{ display: 'flex', gap: '10px' }}>
+                <div style={{ display: 'flex', gap: '12px' }}>
                   <button 
                     type="button" 
                     onClick={() => setIsProductModalOpen(false)} 
                     className="btn btn-outline btn-sm"
-                    style={{ padding: '6px 16px', borderRadius: '7px', fontWeight: '600', fontSize: '0.82rem' }}
+                    style={{ padding: '9px 20px', borderRadius: '8px', fontWeight: '600', fontSize: '0.9rem' }}
                   >
                     Cancel
                   </button>
@@ -5850,12 +5850,12 @@ _Helpline: +91 9316566894_`;
                     type="submit" 
                     disabled={isSavingProduct} 
                     className="btn btn-primary btn-sm" 
-                    style={{ padding: '6px 20px', borderRadius: '7px', fontWeight: '700', fontSize: '0.84rem', gap: '6px' }}
+                    style={{ padding: '9px 24px', borderRadius: '8px', fontWeight: '700', fontSize: '0.92rem', gap: '6px' }}
                   >
                     {isSavingProduct ? (
                       <>
-                        <div className="spinner" style={{ width: '14px', height: '14px', borderTopColor: '#fff' }}></div>
-                        Saving...
+                        <div className="spinner" style={{ width: '16px', height: '16px', borderTopColor: '#fff' }}></div>
+                        Saving Product...
                       </>
                     ) : (
                       editingProduct ? 'Save Product Changes' : 'Create & Publish Product'

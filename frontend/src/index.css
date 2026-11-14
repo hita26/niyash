@@ -89,8 +89,8 @@ button {
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes slideInRight {
@@ -2235,21 +2235,22 @@ body.dark-theme {
 /* Modern Enterprise 2-Column Product Workspace Modal */
 .admin-modal-workspace {
   width: 100%;
-  max-width: min(96vw, 1140px);
-  max-height: 92vh;
-  height: 90vh;
+  max-width: min(96vw, 1080px);
+  max-height: 88vh;
+  height: min(88vh, 670px);
   display: flex !important;
   flex-direction: column !important;
   padding: 0 !important;
-  border-radius: 16px !important;
+  border-radius: 14px !important;
   overflow: hidden !important;
-  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.45) !important;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7) !important;
   background-color: var(--bg-card);
   position: relative;
+  margin: auto;
 }
 
 .admin-workspace-header {
-  padding: 16px 24px;
+  padding: 12px 20px;
   border-bottom: 1px solid var(--border-light);
   display: flex;
   justify-content: space-between;
@@ -2261,23 +2262,23 @@ body.dark-theme {
 .admin-workspace-body {
   flex: 1;
   overflow-y: auto;
-  padding: 20px 24px;
+  padding: 14px 20px;
   display: grid;
-  grid-template-columns: 350px 1fr;
-  gap: 22px;
+  grid-template-columns: 320px 1fr;
+  gap: 16px;
   align-items: start;
 }
 
 @media (max-width: 992px) {
   .admin-workspace-body {
     grid-template-columns: 1fr;
-    gap: 18px;
-    padding: 16px;
+    gap: 14px;
+    padding: 14px;
   }
 }
 
 .admin-workspace-footer {
-  padding: 14px 24px;
+  padding: 12px 20px;
   border-top: 1px solid var(--border-light);
   display: flex;
   justify-content: space-between;

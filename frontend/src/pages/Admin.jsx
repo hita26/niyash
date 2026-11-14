@@ -572,6 +572,7 @@ function Admin() {
   const [enquiries, setEnquiries] = useState([]);
   const [careers, setCareers] = useState([]);
   const [companies, setCompanies] = useState([]);
+  const [totalCompaniesCount, setTotalCompaniesCount] = useState(0);
   const [companySearch, setCompanySearch] = useState('');
   const [companyCategoryFilter, setCompanyCategoryFilter] = useState('All');
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
@@ -746,7 +747,7 @@ function Admin() {
     try {
       // 1. Fetch Products
       try {
-        const prodRes = await fetch('/api/products/admin/all?limit=1000', {
+        const prodRes = await fetch('/api/products/admin/all?limit=15000', {
           headers: getAuthHeaders(),
         });
         if (prodRes.ok) {
@@ -754,7 +755,7 @@ function Admin() {
           setProducts(prodData.products && prodData.products.length > 0 ? prodData.products : FALLBACK_PRODUCTS);
           if (prodData.stats) setProductAdminStats(prodData.stats);
         } else {
-          const fallbackRes = await fetch('/api/products?limit=1000');
+          const fallbackRes = await fetch('/api/products?limit=15000');
           if (fallbackRes.ok) {
             const prodData = await fallbackRes.json();
             setProducts(prodData.products && prodData.products.length > 0 ? prodData.products : FALLBACK_PRODUCTS);
@@ -833,10 +834,11 @@ function Admin() {
 
       // 7. Fetch Companies
       try {
-        const compRes = await fetch('/api/companies?limit=500&admin=true');
+        const compRes = await fetch('/api/companies?limit=1000&admin=true');
         if (compRes.ok) {
           const compData = await compRes.json();
           setCompanies(compData.companies || []);
+          if (compData.total) setTotalCompaniesCount(compData.total);
         } else {
           setCompanies([]);
         }
@@ -2599,7 +2601,7 @@ _Helpline: +91 9316566894_`;
                 <ShoppingBag size={16} /> Products
               </div>
               <span style={{ fontSize: '0.7rem', padding: '2px 7px', borderRadius: '10px', backgroundColor: '#e2e8f0', color: 'var(--text-dark)' }}>
-                {products.length}
+                {productStats.totalProducts || products.length}
               </span>
             </button>
 
@@ -2616,7 +2618,7 @@ _Helpline: +91 9316566894_`;
                 <Building2 size={16} /> Companies
               </div>
               <span style={{ fontSize: '0.7rem', padding: '2px 7px', borderRadius: '10px', backgroundColor: '#e2e8f0', color: 'var(--text-dark)' }}>
-                {companies.length}
+                {totalCompaniesCount || companies.length}
               </span>
             </button>
 
@@ -2719,10 +2721,10 @@ _Helpline: +91 9316566894_`;
                 <Flame size={14} /> Schemes ({news.length})
               </button>
               <button onClick={() => setActiveTab('products')} className={`admin-tab-chip ${activeTab === 'products' ? 'active' : ''}`}>
-                <ShoppingBag size={14} /> Products ({products.length})
+                <ShoppingBag size={14} /> Products ({productStats.totalProducts || products.length})
               </button>
               <button onClick={() => setActiveTab('companies')} className={`admin-tab-chip ${activeTab === 'companies' ? 'active' : ''}`}>
-                <Building2 size={14} /> Companies ({companies.length})
+                <Building2 size={14} /> Companies ({totalCompaniesCount || companies.length})
               </button>
               <button onClick={() => setActiveTab('enquiries')} className={`admin-tab-chip ${activeTab === 'enquiries' ? 'active' : ''}`}>
                 <MessageSquare size={14} /> Enquiries ({enquiries.length})
@@ -2861,7 +2863,7 @@ _Helpline: +91 9316566894_`;
                         </p>
                       </div>
                       <button onClick={() => setActiveTab('products')} className="btn btn-outline btn-sm" style={{ fontSize: '0.78rem' }}>
-                        Explore Catalog ({products.length}) →
+                        Explore Catalog ({productStats.totalProducts || products.length}) →
                       </button>
                     </div>
 
@@ -2952,9 +2954,9 @@ _Helpline: +91 9316566894_`;
                         <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase' }}>Total Products</span>
                         <ShoppingBag size={20} color="var(--secondary-green)" />
                       </div>
-                      <div style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--secondary-green)' }}>{products.length}</div>
+                      <div style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--secondary-green)' }}>{productStats.totalProducts || products.length}</div>
                       <span style={{ fontSize: '0.8rem', color: 'var(--text-medium)', fontWeight: '600' }}>
-                        {products.filter(p => p.inStock).length} In Stock
+                        {productStats.activeProducts ?? products.filter(p => p.inStock).length} In Stock
                       </span>
                     </div>
                   </div>
@@ -3786,7 +3788,7 @@ _Helpline: +91 9316566894_`;
                     {/* Category Quick Selector Chips */}
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                       <button onClick={() => { setProductCategoryFilter('All'); setProductPage(1); }} className={`btn btn-sm ${productCategoryFilter === 'All' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '5px 12px', fontSize: '0.78rem', borderRadius: '20px' }}>
-                        All Products ({products.length})
+                        All Products ({productStats.totalProducts || products.length})
                       </button>
                       <button onClick={() => { setProductCategoryFilter('Generic Medicines'); setProductPage(1); }} className={`btn btn-sm ${productCategoryFilter === 'Generic Medicines' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '5px 12px', fontSize: '0.78rem', borderRadius: '20px' }}>
                         💊 Generic Formulations
@@ -4437,7 +4439,7 @@ _Helpline: +91 9316566894_`;
                   <div className="admin-stat-tiles-grid">
                     <div className="card" style={{ padding: '18px 20px', borderLeft: '4px solid var(--primary-blue)' }}>
                       <div style={{ fontSize: '0.8rem', color: 'var(--text-medium)', textTransform: 'uppercase', fontWeight: '600' }}>Total Companies</div>
-                      <div style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--text-dark)' }}>{companies.length}</div>
+                      <div style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--text-dark)' }}>{totalCompaniesCount || companies.length}</div>
                     </div>
                     <div className="card" style={{ padding: '18px 20px', borderLeft: '4px solid #10b981' }}>
                       <div style={{ fontSize: '0.8rem', color: 'var(--text-medium)', textTransform: 'uppercase', fontWeight: '600' }}>Published (Live)</div>

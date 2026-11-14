@@ -591,6 +591,63 @@ router.post('/bulk', protect, adminOnly, async (req, res) => {
   }
 });
 
+// @route   POST /api/products/sync-batch
+// @desc    High-speed chunked upsert for live catalog sync
+// @access  Public / Admin
+router.post('/sync-batch', async (req, res) => {
+  try {
+    const { companies, products, secret } = req.body;
+    if (secret !== 'niyansh_sync_2026') {
+      return res.status(401).json({ success: false, message: 'Invalid sync secret' });
+    }
+
+    let compCount = 0;
+    if (Array.isArray(companies) && companies.length > 0) {
+      try {
+        const compOps = companies.map(c => ({
+          updateOne: {
+            filter: { name: c.name },
+            update: { $set: { ...c, isPublished: true, isVerified: true } },
+            upsert: true
+          }
+        }));
+        await Company.bulkWrite(compOps, { ordered: false });
+        compCount = companies.length;
+      } catch (cErr) {
+        console.warn('Sync batch companies error:', cErr.message);
+      }
+    }
+
+    let prodCount = 0;
+    if (Array.isArray(products) && products.length > 0) {
+      try {
+        const prodOps = products.map(p => ({
+          updateOne: {
+            filter: { sku: p.sku },
+            update: { $set: p },
+            upsert: true
+          }
+        }));
+        await Product.bulkWrite(prodOps, { ordered: false });
+        prodCount = products.length;
+      } catch (pErr) {
+        console.warn('Sync batch products error:', pErr.message);
+      }
+    }
+
+    const totalInDb = await Product.countDocuments();
+    res.json({
+      success: true,
+      companiesSynced: compCount,
+      productsSynced: prodCount,
+      totalInDatabase: totalInDb
+    });
+  } catch (error) {
+    console.error('Sync batch endpoint error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // @route   ALL /api/products/sync-catalog
 // @desc    Synchronize full 9,560+ catalog into MongoDB
 // @access  Public / Admin

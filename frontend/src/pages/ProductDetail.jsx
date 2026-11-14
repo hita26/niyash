@@ -8,7 +8,7 @@ import {
   Check, Truck, ShieldCheck, FileText, MessageSquare, 
   Sparkles, ChevronRight, Plus, Minus, Share2, 
   Building2, Package, Tag, Pill, Factory, Receipt, 
-  Clock, Info, Lock, LogIn
+  Clock, Info, Lock, LogIn, Syringe, Droplets, Activity
 } from 'lucide-react';
 
 function ProductDetail({ addToCart }) {
@@ -242,14 +242,55 @@ function ProductDetail({ addToCart }) {
                   onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
                 />
               ) : (
-                /* Completely empty image area when authentic photograph is unavailable */
+                /* Clinical Pharmaceutical Packaging Presentation */
                 <div 
                   style={{ 
                     width: '100%', 
-                    height: '100%'
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: '#f8fafc',
+                    borderRadius: '12px',
+                    border: '1px dashed #cbd5e1',
+                    padding: '24px',
+                    boxSizing: 'border-box',
+                    textAlign: 'center',
+                    position: 'relative'
                   }}
                   aria-label="No photograph available"
-                />
+                >
+                  <span style={{ position: 'absolute', top: '12px', left: '16px', fontSize: '1.4rem', fontWeight: '900', color: '#cbd5e1', fontStyle: 'italic', userSelect: 'none' }}>
+                    Rx
+                  </span>
+                  <div style={{ 
+                    width: '64px', 
+                    height: '64px', 
+                    borderRadius: '50%', 
+                    backgroundColor: '#e0f2fe', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    marginBottom: '14px',
+                    color: 'var(--primary-blue)'
+                  }}>
+                    {((product.form || '').toLowerCase().includes('inject')) ? <Syringe size={32} /> :
+                     ((product.form || '').toLowerCase().includes('drop') || (product.form || '').toLowerCase().includes('syrup')) ? <Droplets size={32} /> :
+                     ((product.form || '').toLowerCase().includes('cream') || (product.form || '').toLowerCase().includes('gel')) ? <Activity size={32} /> :
+                     ((product.form || '').toLowerCase().includes('surgic') || (product.form || '').toLowerCase().includes('powder')) ? <Package size={32} /> :
+                     <Pill size={32} />}
+                  </div>
+                  <h3 style={{ fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-dark)', maxWidth: '90%', marginBottom: '4px' }}>
+                    {product.name}
+                  </h3>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-medium)', margin: '0 0 10px 0', fontWeight: '600' }}>
+                    {product.composition || product.packing || product.form || 'Pharmaceutical Formulation'}
+                  </p>
+                  <span style={{ fontSize: '0.75rem', backgroundColor: '#e2e8f0', color: '#334155', padding: '4px 10px', borderRadius: '6px', fontWeight: '700' }}>
+                    {product.brand || product.company}
+                  </span>
+                </div>
               )}
             </div>
 

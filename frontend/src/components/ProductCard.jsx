@@ -1,7 +1,19 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingBag, Eye, CheckCircle2, AlertTriangle, Lock, Check, Plus, Minus, Sparkles, ShieldCheck } from 'lucide-react';
+import { 
+  ShoppingBag, Eye, CheckCircle2, AlertTriangle, Lock, Check, Plus, Minus, 
+  Sparkles, ShieldCheck, Pill, Syringe, Droplets, Package, Activity 
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+
+function getFormIcon(form) {
+  const f = (form || '').toLowerCase();
+  if (f.includes('inject')) return <Syringe size={22} />;
+  if (f.includes('drop') || f.includes('syrup') || f.includes('liquid') || f.includes('susp')) return <Droplets size={22} />;
+  if (f.includes('cream') || f.includes('gel') || f.includes('ointment')) return <Activity size={22} />;
+  if (f.includes('surgic') || f.includes('powder')) return <Package size={22} />;
+  return <Pill size={22} />;
+}
 
 function ProductCard({ product, addToCart }) {
   const { isLoggedIn, openAuth } = useAuth();
@@ -114,11 +126,50 @@ function ProductCard({ product, addToCart }) {
             onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
           />
         ) : (
-          /* Empty image area preserving uniform 1:1 card geometry without placeholder substitution */
+          /* Clinical Pharmaceutical Medicine Packaging Presentation (When photo is pending) */
           <div 
-            style={{ width: '100%', height: '100%' }} 
-            aria-label="No photograph available"
-          />
+            style={{ 
+              width: '100%', 
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: '#f8fafc',
+              borderRadius: '8px',
+              border: '1px dashed #cbd5e1',
+              padding: '12px',
+              boxSizing: 'border-box',
+              textAlign: 'center',
+              position: 'relative'
+            }}
+          >
+            <span style={{ position: 'absolute', top: '6px', left: '8px', fontSize: '1rem', fontWeight: '900', color: '#cbd5e1', fontStyle: 'italic', userSelect: 'none' }}>
+              Rx
+            </span>
+            <div style={{ 
+              width: '42px', 
+              height: '42px', 
+              borderRadius: '50%', 
+              backgroundColor: '#e0f2fe', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              marginBottom: '6px',
+              color: 'var(--primary-blue)'
+            }}>
+              {getFormIcon(product.form)}
+            </div>
+            <span style={{ fontSize: '0.74rem', fontWeight: '800', color: 'var(--text-dark)', maxWidth: '92%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {product.name}
+            </span>
+            <span style={{ fontSize: '0.66rem', color: 'var(--text-light)', marginTop: '2px', fontWeight: '600' }}>
+              {product.packing || product.form || 'Pharmaceutical'}
+            </span>
+            <span style={{ marginTop: '5px', fontSize: '0.62rem', backgroundColor: '#e2e8f0', color: '#475569', padding: '2px 6px', borderRadius: '4px', fontWeight: '700' }}>
+              {product.company || product.brand}
+            </span>
+          </div>
         )}
 
         {/* Brand Tag */}

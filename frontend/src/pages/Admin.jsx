@@ -4014,14 +4014,14 @@ _Helpline: +91 9316566894_`;
 
                               return (
                                 <tr key={p._id} style={{ borderBottom: '1px solid var(--border-light)', backgroundColor: isTargetedForDelete ? '#fef2f2' : 'transparent', transition: 'background-color 0.15s ease' }}>
-                                  {/* Photo Thumbnail */}
+                                  {/* Photo Thumbnail - Standard 1:1 Square */}
                                   <td style={{ padding: '12px 16px', verticalAlign: 'middle' }}>
-                                    <div style={{ position: 'relative', width: '50px', height: '50px', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#f1f5f9', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <div style={{ position: 'relative', width: '50px', height: '50px', aspectRatio: '1 / 1', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#ffffff', padding: '4px', boxSizing: 'border-box', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                       {photoUrl ? (
                                         <img 
                                           src={photoUrl} 
                                           alt={p.name} 
-                                          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                          style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
                                           onError={(e) => { e.target.style.display = 'none'; }}
                                         />
                                       ) : (
@@ -4217,13 +4217,13 @@ _Helpline: +91 9316566894_`;
 
                         return (
                           <div key={p._id} className="card" style={{ padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                            {/* Card Media Preview Header */}
-                            <div style={{ position: 'relative', width: '100%', height: '180px', backgroundColor: '#f8fafc', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {/* Card Media Preview Header - Standard 1:1 Square */}
+                            <div style={{ position: 'relative', width: '100%', aspectRatio: '1 / 1', backgroundColor: '#ffffff', padding: '12px', boxSizing: 'border-box', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                               {photoUrl ? (
                                 <img 
                                   src={photoUrl} 
                                   alt={p.name} 
-                                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                  style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
                                   onError={(e) => { e.target.style.display = 'none'; }}
                                 />
                               ) : (

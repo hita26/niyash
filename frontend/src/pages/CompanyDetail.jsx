@@ -333,8 +333,8 @@ function CompanyDetail({ addToCart }) {
               return (
                 <div key={p._id} className="card" style={{ padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                   
-                  {/* Photo Box */}
-                  <Link to={`/products/${p._id}`} style={{ position: 'relative', width: '100%', height: '170px', backgroundColor: 'var(--bg-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', textDecoration: 'none' }}>
+                  {/* Photo Box - Fixed 1:1 Square Ratio */}
+                  <Link to={`/products/${p._id}`} style={{ position: 'relative', width: '100%', aspectRatio: '1 / 1', backgroundColor: '#ffffff', padding: '12px', boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', textDecoration: 'none' }}>
                     {photoUrl ? (
                       <img 
                         src={photoUrl} 

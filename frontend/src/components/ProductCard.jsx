@@ -75,7 +75,7 @@ function ProductCard({ product, addToCart }) {
         transition: 'all 0.25s ease'
       }}
     >
-      {/* Product Image Container */}
+      {/* Product Image Container - Fixed 1:1 Square Aspect Ratio */}
       <Link 
         to={`/products/${product._id}`} 
         style={{ 
@@ -84,10 +84,13 @@ function ProductCard({ product, addToCart }) {
           justifyContent: 'center',
           position: 'relative', 
           overflow: 'hidden', 
-          borderRadius: '10px', 
+          borderRadius: '12px', 
           marginBottom: '14px', 
-          backgroundColor: 'var(--bg-main)',
-          height: '180px',
+          backgroundColor: '#ffffff',
+          width: '100%',
+          aspectRatio: '1 / 1',
+          padding: '14px',
+          boxSizing: 'border-box',
           border: '1px solid var(--border-light)'
         }}
       >
@@ -95,14 +98,23 @@ function ProductCard({ product, addToCart }) {
           <img 
             src={product.imageUrl} 
             alt={product.name}
+            loading="lazy"
             onError={(e) => {
+              // Hide image completely on load error to leave section clean and empty
               e.target.style.display = 'none';
             }}
-            style={{ width: '100%', height: '100%', objectFit: 'contain', transition: 'var(--transition-smooth)' }}
-            onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+            style={{ 
+              width: '100%', 
+              height: '100%', 
+              objectFit: 'contain', 
+              objectPosition: 'center',
+              transition: 'var(--transition-smooth)' 
+            }}
+            onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.04)'}
             onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
           />
         ) : (
+          /* Empty image area preserving uniform 1:1 card geometry without placeholder substitution */
           <div 
             style={{ width: '100%', height: '100%' }} 
             aria-label="No photograph available"

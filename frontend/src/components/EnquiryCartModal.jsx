@@ -198,7 +198,7 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                         onError={(e) => {
                           e.target.style.display = 'none';
                         }}
-                        style={{ width: '50px', height: '50px', objectFit: 'contain', borderRadius: '4px', backgroundColor: 'var(--bg-main)' }}
+                        style={{ width: '50px', height: '50px', aspectRatio: '1 / 1', objectFit: 'contain', borderRadius: '6px', backgroundColor: '#ffffff', padding: '4px', border: '1px solid var(--border-light)' }}
                       />
                     ) : null}
                     

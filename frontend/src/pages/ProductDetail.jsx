@@ -182,7 +182,7 @@ function ProductDetail({ addToCart }) {
               ======================================================== */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             
-            {/* Primary Main Photo Box */}
+            {/* Primary Main Photo Box - Fixed 1:1 Square Ratio */}
             <div style={{
               backgroundColor: '#ffffff',
               borderRadius: '16px',
@@ -191,10 +191,13 @@ function ProductDetail({ addToCart }) {
               alignItems: 'center',
               justifyContent: 'center',
               padding: '24px',
-              minHeight: '340px',
-              maxHeight: '420px',
+              width: '100%',
+              aspectRatio: '1 / 1',
+              maxWidth: '420px',
+              margin: '0 auto',
               position: 'relative',
               overflow: 'hidden',
+              boxSizing: 'border-box',
               boxShadow: '0 4px 20px rgba(0, 0, 0, 0.03)'
             }}>
               {product.featured && (
@@ -223,15 +226,16 @@ function ProductDetail({ addToCart }) {
               {currentPhoto ? (
                 <img 
                   src={currentPhoto} 
-                  alt={`${product.name} photo`} 
+                  alt={`${product.name} packaging`} 
                   onError={(e) => {
                     // Hide image completely on failure to leave section empty per instructions
                     e.target.style.display = 'none';
                   }}
                   style={{
-                    maxWidth: '100%',
-                    maxHeight: '320px',
+                    width: '100%',
+                    height: '100%',
                     objectFit: 'contain',
+                    objectPosition: 'center',
                     transition: 'transform 0.3s ease'
                   }}
                   onMouseOver={(e) => { e.currentTarget.style.transform = 'scale(1.04)'; }}
@@ -241,11 +245,8 @@ function ProductDetail({ addToCart }) {
                 /* Completely empty image area when authentic photograph is unavailable */
                 <div 
                   style={{ 
-                    minHeight: '280px', 
                     width: '100%', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center' 
+                    height: '100%'
                   }}
                   aria-label="No photograph available"
                 />

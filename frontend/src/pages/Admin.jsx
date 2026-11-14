@@ -574,7 +574,6 @@ function Admin() {
   const [companyCategoryFilter, setCompanyCategoryFilter] = useState('All');
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
   const [editingCompany, setEditingCompany] = useState(null);
-  const [companyToDelete, setCompanyToDelete] = useState(null);
   const [isSavingCompany, setIsSavingCompany] = useState(false);
 
   // Form Fields for Add/Edit Company
@@ -619,9 +618,9 @@ function Admin() {
   const [enquiryFilter, setEnquiryFilter] = useState('All');
 
   // Modals & Drawers States
+  const [deleteConfirm, setDeleteConfirm] = useState(null); // In-page top confirmation state (no alert box)
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [productToDelete, setProductToDelete] = useState(null);
   const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
   const [isSavingProduct, setIsSavingProduct] = useState(false);
   const [isUploadingPhotos, setIsUploadingPhotos] = useState(false);
@@ -1466,22 +1465,95 @@ _Helpline: +91 9316566894_`;
     showToast(`Ticker visibility ${newStatus ? 'enabled' : 'disabled'} for announcement!`);
   };
 
-  const handleDeleteNews = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this scheme/announcement?')) return;
+  const handleRequestDeleteNews = (item) => {
+    setDeleteConfirm({
+      type: 'news',
+      id: item._id,
+      name: item.title || 'Scheme / Announcement'
+    });
+  };
+
+  const handleRequestDeleteEnquiry = (id, name = 'Enquiry record') => {
+    setDeleteConfirm({
+      type: 'enquiry',
+      id,
+      name
+    });
+  };
+
+  const handleRequestDeleteCareer = (id, name = 'Job application record') => {
+    setDeleteConfirm({
+      type: 'career',
+      id,
+      name
+    });
+  };
+
+  const handleRequestDeleteProduct = (product) => {
+    setDeleteConfirm({
+      type: 'product',
+      id: product._id,
+      name: product.name || 'Product',
+      sku: product.sku
+    });
+  };
+
+  const handleRequestDeleteCompany = (company) => {
+    setDeleteConfirm({
+      type: 'company',
+      id: company._id,
+      name: company.name || 'Company'
+    });
+  };
+
+  const handleExecuteDelete = async () => {
+    if (!deleteConfirm) return;
+    const { type, id, name } = deleteConfirm;
 
     try {
-      const res = await fetch(`/api/news/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
-
-      if (res.ok) {
+      if (type === 'product') {
+        const response = await fetch(`/api/products/${id}`, {
+          method: 'DELETE',
+          headers: getAuthHeaders()
+        });
+        const data = await response.json();
+        if (response.ok && data.success) {
+          setProducts(prev => prev.filter(p => p._id !== id));
+          showToast(`"${name}" deleted successfully`);
+          fetchDashboardData();
+        } else {
+          showToast(data.message || 'Failed to delete product', 'error');
+        }
+      } else if (type === 'company') {
+        const res = await fetch(`/api/companies/${id}`, {
+          method: 'DELETE',
+          headers: getAuthHeaders()
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          setCompanies(prev => prev.filter(c => c._id !== id));
+          showToast(`"${name}" removed from directory`);
+          fetchDashboardData();
+        } else {
+          showToast(data.message || 'Failed to delete company', 'error');
+        }
+      } else if (type === 'news') {
+        const res = await fetch(`/api/news/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
         setNews(prev => prev.filter(n => n._id !== id));
         showToast('Announcement deleted successfully.');
-      } else {
-        setNews(prev => prev.filter(n => n._id !== id));
-        showToast('Announcement deleted.');
+      } else if (type === 'enquiry') {
+        await fetch(`/api/enquiries/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+        setEnquiries(prev => prev.filter(e => e._id !== id));
+        showToast('Enquiry deleted');
+      } else if (type === 'career') {
+        await fetch(`/api/careers/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+        setCareers(prev => prev.filter(c => c._id !== id));
+        showToast('Applicant record deleted');
       }
-    } catch {
-      setNews(prev => prev.filter(n => n._id !== id));
-      showToast('Announcement deleted.');
+    } catch (err) {
+      showToast('Error deleting item: ' + err.message, 'error');
+    } finally {
+      setDeleteConfirm(null);
     }
   };
 
@@ -1697,26 +1769,7 @@ _Helpline: +91 9316566894_`;
     }
   };
 
-  const handleConfirmDeleteProduct = async () => {
-    if (!productToDelete) return;
-    try {
-      const response = await fetch(`/api/products/${productToDelete._id}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders()
-      });
-      const data = await response.json();
-      if (response.ok && data.success) {
-        setProducts(prev => prev.filter(p => p._id !== productToDelete._id));
-        setProductToDelete(null);
-        showToast('Product and associated photos removed successfully');
-        fetchDashboardData();
-      } else {
-        showToast(data.message || 'Failed to delete product', 'error');
-      }
-    } catch (err) {
-      showToast('Error deleting product: ' + err.message, 'error');
-    }
-  };
+  const handleDeleteProduct = (product) => handleRequestDeleteProduct(product);
 
   const handleToggleStock = async (product) => {
     const newStock = !product.inStock;
@@ -1970,26 +2023,7 @@ _Helpline: +91 9316566894_`;
     }
   };
 
-  const handleConfirmDeleteCompany = async () => {
-    if (!companyToDelete) return;
-    try {
-      const res = await fetch(`/api/companies/${companyToDelete._id}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders()
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setCompanies(prev => prev.filter(c => c._id !== companyToDelete._id));
-        setCompanyToDelete(null);
-        showToast('Company removed from directory');
-        fetchDashboardData();
-      } else {
-        showToast(data.message || 'Failed to delete company', 'error');
-      }
-    } catch (err) {
-      showToast('Error deleting company: ' + err.message, 'error');
-    }
-  };
+  const handleDeleteCompany = (company) => handleRequestDeleteCompany(company);
 
   const handleToggleCompanyPublish = async (company) => {
     const newStatus = !company.isPublished;
@@ -2259,7 +2293,91 @@ _Helpline: +91 9316566894_`;
 
   return (
     <div className="section animate-fade-in" style={{ backgroundColor: 'var(--bg-main)', minHeight: '85vh', padding: '30px 0' }}>
-      {/* Medilio-Inspired B2B Healthcare Executive Command Header */}
+      {/* In-page Top Confirmation Bar (No browser alert box, smooth top slide-in) */}
+      {deleteConfirm && (
+        <div 
+          role="alert"
+          style={{
+            position: 'fixed',
+            top: '20px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 99999,
+            width: 'min(94vw, 680px)',
+            backgroundColor: '#ffffff',
+            borderRadius: '12px',
+            boxShadow: '0 20px 45px -10px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(239, 68, 68, 0.35)',
+            padding: '14px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '16px',
+            borderLeft: '5px solid #ef4444',
+            animation: 'slideDownTopBar 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1 }}>
+            <div style={{
+              width: '38px',
+              height: '38px',
+              borderRadius: '50%',
+              backgroundColor: '#fee2e2',
+              color: '#ef4444',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}>
+              <AlertTriangle size={20} />
+            </div>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ fontSize: '0.92rem', fontWeight: '700', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span>Delete {deleteConfirm.type === 'product' ? 'Product' : deleteConfirm.type === 'company' ? 'Company' : 'Item'}?</span>
+                <span style={{ fontSize: '0.72rem', fontWeight: '700', color: '#ef4444', backgroundColor: '#fee2e2', padding: '1px 7px', borderRadius: '10px', textTransform: 'uppercase' }}>
+                  Direct Option
+                </span>
+              </div>
+              <div style={{ fontSize: '0.84rem', color: '#475569', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                Are you sure you want to delete <strong style={{ color: '#0f172a' }}>{deleteConfirm.name}</strong>?
+              </div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+            <button
+              type="button"
+              onClick={() => setDeleteConfirm(null)}
+              className="btn btn-outline btn-sm"
+              style={{ padding: '6px 14px', fontSize: '0.84rem', cursor: 'pointer', height: '34px' }}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleExecuteDelete}
+              className="btn btn-sm"
+              style={{
+                backgroundColor: '#ef4444',
+                borderColor: '#ef4444',
+                color: '#ffffff',
+                fontWeight: '700',
+                padding: '6px 16px',
+                fontSize: '0.84rem',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                height: '34px',
+                boxShadow: '0 2px 8px rgba(239, 68, 68, 0.35)'
+              }}
+            >
+              <Trash2 size={14} />
+              <span>Yes, Delete</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Central B2B Operations Header */}
       <div className="admin-workspace-container" style={{ marginBottom: '22px' }}>
         <div className="card" style={{
           padding: 'clamp(16px, 2.5vw, 24px)',
@@ -2276,7 +2394,7 @@ _Helpline: +91 9316566894_`;
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '6px' }}>
               <span style={{ fontSize: '0.72rem', fontWeight: '800', backgroundColor: '#e0f2fe', color: '#0369a1', padding: '3px 10px', borderRadius: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                Medilio Reference B2B Portal
+                Central B2B Portal
               </span>
               <span style={{ fontSize: '0.72rem', fontWeight: '700', backgroundColor: '#f0fdf4', color: '#15803d', padding: '3px 10px', borderRadius: '12px', border: '1px solid #bbf7d0' }}>
                 🛡️ WHO-GMP Certified Distribution
@@ -2292,8 +2410,6 @@ _Helpline: +91 9316566894_`;
               <span>🏛️ DL: <strong>G/20B/12984, G/21B/12985</strong></span>
               <span>•</span>
               <span>📑 GSTIN: <strong>24AAACN9128P1Z8</strong></span>
-              <span>•</span>
-              <span>⚡ Model: <strong>Medilio Healthcare Network</strong></span>
             </div>
           </div>
 
@@ -2592,12 +2708,12 @@ _Helpline: +91 9316566894_`;
                     </button>
                   </div>
                   
-                  {/* Medilio-Style 4-Stage B2B Fulfillment Pipeline Funnel */}
+                  {/* 4-Stage B2B Fulfillment Pipeline Funnel */}
                   <div className="card" style={{ padding: '20px 24px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
                       <div>
                         <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-dark)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <TrendingUp size={18} color="var(--primary-blue)" /> Order Fulfillment Pipeline (Medilio Model)
+                          <TrendingUp size={18} color="var(--primary-blue)" /> Order Fulfillment Pipeline
                         </h3>
                         <p style={{ fontSize: '0.8rem', color: 'var(--text-medium)', margin: '3px 0 0 0' }}>
                           Track wholesale consignments from chemist booking to verified delivery & invoice clearance
@@ -2663,12 +2779,12 @@ _Helpline: +91 9316566894_`;
                     </div>
                   </div>
 
-                  {/* Medilio-Style 4 Healthcare Category Pillars */}
+                  {/* 4 Healthcare Category Pillars */}
                   <div className="card" style={{ padding: '20px 24px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
                       <div>
                         <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-dark)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <Layers size={18} color="var(--primary-blue)" /> Medilio Category Ecosystem
+                          <Layers size={18} color="var(--primary-blue)" /> Healthcare Category Ecosystem
                         </h3>
                         <p style={{ fontSize: '0.8rem', color: 'var(--text-medium)', margin: '3px 0 0 0' }}>
                           Therapeutic formulations, surgical supplies, OTC personal wellness & Ayurvedic remedies
@@ -3408,13 +3524,34 @@ _Helpline: +91 9316566894_`;
                                 <Edit2 size={16} />
                               </button>
 
-                              <button 
-                                onClick={() => handleDeleteNews(item._id)}
-                                style={{ color: '#ef4444', display: 'flex', alignItems: 'center' }}
-                                title="Delete announcement"
-                              >
-                                <Trash2 size={16} />
-                              </button>
+                              {deleteConfirm?.type === 'news' && deleteConfirm?.id === item._id ? (
+                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                  <button 
+                                    type="button"
+                                    onClick={handleExecuteDelete} 
+                                    style={{ color: '#ffffff', backgroundColor: '#ef4444', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '700' }}
+                                    title="Confirm Delete"
+                                  >
+                                    Delete
+                                  </button>
+                                  <button 
+                                    type="button"
+                                    onClick={() => setDeleteConfirm(null)} 
+                                    style={{ color: '#475569', backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1', padding: '3px 6px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem' }}
+                                    title="Cancel"
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              ) : (
+                                <button 
+                                  onClick={() => handleRequestDeleteNews(item)}
+                                  style={{ color: '#ef4444', display: 'flex', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer' }}
+                                  title="Delete announcement"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              )}
                             </div>
                           </div>
 
@@ -3542,7 +3679,7 @@ _Helpline: +91 9316566894_`;
 
                   {/* Controls & Filter Toolbar */}
                   <div className="card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                    {/* Medilio Category Quick Selector Chips */}
+                    {/* Category Quick Selector Chips */}
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                       <button onClick={() => { setProductCategoryFilter('All'); setProductPage(1); }} className={`btn btn-sm ${productCategoryFilter === 'All' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '5px 12px', fontSize: '0.78rem', borderRadius: '20px' }}>
                         All Products ({products.length})
@@ -3767,8 +3904,10 @@ _Helpline: +91 9316566894_`;
                               const isOutOfStock = !p.inStock || (p.stockQuantity !== undefined && p.stockQuantity <= 0);
                               const discountPercent = p.mrp && p.price && p.mrp > p.price ? Math.round(((p.mrp - p.price) / p.mrp) * 100) : 0;
 
+                              const isTargetedForDelete = deleteConfirm?.type === 'product' && deleteConfirm?.id === p._id;
+
                               return (
-                                <tr key={p._id} style={{ borderBottom: '1px solid var(--border-light)', transition: 'background-color 0.15s ease' }}>
+                                <tr key={p._id} style={{ borderBottom: '1px solid var(--border-light)', backgroundColor: isTargetedForDelete ? '#fef2f2' : 'transparent', transition: 'background-color 0.15s ease' }}>
                                   {/* Photo Thumbnail */}
                                   <td style={{ padding: '12px 16px', verticalAlign: 'middle' }}>
                                     <div style={{ position: 'relative', width: '50px', height: '50px', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#f1f5f9', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -3909,26 +4048,48 @@ _Helpline: +91 9316566894_`;
 
                                   {/* Actions */}
                                   <td style={{ padding: '12px 16px', verticalAlign: 'middle', textAlign: 'center' }}>
-                                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                                      <button 
-                                        type="button"
-                                        onClick={() => handleOpenProductModal(p)} 
-                                        style={{ color: 'var(--primary-blue)', display: 'inline-flex', alignItems: 'center', padding: '6px', borderRadius: '6px', border: '1px solid #bfdbfe', backgroundColor: '#eff6ff', cursor: 'pointer' }}
-                                        title="Edit Product Details & Photos"
-                                        aria-label="Edit product"
-                                      >
-                                        <Edit2 size={15} />
-                                      </button>
-                                      <button 
-                                        type="button"
-                                        onClick={() => setProductToDelete(p)} 
-                                        style={{ color: '#ef4444', display: 'inline-flex', alignItems: 'center', padding: '6px', borderRadius: '6px', border: '1px solid #fecaca', backgroundColor: '#fef2f2', cursor: 'pointer' }}
-                                        title="Delete Product"
-                                        aria-label="Delete product"
-                                      >
-                                        <Trash2 size={15} />
-                                      </button>
-                                    </div>
+                                    {isTargetedForDelete ? (
+                                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                        <button 
+                                          type="button"
+                                          onClick={handleExecuteDelete} 
+                                          style={{ color: '#ffffff', backgroundColor: '#ef4444', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '5px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '700' }}
+                                          title="Confirm Delete"
+                                        >
+                                          <Trash2 size={13} />
+                                          <span>Delete</span>
+                                        </button>
+                                        <button 
+                                          type="button"
+                                          onClick={() => setDeleteConfirm(null)} 
+                                          style={{ color: '#475569', backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1', display: 'inline-flex', alignItems: 'center', padding: '5px 8px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem' }}
+                                          title="Cancel"
+                                        >
+                                          <X size={13} />
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                                        <button 
+                                          type="button"
+                                          onClick={() => handleOpenProductModal(p)} 
+                                          style={{ color: 'var(--primary-blue)', display: 'inline-flex', alignItems: 'center', padding: '6px', borderRadius: '6px', border: '1px solid #bfdbfe', backgroundColor: '#eff6ff', cursor: 'pointer' }}
+                                          title="Edit Product Details & Photos"
+                                          aria-label="Edit product"
+                                        >
+                                          <Edit2 size={15} />
+                                        </button>
+                                        <button 
+                                          type="button"
+                                          onClick={() => handleRequestDeleteProduct(p)} 
+                                          style={{ color: '#ef4444', display: 'inline-flex', alignItems: 'center', padding: '6px', borderRadius: '6px', border: '1px solid #fecaca', backgroundColor: '#fef2f2', cursor: 'pointer' }}
+                                          title="Delete Product"
+                                          aria-label="Delete product"
+                                        >
+                                          <Trash2 size={15} />
+                                        </button>
+                                      </div>
+                                    )}
                                   </td>
                                 </tr>
                               );
@@ -4057,25 +4218,46 @@ _Helpline: +91 9316566894_`;
                                 {isOutOfStock ? 'Mark In Stock' : 'Mark Out of Stock'}
                               </button>
 
-                              <div style={{ display: 'flex', gap: '8px' }}>
-                                <button
-                                  type="button"
-                                  onClick={() => handleOpenProductModal(p)}
-                                  className="btn btn-secondary btn-sm"
-                                  style={{ padding: '4px 8px' }}
-                                  title="Edit Product"
-                                >
-                                  <Edit2 size={14} />
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => setProductToDelete(p)}
-                                  style={{ padding: '4px 8px', border: '1px solid #fecaca', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '6px', cursor: 'pointer' }}
-                                  title="Delete Product"
-                                >
-                                  <Trash2 size={14} />
-                                </button>
-                              </div>
+                              {deleteConfirm?.type === 'product' && deleteConfirm?.id === p._id ? (
+                                <div style={{ display: 'flex', gap: '6px' }}>
+                                  <button
+                                    type="button"
+                                    onClick={handleExecuteDelete}
+                                    style={{ padding: '4px 10px', backgroundColor: '#ef4444', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '700' }}
+                                    title="Confirm Delete"
+                                  >
+                                    Delete
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setDeleteConfirm(null)}
+                                    style={{ padding: '4px 8px', backgroundColor: '#f1f5f9', color: '#475569', border: '1px solid #cbd5e1', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem' }}
+                                    title="Cancel"
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              ) : (
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenProductModal(p)}
+                                    className="btn btn-secondary btn-sm"
+                                    style={{ padding: '4px 8px' }}
+                                    title="Edit Product"
+                                  >
+                                    <Edit2 size={14} />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRequestDeleteProduct(p)}
+                                    style={{ padding: '4px 8px', border: '1px solid #fecaca', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '6px', cursor: 'pointer' }}
+                                    title="Delete Product"
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           </div>
                         );
@@ -4271,22 +4453,46 @@ _Helpline: +91 9316566894_`;
 
                               <td style={{ padding: '12px 16px', verticalAlign: 'middle', textAlign: 'center' }}>
                                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleOpenCompanyModal(c)}
-                                    style={{ color: 'var(--primary-blue)', padding: '6px', borderRadius: '6px', border: '1px solid #bfdbfe', backgroundColor: '#eff6ff', cursor: 'pointer' }}
-                                    title="Edit Company Profile & Logo"
-                                  >
-                                    <Edit2 size={14} />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => setCompanyToDelete(c)}
-                                    style={{ color: '#ef4444', padding: '6px', borderRadius: '6px', border: '1px solid #fecaca', backgroundColor: '#fef2f2', cursor: 'pointer' }}
-                                    title="Delete Company"
-                                  >
-                                    <Trash2 size={14} />
-                                  </button>
+                                  {deleteConfirm?.type === 'company' && deleteConfirm?.id === c._id ? (
+                                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                      <button 
+                                        type="button"
+                                        onClick={handleExecuteDelete} 
+                                        style={{ color: '#ffffff', backgroundColor: '#ef4444', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '5px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '700' }}
+                                        title="Confirm Delete"
+                                      >
+                                        <Trash2 size={13} />
+                                        <span>Delete</span>
+                                      </button>
+                                      <button 
+                                        type="button"
+                                        onClick={() => setDeleteConfirm(null)} 
+                                        style={{ color: '#475569', backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1', padding: '5px 8px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem' }}
+                                        title="Cancel"
+                                      >
+                                        <X size={13} />
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleOpenCompanyModal(c)}
+                                        style={{ color: 'var(--primary-blue)', padding: '6px', borderRadius: '6px', border: '1px solid #bfdbfe', backgroundColor: '#eff6ff', cursor: 'pointer' }}
+                                        title="Edit Company Profile & Logo"
+                                      >
+                                        <Edit2 size={14} />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleRequestDeleteCompany(c)}
+                                        style={{ color: '#ef4444', padding: '6px', borderRadius: '6px', border: '1px solid #fecaca', backgroundColor: '#fef2f2', cursor: 'pointer' }}
+                                        title="Delete Company"
+                                      >
+                                        <Trash2 size={14} />
+                                      </button>
+                                    </>
+                                  )}
                                 </div>
                               </td>
                             </tr>
@@ -4362,13 +4568,32 @@ _Helpline: +91 9316566894_`;
                                 <option value="Contacted">Contacted</option>
                                 <option value="Completed">Completed</option>
                               </select>
-                              <button 
-                                onClick={() => handleDeleteEnquiry(enq._id)} 
-                                style={{ color: '#ef4444' }}
-                                aria-label="Delete enquiry"
-                              >
-                                <Trash2 size={16} />
-                              </button>
+                              {deleteConfirm?.type === 'enquiry' && deleteConfirm?.id === enq._id ? (
+                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                  <button 
+                                    type="button"
+                                    onClick={handleExecuteDelete} 
+                                    style={{ color: '#ffffff', backgroundColor: '#ef4444', border: 'none', padding: '3px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '700' }}
+                                  >
+                                    Delete
+                                  </button>
+                                  <button 
+                                    type="button"
+                                    onClick={() => setDeleteConfirm(null)} 
+                                    style={{ color: '#475569', backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1', padding: '3px 6px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem' }}
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              ) : (
+                                <button 
+                                  onClick={() => handleRequestDeleteEnquiry(enq._id, enq.name || enq.phone)} 
+                                  style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}
+                                  aria-label="Delete enquiry"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              )}
                             </div>
                           </div>
 
@@ -4436,13 +4661,32 @@ _Helpline: +91 9316566894_`;
                                 Applied: {formatDate(app.createdAt)}
                               </span>
                             </div>
-                            <button 
-                              onClick={() => handleDeleteCareer(app._id)} 
-                              style={{ color: '#ef4444' }}
-                              aria-label="Delete career"
-                            >
-                              <Trash2 size={16} />
-                            </button>
+                            {deleteConfirm?.type === 'career' && deleteConfirm?.id === app._id ? (
+                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                <button 
+                                  type="button"
+                                  onClick={handleExecuteDelete} 
+                                  style={{ color: '#ffffff', backgroundColor: '#ef4444', border: 'none', padding: '3px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '700' }}
+                                >
+                                  Delete
+                                </button>
+                                <button 
+                                  type="button"
+                                  onClick={() => setDeleteConfirm(null)} 
+                                  style={{ color: '#475569', backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1', padding: '3px 6px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem' }}
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            ) : (
+                              <button 
+                                onClick={() => handleRequestDeleteCareer(app._id, app.fullName || app.position)} 
+                                style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}
+                                aria-label="Delete career"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            )}
                           </div>
 
                           <div className="admin-form-grid-2-1" style={{ gap: '18px' }}>
@@ -5465,35 +5709,6 @@ _Helpline: +91 9316566894_`;
         </div>
       )}
 
-      {/* ==========================================
-          MODAL 6: DELETE PRODUCT CONFIRMATION MODAL
-          ========================================== */}
-      {productToDelete && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-          backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', zIndex: 1100,
-          display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px'
-        }}>
-          <div className="card admin-modal-card" style={{ maxWidth: '460px', textAlign: 'center' }}>
-            <div style={{ width: '50px', height: '50px', borderRadius: '50%', backgroundColor: '#fee2e2', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 15px' }}>
-              <AlertTriangle size={26} />
-            </div>
-            <h3 style={{ fontSize: '1.2rem', color: 'var(--text-dark)', margin: '0 0 8px' }}>Confirm Product Deletion</h3>
-            <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem', lineHeight: 1.5, margin: '0 0 20px' }}>
-              Are you sure you want to permanently delete <strong>{productToDelete.name}</strong> (SKU: {productToDelete.sku || 'N/A'})?
-              This will remove the product and unlinked uploaded photos from disk. This action cannot be undone.
-            </p>
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-              <button onClick={() => setProductToDelete(null)} className="btn btn-outline btn-sm">
-                Cancel
-              </button>
-              <button onClick={handleConfirmDeleteProduct} className="btn btn-primary btn-sm" style={{ backgroundColor: '#ef4444', borderColor: '#ef4444' }}>
-                Yes, Delete Product
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ==========================================
           MODAL 7: BULK CSV IMPORT MODAL
@@ -5704,35 +5919,6 @@ _Helpline: +91 9316566894_`;
         </div>
       )}
 
-      {/* ==========================================
-          MODAL 9: DELETE COMPANY CONFIRMATION MODAL
-          ========================================== */}
-      {companyToDelete && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-          backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', zIndex: 1100,
-          display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px'
-        }}>
-          <div className="card" style={{ width: '100%', maxWidth: '450px', padding: '25px', textAlign: 'center' }}>
-            <div style={{ width: '50px', height: '50px', borderRadius: '50%', backgroundColor: '#fee2e2', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 15px' }}>
-              <AlertTriangle size={26} />
-            </div>
-            <h3 style={{ fontSize: '1.2rem', color: 'var(--text-dark)', margin: '0 0 8px' }}>Remove Company Record</h3>
-            <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem', lineHeight: 1.5, margin: '0 0 20px' }}>
-              Are you sure you want to delete <strong>{companyToDelete.name}</strong> from the directory?
-              Products belonging to this company will remain intact.
-            </p>
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-              <button onClick={() => setCompanyToDelete(null)} className="btn btn-outline btn-sm">
-                Cancel
-              </button>
-              <button onClick={handleConfirmDeleteCompany} className="btn btn-primary btn-sm" style={{ backgroundColor: '#ef4444', borderColor: '#ef4444' }}>
-                Yes, Delete Company
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

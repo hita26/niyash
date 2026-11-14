@@ -5293,440 +5293,543 @@ _Helpline: +91 9316566894_`;
       )}
 
       {/* ==========================================
-          MODAL 5: ADD / EDIT PRODUCT MODAL (UPGRADED)
+          MODAL 5: ADD / EDIT PRODUCT MODAL (UPGRADED ENTERPRISE 2-COLUMN WORKSPACE)
           ========================================== */}
       {isProductModalOpen && (
         <div style={{
           position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-          backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', zIndex: 1000,
-          display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px'
+          backgroundColor: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(6px)', zIndex: 1000,
+          display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '16px'
         }}>
-          <div className="card admin-modal-card" style={{ maxWidth: '820px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light)', paddingBottom: '15px', marginBottom: '20px' }}>
-              <div>
-                <h2 style={{ fontSize: '1.4rem', color: 'var(--text-dark)', margin: 0 }}>
-                  {editingProduct ? 'Edit Product Details & Photos' : 'Add New Product to Catalog'}
-                </h2>
-                <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: 'var(--text-medium)' }}>
-                  Upload photos, configure pricing, track stock quantity, and assign manufacturer
-                </p>
-              </div>
-              <button onClick={() => setIsProductModalOpen(false)} style={{ color: 'var(--text-medium)', background: 'none', border: 'none', cursor: 'pointer' }} aria-label="Close">
-                <XCircle size={22} />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveProduct} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div className="card admin-modal-workspace" role="dialog" aria-modal="true">
+            <form onSubmit={handleSaveProduct} style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
               
-              {/* SECTION 1: MULTI-PHOTO UPLOAD & GALLERY */}
-              <div style={{ padding: '18px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                  <label style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <ImageIcon size={18} color="var(--primary-blue)" /> Product Photos & Gallery ({prodImages.length})
-                  </label>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-medium)' }}>
-                    First photo is designated as the primary display image
-                  </span>
+              {/* STICKY HEADER */}
+              <div className="admin-workspace-header">
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <h2 style={{ fontSize: '1.25rem', color: 'var(--text-dark)', margin: 0, fontWeight: '700' }}>
+                      {editingProduct ? 'Edit Product Details & Photos' : 'Add New Product to Catalog'}
+                    </h2>
+                    <span style={{ 
+                      fontSize: '0.72rem', 
+                      backgroundColor: editingProduct ? '#eff6ff' : '#ecfdf5', 
+                      color: editingProduct ? '#2563eb' : '#059669', 
+                      padding: '3px 8px', 
+                      borderRadius: '12px', 
+                      fontWeight: '700' 
+                    }}>
+                      {editingProduct ? (prodSku || 'Editing SKU') : 'New SKU'}
+                    </span>
+                  </div>
+                  <p style={{ margin: '3px 0 0', fontSize: '0.82rem', color: 'var(--text-medium)' }}>
+                    Upload photos, configure wholesale PTR & MRP pricing, track stock inventory and active molecules
+                  </p>
                 </div>
-
-                {/* Drag-and-drop dropzone */}
-                <div
-                  onDragOver={(e) => { e.preventDefault(); setPhotoDragActive(true); }}
-                  onDragLeave={() => setPhotoDragActive(false)}
-                  onDrop={(e) => { e.preventDefault(); setPhotoDragActive(false); handlePhotoUpload(e); }}
-                  onClick={() => fileInputRef.current?.click()}
-                  style={{
-                    border: `2px dashed ${photoDragActive ? 'var(--primary-blue)' : '#cbd5e1'}`,
-                    backgroundColor: photoDragActive ? '#eff6ff' : '#fff',
-                    borderRadius: '8px',
-                    padding: '24px 15px',
-                    textAlign: 'center',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    marginBottom: '15px'
-                  }}
+                <button 
+                  type="button"
+                  onClick={() => setIsProductModalOpen(false)} 
+                  style={{ color: 'var(--text-medium)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }} 
+                  aria-label="Close"
                 >
-                  <input 
-                    ref={fileInputRef}
-                    type="file" 
-                    multiple 
-                    accept="image/jpeg,image/png,image/webp,image/gif"
-                    onChange={handlePhotoUpload}
-                    style={{ display: 'none' }}
-                  />
-                  {isUploadingPhotos ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-                      <div className="spinner" style={{ width: '24px', height: '24px' }}></div>
-                      <span style={{ fontSize: '0.85rem', color: 'var(--primary-blue)', fontWeight: '600' }}>Uploading photos to persistent storage...</span>
+                  <XCircle size={24} />
+                </button>
+              </div>
+
+              {/* 2-COLUMN RESPONSIVE BODY */}
+              <div className="admin-workspace-body">
+                
+                {/* ================= LEFT COLUMN: MEDIA & STATUS ================= */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  
+                  {/* Photo Upload & Gallery Card */}
+                  <div className="admin-workspace-panel" style={{ padding: '16px', backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <label style={{ fontSize: '0.88rem', fontWeight: '700', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <ImageIcon size={17} color="var(--primary-blue)" /> Product Photos ({prodImages.length})
+                      </label>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-medium)' }}>
+                        ★ First photo is Primary
+                      </span>
                     </div>
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
-                      <Upload size={24} color="var(--primary-blue)" />
-                      <div style={{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                        Click to select photos or drag & drop multiple images
-                      </div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>
-                        Supports JPG, PNG, WebP up to 10MB each (Batch uploads supported)
-                      </div>
-                    </div>
-                  )}
-                </div>
 
-                {/* Or add photo by URL */}
-                <div style={{ display: 'flex', gap: '8px', marginBottom: '15px' }}>
-                  <input 
-                    type="url"
-                    placeholder="Or enter image URL (https://...)"
-                    value={newImageUrlInput}
-                    onChange={(e) => setNewImageUrlInput(e.target.value)}
-                    style={{ flex: 1, padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
-                  />
-                  <button 
-                    type="button" 
-                    onClick={handleAddImageUrl}
-                    className="btn btn-outline btn-sm"
-                    style={{ whiteSpace: 'nowrap' }}
-                  >
-                    Add URL Photo
-                  </button>
-                </div>
-
-                {/* Live Photo Gallery Cards */}
-                {prodImages.length > 0 && (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: '10px' }}>
-                    {prodImages.map((img, idx) => {
-                      const isMain = idx === 0 || img === prodImageUrl;
-                      return (
-                        <div 
-                          key={idx}
-                          style={{
-                            position: 'relative',
-                            height: '110px',
-                            borderRadius: '8px',
-                            overflow: 'hidden',
-                            border: isMain ? '2px solid #f59e0b' : '1px solid #cbd5e1',
-                            backgroundColor: '#fff',
-                            boxShadow: isMain ? '0 0 0 2px rgba(245, 158, 11, 0.2)' : 'none'
-                          }}
-                        >
-                          <img 
-                            src={img} 
-                            alt={`Photo ${idx + 1}`} 
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                            onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=200&q=80'; }}
-                          />
-
-                          {/* Main Badge */}
-                          {isMain && (
-                            <span style={{ position: 'absolute', top: '4px', left: '4px', backgroundColor: '#f59e0b', color: '#fff', fontSize: '0.65rem', fontWeight: '800', padding: '1px 5px', borderRadius: '3px' }}>
-                              ★ Main
-                            </span>
-                          )}
-
-                          {/* Hover Controls */}
-                          <div style={{
-                            position: 'absolute', bottom: 0, left: 0, right: 0,
-                            backgroundColor: 'rgba(0,0,0,0.7)', padding: '3px 4px',
-                            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-                          }}>
-                            {!isMain && (
-                              <button
-                                type="button"
-                                onClick={() => handleSetMainPhoto(img)}
-                                style={{ background: 'none', border: 'none', color: '#fef08a', fontSize: '0.65rem', cursor: 'pointer', padding: '1px' }}
-                                title="Set as primary photo"
-                              >
-                                Set Main
-                              </button>
-                            )}
-                            <div style={{ display: 'flex', gap: '2px', marginLeft: 'auto' }}>
-                              {idx > 0 && (
-                                <button
-                                  type="button"
-                                  onClick={() => handleMovePhoto(idx, -1)}
-                                  style={{ background: 'none', border: 'none', color: '#fff', fontSize: '0.7rem', cursor: 'pointer', padding: '1px 3px' }}
-                                  title="Move Left"
-                                >
-                                  ◀
-                                </button>
-                              )}
-                              {idx < prodImages.length - 1 && (
-                                <button
-                                  type="button"
-                                  onClick={() => handleMovePhoto(idx, 1)}
-                                  style={{ background: 'none', border: 'none', color: '#fff', fontSize: '0.7rem', cursor: 'pointer', padding: '1px 3px' }}
-                                  title="Move Right"
-                                >
-                                  ▶
-                                </button>
-                              )}
-                              <button
-                                type="button"
-                                onClick={() => handleRemovePhoto(img)}
-                                style={{ background: 'none', border: 'none', color: '#fca5a5', fontSize: '0.75rem', cursor: 'pointer', padding: '1px 3px' }}
-                                title="Remove photo"
-                              >
-                                ✕
-                              </button>
-                            </div>
+                    {/* Compact Drag-and-drop dropzone */}
+                    <div
+                      onDragOver={(e) => { e.preventDefault(); setPhotoDragActive(true); }}
+                      onDragLeave={() => setPhotoDragActive(false)}
+                      onDrop={(e) => { e.preventDefault(); setPhotoDragActive(false); handlePhotoUpload(e); }}
+                      onClick={() => fileInputRef.current?.click()}
+                      style={{
+                        border: `2px dashed ${photoDragActive ? 'var(--primary-blue)' : '#cbd5e1'}`,
+                        backgroundColor: photoDragActive ? '#eff6ff' : '#ffffff',
+                        borderRadius: '8px',
+                        padding: '16px 12px',
+                        textAlign: 'center',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        marginBottom: '10px'
+                      }}
+                    >
+                      <input 
+                        ref={fileInputRef}
+                        type="file" 
+                        multiple 
+                        accept="image/jpeg,image/png,image/webp,image/gif"
+                        onChange={handlePhotoUpload}
+                        style={{ display: 'none' }}
+                      />
+                      {isUploadingPhotos ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+                          <div className="spinner" style={{ width: '20px', height: '20px' }}></div>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--primary-blue)', fontWeight: '600' }}>Uploading photos...</span>
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                          <Upload size={20} color="var(--primary-blue)" />
+                          <div style={{ fontSize: '0.84rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                            Click to upload or drag & drop photos
+                          </div>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-light)' }}>
+                            JPG, PNG, WebP up to 10MB (Multi-select supported)
                           </div>
                         </div>
-                      );
-                    })}
+                      )}
+                    </div>
+
+                    {/* Or enter photo URL */}
+                    <div style={{ display: 'flex', gap: '6px', marginBottom: '10px' }}>
+                      <input 
+                        type="url"
+                        placeholder="Or enter image URL (https://...)"
+                        value={newImageUrlInput}
+                        onChange={(e) => setNewImageUrlInput(e.target.value)}
+                        style={{ flex: 1, padding: '7px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.8rem' }}
+                      />
+                      <button 
+                        type="button" 
+                        onClick={handleAddImageUrl}
+                        className="btn btn-outline btn-sm"
+                        style={{ whiteSpace: 'nowrap', padding: '6px 10px', fontSize: '0.78rem' }}
+                      >
+                        + Add URL
+                      </button>
+                    </div>
+
+                    {/* Photo Gallery Grid */}
+                    {prodImages.length > 0 && (
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', maxHeight: '180px', overflowY: 'auto', paddingRight: '2px' }}>
+                        {prodImages.map((img, idx) => {
+                          const isMain = idx === 0 || img === prodImageUrl;
+                          return (
+                            <div 
+                              key={idx}
+                              style={{
+                                position: 'relative',
+                                height: '80px',
+                                borderRadius: '6px',
+                                overflow: 'hidden',
+                                border: isMain ? '2px solid #f59e0b' : '1px solid #cbd5e1',
+                                backgroundColor: '#fff',
+                                boxShadow: isMain ? '0 0 0 2px rgba(245, 158, 11, 0.2)' : 'none'
+                              }}
+                            >
+                              <img 
+                                src={img} 
+                                alt={`Photo ${idx + 1}`} 
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=200&q=80'; }}
+                              />
+
+                              {/* Main Badge */}
+                              {isMain && (
+                                <span style={{ position: 'absolute', top: '3px', left: '3px', backgroundColor: '#f59e0b', color: '#fff', fontSize: '0.62rem', fontWeight: '800', padding: '1px 4px', borderRadius: '3px' }}>
+                                  ★ Main
+                                </span>
+                              )}
+
+                              {/* Thumbnail Controls */}
+                              <div style={{
+                                position: 'absolute', bottom: 0, left: 0, right: 0,
+                                backgroundColor: 'rgba(0,0,0,0.72)', padding: '2px 4px',
+                                display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                              }}>
+                                {!isMain && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSetMainPhoto(img)}
+                                    style={{ background: 'none', border: 'none', color: '#fef08a', fontSize: '0.62rem', cursor: 'pointer', padding: '1px' }}
+                                    title="Set as primary photo"
+                                  >
+                                    Main
+                                  </button>
+                                )}
+                                <div style={{ display: 'flex', gap: '3px', marginLeft: 'auto' }}>
+                                  {idx > 0 && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleMovePhoto(idx, -1)}
+                                      style={{ background: 'none', border: 'none', color: '#fff', fontSize: '0.68rem', cursor: 'pointer', padding: '0 2px' }}
+                                      title="Move Left"
+                                    >
+                                      ◀
+                                    </button>
+                                  )}
+                                  {idx < prodImages.length - 1 && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleMovePhoto(idx, 1)}
+                                      style={{ background: 'none', border: 'none', color: '#fff', fontSize: '0.68rem', cursor: 'pointer', padding: '0 2px' }}
+                                      title="Move Right"
+                                    >
+                                      ▶
+                                    </button>
+                                  )}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemovePhoto(img)}
+                                    style={{ background: 'none', border: 'none', color: '#fca5a5', fontSize: '0.72rem', cursor: 'pointer', padding: '0 2px' }}
+                                    title="Remove photo"
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
 
-              {/* SECTION 2: PRODUCT IDENTITY & COMPANY */}
-              <div className="admin-form-grid-2-1">
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label htmlFor="modal-name" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Product Name *</label>
-                  <input 
-                    id="modal-name"
-                    type="text" required placeholder="E.g., Paracetamol Tablet IP 500mg" 
-                    value={prodName} onChange={(e) => setProdName(e.target.value)}
-                    style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.9rem' }}
-                  />
-                </div>
+                  {/* Publishing Flags & Status */}
+                  <div className="admin-workspace-panel" style={{ padding: '14px', backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-dark)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      Publishing & Visibility
+                    </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <label htmlFor="modal-sku" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Product SKU / ID</label>
-                    <button 
-                      type="button"
-                      onClick={() => setProdSku(`NP-${Date.now().toString().slice(-6)}`)}
-                      style={{ background: 'none', border: 'none', color: 'var(--primary-blue)', fontSize: '0.75rem', cursor: 'pointer', fontWeight: '600' }}
-                    >
-                      Generate SKU
-                    </button>
+                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', fontSize: '0.84rem', fontWeight: '600' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: prodInStock ? '#10b981' : '#94a3b8' }}></span>
+                        Publish as &ldquo;In Stock&rdquo;
+                      </span>
+                      <input 
+                        type="checkbox"
+                        checked={prodInStock}
+                        onChange={(e) => setProdInStock(e.target.checked)}
+                        style={{ accentColor: '#10b981', width: '17px', height: '17px' }}
+                      />
+                    </label>
+
+                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', fontSize: '0.84rem', fontWeight: '600' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: prodFeatured ? '#f59e0b' : '#94a3b8' }}></span>
+                        Mark as Featured Showcase
+                      </span>
+                      <input 
+                        type="checkbox"
+                        checked={prodFeatured}
+                        onChange={(e) => setProdFeatured(e.target.checked)}
+                        style={{ accentColor: '#f59e0b', width: '17px', height: '17px' }}
+                      />
+                    </label>
+
+                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', fontSize: '0.84rem', fontWeight: '600' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: prodIsActive ? '#2563eb' : '#94a3b8' }}></span>
+                        Live on Public Website
+                      </span>
+                      <input 
+                        type="checkbox"
+                        checked={prodIsActive}
+                        onChange={(e) => setProdIsActive(e.target.checked)}
+                        style={{ accentColor: '#2563eb', width: '17px', height: '17px' }}
+                      />
+                    </label>
                   </div>
-                  <input 
-                    id="modal-sku"
-                    type="text" placeholder="E.g., NP-PT-500" 
-                    value={prodSku} onChange={(e) => setProdSku(e.target.value)}
-                    style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.9rem', fontFamily: 'monospace' }}
-                  />
-                </div>
-              </div>
 
-              {/* Company & Category Selection */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label htmlFor="modal-comp" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Manufacturer / Company *</label>
-                  <select 
-                    id="modal-comp"
-                    value={prodCompany} 
-                    onChange={(e) => {
-                      setProdCompany(e.target.value);
-                      setProdManufacturer(e.target.value);
-                      setProdBrand(e.target.value);
-                    }}
-                    style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem', backgroundColor: '#fff' }}
-                  >
-                    <option value="DAXIA">Daxia Healthcare</option>
-                    {companies.map(c => (
-                      <option key={c._id || c.name} value={c.name}>{c.name}</option>
-                    ))}
-                  </select>
+                  {/* Commercial Margin Calculation Card */}
+                  {prodPrice && prodMrp && parseFloat(prodMrp) > 0 && (
+                    <div style={{ padding: '12px 14px', borderRadius: '10px', backgroundColor: 'rgba(34, 197, 94, 0.08)', border: '1px solid rgba(34, 197, 94, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div>
+                        <div style={{ fontSize: '0.72rem', color: '#15803d', fontWeight: '700', textTransform: 'uppercase' }}>Chemist Profit Margin</div>
+                        <div style={{ fontSize: '1.1rem', fontWeight: '800', color: '#16a34a' }}>
+                          {parseFloat(prodMrp) > parseFloat(prodPrice)
+                            ? `${Math.round(((parseFloat(prodMrp) - parseFloat(prodPrice)) / parseFloat(prodMrp)) * 100)}% Profit`
+                            : '0% Margin'}
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right', fontSize: '0.75rem', color: 'var(--text-medium)' }}>
+                        <div>PTR: ₹{parseFloat(prodPrice).toFixed(2)}</div>
+                        <div>MRP: ₹{parseFloat(prodMrp).toFixed(2)}</div>
+                      </div>
+                    </div>
+                  )}
+
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label htmlFor="modal-cat" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Category *</label>
-                  <select 
-                    id="modal-cat"
-                    value={prodCategory} 
-                    onChange={(e) => setProdCategory(e.target.value)}
-                    style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem', backgroundColor: '#fff' }}
-                  >
-                    <option value="Pharma Products">Pharma Products</option>
-                    <option value="OTC Products">OTC Products</option>
-                    <option value="Injectables">Injectables</option>
-                    <option value="Surgical & Medical Supplies">Surgical & Medical Supplies</option>
-                    <option value="Diagnostics & Formulations">Diagnostics & Formulations</option>
-                    <option value="Ophthalmology & Dermatology">Ophthalmology & Dermatology</option>
-                    <option value="Cardiovascular & CNS">Cardiovascular & CNS</option>
-                    <option value="Custom">Custom Category...</option>
-                  </select>
-                  {prodCategory === 'Custom' && (
-                    <input 
-                      type="text" 
-                      placeholder="Enter custom category name..."
-                      value={prodCustomCategory}
-                      onChange={(e) => setProdCustomCategory(e.target.value)}
-                      style={{ marginTop: '4px', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
+                {/* ================= RIGHT COLUMN: PRODUCT FORM DETAILS ================= */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  
+                  {/* Row 1: Product Name & SKU */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label htmlFor="modal-name" style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-dark)' }}>Product Name *</label>
+                      <input 
+                        id="modal-name"
+                        type="text" required placeholder="E.g., Paracetamol Tablet IP 500mg" 
+                        value={prodName} onChange={(e) => setProdName(e.target.value)}
+                        style={{ padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.88rem' }}
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <label htmlFor="modal-sku" style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-dark)' }}>Product SKU / ID</label>
+                        <button 
+                          type="button"
+                          onClick={() => setProdSku(`NP-${Date.now().toString().slice(-6)}`)}
+                          style={{ background: 'none', border: 'none', color: 'var(--primary-blue)', fontSize: '0.72rem', cursor: 'pointer', fontWeight: '700' }}
+                        >
+                          Generate
+                        </button>
+                      </div>
+                      <input 
+                        id="modal-sku"
+                        type="text" placeholder="E.g., NP-PT-500" 
+                        value={prodSku} onChange={(e) => setProdSku(e.target.value)}
+                        style={{ padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.88rem', fontFamily: 'monospace' }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Row 2: Manufacturer & Category */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label htmlFor="modal-comp" style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-dark)' }}>Manufacturer / Company *</label>
+                      <select 
+                        id="modal-comp"
+                        value={prodCompany} 
+                        onChange={(e) => {
+                          setProdCompany(e.target.value);
+                          setProdManufacturer(e.target.value);
+                          setProdBrand(e.target.value);
+                        }}
+                        style={{ padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
+                      >
+                        <option value="DAXIA">Daxia Healthcare</option>
+                        {companies.map(c => (
+                          <option key={c._id || c.name} value={c.name}>{c.name}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label htmlFor="modal-cat" style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-dark)' }}>Category *</label>
+                      <select 
+                        id="modal-cat"
+                        value={prodCategory} 
+                        onChange={(e) => setProdCategory(e.target.value)}
+                        style={{ padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
+                      >
+                        <option value="Pharma Products">Pharma Products</option>
+                        <option value="OTC Products">OTC Products</option>
+                        <option value="Injectables">Injectables</option>
+                        <option value="Surgical & Medical Supplies">Surgical & Medical Supplies</option>
+                        <option value="Diagnostics & Formulations">Diagnostics & Formulations</option>
+                        <option value="Ophthalmology & Dermatology">Ophthalmology & Dermatology</option>
+                        <option value="Cardiovascular & CNS">Cardiovascular & CNS</option>
+                        <option value="Custom">Custom Category...</option>
+                      </select>
+                      {prodCategory === 'Custom' && (
+                        <input 
+                          type="text" 
+                          placeholder="Enter custom category name..."
+                          value={prodCustomCategory}
+                          onChange={(e) => setProdCustomCategory(e.target.value)}
+                          style={{ marginTop: '4px', padding: '7px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.82rem' }}
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Row 3: Brand & Subcategory */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label htmlFor="modal-brand" style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-dark)' }}>Brand Name</label>
+                      <input 
+                        id="modal-brand"
+                        type="text" placeholder="E.g., Daxia Healthcare" 
+                        value={prodBrand} onChange={(e) => setProdBrand(e.target.value)}
+                        style={{ padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label htmlFor="modal-subcat" style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-dark)' }}>Subcategory / Variant</label>
+                      <input 
+                        id="modal-subcat"
+                        type="text" placeholder="E.g., Effervescent, Pain Relief, Pediatric" 
+                        value={prodSubCategory} onChange={(e) => setProdSubCategory(e.target.value)}
+                        style={{ padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Row 4: Commercial Matrix (Price, MRP, Stock) */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', padding: '12px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }} className="admin-workspace-panel">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label htmlFor="modal-price" style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-dark)' }}>Wholesale PTR (₹) *</label>
+                      <input 
+                        id="modal-price"
+                        type="number" step="0.01" required placeholder="E.g., 28.50" 
+                        value={prodPrice} onChange={(e) => setProdPrice(e.target.value)}
+                        style={{ padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.88rem', fontWeight: '600' }}
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label htmlFor="modal-mrp" style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-dark)' }}>Retail MRP (₹)</label>
+                      <input 
+                        id="modal-mrp"
+                        type="number" step="0.01" placeholder="E.g., 45.00" 
+                        value={prodMrp} onChange={(e) => setProdMrp(e.target.value)}
+                        style={{ padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.88rem' }}
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label htmlFor="modal-stockqty" style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-dark)' }}>Stock Units *</label>
+                      <input 
+                        id="modal-stockqty"
+                        type="number" required placeholder="E.g., 100" 
+                        value={prodStockQuantity} onChange={(e) => setProdStockQuantity(e.target.value)}
+                        style={{ padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.88rem' }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Row 5: Formulation Form & Packing Specs */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label htmlFor="modal-form" style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-dark)' }}>Formulation Form</label>
+                      <select 
+                        id="modal-form"
+                        value={prodForm} onChange={(e) => setProdForm(e.target.value)}
+                        style={{ padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
+                      >
+                        <option value="Tablet">Tablet</option>
+                        <option value="Capsule">Capsule</option>
+                        <option value="Injection">Injection</option>
+                        <option value="Syrup">Syrup</option>
+                        <option value="Suspension">Suspension</option>
+                        <option value="Drops">Drops</option>
+                        <option value="Cream">Cream</option>
+                        <option value="Ointment">Ointment</option>
+                        <option value="Gel">Gel</option>
+                        <option value="Lotion">Lotion</option>
+                        <option value="Soap">Soap</option>
+                        <option value="Spray">Spray</option>
+                        <option value="Powder">Powder</option>
+                        <option value="IV Fluid">IV Fluid</option>
+                        <option value="Surgical">Surgical & Device</option>
+                      </select>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label htmlFor="modal-packing" style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-dark)' }}>Packing Specifications</label>
+                      <input 
+                        id="modal-packing"
+                        type="text" placeholder="E.g., 10 x 10 Tablets or 100ml" 
+                        value={prodPacking} onChange={(e) => setProdPacking(e.target.value)}
+                        style={{ padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Row 6: Chemical Composition & Manufacturer */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label htmlFor="modal-composition" style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-dark)' }}>Chemical / Active Composition</label>
+                      <input 
+                        id="modal-composition"
+                        type="text" placeholder="E.g., Paracetamol IP 500mg" 
+                        value={prodComposition} onChange={(e) => setProdComposition(e.target.value)}
+                        style={{ padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label htmlFor="modal-mfg" style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-dark)' }}>Manufacturer Details</label>
+                      <input 
+                        id="modal-mfg"
+                        type="text" placeholder="E.g., Daxia Healthcare Pvt. Ltd." 
+                        value={prodManufacturer} onChange={(e) => setProdManufacturer(e.target.value)}
+                        style={{ padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Row 7: Description */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <label htmlFor="modal-desc" style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-dark)' }}>Product Description & Indications</label>
+                    <textarea 
+                      id="modal-desc"
+                      rows="2" placeholder="Provide product indication, therapeutic dosage, age advisory or usage..." 
+                      value={prodDescription} onChange={(e) => setProdDescription(e.target.value)}
+                      style={{ padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem', resize: 'vertical' }}
                     />
+                  </div>
+
+                </div>
+              </div>
+
+              {/* DOCKED STICKY FOOTER ACTIONS (ALWAYS VISIBLE AT BOTTOM) */}
+              <div className="admin-workspace-footer">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '0.82rem', color: 'var(--text-medium)', fontWeight: '500' }}>
+                    {prodName ? <strong style={{ color: 'var(--text-dark)' }}>{prodName}</strong> : 'New Product Formulation'}
+                  </span>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>•</span>
+                  <span style={{ fontSize: '0.78rem', color: prodInStock ? '#16a34a' : '#dc2626', fontWeight: '600' }}>
+                    {prodInStock ? '✓ In Stock' : '✕ Out of Stock'}
+                  </span>
+                  {prodPrice && (
+                    <>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>•</span>
+                      <span style={{ fontSize: '0.78rem', color: 'var(--text-medium)', fontWeight: '600' }}>
+                        PTR: ₹{parseFloat(prodPrice).toFixed(2)}
+                      </span>
+                    </>
                   )}
                 </div>
-              </div>
 
-              {/* SubCategory & Brand */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label htmlFor="modal-brand" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Brand Name</label>
-                  <input 
-                    id="modal-brand"
-                    type="text" placeholder="E.g., Daxia Healthcare" 
-                    value={prodBrand} onChange={(e) => setProdBrand(e.target.value)}
-                    style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
-                  />
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label htmlFor="modal-subcat" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Subcategory / Variant</label>
-                  <input 
-                    id="modal-subcat"
-                    type="text" placeholder="E.g., Effervescent, Pain Relief, Pediatric" 
-                    value={prodSubCategory} onChange={(e) => setProdSubCategory(e.target.value)}
-                    style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
-                  />
-                </div>
-              </div>
-
-              {/* SECTION 3: PRICING & INVENTORY */}
-              <div className="admin-form-grid-3">
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label htmlFor="modal-price" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Wholesale Price / PTR (₹) *</label>
-                  <input 
-                    id="modal-price"
-                    type="number" step="0.01" required placeholder="E.g., 28.50" 
-                    value={prodPrice} onChange={(e) => setProdPrice(e.target.value)}
-                    style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
-                  />
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label htmlFor="modal-mrp" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Regular Price / MRP (₹)</label>
-                  <input 
-                    id="modal-mrp"
-                    type="number" step="0.01" placeholder="E.g., 45.00" 
-                    value={prodMrp} onChange={(e) => setProdMrp(e.target.value)}
-                    style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
-                  />
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label htmlFor="modal-stockqty" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Stock Quantity (Units) *</label>
-                  <input 
-                    id="modal-stockqty"
-                    type="number" required placeholder="E.g., 100" 
-                    value={prodStockQuantity} onChange={(e) => setProdStockQuantity(e.target.value)}
-                    style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
-                  />
-                </div>
-              </div>
-
-              {/* SECTION 4: FORMULATION & PACKING SPECS */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label htmlFor="modal-form" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Formulation Form</label>
-                  <select 
-                    id="modal-form"
-                    value={prodForm} onChange={(e) => setProdForm(e.target.value)}
-                    style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem', backgroundColor: '#fff' }}
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button 
+                    type="button" 
+                    onClick={() => setIsProductModalOpen(false)} 
+                    className="btn btn-outline btn-sm"
+                    style={{ padding: '8px 18px', borderRadius: '8px', fontWeight: '600' }}
                   >
-                    <option value="Tablet">Tablet</option>
-                    <option value="Capsule">Capsule</option>
-                    <option value="Injection">Injection</option>
-                    <option value="Syrup">Syrup</option>
-                    <option value="Suspension">Suspension</option>
-                    <option value="Drops">Drops</option>
-                    <option value="Cream">Cream</option>
-                    <option value="Ointment">Ointment</option>
-                    <option value="Gel">Gel</option>
-                    <option value="Lotion">Lotion</option>
-                    <option value="Soap">Soap</option>
-                    <option value="Spray">Spray</option>
-                    <option value="Powder">Powder</option>
-                    <option value="IV Fluid">IV Fluid</option>
-                    <option value="Surgical">Surgical & Device</option>
-                  </select>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label htmlFor="modal-packing" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Packing Specifications</label>
-                  <input 
-                    id="modal-packing"
-                    type="text" placeholder="E.g., 10 x 10 Tablets or 100ml" 
-                    value={prodPacking} onChange={(e) => setProdPacking(e.target.value)}
-                    style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
-                  />
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit" 
+                    disabled={isSavingProduct} 
+                    className="btn btn-primary btn-sm" 
+                    style={{ padding: '8px 22px', borderRadius: '8px', fontWeight: '700', gap: '6px' }}
+                  >
+                    {isSavingProduct ? (
+                      <>
+                        <div className="spinner" style={{ width: '16px', height: '16px', borderTopColor: '#fff' }}></div>
+                        Saving Product...
+                      </>
+                    ) : (
+                      editingProduct ? 'Save Product Changes' : 'Create & Publish Product'
+                    )}
+                  </button>
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label htmlFor="modal-composition" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Chemical / Active Composition</label>
-                  <input 
-                    id="modal-composition"
-                    type="text" placeholder="E.g., Paracetamol IP 500mg" 
-                    value={prodComposition} onChange={(e) => setProdComposition(e.target.value)}
-                    style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
-                  />
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label htmlFor="modal-mfg" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Manufacturer Details</label>
-                  <input 
-                    id="modal-mfg"
-                    type="text" placeholder="E.g., Daxia Healthcare Pvt. Ltd." 
-                    value={prodManufacturer} onChange={(e) => setProdManufacturer(e.target.value)}
-                    style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
-                  />
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <label htmlFor="modal-desc" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Product Description & Indications</label>
-                <textarea 
-                  id="modal-desc"
-                  rows="3" placeholder="Provide product indication, therapeutic dosage, age advisory or usage..." 
-                  value={prodDescription} onChange={(e) => setProdDescription(e.target.value)}
-                  style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem', resize: 'vertical' }}
-                />
-              </div>
-
-              {/* Toggles Row */}
-              <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '20px', padding: '12px 16px', backgroundColor: '#f8fafc', borderRadius: '8px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600' }}>
-                  <input 
-                    type="checkbox"
-                    checked={prodInStock}
-                    onChange={(e) => setProdInStock(e.target.checked)}
-                    style={{ accentColor: 'var(--primary-blue)', width: '16px', height: '16px' }}
-                  />
-                  Publish as &ldquo;In Stock&rdquo;
-                </label>
-
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600' }}>
-                  <input 
-                    type="checkbox"
-                    checked={prodFeatured}
-                    onChange={(e) => setProdFeatured(e.target.checked)}
-                    style={{ accentColor: '#f59e0b', width: '16px', height: '16px' }}
-                  />
-                  Mark as Featured Product (Highlights on Showcase)
-                </label>
-
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600' }}>
-                  <input 
-                    type="checkbox"
-                    checked={prodIsActive}
-                    onChange={(e) => setProdIsActive(e.target.checked)}
-                    style={{ accentColor: '#10b981', width: '16px', height: '16px' }}
-                  />
-                  Live & Visible on Public Website
-                </label>
-              </div>
-
-              {/* Footer Actions */}
-              <div style={{ display: 'flex', gap: '15px', justifyContent: 'flex-end', marginTop: '10px', borderTop: '1px solid var(--border-light)', paddingTop: '15px' }}>
-                <button type="button" onClick={() => setIsProductModalOpen(false)} className="btn btn-outline btn-sm">
-                  Cancel
-                </button>
-                <button type="submit" disabled={isSavingProduct} className="btn btn-primary btn-sm" style={{ gap: '6px' }}>
-                  {isSavingProduct ? 'Saving Product...' : (editingProduct ? 'Save Product Changes' : 'Create & Publish Product')}
-                </button>
-              </div>
             </form>
           </div>
         </div>

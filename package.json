@@ -2,14 +2,13 @@
   "name": "niyansh-pharma",
   "version": "1.0.0",
   "description": "Niyansh Pharma Wholesale Distribution Website",
-  "main": "backend/server.js",
+  "main": "server.js",
   "engines": {
-    "node": "22.x"
+    "node": ">=18.0.0"
   },
   "scripts": {
-    "start": "node backend/server.js",
-    "postinstall": "npm --prefix frontend install --include=dev && npm --prefix frontend run build || true",
-    "build": "npm --prefix frontend install && npm --prefix frontend run build",
+    "start": "node server.js",
+    "build": "echo 'Frontend pre-built in frontend/dist'",
     "install-all": "npm install && npm install --prefix backend && npm install --prefix frontend",
     "server": "nodemon backend/server.js",
     "client": "npm run dev --prefix frontend",

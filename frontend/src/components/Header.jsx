@@ -1124,21 +1124,6 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 <li><Link to="/products?category=Surgical %26 Medical Supplies" className="dropdown-link">Surgical & Medical Supplies</Link></li>
               </ul>
             </li>
-
-            <li className="nav-item">
-              <Link 
-                to="/quick-order" 
-                className={`nav-pill-link nav-pill-order ${isActive('/quick-order') || isActive('/order') ? 'active' : ''}`}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
-              >
-                <span>⚡</span> Quick Order Pad
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link to="/news" className={`nav-link ${isActive('/news') || isActive('/schemes') ? 'active' : ''}`} style={{ color: '#ea580c', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <span>🔥</span> Schemes & Deals
-              </Link>
-            </li>
           </ul>
 
           {/* Right Corporate Links */}
@@ -1298,8 +1283,6 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               <Link to="/" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600' }}>Home</Link>
               <Link to="/products" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600' }}>All Products Catalog</Link>
               <Link to="/companies" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600' }}>Companies & Manufacturers (252+)</Link>
-              <Link to="/quick-order" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '700', color: '#ea580c' }}>⚡ Quick Order Pad</Link>
-              <Link to="/news" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600' }}>🔥 Schemes & Deals</Link>
               <Link to="/about" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600' }}>About Us</Link>
               <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600' }}>Contact & Support</Link>
             </div>

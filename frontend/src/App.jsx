@@ -22,7 +22,6 @@ import RetailerDashboard from './pages/RetailerDashboard';
 import Admin from './pages/Admin';
 import CompanyDirectory from './pages/CompanyDirectory';
 import CompanyDetail from './pages/CompanyDetail';
-import NewsTicker from './components/NewsTicker';
 import ScrollToTop from './components/ScrollToTop';
 import MobileBottomNav from './components/MobileBottomNav';
 import AIAssistant from './components/AIAssistant';
@@ -113,9 +112,6 @@ function AppContent() {
           isB2BPortal={isB2BPortal}
         />
 
-        {/* Clean layout: Hide public consumer marquee ticker on B2B Workstation pages */}
-        {!isB2BPortal && <NewsTicker />}
-        
         <main style={{ flex: 1 }}>
           <Routes>
             <Route path="/" element={<Home addToCart={addToCart} />} />

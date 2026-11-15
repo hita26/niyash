@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { X, Trash2, Plus, Minus, Send, CheckCircle, ShoppingBag, AlertCircle } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFromCart, clearCart, user, token, onOpenAuth }) {
+  const { t } = useLanguage();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -127,12 +129,12 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
         {/* Header */}
         <div className="sidebar-header">
           <h2 style={{ fontSize: '1.3rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            Wholesale Cart
+            {t('cart.title', 'Wholesale Cart')}
             <span style={{ fontSize: '0.85rem', padding: '2px 8px', borderRadius: '10px', backgroundColor: 'var(--primary-blue)', color: '#fff' }}>
-              {cartItems.length} items
+              {cartItems.length} {t('products.productsCount', 'items')}
             </span>
           </h2>
-          <button onClick={onClose} style={{ color: 'var(--text-medium)', background: 'none', border: 'none', cursor: 'pointer' }} aria-label="Close">
+          <button onClick={onClose} style={{ color: 'var(--text-medium)', background: 'none', border: 'none', cursor: 'pointer' }} aria-label={t('common.close', 'Close')}>
             <X size={24} />
           </button>
         </div>
@@ -150,13 +152,13 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
           ) : cartItems.length === 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '15px', color: 'var(--text-light)' }}>
               <ShoppingBag size={64} strokeWidth={1.5} />
-              <p>Your cart is empty.</p>
+              <p>{t('cart.empty', 'Your cart is empty.')}</p>
               <button 
                 onClick={onClose} 
                 className="btn btn-primary btn-sm"
                 style={{ padding: '8px 15px', borderRadius: '6px', cursor: 'pointer' }}
               >
-                Browse Products
+                {t('cart.browseCatalog', 'Browse Products')}
               </button>
             </div>
           ) : (

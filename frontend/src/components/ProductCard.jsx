@@ -5,6 +5,7 @@ import {
   Sparkles, ShieldCheck, Pill, Syringe, Droplets, Package, Activity 
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 function getFormIcon(form) {
   const f = (form || '').toLowerCase();
@@ -16,6 +17,7 @@ function getFormIcon(form) {
 }
 
 function ProductCard({ product, addToCart }) {
+  const { t } = useLanguage();
   const { isLoggedIn, openAuth } = useAuth();
   const [quantity, setQuantity] = useState(0);
   const [isAdded, setIsAdded] = useState(false);
@@ -310,12 +312,12 @@ function ProductCard({ product, addToCart }) {
             {product.inStock ? (
               <>
                 <CheckCircle2 size={14} color="var(--secondary-green)" />
-                <span style={{ color: 'var(--secondary-green)' }}>In Stock</span>
+                <span style={{ color: 'var(--secondary-green)' }}>{t('products.inStock', 'In Stock')}</span>
               </>
             ) : (
               <>
                 <AlertTriangle size={14} color="#ef4444" />
-                <span style={{ color: '#ef4444' }}>Out of Stock</span>
+                <span style={{ color: '#ef4444' }}>{t('products.outOfStock', 'Out of Stock')}</span>
               </>
             )}
           </div>
@@ -371,10 +373,10 @@ function ProductCard({ product, addToCart }) {
             disabled={!product.inStock}
             className={`btn ${isAdded ? 'btn-secondary' : 'btn-primary'} btn-sm`}
             style={{ padding: '8px 10px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: '700', opacity: product.inStock ? 1 : 0.6 }}
-            title={product.inStock ? 'Add to Cart' : 'Product Out of Stock'}
+            title={product.inStock ? t('products.addToCart', 'Add to Cart') : t('products.outOfStock', 'Product Out of Stock')}
           >
             {isAdded ? <Check size={14} /> : <ShoppingBag size={14} />}
-            {isAdded ? ' Added' : ' Add to Cart'}
+            {isAdded ? ` ${t('products.addedToCart', 'Added')}` : ` ${t('products.addToCart', 'Add to Cart')}`}
           </button>
         )}
 

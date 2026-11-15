@@ -6,8 +6,10 @@ import {
   ArrowRight, MessageCircle, ExternalLink, Lock, Info, Building2, Store, Sparkles, RefreshCw
 } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
+import { useLanguage, LanguageSelector } from '../context/LanguageContext';
 
 function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogout, onOpenAuth, isB2BPortal }) {
+  const { t, language } = useLanguage();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -785,14 +787,14 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
           </div>
           <div className="top-tagline" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#4ade80', fontWeight: '700', fontSize: '0.88rem', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>
             <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#4ade80', display: 'inline-block' }}></span>
-            Care • Quality • Trust
+            {t('topbar.tagline', 'Care • Quality • Trust')}
           </div>
           <div className="top-links">
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              📍 Rajkot, Gujarat
+              📍 {t('topbar.location', 'Rajkot, Gujarat')}
             </span>
             <span style={{ color: 'var(--secondary-green)', fontWeight: '600' }}>
-              • WHO-GMP Certified Wholesale
+              • {t('topbar.certification', 'WHO-GMP Certified Wholesale')}
             </span>
           </div>
         </div>
@@ -814,7 +816,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             <form className="search-bar" onSubmit={handleSearchSubmit} role="search" style={{ position: 'relative' }}>
               <input
                 type="text"
-                placeholder="Search 9,500+ medicines, companies, compositions..."
+                placeholder={t('nav.searchPlaceholder', 'Search 9,500+ medicines, companies, compositions...')}
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
@@ -949,6 +951,9 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
 
           {/* Header Action Buttons */}
           <div className="header-actions">
+            {/* Language Selector (English | ગુજરાતી | हिन्दी) */}
+            <LanguageSelector />
+
             {/* Dark / Light Mode Toggle */}
             <ThemeToggle />
 
@@ -1056,7 +1061,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 style={{ padding: '8px 18px', borderRadius: '30px', fontWeight: '800', border: '1.5px solid var(--primary-blue)', color: 'var(--primary-blue)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                 aria-label="Open Chemist login and registration modal"
               >
-                <LogIn size={15} aria-hidden="true" /> <span>Chemist Login / Register</span>
+                <LogIn size={15} aria-hidden="true" /> <span>{t('nav.login', 'Chemist Login / Register')}</span>
               </button>
             )}
 
@@ -1088,14 +1093,14 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
           {/* Left Core Catalog Links */}
           <ul className="nav-links">
             <li className="nav-item">
-              <Link to="/" className={`nav-link ${isActive('/')}`}>Home</Link>
+              <Link to="/" className={`nav-link ${isActive('/')}`}>{t('nav.home', 'Home')}</Link>
             </li>
             <li className="nav-item">
-              <Link to="/products" className={`nav-link ${isActive('/products')}`}>All Products</Link>
+              <Link to="/products" className={`nav-link ${isActive('/products')}`}>{t('nav.products', 'All Products')}</Link>
             </li>
             <li className="nav-item">
               <Link to="/companies" className={`nav-link ${isActive('/companies') ? 'active' : ''}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                Companies
+                {t('nav.companies', 'Companies')}
                 <span style={{ fontSize: '0.72rem', backgroundColor: '#e0f2fe', color: '#0369a1', fontWeight: '800', padding: '1px 6px', borderRadius: '10px' }}>252+</span>
               </Link>
             </li>
@@ -1115,13 +1120,13 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 tabIndex={0}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setIsDropdownOpen(!isDropdownOpen); }}
               >
-                Categories <ChevronDown size={14} aria-hidden="true" style={{ transform: isDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }} />
+                {t('nav.categories', 'Categories')} <ChevronDown size={14} aria-hidden="true" style={{ transform: isDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }} />
               </span>
               <ul className={`dropdown-menu ${isDropdownOpen ? 'show' : ''}`} style={{ display: isDropdownOpen ? 'block' : 'none' }}>
-                <li><Link to="/products?category=Pharma Products" className="dropdown-link">Pharma Medicines</Link></li>
-                <li><Link to="/products?category=OTC Products" className="dropdown-link">OTC Products</Link></li>
-                <li><Link to="/products?category=Injectables" className="dropdown-link">Injectables & Critical Care</Link></li>
-                <li><Link to="/products?category=Surgical %26 Medical Supplies" className="dropdown-link">Surgical & Medical Supplies</Link></li>
+                <li><Link to="/products?category=Pharma Products" className="dropdown-link">{t('nav.pharmaMedicines', 'Pharma Medicines')}</Link></li>
+                <li><Link to="/products?category=OTC Products" className="dropdown-link">{t('nav.otcProducts', 'OTC Products')}</Link></li>
+                <li><Link to="/products?category=Injectables" className="dropdown-link">{t('nav.injectables', 'Injectables & Critical Care')}</Link></li>
+                <li><Link to="/products?category=Surgical %26 Medical Supplies" className="dropdown-link">{t('nav.surgical', 'Surgical & Medical Supplies')}</Link></li>
               </ul>
             </li>
           </ul>
@@ -1129,7 +1134,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
           {/* Right Corporate Links */}
           <ul className="nav-links nav-links-right">
             <li className="nav-item">
-              <Link to="/about" className={`nav-link ${isActive('/about') || isActive('/about-us') ? 'active' : ''}`}>About Us</Link>
+              <Link to="/about" className={`nav-link ${isActive('/about') || isActive('/about-us') ? 'active' : ''}`}>{t('nav.about', 'About Us')}</Link>
             </li>
             <li 
               className="nav-item"
@@ -1157,7 +1162,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               </ul>
             </li>
             <li className="nav-item">
-              <Link to="/contact" className={`nav-link ${isActive('/contact') ? 'active' : ''}`}>Contact Us</Link>
+              <Link to="/contact" className={`nav-link ${isActive('/contact') ? 'active' : ''}`}>{t('nav.contact', 'Contact Us')}</Link>
             </li>
             <li className="nav-item">
               <a 
@@ -1274,17 +1279,23 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               </div>
             )}
 
+            {/* Mobile Language Switcher */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', borderRadius: '8px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)' }}>
-              <span style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>Theme Mode</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>{t('nav.language', 'Language')}</span>
+              <LanguageSelector variant="pill-buttons" />
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', borderRadius: '8px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)' }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>{t('nav.themeMode', 'Theme Mode')}</span>
               <ThemeToggle variant="pill" />
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-              <Link to="/" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600' }}>Home</Link>
-              <Link to="/products" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600' }}>All Products Catalog</Link>
-              <Link to="/companies" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600' }}>Companies & Manufacturers (252+)</Link>
-              <Link to="/about" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600' }}>About Us</Link>
-              <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600' }}>Contact & Support</Link>
+              <Link to="/" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600' }}>{t('nav.home', 'Home')}</Link>
+              <Link to="/products" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600' }}>{t('nav.products', 'All Products Catalog')}</Link>
+              <Link to="/companies" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600' }}>{t('nav.companies', 'Companies & Manufacturers')} (252+)</Link>
+              <Link to="/about" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600' }}>{t('nav.about', 'About Us')}</Link>
+              <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600' }}>{t('nav.contact', 'Contact & Support')}</Link>
             </div>
 
             <div style={{ marginTop: 'auto', paddingTop: '15px', borderTop: '1px solid var(--border-light)' }}>
@@ -1293,14 +1304,14 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                   onClick={() => { onLogout(); setIsMobileMenuOpen(false); }}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px 15px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)', borderRadius: '8px', color: 'var(--text-medium)', fontWeight: '600', cursor: 'pointer', width: '100%' }}
                 >
-                  <LogOut size={16} /> Log Out
+                  <LogOut size={16} /> {t('nav.logout', 'Log Out')}
                 </button>
               ) : (
                 <button 
                   onClick={() => { onOpenAuth(); setIsMobileMenuOpen(false); }}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px 15px', backgroundColor: 'var(--primary-blue)', color: '#ffffff', borderRadius: '8px', fontWeight: '700', cursor: 'pointer', border: 'none', width: '100%' }}
                 >
-                  <LogIn size={16} /> Chemist Login / Register
+                  <LogIn size={16} /> {t('nav.login', 'Chemist Login / Register')}
                 </button>
               )}
             </div>

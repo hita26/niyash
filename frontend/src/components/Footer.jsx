@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, Send, Facebook, Twitter, Instagram, Linkedin, CheckCircle2, Lock, ShieldCheck } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 function Footer({ compact = false }) {
+  const { t } = useLanguage();
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -72,35 +74,33 @@ function Footer({ compact = false }) {
               />
             </div>
             <p style={{ fontSize: '0.9rem', lineHeight: '1.6', color: '#cbd5e1' }}>
-              Niyansh Pharma is a trusted pharmaceutical wholesale distributor based in Rajkot, Gujarat. We supply genuine, quality assured medicines, OTC products, and surgical supplies across Gujarat with reliable cold-chain and express dispatch.
+              {t('footer.about', 'Niyansh Pharma is a trusted pharmaceutical wholesale distributor based in Rajkot, Gujarat. We supply genuine, quality assured medicines, OTC products, and surgical supplies across Gujarat with reliable cold-chain and express dispatch.')}
             </p>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: 'var(--secondary-green)', fontSize: '0.85rem', fontWeight: '600' }}>
               <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--secondary-green)', display: 'inline-block' }}></span>
-              WHO-GMP Assured • GST Compliant
+              {t('footer.whoGmp', 'WHO-GMP Assured • GST Compliant')}
             </div>
           </div>
 
           {/* Quick Links */}
           <div className="footer-widget">
-            <h3 className="widget-title">Quick Links</h3>
+            <h3 className="widget-title">{t('footer.quickLinks', 'Quick Links')}</h3>
             <ul className="footer-links">
-              <li><Link to="/">Home</Link></li>
-              <li><Link to="/about">About Us</Link></li>
-              <li><Link to="/products">All Products</Link></li>
-              <li><Link to="/companies">Companies Directory</Link></li>
-              <li><Link to="/quick-order">⚡ Quick Bulk Order</Link></li>
-              <li><Link to="/news">🔥 Schemes & PTR Deals</Link></li>
-              <li><Link to="/contact">Contact & Dispatch</Link></li>
+              <li><Link to="/">{t('nav.home', 'Home')}</Link></li>
+              <li><Link to="/about">{t('nav.about', 'About Us')}</Link></li>
+              <li><Link to="/products">{t('nav.products', 'All Products')}</Link></li>
+              <li><Link to="/companies">{t('nav.companies', 'Companies Directory')}</Link></li>
+              <li><Link to="/contact">{t('nav.contact', 'Contact & Dispatch')}</Link></li>
             </ul>
           </div>
 
           {/* Contact Details */}
           <div className="footer-widget">
-            <h3 className="widget-title">Dispatch Desk</h3>
+            <h3 className="widget-title">{t('footer.dispatchDesk', 'Dispatch Desk')}</h3>
             <div className="footer-contact">
               <div className="contact-item">
                 <MapPin size={18} className="contact-icon" aria-hidden="true" />
-                <span>Niyansh Pharma Wholesale Hub, Rajkot, Gujarat - 360005</span>
+                <span>{t('footer.hubLocation', 'Niyansh Pharma Wholesale Hub, Rajkot, Gujarat - 360005')}</span>
               </div>
               <div className="contact-item">
                 <Phone size={18} className="contact-icon" aria-hidden="true" />
@@ -115,13 +115,13 @@ function Footer({ compact = false }) {
 
           {/* Wholesale Trade Bulletin */}
           <div className="footer-widget">
-            <h3 className="widget-title">Trade Bulletins</h3>
+            <h3 className="widget-title">{t('footer.tradeBulletins', 'Trade Bulletins')}</h3>
             <p style={{ fontSize: '0.88rem', color: '#cbd5e1', marginBottom: '15px' }}>
-              Subscribe to get instant WhatsApp & email alerts for weekly PTR price revisions, 10+1 schemes, and stock arrivals.
+              {t('footer.bulletinDesc', 'Subscribe to get instant WhatsApp & email alerts for weekly PTR price revisions, 10+1 schemes, and stock arrivals.')}
             </p>
             {subscribed ? (
               <div style={{ backgroundColor: 'rgba(56, 142, 60, 0.2)', color: '#4ade80', padding: '10px 14px', borderRadius: '6px', fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <CheckCircle2 size={16} /> Subscribed to trade alerts!
+                <CheckCircle2 size={16} /> {t('footer.subscribed', 'Subscribed to trade alerts!')}
               </div>
             ) : (
               <form className="newsletter-form" onSubmit={handleNewsletterSubmit}>
@@ -129,7 +129,7 @@ function Footer({ compact = false }) {
                   type="email" 
                   value={newsletterEmail}
                   onChange={(e) => setNewsletterEmail(e.target.value.toLowerCase())}
-                  placeholder="Enter your email address..." 
+                  placeholder={t('footer.emailPlaceholder', 'Enter your email address...')} 
                   required 
                   aria-label="Newsletter email address" 
                 />
@@ -142,7 +142,7 @@ function Footer({ compact = false }) {
         </div>
 
         <div className="footer-bottom">
-          <p>© {new Date().getFullYear()} Niyansh Pharma Wholesale Distribution. All Rights Reserved.</p>
+          <p>© {new Date().getFullYear()} {t('footer.rights', 'Niyansh Pharma Wholesale Distribution. All Rights Reserved.')}</p>
           <div className="social-links">
             <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="Niyansh Pharma on Facebook"><Facebook size={16} aria-hidden="true" /></a>
             <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="Niyansh Pharma on Twitter"><Twitter size={16} aria-hidden="true" /></a>

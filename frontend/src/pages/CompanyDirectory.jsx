@@ -6,8 +6,10 @@ import {
   Layers, Package, ChevronLeft, ChevronRight, X, ArrowUpDown,
   Filter, Sparkles, CheckCircle2
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 function CompanyDirectory() {
+  const { t } = useLanguage();
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -98,13 +100,13 @@ function CompanyDirectory() {
         {/* Header Hero Section */}
         <div style={{ textAlign: 'center', marginBottom: '35px' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: 'rgba(26, 86, 160, 0.08)', color: 'var(--primary-blue)', padding: '6px 16px', borderRadius: '30px', fontSize: '0.85rem', fontWeight: '700', marginBottom: '12px' }}>
-            <Building2 size={16} /> Authorized Manufacturers & Partners Directory
+            <Building2 size={16} /> {t('companies.title', 'Authorized Manufacturers & Partners Directory')}
           </div>
           <h1 style={{ fontSize: '2.4rem', color: 'var(--text-dark)', margin: '0 0 10px', fontWeight: '800' }}>
-            Browse Pharmaceutical Companies & Brands
+            {t('companies.title', 'Browse Pharmaceutical Companies & Brands')}
           </h1>
           <p style={{ color: 'var(--text-medium)', fontSize: '1.05rem', maxWidth: '720px', margin: '0 auto', lineHeight: 1.6 }}>
-            Discover authorized formulation manufacturers, critical care laboratories, and certified medical surgical suppliers distributed wholesale across Gujarat by Niyansh Pharma.
+            {t('companies.subtitle', 'Discover authorized formulation manufacturers, critical care laboratories, and certified medical surgical suppliers distributed wholesale across Gujarat by Niyansh Pharma.')}
           </p>
         </div>
 
@@ -116,7 +118,7 @@ function CompanyDirectory() {
               <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
               <input 
                 type="text" 
-                placeholder="Search 252 companies, location, or specialty..."
+                placeholder={t('companies.searchPlaceholder', 'Search 252 companies, location, or specialty...')}
                 value={searchTerm}
                 onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
                 style={{ width: '100%', padding: '10px 16px 10px 42px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none' }}

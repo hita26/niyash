@@ -4,8 +4,10 @@ import {
   ShieldCheck, Truck, Percent, Headset, Globe, ShoppingCart, MessageSquare, 
   PhoneCall, Mail, Search, ArrowRight, Award, Building2, Package, CheckCircle2, Sparkles 
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 function Home({ addToCart }) {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [heroSearch, setHeroSearch] = useState('');
 
@@ -20,29 +22,29 @@ function Home({ addToCart }) {
   const categories = [
     {
       name: 'Pharma Products',
-      title: 'Pharma Medicines',
-      desc: 'Tablets, Capsules, Syrups, Ointments & more.',
+      title: t('categories.pharmaTitle', 'Pharma Medicines'),
+      desc: t('categories.pharmaDesc', 'Tablets, Capsules, Syrups, Ointments & more.'),
       image: '/pharma-products.jpg',
       link: '/products?category=Pharma Products'
     },
     {
       name: 'OTC Products',
-      title: 'OTC Products',
-      desc: 'Over-the-counter medicines & wellness supplies.',
+      title: t('categories.otcTitle', 'OTC Products'),
+      desc: t('categories.otcDesc', 'Over-the-counter medicines & wellness supplies.'),
       image: '/otc-products.jpg',
       link: '/products?category=OTC Products'
     },
     {
       name: 'Injectables',
-      title: 'Injectables',
-      desc: 'Critical care vials, ampoules, and IV infusions.',
+      title: t('categories.injectablesTitle', 'Injectables'),
+      desc: t('categories.injectablesDesc', 'Critical care vials, ampoules, and IV infusions.'),
       image: '/injectables.jpg',
       link: '/products?category=Injectables'
     },
     {
       name: 'Surgical & Medical Supplies',
-      title: 'Surgical & Medical',
-      desc: 'Gloves, syringes, needles, dressings & consumables.',
+      title: t('categories.surgicalTitle', 'Surgical & Medical'),
+      desc: t('categories.surgicalDesc', 'Gloves, syringes, needles, dressings & consumables.'),
       image: '/surgical-supplies.jpg',
       link: '/products?category=Surgical %26 Medical Supplies'
     }
@@ -51,33 +53,33 @@ function Home({ addToCart }) {
   const features = [
     {
       icon: <ShieldCheck size={36} color="var(--primary-blue)" />,
-      title: 'Genuine & Quality Assured',
-      desc: '100% genuine products sourced directly from reputed pharmaceutical companies.'
+      title: t('features.genuineTitle', 'Genuine & Quality Assured'),
+      desc: t('features.genuineDesc', '100% genuine products sourced directly from reputed pharmaceutical companies.')
     },
     {
       icon: <Globe size={36} color="var(--primary-blue)" />,
-      title: 'Wide Product Availability',
-      desc: 'Extensive inventory matching healthcare requirements, ready to ship.'
+      title: t('features.networkTitle', 'Strong Network'),
+      desc: t('features.networkDesc', 'Extensive distribution reach covering Rajkot, Gujarat, and surrounding regions.')
     },
     {
       icon: <Percent size={36} color="var(--primary-blue)" />,
-      title: 'Competitive Wholesale Rates',
-      desc: 'Best profit margins and wholesale pricing structures for medical stores.'
+      title: t('features.pricingTitle', 'Competitive Wholesale Rates'),
+      desc: t('features.pricingDesc', 'Best profit margins and wholesale pricing structures for medical stores.')
     },
     {
       icon: <Truck size={36} color="var(--primary-blue)" />,
-      title: 'Fast & Reliable Delivery',
-      desc: 'Timely and safe delivery mapping medical stores, clinics, and hospitals.'
+      title: t('features.deliveryTitle', 'Fast & Reliable Delivery'),
+      desc: t('features.deliveryDesc', 'Timely and safe delivery mapping medical stores, clinics, and hospitals.')
     },
     {
       icon: <Headset size={36} color="var(--primary-blue)" />,
-      title: 'Professional Support',
-      desc: 'Our dedicated customer care team resolves order queries promptly.'
+      title: t('features.supportTitle', 'Professional Support'),
+      desc: t('features.supportDesc', 'Our dedicated customer care team resolves order queries promptly.')
     },
     {
-      icon: <ShieldCheck size={36} color="var(--primary-blue)" />, // Use appropriate icon
-      title: 'Strong Network',
-      desc: 'Extensive distribution reach covering Rajkot, Gujarat, and surrounding regions.'
+      icon: <ShieldCheck size={36} color="var(--primary-blue)" />,
+      title: t('features.coldChainTitle', 'Cold-Chain Logistics'),
+      desc: t('features.coldChainDesc', 'Strict temperature-controlled handling for insulin, vaccines, and biologics.')
     }
   ];
 
@@ -114,38 +116,38 @@ function Home({ addToCart }) {
         <div className="container hero-container-grid">
           <div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: 'rgba(34, 197, 94, 0.15)', border: '1px solid rgba(74, 222, 128, 0.35)', padding: '6px 14px', borderRadius: '30px', fontSize: '0.82rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.8px', color: '#86efac', marginBottom: '16px' }}>
-              <ShieldCheck size={15} /> Authorized Wholesale & Distribution • PAN Gujarat
+              <ShieldCheck size={15} /> {t('hero.badge', 'Authorized Wholesale & Distribution • PAN Gujarat')}
             </div>
             
             <h1 style={{ fontSize: 'clamp(2.1rem, 4.5vw, 3.2rem)', color: '#ffffff', lineHeight: '1.18', fontWeight: '800', marginBottom: '18px', fontFamily: 'Outfit' }}>
-              Your Trusted Partner in <br />
-              <span style={{ color: '#86efac' }}>9,500+ Pharma, OTC & Surgical</span> Supplies
+              {t('hero.title', 'Your Trusted Partner in')} <br />
+              <span style={{ color: '#86efac' }}>{t('hero.titleHighlight', '9,500+ Pharma, OTC & Surgical')}</span> {t('hero.titleEnd', 'Supplies')}
             </h1>
             
             <p style={{ fontSize: '1.08rem', color: '#e2e8f0', marginBottom: '28px', maxWidth: '620px', fontWeight: '400', lineHeight: '1.65' }}>
-              Niyansh Pharma delivers 9,500+ genuine healthcare formulations, generic medicines, and hospital consumables from 252+ certified manufacturers with verified batch compliance and prompt delivery across Saurashtra & Gujarat.
+              {t('hero.subtitle', 'Niyansh Pharma delivers 9,500+ genuine healthcare formulations, generic medicines, and hospital consumables from 252+ certified manufacturers with verified batch compliance and prompt delivery across Saurashtra & Gujarat.')}
             </p>
 
             {/* High-Impact Action CTAs for Chemists */}
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '25px' }}>
               <Link to="/companies" className="btn btn-secondary" style={{ padding: '13px 24px', fontSize: '0.96rem', fontWeight: '700', borderRadius: '30px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <Building2 size={18} /> Browse 252+ Companies
+                <Building2 size={18} /> {t('hero.browseCompanies', 'Browse 252+ Companies')}
               </Link>
               <Link to="/quick-order" className="btn btn-primary" style={{ padding: '13px 24px', fontSize: '0.96rem', fontWeight: '700', borderRadius: '30px', display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#ffffff', color: 'var(--primary-blue)' }}>
-                <Package size={18} /> Fast Quick Order ⚡
+                <Package size={18} /> {t('hero.quickOrder', 'Fast Quick Order ⚡')}
               </Link>
               <button onClick={handleQuickWhatsApp} className="btn btn-outline" style={{ borderColor: 'rgba(255,255,255,0.7)', color: '#ffffff', padding: '13px 22px', fontSize: '0.96rem', fontWeight: '600', borderRadius: '30px' }}>
-                <MessageSquare size={17} /> WhatsApp Order
+                <MessageSquare size={17} /> {t('hero.whatsappOrder', 'WhatsApp Order')}
               </button>
             </div>
 
             {/* Quick Formulation Filter Shortcuts */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Quick Jump:</span>
-              <Link to="/products?category=Pharma Products" style={{ fontSize: '0.8rem', color: '#e2e8f0', backgroundColor: 'rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: '15px', textDecoration: 'none', transition: 'all 0.2s' }}>Tablets & Capsules</Link>
-              <Link to="/products?category=Injectables" style={{ fontSize: '0.8rem', color: '#e2e8f0', backgroundColor: 'rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: '15px', textDecoration: 'none', transition: 'all 0.2s' }}>Critical Care Injectables</Link>
-              <Link to="/products?category=OTC Products" style={{ fontSize: '0.8rem', color: '#e2e8f0', backgroundColor: 'rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: '15px', textDecoration: 'none', transition: 'all 0.2s' }}>OTC & Wellness</Link>
-              <Link to="/products?category=Surgical %26 Medical Supplies" style={{ fontSize: '0.8rem', color: '#e2e8f0', backgroundColor: 'rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: '15px', textDecoration: 'none', transition: 'all 0.2s' }}>Surgical & Medical</Link>
+              <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{t('hero.quickJump', 'Quick Jump:')}</span>
+              <Link to="/products?category=Pharma Products" style={{ fontSize: '0.8rem', color: '#e2e8f0', backgroundColor: 'rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: '15px', textDecoration: 'none', transition: 'all 0.2s' }}>{t('categories.pharmaTitle', 'Tablets & Capsules')}</Link>
+              <Link to="/products?category=Injectables" style={{ fontSize: '0.8rem', color: '#e2e8f0', backgroundColor: 'rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: '15px', textDecoration: 'none', transition: 'all 0.2s' }}>{t('categories.injectablesTitle', 'Critical Care Injectables')}</Link>
+              <Link to="/products?category=OTC Products" style={{ fontSize: '0.8rem', color: '#e2e8f0', backgroundColor: 'rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: '15px', textDecoration: 'none', transition: 'all 0.2s' }}>{t('categories.otcTitle', 'OTC & Wellness')}</Link>
+              <Link to="/products?category=Surgical %26 Medical Supplies" style={{ fontSize: '0.8rem', color: '#e2e8f0', backgroundColor: 'rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: '15px', textDecoration: 'none', transition: 'all 0.2s' }}>{t('categories.surgicalTitle', 'Surgical & Medical')}</Link>
             </div>
           </div>
 
@@ -159,38 +161,38 @@ function Home({ addToCart }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Sparkles size={18} color="#86efac" />
                 <h3 style={{ color: '#ffffff', fontSize: '1.2rem', fontWeight: '700', margin: 0 }}>
-                  Wholesale Advantage
+                  {t('hero.wholesaleAdvantage', 'Wholesale Advantage')}
                 </h3>
               </div>
               <span style={{ fontSize: '0.72rem', backgroundColor: '#22c55e', color: '#ffffff', fontWeight: '800', padding: '2px 8px', borderRadius: '10px' }}>
-                LIVE B2B
+                {t('hero.liveB2B', 'LIVE B2B')}
               </span>
             </div>
 
             {/* Stat Grid */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '22px' }}>
               <div style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '14px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <div style={{ fontSize: '1.65rem', fontWeight: '800', color: '#ffffff', lineHeight: 1.1 }}>9,500+</div>
-                <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '4px' }}>Genuine Formulations</div>
+                <div style={{ fontSize: '1.65rem', fontWeight: '800', color: '#ffffff', lineHeight: 1.1 }}>{t('hero.statFormulations', '9,500+')}</div>
+                <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '4px' }}>{t('hero.statFormulationsLabel', 'Genuine Formulations')}</div>
               </div>
               <div style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '14px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <div style={{ fontSize: '1.65rem', fontWeight: '800', color: '#86efac', lineHeight: 1.1 }}>252+</div>
-                <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '4px' }}>Pharma Companies</div>
+                <div style={{ fontSize: '1.65rem', fontWeight: '800', color: '#86efac', lineHeight: 1.1 }}>{t('hero.statCompanies', '252+')}</div>
+                <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '4px' }}>{t('hero.statCompaniesLabel', 'Pharma Companies')}</div>
               </div>
               <div style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '14px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#ffffff', lineHeight: 1.1 }}>WHO-GMP</div>
-                <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '4px' }}>Certified Supply Chain</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#ffffff', lineHeight: 1.1 }}>{t('hero.statSupplyChain', 'WHO-GMP')}</div>
+                <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '4px' }}>{t('hero.statSupplyChainLabel', 'Certified Supply Chain')}</div>
               </div>
               <div style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '14px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#93c5fd', lineHeight: 1.1 }}>Same-Day</div>
-                <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '4px' }}>Dispatch in Saurashtra</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#93c5fd', lineHeight: 1.1 }}>{t('hero.statDispatch', 'Same-Day')}</div>
+                <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '4px' }}>{t('hero.statDispatchLabel', 'Dispatch in Saurashtra')}</div>
               </div>
             </div>
 
             {/* Direct Order Help */}
             <div style={{ padding: '14px', backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
               <div>
-                <span style={{ fontSize: '0.74rem', color: '#cbd5e1', display: 'block' }}>Call Wholesale Desk:</span>
+                <span style={{ fontSize: '0.74rem', color: '#cbd5e1', display: 'block' }}>{t('hero.callWholesaleDesk', 'Call Wholesale Desk:')}</span>
                 <a href="tel:+919909923130" style={{ color: '#ffffff', fontWeight: '700', fontSize: '1.02rem', textDecoration: 'none' }}>+91 99099 23130</a>
               </div>
               <a 
@@ -209,8 +211,8 @@ function Home({ addToCart }) {
       {/* Shop By Category Section */}
       <section className="section" style={{ backgroundColor: '#ffffff' }}>
         <div className="container">
-          <h2 className="section-title">Shop By Category</h2>
-          <p className="section-subtitle">We distribute a comprehensive portfolio of pharmaceutical and clinical supplies.</p>
+          <h2 className="section-title">{t('categories.title', 'Shop By Category')}</h2>
+          <p className="section-subtitle">{t('categories.subtitle', 'We distribute a comprehensive portfolio of pharmaceutical and clinical supplies.')}</p>
           
           <div className="grid-4">
             {categories.map((cat, i) => (
@@ -239,7 +241,7 @@ function Home({ addToCart }) {
                   <h3 style={{ fontSize: '1.15rem', marginBottom: '8px' }}>{cat.title}</h3>
                   <p style={{ fontSize: '0.85rem', color: 'var(--text-medium)', marginBottom: '15px', flex: 1 }}>{cat.desc}</p>
                   <Link to={cat.link} className="btn btn-outline btn-sm" style={{ width: '100%', textAlign: 'center' }}>
-                    View Products
+                    {t('categories.viewProducts', 'View Products')}
                   </Link>
                 </div>
               </div>
@@ -251,8 +253,8 @@ function Home({ addToCart }) {
       {/* Why Choose Us Section */}
       <section className="section" style={{ backgroundColor: 'var(--bg-main)' }}>
         <div className="container">
-          <h2 className="section-title">Why Choose Niyansh Pharma?</h2>
-          <p className="section-subtitle">We prioritize quality, affordability, and professional distribution logistics.</p>
+          <h2 className="section-title">{t('features.title', 'Why Choose Niyansh Pharma?')}</h2>
+          <p className="section-subtitle">{t('features.subtitle', 'We prioritize quality, affordability, and professional distribution logistics.')}</p>
 
           <div className="grid-3">
             {features.map((feat, i) => (

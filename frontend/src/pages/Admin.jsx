@@ -630,6 +630,8 @@ function Admin() {
   const [isUploadingPhotos, setIsUploadingPhotos] = useState(false);
   const [photoDragActive, setPhotoDragActive] = useState(false);
   const fileInputRef = useRef(null);
+  const [isSearchingWebImages, setIsSearchingWebImages] = useState(false);
+  const [webImageResults, setWebImageResults] = useState([]);
 
   const [selectedOrder, setSelectedOrder] = useState(null); // Full breakdown modal
   const [selectedLedger, setSelectedLedger] = useState(null); // Statement modal
@@ -1751,6 +1753,52 @@ _Helpline: +91 9316566894_`;
     const url = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(query)}`;
     window.open(url, '_blank');
     showToast(`Searching Google Images for: "${cleanName}"`);
+  };
+
+  const handleAutoFetchImages = async () => {
+    const rawName = prodName || '';
+    if (!rawName.trim()) {
+      showToast('Please enter Product Name first to auto-find photos', 'error');
+      return;
+    }
+    setIsSearchingWebImages(true);
+    setWebImageResults([]);
+    try {
+      const cleanName = rawName
+        .replace(/\(\s*\d+\s*[\*xX]\s*\d+.*?\)/gi, '')
+        .replace(/\b\d+\s*[\*xX]\s*\d+\b/gi, '')
+        .replace(/\(\s*(GREEN|WHITE|RED|BLUE|YELLOW)\s*\)/gi, '')
+        .replace(/[()]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      const compPart = (prodCompany || prodBrand || '').replace(/\(ranbaxy\)|\(wellness\)|\(cosmacia\)|\(cadila\)|pvt|ltd|group/gi, '').trim();
+      const query = `${cleanName} ${compPart}`.trim();
+
+      const res = await fetch(`/api/products/search-medicine-images?query=${encodeURIComponent(query)}`, {
+        headers: getAuthHeaders()
+      });
+      const data = await res.json();
+      if (res.ok && data.success && data.images && data.images.length > 0) {
+        setWebImageResults(data.images);
+        showToast(`Found ${data.images.length} photos! Click one to attach.`, 'success');
+      } else {
+        showToast('No photos found automatically. Click Google Tab to search in browser.', 'error');
+      }
+    } catch (err) {
+      showToast('Error finding photos: ' + err.message, 'error');
+    } finally {
+      setIsSearchingWebImages(false);
+    }
+  };
+
+  const handleSelectWebImage = (imgUrl) => {
+    setProdImages(prev => {
+      if (!prev.includes(imgUrl)) return [imgUrl, ...prev];
+      return prev;
+    });
+    setProdImageUrl(imgUrl);
+    showToast('Photo attached successfully!');
   };
 
   const handleSaveProduct = async (e) => {
@@ -5512,34 +5560,134 @@ _Helpline: +91 9316566894_`;
                       )}
                     </div>
 
-                    {/* 1-Click Google Images Search Button */}
-                    <button
-                      type="button"
-                      onClick={handleSearchGoogleImages}
-                      style={{
-                        width: '100%',
-                        padding: '9px 14px',
-                        backgroundColor: '#1a73e8',
-                        color: '#ffffff',
-                        border: 'none',
-                        borderRadius: '8px',
-                        fontWeight: '700',
-                        fontSize: '0.86rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '8px',
-                        cursor: 'pointer',
-                        boxShadow: '0 2px 6px rgba(26, 115, 232, 0.3)',
-                        marginBottom: '10px',
-                        transition: 'background-color 0.2s ease'
-                      }}
-                      onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#1557b0'; }}
-                      onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#1a73e8'; }}
-                      title="Search clean medicine packaging photos on Google Images in a new tab"
-                    >
-                      <Search size={16} /> 🔍 Find Photo on Google
-                    </button>
+                    {/* Auto-Fetch Medicine Photos Button (In-Modal, Zero Manual Work!) */}
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                      <button
+                        type="button"
+                        onClick={handleAutoFetchImages}
+                        disabled={isSearchingWebImages}
+                        style={{
+                          flex: 1,
+                          padding: '10px 14px',
+                          backgroundColor: '#2563eb',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '8px',
+                          fontWeight: '700',
+                          fontSize: '0.86rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          cursor: 'pointer',
+                          boxShadow: '0 2px 6px rgba(37, 99, 235, 0.3)',
+                          transition: 'background-color 0.2s ease'
+                        }}
+                        onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#1d4ed8'; }}
+                        onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#2563eb'; }}
+                        title="Auto-search and pick medicine photos right inside this modal"
+                      >
+                        {isSearchingWebImages ? (
+                          <>
+                            <div className="spinner" style={{ width: '16px', height: '16px', borderTopColor: '#fff' }}></div>
+                            Searching Photos...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles size={16} /> ⚡ 1-Click Auto-Find Photos
+                          </>
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleSearchGoogleImages}
+                        style={{
+                          padding: '10px 12px',
+                          backgroundColor: '#f1f5f9',
+                          color: '#475569',
+                          border: '1px solid #cbd5e1',
+                          borderRadius: '8px',
+                          fontWeight: '600',
+                          fontSize: '0.82rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          cursor: 'pointer'
+                        }}
+                        title="Open Google Images in browser tab as backup"
+                      >
+                        <Search size={14} /> Google Tab
+                      </button>
+                    </div>
+
+                    {/* Instant In-Modal Photo Picker Grid (Click any photo to attach instantly) */}
+                    {webImageResults.length > 0 && (
+                      <div style={{
+                        padding: '12px',
+                        backgroundColor: '#eff6ff',
+                        borderRadius: '10px',
+                        border: '1.5px solid #bfdbfe',
+                        marginBottom: '12px'
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                          <span style={{ fontSize: '0.82rem', fontWeight: '700', color: '#1e40af' }}>
+                            👉 Found {webImageResults.length} photos! Click one to attach:
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setWebImageResults([])}
+                            style={{ background: 'none', border: 'none', fontSize: '0.75rem', color: '#64748b', cursor: 'pointer', fontWeight: '600' }}
+                          >
+                            ✕ Close
+                          </button>
+                        </div>
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(4, 1fr)',
+                          gap: '8px',
+                          maxHeight: '190px',
+                          overflowY: 'auto',
+                          paddingRight: '2px'
+                        }}>
+                          {webImageResults.map((img, idx) => {
+                            const isSelected = prodImageUrl === img || prodImages.includes(img);
+                            return (
+                              <div
+                                key={idx}
+                                onClick={() => handleSelectWebImage(img)}
+                                style={{
+                                  height: '80px',
+                                  borderRadius: '6px',
+                                  overflow: 'hidden',
+                                  border: isSelected ? '2px solid #2563eb' : '1px solid #cbd5e1',
+                                  backgroundColor: '#ffffff',
+                                  cursor: 'pointer',
+                                  position: 'relative',
+                                  boxShadow: isSelected ? '0 0 0 2px rgba(37,99,235,0.25)' : 'none',
+                                  transition: 'transform 0.15s ease'
+                                }}
+                                onMouseOver={(e) => { e.currentTarget.style.transform = 'scale(1.05)'; }}
+                                onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+                                title="Click to attach this photo directly!"
+                              >
+                                <img
+                                  src={img}
+                                  alt={`Result ${idx + 1}`}
+                                  style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                  onError={(e) => { e.target.parentElement.style.display = 'none'; }}
+                                />
+                                {isSelected && (
+                                  <span style={{ position: 'absolute', bottom: '2px', right: '2px', backgroundColor: '#2563eb', color: '#fff', fontSize: '0.62rem', padding: '1px 5px', borderRadius: '3px', fontWeight: '800' }}>
+                                    ✓ Applied
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Or enter photo URL */}
                     <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>

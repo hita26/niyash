@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const path = require('path');
 const fs = require('fs');
+const https = require('https');
 const multer = require('multer');
 const Product = require('../models/Product');
 const Company = require('../models/Company');
@@ -86,6 +87,66 @@ router.get('/meta/filters', async (req, res) => {
   } catch (error) {
     console.error('Filter meta error:', error);
     res.status(500).json({ success: false, message: 'Server error fetching filter options', error: error.message });
+  }
+});
+
+// Helper function to search medicine images on the web
+const searchWebMedicineImages = (query) => {
+  return new Promise((resolve) => {
+    try {
+      const clean = (query || '')
+        .replace(/\(\s*\d+\s*[\*xX]\s*\d+.*?\)/gi, '')
+        .replace(/\b\d+\s*[\*xX]\s*\d+\b/gi, '')
+        .replace(/\(\s*(GREEN|WHITE|RED|BLUE|YELLOW)\s*\)/gi, '')
+        .replace(/[()]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      const searchQuery = `${clean} medicine packaging`;
+      const url = `https://www.bing.com/images/search?q=${encodeURIComponent(searchQuery)}&form=HDRSC2&first=1`;
+
+      https.get(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
+      }, (resp) => {
+        let body = '';
+        resp.on('data', chunk => body += chunk);
+        resp.on('end', () => {
+          const murlMatches = [...body.matchAll(/murl&quot;:&quot;(https?:\/\/[^&]+)&quot;/g)].map(m => m[1]);
+          const cleanImgs = murlMatches.filter(u =>
+            !u.includes('vector') &&
+            !u.includes('icon') &&
+            !u.includes('logo') &&
+            (u.endsWith('.jpg') || u.endsWith('.jpeg') || u.endsWith('.png') || u.endsWith('.webp') || u.includes('gumlet.io') || u.includes('imimg.com') || u.includes('daxia') || u.includes('zeelab'))
+          );
+          resolve(cleanImgs.slice(0, 8));
+        });
+      }).on('error', () => resolve([]));
+    } catch {
+      resolve([]);
+    }
+  });
+};
+
+// @desc    Auto-search web for authentic medicine packaging photos
+// @route   GET /api/products/search-medicine-images
+// @access  Private/Admin
+router.get('/search-medicine-images', protect, adminOnly, async (req, res) => {
+  try {
+    const { query } = req.query;
+    if (!query || !query.trim()) {
+      return res.status(400).json({ success: false, message: 'Search query is required' });
+    }
+    const images = await searchWebMedicineImages(query.trim());
+    res.json({
+      success: true,
+      query,
+      images,
+    });
+  } catch (error) {
+    console.error('Image search error:', error);
+    res.status(500).json({ success: false, message: 'Error searching medicine photos', error: error.message });
   }
 });
 

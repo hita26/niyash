@@ -2,8 +2,10 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, Package, Building2, Zap, ShoppingBag, ShieldCheck, FileText } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
+  const { t } = useLanguage();
   const location = useLocation();
   const { isLoggedIn, user } = useAuth();
 
@@ -67,7 +69,7 @@ function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
             }}
           >
             <ShieldCheck size={20} strokeWidth={isActive('/dashboard') ? 2.5 : 2} color={isActive('/dashboard') ? 'var(--primary-blue)' : '#64748b'} />
-            <span>Dashboard</span>
+            <span>{t('nav.dashboard', 'Dashboard')}</span>
           </Link>
 
           {/* Quick Order Pad */}
@@ -88,7 +90,7 @@ function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
             }}
           >
             <Zap size={20} color={isActive('/quick-order') ? '#ea580c' : '#64748b'} strokeWidth={2.5} />
-            <span>Quick Order</span>
+            <span>{t('nav.quickOrder', 'Quick Order')}</span>
           </Link>
 
           {/* Ledger & GST Invoices */}
@@ -109,7 +111,7 @@ function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
             }}
           >
             <FileText size={20} strokeWidth={isActive('/outstanding') ? 2.5 : 2} color={isActive('/outstanding') ? '#2563eb' : '#64748b'} />
-            <span>Ledger</span>
+            <span>{t('nav.ledger', 'Ledger')}</span>
           </Link>
 
           {/* Wholesale Products */}
@@ -130,7 +132,7 @@ function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
             }}
           >
             <Package size={20} strokeWidth={isActive('/products') ? 2.5 : 2} />
-            <span>Medicines</span>
+            <span>{t('nav.products', 'Medicines')}</span>
           </Link>
 
           {/* Wholesale Cart */}
@@ -178,7 +180,7 @@ function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
                 </span>
               )}
             </div>
-            <span>Cart</span>
+            <span>{t('nav.cart', 'Cart')}</span>
           </button>
         </>
       ) : (
@@ -201,7 +203,7 @@ function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
             }}
           >
             <Home size={20} strokeWidth={isActive('/') ? 2.5 : 2} />
-            <span>Home</span>
+            <span>{t('nav.home', 'Home')}</span>
           </Link>
 
           {/* Medicines */}
@@ -222,7 +224,7 @@ function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
             }}
           >
             <Package size={20} strokeWidth={isActive('/products') ? 2.5 : 2} />
-            <span>Medicines</span>
+            <span>{t('nav.products', 'Medicines')}</span>
           </Link>
 
           {/* Chemist Portal Access */}
@@ -243,7 +245,7 @@ function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
             }}
           >
             <ShieldCheck size={20} strokeWidth={2.5} color="#059669" />
-            <span>Chemist Portal</span>
+            <span>{t('nav.dashboard', 'Chemist Portal')}</span>
           </Link>
 
           {/* Quick Order */}
@@ -264,7 +266,7 @@ function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
             }}
           >
             <Zap size={20} color={isActive('/quick-order') ? '#ea580c' : '#64748b'} strokeWidth={2.5} />
-            <span>Order</span>
+            <span>{t('nav.quickOrder', 'Order')}</span>
           </Link>
 
           {/* Cart */}

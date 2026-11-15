@@ -16,8 +16,10 @@ import {
   ArrowRight,
   Package
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 function About() {
+  const { t } = useLanguage();
   const stats = [
     { number: '8,700+', label: 'Registered Formulations', desc: 'Tablets, Capsules, Syrups, Injectables & Surgicals' },
     { number: '1,200+', label: 'Retail & Hospital Clients', desc: 'Medical stores and healthcare institutions across Gujarat' },
@@ -95,26 +97,25 @@ function About() {
             display: 'inline-block',
             marginBottom: '18px'
           }}>
-            WHOLESALE DISTRIBUTION & MANUFACTURING • ESTABLISHED IN GUJARAT
+            {t('about.badge', 'WHO-GMP Certified Pharmaceutical Distributor')}
           </span>
           <h1 style={{ fontSize: 'clamp(2.2rem, 4.5vw, 3.2rem)', color: '#ffffff', lineHeight: '1.2', fontWeight: '800', marginBottom: '20px', fontFamily: 'Outfit' }}>
-            Empowering Healthcare Through <br />
-            <span style={{ color: '#86efac' }}>Trust, Quality & Integrity</span>
+            {t('about.title', 'About Niyansh Pharma')}
           </h1>
           <p style={{ fontSize: '1.1rem', color: '#e2e8f0', lineHeight: '1.65', marginBottom: '30px' }}>
-            Niyansh Pharma is a premier pharmaceutical wholesale distributor and stockist based in Rajkot, Gujarat. We bridge top pharmaceutical manufacturers with retail chemists, dispensaries, nursing homes, and hospitals across Western India.
+            {t('about.subtitle', 'Niyansh Pharma is a premier pharmaceutical wholesale distributor and stockist based in Rajkot, Gujarat. We bridge top pharmaceutical manufacturers with retail chemists, dispensaries, nursing homes, and hospitals across Western India.')}
           </p>
 
           <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link to="/products" className="btn btn-secondary" style={{ padding: '12px 28px', fontSize: '0.95rem' }}>
-              Explore Products
+              {t('categories.viewProducts', 'Explore Products')}
             </Link>
             <button 
               onClick={handleWhatsApp} 
               className="btn btn-outline" 
               style={{ borderColor: '#ffffff', color: '#ffffff', padding: '12px 28px', fontSize: '0.95rem', gap: '8px' }}
             >
-              <MessageSquare size={16} /> Contact Sales
+              <MessageSquare size={16} /> {t('common.whatsapp', 'Contact Sales')}
             </button>
           </div>
         </div>

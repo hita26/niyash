@@ -5,10 +5,12 @@ import {
   KeyRound, CheckCircle2, ArrowLeft, Eye, EyeOff, MessageCircle, RotateCcw,
   Upload, Check, Paperclip, ExternalLink
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 const MAX_DOC_SIZE_KB = 500; // Required maximum document size in KB
 
 function AuthModal({ isOpen, onClose, onSuccess }) {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   // Modes: 'login' | 'register' | 'forgot-request' | 'forgot-verify' | 'forgot-success'
   const [authMode, setAuthMode] = useState('login');
@@ -492,7 +494,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                 transition: 'var(--transition-smooth)'
               }}
             >
-              Log In
+              {t('auth.loginTitle', 'Log In')}
             </button>
             <button 
               type="button"
@@ -505,7 +507,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                 transition: 'var(--transition-smooth)'
               }}
             >
-              Chemist Register
+              {t('auth.registerTitle', 'Chemist Register')}
             </button>
           </div>
         )}

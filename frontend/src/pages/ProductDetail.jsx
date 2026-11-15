@@ -10,8 +10,10 @@ import {
   Building2, Package, Tag, Pill, Factory, Receipt, 
   Clock, Info, Lock, LogIn, Syringe, Droplets, Activity
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 function ProductDetail({ addToCart }) {
+  const { t } = useLanguage();
   const { id } = useParams();
   const { isLoggedIn, openAuth } = useAuth();
   const [product, setProduct] = useState(null);
@@ -169,7 +171,7 @@ function ProductDetail({ addToCart }) {
               className="btn btn-outline btn-sm"
               style={{ padding: '5px 12px', fontSize: '0.78rem', gap: '5px', borderRadius: '20px', backgroundColor: '#fff', textDecoration: 'none' }}
             >
-              <ArrowLeft size={13} /> All Products
+              <ArrowLeft size={13} /> {t('productDetail.backToCatalog', 'All Products')}
             </Link>
           </div>
         </div>
@@ -356,19 +358,19 @@ function ProductDetail({ addToCart }) {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <ShieldCheck size={16} color="var(--primary-blue)" />
-                <span>100% Genuine Batch</span>
+                <span>{t('productDetail.verifiedGenuine', '100% Genuine Batch')}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Truck size={16} color="var(--primary-blue)" />
-                <span>Prompt Dispatch</span>
+                <span>{t('features.deliveryTitle', 'Prompt Dispatch')}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Receipt size={16} color="var(--primary-blue)" />
-                <span>GST Tax Invoice</span>
+                <span>{t('features.billingTitle', 'GST Tax Invoice')}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <CheckCircle2 size={16} color="#059669" />
-                <span>WHO-GMP Quality</span>
+                <span>{t('hero.statSupplyChainLabel', 'WHO-GMP Quality')}</span>
               </div>
             </div>
 
@@ -500,13 +502,13 @@ function ProductDetail({ addToCart }) {
                     <>
                       <CheckCircle2 size={16} color="var(--secondary-green)" />
                       <span style={{ color: 'var(--secondary-green)' }}>
-                        In Stock {product.stockQuantity !== undefined && product.stockQuantity > 0 ? `(${product.stockQuantity})` : ''}
+                        {t('products.inStock', 'In Stock')} {product.stockQuantity !== undefined && product.stockQuantity > 0 ? `(${product.stockQuantity})` : ''}
                       </span>
                     </>
                   ) : (
                     <>
                       <AlertTriangle size={16} color="#ef4444" />
-                      <span style={{ color: '#ef4444' }}>Out of Stock</span>
+                      <span style={{ color: '#ef4444' }}>{t('products.outOfStock', 'Out of Stock')}</span>
                     </>
                   )}
                 </div>
@@ -681,11 +683,11 @@ function ProductDetail({ addToCart }) {
                     >
                       {isAdded ? (
                         <>
-                          <Check size={18} /> Added ({quantity} units)!
+                          <Check size={18} /> {t('products.addedToCart', 'Added')} ({quantity})!
                         </>
                       ) : (
                         <>
-                          <ShoppingBag size={18} /> Add to Cart
+                          <ShoppingBag size={18} /> {t('products.addToCart', 'Add to Cart')}
                         </>
                       )}
                     </button>
@@ -710,7 +712,7 @@ function ProductDetail({ addToCart }) {
                         cursor: 'pointer'
                       }}
                     >
-                      <MessageSquare size={18} /> WhatsApp Order
+                      <MessageSquare size={18} /> {t('productDetail.orderOnWhatsApp', 'WhatsApp Order')}
                     </button>
                   </div>
                 </div>

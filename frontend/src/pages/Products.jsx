@@ -4,8 +4,10 @@ import ProductCard from '../components/ProductCard';
 import SkeletonLoader from '../components/SkeletonLoader';
 import { Filter, SlidersHorizontal, ArrowUpDown, RefreshCcw, X, ChevronLeft, ChevronRight, Building2, Search } from 'lucide-react';
 import { useLiveSync, SYNC_EVENTS } from '../utils/liveSync';
+import { useLanguage } from '../context/LanguageContext';
 
 function Products({ addToCart, searchTerm, setSearchTerm }) {
+  const { t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -363,7 +365,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
 
             {/* Categories filter */}
             <div style={{ marginBottom: '22px', borderBottom: '1px solid #f1f5f9', paddingBottom: '18px' }}>
-              <h4 style={{ fontSize: '0.92rem', marginBottom: '10px', color: 'var(--text-dark)', fontWeight: '700' }}>Categories</h4>
+              <h4 style={{ fontSize: '0.92rem', marginBottom: '10px', color: 'var(--text-dark)', fontWeight: '700' }}>{t('nav.categories', 'Categories')}</h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {categories.map((cat, i) => (
                   <label key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.88rem', cursor: 'pointer', color: selectedCategories.includes(cat) ? 'var(--primary-blue)' : 'var(--text-dark)', fontWeight: selectedCategories.includes(cat) ? '600' : '400' }}>
@@ -383,10 +385,10 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
             <div style={{ marginBottom: '22px', borderBottom: '1px solid #f1f5f9', paddingBottom: '18px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                 <h4 style={{ fontSize: '0.92rem', color: 'var(--text-dark)', fontWeight: '700', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Building2 size={15} color="var(--primary-blue)" /> Pharma Companies
+                  <Building2 size={15} color="var(--primary-blue)" /> {t('nav.companies', 'Pharma Companies')}
                 </h4>
                 <Link to="/companies" style={{ fontSize: '0.74rem', color: 'var(--primary-blue)', fontWeight: '700', textDecoration: 'none' }}>
-                  All 252 →
+                  {t('common.viewAll', 'All 252 →')}
                 </Link>
               </div>
 
@@ -498,14 +500,14 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
                 style={{ display: 'none', alignItems: 'center', gap: '6px' }}
               >
                 <Filter size={14} />
-                Filters {activeFilterCount > 0 ? `(${activeFilterCount})` : ''}
+                {t('common.filter', 'Filters')} {activeFilterCount > 0 ? `(${activeFilterCount})` : ''}
               </button>
 
               <div style={{ fontSize: '0.88rem', color: 'var(--text-medium)' }}>
                 {loading ? (
-                  <span>Loading catalog...</span>
+                  <span>{t('common.loading', 'Loading catalog...')}</span>
                 ) : (
-                  <span>Showing <strong className="tabular-nums">{products.length}</strong> of <strong className="tabular-nums">{total}</strong> products</span>
+                  <span>{t('products.showing', 'Showing')} <strong className="tabular-nums">{products.length}</strong> {t('products.of', 'of')} <strong className="tabular-nums">{total}</strong> {t('products.productsCount', 'products')}</span>
                 )}
                 {searchParams.get('search') && (
                   <span> matching &ldquo;<strong>{searchParams.get('search')}</strong>&rdquo;</span>
@@ -515,18 +517,18 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontSize: '0.85rem', color: 'var(--text-medium)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <ArrowUpDown size={14} /> Sort:
+                <ArrowUpDown size={14} /> {t('products.sortBy', 'Sort:')}
               </span>
               <select 
                 value={sortOrder} 
                 onChange={(e) => updateSortParam(e.target.value)}
                 style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--border-light)', fontSize: '0.85rem', backgroundColor: '#ffffff' }}
               >
-                <option value="popular">Default / Newest</option>
-                <option value="priceAsc">Price: Low to High</option>
-                <option value="priceDesc">Price: High to Low</option>
-                <option value="nameAsc">Name: A to Z</option>
-                <option value="nameDesc">Name: Z to A</option>
+                <option value="popular">{t('products.sortPopular', 'Default / Newest')}</option>
+                <option value="priceAsc">{t('products.sortPriceLow', 'Price: Low to High')}</option>
+                <option value="priceDesc">{t('products.sortPriceHigh', 'Price: High to Low')}</option>
+                <option value="nameAsc">{t('products.sortNameAsc', 'Name: A to Z')}</option>
+                <option value="nameDesc">{t('products.sortNameDesc', 'Name: Z to A')}</option>
               </select>
             </div>
           </div>

@@ -39,6 +39,17 @@
                       box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Multi-Language Typography - Gujarati & Hindi Fonts */
+:root[lang="gu"], html[lang="gu"], body[lang="gu"] {
+  --font-family-headings: 'Noto Sans Gujarati', 'Outfit', sans-serif;
+  --font-family-body: 'Noto Sans Gujarati', 'Inter', sans-serif;
+}
+
+:root[lang="hi"], html[lang="hi"], body[lang="hi"] {
+  --font-family-headings: 'Noto Sans Devanagari', 'Outfit', sans-serif;
+  --font-family-body: 'Noto Sans Devanagari', 'Inter', sans-serif;
+}
+
 /* Base Styles */
 * {
   margin: 0;

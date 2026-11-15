@@ -10,9 +10,9 @@ backend/mongod.log
 backend/scripts/extractedData.json
 
 # Build outputs
-dist/
+/dist/
 build/
-frontend/dist/
+!frontend/dist/
 
 # Environment files
 .env

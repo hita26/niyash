@@ -7,6 +7,8 @@
     "node": "22.x"
   },
   "scripts": {
+    "start": "node backend/server.js",
+    "postinstall": "npm --prefix frontend install --include=dev && npm --prefix frontend run build || true",
     "build": "npm --prefix frontend install && npm --prefix frontend run build",
     "install-all": "npm install && npm install --prefix backend && npm install --prefix frontend",
     "server": "nodemon backend/server.js",

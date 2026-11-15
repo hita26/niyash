@@ -1731,6 +1731,28 @@ _Helpline: +91 9316566894_`;
     showToast('Image URL added to gallery');
   };
 
+  const handleSearchGoogleImages = () => {
+    const rawName = prodName || '';
+    if (!rawName.trim()) {
+      showToast('Please enter Product Name first to search on Google', 'error');
+      return;
+    }
+    // Clean name: strip wholesale pack specs like (50*10), (10*10), (12*12*100ml), etc.
+    const cleanName = rawName
+      .replace(/\(\s*\d+\s*[\*xX]\s*\d+.*?\)/gi, '')
+      .replace(/\b\d+\s*[\*xX]\s*\d+\b/gi, '')
+      .replace(/\(\s*(GREEN|WHITE|RED|BLUE|YELLOW)\s*\)/gi, '')
+      .replace(/[()]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    const companyPart = (prodCompany || prodBrand || '').replace(/\(ranbaxy\)|\(wellness\)|\(cosmacia\)|\(cadila\)|pvt|ltd|group/gi, '').trim();
+    const query = `${cleanName} ${companyPart} medicine packaging`.trim();
+    const url = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(query)}`;
+    window.open(url, '_blank');
+    showToast(`Searching Google Images for: "${cleanName}"`);
+  };
+
   const handleSaveProduct = async (e) => {
     e.preventDefault();
     if (!prodName.trim()) {
@@ -5489,6 +5511,35 @@ _Helpline: +91 9316566894_`;
                         </div>
                       )}
                     </div>
+
+                    {/* 1-Click Google Images Search Button */}
+                    <button
+                      type="button"
+                      onClick={handleSearchGoogleImages}
+                      style={{
+                        width: '100%',
+                        padding: '9px 14px',
+                        backgroundColor: '#1a73e8',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontWeight: '700',
+                        fontSize: '0.86rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        cursor: 'pointer',
+                        boxShadow: '0 2px 6px rgba(26, 115, 232, 0.3)',
+                        marginBottom: '10px',
+                        transition: 'background-color 0.2s ease'
+                      }}
+                      onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#1557b0'; }}
+                      onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#1a73e8'; }}
+                      title="Search clean medicine packaging photos on Google Images in a new tab"
+                    >
+                      <Search size={16} /> 🔍 Find Photo on Google
+                    </button>
 
                     {/* Or enter photo URL */}
                     <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>

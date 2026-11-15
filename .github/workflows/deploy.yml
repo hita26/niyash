@@ -1,0 +1,28 @@
+name: Auto Deploy to GoDaddy cPanel
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to Live Server via SSH
+    runs-on: ubuntu-latest
+    steps:
+      - name: Execute Remote SSH Commands
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          port: 22
+          script: |
+            cd ~/public_html
+            rm -rf temp_repo
+            git clone --depth 1 https://github.com/hkPateL26/Pharma.git temp_repo
+            cp -r temp_repo/frontend/dist/* ./
+            cp temp_repo/frontend/dist/.htaccess ./
+            rm -rf temp_repo
+            echo "Deployment to niyanshpharma.com completed successfully!"

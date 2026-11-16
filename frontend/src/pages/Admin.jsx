@@ -677,6 +677,7 @@ function Admin() {
   const [prodStockQuantity, setProdStockQuantity] = useState('100');
   const [prodInStock, setProdInStock] = useState(true);
   const [prodFeatured, setProdFeatured] = useState(false);
+  const [prodIsOurProduct, setProdIsOurProduct] = useState(false);
   const [prodIsActive, setProdIsActive] = useState(true);
   const [prodPacking, setProdPacking] = useState('');
   const [prodComposition, setProdComposition] = useState('');
@@ -1614,6 +1615,7 @@ _Helpline: +91 9316566894_`;
       setProdStockQuantity(product.stockQuantity !== undefined ? String(product.stockQuantity) : (product.inStock ? '100' : '0'));
       setProdInStock(product.inStock !== undefined ? product.inStock : true);
       setProdFeatured(Boolean(product.featured));
+      setProdIsOurProduct(Boolean(product.isOurProduct));
       setProdIsActive(product.isActive !== false);
       setProdPacking(product.packing || '');
       setProdComposition(product.composition || '');
@@ -1639,6 +1641,7 @@ _Helpline: +91 9316566894_`;
       setProdStockQuantity('100');
       setProdInStock(true);
       setProdFeatured(false);
+      setProdIsOurProduct(false);
       setProdIsActive(true);
       setProdPacking('10 x 10 Tablets');
       setProdComposition('');
@@ -1839,6 +1842,7 @@ _Helpline: +91 9316566894_`;
       images: finalImages,
       description: prodDescription.trim(),
       featured: prodFeatured,
+      isOurProduct: prodIsOurProduct,
       isActive: prodIsActive,
     };
 
@@ -1932,6 +1936,23 @@ _Helpline: +91 9316566894_`;
     } catch {
       setProducts(prev => prev.map(p => p._id === product._id ? { ...p, featured: newFeatured } : p));
       broadcastLiveEvent(SYNC_EVENTS.PRODUCT_UPDATED, { id: product._id, featured: newFeatured });
+    }
+  };
+
+  const handleToggleOurProduct = async (product) => {
+    const newOurProduct = !product.isOurProduct;
+    try {
+      await fetch(`/api/products/${product._id}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ isOurProduct: newOurProduct })
+      });
+      setProducts(prev => prev.map(p => p._id === product._id ? { ...p, isOurProduct: newOurProduct } : p));
+      broadcastLiveEvent(SYNC_EVENTS.PRODUCT_UPDATED, { id: product._id, isOurProduct: newOurProduct });
+      showToast(`Product ${newOurProduct ? 'marked as Our Product' : 'removed from Our Products'}`);
+    } catch {
+      setProducts(prev => prev.map(p => p._id === product._id ? { ...p, isOurProduct: newOurProduct } : p));
+      broadcastLiveEvent(SYNC_EVENTS.PRODUCT_UPDATED, { id: product._id, isOurProduct: newOurProduct });
     }
   };
 
@@ -2199,7 +2220,9 @@ _Helpline: +91 9316566894_`;
 
       let matchesCat = productCategoryFilter === 'All';
       if (!matchesCat) {
-        if (productCategoryFilter === 'Generic Medicines') {
+        if (productCategoryFilter === 'Our Products') {
+          matchesCat = Boolean(p.isOurProduct);
+        } else if (productCategoryFilter === 'Generic Medicines') {
           matchesCat = !p.category || !p.category.match(/surgical|otc|ayurved/i);
         } else if (productCategoryFilter === 'Surgical Supplies') {
           matchesCat = p.category && Boolean(p.category.match(/surgical|device|instrument/i));
@@ -3861,6 +3884,9 @@ _Helpline: +91 9316566894_`;
                       <button onClick={() => { setProductCategoryFilter('All'); setProductPage(1); }} className={`btn btn-sm ${productCategoryFilter === 'All' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '5px 12px', fontSize: '0.78rem', borderRadius: '20px' }}>
                         All Products ({productStats.totalProducts || products.length})
                       </button>
+                      <button onClick={() => { setProductCategoryFilter('Our Products'); setProductPage(1); }} className={`btn btn-sm ${productCategoryFilter === 'Our Products' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '5px 12px', fontSize: '0.78rem', borderRadius: '20px', borderColor: '#10b981', color: productCategoryFilter === 'Our Products' ? '#fff' : '#047857' }}>
+                        ⭐ Our Products ({products.filter(p => p.isOurProduct).length})
+                      </button>
                       <button onClick={() => { setProductCategoryFilter('Generic Medicines'); setProductPage(1); }} className={`btn btn-sm ${productCategoryFilter === 'Generic Medicines' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '5px 12px', fontSize: '0.78rem', borderRadius: '20px' }}>
                         💊 Generic Formulations
                       </button>
@@ -4219,6 +4245,20 @@ _Helpline: +91 9316566894_`;
                                         title={p.featured ? 'Featured on website (click to remove)' : 'Mark as featured product'}
                                       >
                                         <Star size={16} fill={p.featured ? '#f59e0b' : 'none'} />
+                                      </button>
+
+                                      <button
+                                        type="button"
+                                        onClick={() => handleToggleOurProduct(p)}
+                                        style={{
+                                          border: 'none', padding: '3px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: '700',
+                                          backgroundColor: p.isOurProduct ? '#dcfce7' : '#f1f5f9',
+                                          color: p.isOurProduct ? '#15803d' : '#94a3b8',
+                                          cursor: 'pointer'
+                                        }}
+                                        title={p.isOurProduct ? 'In Our Products (click to remove)' : 'Add to Our Products page'}
+                                      >
+                                        {p.isOurProduct ? '★ Our' : '+ Our'}
                                       </button>
                                     </div>
                                   </td>
@@ -5824,6 +5864,19 @@ _Helpline: +91 9316566894_`;
                         checked={prodFeatured}
                         onChange={(e) => setProdFeatured(e.target.checked)}
                         style={{ accentColor: '#f59e0b', width: '18px', height: '18px' }}
+                      />
+                    </label>
+
+                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', fontSize: '0.88rem', fontWeight: '600' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: prodIsOurProduct ? '#059669' : '#94a3b8' }}></span>
+                        Our Product (અમારી પ્રોડક્ટ - Exclusive Page)
+                      </span>
+                      <input 
+                        type="checkbox"
+                        checked={prodIsOurProduct}
+                        onChange={(e) => setProdIsOurProduct(e.target.checked)}
+                        style={{ accentColor: '#059669', width: '18px', height: '18px' }}
                       />
                     </label>
 

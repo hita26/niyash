@@ -1109,30 +1109,11 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 <span style={{ fontSize: '0.72rem', backgroundColor: '#e0f2fe', color: '#0369a1', fontWeight: '800', padding: '1px 6px', borderRadius: '10px' }}>252+</span>
               </Link>
             </li>
-            <li 
-              className="nav-item"
-              ref={dropdownRef}
-              onMouseEnter={() => setIsDropdownOpen(true)}
-              onMouseLeave={() => setIsDropdownOpen(false)}
-            >
-              <span 
-                className="nav-link" 
-                style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                role="button"
-                aria-haspopup="true"
-                aria-expanded={isDropdownOpen}
-                tabIndex={0}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setIsDropdownOpen(!isDropdownOpen); }}
-              >
-                {t('nav.categories', 'Categories')} <ChevronDown size={14} aria-hidden="true" style={{ transform: isDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }} />
-              </span>
-              <ul className={`dropdown-menu ${isDropdownOpen ? 'show' : ''}`} style={{ display: isDropdownOpen ? 'block' : 'none' }}>
-                <li><Link to="/products?category=Pharma Products" className="dropdown-link">{t('nav.pharmaMedicines', 'Pharma Medicines')}</Link></li>
-                <li><Link to="/products?category=OTC Products" className="dropdown-link">{t('nav.otcProducts', 'OTC Products')}</Link></li>
-                <li><Link to="/products?category=Injectables" className="dropdown-link">{t('nav.injectables', 'Injectables & Critical Care')}</Link></li>
-                <li><Link to="/products?category=Surgical %26 Medical Supplies" className="dropdown-link">{t('nav.surgical', 'Surgical & Medical Supplies')}</Link></li>
-              </ul>
+            <li className="nav-item">
+              <Link to="/our-products" className={`nav-link ${isActive('/our-products') ? 'active' : ''}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                {t('nav.ourProducts', 'Our Products')}
+                <span style={{ fontSize: '0.70rem', backgroundColor: '#dcfce7', color: '#15803d', fontWeight: '800', padding: '1px 6px', borderRadius: '10px' }}>Exclusive</span>
+              </Link>
             </li>
           </ul>
 
@@ -1302,6 +1283,10 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
               <Link to="/" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600' }}>{t('nav.home', 'Home')}</Link>
+              <Link to="/our-products" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '700', color: 'var(--primary-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span>{t('nav.ourProducts', 'Our Products')}</span>
+                <span style={{ fontSize: '0.68rem', backgroundColor: '#dcfce7', color: '#15803d', fontWeight: '800', padding: '1px 6px', borderRadius: '10px' }}>Exclusive</span>
+              </Link>
               <Link to="/products" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600' }}>{t('nav.products', 'All Products Catalog')}</Link>
               <Link to="/companies" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600' }}>{t('nav.companies', 'Companies & Manufacturers')} (252+)</Link>
               <Link to="/about" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600' }}>{t('nav.about', 'About Us')}</Link>

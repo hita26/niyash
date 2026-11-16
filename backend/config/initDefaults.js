@@ -321,6 +321,20 @@ const initDefaults = async () => {
             }
           }
         }
+
+        // Initialize isOurProduct for DAXIA flagship products if none currently flagged
+        try {
+          const ourProdCount = await Product.countDocuments({ isOurProduct: true });
+          if (ourProdCount === 0) {
+            const updated = await Product.updateMany(
+              { $or: [{ company: /DAXIA/i }, { brand: /DAXIA/i }, { manufacturer: /DAXIA/i }] },
+              { $set: { isOurProduct: true } }
+            );
+            console.log(`✅ Initialized ${updated.modifiedCount} flagship products with isOurProduct=true`);
+          }
+        } catch (ourErr) {
+          console.warn('Flagship product flag notice:', ourErr.message);
+        }
       } catch (catErr) {
         console.warn('Catalog check notice:', catErr.message);
       }

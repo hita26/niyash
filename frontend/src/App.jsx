@@ -10,6 +10,7 @@ import AuthModal from './components/AuthModal';
 import Home from './pages/Home';
 import About from './pages/About';
 import Products from './pages/Products';
+import OurProducts from './pages/OurProducts';
 import ProductDetail from './pages/ProductDetail';
 import Contact from './pages/Contact';
 import Career from './pages/Career';
@@ -118,6 +119,16 @@ function AppContent() {
             <Route path="/" element={<Home addToCart={addToCart} />} />
             <Route path="/about" element={<About />} />
             <Route path="/about-us" element={<About />} />
+            <Route 
+              path="/our-products" 
+              element={
+                <OurProducts 
+                  addToCart={addToCart} 
+                  searchTerm={searchTerm} 
+                  setSearchTerm={setSearchTerm} 
+                />
+              } 
+            />
             <Route 
               path="/products" 
               element={

@@ -1,6 +1,7 @@
 export const hi = {
   "nav": {
     "home": "होम",
+    "ourProducts": "हमारे उत्पाद",
     "products": "सभी उत्पाद",
     "companies": "कंपनियां",
     "categories": "श्रेणियां",

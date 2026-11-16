@@ -422,10 +422,11 @@ _${t('payment.support', 'Support: +91 99099 23130')}_`;
           width: '100%',
           maxWidth: '680px',
           maxHeight: '94vh',
-          backgroundColor: '#ffffff',
+          backgroundColor: 'var(--bg-card)',
           borderRadius: '16px',
           padding: 0,
-          boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.3)',
+          boxShadow: 'var(--card-shadow)',
+          border: '1px solid var(--border-light)',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
@@ -515,8 +516,8 @@ _${t('payment.support', 'Support: +91 99099 23130')}_`;
         {gatewayStage !== 'success' && (
           <div
             style={{
-              backgroundColor: '#f8fafc',
-              borderBottom: '1px solid #e2e8f0',
+              backgroundColor: 'var(--bg-surface-alt)',
+              borderBottom: '1px solid var(--border-light)',
               padding: '12px 18px',
               display: 'flex',
               flexWrap: 'wrap',
@@ -526,10 +527,10 @@ _${t('payment.support', 'Support: +91 99099 23130')}_`;
             }}
           >
             <div>
-              <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#64748b', fontWeight: 700 }}>
+              <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-light)', fontWeight: 700 }}>
                 {t('payment.payableAmount', 'Total Payable Amount')}
               </div>
-              <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#0c3d6c' }}>
+              <div style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--primary-blue)' }}>
                 {formatINR(amountToPay)}
               </div>
             </div>
@@ -544,9 +545,9 @@ _${t('payment.support', 'Support: +91 99099 23130')}_`;
                   fontSize: '0.8rem',
                   fontWeight: 600,
                   cursor: 'pointer',
-                  border: payAmountType === 'full' ? '2px solid #0c3d6c' : '1px solid #cbd5e1',
-                  backgroundColor: payAmountType === 'full' ? '#0c3d6c' : '#ffffff',
-                  color: payAmountType === 'full' ? '#ffffff' : '#475569',
+                  border: payAmountType === 'full' ? '2px solid var(--primary-blue)' : '1px solid var(--border-light)',
+                  backgroundColor: payAmountType === 'full' ? 'var(--primary-blue)' : 'var(--bg-card)',
+                  color: payAmountType === 'full' ? '#ffffff' : 'var(--text-medium)',
                   minHeight: '36px'
                 }}
               >
@@ -562,9 +563,9 @@ _${t('payment.support', 'Support: +91 99099 23130')}_`;
                   fontSize: '0.8rem',
                   fontWeight: 600,
                   cursor: 'pointer',
-                  border: payAmountType === 'custom' ? '2px solid #0c3d6c' : '1px solid #cbd5e1',
-                  backgroundColor: payAmountType === 'custom' ? '#0c3d6c' : '#ffffff',
-                  color: payAmountType === 'custom' ? '#ffffff' : '#475569',
+                  border: payAmountType === 'custom' ? '2px solid var(--primary-blue)' : '1px solid var(--border-light)',
+                  backgroundColor: payAmountType === 'custom' ? 'var(--primary-blue)' : 'var(--bg-card)',
+                  color: payAmountType === 'custom' ? '#ffffff' : 'var(--text-medium)',
                   minHeight: '36px'
                 }}
               >

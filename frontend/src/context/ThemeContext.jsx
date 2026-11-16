@@ -27,15 +27,34 @@ export function ThemeProvider({ children }) {
 
     const root = document.documentElement;
     root.setAttribute('data-theme', theme);
+    if (document.body) {
+      document.body.setAttribute('data-theme', theme);
+    }
     
     if (theme === 'dark') {
       root.classList.add('dark');
       root.classList.add('dark-theme');
-      document.body.classList.add('dark-theme');
+      if (document.body) {
+        document.body.classList.add('dark');
+        document.body.classList.add('dark-theme');
+      }
     } else {
       root.classList.remove('dark');
       root.classList.remove('dark-theme');
-      document.body.classList.remove('dark-theme');
+      if (document.body) {
+        document.body.classList.remove('dark');
+        document.body.classList.remove('dark-theme');
+      }
+    }
+
+    // Update browser status bar meta tag
+    try {
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+      if (metaThemeColor) {
+        metaThemeColor.setAttribute('content', theme === 'dark' ? '#0b0f19' : '#0c3d6c');
+      }
+    } catch {
+      // ignore in SSR/restricted environments
     }
   }, [theme]);
 

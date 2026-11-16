@@ -577,7 +577,7 @@ Rajkot, Gujarat`);
   const creditUtilizationPercent = Math.min(100, Math.round(((ledgerData.outstandingBalance || 0) / creditLimitVal) * 100));
 
   return (
-    <div style={{ backgroundColor: '#f8fafc', minHeight: '100vh', padding: '30px 0 80px' }}>
+    <div style={{ backgroundColor: 'var(--bg-main)', minHeight: '100vh', padding: '30px 0 80px' }}>
       {/* Print Specific CSS */}
       <style>{`
         @media print {
@@ -694,7 +694,7 @@ Rajkot, Gujarat`);
           <div
             className="no-print animate-fade-in card"
             style={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--bg-card)',
               borderRadius: '14px',
               padding: '20px',
               marginBottom: '24px',
@@ -811,7 +811,7 @@ Rajkot, Gujarat`);
         <div
           className="card"
           style={{
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--bg-card)',
             borderRadius: '16px',
             padding: '24px',
             marginBottom: '24px',
@@ -962,7 +962,7 @@ Rajkot, Gujarat`);
           <div
             className="card"
             style={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--bg-card)',
               borderRadius: '14px',
               padding: '20px',
               border: '1px solid #e2e8f0',
@@ -1000,7 +1000,7 @@ Rajkot, Gujarat`);
           <div
             className="card"
             style={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--bg-card)',
               borderRadius: '14px',
               padding: '20px',
               border: '1px solid #e2e8f0',
@@ -1025,7 +1025,7 @@ Rajkot, Gujarat`);
           <div
             className="card"
             style={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--bg-card)',
               borderRadius: '14px',
               padding: '20px',
               border: '1px solid #e2e8f0',
@@ -1050,7 +1050,7 @@ Rajkot, Gujarat`);
           <div
             className="card"
             style={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--bg-card)',
               borderRadius: '14px',
               padding: '20px',
               border: '1px solid #e2e8f0',
@@ -1218,7 +1218,7 @@ Rajkot, Gujarat`);
         <div
           className="card"
           style={{
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--bg-card)',
             borderRadius: '16px',
             padding: '24px',
             marginBottom: '32px',
@@ -1297,7 +1297,7 @@ Rajkot, Gujarat`);
           <div className="table-responsive" style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
               <thead>
-                <tr style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid #e2e8f0', color: '#475569' }}>
+                <tr style={{ backgroundColor: 'var(--bg-surface-elevated)', borderBottom: '2px solid var(--border-light)', color: '#475569' }}>
                   <th style={{ padding: '12px 14px', fontWeight: 700, verticalAlign: 'middle' }}>Invoice No</th>
                   <th style={{ padding: '12px 14px', fontWeight: 700, verticalAlign: 'middle' }}>Invoice Date</th>
                   <th style={{ padding: '12px 14px', fontWeight: 700, verticalAlign: 'middle' }}>Due Date</th>
@@ -1437,7 +1437,7 @@ Rajkot, Gujarat`);
         <div
           className="card"
           style={{
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--bg-card)',
             borderRadius: '16px',
             padding: '24px',
             border: '1px solid #e2e8f0',
@@ -1496,7 +1496,7 @@ Rajkot, Gujarat`);
           <div className="table-responsive" style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
               <thead>
-                <tr style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid #e2e8f0', color: '#475569' }}>
+                <tr style={{ backgroundColor: 'var(--bg-surface-elevated)', borderBottom: '2px solid var(--border-light)', color: '#475569' }}>
                   <th style={{ padding: '12px 14px', fontWeight: 700, verticalAlign: 'middle' }}>Receipt / Payment ID</th>
                   <th style={{ padding: '12px 14px', fontWeight: 700, verticalAlign: 'middle' }}>Payment Date</th>
                   <th style={{ padding: '12px 14px', fontWeight: 700, textAlign: 'right', verticalAlign: 'middle' }}>Amount Paid</th>

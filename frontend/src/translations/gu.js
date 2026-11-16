@@ -854,5 +854,14 @@ export const gu = {
     "View Details": "વિગતવાર જુઓ",
     "Print Invoice": "ઇન્વૉઇસ પ્રિન્ટ કરો",
     "Reset Filters": "ફિલ્ટર્સ રીસેટ કરો"
+  },
+  "theme": {
+    "light": "લાઇટ",
+    "dark": "ડાર્ક",
+    "lightMode": "લાઇટ મોડ",
+    "darkMode": "ડાર્ક મોડ",
+    "switchToLight": "લાઇટ મોડ ચાલુ કરો",
+    "switchToDark": "ડાર્ક મોડ ચાલુ કરો",
+    "title": "થીમ"
   }
 };

@@ -2420,7 +2420,7 @@ _Helpline: +91 9316566894_`;
             </button>
           </form>
 
-          <div style={{ marginTop: '25px', padding: '12px', backgroundColor: '#f8fafc', border: '1px dashed #cbd5e1', borderRadius: '8px', fontSize: '0.8rem', color: 'var(--text-medium)', textAlign: 'center' }}>
+          <div style={{ marginTop: '25px', padding: '12px', backgroundColor: 'var(--bg-surface-alt)', border: '1px dashed var(--border-light)', borderRadius: '8px', fontSize: '0.8rem', color: 'var(--text-medium)', textAlign: 'center' }}>
             🔑 <strong>Demo Credentials:</strong><br />
             Email: <span style={{ fontFamily: 'monospace', color: 'var(--primary-blue)', fontWeight: '600' }}>admin@niyanshpharma.com</span><br />
             Password: <span style={{ fontFamily: 'monospace', color: 'var(--primary-blue)', fontWeight: '600' }}>admin123</span>
@@ -2524,9 +2524,9 @@ _Helpline: +91 9316566894_`;
       <div className="admin-workspace-container" style={{ marginBottom: '22px' }}>
         <div className="card" style={{
           padding: 'clamp(16px, 2.5vw, 24px)',
-          backgroundColor: '#ffffff',
+          backgroundColor: 'var(--bg-card)',
           borderRadius: '14px',
-          border: '1.5px solid #e2e8f0',
+          border: '1.5px solid var(--border-light)',
           boxShadow: '0 4px 20px rgba(12, 61, 108, 0.04)',
           display: 'flex',
           justifyContent: 'space-between',

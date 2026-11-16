@@ -33,7 +33,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Noto+Sans+Gujarati:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
-    <!-- Theme Restore (Prevents Flash of Light Mode) -->
+    <!-- Theme Restore (Prevents Flash of Light Mode or Dark Mode) -->
     <script>
       (function() {
         try {
@@ -43,14 +43,16 @@
           if (theme === 'dark') {
             document.documentElement.classList.add('dark');
             document.documentElement.classList.add('dark-theme');
+            var metaTheme = document.querySelector('meta[name="theme-color"]');
+            if (metaTheme) metaTheme.setAttribute('content', '#0b0f19');
           }
         } catch (e) {}
       })();
     </script>
-    <script type="module" crossorigin src="/assets/index-iR069j2V.js"></script>
+    <script type="module" crossorigin src="/assets/index-DV7vRgl4.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/vendor-core-BqIAhyqm.js">
     <link rel="modulepreload" crossorigin href="/assets/vendor-icons-RmuzAQbd.js">
-    <link rel="stylesheet" crossorigin href="/assets/index-Bl6lDgAr.css">
+    <link rel="stylesheet" crossorigin href="/assets/index-BPSgJ5en.css">
   </head>
   <body>
     <div id="root"></div>

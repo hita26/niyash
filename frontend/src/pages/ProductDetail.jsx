@@ -350,9 +350,9 @@ function ProductDetail({ addToCart }) {
               gridTemplateColumns: '1fr 1fr',
               gap: '10px',
               padding: '14px',
-              backgroundColor: '#f8fafc',
+              backgroundColor: 'var(--bg-surface-alt)',
               borderRadius: '12px',
-              border: '1px solid #e2e8f0',
+              border: '1px solid var(--border-light)',
               fontSize: '0.8rem',
               color: 'var(--text-medium)'
             }}>
@@ -438,14 +438,14 @@ function ProductDetail({ addToCart }) {
                 COMMERCIAL WHOLESALE ORDER CARD (Directly Visible)
                 ======================================================== */}
             <div style={{
-              backgroundColor: '#f8fafc',
+              backgroundColor: 'var(--bg-card)',
               borderRadius: '14px',
-              border: '1.5px solid #e2e8f0',
+              border: '1.5px solid var(--border-light)',
               padding: '20px',
               display: 'flex',
               flexDirection: 'column',
               gap: '16px',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.02)'
+              boxShadow: 'var(--card-shadow)'
             }}>
               
               {/* Price & Stock Header */}
@@ -561,11 +561,11 @@ function ProductDetail({ addToCart }) {
                       <span style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>
                         Quantity:
                       </span>
-                      <div style={{ display: 'flex', alignItems: 'center', border: '1.5px solid #cbd5e1', borderRadius: '8px', overflow: 'hidden', height: '42px', backgroundColor: '#fff' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', border: '1.5px solid var(--border-light)', borderRadius: '8px', overflow: 'hidden', height: '42px', backgroundColor: 'var(--bg-input)' }}>
                         <button 
                           type="button"
                           onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                          style={{ width: '42px', height: '100%', backgroundColor: '#f8fafc', border: 'none', cursor: 'pointer', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dark)' }}
+                          style={{ width: '42px', height: '100%', backgroundColor: 'var(--bg-surface-alt)', border: 'none', cursor: 'pointer', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dark)' }}
                           aria-label="Decrease quantity"
                         >
                           <Minus size={15} />
@@ -575,14 +575,14 @@ function ProductDetail({ addToCart }) {
                           min="1" 
                           value={quantity}
                           onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                          style={{ width: '55px', height: '100%', textAlign: 'center', fontWeight: '800', fontSize: '1rem', border: 'none', outline: 'none', padding: 0 }}
+                          style={{ width: '55px', height: '100%', textAlign: 'center', fontWeight: '800', fontSize: '1rem', border: 'none', outline: 'none', padding: 0, backgroundColor: 'var(--bg-input)', color: 'var(--text-dark)' }}
                           className="tabular-nums"
                           aria-label="Order Quantity"
                         />
                         <button 
                           type="button"
                           onClick={() => setQuantity(quantity + 1)}
-                          style={{ width: '42px', height: '100%', backgroundColor: '#f8fafc', border: 'none', cursor: 'pointer', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dark)' }}
+                          style={{ width: '42px', height: '100%', backgroundColor: 'var(--bg-surface-alt)', border: 'none', cursor: 'pointer', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dark)' }}
                           aria-label="Increase quantity"
                         >
                           <Plus size={15} />
@@ -601,8 +601,8 @@ function ProductDetail({ addToCart }) {
                           style={{
                             padding: '3px 8px',
                             borderRadius: '6px',
-                            border: '1px solid #cbd5e1',
-                            backgroundColor: '#ffffff',
+                            border: '1px solid var(--border-light)',
+                            backgroundColor: 'var(--bg-card)',
                             color: 'var(--primary-blue)',
                             fontSize: '0.75rem',
                             fontWeight: '700',

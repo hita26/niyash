@@ -854,5 +854,14 @@ export const en = {
     "View Details": "View Details",
     "Print Invoice": "Print Invoice",
     "Reset Filters": "Reset Filters"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "lightMode": "Light Mode",
+    "darkMode": "Dark Mode",
+    "switchToLight": "Switch to Light Mode",
+    "switchToDark": "Switch to Dark Mode",
+    "title": "Theme"
   }
 };

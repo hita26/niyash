@@ -459,7 +459,7 @@ function CompanyDetail({ addToCart }) {
             <div className="responsive-table-wrapper" style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left', minWidth: '680px' }}>
                 <thead>
-                  <tr style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid var(--border-light)' }}>
+                  <tr style={{ backgroundColor: 'var(--bg-surface-elevated)', borderBottom: '2px solid var(--border-light)' }}>
                     <th style={{ padding: '12px 16px', width: '60px' }}>{language === 'gu' ? 'ફોટો' : language === 'hi' ? 'फोटो' : 'Photo'}</th>
                     <th style={{ padding: '12px 16px' }}>{t('admin.productName', 'Product Name')}</th>
                     <th style={{ padding: '12px 16px' }}>{t('quickOrder.colPacking', 'Packing')}</th>

@@ -276,8 +276,8 @@ export default function RetailerDashboard() {
   // If not logged in, show verified chemist access barrier
   if (!isLoggedIn && !user) {
     return (
-      <div style={{ minHeight: '80vh', backgroundColor: '#f8fafc', padding: '40px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ maxWidth: '520px', width: '100%', backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 20px 40px -15px rgba(0,0,0,0.07)', padding: '36px 24px', textAlign: 'center' }}>
+      <div style={{ minHeight: '80vh', backgroundColor: 'var(--bg-main)', padding: '40px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ maxWidth: '520px', width: '100%', backgroundColor: 'var(--bg-card)', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 20px 40px -15px rgba(0,0,0,0.07)', padding: '36px 24px', textAlign: 'center' }}>
           <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: '#eff6ff', color: 'var(--primary-blue)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
             <Lock size={32} />
           </div>
@@ -288,7 +288,7 @@ export default function RetailerDashboard() {
             To view confidential <strong>Wholesale PTR Pricing</strong>, book bulk stock orders, and access your <strong>Pharmacy Ledger & GST Invoices</strong>, please sign in with your credentials.
           </p>
 
-          <div style={{ backgroundColor: '#f1f5f9', borderRadius: '10px', padding: '14px', marginBottom: '24px', textAlign: 'left', fontSize: '0.85rem' }}>
+          <div style={{ backgroundColor: 'var(--bg-surface-alt)', borderRadius: '10px', padding: '14px', marginBottom: '24px', textAlign: 'left', fontSize: '0.85rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: '#047857', fontWeight: '700' }}>
               <ShieldCheck size={16} /> Verified Pharmacy Perks:
             </div>
@@ -340,7 +340,7 @@ export default function RetailerDashboard() {
   }
 
   return (
-    <div style={{ backgroundColor: '#f8fafc', minHeight: '90vh', paddingBottom: '90px' }}>
+    <div style={{ backgroundColor: 'var(--bg-main)', minHeight: '90vh', paddingBottom: '90px' }}>
       
       {/* Toast Alert */}
       {toastMsg && (
@@ -503,10 +503,10 @@ export default function RetailerDashboard() {
           
           {/* Card 1: Outstanding Due Balance */}
           <div style={{
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--bg-card)',
             borderRadius: '14px',
             padding: '20px',
-            border: '1px solid #e2e8f0',
+            border: '1px solid var(--border-light)',
             boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
             display: 'flex',
             flexDirection: 'column',
@@ -583,10 +583,10 @@ export default function RetailerDashboard() {
 
           {/* Card 2: Wholesale Credit Limit */}
           <div style={{
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--bg-card)',
             borderRadius: '14px',
             padding: '20px',
-            border: '1px solid #e2e8f0',
+            border: '1px solid var(--border-light)',
             boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
             display: 'flex',
             flexDirection: 'column',
@@ -631,10 +631,10 @@ export default function RetailerDashboard() {
 
           {/* Card 3: Wholesale Orders Placed */}
           <div style={{
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--bg-card)',
             borderRadius: '14px',
             padding: '20px',
-            border: '1px solid #e2e8f0',
+            border: '1px solid var(--border-light)',
             boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
             display: 'flex',
             flexDirection: 'column',
@@ -686,10 +686,10 @@ export default function RetailerDashboard() {
 
           {/* Card 4: Chemist Margins & Live Schemes */}
           <div style={{
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--bg-card)',
             borderRadius: '14px',
             padding: '20px',
-            border: '1px solid #e2e8f0',
+            border: '1px solid var(--border-light)',
             boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
             display: 'flex',
             flexDirection: 'column',
@@ -745,7 +745,7 @@ export default function RetailerDashboard() {
         <div style={{
           display: 'flex',
           gap: '8px',
-          borderBottom: '2px solid #e2e8f0',
+          borderBottom: '2px solid var(--border-light)',
           marginBottom: '20px',
           overflowX: 'auto',
           WebkitOverflowScrolling: 'touch',
@@ -947,9 +947,9 @@ export default function RetailerDashboard() {
                     <div
                       key={order._id || order.orderNumber}
                       style={{
-                        backgroundColor: '#ffffff',
+                        backgroundColor: 'var(--bg-card)',
                         borderRadius: '12px',
-                        border: '1px solid #e2e8f0',
+                        border: '1px solid var(--border-light)',
                         padding: '18px 20px',
                         boxShadow: '0 1px 4px rgba(0,0,0,0.02)',
                         display: 'flex',

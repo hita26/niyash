@@ -1,108 +1,169 @@
 import React from 'react';
 import { Sun, Moon } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 
-export default function ThemeToggle({ className = '', variant = 'icon', showLabel = false }) {
-  const { theme, toggleTheme, isDark } = useTheme();
+export default function ThemeToggle({ className = '', variant = 'segmented', showLabel = false }) {
+  const { theme, setTheme, isDark } = useTheme();
+  const { t } = useLanguage();
 
-  if (variant === 'pill' || showLabel) {
+  const lightText = t('theme.light', 'Light');
+  const darkText = t('theme.dark', 'Dark');
+  const lightFull = t('theme.lightMode', 'Light Mode');
+  const darkFull = t('theme.darkMode', 'Dark Mode');
+
+  if (variant === 'pill' || variant === 'drawer') {
     return (
-      <button
-        type="button"
-        onClick={toggleTheme}
-        aria-label={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-        title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-        className={`theme-toggle-pill ${className}`}
+      <div 
+        className={`theme-segmented-switch full-width ${className}`}
+        role="radiogroup" 
+        aria-label={t('theme.title', 'Theme')}
         style={{
-          display: 'inline-flex',
+          display: 'flex',
           alignItems: 'center',
-          gap: '8px',
-          padding: '8px 16px',
+          backgroundColor: isDark ? '#162032' : '#f1f5f9',
+          border: isDark ? '1px solid #243049' : '1px solid #cbd5e1',
           borderRadius: '24px',
-          backgroundColor: isDark ? '#1f1f26' : '#f1f5f9',
-          color: isDark ? '#f4f4f5' : '#0f172a',
-          border: isDark ? '1px solid #3f3f46' : '1px solid #e2e8f0',
-          cursor: 'pointer',
-          fontWeight: '600',
-          fontSize: '0.86rem',
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          padding: '3px',
+          gap: '3px',
+          width: '100%',
+          boxSizing: 'border-box'
         }}
       >
-        <div
+        <button
+          type="button"
+          role="radio"
+          aria-checked={!isDark}
+          onClick={() => setTheme('light')}
+          className={`theme-segment-btn ${!isDark ? 'active' : ''}`}
           style={{
-            display: 'flex',
+            flex: 1,
+            display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: '24px',
-            height: '24px',
-            borderRadius: '50%',
-            backgroundColor: isDark ? '#fbbf24' : '#0c3d6c',
-            color: isDark ? '#18181b' : '#ffffff',
-            transition: 'transform 0.3s ease, background-color 0.3s ease',
-            transform: isDark ? 'rotate(180deg)' : 'rotate(0deg)',
+            gap: '6px',
+            padding: '8px 12px',
+            borderRadius: '20px',
+            border: 'none',
+            fontSize: '0.84rem',
+            fontWeight: !isDark ? '700' : '500',
+            cursor: 'pointer',
+            backgroundColor: !isDark ? '#ffffff' : 'transparent',
+            color: !isDark ? '#0c3d6c' : (isDark ? '#94a3b8' : '#64748b'),
+            boxShadow: !isDark ? '0 2px 6px rgba(12, 61, 108, 0.12)' : 'none',
+            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
           }}
+          title={t('theme.switchToLight', 'Switch to Light Mode')}
         >
-          {isDark ? <Sun size={15} strokeWidth={2.5} /> : <Moon size={14} strokeWidth={2.5} />}
-        </div>
-        <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>
-      </button>
+          <Sun size={15} color={!isDark ? '#f59e0b' : 'currentColor'} strokeWidth={2.4} />
+          <span>{lightFull}</span>
+        </button>
+
+        <button
+          type="button"
+          role="radio"
+          aria-checked={isDark}
+          onClick={() => setTheme('dark')}
+          className={`theme-segment-btn ${isDark ? 'active' : ''}`}
+          style={{
+            flex: 1,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            padding: '8px 12px',
+            borderRadius: '20px',
+            border: 'none',
+            fontSize: '0.84rem',
+            fontWeight: isDark ? '700' : '500',
+            cursor: 'pointer',
+            backgroundColor: isDark ? '#243049' : 'transparent',
+            color: isDark ? '#38bdf8' : '#64748b',
+            boxShadow: isDark ? '0 2px 6px rgba(0, 0, 0, 0.4)' : 'none',
+            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+          }}
+          title={t('theme.switchToDark', 'Switch to Dark Mode')}
+        >
+          <Moon size={14} color={isDark ? '#38bdf8' : 'currentColor'} strokeWidth={2.4} />
+          <span>{darkFull}</span>
+        </button>
+      </div>
     );
   }
 
-  // Compact circular button for navbar
+  // Default header segmented control: 2 clearly visible options [ ☀️ Light | 🌙 Dark ]
   return (
-    <button
-      type="button"
-      onClick={toggleTheme}
-      aria-label={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-      title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-      className={`theme-toggle-btn ${className}`}
+    <div 
+      className={`theme-segmented-switch header-control ${className}`}
+      role="radiogroup" 
+      aria-label={t('theme.title', 'Theme')}
       style={{
-        width: '42px',
-        height: '42px',
-        borderRadius: '50%',
-        backgroundColor: isDark ? '#1a1a22' : '#f1f5f9',
-        border: isDark ? '1px solid #2f2f38' : '1px solid #e2e8f0',
-        color: isDark ? '#fbbf24' : '#0c3d6c',
-        display: 'flex',
+        display: 'inline-flex',
         alignItems: 'center',
-        justifyContent: 'center',
-        cursor: 'pointer',
-        position: 'relative',
-        overflow: 'hidden',
-        boxShadow: isDark
-          ? '0 0 12px rgba(251, 191, 36, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.05)'
-          : '0 2px 8px rgba(12, 61, 108, 0.08)',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        backgroundColor: isDark ? '#162032' : '#f1f5f9',
+        border: isDark ? '1.5px solid #243049' : '1.5px solid #cbd5e1',
+        borderRadius: '24px',
+        padding: '3px',
+        gap: '2px',
+        boxSizing: 'border-box',
+        transition: 'all 0.25s ease'
       }}
     >
-      <div
+      <button
+        type="button"
+        role="radio"
+        aria-checked={!isDark}
+        onClick={() => setTheme('light')}
+        className={`theme-segment-btn light-segment ${!isDark ? 'active' : ''}`}
         style={{
-          display: 'flex',
+          display: 'inline-flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          transition: 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease',
-          transform: isDark ? 'rotate(0deg) scale(1)' : 'rotate(-90deg) scale(0)',
-          position: isDark ? 'static' : 'absolute',
-          opacity: isDark ? 1 : 0,
+          gap: '5px',
+          padding: '5px 11px',
+          borderRadius: '18px',
+          border: 'none',
+          fontSize: '0.82rem',
+          fontWeight: !isDark ? '700' : '600',
+          cursor: 'pointer',
+          backgroundColor: !isDark ? '#ffffff' : 'transparent',
+          color: !isDark ? '#0c3d6c' : (isDark ? '#94a3b8' : '#64748b'),
+          boxShadow: !isDark ? '0 2px 8px rgba(12, 61, 108, 0.12)' : 'none',
+          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+          whiteSpace: 'nowrap'
         }}
+        title={t('theme.switchToLight', 'Switch to Light Mode')}
       >
-        <Sun size={20} strokeWidth={2.2} />
-      </div>
+        <Sun size={15} color={!isDark ? '#f59e0b' : 'currentColor'} strokeWidth={2.4} />
+        <span className="theme-btn-label">{lightText}</span>
+      </button>
 
-      <div
+      <button
+        type="button"
+        role="radio"
+        aria-checked={isDark}
+        onClick={() => setTheme('dark')}
+        className={`theme-segment-btn dark-segment ${isDark ? 'active' : ''}`}
         style={{
-          display: 'flex',
+          display: 'inline-flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          transition: 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease',
-          transform: !isDark ? 'rotate(0deg) scale(1)' : 'rotate(90deg) scale(0)',
-          position: !isDark ? 'static' : 'absolute',
-          opacity: !isDark ? 1 : 0,
+          gap: '5px',
+          padding: '5px 11px',
+          borderRadius: '18px',
+          border: 'none',
+          fontSize: '0.82rem',
+          fontWeight: isDark ? '700' : '600',
+          cursor: 'pointer',
+          backgroundColor: isDark ? '#243049' : 'transparent',
+          color: isDark ? '#38bdf8' : '#64748b',
+          boxShadow: isDark ? '0 2px 8px rgba(0, 0, 0, 0.4)' : 'none',
+          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+          whiteSpace: 'nowrap'
         }}
+        title={t('theme.switchToDark', 'Switch to Dark Mode')}
       >
-        <Moon size={19} strokeWidth={2.2} />
-      </div>
-    </button>
+        <Moon size={14} color={isDark ? '#38bdf8' : 'currentColor'} strokeWidth={2.4} />
+        <span className="theme-btn-label">{darkText}</span>
+      </button>
+    </div>
   );
 }

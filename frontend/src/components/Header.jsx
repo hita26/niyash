@@ -171,10 +171,10 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
   // =========================================================================
   if (isB2B) {
     return (
-      <header className="b2b-header-shell" style={{ width: '100%', position: 'sticky', top: 0, zIndex: 1000, boxShadow: '0 4px 20px rgba(0,0,0,0.08)', backgroundColor: '#ffffff' }}>
+      <header className="b2b-header-shell" style={{ width: '100%', position: 'sticky', top: 0, zIndex: 1000, boxShadow: '0 4px 20px rgba(0,0,0,0.08)', backgroundColor: 'var(--bg-surface)' }}>
         
         {/* Main Workstation Header Bar */}
-        <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', padding: '10px 16px' }}>
+        <div style={{ backgroundColor: 'var(--bg-surface)', borderBottom: '1px solid var(--border-light)', padding: '10px 16px' }}>
           <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
             
             {/* Left: Brand Logo & B2B Workstation Chip */}
@@ -201,8 +201,8 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 style={{ 
                   display: 'flex', 
                   alignItems: 'center', 
-                  backgroundColor: '#f8fafc', 
-                  border: '1.5px solid #cbd5e1', 
+                  backgroundColor: 'var(--bg-surface-alt)', 
+                  border: '1.5px solid var(--border-light)', 
                   borderRadius: '30px', 
                   padding: '4px 6px 4px 16px',
                   transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
@@ -271,7 +271,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                   }}
                 >
                   {matchedCompanies.length > 0 && (
-                    <div style={{ padding: '8px 14px', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <div style={{ padding: '8px 14px', backgroundColor: 'var(--bg-surface-alt)', borderBottom: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                       <span style={{ fontSize: '0.72rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' }}>Companies:</span>
                       {matchedCompanies.map(comp => (
                         <button
@@ -360,7 +360,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                     </div>
                   )}
 
-                  <div style={{ padding: '8px 14px', backgroundColor: '#f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.74rem', color: '#64748b' }}>
+                  <div style={{ padding: '8px 14px', backgroundColor: 'var(--bg-surface-alt)', borderTop: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.74rem', color: 'var(--text-light)' }}>
                     <span>{t('common.pressEnter', 'Press Enter to view all results')}</span>
                     <span className="kbd-shortcut">{t('common.escToClose', 'ESC to close')}</span>
                   </div>
@@ -430,19 +430,19 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '7px',
-                    backgroundColor: '#f8fafc',
-                    border: '1.5px solid #cbd5e1',
+                    backgroundColor: 'var(--bg-surface-alt)',
+                    border: '1.5px solid var(--border-light)',
                     borderRadius: '24px',
                     padding: '6px 12px',
                     cursor: 'pointer',
                     fontSize: '0.84rem',
                     fontWeight: '700',
-                    color: '#0c3d6c'
+                    color: 'var(--primary-blue)'
                   }}
                   aria-expanded={isUserMenuOpen}
                   aria-haspopup="true"
                 >
-                  <Building2 size={16} color="#0c3d6c" />
+                  <Building2 size={16} color="var(--primary-blue)" />
                   <span style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {chemistInitial}
                   </span>
@@ -455,15 +455,15 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                     top: '100%',
                     right: 0,
                     marginTop: '8px',
-                    backgroundColor: '#ffffff',
+                    backgroundColor: 'var(--bg-card)',
                     borderRadius: '12px',
-                    boxShadow: '0 12px 30px rgba(0,0,0,0.15)',
-                    border: '1px solid #e2e8f0',
+                    boxShadow: 'var(--card-shadow)',
+                    border: '1px solid var(--border-light)',
                     minWidth: '240px',
                     zIndex: 1050,
                     overflow: 'hidden'
                   }}>
-                    <div style={{ padding: '12px 16px', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                    <div style={{ padding: '12px 16px', backgroundColor: 'var(--bg-surface-alt)', borderBottom: '1px solid var(--border-light)' }}>
                       <div style={{ fontSize: '0.72rem', color: '#059669', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                         ● {t('retailerDashboard.verifiedPartner', 'Verified B2B Partner')}
                       </div>
@@ -856,7 +856,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                   }}
                 >
                   {matchedCompanies.length > 0 && (
-                    <div style={{ padding: '8px 14px', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <div style={{ padding: '8px 14px', backgroundColor: 'var(--bg-surface-alt)', borderBottom: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                       <span style={{ fontSize: '0.72rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' }}>Companies:</span>
                       {matchedCompanies.map(comp => (
                         <button
@@ -945,7 +945,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                     </div>
                   )}
 
-                  <div style={{ padding: '8px 14px', backgroundColor: '#f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.74rem', color: '#64748b' }}>
+                  <div style={{ padding: '8px 14px', backgroundColor: 'var(--bg-surface-alt)', borderTop: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.74rem', color: 'var(--text-light)' }}>
                     <span>Press <strong>Enter</strong> to view all results</span>
                     <span className="kbd-shortcut">ESC to close</span>
                   </div>
@@ -1290,9 +1290,9 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               <LanguageSelector variant="pill-buttons" />
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', borderRadius: '8px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '10px 12px', borderRadius: '8px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)' }}>
               <span style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>{t('nav.themeMode', 'Theme Mode')}</span>
-              <ThemeToggle variant="pill" />
+              <ThemeToggle variant="drawer" />
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>

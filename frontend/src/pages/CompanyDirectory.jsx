@@ -259,13 +259,13 @@ function CompanyDirectory() {
                   }}
                 >
                   {/* Card Header Media */}
-                  <div style={{ padding: '18px 18px 12px', backgroundColor: '#f8fafc', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <div style={{ padding: '18px 18px 12px', backgroundColor: 'var(--bg-surface-alt)', borderBottom: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', gap: '14px' }}>
                     <div style={{
                       width: '58px',
                       height: '58px',
                       borderRadius: '12px',
                       backgroundColor: '#fff',
-                      border: '1px solid #e2e8f0',
+                      border: '1px solid var(--border-light)',
                       padding: '6px',
                       display: 'flex',
                       alignItems: 'center',

@@ -1495,7 +1495,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
   };
 
   return (
-    <div style={{ backgroundColor: '#f8fafc', minHeight: '100vh', paddingBottom: '90px' }}>
+    <div style={{ backgroundColor: 'var(--bg-main)', minHeight: '100vh', paddingBottom: '90px' }}>
       {/* Top Breadcrumb & Quick Portal Hero */}
       <div
         style={{
@@ -1571,12 +1571,12 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
         {/* Retailer Information Bar */}
         <div
           style={{
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--bg-card)',
             borderRadius: '10px',
             padding: '10px 16px',
             marginBottom: '14px',
             boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-            border: '1px solid #e2e8f0'
+            border: '1px solid var(--border-light)'
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
@@ -1752,12 +1752,12 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
         {/* Dynamic Filters & Search Header */}
         <div
           style={{
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--bg-card)',
             borderRadius: '12px',
             padding: '16px 20px',
             marginBottom: '20px',
             boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
-            border: '1px solid #e2e8f0'
+            border: '1px solid var(--border-light)'
           }}
         >
           {/* Top Search & Company Filter Row */}
@@ -1773,7 +1773,9 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                   width: '100%',
                   padding: '10px 14px 10px 38px',
                   borderRadius: '8px',
-                  border: '1px solid #cbd5e1',
+                  border: '1px solid var(--border-light)',
+                  backgroundColor: 'var(--bg-input)',
+                  color: 'var(--text-dark)',
                   fontSize: '0.88rem',
                   outline: 'none'
                 }}
@@ -1797,11 +1799,11 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                   width: '100%',
                   padding: '10px 14px',
                   borderRadius: '8px',
-                  border: '1px solid #cbd5e1',
-                  backgroundColor: '#ffffff',
+                  border: '1px solid var(--border-light)',
+                  backgroundColor: 'var(--bg-input)',
                   fontSize: '0.88rem',
                   fontWeight: '600',
-                  color: '#334155'
+                  color: 'var(--text-dark)'
                 }}
               >
                 {companiesList.map((comp) => (
@@ -1926,15 +1928,15 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
             {filteredProducts.length === 0 && (
               <div
                 style={{
-                  backgroundColor: '#ffffff',
+                  backgroundColor: 'var(--bg-card)',
                   borderRadius: '12px',
                   padding: '60px 20px',
                   textAlign: 'center',
-                  border: '1px solid #e2e8f0'
+                  border: '1px solid var(--border-light)'
                 }}
               >
                 <Package size={48} color="#94a3b8" style={{ margin: '0 auto 12px auto' }} />
-                <h3 style={{ fontSize: '1.2rem', color: '#0f172a', marginBottom: '6px' }}>{t('quickOrder.noMedicinesFound', 'No medicines found')}</h3>
+                <h3 style={{ fontSize: '1.2rem', color: 'var(--text-dark)', marginBottom: '6px' }}>{t('quickOrder.noMedicinesFound', 'No medicines found')}</h3>
                 <p style={{ fontSize: '0.88rem', color: '#64748b', maxWidth: '400px', margin: '0 auto 16px auto' }}>
                   No pharmaceutical formulations matched your current search filters. Try adjusting your query or resetting filters.
                 </p>
@@ -1956,17 +1958,17 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
             {viewMode === 'table' && filteredProducts.length > 0 && (
               <div
                 style={{
-                  backgroundColor: '#ffffff',
+                  backgroundColor: 'var(--bg-card)',
                   borderRadius: '12px',
                   overflow: 'hidden',
                   boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
-                  border: '1px solid #e2e8f0'
+                  border: '1px solid var(--border-light)'
                 }}
               >
                 <div className="table-responsive" style={{ overflowX: 'auto' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '750px' }}>
                     <thead>
-                      <tr style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid #e2e8f0', color: '#0c3d6c', fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      <tr style={{ backgroundColor: 'var(--bg-surface-elevated)', borderBottom: '2px solid var(--border-light)', color: 'var(--primary-blue)', fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                         <th style={{ padding: '12px 14px', width: '38%', verticalAlign: 'middle' }}>{t('quickOrder.colProduct', 'Product & Composition')}</th>
                         <th style={{ padding: '12px 12px', width: '16%', verticalAlign: 'middle' }}>{t('quickOrder.colPacking', 'Pack & MOQ')}</th>
                         <th style={{ padding: '12px 12px', width: '18%', verticalAlign: 'middle' }}>{t('quickOrder.colPtr', 'Wholesale PTR & Scheme')}</th>
@@ -1989,8 +1991,8 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                           <tr
                             key={product._id}
                             style={{
-                              borderBottom: '1px solid #f1f5f9',
-                              backgroundColor: isSelected ? '#f0fdf4' : '#ffffff',
+                              borderBottom: '1px solid var(--border-light)',
+                              backgroundColor: isSelected ? 'rgba(52, 211, 153, 0.12)' : 'transparent',
                               transition: 'background-color 0.15s ease'
                             }}
                           >
@@ -2305,11 +2307,11 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                     <div
                       key={product._id}
                       style={{
-                        backgroundColor: isSelected ? '#f0fdf4' : '#ffffff',
+                        backgroundColor: isSelected ? 'rgba(52, 211, 153, 0.12)' : 'var(--bg-card)',
                         borderRadius: '12px',
                         padding: '16px',
                         boxShadow: isSelected ? '0 4px 15px rgba(34, 197, 94, 0.15)' : '0 2px 10px rgba(0,0,0,0.03)',
-                        border: isSelected ? '2px solid #22c55e' : '1px solid #e2e8f0',
+                        border: isSelected ? '2px solid #22c55e' : '1px solid var(--border-light)',
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'space-between',
@@ -2318,7 +2320,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                     >
                       <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
-                          <span style={{ fontSize: '0.72rem', fontWeight: '800', backgroundColor: isDaxia ? '#0c3d6c' : '#f1f5f9', color: isDaxia ? '#ffffff' : '#475569', padding: '2px 8px', borderRadius: '4px' }}>
+                          <span style={{ fontSize: '0.72rem', fontWeight: '800', backgroundColor: isDaxia ? '#0c3d6c' : 'var(--bg-surface-alt)', color: isDaxia ? '#ffffff' : 'var(--text-medium)', padding: '2px 8px', borderRadius: '4px' }}>
                             {product.company || product.brand}
                           </span>
                           <span style={{ fontSize: '0.72rem', fontWeight: '600', backgroundColor: '#e0f2fe', color: '#0369a1', padding: '2px 8px', borderRadius: '12px' }}>
@@ -2326,7 +2328,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                           </span>
                         </div>
 
-                        <h3 style={{ fontSize: '1rem', fontWeight: '800', color: '#0f172a', margin: '10px 0 4px 0', lineHeight: '1.3' }}>
+                        <h3 style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--text-dark)', margin: '10px 0 4px 0', lineHeight: '1.3' }}>
                           {product.name}
                         </h3>
 
@@ -2334,7 +2336,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                           {product.composition}
                         </div>
 
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: '#475569', backgroundColor: '#f8fafc', padding: '6px 10px', borderRadius: '6px', marginBottom: '10px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: 'var(--text-medium)', backgroundColor: 'var(--bg-surface-alt)', padding: '6px 10px', borderRadius: '6px', marginBottom: '10px' }}>
                           <span>Pack: <strong>{product.packing || `${unitsPerBox} Units/Box`}</strong></span>
                           <span>MOQ: <strong>{product.minReorderQty || 1} Box</strong></span>
                         </div>
@@ -2589,17 +2591,17 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
           <div className="sticky-form-desktop" style={{ position: 'sticky', top: '90px' }}>
             <div
               style={{
-                backgroundColor: '#ffffff',
+                backgroundColor: 'var(--bg-card)',
                 borderRadius: '14px',
                 padding: '20px',
-                boxShadow: '0 4px 25px rgba(12, 61, 108, 0.08)',
-                border: '1px solid #cbd5e1'
+                boxShadow: 'var(--card-shadow)',
+                border: '1px solid var(--border-light)'
               }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light)', paddingBottom: '12px', marginBottom: '14px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <ShoppingCart size={20} color="#0c3d6c" />
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#0c3d6c', margin: 0 }}>
+                  <ShoppingCart size={20} color="var(--primary-blue)" />
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--primary-blue)', margin: 0 }}>
                     Commercial Billing
                   </h3>
                 </div>
@@ -2616,17 +2618,17 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
 
               {/* Order Item Count Metrics */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '16px' }}>
-                <div style={{ backgroundColor: '#f8fafc', padding: '8px 10px', borderRadius: '8px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
-                  <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: '600' }}>{t('quickOrder.selected', 'Selected')}</div>
-                  <div style={{ fontSize: '1.05rem', fontWeight: '800', color: '#0c3d6c' }}>{commercialBilling.totalSelectedItems}</div>
+                <div style={{ backgroundColor: 'var(--bg-surface-alt)', padding: '8px 10px', borderRadius: '8px', textAlign: 'center', border: '1px solid var(--border-light)' }}>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-light)', fontWeight: '600' }}>{t('quickOrder.selected', 'Selected')}</div>
+                  <div style={{ fontSize: '1.05rem', fontWeight: '800', color: 'var(--primary-blue)' }}>{commercialBilling.totalSelectedItems}</div>
                 </div>
-                <div style={{ backgroundColor: '#f8fafc', padding: '8px 10px', borderRadius: '8px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
-                  <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: '600' }}>{t('quickOrder.boxes', 'Boxes')}</div>
-                  <div style={{ fontSize: '1.05rem', fontWeight: '800', color: '#0c3d6c' }}>{commercialBilling.totalBoxes}</div>
+                <div style={{ backgroundColor: 'var(--bg-surface-alt)', padding: '8px 10px', borderRadius: '8px', textAlign: 'center', border: '1px solid var(--border-light)' }}>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-light)', fontWeight: '600' }}>{t('quickOrder.boxes', 'Boxes')}</div>
+                  <div style={{ fontSize: '1.05rem', fontWeight: '800', color: 'var(--primary-blue)' }}>{commercialBilling.totalBoxes}</div>
                 </div>
-                <div style={{ backgroundColor: '#f8fafc', padding: '8px 10px', borderRadius: '8px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
-                  <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: '600' }}>{t('quickOrder.units', 'Units')}</div>
-                  <div style={{ fontSize: '1.05rem', fontWeight: '800', color: '#0c3d6c' }}>{commercialBilling.totalUnits}</div>
+                <div style={{ backgroundColor: 'var(--bg-surface-alt)', padding: '8px 10px', borderRadius: '8px', textAlign: 'center', border: '1px solid var(--border-light)' }}>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-light)', fontWeight: '600' }}>{t('quickOrder.units', 'Units')}</div>
+                  <div style={{ fontSize: '1.05rem', fontWeight: '800', color: 'var(--primary-blue)' }}>{commercialBilling.totalUnits}</div>
                 </div>
               </div>
 

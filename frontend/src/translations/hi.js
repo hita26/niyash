@@ -854,5 +854,14 @@ export const hi = {
     "View Details": "विवरण देखें",
     "Print Invoice": "इनवॉयस प्रिंट करें",
     "Reset Filters": "फ़िल्टर रीसेट करें"
+  },
+  "theme": {
+    "light": "लाइट",
+    "dark": "डार्क",
+    "lightMode": "लाइट मोड",
+    "darkMode": "डार्क मोड",
+    "switchToLight": "लाइट मोड चालू करें",
+    "switchToDark": "डार्क मोड चालू करें",
+    "title": "थीम"
   }
 };

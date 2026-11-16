@@ -11,6 +11,7 @@ import {
   Copy, CheckCheck
 } from 'lucide-react';
 import { broadcastLiveEvent, SYNC_EVENTS } from '../utils/liveSync';
+import { useLanguage } from '../context/LanguageContext';
 
 // ==========================================
 // FALLBACK DATASETS FOR OFFLINE / ROBUST DEMO

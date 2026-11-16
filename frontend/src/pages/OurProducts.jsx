@@ -4,7 +4,7 @@ import ProductCard from '../components/ProductCard';
 import SkeletonLoader from '../components/SkeletonLoader';
 import { 
   Sparkles, Search, SlidersHorizontal, ShieldCheck, 
-  ArrowUpDown, RefreshCcw, CheckCircle2, Package, Award, ArrowRight, X
+  ArrowUpDown, RefreshCcw, CheckCircle2, Package, Award, ArrowRight, X, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useLiveSync, SYNC_EVENTS } from '../utils/liveSync';
 import { useLanguage } from '../context/LanguageContext';
@@ -19,9 +19,12 @@ export default function OurProducts({ addToCart, searchTerm, setSearchTerm }) {
   // Filter & Sort states
   const [localSearch, setLocalSearch] = useState('');
   const [selectedForm, setSelectedForm] = useState('All');
-  const [selectedCategory, setSelectedCategory] = useState('All');
   const [onlyInStock, setOnlyInStock] = useState(false);
   const [sortOrder, setSortOrder] = useState('featured');
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
 
   const formsList = [
     'All',
@@ -40,8 +43,7 @@ export default function OurProducts({ addToCart, searchTerm, setSearchTerm }) {
     if (!isSilent) setLoading(true);
     setError(null);
     try {
-      // First attempt: Query backend specifically for isOurProduct=true
-      const res = await fetch('/api/products?isOurProduct=true&limit=100');
+      const res = await fetch('/api/products?isOurProduct=true&limit=250');
       if (res.ok) {
         const data = await res.json();
         const items = data.products || data || [];
@@ -53,7 +55,7 @@ export default function OurProducts({ addToCart, searchTerm, setSearchTerm }) {
       }
 
       // Fallback: If no isOurProduct explicitly returned, check all products and filter for isOurProduct OR DAXIA
-      const fallbackRes = await fetch('/api/products?limit=200');
+      const fallbackRes = await fetch('/api/products?limit=250');
       if (fallbackRes.ok) {
         const fbData = await fallbackRes.json();
         const allItems = fbData.products || fbData || [];
@@ -62,7 +64,7 @@ export default function OurProducts({ addToCart, searchTerm, setSearchTerm }) {
           (p.company && p.company.toUpperCase().includes('DAXIA')) ||
           (p.brand && p.brand.toUpperCase().includes('DAXIA'))
         );
-        setProducts(filtered.length > 0 ? filtered : allItems.slice(0, 24));
+        setProducts(filtered.length > 0 ? filtered : allItems.slice(0, 30));
       } else {
         throw new Error('Failed to load exclusive products');
       }
@@ -127,77 +129,71 @@ export default function OurProducts({ addToCart, searchTerm, setSearchTerm }) {
     return result;
   }, [products, localSearch, searchTerm, selectedForm, onlyInStock, sortOrder]);
 
+  // Reset to first page whenever search/filter parameters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [localSearch, searchTerm, selectedForm, onlyInStock, sortOrder, pageSize]);
+
+  // Standard Pagination slice
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize));
+  const paginatedProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredProducts.slice(startIndex, startIndex + pageSize);
+  }, [filteredProducts, currentPage, pageSize]);
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+      window.scrollTo({ top: 120, behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="page-wrapper our-products-page" style={{ minHeight: '85vh', backgroundColor: 'var(--bg-main)', paddingBottom: '60px' }}>
       
-      {/* HERO BANNER SECTION - Responsive & Modern */}
-      <section style={{
-        background: 'linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%)',
-        color: '#ffffff',
-        padding: '48px 20px',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        <div className="container" style={{ position: 'relative', zIndex: 2, maxWidth: '1200px', margin: '0 auto' }}>
-          
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: 'rgba(255, 255, 255, 0.16)', backdropFilter: 'blur(8px)', padding: '6px 14px', borderRadius: '30px', fontSize: '0.82rem', fontWeight: '700', marginBottom: '14px', border: '1px solid rgba(255, 255, 255, 0.25)' }}>
-            <Sparkles size={16} style={{ color: '#fef08a' }} />
-            <span>
-              {language === 'gu' ? 'વિશેષ ફોર્મ્યુલેશન્સ • ડાયરેક્ટ ડિસ્ટ્રીબ્યુશન' : language === 'hi' ? 'विशेष फॉर्मूलेशन • प्रत्यक्ष वितरण' : 'Exclusive Formulations • Direct Distribution'}
-            </span>
+      {/* CLEAN COMPACT PAGE HEADER - Fast, sleek, no bulky green banner */}
+      <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px 20px 10px 20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '14px', borderBottom: '1px solid var(--border-light)', paddingBottom: '16px' }}>
+          <div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: '800', color: '#059669', textTransform: 'uppercase', marginBottom: '4px' }}>
+              <Sparkles size={14} />
+              <span>{language === 'gu' ? 'વિશેષ ફોર્મ્યુલેશન્સ' : language === 'hi' ? 'विशेष फॉर्मूलेशन' : 'Exclusive Formulations'}</span>
+            </div>
+            <h1 style={{ fontSize: 'clamp(1.5rem, 3vw, 2.1rem)', fontWeight: '800', color: 'var(--text-dark)', margin: '0 0 4px 0', letterSpacing: '-0.02em' }}>
+              {language === 'gu' ? 'અમારી પ્રોડક્ટ્સ' : language === 'hi' ? 'हमारे उत्पाद' : 'Our Products'}
+            </h1>
+            <p style={{ fontSize: '0.88rem', color: 'var(--text-medium)', margin: 0, maxWidth: '640px' }}>
+              {language === 'gu'
+                ? 'નિયાંશ ફાર્મા દ્વારા સીધા વિતરણ કરવામાં આવતી વિશેષ અને ગુણવત્તાયુક્ત ફાર્માસ્યુટિકલ પ્રોડક્ટ્સ.'
+                : 'Directly distributed proprietary formulations with authentic WHO-GMP quality and fast dispatch across Gujarat.'}
+            </p>
           </div>
 
-          <h1 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.75rem)', fontWeight: '800', lineHeight: '1.2', margin: '0 0 12px 0', letterSpacing: '-0.02em', color: '#ffffff' }}>
-            {language === 'gu' ? 'અમારી વિશેષ પ્રોડક્ટ્સ' : language === 'hi' ? 'हमारे विशेष उत्पाद' : 'Our Exclusive Products'}
-          </h1>
-
-          <p style={{ fontSize: 'clamp(0.95rem, 2vw, 1.12rem)', maxWidth: '720px', margin: '0 0 24px 0', color: 'rgba(255, 255, 255, 0.9)', lineHeight: '1.6' }}>
-            {language === 'gu'
-              ? 'નિયાંશ ફાર્મા દ્વારા સીધા વિતરણ કરવામાં આવતી પ્રીમિયમ WHO-GMP ગુણવત્તાયુક્ત ફાર્માસ્યુટિકલ પ્રોડક્ટ્સ. શ્રેષ્ઠ PTR રેટ્સ અને ત્વરિત સપ્લાયની ખાતરી.'
-              : language === 'hi'
-              ? 'नियांश फार्मा द्वारा सीधे वितरित प्रीमियम WHO-GMP गुणवत्तापूर्ण फार्मास्युटिकल उत्पाद। सर्वोत्तम PTR दर और त्वरित आपूर्ति।'
-              : 'Directly distributed premium WHO-GMP quality pharmaceutical formulations with competitive wholesale PTR rates and immediate dispatch across Gujarat.'}
-          </p>
-
-          {/* Quick Highlights Bar */}
-          <div style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '12px',
-            alignItems: 'center',
-            fontSize: '0.85rem'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(0, 0, 0, 0.2)', padding: '6px 12px', borderRadius: '8px' }}>
-              <ShieldCheck size={16} style={{ color: '#34d399' }} />
-              <span>100% Genuine WHO-GMP</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(0, 0, 0, 0.2)', padding: '6px 12px', borderRadius: '8px' }}>
-              <Award size={16} style={{ color: '#fef08a' }} />
-              <span>Attractive PTR & Schemes</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(0, 0, 0, 0.2)', padding: '6px 12px', borderRadius: '8px' }}>
-              <Package size={16} style={{ color: '#6ee7b7' }} />
-              <span>Ready Stock Dispatch</span>
-            </div>
-          </div>
-
+          <Link 
+            to="/products"
+            className="btn btn-outline btn-sm"
+            style={{ borderRadius: '8px', padding: '8px 16px', fontWeight: '700', fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+          >
+            <span>{language === 'gu' ? 'તમામ દવાઓ જુઓ (9,500+)' : 'Browse Full Catalog (9,500+)'}</span>
+            <ArrowRight size={14} />
+          </Link>
         </div>
-      </section>
+      </div>
 
       {/* SEARCH & FILTER CONTROLS TOOLBAR */}
-      <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px 20px 0 20px' }}>
+      <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '16px 20px 0 20px' }}>
         <div style={{
           backgroundColor: 'var(--bg-card)',
-          borderRadius: '14px',
-          padding: '16px 20px',
-          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
+          borderRadius: '12px',
+          padding: '14px 18px',
+          boxShadow: '0 2px 10px rgba(0, 0, 0, 0.04)',
           border: '1px solid var(--border-light)',
           display: 'flex',
           flexDirection: 'column',
-          gap: '16px'
+          gap: '14px'
         }}>
           
-          {/* Top Row: Search Input + Sorting */}
+          {/* Top Row: Search Input + In-stock toggle + Sorting */}
           <div style={{
             display: 'flex',
             flexWrap: 'wrap',
@@ -205,23 +201,22 @@ export default function OurProducts({ addToCart, searchTerm, setSearchTerm }) {
             alignItems: 'center',
             justifyContent: 'space-between'
           }}>
-            <div style={{ position: 'relative', flex: '1 1 280px', maxWidth: '520px' }}>
+            <div style={{ position: 'relative', flex: '1 1 260px', maxWidth: '480px' }}>
               <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
               <input 
                 type="text"
-                placeholder={language === 'gu' ? 'પ્રોડક્ટનું નામ અથવા કમ્પોઝિશન શોધો...' : language === 'hi' ? 'उत्पाद का नाम या संरचना खोजें...' : 'Search our products by name, salt composition, SKU...'}
+                placeholder={language === 'gu' ? 'પ્રોડક્ટનું નામ અથવા કમ્પોઝિશન શોધો...' : language === 'hi' ? 'उत्पाद का नाम या संरचना खोजें...' : 'Search our products by name, composition, SKU...'}
                 value={localSearch}
                 onChange={(e) => setLocalSearch(e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '11px 40px 11px 40px',
-                  borderRadius: '10px',
+                  padding: '9px 36px 9px 38px',
+                  borderRadius: '8px',
                   border: '1px solid var(--border-light)',
                   backgroundColor: 'var(--bg-main)',
                   color: 'var(--text-dark)',
-                  fontSize: '0.92rem',
-                  outline: 'none',
-                  transition: 'border-color 0.2s'
+                  fontSize: '0.9rem',
+                  outline: 'none'
                 }}
               />
               {localSearch && (
@@ -230,14 +225,14 @@ export default function OurProducts({ addToCart, searchTerm, setSearchTerm }) {
                   style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-medium)', cursor: 'pointer' }}
                   aria-label="Clear search"
                 >
-                  <X size={16} />
+                  <X size={15} />
                 </button>
               )}
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
               {/* In Stock Only Checkbox */}
-              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)', userSelect: 'none' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.84rem', fontWeight: '600', color: 'var(--text-dark)', userSelect: 'none' }}>
                 <input 
                   type="checkbox"
                   checked={onlyInStock}
@@ -249,17 +244,17 @@ export default function OurProducts({ addToCart, searchTerm, setSearchTerm }) {
 
               {/* Sorting Select */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <ArrowUpDown size={16} style={{ color: 'var(--text-medium)' }} />
+                <ArrowUpDown size={15} style={{ color: 'var(--text-medium)' }} />
                 <select
                   value={sortOrder}
                   onChange={(e) => setSortOrder(e.target.value)}
                   style={{
-                    padding: '8px 12px',
-                    borderRadius: '8px',
+                    padding: '7px 10px',
+                    borderRadius: '6px',
                     border: '1px solid var(--border-light)',
                     backgroundColor: 'var(--bg-main)',
                     color: 'var(--text-dark)',
-                    fontSize: '0.85rem',
+                    fontSize: '0.84rem',
                     fontWeight: '600'
                   }}
                 >
@@ -273,8 +268,8 @@ export default function OurProducts({ addToCart, searchTerm, setSearchTerm }) {
           </div>
 
           {/* Bottom Row: Dosage Form Filter Chips */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-medium)', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflowX: 'auto', paddingBottom: '2px' }}>
+            <span style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-medium)', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
               {language === 'gu' ? 'સ્વરૂપ:' : 'Form:'}
             </span>
             {formsList.map((form) => {
@@ -284,9 +279,9 @@ export default function OurProducts({ addToCart, searchTerm, setSearchTerm }) {
                   key={form}
                   onClick={() => setSelectedForm(form)}
                   style={{
-                    padding: '5px 12px',
-                    borderRadius: '20px',
-                    fontSize: '0.8rem',
+                    padding: '4px 11px',
+                    borderRadius: '16px',
+                    fontSize: '0.78rem',
                     fontWeight: isSelected ? '700' : '600',
                     border: '1px solid',
                     borderColor: isSelected ? '#059669' : 'var(--border-light)',
@@ -294,7 +289,7 @@ export default function OurProducts({ addToCart, searchTerm, setSearchTerm }) {
                     color: isSelected ? '#ffffff' : 'var(--text-dark)',
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
-                    transition: 'all 0.2s'
+                    transition: 'all 0.15s'
                   }}
                 >
                   {form === 'All' ? (language === 'gu' ? 'તમામ' : language === 'hi' ? 'सभी' : 'All Forms') : form}
@@ -307,100 +302,190 @@ export default function OurProducts({ addToCart, searchTerm, setSearchTerm }) {
       </div>
 
       {/* PRODUCTS GRID CONTENT */}
-      <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px 20px 0 20px' }}>
+      <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '18px 20px 0 20px' }}>
         
-        {/* Count Bar */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '10px' }}>
-          <div style={{ fontSize: '0.92rem', color: 'var(--text-medium)', fontWeight: '600' }}>
+        {/* Count Bar with Page Size Info */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+          <div style={{ fontSize: '0.88rem', color: 'var(--text-medium)', fontWeight: '600' }}>
             {language === 'gu' ? (
-              <span>કુલ <strong style={{ color: 'var(--text-dark)' }}>{filteredProducts.length}</strong> વિશેષ પ્રોડક્ટ્સ ઉપલબ્ધ</span>
+              <span>કુલ <strong style={{ color: 'var(--text-dark)' }}>{filteredProducts.length}</strong> પ્રોડક્ટ્સમાંથી <strong>{paginatedProducts.length}</strong> દર્શાવેલ (પેજ {currentPage}/{totalPages})</span>
             ) : language === 'hi' ? (
-              <span>कुल <strong style={{ color: 'var(--text-dark)' }}>{filteredProducts.length}</strong> विशेष उत्पाद उपलब्ध</span>
+              <span>कुल <strong style={{ color: 'var(--text-dark)' }}>{filteredProducts.length}</strong> में से <strong>{paginatedProducts.length}</strong> उत्पाद (पेज {currentPage}/{totalPages})</span>
             ) : (
-              <span>Showing <strong style={{ color: 'var(--text-dark)' }}>{filteredProducts.length}</strong> exclusive formulations</span>
+              <span>Showing <strong>{(currentPage - 1) * pageSize + 1}</strong> - <strong>{Math.min(currentPage * pageSize, filteredProducts.length)}</strong> of <strong>{filteredProducts.length}</strong> products</span>
             )}
           </div>
 
-          <Link 
-            to="/products"
-            style={{
-              fontSize: '0.85rem',
-              color: 'var(--primary-color)',
-              fontWeight: '700',
-              textDecoration: 'none',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px'
-            }}
-          >
-            <span>{language === 'gu' ? 'તમામ 9,500+ દવાઓ જુઓ' : language === 'hi' ? 'सभी 9,500+ दवाएं देखें' : 'View All 9,500+ General Catalog'}</span>
-            <ArrowRight size={14} />
-          </Link>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'var(--text-medium)' }}>
+            <span>{language === 'gu' ? 'પ્રતિ પેજ:' : 'Per page:'}</span>
+            <select
+              value={pageSize}
+              onChange={(e) => setPageSize(Number(e.target.value))}
+              style={{
+                padding: '4px 8px',
+                borderRadius: '6px',
+                border: '1px solid var(--border-light)',
+                backgroundColor: 'var(--bg-card)',
+                color: 'var(--text-dark)',
+                fontSize: '0.82rem',
+                fontWeight: '600'
+              }}
+            >
+              <option value={12}>12</option>
+              <option value={20}>20</option>
+              <option value={24}>24</option>
+              <option value={48}>48</option>
+            </select>
+          </div>
         </div>
 
         {/* LOADING SKELETON */}
         {loading ? (
           <div className="products-grid" style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-            gap: '20px'
+            gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+            gap: '18px'
           }}>
-            {[...Array(8)].map((_, i) => (
+            {[...Array(pageSize > 12 ? 12 : pageSize)].map((_, i) => (
               <SkeletonLoader key={i} type="product-card" />
             ))}
           </div>
-        ) : filteredProducts.length > 0 ? (
+        ) : paginatedProducts.length > 0 ? (
           /* PRODUCTS GRID */
-          <div className="products-grid" style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-            gap: '20px'
-          }}>
-            {filteredProducts.map((product) => (
-              <ProductCard 
-                key={product._id || product.sku} 
-                product={product} 
-                addToCart={addToCart} 
-              />
-            ))}
-          </div>
+          <>
+            <div className="products-grid" style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+              gap: '18px'
+            }}>
+              {paginatedProducts.map((product) => (
+                <ProductCard 
+                  key={product._id || product.sku} 
+                  product={product} 
+                  addToCart={addToCart} 
+                />
+              ))}
+            </div>
+
+            {/* REAL-WORLD PAGINATION BAR */}
+            {totalPages > 1 && (
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '8px',
+                marginTop: '36px',
+                paddingTop: '20px',
+                borderTop: '1px solid var(--border-light)',
+                flexWrap: 'wrap'
+              }}>
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="btn btn-outline btn-sm"
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: '8px',
+                    fontSize: '0.82rem',
+                    fontWeight: '700',
+                    opacity: currentPage === 1 ? 0.35 : 1,
+                    cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <ChevronLeft size={16} />
+                  <span>{language === 'gu' ? 'પાછળ' : 'Prev'}</span>
+                </button>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
+                    if (p === 1 || p === totalPages || (p >= currentPage - 2 && p <= currentPage + 2)) {
+                      const isActive = currentPage === p;
+                      return (
+                        <button
+                          key={p}
+                          onClick={() => handlePageChange(p)}
+                          className={`btn btn-sm ${isActive ? 'btn-primary' : 'btn-outline'}`}
+                          style={{
+                            minWidth: '34px',
+                            height: '34px',
+                            padding: '0 8px',
+                            borderRadius: '8px',
+                            fontWeight: isActive ? '800' : '600',
+                            fontSize: '0.84rem'
+                          }}
+                        >
+                          {p}
+                        </button>
+                      );
+                    } else if (p === currentPage - 3 || p === currentPage + 3) {
+                      return <span key={p} style={{ padding: '0 4px', color: 'var(--text-light)', fontSize: '0.8rem' }}>•••</span>;
+                    }
+                    return null;
+                  })}
+                </div>
+
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="btn btn-outline btn-sm"
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: '8px',
+                    fontSize: '0.82rem',
+                    fontWeight: '700',
+                    opacity: currentPage === totalPages ? 0.35 : 1,
+                    cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <span>{language === 'gu' ? 'આગળ' : 'Next'}</span>
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           /* EMPTY STATE */
           <div style={{
             backgroundColor: 'var(--bg-card)',
-            borderRadius: '16px',
-            padding: '60px 20px',
+            borderRadius: '12px',
+            padding: '50px 20px',
             textAlign: 'center',
             border: '1px solid var(--border-light)',
-            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)'
+            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.03)'
           }}>
             <div style={{
-              width: '64px',
-              height: '64px',
+              width: '56px',
+              height: '56px',
               borderRadius: '50%',
               backgroundColor: 'rgba(5, 150, 105, 0.1)',
               color: '#059669',
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              marginBottom: '16px'
+              marginBottom: '14px'
             }}>
-              <Package size={32} />
+              <Package size={28} />
             </div>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-dark)', margin: '0 0 8px 0' }}>
-              {language === 'gu' ? 'કોઈ પ્રોડક્ટ મળી નથી' : language === 'hi' ? 'कोई उत्पाद नहीं मिला' : 'No Exclusive Products Found'}
+            <h3 style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--text-dark)', margin: '0 0 6px 0' }}>
+              {language === 'gu' ? 'કોઈ પ્રોડક્ટ મળી નથી' : language === 'hi' ? 'कोई उत्पाद नहीं मिला' : 'No Products Found'}
             </h3>
-            <p style={{ color: 'var(--text-medium)', maxWidth: '460px', margin: '0 auto 20px auto', fontSize: '0.9rem', lineHeight: '1.5' }}>
+            <p style={{ color: 'var(--text-medium)', maxWidth: '440px', margin: '0 auto 18px auto', fontSize: '0.88rem', lineHeight: '1.5' }}>
               {language === 'gu'
-                ? 'તમારી શોધ મુજબ કોઈ પ્રોડક્ટ મળી નથી અથવા એડમિન પેનલમાંથી "Our Product" તરીકે પ્રોડક્ટ ઉમેરવાની બાકી છે.'
-                : 'No products match your current filter, or products are yet to be marked as "Our Product" in the Admin Panel.'}
+                ? 'તમારી શોધ મુજબ કોઈ પ્રોડક્ટ મળી નથી.'
+                : 'No products match your current search criteria.'}
             </p>
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
               {(localSearch || selectedForm !== 'All' || onlyInStock) && (
                 <button
                   onClick={() => { setLocalSearch(''); setSelectedForm('All'); setOnlyInStock(false); }}
                   className="btn btn-outline btn-sm"
-                  style={{ borderRadius: '8px', padding: '8px 18px', fontWeight: '600' }}
+                  style={{ borderRadius: '8px', padding: '8px 16px', fontWeight: '600' }}
                 >
                   {language === 'gu' ? 'ફિલ્ટર્સ રીસેટ કરો' : 'Reset Filters'}
                 </button>
@@ -408,7 +493,7 @@ export default function OurProducts({ addToCart, searchTerm, setSearchTerm }) {
               <Link 
                 to="/products"
                 className="btn btn-primary btn-sm"
-                style={{ borderRadius: '8px', padding: '8px 18px', fontWeight: '700', textDecoration: 'none' }}
+                style={{ borderRadius: '8px', padding: '8px 16px', fontWeight: '700', textDecoration: 'none' }}
               >
                 {language === 'gu' ? 'તમામ પ્રોડક્ટ્સ જુઓ' : 'Browse All Products'}
               </Link>

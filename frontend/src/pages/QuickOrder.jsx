@@ -611,7 +611,7 @@ function QuickOrder() {
   const [showConfig, setShowConfig] = useState(false);
 
   // Catalog & Filter State
-  const [products, setProducts] = useState(FALLBACK_PRODUCTS);
+  const [products, setProducts] = useState([]);
   const [companiesList, setCompaniesList] = useState(DEFAULT_COMPANIES);
   const [formsList, setFormsList] = useState(ALL_FORMS);
   const [searchQuery, setSearchQuery] = useState('');
@@ -686,9 +686,7 @@ function QuickOrder() {
       const prodRes = await fetch('/api/products?limit=15000');
       if (prodRes.ok) {
         const data = await prodRes.json();
-        if (data.products && data.products.length > 0) {
-          setProducts(data.products);
-        }
+        setProducts(Array.isArray(data.products) ? data.products : []);
       }
 
       // Fetch meta filters

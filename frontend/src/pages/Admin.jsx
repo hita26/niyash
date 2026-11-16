@@ -580,6 +580,8 @@ function Admin() {
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
   const [editingCompany, setEditingCompany] = useState(null);
   const [isSavingCompany, setIsSavingCompany] = useState(false);
+  const [isClearingProducts, setIsClearingProducts] = useState(false);
+  const [isClearingCompanies, setIsClearingCompanies] = useState(false);
 
   // Form Fields for Add/Edit Company
   const [compName, setCompName] = useState('');
@@ -757,19 +759,19 @@ function Admin() {
         });
         if (prodRes.ok) {
           const prodData = await prodRes.json();
-          setProducts(prodData.products && prodData.products.length > 0 ? prodData.products : FALLBACK_PRODUCTS);
+          setProducts(Array.isArray(prodData.products) ? prodData.products : []);
           if (prodData.stats) setProductAdminStats(prodData.stats);
         } else {
           const fallbackRes = await fetch('/api/products?limit=15000');
           if (fallbackRes.ok) {
             const prodData = await fallbackRes.json();
-            setProducts(prodData.products && prodData.products.length > 0 ? prodData.products : FALLBACK_PRODUCTS);
+            setProducts(Array.isArray(prodData.products) ? prodData.products : []);
           } else {
-            setProducts(FALLBACK_PRODUCTS);
+            setProducts([]);
           }
         }
       } catch {
-        setProducts(FALLBACK_PRODUCTS);
+        setProducts([]);
       }
 
       // 2. Fetch Orders
@@ -1957,6 +1959,42 @@ _Helpline: +91 9316566894_`;
     }
   };
 
+  const handleClearAllProducts = async () => {
+    if (!window.confirm('⚠️ ARE YOU SURE? This will permanently delete ALL products from the database so you can add products manually from scratch.')) {
+      return;
+    }
+    if (!window.confirm('Double Confirmation: Delete ALL products now? This action cannot be undone.')) {
+      return;
+    }
+    setIsClearingProducts(true);
+    try {
+      const res = await fetch('/api/products/clear-all', {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast(data.message || 'All products cleared from catalog successfully!');
+        setProducts([]);
+        setProductAdminStats({
+          totalProducts: 0,
+          inStock: 0,
+          outOfStock: 0,
+          totalCompanies: 0,
+          totalCategories: 0,
+        });
+        broadcastLiveEvent(SYNC_EVENTS.PRODUCT_DELETED, { all: true });
+        await fetchDashboardData();
+      } else {
+        showToast(data.message || 'Failed to clear products', 'error');
+      }
+    } catch (err) {
+      showToast('Error clearing products: ' + err.message, 'error');
+    } finally {
+      setIsClearingProducts(false);
+    }
+  };
+
   const handleExportCSV = () => {
     if (!products || products.length === 0) {
       showToast('No products to export', 'error');
@@ -2202,6 +2240,36 @@ _Helpline: +91 9316566894_`;
     } catch {
       setCompanies(prev => prev.map(c => c._id === company._id ? { ...c, isPublished: newStatus } : c));
       broadcastLiveEvent(SYNC_EVENTS.COMPANY_MUTATED, { action: 'toggle', id: company._id, isPublished: newStatus });
+    }
+  };
+
+  const handleClearAllCompanies = async () => {
+    if (!window.confirm('⚠️ ARE YOU SURE? This will permanently delete ALL companies from the database so you can add companies manually from scratch.')) {
+      return;
+    }
+    if (!window.confirm('Double Confirmation: Delete ALL companies now? This action cannot be undone.')) {
+      return;
+    }
+    setIsClearingCompanies(true);
+    try {
+      const res = await fetch('/api/companies/clear-all', {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast(data.message || 'All companies cleared successfully!');
+        setCompanies([]);
+        setTotalCompaniesCount(0);
+        broadcastLiveEvent(SYNC_EVENTS.COMPANY_MUTATED, { all: true });
+        await fetchDashboardData();
+      } else {
+        showToast(data.message || 'Failed to clear companies', 'error');
+      }
+    } catch (err) {
+      showToast('Error clearing companies: ' + err.message, 'error');
+    } finally {
+      setIsClearingCompanies(false);
     }
   };
 
@@ -3798,6 +3866,18 @@ _Helpline: +91 9316566894_`;
                         </button>
                       )}
 
+                      {products.length > 0 && (
+                        <button 
+                          onClick={handleClearAllProducts}
+                          disabled={isClearingProducts}
+                          className="btn btn-sm"
+                          style={{ gap: '6px', backgroundColor: '#fee2e2', color: '#b91c1c', border: '1px solid #fecaca', fontWeight: '700' }}
+                          title="Delete all products to start manual entry from scratch"
+                        >
+                          <Trash2 size={14} /> {isClearingProducts ? 'Clearing...' : 'Clear All Products'}
+                        </button>
+                      )}
+
                       <button 
                         onClick={() => handleOpenProductModal(null)} 
                         className="btn btn-primary btn-sm" 
@@ -3807,27 +3887,6 @@ _Helpline: +91 9316566894_`;
                       </button>
                     </div>
                   </div>
-
-                  {/* Cloud Database Alert Banner if catalog is underpopulated */}
-                  {productStats.totalProducts < 500 && (
-                    <div style={{ padding: '14px 20px', backgroundColor: '#fef3c7', border: '1.5px solid #fde68a', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.88rem', color: '#92400e' }}>
-                        <AlertTriangle size={20} color="#d97706" style={{ flexShrink: 0 }} />
-                        <span>
-                          <strong>Database sync notice:</strong> This environment currently has only <strong>{productStats.totalProducts}</strong> products in its database. Click to load all <strong>9,560</strong> wholesale medicines into this database.
-                        </span>
-                      </div>
-                      <button 
-                        onClick={handleSyncFullCatalog}
-                        disabled={isSyncingCatalog}
-                        className="btn btn-sm"
-                        style={{ backgroundColor: '#d97706', color: '#fff', border: 'none', padding: '7px 16px', fontWeight: '700', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
-                      >
-                        <RefreshCw size={14} className={isSyncingCatalog ? 'animate-spin' : ''} />
-                        {isSyncingCatalog ? 'Syncing 9,560 Products...' : 'Sync 9,560 Products to Cloud Now'}
-                      </button>
-                    </div>
-                  )}
 
                   {/* Stat Cards Metrics Row */}
                   <div className="admin-stat-5-grid">
@@ -4542,13 +4601,27 @@ _Helpline: +91 9316566894_`;
                       </p>
                     </div>
 
-                    <button 
-                      onClick={() => handleOpenCompanyModal(null)} 
-                      className="btn btn-primary btn-sm" 
-                      style={{ gap: '6px' }}
-                    >
-                      <Plus size={16} /> Add New Company
-                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                      {companies.length > 0 && (
+                        <button 
+                          onClick={handleClearAllCompanies}
+                          disabled={isClearingCompanies}
+                          className="btn btn-sm"
+                          style={{ gap: '6px', backgroundColor: '#fee2e2', color: '#b91c1c', border: '1px solid #fecaca', fontWeight: '700' }}
+                          title="Delete all companies to start manual entry from scratch"
+                        >
+                          <Trash2 size={14} /> {isClearingCompanies ? 'Clearing...' : 'Clear All Companies'}
+                        </button>
+                      )}
+
+                      <button 
+                        onClick={() => handleOpenCompanyModal(null)} 
+                        className="btn btn-primary btn-sm" 
+                        style={{ gap: '6px' }}
+                      >
+                        <Plus size={16} /> Add New Company
+                      </button>
+                    </div>
                   </div>
 
                   {/* Summary Metric Tiles */}
@@ -4600,21 +4673,41 @@ _Helpline: +91 9316566894_`;
                     </div>
                   </div>
 
-                  {/* Companies Table */}
-                  <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                    <div className="admin-table-container">
-                      <table className="admin-table" style={{ width: '100%', minWidth: '780px' }}>
-                        <thead>
-                          <tr>
-                            <th style={{ width: '68px', minWidth: '68px', textAlign: 'center' }}>Logo</th>
-                            <th style={{ minWidth: '220px' }}>Company Name</th>
-                            <th style={{ minWidth: '160px' }}>Category</th>
-                            <th style={{ minWidth: '160px' }}>Location</th>
-                            <th style={{ minWidth: '110px', textAlign: 'center' }}>Status</th>
-                            <th style={{ minWidth: '110px', textAlign: 'center' }}>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
+                  {/* Companies Table or Empty State */}
+                  {filteredCompanies.length === 0 ? (
+                    <div className="card" style={{ padding: '60px 20px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+                      <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-light)' }}>
+                        <Building2 size={30} />
+                      </div>
+                      <h3 style={{ margin: 0, color: 'var(--text-dark)' }}>No companies found</h3>
+                      <p style={{ color: 'var(--text-medium)', maxWidth: '420px', margin: 0, fontSize: '0.9rem' }}>
+                        {companySearch || companyCategoryFilter !== 'All'
+                          ? 'Try adjusting your search criteria or resetting the category filter.'
+                          : 'No companies in directory. Start adding your pharmaceutical manufacturers or suppliers now.'}
+                      </p>
+                      <button 
+                        onClick={() => handleOpenCompanyModal(null)} 
+                        className="btn btn-primary btn-sm"
+                        style={{ marginTop: '10px' }}
+                      >
+                        <Plus size={16} /> Add First Company
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+                      <div className="admin-table-container">
+                        <table className="admin-table" style={{ width: '100%', minWidth: '780px' }}>
+                          <thead>
+                            <tr>
+                              <th style={{ width: '68px', minWidth: '68px', textAlign: 'center' }}>Logo</th>
+                              <th style={{ minWidth: '220px' }}>Company Name</th>
+                              <th style={{ minWidth: '160px' }}>Category</th>
+                              <th style={{ minWidth: '160px' }}>Location</th>
+                              <th style={{ minWidth: '110px', textAlign: 'center' }}>Status</th>
+                              <th style={{ minWidth: '110px', textAlign: 'center' }}>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
                           {filteredCompanies.map(c => (
                             <tr key={c._id} style={{ borderBottom: '1px solid var(--border-light)' }}>
                               <td style={{ padding: '10px 16px', verticalAlign: 'middle' }}>
@@ -4723,6 +4816,7 @@ _Helpline: +91 9316566894_`;
                       </table>
                     </div>
                   </div>
+                )}
 
                 </div>
               )}

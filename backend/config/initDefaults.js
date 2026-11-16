@@ -252,11 +252,11 @@ const initDefaults = async () => {
         // ignore
       }
 
-      // 5. Ensure Full Catalog (9,500+ products & companies) is synced
+      // 5. Catalog sync (only if explicitly enabled via AUTO_SEED_CATALOG env)
       try {
         const productCount = await Product.countDocuments();
-        if (productCount < 500) {
-          console.log(`Current product count (${productCount}) is below full catalog threshold. Starting automatic catalog sync...`);
+        if (process.env.AUTO_SEED_CATALOG === 'true' && productCount < 500) {
+          console.log(`AUTO_SEED_CATALOG is active and product count (${productCount}) is below threshold. Starting catalog sync...`);
           let companiesData = null;
           let productsData = null;
 

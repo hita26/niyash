@@ -582,6 +582,24 @@ router.put('/:id', protect, adminOnly, async (req, res) => {
   }
 });
 
+// @desc    Delete ALL products from catalog (Admin only)
+// @route   DELETE /api/products/clear-all
+// @access  Private/Admin
+router.delete('/clear-all', protect, adminOnly, async (req, res) => {
+  try {
+    const result = await Product.deleteMany({});
+    console.log(`[ADMIN ACTION] Cleared all products from database. Count: ${result.deletedCount}`);
+    res.json({
+      success: true,
+      message: `All ${result.deletedCount} products have been deleted successfully.`,
+      deletedCount: result.deletedCount,
+    });
+  } catch (error) {
+    console.error('Clear all products error:', error);
+    res.status(500).json({ success: false, message: 'Server error clearing products', error: error.message });
+  }
+});
+
 // @desc    Delete a product and cleanup uploaded files
 // @route   DELETE /api/products/:id
 // @access  Private/Admin

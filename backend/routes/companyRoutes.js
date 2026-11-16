@@ -251,6 +251,25 @@ router.put('/:id', protect, adminOnly, async (req, res) => {
 });
 
 // ========================================================
+// DELETE /api/companies/clear-all
+// Delete ALL companies (Admin only)
+// ========================================================
+router.delete('/clear-all', protect, adminOnly, async (req, res) => {
+  try {
+    const result = await Company.deleteMany({});
+    console.log(`[ADMIN ACTION] Cleared all companies from database. Count: ${result.deletedCount}`);
+    res.json({
+      success: true,
+      message: `All ${result.deletedCount} companies have been deleted successfully.`,
+      deletedCount: result.deletedCount,
+    });
+  } catch (err) {
+    console.error('Error clearing companies:', err);
+    res.status(500).json({ success: false, message: 'Failed to clear companies', error: err.message });
+  }
+});
+
+// ========================================================
 // DELETE /api/companies/:id
 // Delete a company (Admin only)
 // ========================================================

@@ -54,7 +54,7 @@ export default function OurProducts({ addToCart, searchTerm, setSearchTerm }) {
         }
       }
 
-      // Fallback: If no isOurProduct explicitly returned, check all products and filter for isOurProduct OR DAXIA
+      // Check if any products exist that match our brand
       const fallbackRes = await fetch('/api/products?limit=250');
       if (fallbackRes.ok) {
         const fbData = await fallbackRes.json();
@@ -64,9 +64,9 @@ export default function OurProducts({ addToCart, searchTerm, setSearchTerm }) {
           (p.company && p.company.toUpperCase().includes('DAXIA')) ||
           (p.brand && p.brand.toUpperCase().includes('DAXIA'))
         );
-        setProducts(filtered.length > 0 ? filtered : allItems.slice(0, 30));
+        setProducts(filtered);
       } else {
-        throw new Error('Failed to load exclusive products');
+        setProducts([]);
       }
     } catch (err) {
       console.warn('OurProducts load error:', err);

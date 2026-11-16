@@ -299,6 +299,77 @@ function About() {
         </div>
       </section>
 
+      {/* Official Business Registration & Statutory Licences */}
+      <section className="section" style={{ backgroundColor: 'var(--bg-card)', borderTop: '1px solid var(--border-light)', borderBottom: '1px solid var(--border-light)' }}>
+        <div className="container">
+          <div style={{ textAlign: 'center', maxWidth: '750px', margin: '0 auto 35px auto' }}>
+            <span style={{ backgroundColor: 'rgba(56, 142, 60, 0.1)', color: 'var(--secondary-green)', padding: '5px 14px', borderRadius: '16px', fontSize: '0.82rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'inline-block', marginBottom: '12px' }}>
+              {t('compliance.subtitle', 'Government Registered & Licensed Wholesale Stockist')}
+            </span>
+            <h2 className="section-title" style={{ marginBottom: '10px' }}>
+              {t('compliance.title', 'Official Business Registration & Statutory Licences')}
+            </h2>
+            <p className="section-subtitle" style={{ margin: 0 }}>
+              {language === 'gu'
+                ? 'નિયાંશ ફાર્મા તમામ સરકારી અને ઔષધ નિયમનકારી ધારાધોરણોનું સંપૂર્ણ પાલન કરે છે.'
+                : language === 'hi'
+                ? 'नियांश फार्मा सभी सरकारी और औषधि विनियामक मानकों का पूर्ण अनुपालन करता है।'
+                : 'Niyansh Pharma operates under strict compliance with all statutory food, drug, and taxation authorities.'}
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px' }}>
+            <div className="card" style={{ padding: '22px', borderTop: '4px solid var(--primary-blue)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-light)', textTransform: 'uppercase' }}>
+                {t('compliance.dlLabel', 'D.L.No.')} (Form 20B & 21B)
+              </div>
+              <div style={{ fontSize: '1.15rem', fontWeight: '800', fontFamily: 'monospace', color: 'var(--primary-blue)' }}>
+                20B, 264618, 21B, 264619
+              </div>
+              <div style={{ fontSize: '0.82rem', color: 'var(--text-medium)' }}>
+                {language === 'gu' ? 'ડ્રગ લાયસન્સ (હોલસેલ મેડિસિન વિતરણ)' : language === 'hi' ? 'ड्रग लाइसेंस (थोक दवा वितरण)' : 'Drug License (Wholesale Drug Distribution)'}
+              </div>
+            </div>
+
+            <div className="card" style={{ padding: '22px', borderTop: '4px solid var(--secondary-green)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-light)', textTransform: 'uppercase' }}>
+                {t('compliance.gstinLabel', 'GSTIN')}
+              </div>
+              <div style={{ fontSize: '1.15rem', fontWeight: '800', fontFamily: 'monospace', color: 'var(--secondary-green)' }}>
+                24BVXPP6108F2Z7
+              </div>
+              <div style={{ fontSize: '0.82rem', color: 'var(--text-medium)' }}>
+                {language === 'gu' ? 'ગુજરાત રાજ્ય જીએસટી નોંધણી' : language === 'hi' ? 'गुजरात राज्य जीएसटी पंजीकरण' : 'Goods & Services Tax Identification Number'}
+              </div>
+            </div>
+
+            <div className="card" style={{ padding: '22px', borderTop: '4px solid #0284c7', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-light)', textTransform: 'uppercase' }}>
+                {t('compliance.panLabel', 'PAN No.')}
+              </div>
+              <div style={{ fontSize: '1.15rem', fontWeight: '800', fontFamily: 'monospace', color: '#0284c7' }}>
+                BVXPP6108F
+              </div>
+              <div style={{ fontSize: '0.82rem', color: 'var(--text-medium)' }}>
+                {language === 'gu' ? 'કાયમી એકાઉન્ટ નંબર (આવકવેરા વિભાગ)' : language === 'hi' ? 'स्थायी खाता संख्या (आयकर विभाग)' : 'Permanent Account Number (Income Tax Dept)'}
+              </div>
+            </div>
+
+            <div className="card" style={{ padding: '22px', borderTop: '4px solid #f59e0b', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-light)', textTransform: 'uppercase' }}>
+                {t('compliance.fssaiLabel', 'Food License no.')}
+              </div>
+              <div style={{ fontSize: '1.15rem', fontWeight: '800', fontFamily: 'monospace', color: '#d97706' }}>
+                20726030000567
+              </div>
+              <div style={{ fontSize: '0.82rem', color: 'var(--text-medium)' }}>
+                {language === 'gu' ? 'ફૂડ એન્ડ સેફ્ટી લાયસન્સ (FSSAI)' : language === 'hi' ? 'खाद्य सुरक्षा लाइसेंस (FSSAI)' : 'Food Safety & Standards Authority License'}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Brands Collaboration Banner */}
       <section className="section" style={{ backgroundColor: '#ffffff' }}>
         <div className="container" style={{ textAlign: 'center' }}>

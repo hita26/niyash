@@ -867,5 +867,18 @@ export const gu = {
     "switchToLight": "લાઇટ મોડ ચાલુ કરો",
     "switchToDark": "ડાર્ક મોડ ચાલુ કરો",
     "title": "થીમ"
+  },
+  "compliance": {
+    "title": "સત્તાવાર બિઝનેસ રજીસ્ટ્રેશન અને લાયસન્સ વિગતો",
+    "dlLabel": "D.L.No.",
+    "dlValue": "20B, 264618, 21B, 264619",
+    "gstinLabel": "GSTIN",
+    "gstinValue": "24BVXPP6108F2Z7",
+    "panLabel": "PAN No.",
+    "panValue": "BVXPP6108F",
+    "fssaiLabel": "Food License no.",
+    "fssaiValue": "20726030000567",
+    "registeredName": "નિયાંશ ફાર્મા",
+    "subtitle": "સરકાર માન્ય અને લાયસન્સ ધરાવતો ફાર્માસ્યુટિકલ જથ્થાબંધ સ્ટોકિસ્ટ"
   }
 };

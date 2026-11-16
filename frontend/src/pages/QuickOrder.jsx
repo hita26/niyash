@@ -1278,8 +1278,8 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
           <div>
             <div class="title">NIYANSH PHARMA</div>
             <div class="subtitle">Wholesale Pharmaceutical & Healthcare Distributors</div>
-            <div class="subtitle">Rajkot Wholesale Hub, Gujarat | DL No: G/20B/12984, G/21B/12985</div>
-            <div class="subtitle">GSTIN: 24AAACN9128P1Z8 | Contact: +91 9316566894, +91 99099 23130</div>
+            <div class="subtitle">Rajkot Wholesale Hub, Gujarat | D.L.No.: 20B, 264618, 21B, 264619</div>
+            <div class="subtitle">GSTIN: 24BVXPP6108F2Z7 | PAN No.: BVXPP6108F | Food License no.: 20726030000567 | Contact: +91 99099 23130</div>
           </div>
           <div class="inv-meta">
             <span class="badge">B2B TAX INVOICE</span>

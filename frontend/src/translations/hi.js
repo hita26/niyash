@@ -867,5 +867,18 @@ export const hi = {
     "switchToLight": "लाइट मोड चालू करें",
     "switchToDark": "डार्क मोड चालू करें",
     "title": "थीम"
+  },
+  "compliance": {
+    "title": "आधिकारिक व्यापार पंजीकरण एवं वैधानिक लाइसेंस विवरण",
+    "dlLabel": "D.L.No.",
+    "dlValue": "20B, 264618, 21B, 264619",
+    "gstinLabel": "GSTIN",
+    "gstinValue": "24BVXPP6108F2Z7",
+    "panLabel": "PAN No.",
+    "panValue": "BVXPP6108F",
+    "fssaiLabel": "Food License no.",
+    "fssaiValue": "20726030000567",
+    "registeredName": "नियांश फार्मा",
+    "subtitle": "सरकारी मान्यता प्राप्त एवं लाइसेंस प्राप्त फार्मास्युटिकल थोक स्टॉकिस्ट"
   }
 };

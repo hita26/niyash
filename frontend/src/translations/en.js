@@ -867,5 +867,18 @@ export const en = {
     "switchToLight": "Switch to Light Mode",
     "switchToDark": "Switch to Dark Mode",
     "title": "Theme"
+  },
+  "compliance": {
+    "title": "Official Business Registration & Statutory Licences",
+    "dlLabel": "D.L.No.",
+    "dlValue": "20B, 264618, 21B, 264619",
+    "gstinLabel": "GSTIN",
+    "gstinValue": "24BVXPP6108F2Z7",
+    "panLabel": "PAN No.",
+    "panValue": "BVXPP6108F",
+    "fssaiLabel": "Food License no.",
+    "fssaiValue": "20726030000567",
+    "registeredName": "Niyansh Pharma",
+    "subtitle": "Government Registered & Licensed Wholesale Pharmaceutical Stockist"
   }
 };

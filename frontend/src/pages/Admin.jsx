@@ -2574,9 +2574,13 @@ _Helpline: +91 9316566894_`;
               Niyansh Pharma • Central B2B Operations Console
             </h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginTop: '6px', fontSize: '0.8rem', color: 'var(--text-medium)', flexWrap: 'wrap' }}>
-              <span>🏛️ DL: <strong>G/20B/12984, G/21B/12985</strong></span>
+              <span>🏛️ D.L.No.: <strong>20B, 264618, 21B, 264619</strong></span>
               <span>•</span>
-              <span>📑 GSTIN: <strong>24AAACN9128P1Z8</strong></span>
+              <span>📑 GSTIN: <strong>24BVXPP6108F2Z7</strong></span>
+              <span>•</span>
+              <span>💳 PAN: <strong>BVXPP6108F</strong></span>
+              <span>•</span>
+              <span>🥗 Food License no.: <strong>20726030000567</strong></span>
             </div>
           </div>
 

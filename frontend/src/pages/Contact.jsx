@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Phone, Mail, MapPin, Send, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { Phone, Mail, MapPin, Send, CheckCircle2, Clock, AlertCircle, ShieldCheck } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 function Contact() {
@@ -142,6 +142,35 @@ function Contact() {
                       <span style={{ display: 'inline-block', width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#f59e0b' }}></span>
                       <strong>{t('contact.lunchBreakLabel', 'Lunch Break')}:</strong> 2:00 PM – 4:00 PM
                     </p>
+                  </div>
+                </li>
+
+                <li style={{ display: 'flex', gap: '15px', alignItems: 'flex-start' }}>
+                  <div style={{ backgroundColor: 'rgba(56, 142, 60, 0.08)', padding: '10px', borderRadius: '10px', color: 'var(--secondary-green)', display: 'flex' }}>
+                    <ShieldCheck size={22} />
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: '1.05rem', marginBottom: '6px' }}>
+                      {t('compliance.title', 'Official Business Registration & Licences')}
+                    </h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.88rem', color: 'var(--text-medium)' }}>
+                      <div>
+                        <strong style={{ color: 'var(--text-dark)' }}>{t('compliance.dlLabel', 'D.L.No.')}:</strong>{' '}
+                        <span style={{ fontFamily: 'monospace', fontWeight: '700', color: 'var(--primary-blue)' }}>20B, 264618, 21B, 264619</span>
+                      </div>
+                      <div>
+                        <strong style={{ color: 'var(--text-dark)' }}>{t('compliance.gstinLabel', 'GSTIN')}:</strong>{' '}
+                        <span style={{ fontFamily: 'monospace', fontWeight: '700', color: 'var(--primary-blue)' }}>24BVXPP6108F2Z7</span>
+                      </div>
+                      <div>
+                        <strong style={{ color: 'var(--text-dark)' }}>{t('compliance.panLabel', 'PAN No.')}:</strong>{' '}
+                        <span style={{ fontFamily: 'monospace', fontWeight: '700', color: 'var(--primary-blue)' }}>BVXPP6108F</span>
+                      </div>
+                      <div>
+                        <strong style={{ color: 'var(--text-dark)' }}>{t('compliance.fssaiLabel', 'Food License no.')}:</strong>{' '}
+                        <span style={{ fontFamily: 'monospace', fontWeight: '700', color: 'var(--primary-blue)' }}>20726030000567</span>
+                      </div>
+                    </div>
                   </div>
                 </li>
               </ul>

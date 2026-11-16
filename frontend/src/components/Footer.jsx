@@ -21,6 +21,15 @@ function Footer({ compact = false }) {
           <div>
             © {new Date().getFullYear()} {t('footer.chemistPortalRights', 'Niyansh Pharma Chemist Portal')} • {t('footer.directHelpline', 'Direct Helpline')}: <a href="tel:+919909923130" style={{ color: '#38bdf8', fontWeight: '700' }}>+91 99099 23130</a>
           </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center', fontSize: '0.78rem', color: '#cbd5e1' }}>
+            <span><strong>D.L.No.:</strong> 20B, 264618, 21B, 264619</span>
+            <span>•</span>
+            <span><strong>GSTIN:</strong> 24BVXPP6108F2Z7</span>
+            <span>•</span>
+            <span><strong>PAN No.:</strong> BVXPP6108F</span>
+            <span>•</span>
+            <span><strong>Food License no.:</strong> 20726030000567</span>
+          </div>
           <div style={{ display: 'flex', gap: '14px' }}>
             <Link to="/" style={{ color: '#cbd5e1', textDecoration: 'none' }}>{t('nav.publicSite', 'Public Website')}</Link>
             <Link to="/products" style={{ color: '#cbd5e1', textDecoration: 'none' }}>{t('nav.products', 'All Medicines')}</Link>
@@ -80,6 +89,11 @@ function Footer({ compact = false }) {
               <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--secondary-green)', display: 'inline-block' }}></span>
               {t('footer.whoGmp', 'WHO-GMP Assured • GST Compliant')}
             </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.8rem', color: '#94a3b8', marginTop: '-4px' }}>
+              <div>D.L.No.: <span style={{ fontFamily: 'monospace', color: '#cbd5e1', fontWeight: '600' }}>20B, 264618, 21B, 264619</span></div>
+              <div>GSTIN: <span style={{ fontFamily: 'monospace', color: '#cbd5e1', fontWeight: '600' }}>24BVXPP6108F2Z7</span></div>
+              <div>Food License no.: <span style={{ fontFamily: 'monospace', color: '#cbd5e1', fontWeight: '600' }}>20726030000567</span></div>
+            </div>
           </div>
 
           {/* Quick Links */}
@@ -138,6 +152,44 @@ function Footer({ compact = false }) {
                 </button>
               </form>
             )}
+          </div>
+        </div>
+
+        {/* Official Statutory Licences & Registration Bar */}
+        <div style={{
+          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          padding: '16px 0',
+          marginTop: '30px',
+          marginBottom: '20px',
+          display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: '14px',
+          fontSize: '0.82rem',
+          color: '#cbd5e1'
+        }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px 22px', alignItems: 'center' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <strong style={{ color: '#ffffff' }}>D.L.No.:</strong>
+              <span style={{ fontFamily: 'monospace', color: '#93c5fd', fontWeight: '700', letterSpacing: '0.5px' }}>20B, 264618, 21B, 264619</span>
+            </span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <strong style={{ color: '#ffffff' }}>GSTIN:</strong>
+              <span style={{ fontFamily: 'monospace', color: '#93c5fd', fontWeight: '700', letterSpacing: '0.5px' }}>24BVXPP6108F2Z7</span>
+            </span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <strong style={{ color: '#ffffff' }}>PAN No.:</strong>
+              <span style={{ fontFamily: 'monospace', color: '#93c5fd', fontWeight: '700', letterSpacing: '0.5px' }}>BVXPP6108F</span>
+            </span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <strong style={{ color: '#ffffff' }}>Food License no.:</strong>
+              <span style={{ fontFamily: 'monospace', color: '#93c5fd', fontWeight: '700', letterSpacing: '0.5px' }}>20726030000567</span>
+            </span>
+          </div>
+          <div style={{ color: '#4ade80', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem' }}>
+            <ShieldCheck size={16} /> WHO-GMP Assured Wholesale Stockist
           </div>
         </div>
 

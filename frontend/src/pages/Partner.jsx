@@ -173,6 +173,19 @@ function Partner() {
               </div>
             </div>
           </div>
+
+          {/* Statutory Registration Badge */}
+          <div className="card" style={{ marginTop: '16px', padding: '16px 20px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-light)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--secondary-green)', fontWeight: '700', fontSize: '0.85rem' }}>
+              <ShieldCheck size={18} />
+              <span>{t('compliance.title', 'Official Business Registration & Statutory Licences')}</span>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 16px', fontSize: '0.82rem', color: 'var(--text-medium)' }}>
+              <span><strong>D.L.No.:</strong> <span style={{ fontFamily: 'monospace', fontWeight: '700', color: 'var(--primary-blue)' }}>20B, 264618, 21B, 264619</span></span>
+              <span><strong>GSTIN:</strong> <span style={{ fontFamily: 'monospace', fontWeight: '700', color: 'var(--primary-blue)' }}>24BVXPP6108F2Z7</span></span>
+              <span><strong>Food License no.:</strong> <span style={{ fontFamily: 'monospace', fontWeight: '700', color: 'var(--primary-blue)' }}>20726030000567</span></span>
+            </div>
+          </div>
         </div>
 
         {/* Form Column */}

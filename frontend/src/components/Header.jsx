@@ -195,7 +195,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             </div>
 
             {/* Center: Fast Wholesale Medicine Search */}
-            <div ref={searchContainerRef} style={{ position: 'relative', flex: '1 1 320px', maxWidth: '540px' }}>
+            <div ref={searchContainerRef} className="search-wrapper" style={{ position: 'relative', flex: '1 1 320px', maxWidth: '540px' }}>
               <form 
                 onSubmit={handleSearchSubmit} 
                 style={{ 
@@ -535,6 +535,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               {/* Exit to Public Website Button */}
               <Link
                 to="/"
+                className="hide-mobile"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -815,7 +816,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
           </Link>
 
           {/* Search Form with Typeahead */}
-          <div style={{ position: 'relative', flex: '1 1 300px', maxWidth: '580px' }}>
+          <div className="search-wrapper" style={{ position: 'relative', flex: '1 1 300px', maxWidth: '580px' }}>
             <form className="search-bar" onSubmit={handleSearchSubmit} role="search" style={{ position: 'relative' }}>
               <input
                 type="text"
@@ -965,6 +966,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderRight: '1px solid var(--border-light)', paddingRight: '12px', position: 'relative' }} ref={userMenuRef}>
                 <Link
                   to="/dashboard"
+                  className="hide-mobile"
                   style={{
                     backgroundColor: '#ecfdf5',
                     color: '#065f46',
@@ -1060,7 +1062,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             ) : (
               <button 
                 onClick={onOpenAuth}
-                className="btn btn-outline btn-sm"
+                className="btn btn-outline btn-sm hide-mobile"
                 style={{ padding: '8px 18px', borderRadius: '30px', fontWeight: '800', border: '1.5px solid var(--primary-blue)', color: 'var(--primary-blue)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                 aria-label="Open Chemist login and registration modal"
               >

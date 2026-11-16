@@ -626,7 +626,7 @@ _${t('payment.support', 'Support: +91 99099 23130')}_`;
         )}
 
         {/* Modal Body Container */}
-        <div style={{ padding: '16px sm:padding:20px', overflowY: 'auto', flex: 1 }}>
+        <div style={{ padding: '16px', overflowY: 'auto', flex: 1 }}>
           {/* STAGE 1: INPUT STAGE */}
           {gatewayStage === 'input' && (
             <div>

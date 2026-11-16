@@ -657,7 +657,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
             {isRegister && (
               <>
                 {/* Store Name & Mobile Number (Both Required) */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '15px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '15px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                     <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>
                       {t('auth.companyLabel', 'Chemist / Store Name')} <span style={{ color: '#ef4444' }}>*</span>
@@ -721,7 +721,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                     <span>{t('auth.docGuidanceText', 'Accepted documents: PDF, JPG, PNG (Max 500 KB). Leave blank if no GST and enter PAN only.')}</span>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '14px' }}>
                     
                     {/* GSTIN Field (OPTIONAL) with Upload Button */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
@@ -842,7 +842,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                     <span>{t('auth.dlDocGuidance', 'Accepted documents: PDF, JPG, PNG (Max 500 KB). Form 20 is required, Form 21 is optional.')}</span>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '14px' }}>
                     
                     {/* Drug License No 1 Field (REQUIRED) with Upload Button */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>

@@ -618,7 +618,7 @@ function QuickOrder() {
   const [selectedCompany, setSelectedCompany] = useState('All');
   const [selectedForm, setSelectedForm] = useState('All');
   const [showOnlySelected, setShowOnlySelected] = useState(false);
-  const [viewMode, setViewMode] = useState('table'); // 'table' | 'card'
+  const [viewMode, setViewMode] = useState(() => (typeof window !== 'undefined' && window.innerWidth < 768 ? 'card' : 'table')); // 'table' | 'card'
 
   // Box Quantities state: { [productId]: boxQtyNumber }
   const [boxQuantities, setBoxQuantities] = useState({});
@@ -1513,10 +1513,10 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                 <Flame size={13} color="#f97316" /> {t('quickOrder.badge', 'Wholesale Quick Booking')}
               </div>
               <h1 style={{ color: '#ffffff', fontSize: '1.5rem', fontWeight: '800', margin: 0, letterSpacing: '-0.3px', lineHeight: 1.2 }}>
-                Wholesale Quick Order Matrix
+                {t('quickOrder.title', 'Wholesale Quick Order Matrix')}
               </h1>
               <p style={{ color: '#e0f2fe', fontSize: '0.82rem', margin: '3px 0 0 0', maxWidth: '620px' }}>
-                Live PTR pricing, trade scheme bonuses, instant GST calculation & multi-channel WhatsApp dispatch.
+                {t('quickOrder.subtitle', 'Live PTR pricing, trade scheme bonuses, instant GST calculation & multi-channel WhatsApp dispatch.')}
               </p>
             </div>
 
@@ -2290,7 +2290,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
 
             {/* CARD VIEW MODE */}
             {viewMode === 'card' && filteredProducts.length > 0 && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '16px' }}>
                 {paginatedProducts.map((product) => {
                   const boxQty = getBoxQty(product._id);
                   const isSelected = boxQty > 0;

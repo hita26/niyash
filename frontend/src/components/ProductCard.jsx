@@ -376,18 +376,18 @@ function ProductCard({ product, addToCart }) {
             onClick={onAddCartClick}
             disabled={!product.inStock}
             className={`btn ${isAdded ? 'btn-secondary' : 'btn-primary'} btn-sm`}
-            style={{ padding: '8px 10px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: '700', opacity: product.inStock ? 1 : 0.6 }}
+            style={{ padding: '8px 6px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: '700', opacity: product.inStock ? 1 : 0.6, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
             title={product.inStock ? t('products.addToCart', 'Add to Cart') : t('products.outOfStock', 'Product Out of Stock')}
           >
             {isAdded ? <Check size={14} /> : <ShoppingBag size={14} />}
-            {isAdded ? ` ${t('products.addedToCart', 'Added')}` : ` ${t('products.addToCart', 'Add to Cart')}`}
+            <span>{isAdded ? ` ${t('products.addedToCart', 'Added')}` : ` ${t('products.addToCart', 'Add to Cart')}`}</span>
           </button>
         )}
 
         <button 
           onClick={handleWhatsAppOrder}
           className="btn btn-secondary btn-sm"
-          style={{ padding: '8px 10px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: '700' }}
+          style={{ padding: '8px 6px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
         >
           {t('common.whatsapp', 'WhatsApp')}
         </button>

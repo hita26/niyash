@@ -153,6 +153,9 @@ button {
 }
 
 @media (max-width: 768px) {
+  .quickorder-mobile-sticky-bar {
+    bottom: 62px !important;
+  }
   .container {
     padding: 0 16px;
   }
@@ -865,29 +868,38 @@ button {
     padding-bottom: 64px; /* Space for MobileBottomNav */
   }
 
+  .hide-mobile {
+    display: none !important;
+  }
+
+  .top-strip {
+    display: none !important;
+  }
+
   input, select, textarea {
     font-size: 16px !important; /* Prevents auto-zoom on mobile */
   }
 
   .main-header-content {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: auto 1fr;
     grid-template-areas:
       "logo actions"
       "search search";
-    gap: 12px;
+    gap: 10px;
     align-items: center;
   }
   
   .logo-container {
     grid-area: logo;
     display: flex;
-    justify-content: flex-start;
+    align-items: center;
     margin-bottom: 0;
   }
 
   .logo-container img {
-    height: 46px;
+    height: 42px;
+    max-width: 140px;
   }
   
   .header-actions {
@@ -895,14 +907,20 @@ button {
     width: auto;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     justify-content: flex-end;
+  }
+
+  .search-wrapper {
+    grid-area: search !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
   .search-bar {
     grid-area: search;
-    max-width: 100%;
-    width: 100%;
+    max-width: 100% !important;
+    width: 100% !important;
   }
 
   .detail-layout {
@@ -918,6 +936,9 @@ button {
 }
 
 @media (min-width: 769px) {
+  .hide-desktop {
+    display: none !important;
+  }
   .mobile-bottom-nav {
     display: none !important;
   }
@@ -1160,7 +1181,7 @@ button {
   .quickorder-mobile-sticky-bar {
     display: block;
     position: fixed;
-    bottom: 62px; /* Fixed right above MobileBottomNav (which has height 62px) */
+    bottom: 0px;
     left: 0;
     right: 0;
     z-index: 9980;

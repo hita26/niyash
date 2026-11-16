@@ -252,6 +252,7 @@ export function LanguageSelector({ variant = 'default' }) {
     <div ref={dropdownRef} style={{ position: 'relative', display: 'inline-block' }}>
       <button
         type="button"
+        className="lang-selector-btn"
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Change website language"
         aria-expanded={isOpen}

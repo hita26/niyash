@@ -7,7 +7,7 @@ import { useLiveSync, SYNC_EVENTS } from '../utils/liveSync';
 import { useLanguage } from '../context/LanguageContext';
 
 function Products({ addToCart, searchTerm, setSearchTerm }) {
-  const { t } = useLanguage();
+  const { t, translateCategory, translateDosageForm } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -343,14 +343,14 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
           <div className="card" style={{ padding: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid var(--border-light)', paddingBottom: '10px' }}>
               <h3 style={{ fontSize: '1.15rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Filter size={16} /> Filters {activeFilterCount > 0 && <span style={{ fontSize: '0.75rem', backgroundColor: 'var(--primary-blue)', color: '#ffffff', borderRadius: '10px', padding: '1px 7px' }}>{activeFilterCount}</span>}
+                <Filter size={16} /> {t('common.filter', 'Filters')} {activeFilterCount > 0 && <span style={{ fontSize: '0.75rem', backgroundColor: 'var(--primary-blue)', color: '#ffffff', borderRadius: '10px', padding: '1px 7px' }}>{activeFilterCount}</span>}
               </h3>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <button 
                   onClick={handleResetFilters}
                   style={{ fontSize: '0.8rem', color: 'var(--secondary-green)', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: '600', background: 'none', border: 'none', cursor: 'pointer' }}
                 >
-                  <RefreshCcw size={12} /> Reset
+                  <RefreshCcw size={12} /> {t('common.reset', 'Reset')}
                 </button>
                 <button 
                   onClick={() => setShowMobileFilters(false)}
@@ -375,7 +375,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
                       onChange={() => handleCheckboxChange('category', selectedCategories, setSelectedCategories, cat)}
                       style={{ accentColor: 'var(--primary-blue)', width: '15px', height: '15px', cursor: 'pointer' }}
                     />
-                    <span>{cat}</span>
+                    <span>{translateCategory(cat)}</span>
                   </label>
                 ))}
               </div>
@@ -397,7 +397,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
                 <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                 <input 
                   type="text"
-                  placeholder="Search 252 companies..."
+                  placeholder={t('products.searchCompaniesPlaceholder', 'Search 252 companies...')}
                   value={companySearchTerm}
                   onChange={(e) => setCompanySearchTerm(e.target.value)}
                   style={{
@@ -429,7 +429,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
             {/* Price Slider Filter */}
             <div style={{ marginBottom: '22px', borderBottom: '1px solid #f1f5f9', paddingBottom: '18px' }}>
               <h4 style={{ fontSize: '0.92rem', marginBottom: '10px', color: 'var(--text-dark)', fontWeight: '700', display: 'flex', justifyContent: 'space-between' }}>
-                <span>Wholesale Price</span>
+                <span>{t('productDetail.wholesaleRate', 'Wholesale Price')}</span>
                 <span style={{ color: 'var(--primary-blue)', fontWeight: '700' }} className="tabular-nums">≤ ₹{maxPrice}</span>
               </h4>
               <input 
@@ -450,7 +450,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
 
             {/* Brands filter */}
             <div style={{ marginBottom: '22px', borderBottom: '1px solid #f1f5f9', paddingBottom: '18px' }}>
-              <h4 style={{ fontSize: '0.92rem', marginBottom: '10px', color: 'var(--text-dark)', fontWeight: '700' }}>Brands</h4>
+              <h4 style={{ fontSize: '0.92rem', marginBottom: '10px', color: 'var(--text-dark)', fontWeight: '700' }}>{t('hero.featuredBrands', 'Brands')}</h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '180px', overflowY: 'auto', paddingRight: '5px' }}>
                 {brands.map((br, i) => (
                   <label key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.88rem', cursor: 'pointer', color: selectedBrands.includes(br) ? 'var(--primary-blue)' : 'var(--text-dark)', fontWeight: selectedBrands.includes(br) ? '600' : '400' }}>
@@ -468,7 +468,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
 
             {/* Formulation Forms Filter */}
             <div>
-              <h4 style={{ fontSize: '0.92rem', marginBottom: '10px', color: 'var(--text-dark)', fontWeight: '700' }}>Formulation Form</h4>
+              <h4 style={{ fontSize: '0.92rem', marginBottom: '10px', color: 'var(--text-dark)', fontWeight: '700' }}>{t('productDetail.dosageForm', 'Formulation Form')}</h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '160px', overflowY: 'auto', paddingRight: '5px' }}>
                 {forms.map((fr, i) => (
                   <label key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.88rem', cursor: 'pointer', color: selectedForms.includes(fr) ? 'var(--primary-blue)' : 'var(--text-dark)', fontWeight: selectedForms.includes(fr) ? '600' : '400' }}>
@@ -478,7 +478,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
                       onChange={() => handleCheckboxChange('form', selectedForms, setSelectedForms, fr)}
                       style={{ accentColor: 'var(--primary-blue)', width: '15px', height: '15px', cursor: 'pointer' }}
                     />
-                    <span>{fr}</span>
+                    <span>{translateDosageForm(fr)}</span>
                   </label>
                 ))}
               </div>
@@ -510,7 +510,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
                   <span>{t('products.showing', 'Showing')} <strong className="tabular-nums">{products.length}</strong> {t('products.of', 'of')} <strong className="tabular-nums">{total}</strong> {t('products.productsCount', 'products')}</span>
                 )}
                 {searchParams.get('search') && (
-                  <span> matching &ldquo;<strong>{searchParams.get('search')}</strong>&rdquo;</span>
+                  <span> {t('products.matching', 'matching')} &ldquo;<strong>{searchParams.get('search')}</strong>&rdquo;</span>
                 )}
               </div>
             </div>
@@ -536,10 +536,10 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
           {/* Active Filter Chips */}
           {(selectedCategories.length > 0 || selectedBrands.length > 0 || selectedCompanies.length > 0 || selectedForms.length > 0 || maxPrice < MAX_PRICE_LIMIT || searchParams.get('search')) && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', padding: '4px 0' }}>
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', fontWeight: '600' }}>Active:</span>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', fontWeight: '600' }}>{t('products.activeFilters', 'Active:')}</span>
               {searchParams.get('search') && (
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', backgroundColor: '#e0f2fe', color: '#0369a1', padding: '3px 8px', borderRadius: '14px', fontSize: '0.78rem', fontWeight: '500' }}>
-                  Search: &ldquo;{searchParams.get('search')}&rdquo;
+                  {t('common.search', 'Search')}: &ldquo;{searchParams.get('search')}&rdquo;
                   <button onClick={() => removeFilterTag('search')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#0369a1', display: 'flex', alignItems: 'center' }}><X size={12} /></button>
                 </span>
               )}
@@ -551,7 +551,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
               ))}
               {selectedCategories.map((cat) => (
                 <span key={cat} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', backgroundColor: '#eff6ff', color: 'var(--primary-blue)', padding: '3px 8px', borderRadius: '14px', fontSize: '0.78rem', fontWeight: '500' }}>
-                  {cat}
+                  {translateCategory(cat)}
                   <button onClick={() => removeFilterTag('category', cat)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary-blue)', display: 'flex', alignItems: 'center' }}><X size={12} /></button>
                 </span>
               ))}
@@ -563,7 +563,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
               ))}
               {selectedForms.map((form) => (
                 <span key={form} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', backgroundColor: '#fef3c7', color: '#b45309', padding: '3px 8px', borderRadius: '14px', fontSize: '0.78rem', fontWeight: '500' }}>
-                  {form}
+                  {translateDosageForm(form)}
                   <button onClick={() => removeFilterTag('form', form)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#b45309', display: 'flex', alignItems: 'center' }}><X size={12} /></button>
                 </span>
               ))}
@@ -577,7 +577,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
                 onClick={handleResetFilters}
                 style={{ fontSize: '0.78rem', color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
               >
-                Clear all
+                {t('products.clearAllFilters', 'Clear all')}
               </button>
             </div>
           )}
@@ -588,17 +588,17 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
           ) : products.length === 0 ? (
             <div className="card" style={{ padding: '70px 20px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
               <SlidersHorizontal size={44} color="var(--text-light)" />
-              <h3 style={{ fontSize: '1.2rem', color: 'var(--text-dark)' }}>No Products Found</h3>
+              <h3 style={{ fontSize: '1.2rem', color: 'var(--text-dark)' }}>{t('products.noProductsFound', 'No Products Found')}</h3>
               <p style={{ color: 'var(--text-medium)', maxWidth: '420px', fontSize: '0.9rem' }}>
-                We couldn&apos;t find any medicines matching your active filters. Try resetting or adjusting your search term.
+                {t('products.noProductsDesc', "We couldn't find any medicines matching your active filters. Try resetting or adjusting your search term.")}
               </p>
               <button onClick={handleResetFilters} className="btn btn-primary btn-sm">
-                Reset All Filters
+                {t('products.resetFilters', 'Reset All Filters')}
               </button>
             </div>
           ) : (
             <>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '18px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: '18px' }}>
                 {products.map((product) => (
                   <ProductCard key={product._id} product={product} addToCart={addToCart} />
                 ))}
@@ -613,7 +613,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
                     className="btn btn-outline btn-sm"
                     style={{ borderRadius: '6px', opacity: page === 1 ? 0.4 : 1, display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '6px 12px' }}
                   >
-                    <ChevronLeft size={14} /> Prev
+                    <ChevronLeft size={14} /> {t('products.prevPage', 'Prev')}
                   </button>
 
                   {getPaginationItems().map((pItem, idx) => {
@@ -642,7 +642,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
                     className="btn btn-outline btn-sm"
                     style={{ borderRadius: '6px', opacity: page === pages ? 0.4 : 1, display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '6px 12px' }}
                   >
-                    Next <ChevronRight size={14} />
+                    {t('products.nextPage', 'Next')} <ChevronRight size={14} />
                   </button>
                 </div>
               )}

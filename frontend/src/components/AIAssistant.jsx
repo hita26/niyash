@@ -3,14 +3,16 @@ import {
   Sparkles, X, Send, Bot, RefreshCw, ShoppingBag, 
   ChevronDown, ArrowRight, Check, AlertCircle, Info, Package
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function AIAssistant({ addToCart }) {
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
       id: 'welcome-1',
       sender: 'assistant',
-      text: 'Hello! I am **Niyansh AI**, your pharmaceutical & stock assistant.\n\nAsk me about medicine availability, active generic compositions (salts), packing, or wholesale pricing!',
+      text: t('aiAssistant.welcome', 'Hello! I am **Niyansh AI**, your pharmaceutical & stock assistant.\n\nAsk me about medicine availability, active generic compositions (salts), packing, or wholesale pricing!'),
       timestamp: new Date(),
       suggestedProducts: [],
     },
@@ -23,10 +25,10 @@ export default function AIAssistant({ addToCart }) {
 
   // Quick suggestion chips
   const quickChips = [
-    'Amoxyclav 625 stock?',
-    'Find Paracetamol formulations',
-    'Antibiotics in stock',
-    'How to place bulk order?',
+    t('aiAssistant.chip1', 'Amoxyclav 625 stock?'),
+    t('aiAssistant.chip2', 'Find Paracetamol formulations'),
+    t('aiAssistant.chip3', 'Antibiotics in stock'),
+    t('aiAssistant.chip4', 'How to place bulk order?'),
   ];
 
   // Auto scroll to bottom of chat
@@ -220,7 +222,7 @@ export default function AIAssistant({ addToCart }) {
               border: '2px solid #0c3d6c',
             }} />
           </div>
-          <span>Ask Niyansh AI</span>
+          <span>{t('aiAssistant.title', 'Ask Niyansh AI')}</span>
         </button>
       )}
 
@@ -298,7 +300,7 @@ export default function AIAssistant({ addToCart }) {
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 700, letterSpacing: '0.2px' }}>
-                    Niyansh AI
+                    {t('aiAssistant.title', 'Niyansh AI')}
                   </h3>
                   <span
                     style={{
@@ -314,11 +316,11 @@ export default function AIAssistant({ addToCart }) {
                     }}
                   >
                     <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: '#4ade80' }} />
-                    Online
+                    {t('aiAssistant.online', 'Online')}
                   </span>
                 </div>
                 <p style={{ margin: 0, fontSize: '11px', color: '#cbd5e1' }}>
-                  Wholesale Medicine & Stock Assistant
+                  {t('aiAssistant.subtitle', 'Wholesale Medicine & Stock Assistant')}
                 </p>
               </div>
             </div>
@@ -419,7 +421,7 @@ export default function AIAssistant({ addToCart }) {
                   >
                     <div style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <Package size={12} />
-                      Matching Catalog Products:
+                      {t('aiAssistant.matchingProducts', 'Matching Catalog Products:')}
                     </div>
                     {msg.suggestedProducts.map((prod) => (
                       <div
@@ -459,7 +461,7 @@ export default function AIAssistant({ addToCart }) {
                                 fontWeight: 600,
                               }}
                             >
-                              {prod.inStock ? 'In Stock' : 'Out of Stock'}
+                              {prod.inStock ? t('products.inStock', 'In Stock') : t('products.outOfStock', 'Out of Stock')}
                             </span>
                           </div>
                         </div>
@@ -488,12 +490,12 @@ export default function AIAssistant({ addToCart }) {
                             {addedItemIds[prod._id] ? (
                               <>
                                 <Check size={12} />
-                                Added
+                                {t('aiAssistant.added', 'Added')}
                               </>
                             ) : (
                               <>
                                 <ShoppingBag size={12} />
-                                + Cart
+                                {t('aiAssistant.addCart', '+ Cart')}
                               </>
                             )}
                           </button>
@@ -525,7 +527,7 @@ export default function AIAssistant({ addToCart }) {
                   }}
                 >
                   <Sparkles size={14} className="animate-spin" style={{ color: '#0c3d6c' }} />
-                  <span style={{ fontSize: '12px', color: '#64748b' }}>Consulting pharma catalog...</span>
+                  <span style={{ fontSize: '12px', color: '#64748b' }}>{t('aiAssistant.consulting', 'Consulting pharma catalog...')}</span>
                 </div>
               </div>
             )}
@@ -593,7 +595,7 @@ export default function AIAssistant({ addToCart }) {
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask about medicines, stock, compositions..."
+                placeholder={t('aiAssistant.inputPlaceholder', 'Ask about medicines, stock, compositions...')}
                 disabled={isLoading}
                 style={{
                   flex: 1,
@@ -636,7 +638,7 @@ export default function AIAssistant({ addToCart }) {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
               <Info size={10} style={{ color: '#94a3b8' }} />
               <span style={{ fontSize: '10px', color: '#94a3b8' }}>
-                For licensed B2B wholesale enquiries. Not direct consumer medical advice.
+                {t('aiAssistant.disclaimer', 'For licensed B2B wholesale enquiries. Not direct consumer medical advice.')}
               </span>
             </div>
           </div>

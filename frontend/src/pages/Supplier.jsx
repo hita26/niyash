@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Send, CheckCircle2, Factory, ShieldCheck, TrendingUp, AlertCircle, Upload, FileSpreadsheet, FileText, X, Check } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 function Supplier() {
+  const { t, language } = useLanguage();
   const [companyName, setCompanyName] = useState('');
   const [contactName, setContactName] = useState('');
   const [designation, setDesignation] = useState('');
@@ -26,7 +28,13 @@ function Supplier() {
 
     // Check size limit: 10MB for product portfolio catalogs/spreadsheets
     if (file.size > 10 * 1024 * 1024) {
-      setErrorMessage(`File "${file.name}" exceeds 10MB limit.`);
+      setErrorMessage(
+        language === 'gu'
+          ? `ફાઇલ "${file.name}" 10MB ની મર્યાદા કરતાં મોટી છે.`
+          : language === 'hi'
+          ? `फ़ाइल "${file.name}" 10MB की सीमा से अधिक है।`
+          : `File "${file.name}" exceeds 10MB limit.`
+      );
       return;
     }
 
@@ -74,17 +82,35 @@ function Supplier() {
 
     const cleanPhone = phone.replace(/\D/g, '');
     if (cleanPhone.length !== 10) {
-      setErrorMessage('Phone number must contain exactly 10 numeric digits.');
+      setErrorMessage(
+        language === 'gu'
+          ? 'મોબાઈલ નંબર બરાબર ૧૦ આંકડાનો હોવો આવશ્યક છે.'
+          : language === 'hi'
+          ? 'मोबाइल नंबर ठीक १० अंकों का होना चाहिए।'
+          : 'Phone number must contain exactly 10 numeric digits.'
+      );
       return;
     }
 
     if (!designation || !designation.trim()) {
-      setErrorMessage('Please enter your Designation.');
+      setErrorMessage(
+        language === 'gu'
+          ? 'કૃપા કરીને આપનો હોદ્દો દાખલ કરો.'
+          : language === 'hi'
+          ? 'कृपया अपना पद दर्ज करें।'
+          : 'Please enter your Designation.'
+      );
       return;
     }
 
     if (!portfolioFile && !portfolioUrl) {
-      setErrorMessage('Please upload your Product Portfolio file (JPG, PNG, Excel or PDF).');
+      setErrorMessage(
+        language === 'gu'
+          ? 'કૃપા કરીને પ્રોડક્ટ કેટલોગ ફાઇલ (JPG, PNG, Excel કે PDF) અપલોડ કરો.'
+          : language === 'hi'
+          ? 'कृपया उत्पाद कैटलॉग फ़ाइल (JPG, PNG, Excel या PDF) अपलोड करें।'
+          : 'Please upload your Product Portfolio file (JPG, PNG, Excel or PDF).'
+      );
       return;
     }
 
@@ -126,11 +152,17 @@ function Supplier() {
         setPortfolioUrl('');
         setTimeout(() => setIsSuccess(false), 6000);
       } else {
-        setErrorMessage(data.message || 'Failed to submit supplier details.');
+        setErrorMessage(data.message || t('common.error', 'Failed to submit supplier details.'));
       }
     } catch (error) {
       console.error('Error submitting supplier form:', error);
-      setErrorMessage('Network connection error. Please try again.');
+      setErrorMessage(
+        language === 'gu'
+          ? 'નેટવર્ક કનેક્શન એરર. કૃપા કરીને ફરી પ્રયાસ કરો.'
+          : language === 'hi'
+          ? 'नेटवर्क कनेक्शन त्रुटि। कृपया पुनः प्रयास करें।'
+          : 'Network connection error. Please try again.'
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -148,11 +180,13 @@ function Supplier() {
               padding: '6px 14px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: '700',
               textTransform: 'uppercase', display: 'inline-block', marginBottom: '15px'
             }}>
-              Manufacturer & Importer Channel
+              {t('supplier.badge', 'Pharmaceutical Manufacturer Onboarding')}
             </span>
-            <h1 style={{ fontSize: '2.5rem', marginBottom: '20px', lineHeight: '1.2' }}>Become a Supplier</h1>
+            <h1 style={{ fontSize: '2.5rem', marginBottom: '20px', lineHeight: '1.2' }}>
+              {t('supplier.title', 'Supply Your Formulations to Niyansh Pharma')}
+            </h1>
             <p style={{ color: 'var(--text-medium)', fontSize: '1.05rem', lineHeight: '1.6' }}>
-              Are you a pharmaceutical manufacturer, wellness product importer, or brand owner? Expand your reach in Gujarat. Partner with Niyansh Pharma to supply your high-quality products to our extensive network of pharmacies, clinics, and hospitals.
+              {t('supplier.subtitle', 'Expand your pharmaceutical reach across 1,200+ licensed chemists, clinics, and hospitals in Saurashtra and Gujarat. We invite certified manufacturers to supply quality medicines through our established distribution network.')}
             </p>
           </div>
 
@@ -162,8 +196,12 @@ function Supplier() {
                 <TrendingUp size={20} />
               </div>
               <div>
-                <h3 style={{ fontSize: '1.1rem', marginBottom: '4px' }}>Market Expansion</h3>
-                <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem' }}>Instant distribution leverage across Rajkot, Saurashtra, and neighboring districts in Gujarat.</p>
+                <h3 style={{ fontSize: '1.1rem', marginBottom: '4px' }}>
+                  {t('supplier.benefit1Title', 'PAN Saurashtra Reach')}
+                </h3>
+                <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem' }}>
+                  {t('supplier.benefit1Desc', 'Instant access to a mature network of independent chemists and hospital procurement desks.')}
+                </p>
               </div>
             </div>
 
@@ -172,8 +210,12 @@ function Supplier() {
                 <Factory size={20} />
               </div>
               <div>
-                <h3 style={{ fontSize: '1.1rem', marginBottom: '4px' }}>Bulk Procurement</h3>
-                <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem' }}>We purchase in bulk volumes with organized logistical handling, batch verification, and WHO-GMP compliant storage standards.</p>
+                <h3 style={{ fontSize: '1.1rem', marginBottom: '4px' }}>
+                  {t('supplier.benefit2Title', 'Timely Settlement Cycles')}
+                </h3>
+                <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem' }}>
+                  {t('supplier.benefit2Desc', 'Transparent billing and reliable payment reconciliation compliant with agreed payment schedules.')}
+                </p>
               </div>
             </div>
 
@@ -182,8 +224,12 @@ function Supplier() {
                 <ShieldCheck size={20} />
               </div>
               <div>
-                <h3 style={{ fontSize: '1.1rem', marginBottom: '4px' }}>Ethical Business Terms</h3>
-                <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem' }}>Prompt payments, transparent billing reconciliation, and reliable long-term manufacturer partnerships.</p>
+                <h3 style={{ fontSize: '1.1rem', marginBottom: '4px' }}>
+                  {t('supplier.benefit3Title', 'Validated Warehousing')}
+                </h3>
+                <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem' }}>
+                  {t('supplier.benefit3Desc', 'WHO-GDP compliant storage facilities with strictly controlled temperature and humidity parameters.')}
+                </p>
               </div>
             </div>
           </div>
@@ -192,15 +238,15 @@ function Supplier() {
         {/* Form Column */}
         <div className="card" style={{ padding: '30px' }}>
           <h2 style={{ fontSize: '1.4rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '10px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Factory size={22} color="var(--primary-blue)" /> Supplier Registration Form
+            <Factory size={22} color="var(--primary-blue)" /> {t('supplier.formTitle', 'Manufacturer Onboarding Form')}
           </h2>
 
           {isSuccess ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '15px', textAlign: 'center', padding: '40px 0' }}>
               <CheckCircle2 size={54} color="var(--secondary-green)" />
-              <h3 style={{ color: 'var(--secondary-green)' }}>Details Submitted!</h3>
+              <h3 style={{ color: 'var(--secondary-green)' }}>{t('common.success', 'Details Submitted!')}</h3>
               <p style={{ color: 'var(--text-medium)', fontSize: '0.95rem' }}>
-                Thank you for reaching out. Our business development team will review your product portfolio and contact you for trade terms.
+                {t('supplier.successNotice', 'Supplier registration received. Our procurement team will review your portfolio and initiate onboarding.')}
               </p>
             </div>
           ) : (
@@ -216,13 +262,13 @@ function Supplier() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="supplier-company" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                    Company / Entity Name *
+                    {t('supplier.companyLabel', 'Manufacturing / Pharmaceutical Firm *')}
                   </label>
                   <input 
                     id="supplier-company"
                     type="text" 
                     required 
-                    placeholder="E.g., Sunrise Pharma Labs"
+                    placeholder={language === 'gu' ? 'દા.ત. સનરાઇઝ ફાર્મા લેબ્સ' : language === 'hi' ? 'उदा. सनराइज फार्मा लैब्स' : 'E.g., Sunrise Pharma Labs'}
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
                     style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
@@ -230,13 +276,13 @@ function Supplier() {
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="supplier-contact" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                    Contact Person Name *
+                    {t('supplier.contactLabel', 'Contact Person Name *')}
                   </label>
                   <input 
                     id="supplier-contact"
                     type="text" 
                     required 
-                    placeholder="Enter full name"
+                    placeholder={language === 'gu' ? 'પૂરું નામ દાખલ કરો' : language === 'hi' ? 'पूरा नाम दर्ज करें' : 'Enter full name'}
                     value={contactName}
                     onChange={(e) => setContactName(e.target.value)}
                     style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
@@ -248,13 +294,13 @@ function Supplier() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="supplier-designation" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                    Designation *
+                    {t('supplier.designationLabel', 'Designation *')}
                   </label>
                   <input 
                     id="supplier-designation"
                     type="text" 
                     required 
-                    placeholder="E.g., Sales Director, Managing Director, National Head"
+                    placeholder={language === 'gu' ? 'સેલ્સ ડિરેક્ટર, મેનેજિંગ ડિરેક્ટર' : language === 'hi' ? 'सेल्स डायरेक्टर, प्रबंध निदेशक' : 'E.g., Sales Director, Managing Director'}
                     value={designation}
                     onChange={(e) => setDesignation(e.target.value)}
                     style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
@@ -262,14 +308,14 @@ function Supplier() {
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="supplier-phone" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                    Mobile Number *
+                    {t('partner.phoneLabel', '10-Digit Mobile Number *')}
                   </label>
                   <input 
                     id="supplier-phone"
                     type="tel" 
                     required 
                     maxLength={10}
-                    placeholder="10-digit mobile number"
+                    placeholder={language === 'gu' ? '૧૦ આંકડાનો મોબાઈલ નંબર' : language === 'hi' ? '१० अंकों का मोबाइल नंबर' : '10-digit mobile number'}
                     value={phone}
                     onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                     style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
@@ -281,7 +327,7 @@ function Supplier() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="supplier-email" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                    Business Email *
+                    {t('cart.email', 'Business Email *')}
                   </label>
                   <input 
                     id="supplier-email"
@@ -295,13 +341,13 @@ function Supplier() {
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="supplier-gst" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                    GSTIN (GST Number) *
+                    {t('supplier.gstLabel', 'GSTIN Number *')}
                   </label>
                   <input 
                     id="supplier-gst"
                     type="text" 
                     required
-                    placeholder="Enter GSTIN number"
+                    placeholder={language === 'gu' ? 'જીએસટી નંબર દાખલ કરો' : language === 'hi' ? 'जीएसटी नंबर दर्ज करें' : 'Enter GSTIN number'}
                     value={gstNumber}
                     onChange={(e) => setGstNumber(e.target.value)}
                     style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
@@ -312,13 +358,13 @@ function Supplier() {
               {/* Row 4: Company Address */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                 <label htmlFor="supplier-address" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                  Company / Factory Address *
+                  {t('supplier.addressLabel', 'Plant / Corporate Address *')}
                 </label>
                 <input 
                   id="supplier-address"
                   type="text" 
                   required 
-                  placeholder="Factory/Office Address, State, Pincode"
+                  placeholder={language === 'gu' ? 'ફેક્ટરી/ઓફિસ સરનામું, રાજ્ય, પીનકોડ' : language === 'hi' ? 'फैक्ट्री/कार्यालय पता, राज्य, पिनकोड' : 'Factory/Office Address, State, Pincode'}
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
@@ -329,7 +375,7 @@ function Supplier() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <label htmlFor="supplier-portfolio-upload" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                    Product Portfolio Upload (JPG, PNG, Excel, PDF) *
+                    {t('supplier.uploadPortfolio', 'Product Catalog / Price List (Excel, PDF or JPG) *')}
                   </label>
                   <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Max 10 MB</span>
                 </div>
@@ -379,11 +425,11 @@ function Supplier() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--primary-blue)' }}>
                         <Upload size={20} />
                         <span style={{ fontSize: '0.88rem', fontWeight: '700' }}>
-                          {isUploadingFile ? 'Uploading file...' : 'Choose Product Portfolio File'}
+                          {isUploadingFile ? t('common.loading', 'Uploading file...') : t('supplier.dragOrClick', 'Click to browse or drag file here (Max 10MB)')}
                         </span>
                       </div>
                       <p style={{ fontSize: '0.78rem', color: 'var(--text-medium)', margin: 0 }}>
-                        Supported formats: JPG, PNG image, Excel (.xlsx, .xls, .csv), or PDF price list
+                        {language === 'gu' ? 'સમર્થિત ફોર્મેટ: JPG, PNG, Excel (.xlsx, .xls) અથવા PDF' : language === 'hi' ? 'समर्थित प्रारूप: JPG, PNG, Excel (.xlsx, .xls) या PDF' : 'Supported formats: JPG, PNG image, Excel (.xlsx, .xls, .csv), or PDF price list'}
                       </p>
                       <label style={{
                         display: 'inline-flex',
@@ -399,7 +445,7 @@ function Supplier() {
                         marginTop: '4px'
                       }}>
                         <Upload size={14} />
-                        <span>Select File</span>
+                        <span>{language === 'gu' ? 'ફાઇલ પસંદ કરો' : language === 'hi' ? 'फ़ाइल चुनें' : 'Select File'}</span>
                         <input
                           id="supplier-portfolio-upload"
                           type="file"
@@ -416,13 +462,13 @@ function Supplier() {
               {/* Row 6: Product Portfolio Details / Notes */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                 <label htmlFor="supplier-msg" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                  Product Portfolio & Certifications Details *
+                  {t('supplier.notesLabel', 'Formulation Portfolio Details / Message')} *
                 </label>
                 <textarea 
                   id="supplier-msg"
                   required
                   rows="3" 
-                  placeholder="Mention product categories (e.g., Generic medicines, Ayurvedic, Surgical items) and certifications (WHO-GMP, ISO)..."
+                  placeholder={language === 'gu' ? 'દવાની કેટેગરી (દા.ત. જેનરિક દવાઓ, આયુર્વેદિક, સર્જિકલ) અને પ્રમાણપત્રો (WHO-GMP) જણાવો...' : language === 'hi' ? 'दवा श्रेणी (उदा. जेनेरिक दवाएं, आयुर्वेदिक, सर्जिकल) और प्रमाणन (WHO-GMP) का उल्लेख करें...' : 'Mention product categories and certifications (WHO-GMP)...'}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem', resize: 'vertical' }}
@@ -436,7 +482,7 @@ function Supplier() {
                 style={{ width: '100%', height: '45px', gap: '10px', marginTop: '10px' }}
               >
                 <Send size={16} />
-                {isSubmitting ? 'Submitting details...' : 'Submit Supplier Details'}
+                {isSubmitting ? t('supplier.submittingBtn', 'Registering...') : t('supplier.submitBtn', 'Register as Supplier')}
               </button>
             </form>
           )}

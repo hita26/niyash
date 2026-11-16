@@ -7,7 +7,7 @@ import {
 import { useLanguage } from '../context/LanguageContext';
 
 function Home({ addToCart }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [heroSearch, setHeroSearch] = useState('');
 
@@ -100,7 +100,11 @@ function Home({ addToCart }) {
   ];
 
   const handleQuickWhatsApp = () => {
-    const msg = "Hello Niyansh Pharma, I would like to place a quick wholesale order. Please guide me.";
+    const msg = language === 'gu'
+      ? "નમસ્તે નિયાંશ ફાર્મા, મારે હોલસેલ દવાનો ઓર્ડર આપવો છે. કૃપા કરીને વિગતો આપો."
+      : language === 'hi'
+      ? "नमस्ते नियांश फार्मा, मुझे थोक दवा ऑर्डर करना है। कृपया सहायता करें।"
+      : "Hello Niyansh Pharma, I would like to place a quick wholesale order. Please guide me.";
     window.open(`https://wa.me/919909923130?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
@@ -285,15 +289,15 @@ function Home({ addToCart }) {
       {/* Easy Ordering Process */}
       <section className="section" style={{ backgroundColor: '#ffffff' }}>
         <div className="container">
-          <h2 className="section-title">Easy Ordering Process</h2>
-          <p className="section-subtitle">How medical stores and healthcare institutions order from us.</p>
+          <h2 className="section-title">{t('orderingProcess.title', 'Easy Ordering Process')}</h2>
+          <p className="section-subtitle">{t('orderingProcess.subtitle', 'How medical stores and healthcare institutions order from us in 4 simple steps.')}</p>
 
           <div className="grid-4" style={{ position: 'relative' }}>
             {[
-              { step: '01', title: 'Search Products', desc: 'Browse our wholesale list of medicines and select required quantities.' },
-              { step: '02', title: 'Add to Cart', desc: 'Add selected items to your Cart. Include prescription if needed.' },
-              { step: '03', title: 'Submit Details', desc: 'Provide your pharmacy or clinic info and send the enquiry.' },
-              { step: '04', title: 'Get Fast Quote', desc: 'Our team will contact you with wholesale pricing and dispatch details.' }
+              { step: '01', title: t('orderingProcess.step1Title', 'Search Medicines'), desc: t('orderingProcess.step1Desc', 'Browse our 9,500+ product catalog by brand name, salt composition, or company.') },
+              { step: '02', title: t('orderingProcess.step2Title', 'Add to Inquiry Cart'), desc: t('orderingProcess.step2Desc', 'Select required pack sizes and quantities into your inquiry cart.') },
+              { step: '03', title: t('orderingProcess.step3Title', 'Confirm Store Details'), desc: t('orderingProcess.step3Desc', 'Enter your pharmacy name, mobile number, and drug license details.') },
+              { step: '04', title: t('orderingProcess.step4Title', 'Instant Dispatch & Delivery'), desc: t('orderingProcess.step4Desc', 'Receive instant wholesale invoice quotation and expedited delivery.') }
             ].map((step, i) => (
               <div 
                 key={i} 
@@ -326,9 +330,11 @@ function Home({ addToCart }) {
       }}>
         <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '30px' }}>
           <div>
-            <h2 style={{ color: '#ffffff', fontSize: '2rem', marginBottom: '10px' }}>Quick Wholesale Enquiry</h2>
+            <h2 style={{ color: '#ffffff', fontSize: '2rem', marginBottom: '10px' }}>
+              {t('quickOrder.title', 'B2B Fast Quick Order Workstation')}
+            </h2>
             <p style={{ color: '#e2e8f0', fontSize: '1.05rem', maxWidth: '700px' }}>
-              Have a bulk pharmaceutical requirement? Send us a list or photo of your requirement on WhatsApp, and we will get back to you with rates instantly.
+              {t('quickOrder.subtitle', 'Search 9,500+ formulations, bulk add to cart, and download or print wholesale purchase invoices instantly.')}
             </p>
           </div>
           <div>
@@ -341,7 +347,7 @@ function Home({ addToCart }) {
               }}
             >
               <MessageSquare size={18} />
-              Chat on WhatsApp
+              {t('hero.whatsappOrder', 'WhatsApp Order')}
             </button>
           </div>
         </div>
@@ -350,8 +356,8 @@ function Home({ addToCart }) {
       {/* Brands We Deal In Section */}
       <section className="section" style={{ backgroundColor: '#ffffff' }}>
         <div className="container">
-          <h2 className="section-title">Brands We Deal In</h2>
-          <p className="section-subtitle">We distribute high-quality medical supplies from reputed pharmaceutical corporations.</p>
+          <h2 className="section-title">{t('about.brandNetworkTitle', 'Brands We Deal In')}</h2>
+          <p className="section-subtitle">{t('about.brandNetworkSubtitle', 'We distribute high-quality medical supplies from reputed pharmaceutical corporations.')}</p>
           
           <div style={{
             display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '12px',

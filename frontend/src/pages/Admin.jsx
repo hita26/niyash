@@ -555,6 +555,7 @@ const formatDate = (dateStr) => {
 };
 
 function Admin() {
+  const { t, formatCurrency, formatDate, translateStatus, translatePaymentStatus } = useLanguage();
   // Authentication State
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [email, setEmail] = useState('');
@@ -2563,14 +2564,14 @@ _Helpline: +91 9316566894_`;
               className="btn btn-outline btn-sm"
               style={{ gap: '6px', fontSize: '0.82rem', fontWeight: '700' }}
             >
-              <ExternalLink size={14} /> Quick Matrix
+              <ExternalLink size={14} /> {t('admin.quickMatrixBtn', 'Quick Matrix')}
             </a>
             <button
               onClick={handleDownloadOrdersCSV}
               className="btn btn-primary btn-sm"
               style={{ gap: '6px', fontSize: '0.82rem', fontWeight: '700' }}
             >
-              <FileSpreadsheet size={14} /> Export Orders (Excel)
+              <FileSpreadsheet size={14} /> {t('admin.exportOrdersBtn', 'Export Orders (Excel)')}
             </button>
           </div>
         </div>
@@ -2583,7 +2584,7 @@ _Helpline: +91 9316566894_`;
           <div style={{ borderBottom: '1px solid var(--border-light)', paddingBottom: '15px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#22c55e', animation: 'pulse 2s infinite' }}></div>
-              <h3 style={{ fontSize: '1.15rem', color: 'var(--text-dark)', margin: 0 }}>Admin Console</h3>
+              <h3 style={{ fontSize: '1.15rem', color: 'var(--text-dark)', margin: 0 }}>{t('admin.consoleSidebarTitle', 'Admin Console')}</h3>
             </div>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', display: 'block', marginTop: '4px' }}>
               Niyansh Pharma B2B Portal
@@ -2733,7 +2734,7 @@ _Helpline: +91 9316566894_`;
               className="btn btn-outline btn-sm"
               style={{ width: '100%', fontSize: '0.8rem', gap: '6px' }}
             >
-              <RefreshCw size={13} /> Refresh Live Data
+              <RefreshCw size={13} /> {t('admin.refreshData', 'Refresh Live Data')}
             </button>
 
             <button 
@@ -2741,7 +2742,7 @@ _Helpline: +91 9316566894_`;
               className="btn btn-outline btn-sm"
               style={{ width: '100%', borderColor: '#ef4444', color: '#ef4444', gap: '6px', fontSize: '0.8rem' }}
             >
-              <LogOut size={13} /> Log Out
+              <LogOut size={13} /> {t('admin.logout', 'Log Out')}
             </button>
           </div>
         </aside>
@@ -2765,42 +2766,42 @@ _Helpline: +91 9316566894_`;
                   style={{ padding: '4px 10px', fontSize: '0.75rem', gap: '4px', height: '30px' }}
                   title="Refresh Live Data"
                 >
-                  <RefreshCw size={12} className={isLoading ? 'animate-spin' : ''} /> Refresh
+                  <RefreshCw size={12} className={isLoading ? 'animate-spin' : ''} /> {t('admin.refresh', 'Refresh')}
                 </button>
                 <button
                   onClick={handleLogout}
                   className="btn btn-sm"
                   style={{ padding: '4px 10px', fontSize: '0.75rem', color: '#ef4444', backgroundColor: '#fee2e2', border: 'none', borderRadius: '6px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '4px', height: '30px' }}
                 >
-                  <LogOut size={12} /> Exit
+                  <LogOut size={12} /> {t('admin.exit', 'Exit')}
                 </button>
               </div>
             </div>
 
             <div className="admin-mobile-tabs-scroll">
               <button onClick={() => setActiveTab('overview')} className={`admin-tab-chip ${activeTab === 'overview' ? 'active' : ''}`}>
-                <LayoutDashboard size={14} /> Overview
+                <LayoutDashboard size={14} /> {t('admin.tabOverview', 'Overview')}
               </button>
               <button onClick={() => setActiveTab('orders')} className={`admin-tab-chip ${activeTab === 'orders' ? 'active' : ''}`}>
-                <Package size={14} /> Orders ({orders.length})
+                <Package size={14} /> {t('admin.tabOrders', 'Orders')} ({orders.length})
               </button>
               <button onClick={() => setActiveTab('ledgers')} className={`admin-tab-chip ${activeTab === 'ledgers' ? 'active' : ''}`}>
-                <CreditCard size={14} /> Ledgers {overdueLedgersCount > 0 ? `(${overdueLedgersCount} Due)` : `(${ledgers.length})`}
+                <CreditCard size={14} /> {t('admin.tabLedgers', 'Ledgers')} {overdueLedgersCount > 0 ? `(${overdueLedgersCount} Due)` : `(${ledgers.length})`}
               </button>
               <button onClick={() => setActiveTab('news')} className={`admin-tab-chip ${activeTab === 'news' ? 'active' : ''}`}>
-                <Flame size={14} /> Schemes ({news.length})
+                <Flame size={14} /> {t('admin.tabBulletins', 'Schemes')} ({news.length})
               </button>
               <button onClick={() => setActiveTab('products')} className={`admin-tab-chip ${activeTab === 'products' ? 'active' : ''}`}>
-                <ShoppingBag size={14} /> Products ({productStats.totalProducts || products.length})
+                <ShoppingBag size={14} /> {t('admin.tabProducts', 'Products')} ({productStats.totalProducts || products.length})
               </button>
               <button onClick={() => setActiveTab('companies')} className={`admin-tab-chip ${activeTab === 'companies' ? 'active' : ''}`}>
-                <Building2 size={14} /> Companies ({totalCompaniesCount || companies.length})
+                <Building2 size={14} /> {t('admin.tabCompanies', 'Companies')} ({totalCompaniesCount || companies.length})
               </button>
               <button onClick={() => setActiveTab('enquiries')} className={`admin-tab-chip ${activeTab === 'enquiries' ? 'active' : ''}`}>
-                <MessageSquare size={14} /> Enquiries ({enquiries.length})
+                <MessageSquare size={14} /> {t('admin.tabEnquiries', 'Enquiries')} ({enquiries.length})
               </button>
               <button onClick={() => setActiveTab('careers')} className={`admin-tab-chip ${activeTab === 'careers' ? 'active' : ''}`}>
-                <Briefcase size={14} /> Careers ({careers.length})
+                <Briefcase size={14} /> {t('admin.tabCareers', 'Careers')} ({careers.length})
               </button>
             </div>
           </div>

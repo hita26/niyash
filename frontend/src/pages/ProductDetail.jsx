@@ -13,7 +13,7 @@ import {
 import { useLanguage } from '../context/LanguageContext';
 
 function ProductDetail({ addToCart }) {
-  const { t } = useLanguage();
+  const { t, translateCategory, translateDosageForm, formatCurrency } = useLanguage();
   const { id } = useParams();
   const { isLoggedIn, openAuth } = useAuth();
   const [product, setProduct] = useState(null);
@@ -65,7 +65,7 @@ function ProductDetail({ addToCart }) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', gap: '15px' }}>
         <div style={{ border: '4px solid #cbd5e1', borderTop: '4px solid var(--primary-blue)', borderRadius: '50%', width: '44px', height: '44px', animation: 'spin 1s linear infinite' }}></div>
-        <p style={{ color: 'var(--text-medium)', fontSize: '0.95rem' }}>Loading formulation details...</p>
+        <p style={{ color: 'var(--text-medium)', fontSize: '0.95rem' }}>{t('common.loading', 'Loading formulation details...')}</p>
       </div>
     );
   }
@@ -75,12 +75,12 @@ function ProductDetail({ addToCart }) {
       <div className="container section" style={{ textAlign: 'center', padding: '60px 20px' }}>
         <div className="card" style={{ maxWidth: '480px', margin: '0 auto', padding: '40px' }}>
           <AlertTriangle size={48} color="#ef4444" style={{ margin: '0 auto 16px' }} />
-          <h2 style={{ marginBottom: '10px', color: 'var(--text-dark)' }}>Product Not Found</h2>
+          <h2 style={{ marginBottom: '10px', color: 'var(--text-dark)' }}>{t('productDetail.notFoundTitle', 'Product Not Found')}</h2>
           <p style={{ margin: '0 0 24px', color: 'var(--text-medium)' }}>
             The medicine or formulation you requested does not exist or has been removed from catalog.
           </p>
           <Link to="/products" className="btn btn-primary btn-sm">
-            ← Return to All Products
+            {t('productDetail.returnToProducts', '← Return to All Products')}
           </Link>
         </div>
       </div>
@@ -140,9 +140,9 @@ function ProductDetail({ addToCart }) {
         {/* Breadcrumb & Navigation Bar */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', marginBottom: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--text-medium)', flexWrap: 'wrap' }}>
-            <Link to="/" style={{ color: 'var(--text-medium)', textDecoration: 'none' }}>Home</Link>
+            <Link to="/" style={{ color: 'var(--text-medium)', textDecoration: 'none' }}>{t('nav.home', 'Home')}</Link>
             <ChevronRight size={14} />
-            <Link to="/products" style={{ color: 'var(--text-medium)', textDecoration: 'none' }}>Products</Link>
+            <Link to="/products" style={{ color: 'var(--text-medium)', textDecoration: 'none' }}>{t('nav.products', 'Products')}</Link>
             {product.category && (
               <>
                 <ChevronRight size={14} />
@@ -164,7 +164,7 @@ function ProductDetail({ addToCart }) {
               style={{ padding: '5px 12px', fontSize: '0.78rem', gap: '5px', borderRadius: '20px', backgroundColor: '#fff' }}
               title="Copy product link"
             >
-              <Share2 size={13} /> {copied ? 'Link Copied!' : 'Share'}
+              <Share2 size={13} /> {copied ? t('productDetail.linkCopied', 'Link Copied!') : t('productDetail.share', 'Share')}
             </button>
             <Link 
               to="/products" 
@@ -459,7 +459,7 @@ function ProductDetail({ addToCart }) {
                             MRP ₹{unitMrp.toFixed(2)}
                           </span>
                           <span style={{ fontSize: '0.78rem', backgroundColor: '#ecfdf5', color: '#059669', fontWeight: '800', padding: '2px 8px', borderRadius: '6px' }}>
-                            {marginPercent}% MARGIN
+                            {marginPercent}% {t('products.margin', 'MARGIN')}
                           </span>
                           <span style={{ fontSize: '0.75rem', color: '#059669', fontWeight: '600' }}>
                             (Save ₹{unitSavings.toFixed(2)}/unit)
@@ -533,10 +533,10 @@ function ProductDetail({ addToCart }) {
                     </div>
                     <div>
                       <div style={{ fontSize: '0.88rem', fontWeight: '800', color: 'var(--primary-blue)' }}>
-                        Wholesale PTR Rate Protected
+                        {t('productDetail.wholesaleProtected', 'Wholesale PTR Rate Protected')}
                       </div>
                       <div style={{ fontSize: '0.78rem', color: '#475569' }}>
-                        Special wholesale PTR rates and chemist trade margins are visible only to verified accounts.
+                        {t('productDetail.wholesaleProtectedDesc', 'Special wholesale PTR rates and chemist trade margins are visible only to verified accounts.')}
                       </div>
                     </div>
                   </div>
@@ -546,7 +546,7 @@ function ProductDetail({ addToCart }) {
                     className="btn btn-primary btn-sm"
                     style={{ padding: '7px 16px', fontSize: '0.82rem', fontWeight: '700', borderRadius: '6px', gap: '6px' }}
                   >
-                    <LogIn size={14} /> Login to View PTR
+                    <LogIn size={14} /> {t('productDetail.loginToViewPtr', 'Login to View PTR')}
                   </button>
                 </div>
               )}
@@ -592,7 +592,7 @@ function ProductDetail({ addToCart }) {
 
                     {/* Bulk Preset Chips for Retailers */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: '0.74rem', color: 'var(--text-light)', fontWeight: '600' }}>Add Bulk:</span>
+                      <span style={{ fontSize: '0.74rem', color: 'var(--text-light)', fontWeight: '600' }}>{t('productDetail.addBulk', 'Add Bulk:')}</span>
                       {[5, 10, 25, 50, 100].map((preset) => (
                         <button
                           key={preset}
@@ -632,21 +632,21 @@ function ProductDetail({ addToCart }) {
                     {isLoggedIn ? (
                       <>
                         <div>
-                          <span>Total Cart Value (PTR): </span>
+                          <span>{t('productDetail.totalCartValue', 'Total Cart Value (PTR):')} </span>
                           <strong style={{ fontSize: '1rem', fontWeight: '800' }} className="tabular-nums">
                             ₹{totalOrderValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </strong>
                         </div>
                         {hasMargin && (
                           <div style={{ fontSize: '0.8rem', color: '#047857', fontWeight: '700' }}>
-                            Est. Chemist Profit: ₹{totalChemistProfit.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            {t('productDetail.estProfit', 'Est. Chemist Profit:')} ₹{totalChemistProfit.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </div>
                         )}
                       </>
                     ) : (
                       <>
                         <div>
-                          <span>Estimated Retail Value (MRP): </span>
+                          <span>{t('productDetail.estRetailValue', 'Estimated Retail Value (MRP):')} </span>
                           <strong style={{ fontSize: '1rem', fontWeight: '800' }} className="tabular-nums">
                             ₹{totalRetailValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </strong>
@@ -656,14 +656,14 @@ function ProductDetail({ addToCart }) {
                           onClick={openAuth}
                           style={{ background: 'none', border: 'none', color: '#0369a1', fontSize: '0.8rem', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
                         >
-                          <Lock size={12} /> Login to unlock wholesale PTR rates
+                          <Lock size={12} /> {t('productDetail.loginToUnlock', 'Login to unlock wholesale PTR rates')}
                         </button>
                       </>
                     )}
                   </div>
 
                   {/* Primary Call-to-Action Buttons */}
-                  <div className="product-detail-actions" style={{ display: 'flex', gap: '12px', marginTop: '4px' }}>
+                  <div className="product-detail-actions" style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '4px' }}>
                     <button 
                       onClick={handleAddToCart}
                       className={`btn ${isAdded ? 'btn-secondary' : 'btn-primary'}`}
@@ -723,7 +723,7 @@ function ProductDetail({ addToCart }) {
             {/* Product Specifications Section */}
             <div>
               <h3 style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: '700', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <FileText size={18} color="var(--primary-blue)" /> Product Specifications
+                <FileText size={18} color="var(--primary-blue)" /> {t('productDetail.specifications', 'Product Specifications')}
               </h3>
               
               <div style={{
@@ -736,14 +736,14 @@ function ProductDetail({ addToCart }) {
                 padding: '16px'
               }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                  <span style={{ fontSize: '0.74rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase' }}>Composition</span>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase' }}>{t('products.composition', 'Composition')}</span>
                   <span style={{ fontSize: '0.9rem', color: 'var(--text-dark)', fontWeight: '600', fontStyle: 'italic' }}>
                     {product.composition || 'As per formulation standard'}
                   </span>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                  <span style={{ fontSize: '0.74rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase' }}>Packaging</span>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase' }}>{t('products.packing', 'Packaging')}</span>
                   <span style={{ fontSize: '0.9rem', color: 'var(--text-dark)', fontWeight: '600' }}>
                     {product.packing || 'Standard Pack'}
                   </span>
@@ -757,7 +757,7 @@ function ProductDetail({ addToCart }) {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                  <span style={{ fontSize: '0.74rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase' }}>Manufacturer / Marketer</span>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase' }}>{t('productDetail.manufacturer', 'Manufacturer / Marketer')}</span>
                   <span style={{ fontSize: '0.9rem', color: 'var(--text-dark)', fontWeight: '600' }}>
                     {product.manufacturer || product.brand || 'Authorized Pharma Partner'}
                   </span>
@@ -771,7 +771,7 @@ function ProductDetail({ addToCart }) {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                  <span style={{ fontSize: '0.74rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase' }}>SKU Code</span>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase' }}>{t('productDetail.skuCode', 'SKU Code')}</span>
                   <span style={{ fontSize: '0.9rem', color: 'var(--text-dark)', fontWeight: '600' }}>
                     {product.sku || 'N/A'}
                   </span>
@@ -782,7 +782,7 @@ function ProductDetail({ addToCart }) {
             {/* Description & Clinical Indications */}
             <div>
               <h3 style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: '700', margin: '0 0 10px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Info size={18} color="var(--primary-blue)" /> Description & Indications
+                <Info size={18} color="var(--primary-blue)" /> {t('productDetail.descAndIndications', 'Description & Indications')}
               </h3>
               <div style={{
                 backgroundColor: '#ffffff',
@@ -807,14 +807,14 @@ function ProductDetail({ addToCart }) {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <div>
                 <h2 style={{ fontSize: '1.4rem', color: 'var(--text-dark)', fontWeight: '800', margin: '0 0 4px 0' }}>
-                  Related Medicines & Formulations
+                  {t('productDetail.relatedTitle', 'Related Medicines & Formulations')}
                 </h2>
                 <p style={{ margin: 0, fontSize: '0.86rem', color: 'var(--text-medium)' }}>
-                  Other high-demand therapeutic formulations in this category
+                  {t('productDetail.relatedDesc', 'Other high-demand therapeutic formulations in this category')}
                 </p>
               </div>
               <Link to="/products" className="btn btn-outline btn-sm" style={{ textDecoration: 'none' }}>
-                View All Catalog →
+                {t('productDetail.viewAllCatalog', 'View All Catalog →')}
               </Link>
             </div>
             

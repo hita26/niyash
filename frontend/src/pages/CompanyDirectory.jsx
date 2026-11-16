@@ -138,16 +138,16 @@ function CompanyDirectory() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', width: 'auto' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <ArrowUpDown size={15} color="var(--text-medium)" />
-                <span style={{ fontSize: '0.82rem', color: 'var(--text-medium)', fontWeight: '600' }}>Sort:</span>
+                <span style={{ fontSize: '0.82rem', color: 'var(--text-medium)', fontWeight: '600' }}>{t('products.sortBy', 'Sort by')}:</span>
                 <select
                   value={sortOrder}
                   onChange={(e) => { setSortOrder(e.target.value); setPage(1); }}
                   style={{ padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.82rem', backgroundColor: '#fff', color: 'var(--text-dark)' }}
                 >
-                  <option value="priority">Featured & Priority</option>
-                  <option value="productsDesc">Most Products First</option>
-                  <option value="nameAsc">Name (A → Z)</option>
-                  <option value="nameDesc">Name (Z → A)</option>
+                  <option value="priority">{t('products.sortPopular', 'Featured & Priority')}</option>
+                  <option value="productsDesc">{t('companies.productsCount', 'Most Products First')}</option>
+                  <option value="nameAsc">{t('products.sortNameAsc', 'Name: A to Z')}</option>
+                  <option value="nameDesc">{t('products.sortNameDesc', 'Name: Z to A')}</option>
                 </select>
               </div>
 
@@ -199,7 +199,7 @@ function CompanyDirectory() {
                     flexShrink: 0
                   }}
                 >
-                  {cat === 'All' ? 'All Companies' : cat}
+                  {cat === 'All' ? t('companies.allCompanies', 'All Companies') : cat}
                 </button>
               );
             })}
@@ -210,7 +210,7 @@ function CompanyDirectory() {
         {(searchTerm || selectedCategory !== 'All' || sortOrder !== 'priority') && (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', fontSize: '0.9rem', color: 'var(--text-medium)' }}>
             <div>
-              Showing <strong>{total}</strong> companies matching filters
+              {t('products.showing', 'Showing')} <strong>{total}</strong> {t('companies.productsCount', 'companies')}
             </div>
             <button
               onClick={() => {
@@ -221,7 +221,7 @@ function CompanyDirectory() {
               }}
               style={{ background: 'none', border: 'none', color: '#dc2626', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem' }}
             >
-              <X size={14} /> Clear all filters
+              <X size={14} /> {t('products.resetFilters', 'Clear all filters')}
             </button>
           </div>
         )}
@@ -230,14 +230,14 @@ function CompanyDirectory() {
         {loading ? (
           <div style={{ textAlign: 'center', padding: '80px 20px', color: 'var(--text-light)' }}>
             <div className="spinner" style={{ margin: '0 auto 15px' }}></div>
-            <p style={{ margin: 0, fontSize: '1rem', color: 'var(--text-medium)' }}>Loading verified company catalog...</p>
+            <p style={{ margin: 0, fontSize: '1rem', color: 'var(--text-medium)' }}>{t('common.loading', 'Loading verified company catalog...')}</p>
           </div>
         ) : companies.length === 0 ? (
           <div className="card" style={{ padding: '60px 20px', textAlign: 'center' }}>
             <Building2 size={40} color="var(--text-light)" style={{ margin: '0 auto 15px' }} />
-            <h3 style={{ margin: '0 0 8px', color: 'var(--text-dark)' }}>No companies found</h3>
+            <h3 style={{ margin: '0 0 8px', color: 'var(--text-dark)' }}>{t('products.noProductsFound', 'No companies found')}</h3>
             <p style={{ color: 'var(--text-medium)', margin: 0, fontSize: '0.9rem' }}>
-              No companies match your search criteria. Try clearing the filter or search keyword.
+              {t('products.searchFilter', 'No companies match your search criteria. Try clearing the filter or search keyword.')}
             </p>
           </div>
         ) : (
@@ -332,12 +332,12 @@ function CompanyDirectory() {
                       </span>
 
                       <span style={{ fontSize: '0.78rem', fontWeight: '700', color: '#059669', backgroundColor: '#ecfdf5', padding: '3px 10px', borderRadius: '20px', display: 'inline-flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
-                        <Package size={12} /> {company.productCount || 0} Products
+                        <Package size={12} /> {company.productCount || 0} {t('companies.productsCount', 'Products')}
                       </span>
                     </div>
 
                     <p style={{ margin: 0, fontSize: '0.84rem', color: 'var(--text-medium)', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                      {company.description || `Supplying certified pharmaceuticals and healthcare formulations across Gujarat.`}
+                      {company.description || t('companies.directProcurement', 'Supplying certified pharmaceuticals and healthcare formulations across Gujarat.')}
                     </p>
 
                     {company.specialties && company.specialties.length > 0 && (
@@ -358,7 +358,7 @@ function CompanyDirectory() {
                       className="btn btn-primary btn-sm"
                       style={{ fontSize: '0.8rem', padding: '7px 14px', textDecoration: 'none', flex: '1 1 auto', textAlign: 'center', justifyContent: 'center' }}
                     >
-                      View Catalog ({company.productCount || 0})
+                      {t('companies.viewProducts', 'View Products')} ({company.productCount || 0})
                     </Link>
 
                     {company.websiteUrl ? (
@@ -372,7 +372,7 @@ function CompanyDirectory() {
                         Site <ExternalLink size={13} />
                       </a>
                     ) : (
-                      <span style={{ fontSize: '0.74rem', color: 'var(--text-light)' }}>Verified Partner</span>
+                      <span style={{ fontSize: '0.74rem', color: 'var(--text-light)' }}>{t('companies.featuredBadge', 'Verified Partner')}</span>
                     )}
                   </div>
                 </div>
@@ -385,7 +385,7 @@ function CompanyDirectory() {
         {totalPages > 1 && (
           <div className="card" style={{ padding: '16px 24px', marginTop: '35px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
             <div style={{ fontSize: '0.85rem', color: 'var(--text-medium)' }}>
-              Showing Page <strong>{page}</strong> of <strong>{totalPages}</strong> ({total} total companies)
+              {t('products.showing', 'Showing')} {page} / {totalPages} ({total} {t('companies.productsCount', 'companies')})
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -395,7 +395,7 @@ function CompanyDirectory() {
                 className="btn btn-outline btn-sm"
                 style={{ padding: '6px 12px', opacity: page === 1 ? 0.5 : 1, cursor: page === 1 ? 'not-allowed' : 'pointer', gap: '4px' }}
               >
-                <ChevronLeft size={16} /> Previous
+                <ChevronLeft size={16} /> {t('products.prevPage', 'Previous')}
               </button>
 
               <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)', padding: '0 8px' }}>
@@ -408,7 +408,7 @@ function CompanyDirectory() {
                 className="btn btn-outline btn-sm"
                 style={{ padding: '6px 12px', opacity: page >= totalPages ? 0.5 : 1, cursor: page >= totalPages ? 'not-allowed' : 'pointer', gap: '4px' }}
               >
-                Next <ChevronRight size={16} />
+                {t('products.nextPage', 'Next')} <ChevronRight size={16} />
               </button>
             </div>
           </div>

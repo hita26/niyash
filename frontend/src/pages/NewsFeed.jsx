@@ -410,7 +410,7 @@ function NewsFeed() {
                 fontWeight: '400'
               }}
             >
-              Access verified distributor bonus schemes (10+1 / 15+2), manufacturer PTR revisions, new formulation launches, and pharmaceutical regulatory updates in real time.
+              {t('news.subtitle', 'Access verified distributor bonus schemes (10+1 / 15+2), manufacturer PTR revisions, new formulation launches, and pharmaceutical regulatory updates in real time.')}
             </p>
 
             {/* Quick Stats Strip */}
@@ -488,7 +488,7 @@ function NewsFeed() {
             >
               <input
                 type="text"
-                placeholder="Search schemes, products (e.g. Mucidax, Ceftriaxone), companies..."
+                placeholder={t('news.searchPlaceholder', 'Search schemes, products (e.g. Mucidax, Ceftriaxone), companies...')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
@@ -638,7 +638,7 @@ function NewsFeed() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-medium)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <ArrowUpDown size={14} /> Sort By:
+                  <ArrowUpDown size={14} /> {t('products.sortBy', 'Sort By:')}
                 </span>
                 <select
                   value={sortBy}

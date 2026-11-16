@@ -43,14 +43,15 @@ export function LanguageProvider({ children }) {
     }
   }, [language]);
 
-  // Translation helper function with nested dot-lookup and token interpolation
+  // Translation helper function with nested dot-lookup, phrase dictionary lookup, and token interpolation
   const t = (path, paramsOrFallback = {}) => {
+    if (!path) return '';
     let fallback = typeof paramsOrFallback === 'string' ? paramsOrFallback : '';
-    let params = typeof paramsOrFallback === 'object' ? paramsOrFallback : {};
+    let params = typeof paramsOrFallback === 'object' && paramsOrFallback !== null ? paramsOrFallback : {};
 
-    const keys = path.split('.');
+    const keys = String(path).split('.');
     
-    // 1. Look in active language
+    // 1. Look in active language dictionary by nested dot path
     let value = translations[language];
     for (const key of keys) {
       if (value && typeof value === 'object' && key in value) {
@@ -61,7 +62,12 @@ export function LanguageProvider({ children }) {
       }
     }
 
-    // 2. Fallback to English if not found
+    // 2. Check phrases dictionary in active language if not found
+    if (value === undefined && translations[language]?.phrases && path in translations[language].phrases) {
+      value = translations[language].phrases[path];
+    }
+
+    // 3. Fallback to English nested path if not found
     if (value === undefined && language !== 'en') {
       let enValue = translations['en'];
       for (const key of keys) {
@@ -75,7 +81,12 @@ export function LanguageProvider({ children }) {
       value = enValue;
     }
 
-    // 3. Fallback to passed fallback or key itself
+    // 4. Fallback to English phrases dictionary
+    if (value === undefined && language !== 'en' && translations['en']?.phrases && path in translations['en'].phrases) {
+      value = translations['en'].phrases[path];
+    }
+
+    // 5. Fallback to passed fallback or path key itself
     if (value === undefined) {
       return fallback || path;
     }
@@ -86,6 +97,49 @@ export function LanguageProvider({ children }) {
     }
 
     return value;
+  };
+
+  // Helper to translate product category
+  const translateCategory = (cat) => {
+    if (!cat) return '';
+    const cleanCat = String(cat).trim();
+    if (translations[language]?.categoriesList && translations[language].categoriesList[cleanCat]) {
+      return translations[language].categoriesList[cleanCat];
+    }
+    if (translations['en']?.categoriesList && translations['en'].categoriesList[cleanCat]) {
+      return translations['en'].categoriesList[cleanCat];
+    }
+    return t(`categories.${cleanCat}`, cleanCat);
+  };
+
+  // Helper to translate dosage formulation form (Tablet, Capsule, Syrup, Injectable, etc.)
+  const translateDosageForm = (form) => {
+    if (!form) return '';
+    const cleanForm = String(form).trim();
+    if (translations[language]?.dosageForms && translations[language].dosageForms[cleanForm]) {
+      return translations[language].dosageForms[cleanForm];
+    }
+    return t(`dosageForms.${cleanForm}`, cleanForm);
+  };
+
+  // Helper to translate order status
+  const translateStatus = (status) => {
+    if (!status) return '';
+    const cleanStatus = String(status).trim();
+    if (translations[language]?.orderStatus && translations[language].orderStatus[cleanStatus]) {
+      return translations[language].orderStatus[cleanStatus];
+    }
+    return t(`orderStatus.${cleanStatus}`, cleanStatus);
+  };
+
+  // Helper to translate payment status
+  const translatePaymentStatus = (status) => {
+    if (!status) return '';
+    const cleanStatus = String(status).trim();
+    if (translations[language]?.paymentStatus && translations[language].paymentStatus[cleanStatus]) {
+      return translations[language].paymentStatus[cleanStatus];
+    }
+    return t(`paymentStatus.${cleanStatus}`, cleanStatus);
   };
 
   // Localized currency formatter (Indian Rupee ₹)
@@ -101,6 +155,23 @@ export function LanguageProvider({ children }) {
     return n.toLocaleString(locale);
   };
 
+  // Localized Date formatter
+  const formatDate = (dateInput) => {
+    if (!dateInput) return '';
+    try {
+      const d = new Date(dateInput);
+      if (isNaN(d.getTime())) return String(dateInput);
+      const locale = language === 'gu' ? 'gu-IN' : language === 'hi' ? 'hi-IN' : 'en-IN';
+      return d.toLocaleDateString(locale, {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+    } catch {
+      return String(dateInput);
+    }
+  };
+
   const currentLangObj = supportedLanguages.find(l => l.code === language) || supportedLanguages[0];
 
   return (
@@ -108,8 +179,13 @@ export function LanguageProvider({ children }) {
       language, 
       setLanguage, 
       t, 
+      translateCategory,
+      translateDosageForm,
+      translateStatus,
+      translatePaymentStatus,
       formatCurrency, 
       formatNumber, 
+      formatDate,
       supportedLanguages, 
       currentLangObj 
     }}>
@@ -151,12 +227,12 @@ export function LanguageSelector({ variant = 'default' }) {
             type="button"
             onClick={() => setLanguage(lang.code)}
             style={{
-              padding: '5px 12px',
+              padding: '6px 14px',
               borderRadius: '20px',
               border: 'none',
               backgroundColor: language === lang.code ? 'var(--primary-blue, #0c3d6c)' : 'transparent',
               color: language === lang.code ? '#ffffff' : 'var(--text-medium, #475569)',
-              fontSize: '0.8rem',
+              fontSize: '0.84rem',
               fontWeight: language === lang.code ? '800' : '600',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
@@ -188,7 +264,7 @@ export function LanguageSelector({ variant = 'default' }) {
           border: '1.5px solid var(--border-light, #e2e8f0)',
           backgroundColor: 'var(--bg-card, #ffffff)',
           color: 'var(--text-dark, #0f172a)',
-          fontSize: '0.84rem',
+          fontSize: '0.86rem',
           fontWeight: '700',
           cursor: 'pointer',
           transition: 'all 0.2s ease',
@@ -217,7 +293,7 @@ export function LanguageSelector({ variant = 'default' }) {
             boxShadow: '0 12px 30px -5px rgba(0, 0, 0, 0.15)',
             border: '1px solid var(--border-light, #e2e8f0)',
             padding: '6px',
-            minWidth: '160px',
+            minWidth: '165px',
             zIndex: 1200,
             animation: 'fadeIn 0.15s ease-out'
           }}
@@ -245,7 +321,7 @@ export function LanguageSelector({ variant = 'default' }) {
                   border: 'none',
                   backgroundColor: isSelected ? 'var(--primary-light, #eff6ff)' : 'transparent',
                   color: isSelected ? 'var(--primary-blue, #0c3d6c)' : 'var(--text-dark, #0f172a)',
-                  fontSize: '0.86rem',
+                  fontSize: '0.88rem',
                   fontWeight: isSelected ? '800' : '600',
                   cursor: 'pointer',
                   textAlign: 'left',

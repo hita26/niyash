@@ -314,7 +314,7 @@ function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
                 </span>
               )}
             </div>
-            <span>Cart</span>
+            <span>{t('nav.cart', 'Cart')}</span>
           </button>
         </>
       )}

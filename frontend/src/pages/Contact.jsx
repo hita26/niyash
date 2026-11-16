@@ -3,7 +3,7 @@ import { Phone, Mail, MapPin, Send, CheckCircle2, Clock, AlertCircle } from 'luc
 import { useLanguage } from '../context/LanguageContext';
 
 function Contact() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -20,7 +20,13 @@ function Contact() {
     // Phone validation
     const cleanPhone = phone.replace(/\D/g, '');
     if (cleanPhone.length !== 10) {
-      setErrorMessage('Phone number must contain exactly 10 numeric digits.');
+      setErrorMessage(
+        language === 'gu'
+          ? 'મોબાઈલ નંબર બરાબર ૧૦ આંકડાનો હોવો આવશ્યક છે.'
+          : language === 'hi'
+          ? 'मोबाइल नंबर ठीक १० अंकों का होना चाहिए।'
+          : 'Phone number must contain exactly 10 numeric digits.'
+      );
       return;
     }
 
@@ -52,11 +58,17 @@ function Contact() {
         setMessage('');
         setTimeout(() => setIsSuccess(false), 6000);
       } else {
-        setErrorMessage(data.message || 'Failed to send message. Please try again.');
+        setErrorMessage(data.message || t('common.error', 'Failed to send message. Please try again.'));
       }
     } catch (error) {
       console.error('Error submitting contact form:', error);
-      setErrorMessage('Network connection error. Please try again.');
+      setErrorMessage(
+        language === 'gu'
+          ? 'નેટવર્ક કનેક્શન એરર. કૃપા કરીને ફરી પ્રયાસ કરો.'
+          : language === 'hi'
+          ? 'नेटवर्क कनेक्शन त्रुटि। कृपया पुनः प्रयास करें।'
+          : 'Network connection error. Please try again.'
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -65,15 +77,17 @@ function Contact() {
   return (
     <div className="section animate-fade-in" style={{ backgroundColor: 'var(--bg-main)' }}>
       <div className="container">
-        <h1 className="section-title">{t('contact.title', 'Contact Us')}</h1>
-        <p className="section-subtitle">{t('contact.subtitle', 'Reach out to Niyansh Pharma for wholesale distributorship queries, orders, or support.')}</p>
+        <h1 className="section-title">{t('contact.title', 'Contact & Dispatch Desk')}</h1>
+        <p className="section-subtitle">{t('contact.subtitle', 'Reach out to Niyansh Pharma for wholesale distributorship queries, orders, or urgent dispatch assistance.')}</p>
 
         <div className="contact-layout">
           
           {/* Contact Details & Info */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
             <div className="card" style={{ padding: '30px', flex: 1, display: 'flex', flexDirection: 'column', gap: '25px' }}>
-              <h2 style={{ fontSize: '1.4rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '10px' }}>{t('contact.title', 'Get In Touch')}</h2>
+              <h2 style={{ fontSize: '1.4rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '10px' }}>
+                {t('contact.title', 'Contact & Dispatch Desk')}
+              </h2>
               
               <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 <li style={{ display: 'flex', gap: '15px', alignItems: 'flex-start' }}>
@@ -81,7 +95,7 @@ function Contact() {
                     <MapPin size={22} />
                   </div>
                   <div>
-                    <h3 style={{ fontSize: '1.05rem', marginBottom: '4px' }}>{t('contact.hubAddress', 'Office Address')}</h3>
+                    <h3 style={{ fontSize: '1.05rem', marginBottom: '4px' }}>{t('contact.hubAddress', 'Wholesale Hub Address')}</h3>
                     <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem', lineHeight: '1.5' }}>
                       {t('contact.addressValue', 'Block no. 52B, Panchayat Nagar-3, Ram Park Main Road, University Rd, Rajkot, Gujarat - 360005.')}
                     </p>
@@ -95,7 +109,7 @@ function Contact() {
                   <div>
                     <h3 style={{ fontSize: '1.05rem', marginBottom: '4px' }}>{t('contact.callUs', 'Phone Numbers')}</h3>
                     <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem' }}>
-                      Mobile: <a href="tel:+919909923130" style={{ color: 'var(--text-dark)', fontWeight: '600' }}>+91 99099 23130</a>
+                      {language === 'gu' ? 'મોબાઈલ:' : language === 'hi' ? 'मोबाइल:' : 'Mobile:'} <a href="tel:+919909923130" style={{ color: 'var(--text-dark)', fontWeight: '600' }}>+91 99099 23130</a>
                     </p>
                   </div>
                 </li>
@@ -105,9 +119,9 @@ function Contact() {
                     <Mail size={22} />
                   </div>
                   <div>
-                    <h3 style={{ fontSize: '1.05rem', marginBottom: '4px' }}>{t('contact.emailUs', 'Email Address')}</h3>
+                    <h3 style={{ fontSize: '1.05rem', marginBottom: '4px' }}>{t('contact.emailUs', 'Official Email')}</h3>
                     <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem' }}>
-                      General: <a href="mailto:niyanshpharma@gmail.com" style={{ color: 'var(--text-dark)', fontWeight: '600' }}>niyanshpharma@gmail.com</a>
+                      {language === 'gu' ? 'ઇમેઇલ:' : language === 'hi' ? 'ईमेल:' : 'Official:'} <a href="mailto:niyanshpharma@gmail.com" style={{ color: 'var(--text-dark)', fontWeight: '600' }}>niyanshpharma@gmail.com</a>
                     </p>
                   </div>
                 </li>
@@ -117,7 +131,7 @@ function Contact() {
                     <Clock size={22} />
                   </div>
                   <div>
-                    <h3 style={{ fontSize: '1.05rem', marginBottom: '4px' }}>{t('contact.workingHours', 'Business Hours')}</h3>
+                    <h3 style={{ fontSize: '1.05rem', marginBottom: '4px' }}>{t('contact.workingHours', 'Operating Hours')}</h3>
                     <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem' }}>
                       {t('contact.hoursValue', 'Monday – Saturday: 9:00 AM – 8:30 PM (Sunday Closed)')}
                     </p>
@@ -126,7 +140,7 @@ function Contact() {
               </ul>
             </div>
 
-            {/* Embedded Google Map (Interactive representation) */}
+            {/* Embedded Google Map */}
             <div className="card" style={{ padding: '0', overflow: 'hidden', height: '280px' }}>
               <iframe 
                 title="Niyansh Pharma Location Map"
@@ -144,7 +158,7 @@ function Contact() {
           {/* Contact Message Form */}
           <div className="card" style={{ padding: '30px', display: 'flex', flexDirection: 'column' }}>
             <h2 style={{ fontSize: '1.4rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '10px', marginBottom: '20px' }}>
-              {t('contact.formHeading', 'Send Us A Message')}
+              {t('contact.formHeading', 'Send a Wholesale Message')}
             </h2>
             
             {isSuccess ? (
@@ -166,25 +180,29 @@ function Contact() {
                 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                    <label htmlFor="contact-name" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>{t('contact.nameLabel', 'Your Name *')}</label>
+                    <label htmlFor="contact-name" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                      {t('contact.nameLabel', 'Your Name *')}
+                    </label>
                     <input 
                       id="contact-name"
                       type="text" 
                       required 
-                      placeholder="e.g. Ramesh Patel"
+                      placeholder={language === 'gu' ? 'દા.ત. રમેશભાઈ પટેલ' : language === 'hi' ? 'उदा. रमेश पटेल' : 'e.g. Ramesh Patel'}
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       style={{ padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
                     />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                    <label htmlFor="contact-phone" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>{t('contact.phoneLabel', 'Phone Number *')}</label>
+                    <label htmlFor="contact-phone" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                      {t('contact.phoneLabel', 'Phone Number *')}
+                    </label>
                     <input 
                       id="contact-phone"
                       type="tel" 
                       required 
                       maxLength={10}
-                      placeholder="10-digit mobile number"
+                      placeholder={language === 'gu' ? '૧૦ આંકડાનો મોબાઈલ નંબર' : language === 'hi' ? '१० अंकों का मोबाइल नंबर' : '10-digit mobile number'}
                       value={phone}
                       onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                       style={{ padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
@@ -193,7 +211,9 @@ function Contact() {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                  <label htmlFor="contact-email" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>{t('cart.email', 'Email Address')}</label>
+                  <label htmlFor="contact-email" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                    {t('cart.email', 'Email Address')}
+                  </label>
                   <input 
                     id="contact-email"
                     type="email" 
@@ -205,12 +225,14 @@ function Contact() {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', flex: 1 }}>
-                  <label htmlFor="contact-msg" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>{t('contact.messageLabel', 'Message *')}</label>
+                  <label htmlFor="contact-msg" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                    {t('contact.messageLabel', 'Medicines List / Message *')}
+                  </label>
                   <textarea 
                     id="contact-msg"
                     required 
                     rows="5" 
-                    placeholder="Write your requirement or question here..."
+                    placeholder={language === 'gu' ? 'આપની જરૂરિયાત કે દવાઓની વિગત અહીં લખો...' : language === 'hi' ? 'अपनी आवश्यकता या दवाओं का विवरण यहाँ लिखें...' : 'Write your requirement or question here...'}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     style={{ padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem', resize: 'vertical', flex: 1, minHeight: '120px' }}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useLiveSync, SYNC_EVENTS } from '../utils/liveSync';
 import {
   Building2,
@@ -37,6 +38,7 @@ import PaymentGatewayModal from '../components/PaymentGatewayModal';
 import SkeletonLoader from '../components/SkeletonLoader';
 
 export default function RetailerDashboard() {
+  const { t, formatCurrency, formatDate, translateStatus, translatePaymentStatus } = useLanguage();
   const { user, token, logout, openAuth, isLoggedIn } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -377,7 +379,7 @@ export default function RetailerDashboard() {
             <div style={{ flex: '1 1 360px' }}>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: 'rgba(255,255,255,0.15)', padding: '4px 14px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: '800', letterSpacing: '0.6px', marginBottom: '12px' }}>
                 <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#4ade80', display: 'inline-block' }}></span>
-                WHO-GMP VERIFIED B2B RETAIL PHARMACY
+                {t('retailerDashboard.verifiedPharmacyBadge', 'WHO-GMP VERIFIED B2B RETAIL PHARMACY')}
               </div>
               
               {/* Force white color on H1 so index.css does not turn it into invisible blue */}
@@ -440,7 +442,7 @@ export default function RetailerDashboard() {
                   transition: 'transform 0.15s ease'
                 }}
               >
-                <Zap size={18} /> Quick Order Pad
+                <Zap size={18} /> {t('retailerDashboard.quickOrderPad', 'Quick Order Pad')}
               </Link>
 
               <button
@@ -460,7 +462,7 @@ export default function RetailerDashboard() {
                 }}
                 title="Send ledger statement to WhatsApp"
               >
-                <MessageCircle size={18} color="#4ade80" /> WhatsApp Statement
+                <MessageCircle size={18} color="#4ade80" /> {t('retailerDashboard.whatsAppStatement', 'WhatsApp Statement')}
               </button>
 
               <button
@@ -480,7 +482,7 @@ export default function RetailerDashboard() {
                 }}
                 title="Sign out of B2B portal"
               >
-                <LogOut size={16} /> Exit
+                <LogOut size={16} /> {t('retailerDashboard.exit', 'Exit')}
               </button>
             </div>
 
@@ -768,7 +770,7 @@ export default function RetailerDashboard() {
             }}
           >
             <Package size={18} />
-            <span>My Wholesale Orders ({orders.length})</span>
+            <span>{t('retailerDashboard.tabMyOrders', 'My Wholesale Orders')} ({orders.length})</span>
           </button>
 
           <button
@@ -790,7 +792,7 @@ export default function RetailerDashboard() {
             }}
           >
             <FileText size={18} />
-            <span>Invoices & Statements ({ledger?.invoices?.length || 0})</span>
+            <span>{t('retailerDashboard.tabInvoicesStatements', 'Invoices & Statements')} ({ledger?.invoices?.length || 0})</span>
           </button>
 
           <button
@@ -812,7 +814,7 @@ export default function RetailerDashboard() {
             }}
           >
             <Sparkles size={18} />
-            <span>High-Margin Schemes & PTR Rates</span>
+            <span>{t('retailerDashboard.tabHighMarginSchemes', 'High-Margin Schemes & PTR Rates')}</span>
           </button>
         </div>
 

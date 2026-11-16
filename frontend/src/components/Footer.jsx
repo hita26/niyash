@@ -16,15 +16,15 @@ function Footer({ compact = false }) {
         <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ color: '#4ade80' }}>●</span>
-            <span>WHO-GMP Certified B2B Pharma Wholesale • Rajkot, Gujarat</span>
+            <span>{t('footer.whoGmp', 'WHO-GMP Certified B2B Pharma Wholesale • Rajkot, Gujarat')}</span>
           </div>
           <div>
-            © {new Date().getFullYear()} Niyansh Pharma Chemist Portal • Direct Helpline: <a href="tel:+919909923130" style={{ color: '#38bdf8', fontWeight: '700' }}>+91 99099 23130</a>
+            © {new Date().getFullYear()} {t('footer.chemistPortalRights', 'Niyansh Pharma Chemist Portal')} • {t('footer.directHelpline', 'Direct Helpline')}: <a href="tel:+919909923130" style={{ color: '#38bdf8', fontWeight: '700' }}>+91 99099 23130</a>
           </div>
           <div style={{ display: 'flex', gap: '14px' }}>
-            <Link to="/" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Public Website</Link>
-            <Link to="/products" style={{ color: '#cbd5e1', textDecoration: 'none' }}>All Medicines</Link>
-            <Link to="/quick-order" style={{ color: '#ea580c', textDecoration: 'none', fontWeight: '700' }}>Quick Order Pad</Link>
+            <Link to="/" style={{ color: '#cbd5e1', textDecoration: 'none' }}>{t('nav.publicSite', 'Public Website')}</Link>
+            <Link to="/products" style={{ color: '#cbd5e1', textDecoration: 'none' }}>{t('nav.products', 'All Medicines')}</Link>
+            <Link to="/quick-order" style={{ color: '#ea580c', textDecoration: 'none', fontWeight: '700' }}>{t('nav.quickOrder', 'Quick Order Pad')}</Link>
           </div>
         </div>
       </footer>

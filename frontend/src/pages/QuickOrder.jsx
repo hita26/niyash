@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useLiveSync, SYNC_EVENTS } from '../utils/liveSync';
 import {
   Search,
@@ -1509,7 +1510,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
             <div>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(8px)', padding: '3px 10px', borderRadius: '20px', fontSize: '0.74rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px', color: '#ffedd5' }}>
-                <Flame size={13} color="#f97316" /> Wholesale Quick Booking
+                <Flame size={13} color="#f97316" /> {t('quickOrder.badge', 'Wholesale Quick Booking')}
               </div>
               <h1 style={{ color: '#ffffff', fontSize: '1.5rem', fontWeight: '800', margin: 0, letterSpacing: '-0.3px', lineHeight: 1.2 }}>
                 Wholesale Quick Order Matrix
@@ -1539,7 +1540,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                     transition: 'all 0.2s ease'
                   }}
                 >
-                  <Table size={14} /> Matrix Grid
+                  <Table size={14} /> {t('quickOrder.matrixGrid', 'Matrix Grid')}
                 </button>
                 <button
                   onClick={() => setViewMode('card')}
@@ -1558,7 +1559,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                     transition: 'all 0.2s ease'
                   }}
                 >
-                  <Grid size={14} /> Cards
+                  <Grid size={14} /> {t('quickOrder.cards', 'Cards')}
                 </button>
               </div>
             </div>
@@ -1599,16 +1600,16 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ fontSize: '0.95rem', fontWeight: '800', color: '#0f172a' }}>
-                    {shopName.trim() ? shopName : 'Set Retailer Store Profile'}
+                    {shopName.trim() ? shopName : t('quickOrder.storeProfile', 'Set Retailer Store Profile')}
                   </span>
                   <span style={{ fontSize: '0.7rem', backgroundColor: '#dcfce7', color: '#15803d', fontWeight: '700', padding: '1px 6px', borderRadius: '10px' }}>
                     Wholesale B2B
                   </span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.78rem', color: '#64748b', marginTop: '1px', flexWrap: 'wrap' }}>
-                  <span>📱 <strong>Mobile:</strong> {retailerMobile || 'Not configured'}</span>
-                  {gstin && <span>🏛️ <strong>GSTIN:</strong> {gstin}</span>}
-                  <span>🚀 <strong>Dispatch Desk:</strong> +91 {destinationWhatsApp}</span>
+                  <span>📱 <strong>{t('quickOrder.mobile', 'Mobile:')}</strong> {retailerMobile || 'Not configured'}</span>
+                  {gstin && <span>🏛️ <strong>{t('quickOrder.gstin', 'GSTIN:')}</strong> {gstin}</span>}
+                  <span>🚀 <strong>{t('quickOrder.dispatchDesk', 'Dispatch Desk:')}</strong> +91 {destinationWhatsApp}</span>
                 </div>
               </div>
             </div>
@@ -1631,7 +1632,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                 }}
               >
                 {showConfig ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-                {showConfig ? 'Hide Profile Fields' : 'Edit Booking Details'}
+                {showConfig ? t('quickOrder.hideProfileFields', 'Hide Profile Fields') : t('quickOrder.editBookingDetails', 'Edit Booking Details')}
               </button>
             </div>
           </div>
@@ -1650,7 +1651,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
             >
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>
-                  Chemist / Store Name <span style={{ color: '#ef4444' }}>*</span>
+                  {t('quickOrder.chemistStoreName', 'Chemist / Store Name')} <span style={{ color: '#ef4444' }}>*</span>
                 </label>
                 <input
                   type="text"
@@ -1669,7 +1670,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
 
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>
-                  Retailer Mobile Number <span style={{ color: '#ef4444' }}>*</span>
+                  {t('quickOrder.retailerMobileNumber', 'Retailer Mobile Number')} <span style={{ color: '#ef4444' }}>*</span>
                 </label>
                 <input
                   type="tel"
@@ -1765,7 +1766,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
               <Search size={17} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
               <input
                 type="text"
-                placeholder="Search products by brand, medicine name, composition (e.g. Acetylcysteine, Paracetamol)..."
+                placeholder={t('quickOrder.searchQuickPlaceholder', 'Search products by brand, medicine name, composition (e.g. Acetylcysteine, Paracetamol)...')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
@@ -1805,7 +1806,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
               >
                 {companiesList.map((comp) => (
                   <option key={comp} value={comp}>
-                    {comp === 'All' ? '🏢 All Companies' : comp}
+                    {comp === 'All' ? t('quickOrder.allCompanies', '🏢 All Companies') : comp}
                   </option>
                 ))}
               </select>
@@ -1830,7 +1831,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
               }}
             >
               <ShoppingCart size={15} />
-              <span>In-Cart ({commercialBilling.totalSelectedItems})</span>
+              <span>{t('quickOrder.inCart', 'In-Cart')} ({commercialBilling.totalSelectedItems})</span>
             </button>
 
             {/* Clear All Filters Button */}
@@ -1856,7 +1857,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                   cursor: 'pointer'
                 }}
               >
-                <RotateCcw size={13} /> Reset Filters
+                <RotateCcw size={13} /> {t('quickOrder.resetFilters', 'Reset Filters')}
               </button>
             )}
           </div>
@@ -1933,7 +1934,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                 }}
               >
                 <Package size={48} color="#94a3b8" style={{ margin: '0 auto 12px auto' }} />
-                <h3 style={{ fontSize: '1.2rem', color: '#0f172a', marginBottom: '6px' }}>No medicines found</h3>
+                <h3 style={{ fontSize: '1.2rem', color: '#0f172a', marginBottom: '6px' }}>{t('quickOrder.noMedicinesFound', 'No medicines found')}</h3>
                 <p style={{ fontSize: '0.88rem', color: '#64748b', maxWidth: '400px', margin: '0 auto 16px auto' }}>
                   No pharmaceutical formulations matched your current search filters. Try adjusting your query or resetting filters.
                 </p>
@@ -1966,10 +1967,10 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                   <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '750px' }}>
                     <thead>
                       <tr style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid #e2e8f0', color: '#0c3d6c', fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                        <th style={{ padding: '12px 14px', width: '38%', verticalAlign: 'middle' }}>Product & Composition</th>
-                        <th style={{ padding: '12px 12px', width: '16%', verticalAlign: 'middle' }}>Pack & MOQ</th>
-                        <th style={{ padding: '12px 12px', width: '18%', verticalAlign: 'middle' }}>Wholesale PTR & Scheme</th>
-                        <th style={{ padding: '12px 12px', width: '28%', verticalAlign: 'middle' }}>Box Qty Stepper & Total</th>
+                        <th style={{ padding: '12px 14px', width: '38%', verticalAlign: 'middle' }}>{t('quickOrder.colProduct', 'Product & Composition')}</th>
+                        <th style={{ padding: '12px 12px', width: '16%', verticalAlign: 'middle' }}>{t('quickOrder.colPacking', 'Pack & MOQ')}</th>
+                        <th style={{ padding: '12px 12px', width: '18%', verticalAlign: 'middle' }}>{t('quickOrder.colPtr', 'Wholesale PTR & Scheme')}</th>
+                        <th style={{ padding: '12px 12px', width: '28%', verticalAlign: 'middle' }}>{t('quickOrder.colQty', 'Box Qty Stepper & Total')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -2608,7 +2609,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                     title="Reset order"
                     style={{ fontSize: '0.75rem', color: '#dc2626', fontWeight: '700', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
                   >
-                    <RotateCcw size={12} /> Clear
+                    <RotateCcw size={12} /> {t('quickOrder.clearOrder', 'Clear')}
                   </button>
                 )}
               </div>
@@ -2616,15 +2617,15 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
               {/* Order Item Count Metrics */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '16px' }}>
                 <div style={{ backgroundColor: '#f8fafc', padding: '8px 10px', borderRadius: '8px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
-                  <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: '600' }}>Selected</div>
+                  <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: '600' }}>{t('quickOrder.selected', 'Selected')}</div>
                   <div style={{ fontSize: '1.05rem', fontWeight: '800', color: '#0c3d6c' }}>{commercialBilling.totalSelectedItems}</div>
                 </div>
                 <div style={{ backgroundColor: '#f8fafc', padding: '8px 10px', borderRadius: '8px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
-                  <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: '600' }}>Boxes</div>
+                  <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: '600' }}>{t('quickOrder.boxes', 'Boxes')}</div>
                   <div style={{ fontSize: '1.05rem', fontWeight: '800', color: '#0c3d6c' }}>{commercialBilling.totalBoxes}</div>
                 </div>
                 <div style={{ backgroundColor: '#f8fafc', padding: '8px 10px', borderRadius: '8px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
-                  <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: '600' }}>Units</div>
+                  <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: '600' }}>{t('quickOrder.units', 'Units')}</div>
                   <div style={{ fontSize: '1.05rem', fontWeight: '800', color: '#0c3d6c' }}>{commercialBilling.totalUnits}</div>
                 </div>
               </div>
@@ -2632,7 +2633,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
               {/* Line items preview / breakdown */}
               <div style={{ borderBottom: '1px dashed #cbd5e1', paddingBottom: '12px', marginBottom: '12px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#475569', marginBottom: '6px' }}>
-                  <span>Taxable Subtotal (PTR)</span>
+                  <span>{t('quickOrder.taxableSubtotal', 'Taxable Subtotal (PTR)')}</span>
                   <span style={{ fontWeight: '700', color: '#0f172a' }}>₹{commercialBilling.taxableSubtotal.toFixed(2)}</span>
                 </div>
 
@@ -2651,7 +2652,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                 )}
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#475569', marginTop: '4px' }}>
-                  <span>Total GST Tax Amount</span>
+                  <span>{t('quickOrder.totalGst', 'Total GST Tax Amount')}</span>
                   <span style={{ fontWeight: '600' }}>₹{commercialBilling.totalGstAmount.toFixed(2)}</span>
                 </div>
               </div>
@@ -2721,14 +2722,14 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                   <div style={{ fontSize: '0.75rem', color: '#166534', fontWeight: '700', textTransform: 'uppercase' }}>
                     Grand Commercial Total
                   </div>
-                  <div style={{ fontSize: '0.7rem', color: '#4ade80' }}>Inclusive of all Taxes</div>
+                  <div style={{ fontSize: '0.7rem', color: '#4ade80' }}>{t('quickOrder.inclusiveTaxes', 'Inclusive of all Taxes')}</div>
                 </div>
                 <div style={{ fontSize: isLoggedIn ? '1.45rem' : '1.05rem', fontWeight: '900', color: '#15803d' }}>
                     {isLoggedIn ? (
                       `₹${commercialBilling.grandTotal.toFixed(2)}`
                     ) : (
                       <button onClick={openAuth} style={{ border: 'none', background: '#dcfce7', color: '#166534', padding: '4px 10px', borderRadius: '6px', fontSize: '0.78rem', fontWeight: '800', cursor: 'pointer' }}>
-                        🔒 Login for PTR Total
+                        {t('quickOrder.loginForPtrTotal', '🔒 Login for PTR Total')}
                       </button>
                     )}
                   </div>
@@ -2759,7 +2760,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                     transition: 'all 0.2s ease'
                   }}
                 >
-                  <Send size={16} /> Send Order on WhatsApp
+                  <Send size={16} /> {t('quickOrder.sendOrderWhatsApp', 'Send Order on WhatsApp')}
                 </button>
 
                 {/* 2. Download CSV / Excel */}
@@ -2784,7 +2785,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                     transition: 'all 0.2s ease'
                   }}
                 >
-                  <FileSpreadsheet size={15} /> Download CSV / Excel
+                  <FileSpreadsheet size={15} /> {t('quickOrder.downloadExcel', 'Download CSV / Excel')}
                 </button>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
@@ -2807,7 +2808,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                       cursor: commercialBilling.totalSelectedItems === 0 ? 'not-allowed' : 'pointer'
                     }}
                   >
-                    <Printer size={14} /> Print Invoice
+                    <Printer size={14} /> {t('quickOrder.printInvoice', 'Print')} Invoice
                   </button>
 
                   {/* 4. Send via Email */}

@@ -17,7 +17,7 @@ function getFormIcon(form) {
 }
 
 function ProductCard({ product, addToCart }) {
-  const { t } = useLanguage();
+  const { t, language, translateCategory, formatCurrency } = useLanguage();
   const { isLoggedIn, openAuth } = useAuth();
   const [quantity, setQuantity] = useState(0);
   const [isAdded, setIsAdded] = useState(false);
@@ -29,7 +29,13 @@ function ProductCard({ product, addToCart }) {
       ? `*PTR (Wholesale):* ₹${product.price.toFixed(2)}`
       : `*MRP:* ₹${(product.mrp || product.price || 0).toFixed(2)}\n*Note:* Please share wholesale PTR quote`;
 
-    const message = `Hello Niyansh Pharma, I would like to enquire about this product:\n\n*Product Name:* ${product.name}\n*Brand:* ${product.brand}\n*Packing:* ${product.packing}\n${priceText}\n*SKU:* ${product.sku || 'N/A'}`;
+    const greeting = language === 'gu'
+      ? `નમસ્તે નિયાંશ ફાર્મા, મારે આ પ્રોડક્ટ માટે ઓર્ડર / પૂછપરછ કરવી છે:`
+      : language === 'hi'
+      ? `नमस्ते नियांश फार्मा, मुझे इस उत्पाद के लिए पूछताछ / ऑर्डर करना है:`
+      : `Hello Niyansh Pharma, I would like to enquire about this product:`;
+
+    const message = `${greeting}\n\n*Product Name:* ${product.name}\n*Brand:* ${product.brand}\n*Packing:* ${product.packing}\n${priceText}\n*SKU:* ${product.sku || 'N/A'}`;
     const whatsappUrl = `https://wa.me/919909923130?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
@@ -114,7 +120,6 @@ function ProductCard({ product, addToCart }) {
             alt={product.name}
             loading="lazy"
             onError={(e) => {
-              // Hide image completely on load error to leave section clean and empty
               e.target.style.display = 'none';
             }}
             style={{ 
@@ -128,7 +133,6 @@ function ProductCard({ product, addToCart }) {
             onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
           />
         ) : (
-          /* Clinical Pharmaceutical Medicine Packaging Presentation (When photo is pending) */
           <div 
             style={{ 
               width: '100%', 
@@ -204,7 +208,7 @@ function ProductCard({ product, addToCart }) {
               borderRadius: '12px', border: '1px solid #fde68a'
             }}
           >
-            ★ Featured
+            ★ {t('products.scheme', 'Featured')}
           </span>
         ) : null}
       </Link>
@@ -213,7 +217,7 @@ function ProductCard({ product, addToCart }) {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontSize: '0.72rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-            {product.category || 'Pharmaceutical'}
+            {translateCategory(product.category || 'Pharma Products')}
           </span>
           <span style={{ fontSize: '0.68rem', color: '#059669', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '3px' }}>
             <ShieldCheck size={12} /> WHO-GMP
@@ -233,12 +237,12 @@ function ProductCard({ product, addToCart }) {
         </Link>
         
         <p style={{ fontSize: '0.82rem', color: 'var(--text-medium)', marginBottom: '4px' }}>
-          Packing: <strong style={{ color: 'var(--text-dark)' }}>{product.packing || 'Standard'}</strong>
+          {t('products.packing', 'Packing')}: <strong style={{ color: 'var(--text-dark)' }}>{product.packing || 'Standard'}</strong>
         </p>
 
         {product.composition && (
           <p style={{ fontSize: '0.78rem', color: 'var(--text-light)', marginBottom: '6px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={product.composition}>
-            Molecule: <span style={{ fontStyle: 'italic', color: 'var(--text-medium)' }}>{product.composition}</span>
+            {t('products.composition', 'Composition')}: <span style={{ fontStyle: 'italic', color: 'var(--text-medium)' }}>{product.composition}</span>
           </p>
         )}
 
@@ -250,20 +254,20 @@ function ProductCard({ product, addToCart }) {
                 {hasMargin && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px', flexWrap: 'wrap' }}>
                     <span style={{ fontSize: '0.74rem', color: 'var(--text-light)', textDecoration: 'line-through' }} className="tabular-nums">
-                      MRP ₹{displayMrp.toFixed(2)}
+                      {t('products.mrp', 'MRP')} {formatCurrency(displayMrp)}
                     </span>
                     <span style={{ fontSize: '0.7rem', backgroundColor: '#ecfdf5', color: '#059669', fontWeight: '800', padding: '1px 6px', borderRadius: '4px' }}>
-                      {marginPercent}% MARGIN
+                      {marginPercent}% {language === 'gu' ? 'માર્જિન' : language === 'hi' ? 'मार्जिन' : 'MARGIN'}
                     </span>
                   </div>
                 )}
                 <div>
                   <span style={{ fontSize: '0.7rem', color: 'var(--primary-blue)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'block' }}>
-                    PTR (Wholesale):
+                    {t('products.ptr', 'PTR Rate')}:
                   </span>
                   <span style={{ fontSize: '1.3rem', fontWeight: '900', color: 'var(--primary-blue)' }} className="tabular-nums">
-                    ₹{displayPrice.toFixed(2)}
-                    <span style={{ fontSize: '0.74rem', fontWeight: '500', color: 'var(--text-medium)' }}> /unit</span>
+                    {formatCurrency(displayPrice)}
+                    <span style={{ fontSize: '0.74rem', fontWeight: '500', color: 'var(--text-medium)' }}> /{language === 'gu' ? 'નંગ' : language === 'hi' ? 'यूनिट' : 'unit'}</span>
                   </span>
                 </div>
               </>
@@ -271,11 +275,11 @@ function ProductCard({ product, addToCart }) {
               <div>
                 <div style={{ marginBottom: '3px' }}>
                   <span style={{ fontSize: '0.7rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'block' }}>
-                    MRP (Retail Price):
+                    {t('products.mrp', 'MRP')}:
                   </span>
                   <span style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--text-dark)' }} className="tabular-nums">
-                    ₹{displayMrp.toFixed(2)}
-                    <span style={{ fontSize: '0.74rem', fontWeight: '500', color: 'var(--text-medium)' }}> /unit</span>
+                    {formatCurrency(displayMrp)}
+                    <span style={{ fontSize: '0.74rem', fontWeight: '500', color: 'var(--text-medium)' }}> /{language === 'gu' ? 'નંગ' : language === 'hi' ? 'यूनिट' : 'unit'}</span>
                   </span>
                 </div>
                 <button
@@ -302,7 +306,7 @@ function ProductCard({ product, addToCart }) {
                   title="Login as verified chemist to view Wholesale PTR Rate"
                 >
                   <Lock size={12} color="var(--primary-blue)" />
-                  <span>Login for PTR Rate</span>
+                  <span>{t('products.loginForPtr', 'Login for PTR Rate')}</span>
                 </button>
               </div>
             )}
@@ -352,7 +356,7 @@ function ProductCard({ product, addToCart }) {
               <Minus size={13} />
             </button>
             <span style={{ fontWeight: '800', fontSize: '0.84rem', color: '#064e3b' }}>
-              {quantity} Box{quantity > 1 ? 'es' : ''}
+              {quantity} {language === 'gu' ? 'બોક્સ' : language === 'hi' ? 'बॉक्स' : 'Box'}
             </span>
             <button 
               onClick={handleIncrement}
@@ -385,7 +389,7 @@ function ProductCard({ product, addToCart }) {
           className="btn btn-secondary btn-sm"
           style={{ padding: '8px 10px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: '700' }}
         >
-          WhatsApp
+          {t('common.whatsapp', 'WhatsApp')}
         </button>
       </div>
 
@@ -396,7 +400,7 @@ function ProductCard({ product, addToCart }) {
           marginTop: '10px', fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)'
         }}
       >
-        <Eye size={12} /> View Details
+        <Eye size={12} /> {t('products.viewDetails', 'View Details')}
       </Link>
     </div>
   );

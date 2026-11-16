@@ -571,7 +571,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
             {isRegister && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                 <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                  Contact Name <span style={{ color: '#ef4444' }}>*</span>
+                  {t('auth.nameLabel', 'Contact Name')} <span style={{ color: '#ef4444' }}>*</span>
                 </label>
                 <div style={{ position: 'relative' }}>
                   <User size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
@@ -581,7 +581,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                     required 
                     value={formData.name} 
                     onChange={handleChange}
-                    placeholder="John Doe"
+                    placeholder={t('auth.namePlaceholder', 'John Doe')}
                     style={{ width: '100%', padding: '10px 10px 10px 38px', borderRadius: '6px', border: '1px solid var(--border-light)' }}
                   />
                 </div>
@@ -590,7 +590,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
               <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                Email Address <span style={{ color: '#ef4444' }}>*</span>
+                {t('auth.emailLabel', 'Email Address')} <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <div style={{ position: 'relative' }}>
                 <Mail size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
@@ -600,7 +600,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                   required 
                   value={formData.email} 
                   onChange={handleChange}
-                  placeholder="example@mail.com"
+                  placeholder={t('auth.emailPlaceholder', 'example@mail.com')}
                   style={{ width: '100%', padding: '10px 10px 10px 38px', borderRadius: '6px', border: '1px solid var(--border-light)' }}
                 />
               </div>
@@ -608,7 +608,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
               <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                Password <span style={{ color: '#ef4444' }}>*</span>
+                {t('auth.passwordLabel', 'Password')} <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <div style={{ position: 'relative' }}>
                 <Lock size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
@@ -629,8 +629,8 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                     background: 'none', border: 'none', color: 'var(--text-light)', cursor: 'pointer', padding: '2px',
                     display: 'flex', alignItems: 'center'
                   }}
-                  title={showLoginPassword ? 'Hide password' : 'Show password'}
-                  aria-label={showLoginPassword ? 'Hide password' : 'Show password'}
+                  title={showLoginPassword ? t('auth.hidePassword', 'Hide password') : t('auth.showPassword', 'Show password')}
+                  aria-label={showLoginPassword ? t('auth.hidePassword', 'Hide password') : t('auth.showPassword', 'Show password')}
                 >
                   {showLoginPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -648,7 +648,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                       textDecoration: 'underline'
                     }}
                   >
-                    Forgot Password?
+                    {t('auth.forgotPassword', 'Forgot Password?')}
                   </button>
                 </div>
               )}
@@ -660,7 +660,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '15px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                     <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                      Chemist / Store Name <span style={{ color: '#ef4444' }}>*</span>
+                      {t('auth.companyLabel', 'Chemist / Store Name')} <span style={{ color: '#ef4444' }}>*</span>
                     </label>
                     <div style={{ position: 'relative' }}>
                       <Building size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
@@ -670,7 +670,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                         required
                         value={formData.companyName} 
                         onChange={handleChange}
-                        placeholder="Niyansh Medicals"
+                        placeholder={t('auth.companyPlaceholder', 'Niyansh Medicals')}
                         style={{ width: '100%', padding: '10px 10px 10px 38px', borderRadius: '6px', border: '1px solid var(--border-light)', fontSize: '0.85rem' }}
                       />
                     </div>
@@ -678,7 +678,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                     <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                      Phone Number <span style={{ color: '#ef4444' }}>*</span>
+                      {t('auth.phoneLabel', 'Phone Number')} <span style={{ color: '#ef4444' }}>*</span>
                     </label>
                     <div style={{ position: 'relative' }}>
                       <Phone size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
@@ -689,7 +689,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                         maxLength={10}
                         value={formData.phone} 
                         onChange={handleChange}
-                        placeholder="10-digit mobile number"
+                        placeholder={t('auth.phonePlaceholder', '10-digit mobile number')}
                         style={{ width: '100%', padding: '10px 10px 10px 38px', borderRadius: '6px', border: '1px solid var(--border-light)', fontSize: '0.85rem' }}
                       />
                     </div>
@@ -708,17 +708,17 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
                     <span style={{ fontSize: '0.84rem', fontWeight: '800', color: 'var(--primary-blue, #2563eb)' }}>
-                      Tax Credentials (GSTIN / PAN)
+                      {t('auth.taxCredentials', 'Tax Credentials (GSTIN / PAN)')}
                     </span>
                     <span style={{ fontSize: '0.74rem', color: '#0369a1', backgroundColor: '#e0f2fe', padding: '3px 9px', borderRadius: '12px', fontWeight: '700' }}>
-                      GSTIN is Optional • Max 500 KB per document
+                      {t('auth.taxGuidance', 'GSTIN is Optional • Max 500 KB per document')}
                     </span>
                   </div>
 
                   {/* Informational banner about document formats and size */}
                   <div style={{ fontSize: '0.76rem', color: '#0f766e', backgroundColor: '#ccfbf1', padding: '6px 10px', borderRadius: '6px', border: '1px solid #99f6e4', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <span>📄</span>
-                    <span><strong>માન્ય ડોક્યુમેન્ટ:</strong> PDF, JPG, PNG (Max 500 KB). GST નંબર ન હોય તો ખાલી છોડો અને ફક્ત PAN નંબર દાખલ કરો.</span>
+                    <span>{t('auth.docGuidanceText', 'Accepted documents: PDF, JPG, PNG (Max 500 KB). Leave blank if no GST and enter PAN only.')}</span>
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
@@ -727,7 +727,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
                         <label style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-dark)', whiteSpace: 'nowrap' }}>
-                          GSTIN Number <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: '600' }}>(વૈકલ્પિક / Optional)</span>
+                          {t('auth.gstinOptional', 'GSTIN Number (Optional)')}
                         </label>
                         <label style={{
                           display: 'inline-flex', alignItems: 'center', gap: '5px',
@@ -737,7 +737,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                           whiteSpace: 'nowrap', flexShrink: 0
                         }}>
                           <Upload size={12} />
-                          <span>{docFiles.gstin ? 'Change File' : 'Upload (≤500 KB)'}</span>
+                          <span>{docFiles.gstin ? t('auth.changeFile', 'Change File') : t('auth.upload500kb', 'Upload (≤500 KB)')}</span>
                           <input 
                             type="file" 
                             accept=".pdf, .jpg, .jpeg, .png, .webp, application/pdf, image/jpeg, image/png, image/webp" 
@@ -772,7 +772,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
                         <label style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-dark)', whiteSpace: 'nowrap' }}>
-                          PAN Number {!formData.gstin ? <span style={{ color: '#ef4444' }}>* (Required without GST)</span> : <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: '600' }}>(Auto-filled / Optional)</span>}
+                          {t('auth.panNumber', 'PAN Number')} {!formData.gstin ? <span style={{ color: '#ef4444' }}>* ({t('auth.requiredWithoutGst', 'Required without GST')})</span> : <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: '600' }}>({t('auth.optional', 'Optional')})</span>}
                         </label>
                         <label style={{
                           display: 'inline-flex', alignItems: 'center', gap: '5px',
@@ -782,7 +782,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                           whiteSpace: 'nowrap', flexShrink: 0
                         }}>
                           <Upload size={12} />
-                          <span>{docFiles.pan ? 'Change File' : 'Upload (≤500 KB)'}</span>
+                          <span>{docFiles.pan ? t('auth.changeFile', 'Change File') : t('auth.upload500kb', 'Upload (≤500 KB)')}</span>
                           <input 
                             type="file" 
                             accept=".pdf, .jpg, .jpeg, .png, .webp, application/pdf, image/jpeg, image/png, image/webp" 
@@ -829,17 +829,17 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
                     <span style={{ fontSize: '0.84rem', fontWeight: '800', color: 'var(--primary-blue, #2563eb)' }}>
-                      Drug Licenses (Form 20 & 21)
+                      {t('auth.drugLicenses', 'Drug Licenses (Form 20 & 21)')}
                     </span>
                     <span style={{ fontSize: '0.74rem', color: '#0369a1', backgroundColor: '#e0f2fe', padding: '3px 9px', borderRadius: '12px', fontWeight: '700' }}>
-                      Form 20 Required • Form 21 Optional • Max 500 KB
+                      {t('auth.dlGuidance', 'Form 20 Required • Form 21 Optional • Max 500 KB')}
                     </span>
                   </div>
 
                   {/* Informational banner about document formats and size */}
                   <div style={{ fontSize: '0.76rem', color: '#0f766e', backgroundColor: '#ccfbf1', padding: '6px 10px', borderRadius: '6px', border: '1px solid #99f6e4', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <span>📄</span>
-                    <span><strong>માન્ય ડોક્યુમેન્ટ:</strong> PDF, JPG, PNG (Max 500 KB). Form 20 લાયસન્સ ફરજિયાત છે, Form 21 વૈકલ્પિક છે.</span>
+                    <span>{t('auth.dlDocGuidance', 'Accepted documents: PDF, JPG, PNG (Max 500 KB). Form 20 is required, Form 21 is optional.')}</span>
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
@@ -848,7 +848,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
                         <label style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-dark)', whiteSpace: 'nowrap' }}>
-                          Drug License No 1 (Form 20) <span style={{ color: '#ef4444' }}>*</span>
+                          {t('auth.dl1Label', 'Drug License No 1 (Form 20)')} <span style={{ color: '#ef4444' }}>*</span>
                         </label>
                         <label style={{
                           display: 'inline-flex', alignItems: 'center', gap: '5px',
@@ -858,7 +858,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                           whiteSpace: 'nowrap', flexShrink: 0
                         }}>
                           <Upload size={12} />
-                          <span>{docFiles.drugLicense1 ? 'Change File' : 'Upload (≤500 KB)'}</span>
+                          <span>{docFiles.drugLicense1 ? t('auth.changeFile', 'Change File') : t('auth.upload500kb', 'Upload (≤500 KB)')}</span>
                           <input 
                             type="file" 
                             accept=".pdf, .jpg, .jpeg, .png, .webp, application/pdf, image/jpeg, image/png, image/webp" 
@@ -893,7 +893,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
                         <label style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-dark)', whiteSpace: 'nowrap' }}>
-                          Drug License No 2 (Form 21) <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: '600' }}>(વૈકલ્પિક / Optional)</span>
+                          {t('auth.dl2Label', 'Drug License No 2 (Form 21) (Optional)')}
                         </label>
                         <label style={{
                           display: 'inline-flex', alignItems: 'center', gap: '5px',
@@ -903,7 +903,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                           whiteSpace: 'nowrap', flexShrink: 0
                         }}>
                           <Upload size={12} />
-                          <span>{docFiles.drugLicense2 ? 'Change File' : 'Upload (≤500 KB)'}</span>
+                          <span>{docFiles.drugLicense2 ? t('auth.changeFile', 'Change File') : t('auth.upload500kb', 'Upload (≤500 KB)')}</span>
                           <input 
                             type="file" 
                             accept=".pdf, .jpg, .jpeg, .png, .webp, application/pdf, image/jpeg, image/png, image/webp" 
@@ -944,7 +944,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
               className="btn btn-primary"
               style={{ width: '100%', padding: '12px', marginTop: '10px', borderRadius: '6px', fontWeight: '700' }}
             >
-              {loading ? 'Authenticating...' : isLogin ? 'Sign In to Account' : 'Create Chemist Account'}
+              {loading ? t('auth.authenticating', 'Authenticating...') : isLogin ? t('auth.loginBtn', 'Sign In to Account') : t('auth.registerBtn', 'Create Chemist Account')}
             </button>
           </form>
         )}
@@ -954,24 +954,24 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
           <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '0.85rem', color: 'var(--text-medium)' }}>
             {isLogin ? (
               <span>
-                New Chemist / Retailer?{' '}
+                {t('auth.newChemist', 'New Chemist / Retailer?')}{' '}
                 <button 
                   type="button"
                   onClick={() => { setAuthMode('register'); setError(''); setInfoMessage(''); }}
                   style={{ color: 'var(--primary-blue)', fontWeight: '700', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
                 >
-                  Chemist Register
+                  {t('auth.registerTitle', 'Chemist Register')}
                 </button>
               </span>
             ) : (
               <span>
-                Already have an account?{' '}
+                {t('auth.alreadyAccount', 'Already have an account?')}{' '}
                 <button 
                   type="button"
                   onClick={() => { setAuthMode('login'); setError(''); setInfoMessage(''); }}
                   style={{ color: 'var(--primary-blue)', fontWeight: '700', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
                 >
-                  Log In
+                  {t('auth.loginTitle', 'Log In')}
                 </button>
               </span>
             )}

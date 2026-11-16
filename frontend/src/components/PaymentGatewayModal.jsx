@@ -26,6 +26,7 @@ import {
   BadgeCheck,
   Send
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 const TOP_BANKS = [
   { id: 'HDFC', name: 'HDFC Bank', code: 'HDFC0000001', color: '#004c8f', logo: '🏛️' },
@@ -59,6 +60,8 @@ export default function PaymentGatewayModal({
   invoiceNumber = '',
   onPaymentSuccess
 }) {
+  const { t, formatCurrency, formatDate } = useLanguage();
+
   // Amount selection state
   const initialDue = Math.max(0, Number(dueAmount) || 0);
   const [payAmountType, setPayAmountType] = useState('full'); // 'full' | 'custom'
@@ -200,7 +203,9 @@ export default function PaymentGatewayModal({
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiDeepLink)}&margin=6`;
 
   const copyToClipboard = (text, type) => {
-    navigator.clipboard.writeText(text);
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(text);
+    }
     if (type === 'upi') {
       setCopiedUpi(true);
       setTimeout(() => setCopiedUpi(false), 2500);
@@ -215,6 +220,7 @@ export default function PaymentGatewayModal({
 
   // Format currency helper
   const formatINR = (val) => {
+    if (formatCurrency) return formatCurrency(val);
     const num = Number(val) || 0;
     return '₹' + num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
@@ -223,13 +229,13 @@ export default function PaymentGatewayModal({
   const handleInitiatePayment = (e) => {
     if (e) e.preventDefault();
     if (amountToPay <= 0) {
-      setErrorMessage('Please enter a valid amount greater than ₹0');
+      setErrorMessage(t('common.error', 'Please enter a valid amount greater than ₹0'));
       return;
     }
 
     setErrorMessage('');
     setGatewayStage('processing');
-    setProcessingMessage('Connecting securely to RBI 256-bit payment switch...');
+    setProcessingMessage(t('payment.processingSettlement', 'Connecting securely to RBI 256-bit payment switch...'));
 
     setTimeout(() => {
       if (activeTab === 'card' || activeTab === 'netbanking') {
@@ -237,13 +243,13 @@ export default function PaymentGatewayModal({
         setOtpCountdown(59);
         setOtpCode('749210');
       } else if (activeTab === 'upi') {
-        setProcessingMessage('Awaiting UPI App authorization on your mobile...');
+        setProcessingMessage(t('payment.paymentRequestSent', { vpa: merchantUpiId }));
         setTimeout(() => {
           executeFinalPaymentRecord('UPI', `UPI/${Date.now().toString().slice(-8)}`);
         }, 1800);
       } else {
         // NEFT / Cheque
-        setProcessingMessage('Validating bank UTR / Cheque reference...');
+        setProcessingMessage(t('payment.processingSettlement', 'Validating bank UTR / Cheque reference...'));
         setTimeout(() => {
           executeFinalPaymentRecord('Cheque', utrNumber || `NEFT/${Date.now().toString().slice(-8)}`);
         }, 1500);
@@ -255,7 +261,7 @@ export default function PaymentGatewayModal({
   const handleAuthorizeOtp = (e) => {
     if (e) e.preventDefault();
     setGatewayStage('processing');
-    setProcessingMessage('Verifying two-factor bank authorization & updating wholesale ledger...');
+    setProcessingMessage(t('payment.processingSettlement', 'Verifying two-factor bank authorization & updating wholesale ledger...'));
 
     const methodTag = activeTab === 'card' ? 'Card' : 'NetBanking';
     const txnRef = activeTab === 'card' 
@@ -314,7 +320,6 @@ export default function PaymentGatewayModal({
           onPaymentSuccess(receiptData, data.ledger);
         }
       } else {
-        // Fallback simulated success for offline demo mode
         const fallbackReceipt = {
           paymentId: paymentId,
           amount: amountToPay,
@@ -358,23 +363,23 @@ export default function PaymentGatewayModal({
   // WhatsApp share receipt
   const shareReceiptWhatsApp = () => {
     if (!completedReceipt) return;
-    const msg = `🧾 *NIYANSH PHARMA - PAYMENT RECEIPT*
+    const msg = `🧾 *${t('payment.receiptId', 'NIYANSH PHARMA - PAYMENT RECEIPT')}*
 ━━━━━━━━━━━━━━━━━━━━
-*Receipt ID:* ${completedReceipt.paymentId}
-*Amount Paid:* ${formatINR(completedReceipt.amount)}
-*Payment Mode:* ${completedReceipt.method}
-*Ref / UTR:* ${completedReceipt.transactionRef}
-*Date:* ${new Date(completedReceipt.date).toLocaleString('en-IN')}
+*${t('payment.receiptId', 'Receipt ID')}:* ${completedReceipt.paymentId}
+*${t('payment.amountCleared', 'Amount Paid')}:* ${formatINR(completedReceipt.amount)}
+*${t('payment.paymentMethod', 'Payment Mode')}:* ${completedReceipt.method}
+*${t('payment.bankRefUtr', 'Ref / UTR')}:* ${completedReceipt.transactionRef}
+*${t('payment.paymentTimestamp', 'Date')}:* ${new Date(completedReceipt.date).toLocaleString('en-IN')}
 
-*Retailer:* ${completedReceipt.shopName} (${completedReceipt.retailerMobile})
-${completedReceipt.invoiceNumber ? `*Invoice Settled:* ${completedReceipt.invoiceNumber}\n` : ''}*Remaining Outstanding:* ${formatINR(completedReceipt.remainingBalance)}
+*${t('payment.paidForRetailer', 'Retailer')}:* ${completedReceipt.shopName} (${completedReceipt.retailerMobile})
+${completedReceipt.invoiceNumber ? `*Invoice Settled:* ${completedReceipt.invoiceNumber}\n` : ''}*${t('payment.updatedBalance', 'Remaining Outstanding')}:* ${formatINR(completedReceipt.remainingBalance)}
 
-*Status:* ✅ Payment Cleared & Reconciled
+*${t('payment.statusCompleted', 'Status')}:* ✅ ${t('payment.statusCompleted', 'Payment Cleared & Reconciled')}
 ━━━━━━━━━━━━━━━━━━━━
-_Niyansh Pharma Wholesale & Distribution_
-_Support: +91 9316566894_`;
+_${t('payment.distributorSubtitle', 'Niyansh Pharma Wholesale & Distribution')}_
+_${t('payment.support', 'Support: +91 99099 23130')}_`;
 
-    const url = `https://api.whatsapp.com/send?phone=91${(completedReceipt.retailerMobile || '9316566894').replace(/\D/g, '')}&text=${encodeURIComponent(msg)}`;
+    const url = `https://api.whatsapp.com/send?phone=91${(completedReceipt.retailerMobile || '9909923130').replace(/\D/g, '')}&text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
   };
 
@@ -403,19 +408,20 @@ _Support: +91 9316566894_`;
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '16px',
-        overflowY: 'auto'
+        padding: '12px',
+        overflowY: 'auto',
+        boxSizing: 'border-box'
       }}
     >
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Wholesale Payment Gateway"
+        aria-label={t('payment.title', 'Wholesale Payment Gateway')}
         className="card animate-fade-in"
         style={{
           width: '100%',
           maxWidth: '680px',
-          maxHeight: '92vh',
+          maxHeight: '94vh',
           backgroundColor: '#ffffff',
           borderRadius: '16px',
           padding: 0,
@@ -431,50 +437,54 @@ _Support: +91 9316566894_`;
           style={{
             background: 'linear-gradient(135deg, #0c3d6c 0%, #1e5288 100%)',
             color: '#ffffff',
-            padding: '20px 24px',
+            padding: '16px 20px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+            flexWrap: 'wrap',
+            gap: '10px'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1 }}>
             <div
               style={{
-                width: '44px',
-                height: '44px',
-                borderRadius: '12px',
+                width: '40px',
+                height: '40px',
+                borderRadius: '10px',
                 backgroundColor: 'rgba(255, 255, 255, 0.15)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                flexShrink: 0,
                 backdropFilter: 'blur(4px)'
               }}
             >
-              <ShieldCheck size={26} color="#4ade80" />
+              <ShieldCheck size={24} color="#4ade80" />
             </div>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <h3 style={{ margin: 0, color: '#ffffff', fontSize: '1.2rem', fontWeight: 700 }}>
-                  Niyansh Pharma B2B Payments
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <h3 style={{ margin: 0, color: '#ffffff', fontSize: '1.05rem', fontWeight: 700, wordBreak: 'break-word' }}>
+                  {t('payment.b2bTitle', 'Niyansh Pharma B2B Payments')}
                 </h3>
                 <span
                   style={{
-                    fontSize: '0.7rem',
+                    fontSize: '0.68rem',
                     backgroundColor: 'rgba(74, 222, 128, 0.2)',
                     color: '#86efac',
-                    padding: '2px 8px',
-                    borderRadius: '12px',
+                    padding: '2px 7px',
+                    borderRadius: '10px',
                     fontWeight: 600,
-                    border: '1px solid rgba(74, 222, 128, 0.3)'
+                    border: '1px solid rgba(74, 222, 128, 0.3)',
+                    whiteSpace: 'nowrap'
                   }}
                 >
-                  256-bit SSL
+                  {t('payment.sslSecure', '256-bit SSL')}
                 </span>
               </div>
-              <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: '#cbd5e1' }}>
+              <p style={{ margin: '2px 0 0', fontSize: '0.8rem', color: '#cbd5e1', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {retailerInfo.shopName ? `${retailerInfo.shopName} • ` : ''}
-                {invoiceNumber ? `Paying Invoice #${invoiceNumber}` : 'Ledger Account Settlement'}
+                {invoiceNumber ? t('payment.payingInvoice', { invoice: invoiceNumber }) : t('payment.ledgerSettlement', 'Ledger Account Settlement')}
               </p>
             </div>
           </div>
@@ -492,54 +502,55 @@ _Support: +91 9316566894_`;
               justifyContent: 'center',
               border: 'none',
               cursor: 'pointer',
+              flexShrink: 0,
               transition: 'all 0.2s'
             }}
-            aria-label="Close payment modal"
+            aria-label={t('common.close', 'Close')}
           >
             <X size={20} />
           </button>
         </div>
 
-        {/* Amount Selection Strip (Only in input/otp stages) */}
+        {/* Amount Selection Strip */}
         {gatewayStage !== 'success' && (
           <div
             style={{
               backgroundColor: '#f8fafc',
               borderBottom: '1px solid #e2e8f0',
-              padding: '16px 24px',
+              padding: '12px 18px',
               display: 'flex',
               flexWrap: 'wrap',
               alignItems: 'center',
               justifyContent: 'space-between',
-              gap: '12px'
+              gap: '10px'
             }}
           >
             <div>
-              <div style={{ fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#64748b', fontWeight: 700 }}>
-                Total Payable Amount
+              <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#64748b', fontWeight: 700 }}>
+                {t('payment.payableAmount', 'Total Payable Amount')}
               </div>
-              <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0c3d6c' }}>
+              <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#0c3d6c' }}>
                 {formatINR(amountToPay)}
               </div>
             </div>
 
-            {/* Amount Radio Toggle & Quick Selection */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <button
                 type="button"
                 onClick={() => setPayAmountType('full')}
                 style={{
                   padding: '6px 12px',
                   borderRadius: '20px',
-                  fontSize: '0.82rem',
+                  fontSize: '0.8rem',
                   fontWeight: 600,
                   cursor: 'pointer',
                   border: payAmountType === 'full' ? '2px solid #0c3d6c' : '1px solid #cbd5e1',
                   backgroundColor: payAmountType === 'full' ? '#0c3d6c' : '#ffffff',
-                  color: payAmountType === 'full' ? '#ffffff' : '#475569'
+                  color: payAmountType === 'full' ? '#ffffff' : '#475569',
+                  minHeight: '36px'
                 }}
               >
-                Full Amount ({formatINR(initialDue)})
+                {t('payment.fullAmount', 'Full Amount')} ({formatINR(initialDue)})
               </button>
 
               <button
@@ -548,21 +559,22 @@ _Support: +91 9316566894_`;
                 style={{
                   padding: '6px 12px',
                   borderRadius: '20px',
-                  fontSize: '0.82rem',
+                  fontSize: '0.8rem',
                   fontWeight: 600,
                   cursor: 'pointer',
                   border: payAmountType === 'custom' ? '2px solid #0c3d6c' : '1px solid #cbd5e1',
                   backgroundColor: payAmountType === 'custom' ? '#0c3d6c' : '#ffffff',
-                  color: payAmountType === 'custom' ? '#ffffff' : '#475569'
+                  color: payAmountType === 'custom' ? '#ffffff' : '#475569',
+                  minHeight: '36px'
                 }}
               >
-                Custom Partial
+                {t('payment.customPartial', 'Custom Partial')}
               </button>
             </div>
 
             {payAmountType === 'custom' && (
-              <div style={{ width: '100%', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ position: 'relative', flex: 1 }}>
+              <div style={{ width: '100%', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <div style={{ position: 'relative', flex: 1, minWidth: '160px' }}>
                   <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontWeight: 700, color: '#64748b' }}>
                     ₹
                   </span>
@@ -570,9 +582,10 @@ _Support: +91 9316566894_`;
                     type="number"
                     min="1"
                     max="1000000"
+                    inputMode="numeric"
                     value={customAmount}
                     onChange={(e) => setCustomAmount(e.target.value)}
-                    placeholder="Enter amount to pay"
+                    placeholder={t('payment.enterAmountPlaceholder', 'Enter amount to pay')}
                     style={{
                       width: '100%',
                       padding: '8px 12px 8px 28px',
@@ -581,11 +594,12 @@ _Support: +91 9316566894_`;
                       fontSize: '0.95rem',
                       fontWeight: 700,
                       color: '#0c3d6c',
-                      backgroundColor: '#ffffff'
+                      backgroundColor: '#ffffff',
+                      boxSizing: 'border-box'
                     }}
                   />
                 </div>
-                <div style={{ display: 'flex', gap: '6px' }}>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                   {[1000, 5000, 10000, 25000].map((preset) => (
                     <button
                       key={preset}
@@ -612,7 +626,7 @@ _Support: +91 9316566894_`;
         )}
 
         {/* Modal Body Container */}
-        <div style={{ padding: '24px', overflowY: 'auto', flex: 1 }}>
+        <div style={{ padding: '16px sm:padding:20px', overflowY: 'auto', flex: 1 }}>
           {/* STAGE 1: INPUT STAGE */}
           {gatewayStage === 'input' && (
             <div>
@@ -620,9 +634,9 @@ _Support: +91 9316566894_`;
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
-                  gap: '8px',
-                  marginBottom: '20px',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 120px), 1fr))',
+                  gap: '6px',
+                  marginBottom: '16px',
                   backgroundColor: '#f1f5f9',
                   padding: '4px',
                   borderRadius: '12px'
@@ -637,12 +651,13 @@ _Support: +91 9316566894_`;
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '4px',
-                    padding: '10px 6px',
+                    padding: '8px 4px',
                     borderRadius: '8px',
                     border: 'none',
                     fontWeight: 700,
-                    fontSize: '0.82rem',
+                    fontSize: '0.8rem',
                     cursor: 'pointer',
+                    minHeight: '44px',
                     backgroundColor: activeTab === 'upi' ? '#ffffff' : 'transparent',
                     color: activeTab === 'upi' ? '#0c3d6c' : '#64748b',
                     boxShadow: activeTab === 'upi' ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
@@ -650,7 +665,7 @@ _Support: +91 9316566894_`;
                   }}
                 >
                   <QrCode size={18} color={activeTab === 'upi' ? '#0c3d6c' : '#64748b'} />
-                  <span>⚡ UPI / QR</span>
+                  <span>{t('payment.tabUpi', '⚡ UPI / QR')}</span>
                 </button>
 
                 <button
@@ -662,12 +677,13 @@ _Support: +91 9316566894_`;
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '4px',
-                    padding: '10px 6px',
+                    padding: '8px 4px',
                     borderRadius: '8px',
                     border: 'none',
                     fontWeight: 700,
-                    fontSize: '0.82rem',
+                    fontSize: '0.8rem',
                     cursor: 'pointer',
+                    minHeight: '44px',
                     backgroundColor: activeTab === 'card' ? '#ffffff' : 'transparent',
                     color: activeTab === 'card' ? '#0c3d6c' : '#64748b',
                     boxShadow: activeTab === 'card' ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
@@ -675,7 +691,7 @@ _Support: +91 9316566894_`;
                   }}
                 >
                   <CreditCard size={18} color={activeTab === 'card' ? '#0c3d6c' : '#64748b'} />
-                  <span>💳 Card</span>
+                  <span>{t('payment.tabCard', '💳 Card')}</span>
                 </button>
 
                 <button
@@ -687,12 +703,13 @@ _Support: +91 9316566894_`;
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '4px',
-                    padding: '10px 6px',
+                    padding: '8px 4px',
                     borderRadius: '8px',
                     border: 'none',
                     fontWeight: 700,
-                    fontSize: '0.82rem',
+                    fontSize: '0.8rem',
                     cursor: 'pointer',
+                    minHeight: '44px',
                     backgroundColor: activeTab === 'netbanking' ? '#ffffff' : 'transparent',
                     color: activeTab === 'netbanking' ? '#0c3d6c' : '#64748b',
                     boxShadow: activeTab === 'netbanking' ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
@@ -700,7 +717,7 @@ _Support: +91 9316566894_`;
                   }}
                 >
                   <Landmark size={18} color={activeTab === 'netbanking' ? '#0c3d6c' : '#64748b'} />
-                  <span>🏛️ Net Banking</span>
+                  <span>{t('payment.tabNetBanking', '🏛️ Net Banking')}</span>
                 </button>
 
                 <button
@@ -712,12 +729,13 @@ _Support: +91 9316566894_`;
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '4px',
-                    padding: '10px 6px',
+                    padding: '8px 4px',
                     borderRadius: '8px',
                     border: 'none',
                     fontWeight: 700,
-                    fontSize: '0.82rem',
+                    fontSize: '0.8rem',
                     cursor: 'pointer',
+                    minHeight: '44px',
                     backgroundColor: activeTab === 'neft' ? '#ffffff' : 'transparent',
                     color: activeTab === 'neft' ? '#0c3d6c' : '#64748b',
                     boxShadow: activeTab === 'neft' ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
@@ -725,7 +743,7 @@ _Support: +91 9316566894_`;
                   }}
                 >
                   <FileText size={18} color={activeTab === 'neft' ? '#0c3d6c' : '#64748b'} />
-                  <span>📄 NEFT / Cheque</span>
+                  <span>{t('payment.tabNeftCheque', '📄 NEFT / Cheque')}</span>
                 </button>
               </div>
 
@@ -751,14 +769,14 @@ _Support: +91 9316566894_`;
 
               {/* TAB 1: UPI / QR CODE */}
               {activeTab === 'upi' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div
                     style={{
                       display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-                      gap: '20px',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))',
+                      gap: '16px',
                       backgroundColor: '#f8fafc',
-                      padding: '20px',
+                      padding: '16px',
                       borderRadius: '12px',
                       border: '1px solid #e2e8f0',
                       alignItems: 'center'
@@ -769,7 +787,7 @@ _Support: +91 9316566894_`;
                       <div
                         style={{
                           backgroundColor: '#ffffff',
-                          padding: '10px',
+                          padding: '8px',
                           borderRadius: '12px',
                           boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
                           border: '1px solid #e2e8f0',
@@ -779,17 +797,16 @@ _Support: +91 9316566894_`;
                         <img
                           src={qrCodeUrl}
                           alt="Niyansh Pharma UPI QR"
-                          style={{ width: '160px', height: '160px', display: 'block', borderRadius: '8px' }}
+                          style={{ width: '150px', height: '150px', display: 'block', borderRadius: '8px' }}
                           onError={(e) => {
-                            // Fallback if network blocks qr api
                             e.target.style.display = 'none';
-                            e.target.nextSibling.style.display = 'flex';
+                            if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
                           }}
                         />
                         <div
                           style={{
-                            width: '160px',
-                            height: '160px',
+                            width: '150px',
+                            height: '150px',
                             display: 'none',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -799,25 +816,28 @@ _Support: +91 9316566894_`;
                             gap: '8px'
                           }}
                         >
-                          <QrCode size={48} color="#0c3d6c" />
-                          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#475569' }}>UPI: 9316566894@okbizaxis</span>
+                          <QrCode size={40} color="#0c3d6c" />
+                          <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#475569' }}>UPI: 9316566894@okbizaxis</span>
                         </div>
                       </div>
                       <span style={{ marginTop: '8px', fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>
-                        Scan with any UPI App
+                        {t('payment.scanToPay', 'Scan QR Code using any UPI App')}
                       </span>
-                      <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
-                        <span style={{ fontSize: '0.7rem', backgroundColor: '#e2e8f0', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>GPay</span>
-                        <span style={{ fontSize: '0.7rem', backgroundColor: '#e2e8f0', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>PhonePe</span>
-                        <span style={{ fontSize: '0.7rem', backgroundColor: '#e2e8f0', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>Paytm</span>
-                        <span style={{ fontSize: '0.7rem', backgroundColor: '#e2e8f0', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>BHIM</span>
+                      <div style={{ display: 'flex', gap: '4px', marginTop: '6px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                        {['GPay', 'PhonePe', 'Paytm', 'BHIM'].map((app) => (
+                          <span key={app} style={{ fontSize: '0.7rem', backgroundColor: '#e2e8f0', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>
+                            {app}
+                          </span>
+                        ))}
                       </div>
                     </div>
 
                     {/* Quick UPI Details & App Launch */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', minWidth: 0 }}>
                       <div>
-                        <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>Official Wholesale UPI ID</div>
+                        <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>
+                          {t('payment.officialUpi', 'Official Wholesale UPI ID')}
+                        </div>
                         <div
                           style={{
                             display: 'flex',
@@ -827,10 +847,11 @@ _Support: +91 9316566894_`;
                             padding: '8px 12px',
                             borderRadius: '8px',
                             border: '1px solid #cbd5e1',
-                            marginTop: '4px'
+                            marginTop: '4px',
+                            gap: '8px'
                           }}
                         >
-                          <span style={{ fontWeight: 700, fontSize: '0.88rem', color: '#0c3d6c' }}>
+                          <span style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0c3d6c', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {merchantUpiId}
                           </span>
                           <button
@@ -843,15 +864,16 @@ _Support: +91 9316566894_`;
                               border: 'none',
                               backgroundColor: copiedUpi ? '#dcfce7' : '#f1f5f9',
                               color: copiedUpi ? '#15803d' : '#475569',
-                              padding: '4px 8px',
+                              padding: '6px 10px',
                               borderRadius: '6px',
                               fontSize: '0.75rem',
                               fontWeight: 600,
-                              cursor: 'pointer'
+                              cursor: 'pointer',
+                              flexShrink: 0
                             }}
                           >
                             {copiedUpi ? <Check size={13} /> : <Copy size={13} />}
-                            {copiedUpi ? 'Copied' : 'Copy'}
+                            {copiedUpi ? t('payment.copied', 'Copied') : t('payment.copyUpi', 'Copy')}
                           </button>
                         </div>
                       </div>
@@ -859,7 +881,7 @@ _Support: +91 9316566894_`;
                       {/* 1-Click Launch UPI Intent Apps */}
                       <div>
                         <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600, marginBottom: '6px' }}>
-                          1-Click App Pay (Mobile/Desktop)
+                          {t('payment.openInUpi', 'Open Directly in UPI App')}
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
                           <a
@@ -910,17 +932,17 @@ _Support: +91 9316566894_`;
                   </div>
 
                   {/* Pay via UPI ID Input */}
-                  <form onSubmit={handleInitiatePayment} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <form onSubmit={handleInitiatePayment} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                       <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155' }}>
-                        Or Enter Retailer UPI ID / VPA
+                        {t('payment.enterUpiVpa', 'Or Enter your UPI VPA / ID')}
                       </label>
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <div style={{ position: 'relative', flex: 1 }}>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        <div style={{ position: 'relative', flex: 1, minWidth: '180px' }}>
                           <Smartphone size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                           <input
                             type="text"
-                            placeholder="e.g. retailer@okaxis or 9825012345@paytm"
+                            placeholder={t('payment.vpaPlaceholder', 'e.g. retailer@okaxis or 9825012345@paytm')}
                             value={vpa}
                             onChange={(e) => setVpa(e.target.value)}
                             style={{
@@ -928,7 +950,8 @@ _Support: +91 9316566894_`;
                               padding: '10px 12px 10px 38px',
                               borderRadius: '8px',
                               border: '1px solid #cbd5e1',
-                              fontSize: '0.9rem'
+                              fontSize: '0.9rem',
+                              boxSizing: 'border-box'
                             }}
                           />
                         </div>
@@ -936,7 +959,8 @@ _Support: +91 9316566894_`;
                           type="button"
                           onClick={() => setVpa(`${retailerInfo.retailerMobile || '9825012345'}@okaxis`)}
                           style={{
-                            padding: '0 12px',
+                            padding: '0 14px',
+                            minHeight: '44px',
                             borderRadius: '8px',
                             backgroundColor: '#f1f5f9',
                             border: '1px solid #cbd5e1',
@@ -956,11 +980,12 @@ _Support: +91 9316566894_`;
                       style={{
                         width: '100%',
                         padding: '14px',
+                        minHeight: '48px',
                         borderRadius: '10px',
                         background: 'linear-gradient(135deg, #0c3d6c 0%, #1b75bc 100%)',
                         color: '#ffffff',
                         fontWeight: 700,
-                        fontSize: '1rem',
+                        fontSize: '0.95rem',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -968,10 +993,10 @@ _Support: +91 9316566894_`;
                         border: 'none',
                         cursor: 'pointer',
                         boxShadow: '0 4px 14px rgba(12, 61, 108, 0.25)',
-                        marginTop: '6px'
+                        marginTop: '4px'
                       }}
                     >
-                      <Lock size={16} /> Pay {formatINR(amountToPay)} via Instant UPI
+                      <Lock size={16} /> {t('payment.verifyAndPay', 'Verify VPA & Request Payment')} ({formatINR(amountToPay)})
                     </button>
                   </form>
                 </div>
@@ -979,12 +1004,12 @@ _Support: +91 9316566894_`;
 
               {/* TAB 2: CREDIT / DEBIT CARD */}
               {activeTab === 'card' && (
-                <form onSubmit={handleInitiatePayment} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <span style={{ padding: '3px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700, backgroundColor: cardType === 'Visa' ? '#00579f' : '#f1f5f9', color: cardType === 'Visa' ? '#ffffff' : '#64748b' }}>Visa</span>
-                      <span style={{ padding: '3px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700, backgroundColor: cardType === 'MasterCard' ? '#eb001b' : '#f1f5f9', color: cardType === 'MasterCard' ? '#ffffff' : '#64748b' }}>MasterCard</span>
-                      <span style={{ padding: '3px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700, backgroundColor: cardType === 'RuPay' ? '#097939' : '#f1f5f9', color: cardType === 'RuPay' ? '#ffffff' : '#64748b' }}>RuPay</span>
+                <form onSubmit={handleInitiatePayment} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <span style={{ padding: '3px 8px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 700, backgroundColor: cardType === 'Visa' ? '#00579f' : '#f1f5f9', color: cardType === 'Visa' ? '#ffffff' : '#64748b' }}>Visa</span>
+                      <span style={{ padding: '3px 8px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 700, backgroundColor: cardType === 'MasterCard' ? '#eb001b' : '#f1f5f9', color: cardType === 'MasterCard' ? '#ffffff' : '#64748b' }}>MasterCard</span>
+                      <span style={{ padding: '3px 8px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 700, backgroundColor: cardType === 'RuPay' ? '#097939' : '#f1f5f9', color: cardType === 'RuPay' ? '#ffffff' : '#64748b' }}>RuPay</span>
                     </div>
 
                     <button
@@ -1004,17 +1029,20 @@ _Support: +91 9316566894_`;
                         gap: '4px'
                       }}
                     >
-                      <Sparkles size={12} /> Fill Demo Test Card
+                      <Sparkles size={12} /> Fill Demo Card
                     </button>
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155' }}>Card Number</label>
+                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155' }}>
+                      {t('payment.cardNumber', 'Card Number')}
+                    </label>
                     <div style={{ position: 'relative' }}>
                       <CreditCard size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                       <input
                         type="text"
                         required
+                        inputMode="numeric"
                         maxLength={19}
                         placeholder="4532 8920 1842 7793"
                         value={cardNumber}
@@ -1025,14 +1053,17 @@ _Support: +91 9316566894_`;
                           borderRadius: '8px',
                           border: '1px solid #cbd5e1',
                           fontSize: '0.95rem',
-                          letterSpacing: '1px'
+                          letterSpacing: '1px',
+                          boxSizing: 'border-box'
                         }}
                       />
                     </div>
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155' }}>Cardholder Name</label>
+                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155' }}>
+                      {t('payment.cardholderName', 'Cardholder Name')}
+                    </label>
                     <input
                       type="text"
                       required
@@ -1044,14 +1075,17 @@ _Support: +91 9316566894_`;
                         padding: '10px 12px',
                         borderRadius: '8px',
                         border: '1px solid #cbd5e1',
-                        fontSize: '0.9rem'
+                        fontSize: '0.9rem',
+                        boxSizing: 'border-box'
                       }}
                     />
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155' }}>Expiry Date</label>
+                      <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155' }}>
+                        {t('payment.expiryDate', 'Expiry Date')}
+                      </label>
                       <input
                         type="text"
                         required
@@ -1065,17 +1099,21 @@ _Support: +91 9316566894_`;
                           borderRadius: '8px',
                           border: '1px solid #cbd5e1',
                           fontSize: '0.9rem',
-                          textAlign: 'center'
+                          textAlign: 'center',
+                          boxSizing: 'border-box'
                         }}
                       />
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155' }}>CVV / CVC</label>
+                      <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155' }}>
+                        {t('payment.cvv', 'CVV / CVC')}
+                      </label>
                       <input
                         type="password"
                         required
                         maxLength={4}
+                        inputMode="numeric"
                         placeholder="•••"
                         value={cardCvv}
                         onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, ''))}
@@ -1086,7 +1124,8 @@ _Support: +91 9316566894_`;
                           border: '1px solid #cbd5e1',
                           fontSize: '0.9rem',
                           textAlign: 'center',
-                          letterSpacing: '2px'
+                          letterSpacing: '2px',
+                          boxSizing: 'border-box'
                         }}
                       />
                     </div>
@@ -1097,11 +1136,12 @@ _Support: +91 9316566894_`;
                     style={{
                       width: '100%',
                       padding: '14px',
+                      minHeight: '48px',
                       borderRadius: '10px',
                       background: 'linear-gradient(135deg, #0c3d6c 0%, #1b75bc 100%)',
                       color: '#ffffff',
                       fontWeight: 700,
-                      fontSize: '1rem',
+                      fontSize: '0.95rem',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -1109,23 +1149,22 @@ _Support: +91 9316566894_`;
                       border: 'none',
                       cursor: 'pointer',
                       boxShadow: '0 4px 14px rgba(12, 61, 108, 0.25)',
-                      marginTop: '6px'
+                      marginTop: '4px'
                     }}
                   >
-                    <Lock size={16} /> Pay {formatINR(amountToPay)} Securely
+                    <Lock size={16} /> {t('payment.payViaCard', { amount: formatINR(amountToPay) })}
                   </button>
                 </form>
               )}
 
               {/* TAB 3: NET BANKING */}
               {activeTab === 'netbanking' && (
-                <form onSubmit={handleInitiatePayment} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <form onSubmit={handleInitiatePayment} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155' }}>
-                    Select Your Corporate / Retail Bank
+                    {t('payment.selectBank', 'Select Your Bank')}
                   </div>
 
-                  {/* Popular Banks Grid */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '10px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 110px), 1fr))', gap: '8px' }}>
                     {TOP_BANKS.map((bank) => {
                       const isSelected = selectedBank === bank.id;
                       return (
@@ -1133,7 +1172,7 @@ _Support: +91 9316566894_`;
                           key={bank.id}
                           onClick={() => { setSelectedBank(bank.id); setOtherBankName(''); }}
                           style={{
-                            padding: '12px 8px',
+                            padding: '10px 6px',
                             borderRadius: '10px',
                             border: isSelected ? '2px solid #0c3d6c' : '1px solid #e2e8f0',
                             backgroundColor: isSelected ? '#eff6ff' : '#ffffff',
@@ -1143,13 +1182,13 @@ _Support: +91 9316566894_`;
                             alignItems: 'center',
                             justifyContent: 'center',
                             textAlign: 'center',
-                            minHeight: '84px',
+                            minHeight: '74px',
                             gap: '4px',
                             transition: 'all 0.2s'
                           }}
                         >
-                          <span style={{ fontSize: '1.4rem' }}>{bank.logo}</span>
-                          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: isSelected ? '#0c3d6c' : '#334155', lineHeight: 1.2 }}>
+                          <span style={{ fontSize: '1.3rem' }}>{bank.logo}</span>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: isSelected ? '#0c3d6c' : '#334155', lineHeight: 1.2 }}>
                             {bank.name}
                           </span>
                         </div>
@@ -1157,9 +1196,10 @@ _Support: +91 9316566894_`;
                     })}
                   </div>
 
-                  {/* Other Banks Dropdown */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#64748b' }}>Or Select Other Bank</label>
+                    <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#64748b' }}>
+                      {t('payment.otherBank', 'Or Select Other Bank')}
+                    </label>
                     <select
                       value={otherBankName}
                       onChange={(e) => { setOtherBankName(e.target.value); setSelectedBank(''); }}
@@ -1169,10 +1209,11 @@ _Support: +91 9316566894_`;
                         border: '1px solid #cbd5e1',
                         fontSize: '0.88rem',
                         backgroundColor: '#ffffff',
-                        color: '#334155'
+                        color: '#334155',
+                        boxSizing: 'border-box'
                       }}
                     >
-                      <option value="">-- Choose from all Indian Banks --</option>
+                      <option value="">{t('payment.chooseBankPlaceholder', '-- Choose from all Indian Banks --')}</option>
                       {OTHER_BANKS.map((bank) => (
                         <option key={bank} value={bank}>{bank}</option>
                       ))}
@@ -1184,11 +1225,12 @@ _Support: +91 9316566894_`;
                     style={{
                       width: '100%',
                       padding: '14px',
+                      minHeight: '48px',
                       borderRadius: '10px',
                       background: 'linear-gradient(135deg, #0c3d6c 0%, #1b75bc 100%)',
                       color: '#ffffff',
                       fontWeight: 700,
-                      fontSize: '1rem',
+                      fontSize: '0.95rem',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -1196,43 +1238,47 @@ _Support: +91 9316566894_`;
                       border: 'none',
                       cursor: 'pointer',
                       boxShadow: '0 4px 14px rgba(12, 61, 108, 0.25)',
-                      marginTop: '6px'
+                      marginTop: '4px'
                     }}
                   >
-                    <Landmark size={16} /> Proceed to {selectedBank ? `${selectedBank} Net Banking` : otherBankName || 'Net Banking'} ({formatINR(amountToPay)})
+                    <Landmark size={16} /> {t('payment.proceedToNetBanking', 'Proceed to Net Banking')} ({formatINR(amountToPay)})
                   </button>
                 </form>
               )}
 
               {/* TAB 4: NEFT / RTGS & CHEQUE */}
               {activeTab === 'neft' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   <div
                     style={{
                       backgroundColor: '#f8fafc',
                       borderRadius: '12px',
-                      padding: '16px',
+                      padding: '14px',
                       border: '1px solid #e2e8f0',
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: '10px'
+                      gap: '8px'
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <Building2 size={18} color="#0c3d6c" />
                       <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0c3d6c' }}>
-                        Niyansh Pharma Wholesale Bank Account
+                        {t('payment.companyBankDetails', 'Official Company Bank Account')}
                       </span>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '0.85rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px', fontSize: '0.82rem' }}>
                       <div>
-                        <span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem' }}>Bank & Branch</span>
+                        <span style={{ color: '#64748b', display: 'block', fontSize: '0.72rem' }}>
+                          {t('payment.bankAndBranch', 'Bank & Branch')}
+                        </span>
                         <strong style={{ color: '#1e293b' }}>Axis Bank, Rajkot Main Branch</strong>
                       </div>
                       <div>
-                        <span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem' }}>Account Type</span>
-                        <strong style={{ color: '#1e293b' }}>Current Account</strong>
+                        <span style={{ color: '#64748b', display: 'block', fontSize: '0.72rem' }}>
+                          {t('payment.accountType', 'Account Type')}
+                        </span>
+                        <strong style={{ color: '#1e293b' }}>{t('payment.currentAccount', 'Current Account')}</strong>
                       </div>
                     </div>
 
@@ -1242,14 +1288,17 @@ _Support: +91 9316566894_`;
                         alignItems: 'center',
                         justifyContent: 'space-between',
                         backgroundColor: '#ffffff',
-                        padding: '8px 12px',
+                        padding: '8px 10px',
                         borderRadius: '8px',
-                        border: '1px solid #cbd5e1'
+                        border: '1px solid #cbd5e1',
+                        gap: '8px'
                       }}
                     >
-                      <div>
-                        <span style={{ color: '#64748b', fontSize: '0.72rem', display: 'block' }}>Account Number</span>
-                        <span style={{ fontFamily: 'monospace', fontWeight: 800, fontSize: '0.95rem', color: '#0c3d6c' }}>
+                      <div style={{ minWidth: 0 }}>
+                        <span style={{ color: '#64748b', fontSize: '0.7rem', display: 'block' }}>
+                          {t('payment.accountNumber', 'Account Number')}
+                        </span>
+                        <span style={{ fontFamily: 'monospace', fontWeight: 800, fontSize: '0.9rem', color: '#0c3d6c', wordBreak: 'break-all' }}>
                           923020048192019
                         </span>
                       </div>
@@ -1265,13 +1314,14 @@ _Support: +91 9316566894_`;
                           color: copiedAccount ? '#15803d' : '#475569',
                           padding: '4px 8px',
                           borderRadius: '6px',
-                          fontSize: '0.75rem',
+                          fontSize: '0.72rem',
                           fontWeight: 600,
-                          cursor: 'pointer'
+                          cursor: 'pointer',
+                          flexShrink: 0
                         }}
                       >
-                        {copiedAccount ? <Check size={13} /> : <Copy size={13} />}
-                        {copiedAccount ? 'Copied' : 'Copy A/C'}
+                        {copiedAccount ? <Check size={12} /> : <Copy size={12} />}
+                        {copiedAccount ? t('payment.copied', 'Copied') : t('payment.copyUpi', 'Copy')}
                       </button>
                     </div>
 
@@ -1281,14 +1331,17 @@ _Support: +91 9316566894_`;
                         alignItems: 'center',
                         justifyContent: 'space-between',
                         backgroundColor: '#ffffff',
-                        padding: '8px 12px',
+                        padding: '8px 10px',
                         borderRadius: '8px',
-                        border: '1px solid #cbd5e1'
+                        border: '1px solid #cbd5e1',
+                        gap: '8px'
                       }}
                     >
-                      <div>
-                        <span style={{ color: '#64748b', fontSize: '0.72rem', display: 'block' }}>IFSC Code</span>
-                        <span style={{ fontFamily: 'monospace', fontWeight: 800, fontSize: '0.95rem', color: '#0c3d6c' }}>
+                      <div style={{ minWidth: 0 }}>
+                        <span style={{ color: '#64748b', fontSize: '0.7rem', display: 'block' }}>
+                          {t('payment.ifscCode', 'IFSC Code')}
+                        </span>
+                        <span style={{ fontFamily: 'monospace', fontWeight: 800, fontSize: '0.9rem', color: '#0c3d6c' }}>
                           UTIB0000123
                         </span>
                       </div>
@@ -1304,13 +1357,14 @@ _Support: +91 9316566894_`;
                           color: copiedIfsc ? '#15803d' : '#475569',
                           padding: '4px 8px',
                           borderRadius: '6px',
-                          fontSize: '0.75rem',
+                          fontSize: '0.72rem',
                           fontWeight: 600,
-                          cursor: 'pointer'
+                          cursor: 'pointer',
+                          flexShrink: 0
                         }}
                       >
-                        {copiedIfsc ? <Check size={13} /> : <Copy size={13} />}
-                        {copiedIfsc ? 'Copied' : 'Copy IFSC'}
+                        {copiedIfsc ? <Check size={12} /> : <Copy size={12} />}
+                        {copiedIfsc ? t('payment.copied', 'Copied') : t('payment.copyUpi', 'Copy')}
                       </button>
                     </div>
                   </div>
@@ -1318,32 +1372,34 @@ _Support: +91 9316566894_`;
                   {/* Cheque / NEFT Reference Submission Form */}
                   <form onSubmit={handleInitiatePayment} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155' }}>
-                      Record Cheque / NEFT / RTGS Transfer Details
+                      {t('payment.utrLabel', 'Record Cheque / NEFT / RTGS Transfer Details')}
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: '8px' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                         <label style={{ fontSize: '0.78rem', fontWeight: 600, color: '#475569' }}>
-                          UTR / Cheque No. *
+                          {t('payment.utrLabel', 'UTR / Cheque No. *')}
                         </label>
                         <input
                           type="text"
                           required
-                          placeholder="e.g. UTR1948201 or CHQ-991204"
+                          placeholder={t('payment.utrPlaceholder', 'e.g. UTR1948201 or CHQ-991204')}
                           value={utrNumber}
                           onChange={(e) => setUtrNumber(e.target.value)}
                           style={{
                             padding: '8px 10px',
                             borderRadius: '6px',
                             border: '1px solid #cbd5e1',
-                            fontSize: '0.85rem'
+                            fontSize: '0.85rem',
+                            boxSizing: 'border-box',
+                            width: '100%'
                           }}
                         />
                       </div>
 
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                         <label style={{ fontSize: '0.78rem', fontWeight: 600, color: '#475569' }}>
-                          Date of Transfer *
+                          {t('payment.depositDate', 'Date of Transfer *')}
                         </label>
                         <input
                           type="date"
@@ -1354,7 +1410,9 @@ _Support: +91 9316566894_`;
                             padding: '8px 10px',
                             borderRadius: '6px',
                             border: '1px solid #cbd5e1',
-                            fontSize: '0.85rem'
+                            fontSize: '0.85rem',
+                            boxSizing: 'border-box',
+                            width: '100%'
                           }}
                         />
                       </div>
@@ -1362,18 +1420,20 @@ _Support: +91 9316566894_`;
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                       <label style={{ fontSize: '0.78rem', fontWeight: 600, color: '#475569' }}>
-                        Remitting Bank Name
+                        {t('payment.bankNameCheque', 'Remitting Bank Name')}
                       </label>
                       <input
                         type="text"
-                        placeholder="e.g. State Bank of India, Rajkot Branch"
+                        placeholder={t('payment.bankPlaceholder', 'e.g. State Bank of India, Rajkot Branch')}
                         value={chequeBankName}
                         onChange={(e) => setChequeBankName(e.target.value)}
                         style={{
                           padding: '8px 10px',
                           borderRadius: '6px',
                           border: '1px solid #cbd5e1',
-                          fontSize: '0.85rem'
+                          fontSize: '0.85rem',
+                          boxSizing: 'border-box',
+                          width: '100%'
                         }}
                       />
                     </div>
@@ -1383,11 +1443,12 @@ _Support: +91 9316566894_`;
                       style={{
                         width: '100%',
                         padding: '14px',
+                        minHeight: '48px',
                         borderRadius: '10px',
                         background: 'linear-gradient(135deg, #0c3d6c 0%, #1b75bc 100%)',
                         color: '#ffffff',
                         fontWeight: 700,
-                        fontSize: '1rem',
+                        fontSize: '0.95rem',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -1398,7 +1459,7 @@ _Support: +91 9316566894_`;
                         marginTop: '4px'
                       }}
                     >
-                      <FileText size={16} /> Record & Clear {formatINR(amountToPay)}
+                      <FileText size={16} /> {t('payment.recordAndClear', { amount: formatINR(amountToPay) })}
                     </button>
                   </form>
                 </div>
@@ -1410,18 +1471,18 @@ _Support: +91 9316566894_`;
           {gatewayStage === 'processing' && (
             <div
               style={{
-                padding: '40px 20px',
+                padding: '30px 16px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 textAlign: 'center',
-                gap: '16px'
+                gap: '14px'
               }}
             >
               <div
                 style={{
-                  width: '64px',
-                  height: '64px',
+                  width: '56px',
+                  height: '56px',
                   borderRadius: '50%',
                   border: '4px solid #e2e8f0',
                   borderTopColor: '#0c3d6c',
@@ -1435,10 +1496,10 @@ _Support: +91 9316566894_`;
                 }
               `}</style>
               <div>
-                <h4 style={{ margin: '0 0 6px', color: '#0c3d6c', fontSize: '1.2rem' }}>
-                  Processing B2B Settlement
+                <h4 style={{ margin: '0 0 6px', color: '#0c3d6c', fontSize: '1.15rem' }}>
+                  {t('payment.processingSettlement', 'Processing B2B Settlement')}
                 </h4>
-                <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem', maxWidth: '380px' }}>
+                <p style={{ margin: 0, color: '#64748b', fontSize: '0.88rem', maxWidth: '380px' }}>
                   {processingMessage}
                 </p>
               </div>
@@ -1447,21 +1508,21 @@ _Support: +91 9316566894_`;
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  fontSize: '0.8rem',
+                  fontSize: '0.78rem',
                   backgroundColor: '#eff6ff',
                   color: '#1d4ed8',
                   padding: '6px 14px',
                   borderRadius: '20px'
                 }}
               >
-                <Lock size={12} /> Encrypted Gateway • Do not refresh or press back
+                <Lock size={12} /> {t('payment.encryptedGateway', 'Encrypted Gateway • Do not refresh or press back')}
               </div>
             </div>
           )}
 
           {/* STAGE 3: SIMULATED BANK OTP SCREEN */}
           {gatewayStage === 'otp' && (
-            <form onSubmit={handleAuthorizeOtp} style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '10px 0' }}>
+            <form onSubmit={handleAuthorizeOtp} style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '10px 0' }}>
               <div
                 style={{
                   backgroundColor: '#f8fafc',
@@ -1471,12 +1532,14 @@ _Support: +91 9316566894_`;
                   textAlign: 'center'
                 }}
               >
-                <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#eff6ff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px' }}>
-                  <ShieldCheck size={26} color="#0c3d6c" />
+                <div style={{ width: '44px', height: '44px', borderRadius: '50%', backgroundColor: '#eff6ff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px' }}>
+                  <ShieldCheck size={24} color="#0c3d6c" />
                 </div>
-                <h4 style={{ margin: '0 0 4px', color: '#0c3d6c' }}>Bank Two-Factor Authentication</h4>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
-                  Enter the 6-digit OTP sent to registered mobile linked with your account
+                <h4 style={{ margin: '0 0 4px', color: '#0c3d6c' }}>
+                  {t('payment.bank2fa', 'Bank Two-Factor Authentication')}
+                </h4>
+                <p style={{ margin: 0, fontSize: '0.82rem', color: '#64748b' }}>
+                  {t('payment.enterOtp', 'Enter the 6-digit OTP sent to registered mobile linked with your account')}
                 </p>
               </div>
 
@@ -1485,25 +1548,27 @@ _Support: +91 9316566894_`;
                   type="text"
                   maxLength={6}
                   required
+                  inputMode="numeric"
                   value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
                   placeholder="123456"
                   style={{
-                    width: '200px',
-                    padding: '12px',
-                    fontSize: '1.6rem',
+                    width: '180px',
+                    padding: '10px',
+                    fontSize: '1.4rem',
                     textAlign: 'center',
-                    letterSpacing: '8px',
+                    letterSpacing: '6px',
                     fontWeight: 800,
                     borderRadius: '10px',
                     border: '2px solid #0c3d6c',
-                    color: '#0c3d6c'
+                    color: '#0c3d6c',
+                    boxSizing: 'border-box'
                   }}
                 />
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.8rem', color: '#64748b' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.78rem', color: '#64748b', flexWrap: 'wrap', justifyContent: 'center' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <Clock size={12} /> Resend OTP in {otpCountdown}s
+                    <Clock size={12} /> {t('payment.resendOtpIn', { seconds: otpCountdown })}
                   </span>
                   <button
                     type="button"
@@ -1517,17 +1582,19 @@ _Support: +91 9316566894_`;
                       textDecoration: 'underline'
                     }}
                   >
-                    Auto-Fill Demo OTP
+                    {t('payment.autoFillDemo', 'Auto-Fill Demo OTP')}
                   </button>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '10px' }}>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 <button
                   type="button"
                   onClick={() => setGatewayStage('input')}
                   style={{
                     flex: 1,
+                    minWidth: '100px',
+                    minHeight: '44px',
                     padding: '12px',
                     borderRadius: '8px',
                     border: '1px solid #cbd5e1',
@@ -1536,19 +1603,21 @@ _Support: +91 9316566894_`;
                     cursor: 'pointer'
                   }}
                 >
-                  Cancel
+                  {t('payment.cancel', 'Cancel')}
                 </button>
                 <button
                   type="submit"
                   style={{
                     flex: 2,
+                    minWidth: '160px',
+                    minHeight: '44px',
                     padding: '12px',
                     borderRadius: '8px',
                     border: 'none',
                     backgroundColor: '#16a34a',
                     color: '#ffffff',
                     fontWeight: 700,
-                    fontSize: '0.95rem',
+                    fontSize: '0.92rem',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -1557,7 +1626,7 @@ _Support: +91 9316566894_`;
                     boxShadow: '0 4px 12px rgba(22, 163, 74, 0.25)'
                   }}
                 >
-                  <CheckCircle2 size={16} /> Authorize & Pay {formatINR(amountToPay)}
+                  <CheckCircle2 size={16} /> {t('payment.authorizeAndPay', { amount: formatINR(amountToPay) })}
                 </button>
               </div>
             </form>
@@ -1565,7 +1634,7 @@ _Support: +91 9316566894_`;
 
           {/* STAGE 4: PAYMENT SUCCESS RECEIPT */}
           {gatewayStage === 'success' && completedReceipt && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {/* Celebration Banner */}
               <div
                 style={{
@@ -1573,29 +1642,29 @@ _Support: +91 9316566894_`;
                   flexDirection: 'column',
                   alignItems: 'center',
                   textAlign: 'center',
-                  padding: '10px 0'
+                  padding: '8px 0'
                 }}
               >
                 <div
                   style={{
-                    width: '64px',
-                    height: '64px',
+                    width: '56px',
+                    height: '56px',
                     borderRadius: '50%',
                     backgroundColor: '#dcfce7',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    marginBottom: '10px',
+                    marginBottom: '8px',
                     boxShadow: '0 8px 20px rgba(34, 197, 94, 0.2)'
                   }}
                 >
-                  <CheckCircle2 size={36} color="#16a34a" />
+                  <CheckCircle2 size={32} color="#16a34a" />
                 </div>
-                <h3 style={{ margin: '0 0 4px', color: '#16a34a', fontSize: '1.4rem', fontWeight: 800 }}>
-                  Payment Received & Settled!
+                <h3 style={{ margin: '0 0 4px', color: '#16a34a', fontSize: '1.25rem', fontWeight: 800 }}>
+                  {t('payment.paymentSettled', 'Payment Received & Settled!')}
                 </h3>
-                <p style={{ margin: 0, fontSize: '0.88rem', color: '#475569' }}>
-                  Transaction reconciled and ledger updated with FIFO invoice deduction.
+                <p style={{ margin: 0, fontSize: '0.85rem', color: '#475569' }}>
+                  {t('payment.settledDesc', 'Transaction reconciled and ledger updated with FIFO invoice deduction.')}
                 </p>
               </div>
 
@@ -1606,53 +1675,67 @@ _Support: +91 9316566894_`;
                   backgroundColor: '#f8fafc',
                   border: '1px solid #e2e8f0',
                   borderRadius: '12px',
-                  padding: '20px',
+                  padding: '16px',
                   position: 'relative'
                 }}
               >
                 {/* Receipt Watermark / Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px', marginBottom: '10px', flexWrap: 'wrap', gap: '6px' }}>
                   <div>
-                    <div style={{ fontWeight: 800, color: '#0c3d6c', fontSize: '1rem' }}>NIYANSH PHARMA</div>
-                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Wholesale Pharma Distributor • Rajkot</div>
+                    <div style={{ fontWeight: 800, color: '#0c3d6c', fontSize: '0.95rem' }}>NIYANSH PHARMA</div>
+                    <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                      {t('payment.distributorSubtitle', 'Wholesale Pharma Distributor • Rajkot')}
+                    </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '0.72rem', color: '#64748b' }}>RECEIPT ID</div>
-                    <div style={{ fontWeight: 700, fontFamily: 'monospace', color: '#0c3d6c', fontSize: '0.9rem' }}>
+                    <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                      {t('payment.receiptId', 'RECEIPT ID')}
+                    </div>
+                    <div style={{ fontWeight: 700, fontFamily: 'monospace', color: '#0c3d6c', fontSize: '0.85rem' }}>
                       {completedReceipt.paymentId}
                     </div>
                   </div>
                 </div>
 
                 {/* Key Receipt Fields */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', fontSize: '0.85rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: '10px', fontSize: '0.82rem' }}>
                   <div>
-                    <span style={{ color: '#64748b', fontSize: '0.75rem', display: 'block' }}>Paid For Retailer</span>
+                    <span style={{ color: '#64748b', fontSize: '0.72rem', display: 'block' }}>
+                      {t('payment.paidForRetailer', 'Paid For Retailer')}
+                    </span>
                     <strong style={{ color: '#1e293b' }}>{completedReceipt.shopName}</strong>
-                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Mob: {completedReceipt.retailerMobile}</div>
+                    <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Mob: {completedReceipt.retailerMobile}</div>
                   </div>
 
                   <div>
-                    <span style={{ color: '#64748b', fontSize: '0.75rem', display: 'block' }}>Amount Cleared</span>
-                    <strong style={{ fontSize: '1.2rem', color: '#16a34a', fontWeight: 800 }}>
+                    <span style={{ color: '#64748b', fontSize: '0.72rem', display: 'block' }}>
+                      {t('payment.amountCleared', 'Amount Cleared')}
+                    </span>
+                    <strong style={{ fontSize: '1.15rem', color: '#16a34a', fontWeight: 800 }}>
                       {formatINR(completedReceipt.amount)}
                     </strong>
                   </div>
 
                   <div>
-                    <span style={{ color: '#64748b', fontSize: '0.75rem', display: 'block' }}>Payment Method</span>
+                    <span style={{ color: '#64748b', fontSize: '0.72rem', display: 'block' }}>
+                      {t('payment.paymentMethod', 'Payment Method')}
+                    </span>
                     <strong style={{ color: '#1e293b' }}>{completedReceipt.method}</strong>
                   </div>
 
                   <div>
-                    <span style={{ color: '#64748b', fontSize: '0.75rem', display: 'block' }}>Bank Reference / UTR</span>
-                    <span style={{ fontFamily: 'monospace', fontWeight: 600, color: '#334155' }}>
+                    <span style={{ color: '#64748b', fontSize: '0.72rem', display: 'block' }}>
+                      {t('payment.bankRefUtr', 'Bank Reference / UTR')}
+                    </span>
+                    <span style={{ fontFamily: 'monospace', fontWeight: 600, color: '#334155', wordBreak: 'break-all' }}>
                       {completedReceipt.transactionRef}
                     </span>
                   </div>
 
                   <div>
-                    <span style={{ color: '#64748b', fontSize: '0.75rem', display: 'block' }}>Payment Timestamp</span>
+                    <span style={{ color: '#64748b', fontSize: '0.72rem', display: 'block' }}>
+                      {t('payment.paymentTimestamp', 'Payment Timestamp')}
+                    </span>
                     <span style={{ color: '#334155' }}>
                       {new Date(completedReceipt.date).toLocaleString('en-IN', {
                         day: '2-digit',
@@ -1665,7 +1748,9 @@ _Support: +91 9316566894_`;
                   </div>
 
                   <div>
-                    <span style={{ color: '#64748b', fontSize: '0.75rem', display: 'block' }}>Updated Remaining Balance</span>
+                    <span style={{ color: '#64748b', fontSize: '0.72rem', display: 'block' }}>
+                      {t('payment.updatedBalance', 'Updated Remaining Balance')}
+                    </span>
                     <strong style={{ color: completedReceipt.remainingBalance > 0 ? '#ea580c' : '#16a34a', fontWeight: 700 }}>
                       {formatINR(completedReceipt.remainingBalance)}
                     </strong>
@@ -1674,34 +1759,39 @@ _Support: +91 9316566894_`;
 
                 <div
                   style={{
-                    marginTop: '14px',
-                    paddingTop: '10px',
+                    marginTop: '12px',
+                    paddingTop: '8px',
                     borderTop: '1px dashed #cbd5e1',
-                    fontSize: '0.75rem',
+                    fontSize: '0.72rem',
                     color: '#64748b',
                     display: 'flex',
                     justifyContent: 'space-between',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '4px'
                   }}
                 >
-                  <span>Auto-reconciled with FIFO invoice allocation</span>
-                  <span style={{ color: '#16a34a', fontWeight: 700 }}>● Status: COMPLETED</span>
+                  <span>{t('payment.autoReconciled', 'Auto-reconciled with FIFO invoice allocation')}</span>
+                  <span style={{ color: '#16a34a', fontWeight: 700 }}>
+                    {t('payment.statusCompleted', '● Status: COMPLETED')}
+                  </span>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 130px), 1fr))', gap: '8px' }}>
                 <button
                   type="button"
                   onClick={shareReceiptWhatsApp}
                   style={{
-                    padding: '12px 10px',
+                    padding: '10px 8px',
+                    minHeight: '44px',
                     borderRadius: '8px',
                     border: 'none',
                     backgroundColor: '#25D366',
                     color: '#ffffff',
                     fontWeight: 700,
-                    fontSize: '0.85rem',
+                    fontSize: '0.82rem',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -1710,20 +1800,21 @@ _Support: +91 9316566894_`;
                     boxShadow: '0 4px 10px rgba(37, 211, 102, 0.25)'
                   }}
                 >
-                  <Share2 size={16} /> WhatsApp Receipt
+                  <Share2 size={15} /> {t('payment.whatsAppReceipt', 'WhatsApp Receipt')}
                 </button>
 
                 <button
                   type="button"
                   onClick={handlePrintReceipt}
                   style={{
-                    padding: '12px 10px',
+                    padding: '10px 8px',
+                    minHeight: '44px',
                     borderRadius: '8px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
                     color: '#334155',
                     fontWeight: 700,
-                    fontSize: '0.85rem',
+                    fontSize: '0.82rem',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -1731,20 +1822,21 @@ _Support: +91 9316566894_`;
                     gap: '6px'
                   }}
                 >
-                  <Printer size={16} /> Print Receipt
+                  <Printer size={15} /> {t('payment.printReceipt', 'Print Receipt')}
                 </button>
 
                 <button
                   type="button"
                   onClick={onClose}
                   style={{
-                    padding: '12px 10px',
+                    padding: '10px 8px',
+                    minHeight: '44px',
                     borderRadius: '8px',
                     border: 'none',
                     backgroundColor: '#0c3d6c',
                     color: '#ffffff',
                     fontWeight: 700,
-                    fontSize: '0.85rem',
+                    fontSize: '0.82rem',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -1752,7 +1844,7 @@ _Support: +91 9316566894_`;
                     gap: '6px'
                   }}
                 >
-                  <Check size={16} /> Done / Return
+                  <Check size={15} /> {t('payment.doneReturn', 'Done / Return')}
                 </button>
               </div>
             </div>
@@ -1764,19 +1856,21 @@ _Support: +91 9316566894_`;
           style={{
             backgroundColor: '#f1f5f9',
             borderTop: '1px solid #e2e8f0',
-            padding: '10px 24px',
+            padding: '8px 18px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            fontSize: '0.75rem',
-            color: '#64748b'
+            fontSize: '0.72rem',
+            color: '#64748b',
+            flexWrap: 'wrap',
+            gap: '6px'
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <BadgeCheck size={14} color="#16a34a" />
-            <span>Niyansh Pharma Verified Wholesale Gateway</span>
+            <span>{t('payment.verifiedGateway', 'Niyansh Pharma Verified Wholesale Gateway')}</span>
           </div>
-          <span>Support: +91 9316566894</span>
+          <span>{t('payment.support', 'Support: +91 99099 23130')}</span>
         </div>
       </div>
     </div>

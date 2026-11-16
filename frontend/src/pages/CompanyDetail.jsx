@@ -7,10 +7,12 @@ import {
   Plus, Check, ShoppingBag, List, Grid, Lock
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 function CompanyDetail({ addToCart }) {
   const { id } = useParams();
   const { isLoggedIn, openAuth } = useAuth();
+  const { t, language, translateDosageForm, translateCategory, formatCurrency } = useLanguage();
   const [company, setCompany] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -86,11 +88,6 @@ function CompanyDetail({ addToCart }) {
     });
   }, [products, productSearch, formFilter, inStockOnly]);
 
-  const formatCurrency = (val) => {
-    const num = Number(val) || 0;
-    return `₹${num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  };
-
   const getCleanLogoUrl = (comp) => {
     if (!comp) return '';
     if (comp.logoUrl && comp.logoUrl.trim() !== '') return comp.logoUrl;
@@ -102,7 +99,7 @@ function CompanyDetail({ addToCart }) {
     return (
       <div style={{ padding: '80px 20px', textAlign: 'center', minHeight: '60vh' }}>
         <div className="spinner" style={{ margin: '0 auto 15px' }}></div>
-        <p style={{ color: 'var(--text-medium)' }}>Loading company profile and catalog...</p>
+        <p style={{ color: 'var(--text-medium)' }}>{t('common.loading', 'Loading company profile and catalog...')}</p>
       </div>
     );
   }
@@ -112,12 +109,12 @@ function CompanyDetail({ addToCart }) {
       <div className="container" style={{ padding: '60px 20px', textAlign: 'center' }}>
         <div className="card" style={{ padding: '40px', maxWidth: '500px', margin: '0 auto' }}>
           <Building2 size={48} color="#ef4444" style={{ margin: '0 auto 15px' }} />
-          <h2 style={{ margin: '0 0 10px', color: 'var(--text-dark)' }}>Company Not Found</h2>
+          <h2 style={{ margin: '0 0 10px', color: 'var(--text-dark)' }}>{t('products.noProductsFound', 'Company Not Found')}</h2>
           <p style={{ color: 'var(--text-medium)', marginBottom: '20px' }}>
-            {error || "The company you are looking for does not exist or has been removed."}
+            {error || t('companies.subtitle', 'The company you are looking for does not exist or has been removed.')}
           </p>
           <Link to="/companies" className="btn btn-primary btn-sm">
-            ← Return to Companies Directory
+            ← {t('companies.title', 'Return to Companies Directory')}
           </Link>
         </div>
       </div>
@@ -130,9 +127,9 @@ function CompanyDetail({ addToCart }) {
         
         {/* Breadcrumb Navigation */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--text-medium)', marginBottom: '20px' }}>
-          <Link to="/" style={{ color: 'var(--text-medium)', textDecoration: 'none' }}>Home</Link>
+          <Link to="/" style={{ color: 'var(--text-medium)', textDecoration: 'none' }}>{t('nav.home', 'Home')}</Link>
           <ChevronRight size={14} />
-          <Link to="/companies" style={{ color: 'var(--text-medium)', textDecoration: 'none' }}>Companies</Link>
+          <Link to="/companies" style={{ color: 'var(--text-medium)', textDecoration: 'none' }}>{t('nav.companies', 'Companies')}</Link>
           <ChevronRight size={14} />
           <span style={{ color: 'var(--primary-blue)', fontWeight: '600' }}>{company.name}</span>
         </div>
@@ -175,7 +172,7 @@ function CompanyDetail({ addToCart }) {
                 </h1>
                 {company.isVerified !== false && (
                   <span style={{ backgroundColor: '#e0f2fe', color: '#0369a1', fontSize: '0.8rem', fontWeight: '700', padding: '3px 10px', borderRadius: '20px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                    <ShieldCheck size={14} /> Verified Partner
+                    <ShieldCheck size={14} /> {t('companies.featuredBadge', 'Authorized Distributor')}
                   </span>
                 )}
               </div>
@@ -185,15 +182,15 @@ function CompanyDetail({ addToCart }) {
                   <MapPin size={15} color="var(--primary-blue)" /> {company.location || 'India'}
                 </span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontWeight: '600', color: '#059669' }}>
-                  <Package size={15} /> {products.length} Products Listed
+                  <Package size={15} /> {products.length} {t('companies.productsCount', 'Products Listed')}
                 </span>
                 <span style={{ backgroundColor: '#f1f5f9', padding: '2px 8px', borderRadius: '4px', fontSize: '0.8rem', color: '#475569' }}>
-                  {company.category || 'Pharmaceutical Formulations'}
+                  {translateCategory(company.category || 'Pharma Products')}
                 </span>
               </div>
 
               <p style={{ margin: '12px 0 16px', fontSize: '0.95rem', color: 'var(--text-medium)', lineHeight: 1.6 }}>
-                {company.description || `Official pharmaceutical manufacturing partner supplying WHO-GMP certified therapeutic formulations to Niyansh Pharma.`}
+                {company.description || t('companies.directProcurement', 'Official pharmaceutical manufacturing partner supplying WHO-GMP certified therapeutic formulations to Niyansh Pharma.')}
               </p>
 
               {/* Specialties */}
@@ -218,11 +215,11 @@ function CompanyDetail({ addToCart }) {
                   className="btn btn-outline btn-sm"
                   style={{ gap: '6px', textDecoration: 'none' }}
                 >
-                  <Globe size={15} /> Visit Official Website <ExternalLink size={13} />
+                  <Globe size={15} /> {language === 'gu' ? 'કંપની વેબસાઇટ' : language === 'hi' ? 'कंपनी वेबसाइट' : 'Visit Official Website'} <ExternalLink size={13} />
                 </a>
               )}
               <Link to="/companies" className="btn btn-secondary btn-sm" style={{ gap: '6px', textDecoration: 'none', textAlign: 'center' }}>
-                <ArrowLeft size={15} /> All Companies
+                <ArrowLeft size={15} /> {t('companies.allCompanies', 'All Companies')}
               </Link>
             </div>
 
@@ -238,7 +235,7 @@ function CompanyDetail({ addToCart }) {
               <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
               <input 
                 type="text" 
-                placeholder={`Search ${company.name} products by name, composition...`}
+                placeholder={t('products.searchFilter', `Search ${company.name} products by name, composition...`)}
                 value={productSearch}
                 onChange={(e) => setProductSearch(e.target.value)}
                 style={{ width: '100%', padding: '9px 14px 9px 38px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}
@@ -248,14 +245,16 @@ function CompanyDetail({ addToCart }) {
             {/* Filter controls */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-medium)', fontWeight: '600' }}>Form:</span>
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-medium)', fontWeight: '600' }}>
+                  {language === 'gu' ? 'પ્રકાર:' : language === 'hi' ? 'प्रकार:' : 'Form:'}
+                </span>
                 <select
                   value={formFilter}
                   onChange={(e) => setFormFilter(e.target.value)}
                   style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem', backgroundColor: '#fff' }}
                 >
                   {availableForms.map(f => (
-                    <option key={f} value={f}>{f}</option>
+                    <option key={f} value={f}>{f === 'All' ? (language === 'gu' ? 'તમામ પ્રકાર' : language === 'hi' ? 'सभी प्रकार' : 'All Forms') : translateDosageForm(f)}</option>
                   ))}
                 </select>
               </div>
@@ -267,7 +266,7 @@ function CompanyDetail({ addToCart }) {
                   onChange={(e) => setInStockOnly(e.target.checked)}
                   style={{ accentColor: 'var(--primary-blue)', width: '15px', height: '15px' }}
                 />
-                In Stock Only
+                {t('products.inStock', 'In Stock Only')}
               </label>
 
               {/* View Switcher */}
@@ -282,7 +281,7 @@ function CompanyDetail({ addToCart }) {
                     color: viewMode === 'grid' ? '#fff' : 'var(--text-medium)',
                     cursor: 'pointer'
                   }}
-                  title="Grid View"
+                  title={t('quickOrder.gridMode', 'Grid View')}
                 >
                   <Grid size={15} />
                 </button>
@@ -296,7 +295,7 @@ function CompanyDetail({ addToCart }) {
                     color: viewMode === 'table' ? '#fff' : 'var(--text-medium)',
                     cursor: 'pointer'
                   }}
-                  title="Table View"
+                  title={t('quickOrder.tableMode', 'Table View')}
                 >
                   <List size={15} />
                 </button>
@@ -309,22 +308,20 @@ function CompanyDetail({ addToCart }) {
         {/* Products Section */}
         <div style={{ marginBottom: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text-dark)', fontWeight: '700' }}>
-            Products by {company.name} ({filteredProducts.length})
+            {t('companies.productsCount', 'Products by')} {company.name} ({filteredProducts.length})
           </h3>
         </div>
 
         {filteredProducts.length === 0 ? (
           <div className="card" style={{ padding: '50px 20px', textAlign: 'center' }}>
             <Package size={36} color="var(--text-light)" style={{ margin: '0 auto 12px' }} />
-            <h4 style={{ margin: '0 0 6px', color: 'var(--text-dark)' }}>No products found</h4>
+            <h4 style={{ margin: '0 0 6px', color: 'var(--text-dark)' }}>{t('products.noProductsFound', 'No products found')}</h4>
             <p style={{ color: 'var(--text-medium)', margin: 0, fontSize: '0.9rem' }}>
-              No items match your filter criteria under {company.name}. Try adjusting search or form filters.
+              {t('products.searchFilter', `No items match your filter criteria under ${company.name}. Try adjusting search or form filters.`)}
             </p>
           </div>
         ) : viewMode === 'grid' ? (
-          /* ==========================================
-             GRID VIEW
-             ========================================== */
+          /* GRID VIEW */
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 240px), 1fr))', gap: '20px' }}>
             {filteredProducts.map((p) => {
               const photoUrl = (p.images && p.images.length > 0) ? p.images[0] : (p.imageUrl || '');
@@ -333,7 +330,7 @@ function CompanyDetail({ addToCart }) {
               return (
                 <div key={p._id} className="card" style={{ padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                   
-                  {/* Photo Box - Fixed 1:1 Square Ratio */}
+                  {/* Photo Box */}
                   <Link to={`/products/${p._id}`} style={{ position: 'relative', width: '100%', aspectRatio: '1 / 1', backgroundColor: '#ffffff', padding: '12px', boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', textDecoration: 'none' }}>
                     {photoUrl ? (
                       <img 
@@ -343,7 +340,6 @@ function CompanyDetail({ addToCart }) {
                         onError={(e) => { e.target.style.display = 'none'; }}
                       />
                     ) : (
-                      /* Leave completely empty when original manufacturer photograph is unavailable */
                       <div style={{ width: '100%', height: '100%' }} aria-label="No photograph available" />
                     )}
 
@@ -358,7 +354,7 @@ function CompanyDetail({ addToCart }) {
                       backgroundColor: p.inStock ? '#10b981' : '#ef4444',
                       color: '#fff', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', fontWeight: '700'
                     }}>
-                      {p.inStock ? '● In Stock' : '✕ Out of Stock'}
+                      {p.inStock ? `● ${t('products.inStock', 'In Stock')}` : `✕ ${t('products.outOfStock', 'Out of Stock')}`}
                     </span>
                   </Link>
 
@@ -366,7 +362,7 @@ function CompanyDetail({ addToCart }) {
                   <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '6px' }}>
                       <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-medium)', backgroundColor: '#f1f5f9', padding: '2px 6px', borderRadius: '4px' }}>
-                        {p.form || 'Tablet'}
+                        {translateDosageForm(p.form || 'Tablet')}
                       </span>
                       {p.packing && (
                         <span style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>
@@ -394,29 +390,27 @@ function CompanyDetail({ addToCart }) {
                             {p.mrp && p.mrp > p.price && (
                               <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px', flexWrap: 'wrap' }}>
                                 <span style={{ fontSize: '0.72rem', color: 'var(--text-light)', textDecoration: 'line-through' }} className="tabular-nums">
-                                  MRP: {formatCurrency(p.mrp)}
+                                  {t('products.mrp', 'MRP')}: {formatCurrency(p.mrp)}
                                 </span>
                                 <span style={{ fontSize: '0.68rem', backgroundColor: '#ecfdf5', color: '#059669', fontWeight: '800', padding: '1px 5px', borderRadius: '4px' }}>
-                                  {Math.round(((p.mrp - p.price) / p.mrp) * 100)}% MARGIN
+                                  {Math.round(((p.mrp - p.price) / p.mrp) * 100)}% {language === 'gu' ? 'માર્જિન' : language === 'hi' ? 'मार्जिन' : 'MARGIN'}
                                 </span>
                               </div>
                             )}
                             <span style={{ fontSize: '0.68rem', color: 'var(--primary-blue)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'block' }}>
-                              PTR (Wholesale):
+                              {t('products.ptr', 'PTR Rate')}:
                             </span>
                             <div style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--primary-blue)' }} className="tabular-nums">
                               {formatCurrency(p.price)}
-                              <span style={{ fontSize: '0.75rem', fontWeight: '500', color: 'var(--text-medium)' }}> /unit</span>
                             </div>
                           </>
                         ) : (
                           <div>
                             <span style={{ fontSize: '0.68rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'block' }}>
-                              MRP (Retail Price):
+                              {t('products.mrp', 'MRP')}:
                             </span>
                             <div style={{ fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-dark)' }} className="tabular-nums">
                               {formatCurrency(p.mrp || p.price)}
-                              <span style={{ fontSize: '0.75rem', fontWeight: '500', color: 'var(--text-medium)' }}> /unit</span>
                             </div>
                             <button
                               type="button"
@@ -437,7 +431,7 @@ function CompanyDetail({ addToCart }) {
                               }}
                               title="Sign in to view wholesale PTR rate"
                             >
-                              <Lock size={10} /> Login for PTR
+                              <Lock size={10} /> {t('products.loginForPtr', 'Login for PTR Rate')}
                             </button>
                           </div>
                         )}
@@ -450,7 +444,7 @@ function CompanyDetail({ addToCart }) {
                         style={{ padding: '6px 12px', fontSize: '0.8rem', gap: '4px' }}
                       >
                         {isAdded ? <Check size={14} /> : <Plus size={14} />}
-                        {isAdded ? 'Added' : 'Add to Cart'}
+                        {isAdded ? t('products.addedToCart', 'Added') : t('products.addToCart', 'Add to Cart')}
                       </button>
                     </div>
                   </div>
@@ -460,21 +454,19 @@ function CompanyDetail({ addToCart }) {
             })}
           </div>
         ) : (
-          /* ==========================================
-             TABLE VIEW
-             ========================================== */
+          /* TABLE VIEW */
           <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
             <div className="responsive-table-wrapper" style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left', minWidth: '680px' }}>
                 <thead>
                   <tr style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid var(--border-light)' }}>
-                    <th style={{ padding: '12px 16px', width: '60px' }}>Photo</th>
-                    <th style={{ padding: '12px 16px' }}>Product Name</th>
-                    <th style={{ padding: '12px 16px' }}>Form & Packing</th>
-                    <th style={{ padding: '12px 16px' }}>Wholesale (PTR)</th>
-                    <th style={{ padding: '12px 16px' }}>MRP</th>
-                    <th style={{ padding: '12px 16px' }}>Availability</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'center' }}>Action</th>
+                    <th style={{ padding: '12px 16px', width: '60px' }}>{language === 'gu' ? 'ફોટો' : language === 'hi' ? 'फोटो' : 'Photo'}</th>
+                    <th style={{ padding: '12px 16px' }}>{t('admin.productName', 'Product Name')}</th>
+                    <th style={{ padding: '12px 16px' }}>{t('quickOrder.colPacking', 'Packing')}</th>
+                    <th style={{ padding: '12px 16px' }}>{t('products.ptr', 'Wholesale (PTR)')}</th>
+                    <th style={{ padding: '12px 16px' }}>{t('products.mrp', 'MRP')}</th>
+                    <th style={{ padding: '12px 16px' }}>{t('products.inStock', 'Availability')}</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'center' }}>{t('common.status', 'Action')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -505,7 +497,7 @@ function CompanyDetail({ addToCart }) {
 
                         <td style={{ padding: '10px 16px', verticalAlign: 'middle' }}>
                           <span style={{ fontSize: '0.8rem', backgroundColor: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', fontWeight: '600' }}>
-                            {p.form || 'Tablet'}
+                            {translateDosageForm(p.form || 'Tablet')}
                           </span>
                           <span style={{ fontSize: '0.8rem', color: 'var(--text-medium)', marginLeft: '6px' }}>
                             {p.packing || '—'}
@@ -534,7 +526,7 @@ function CompanyDetail({ addToCart }) {
                               }}
                               title="Sign in to view wholesale PTR rate"
                             >
-                              <Lock size={11} /> Login for PTR
+                              <Lock size={11} /> {t('products.loginForPtr', 'Login for PTR')}
                             </button>
                           )}
                         </td>
@@ -549,7 +541,7 @@ function CompanyDetail({ addToCart }) {
                             backgroundColor: p.inStock ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
                             color: p.inStock ? '#059669' : '#dc2626'
                           }}>
-                            {p.inStock ? '● In Stock' : '✕ Out of Stock'}
+                            {p.inStock ? `● ${t('products.inStock', 'In Stock')}` : `✕ ${t('products.outOfStock', 'Out of Stock')}`}
                           </span>
                         </td>
 
@@ -561,7 +553,7 @@ function CompanyDetail({ addToCart }) {
                             style={{ padding: '4px 10px', fontSize: '0.75rem', gap: '4px' }}
                           >
                             {isAdded ? <Check size={13} /> : <Plus size={13} />}
-                            {isAdded ? 'Added' : 'Add to Cart'}
+                            {isAdded ? t('products.addedToCart', 'Added') : t('products.addToCart', 'Add to Cart')}
                           </button>
                         </td>
                       </tr>

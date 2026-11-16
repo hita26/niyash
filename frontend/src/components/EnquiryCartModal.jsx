@@ -144,9 +144,9 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
           {isSuccess ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '15px', textAlign: 'center' }}>
               <CheckCircle size={60} color="var(--secondary-green)" />
-              <h3 style={{ color: 'var(--secondary-green)' }}>Enquiry Sent Successfully!</h3>
+              <h3 style={{ color: 'var(--secondary-green)' }}>{t('cart.successTitle', 'Enquiry Sent Successfully!')}</h3>
               <p style={{ color: 'var(--text-medium)', fontSize: '0.95rem' }}>
-                Thank you for reaching out to Niyansh Pharma. Our representative will contact you shortly on <strong>{phone}</strong> with wholesale quotes.
+                {t('cart.successDesc', `Thank you for reaching out to Niyansh Pharma. Our representative will contact you shortly on ${phone} with wholesale quotes.`)}
               </p>
             </div>
           ) : cartItems.length === 0 ? (
@@ -170,8 +170,8 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                     <span style={{ fontSize: '0.8rem', fontWeight: '800', color: totalValuation >= 10000 ? '#15803d' : '#166534' }}>
                       {totalValuation >= 10000 
-                        ? '🎉 Free Cold-Chain Dispatch across Gujarat Unlocked!' 
-                        : `🚚 Add ₹${(10000 - totalValuation).toFixed(2)} more for Free Dispatch`}
+                        ? t('cart.freeDeliveryUnlocked', '🎉 Free Cold-Chain Dispatch across Gujarat Unlocked!') 
+                        : t('cart.addMoreForFree', `🚚 Add ₹${(10000 - totalValuation).toFixed(2)} more for Free Dispatch`)}
                     </span>
                     <span style={{ fontSize: '0.74rem', fontWeight: '800', color: '#15803d' }}>
                       {Math.min(100, Math.round((totalValuation / 10000) * 100))}%
@@ -209,10 +209,10 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                         {item.product.name}
                       </h4>
                       <p style={{ fontSize: '0.8rem', color: 'var(--text-light)' }}>
-                        Brand: {item.product.brand} | {item.product.packing}
+                        {t('common.brand', 'Brand')}: {item.product.brand} | {item.product.packing}
                       </p>
                       <p style={{ fontSize: '0.85rem', color: 'var(--primary-blue)', fontWeight: '600', marginTop: '3px' }}>
-                        {user ? `PTR (Wholesale): ₹${item.product.price.toFixed(2)} / Strip` : `MRP: ₹${(item.product.mrp || item.product.price).toFixed(2)} / Strip`}
+                        {user ? `${t('products.ptr', 'PTR (Wholesale)')}: ₹${item.product.price.toFixed(2)} / ${t('productDetail.unit', 'Strip')}` : `MRP: ₹${(item.product.mrp || item.product.price).toFixed(2)} / ${t('productDetail.unit', 'Strip')}`}
                       </p>
                     </div>
 
@@ -254,14 +254,14 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                 padding: '15px', backgroundColor: '#f8fafc', borderRadius: '8px',
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--border-light)'
               }}>
-                <span style={{ fontWeight: '600', color: 'var(--text-medium)', fontSize: '0.9rem' }}>{user ? 'Estimated Wholesale Value:' : 'Estimated Retail Value (MRP):'}</span>
+                <span style={{ fontWeight: '600', color: 'var(--text-medium)', fontSize: '0.9rem' }}>{user ? t('cart.estWholesaleVal', 'Estimated Wholesale Value:') : t('cart.estRetailVal', 'Estimated Retail Value (MRP):')}</span>
                 <span style={{ fontWeight: '800', color: 'var(--primary-blue)', fontSize: '1.1rem' }}>₹{totalValuation.toFixed(2)}</span>
               </div>
 
               {/* Enquiry Form or Auth Required Prompt */}
               {user ? (
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <h3 style={{ fontSize: '1.05rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '6px', color: 'var(--text-dark)' }}>Confirm Business Details</h3>
+                  <h3 style={{ fontSize: '1.05rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '6px', color: 'var(--text-dark)' }}>{t('cart.confirmBusinessDetails', 'Confirm Business Details')}</h3>
                   
                   {errorMessage && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', color: '#b91c1c', fontSize: '0.85rem' }} role="alert">
@@ -271,12 +271,12 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                   )}
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <label htmlFor="name-input" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>Full Name *</label>
+                    <label htmlFor="name-input" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>{t('auth.nameLabel', 'Full Name *')}</label>
                     <input 
                       id="name-input"
                       type="text" 
                       required 
-                      placeholder="Enter name"
+                      placeholder={t('auth.namePlaceholder', 'Enter name')}
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
@@ -284,13 +284,13 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <label htmlFor="phone-input" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>Phone Number *</label>
+                    <label htmlFor="phone-input" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>{t('auth.phoneLabel', 'Phone Number *')}</label>
                     <input 
                       id="phone-input"
                       type="tel" 
                       required 
                       maxLength={10}
-                      placeholder="10-digit mobile number"
+                      placeholder={t('auth.phonePlaceholder', '10-digit mobile number')}
                       value={phone}
                       onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                       style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
@@ -298,11 +298,11 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <label htmlFor="email-input" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>Email ID (Optional)</label>
+                    <label htmlFor="email-input" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>{t('cart.emailOptional', 'Email ID (Optional)')}</label>
                     <input 
                       id="email-input"
                       type="email" 
-                      placeholder="Enter email address"
+                      placeholder={t('auth.emailPlaceholder', 'Enter email address')}
                       value={email}
                       onChange={(e) => setEmail(e.target.value.toLowerCase())}
                       style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
@@ -310,11 +310,11 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <label htmlFor="address-input" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>Company / Store Name</label>
+                    <label htmlFor="address-input" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>{t('auth.companyLabel', 'Company / Store Name')}</label>
                     <input 
                       id="address-input"
                       type="text" 
-                      placeholder="Store name, address, city"
+                      placeholder={t('cart.storePlaceholder', 'Store name, address, city')}
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
                       style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
@@ -322,11 +322,11 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <label htmlFor="msg-input" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>Message / Instruction</label>
+                    <label htmlFor="msg-input" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>{t('contact.messageLabel', 'Message / Instruction')}</label>
                     <textarea 
                       id="msg-input"
                       rows="3" 
-                      placeholder="Enter special instructions or wholesale discount query..."
+                      placeholder={t('cart.msgPlaceholder', 'Enter special instructions or wholesale discount query...')}
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem', resize: 'vertical' }}
@@ -340,7 +340,7 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                     style={{ width: '100%', marginTop: '10px', gap: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                   >
                     <Send size={16} />
-                    {isSubmitting ? 'Submitting Order...' : 'Submit Order Enquiry'}
+                    {isSubmitting ? t('cart.submitting', 'Submitting Order...') : t('cart.submitEnquiry', 'Submit Order Enquiry')}
                   </button>
                 </form>
               ) : (
@@ -349,7 +349,7 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px', textAlign: 'center', marginTop: '10px'
                 }}>
                   <p style={{ fontSize: '0.9rem', color: 'var(--text-medium)', fontWeight: '600', lineHeight: '1.5' }}>
-                    Please log in to your account to complete your B2B wholesale order enquiry.
+                    {t('cart.loginRequiredNotice', 'Please log in to your account to complete your B2B wholesale order enquiry.')}
                   </p>
                   <button 
                     type="button" 
@@ -357,7 +357,7 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                     className="btn btn-primary"
                     style={{ width: '100%', padding: '12px', borderRadius: '6px', fontWeight: '700', cursor: 'pointer' }}
                   >
-                    Sign In / Register Store
+                    {t('cart.loginBtn', 'Sign In / Register Store')}
                   </button>
                 </div>
               )}

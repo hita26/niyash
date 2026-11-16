@@ -629,12 +629,12 @@ Rajkot, Gujarat`);
         >
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: '#64748b', marginBottom: '4px' }}>
-              <Link to="/" style={{ color: '#0c3d6c', fontWeight: 600 }}>Home</Link>
+              <Link to="/" style={{ color: '#0c3d6c', fontWeight: 600 }}>{t('nav.home', 'Home')}</Link>
               <span>/</span>
-              <span style={{ color: '#0f172a', fontWeight: 700 }}>Retailer Ledger & Statement of Account</span>
+              <span style={{ color: '#0f172a', fontWeight: 700 }}>{t('ledger.title', 'Retailer Ledger & Statement of Account')}</span>
             </div>
             <h1 style={{ margin: 0, fontSize: '1.8rem', color: '#0c3d6c', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span>📊 Retailer Outstanding Ledger</span>
+              <span>📊 {t('ledger.title', 'Retailer Outstanding Ledger')}</span>
               <span style={{ fontSize: '0.8rem', backgroundColor: '#e0f2fe', color: '#0369a1', padding: '4px 10px', borderRadius: '20px', fontWeight: 700 }}>
                 Live Chemist Portal
               </span>
@@ -661,7 +661,7 @@ Rajkot, Gujarat`);
               }}
             >
               <User size={16} />
-              <span>Switch Retailer ({ledgerData.retailerMobile})</span>
+              <span>{t('ledger.switchRetailer', 'Switch Retailer')} ({ledgerData.retailerMobile})</span>
               <ChevronDown size={14} />
             </button>
 
@@ -704,7 +704,7 @@ Rajkot, Gujarat`);
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
               <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0c3d6c' }}>
-                Lookup Retailer Account or Select Demo Wholesale Account
+                {t('ledger.lookupTitle', 'Lookup Retailer Account or Select Demo Wholesale Account')}
               </div>
               <button
                 onClick={() => setIsSwitchAccountOpen(false)}
@@ -752,7 +752,7 @@ Rajkot, Gujarat`);
 
             {/* Quick Demo Switcher Pills */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#64748b' }}>Quick Sample Accounts:</span>
+              <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#64748b' }}>{t('ledger.quickSampleAccounts', 'Quick Sample Accounts:')}</span>
               <button
                 type="button"
                 onClick={() => handleSwitchAccount('9825012345')}
@@ -878,7 +878,7 @@ Rajkot, Gujarat`);
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{ textAlign: 'right', fontSize: '0.78rem', color: '#64748b' }}>
-              <div>Statement as of:</div>
+              <div>{t('ledger.statementAsOf', 'Statement as of:')}</div>
               <strong style={{ color: '#0f172a' }}>{lastSyncTime.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</strong>
             </div>
           </div>
@@ -919,10 +919,10 @@ Rajkot, Gujarat`);
               </div>
               <div>
                 <div style={{ fontWeight: 800, color: '#991b1b', fontSize: '1rem' }}>
-                  ⚠️ OVERDUE INVOICE ALERT: {overdueInvoices.length} Invoice(s) Overdue ({formatINR(totalOverdueAmount)})
+                  ⚠️ {t('ledger.overdueAlertTitle', 'OVERDUE INVOICE ALERT:')} {overdueInvoices.length} Invoice(s) Overdue ({formatINR(totalOverdueAmount)})
                 </div>
                 <p style={{ margin: '2px 0 0', fontSize: '0.84rem', color: '#b91c1c' }}>
-                  Overdue invoices may lead to dispatch hold on new wholesale orders. Kindly clear dues immediately.
+                  {t('ledger.overdueAlertDesc', 'Overdue invoices may lead to dispatch hold on new wholesale orders. Kindly clear dues immediately.')}
                 </p>
               </div>
             </div>
@@ -944,7 +944,7 @@ Rajkot, Gujarat`);
                 boxShadow: '0 4px 10px rgba(220, 38, 38, 0.3)'
               }}
             >
-              <Zap size={16} /> Pay Overdue Balance ({formatINR(totalOverdueAmount)})
+              <Zap size={16} /> {t('ledger.payOverdueBalance', 'Pay Overdue Balance')} ({formatINR(totalOverdueAmount)})
             </button>
           </div>
         )}

@@ -189,7 +189,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', padding: '3px 10px', borderRadius: '20px' }}>
                 <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981', display: 'inline-block' }}></span>
                 <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#065f46', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-                  Chemist Portal
+                  {t('nav.chemistPortal', 'Chemist Portal')}
                 </span>
               </div>
             </div>
@@ -213,7 +213,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 <input
                   ref={searchInputRef}
                   type="text"
-                  placeholder="Search Wholesale Medicines, Compositions..."
+                  placeholder={t('nav.searchB2BPlaceholder', 'Search Wholesale Medicines, Compositions...')}
                   value={searchTerm}
                   onChange={(e) => {
                     setSearchTerm(e.target.value);
@@ -248,7 +248,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                     flexShrink: 0 
                   }}
                 >
-                  Search
+                  {t('common.search', 'Search')}
                 </button>
               </form>
 
@@ -300,16 +300,16 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
 
                   {isSearching ? (
                     <div style={{ padding: '20px', textAlign: 'center', color: '#64748b', fontSize: '0.84rem' }}>
-                      Searching wholesale catalog...
+                      {t('products.searchingWholesale', 'Searching wholesale catalog...')}
                     </div>
                   ) : suggestions.length === 0 ? (
                     <div style={{ padding: '20px', textAlign: 'center', color: '#64748b', fontSize: '0.84rem' }}>
-                      No exact medicines matched "{searchTerm}". Press Enter to view all results.
+                      {t('products.noExactMatches', `No exact medicines matched "${searchTerm}". Press Enter to view all results.`)}
                     </div>
                   ) : (
                     <div>
                       <div style={{ padding: '8px 14px 4px 14px', fontSize: '0.72rem', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                        Matched Medicines ({suggestions.length})
+                        {t('products.matchedMedicines', 'Matched Medicines')} ({suggestions.length})
                       </div>
                       {suggestions.map(prod => (
                         <div
@@ -361,8 +361,8 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                   )}
 
                   <div style={{ padding: '8px 14px', backgroundColor: '#f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.74rem', color: '#64748b' }}>
-                    <span>Press <strong>Enter</strong> to view all results</span>
-                    <span className="kbd-shortcut">ESC to close</span>
+                    <span>{t('common.pressEnter', 'Press Enter to view all results')}</span>
+                    <span className="kbd-shortcut">{t('common.escToClose', 'ESC to close')}</span>
                   </div>
                 </div>
               )}
@@ -371,6 +371,9 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             {/* Right: Operational Controls & Store Profile */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               
+              {/* Language Selector in B2B Header */}
+              <LanguageSelector />
+
               {/* Credit Line Status Badge (Desktop only) */}
               <div 
                 className="hide-mobile"
@@ -389,7 +392,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 title="Allocated Wholesale Credit Line"
               >
                 <CreditCard size={14} />
-                <span>Credit: ₹1.00L</span>
+                <span>{t('retailerDashboard.creditAllocated', 'Credit')}: ₹1.00L</span>
                 <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#3b82f6' }}></span>
               </div>
 
@@ -413,7 +416,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 title={`Wholesale Cart (${cartCount} items)`}
               >
                 <ShoppingBag size={16} />
-                <span>Cart ({cartCount})</span>
+                <span>{t('nav.cart', 'Cart')} ({cartCount})</span>
               </button>
 
               {/* Theme Toggle */}
@@ -462,7 +465,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                   }}>
                     <div style={{ padding: '12px 16px', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
                       <div style={{ fontSize: '0.72rem', color: '#059669', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                        ● Verified B2B Partner
+                        ● {t('retailerDashboard.verifiedPartner', 'Verified B2B Partner')}
                       </div>
                       <div style={{ fontSize: '0.92rem', fontWeight: '800', color: 'var(--text-dark)', marginTop: '2px' }}>
                         {chemistName}
@@ -482,28 +485,28 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                       onClick={() => setIsUserMenuOpen(false)}
                       style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', fontSize: '0.85rem', color: 'var(--text-dark)', textDecoration: 'none', fontWeight: '600', borderBottom: '1px solid #f1f5f9' }}
                     >
-                      <ShieldCheck size={16} color="#059669" /> B2B Dashboard
+                      <ShieldCheck size={16} color="#059669" /> {t('nav.dashboard', 'B2B Dashboard')}
                     </Link>
                     <Link 
                       to="/quick-order" 
                       onClick={() => setIsUserMenuOpen(false)}
                       style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', fontSize: '0.85rem', color: 'var(--text-dark)', textDecoration: 'none', fontWeight: '600', borderBottom: '1px solid #f1f5f9' }}
                     >
-                      <Zap size={16} color="#ea580c" /> Quick Order Pad
+                      <Zap size={16} color="#ea580c" /> {t('nav.quickOrder', 'Quick Order Pad')}
                     </Link>
                     <Link 
                       to="/outstanding" 
                       onClick={() => setIsUserMenuOpen(false)}
                       style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', fontSize: '0.85rem', color: 'var(--text-dark)', textDecoration: 'none', fontWeight: '600', borderBottom: '1px solid #f1f5f9' }}
                     >
-                      <FileText size={16} color="#3b82f6" /> Ledger & GST Invoices
+                      <FileText size={16} color="#3b82f6" /> {t('nav.ledger', 'Ledger & GST Invoices')}
                     </Link>
                     <Link 
                       to="/products" 
                       onClick={() => setIsUserMenuOpen(false)}
                       style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', fontSize: '0.85rem', color: 'var(--text-dark)', textDecoration: 'none', fontWeight: '600', borderBottom: '1px solid #f1f5f9' }}
                     >
-                      <Package size={16} color="#6366f1" /> Browse Public Catalog (MRP)
+                      <Package size={16} color="#6366f1" /> {t('nav.publicCatalog', 'Browse Public Catalog (MRP)')}
                     </Link>
 
                     <button 
@@ -523,7 +526,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                         textAlign: 'left' 
                       }}
                     >
-                      <LogOut size={16} /> Sign Out of Workstation
+                      <LogOut size={16} /> {t('nav.logout', 'Sign Out of Workstation')}
                     </button>
                   </div>
                 )}
@@ -548,7 +551,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 }}
                 title="Return to Public Retail Website"
               >
-                <span>🌐 Public Site</span>
+                <span>🌐 {t('nav.publicSite', 'Public Site')}</span>
               </Link>
 
               {/* Mobile Drawer Hamburger */}
@@ -589,7 +592,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 }}
               >
                 <ShieldCheck size={16} color="#38bdf8" />
-                <span>Dashboard Overview</span>
+                <span>{t('nav.dashboardOverview', 'Dashboard Overview')}</span>
               </Link>
 
               <Link 
@@ -609,7 +612,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 }}
               >
                 <Zap size={16} color="#fb923c" />
-                <span>Quick Order Pad</span>
+                <span>{t('nav.quickOrder', 'Quick Order Pad')}</span>
               </Link>
 
               <Link 
@@ -629,7 +632,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 }}
               >
                 <FileText size={16} color="#93c5fd" />
-                <span>Ledger & GST Bills</span>
+                <span>{t('nav.ledger', 'Ledger & GST Bills')}</span>
               </Link>
 
               <Link 
@@ -647,7 +650,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 }}
               >
                 <Package size={16} color="#a7f3d0" />
-                <span>Wholesale Catalog & PTR</span>
+                <span>{t('nav.wholesaleCatalog', 'Wholesale Catalog & PTR')}</span>
               </Link>
 
               <Link 
@@ -665,7 +668,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 }}
               >
                 <Sparkles size={16} color="#fb923c" />
-                <span>10+1 & 15+2 Schemes</span>
+                <span>{t('nav.marginSchemes', '10+1 & 15+2 Schemes')}</span>
               </Link>
             </div>
 
@@ -690,7 +693,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 title="Direct B2B Dispatch Helpline"
               >
                 <MessageCircle size={14} />
-                <span>Wholesale Desk</span>
+                <span>{t('nav.wholesaleDesk', 'Wholesale Desk')}</span>
               </a>
             </div>
 
@@ -718,35 +721,35 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               overflowY: 'auto'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '14px', borderBottom: '1px solid #e2e8f0' }}>
-                <span style={{ fontWeight: '800', color: '#0c3d6c', fontSize: '1rem' }}>B2B Workstation</span>
+                <span style={{ fontWeight: '800', color: '#0c3d6c', fontSize: '1rem' }}>{t('nav.b2bWorkstation', 'B2B Workstation')}</span>
                 <button onClick={() => setIsMobileMenuOpen(false)} style={{ border: 'none', background: 'none', cursor: 'pointer' }}><X size={22} /></button>
               </div>
 
               {/* Chemist Profile Card in mobile */}
               <div style={{ backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '10px', padding: '12px', margin: '14px 0' }}>
-                <div style={{ fontSize: '0.72rem', color: '#059669', fontWeight: '800', textTransform: 'uppercase' }}>● Verified Retailer</div>
+                <div style={{ fontSize: '0.72rem', color: '#059669', fontWeight: '800', textTransform: 'uppercase' }}>● {t('retailerDashboard.verifiedPartner', 'Verified Retailer')}</div>
                 <div style={{ fontSize: '0.95rem', fontWeight: '800', color: '#064e3b', marginTop: '2px' }}>{chemistName}</div>
                 <div style={{ fontSize: '0.78rem', color: '#065f46', marginTop: '2px' }}>👤 {user?.name || 'Hari Patel'}</div>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px', borderRadius: '8px', fontWeight: '700', color: '#0c3d6c', textDecoration: 'none', backgroundColor: '#eff6ff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <ShieldCheck size={18} color="#2563eb" /> B2B Dashboard
+                  <ShieldCheck size={18} color="#2563eb" /> {t('nav.dashboard', 'B2B Dashboard')}
                 </Link>
                 <Link to="/quick-order" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px', borderRadius: '8px', fontWeight: '700', color: '#ea580c', textDecoration: 'none', backgroundColor: '#fff7ed', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Zap size={18} color="#ea580c" /> Quick Order Pad
+                  <Zap size={18} color="#ea580c" /> {t('nav.quickOrder', 'Quick Order Pad')}
                 </Link>
                 <Link to="/outstanding" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px', borderRadius: '8px', fontWeight: '700', color: '#0c3d6c', textDecoration: 'none', backgroundColor: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <FileText size={18} color="#3b82f6" /> Ledger & GST Invoices
+                  <FileText size={18} color="#3b82f6" /> {t('nav.ledger', 'Ledger & GST Invoices')}
                 </Link>
                 <Link to="/products" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px', borderRadius: '8px', fontWeight: '600', color: '#475569', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Package size={18} /> Wholesale Products
+                  <Package size={18} /> {t('nav.products', 'Wholesale Products')}
                 </Link>
                 <Link to="/news" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px', borderRadius: '8px', fontWeight: '600', color: '#475569', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Sparkles size={18} color="#ea580c" /> Margin Schemes
+                  <Sparkles size={18} color="#ea580c" /> {t('nav.marginSchemes', 'Margin Schemes')}
                 </Link>
                 <Link to="/" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px', borderRadius: '8px', fontWeight: '600', color: '#475569', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>🌐</span> Exit to Public Website
+                  <span>🌐</span> {t('nav.publicSite', 'Exit to Public Website')}
                 </Link>
               </div>
 
@@ -755,7 +758,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                   onClick={() => { setIsMobileMenuOpen(false); onLogout(); }}
                   style={{ width: '100%', padding: '11px', borderRadius: '8px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                 >
-                  <LogOut size={16} /> Sign Out
+                  <LogOut size={16} /> {t('nav.logout', 'Sign Out')}
                 </button>
               </div>
             </div>
@@ -1152,13 +1155,13 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 tabIndex={0}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setIsMoreOpen(!isMoreOpen); }}
               >
-                Services <ChevronDown size={14} aria-hidden="true" style={{ transform: isMoreOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }} />
+                {t('nav.services', 'Services')} <ChevronDown size={14} aria-hidden="true" style={{ transform: isMoreOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }} />
               </span>
               <ul className={`dropdown-menu dropdown-menu-right ${isMoreOpen ? 'show' : ''}`} style={{ display: isMoreOpen ? 'block' : 'none', minWidth: '220px', right: 0, left: 'auto' }}>
-                <li><Link to="/manufacturing" className="dropdown-link" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Factory size={15} /> Manufacturing</Link></li>
-                <li><Link to="/partner" className="dropdown-link" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Handshake size={15} /> Business With Us</Link></li>
-                <li><Link to="/supplier" className="dropdown-link" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Shield size={15} /> Supplier Registration</Link></li>
-                <li><Link to="/career" className="dropdown-link" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Users size={15} /> Career With Us</Link></li>
+                <li><Link to="/manufacturing" className="dropdown-link" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Factory size={15} /> {t('services.contractManufacturing', 'Manufacturing')}</Link></li>
+                <li><Link to="/partner" className="dropdown-link" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Handshake size={15} /> {t('services.distributionSupply', 'Business With Us')}</Link></li>
+                <li><Link to="/supplier" className="dropdown-link" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Shield size={15} /> {t('services.thirdPartyManufacturing', 'Supplier Registration')}</Link></li>
+                <li><Link to="/career" className="dropdown-link" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Users size={15} /> {t('nav.career', 'Career With Us')}</Link></li>
               </ul>
             </li>
             <li className="nav-item">
@@ -1185,7 +1188,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 }}
                 title="Direct WhatsApp Wholesale Desk"
               >
-                <MessageCircle size={14} /> WhatsApp Desk
+                <MessageCircle size={14} /> {t('nav.whatsappDesk', 'WhatsApp Desk')}
               </a>
             </li>
           </ul>

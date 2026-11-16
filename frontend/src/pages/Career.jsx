@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Briefcase, Upload, Send, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 function Career() {
+  const { t, language } = useLanguage();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -15,11 +17,36 @@ function Career() {
   const [errorMessage, setErrorMessage] = useState('');
 
   const positions = [
-    { title: 'Sales Manager', dept: 'Sales & Business Development', type: 'Full Time', desc: 'Lead institutional pharma sales, wholesale distributor relations, and territory expansion across Gujarat.' },
-    { title: 'Sales Executive', dept: 'Field Sales', type: 'Full Time', desc: 'Promote products to medical stores and collect orders.' },
-    { title: 'Warehouse In-charge', dept: 'Logistics & Inventory', type: 'Full Time', desc: 'Manage pharmaceutical stocks, batch details, and packaging.' },
-    { title: 'Delivery Partner (Local)', dept: 'Distribution', type: 'Full Time / Part Time', desc: 'Deliver products safely and timely to local hospitals and pharmacies.' },
-    { title: 'Telecaller / Order Clerk', dept: 'Customer Support', type: 'Full Time', desc: 'Call medical stores, book wholesale orders, and handle general enquiries.' }
+    { 
+      title: t('career.job1Title', 'Sales Manager'), 
+      dept: t('career.job1Dept', 'Sales & Business Development'), 
+      type: language === 'gu' ? 'ફુલ ટાઈમ' : language === 'hi' ? 'फुल टाइम' : 'Full Time', 
+      desc: t('career.job1Desc', 'Lead institutional pharma sales, wholesale distributor relations, and territory expansion across Gujarat.') 
+    },
+    { 
+      title: t('career.job2Title', 'Sales Executive'), 
+      dept: t('career.job2Dept', 'Field Sales'), 
+      type: language === 'gu' ? 'ફુલ ટાઈમ' : language === 'hi' ? 'फुल टाइम' : 'Full Time', 
+      desc: t('career.job2Desc', 'Promote products to medical stores and collect orders.') 
+    },
+    { 
+      title: t('career.job3Title', 'Warehouse In-charge'), 
+      dept: t('career.job3Dept', 'Logistics & Inventory'), 
+      type: language === 'gu' ? 'ફુલ ટાઈમ' : language === 'hi' ? 'फुल टाइम' : 'Full Time', 
+      desc: t('career.job3Desc', 'Manage pharmaceutical stocks, batch details, and packaging.') 
+    },
+    { 
+      title: t('career.job4Title', 'Delivery Partner (Local)'), 
+      dept: t('career.job4Dept', 'Distribution'), 
+      type: language === 'gu' ? 'ફુલ / પાર્ટ ટાઈમ' : language === 'hi' ? 'फुल / पार्ट टाइम' : 'Full Time / Part Time', 
+      desc: t('career.job4Desc', 'Deliver products safely and timely to local hospitals and pharmacies.') 
+    },
+    { 
+      title: t('career.job5Title', 'Telecaller / Order Clerk'), 
+      dept: t('career.job5Dept', 'Customer Support'), 
+      type: language === 'gu' ? 'ફુલ ટાઈમ' : language === 'hi' ? 'फुल टाइम' : 'Full Time', 
+      desc: t('career.job5Desc', 'Call medical stores, book wholesale orders, and handle general enquiries.') 
+    }
   ];
 
   const handleFileChange = (e) => {
@@ -32,13 +59,25 @@ function Career() {
     setErrorMessage('');
 
     if (!resumeFile) {
-      setErrorMessage('Please upload your resume (PDF or Word document).');
+      setErrorMessage(
+        language === 'gu'
+          ? 'કૃપા કરીને આપનો રેઝ્યુમે (PDF કે Word ફાઇલ) અપલોડ કરો.'
+          : language === 'hi'
+          ? 'कृपया अपना बायोडाटा (PDF या Word फ़ाइल) अपलोड करें।'
+          : 'Please upload your resume (PDF or Word document).'
+      );
       return;
     }
 
     const cleanPhone = phone.replace(/\D/g, '');
     if (cleanPhone.length < 10) {
-      setErrorMessage('Please enter a valid 10-digit mobile number.');
+      setErrorMessage(
+        language === 'gu'
+          ? 'કૃપા કરીને માન્ય ૧૦ આંકડાનો મોબાઈલ નંબર દાખલ કરો.'
+          : language === 'hi'
+          ? 'कृपया वैध १० अंकों का मोबाइल नंबर दर्ज करें।'
+          : 'Please enter a valid 10-digit mobile number.'
+      );
       return;
     }
 
@@ -56,7 +95,7 @@ function Career() {
 
       const response = await fetch('/api/careers', {
         method: 'POST',
-        body: formData, // FormData automatically sets correct headers
+        body: formData,
       });
 
       const data = await response.json();
@@ -70,17 +109,22 @@ function Career() {
         setExperience('');
         setCoverLetter('');
         setResumeFile(null);
-        // Reset file input
         const fileInput = document.getElementById('career-resume');
         if (fileInput) fileInput.value = '';
         
         setTimeout(() => setIsSuccess(false), 6000);
       } else {
-        setErrorMessage(data.message || 'Failed to submit application. Please check your details.');
+        setErrorMessage(data.message || t('common.error', 'Failed to submit application. Please check your details.'));
       }
     } catch (error) {
       console.error('Error submitting career form:', error);
-      setErrorMessage('Network connection error. Please try again.');
+      setErrorMessage(
+        language === 'gu'
+          ? 'નેટવર્ક કનેક્શન એરર. કૃપા કરીને ફરી પ્રયાસ કરો.'
+          : language === 'hi'
+          ? 'नेटवर्क कनेक्शन त्रुटि। कृपया पुनः प्रयास करें।'
+          : 'Network connection error. Please try again.'
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -92,12 +136,16 @@ function Career() {
         
         {/* Left: Job Listings */}
         <div>
-          <h1 style={{ fontSize: '2.2rem', marginBottom: '15px' }}>Careers at Niyansh Pharma</h1>
+          <h1 style={{ fontSize: '2.2rem', marginBottom: '15px' }}>
+            {t('career.title', 'Careers at Niyansh Pharma')}
+          </h1>
           <p style={{ color: 'var(--text-medium)', marginBottom: '35px', fontSize: '1.05rem', lineHeight: '1.6' }}>
-            Join our growing team and build a rewarding career in pharmaceutical distribution. We offer competitive salaries, performance incentives, and a collaborative work environment.
+            {t('career.subtitle', 'Join our growing team and build a rewarding career in pharmaceutical distribution. We offer competitive salaries, performance incentives, and a collaborative work environment.')}
           </p>
 
-          <h2 style={{ fontSize: '1.4rem', marginBottom: '20px' }}>Current Openings</h2>
+          <h2 style={{ fontSize: '1.4rem', marginBottom: '20px' }}>
+            {t('career.openingsTitle', 'Current Job Openings')}
+          </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {positions.map((pos, i) => (
               <div key={i} className="card" style={{ padding: '25px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -108,7 +156,7 @@ function Career() {
                   </span>
                 </div>
                 <div style={{ fontSize: '0.85rem', color: 'var(--text-light)', display: 'flex', gap: '15px' }}>
-                  <span>Department: <strong>{pos.dept}</strong></span>
+                  <span>{language === 'gu' ? 'વિભાગ:' : language === 'hi' ? 'विभाग:' : 'Department:'} <strong>{pos.dept}</strong></span>
                 </div>
                 <p style={{ fontSize: '0.9rem', color: 'var(--text-medium)', lineHeight: '1.5' }}>{pos.desc}</p>
                 <button 
@@ -116,9 +164,9 @@ function Career() {
                     setPosition(pos.title);
                     document.getElementById('career-form-container')?.scrollIntoView({ behavior: 'smooth' });
                   }}
-                  style={{ alignSelf: 'flex-start', color: 'var(--primary-blue)', fontWeight: '700', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '5px' }}
+                  style={{ alignSelf: 'flex-start', color: 'var(--primary-blue)', fontWeight: '700', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '5px', cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
                 >
-                  Apply Now →
+                  {language === 'gu' ? 'અરજી કરો →' : language === 'hi' ? 'आवेदन करें →' : 'Apply Now →'}
                 </button>
               </div>
             ))}
@@ -129,15 +177,15 @@ function Career() {
         <div id="career-form-container" style={{ display: 'flex', flexDirection: 'column' }}>
           <div className="card sticky-form-desktop" style={{ padding: '30px', position: 'sticky', top: '100px' }}>
             <h2 style={{ fontSize: '1.4rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '10px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Briefcase size={22} color="var(--primary-blue)" /> Submit Application
+              <Briefcase size={22} color="var(--primary-blue)" /> {t('career.applyTitle', 'Apply for a Position')}
             </h2>
 
             {isSuccess ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '15px', textAlign: 'center', padding: '40px 0' }}>
                 <CheckCircle2 size={54} color="var(--secondary-green)" />
-                <h3 style={{ color: 'var(--secondary-green)' }}>Application Submitted!</h3>
+                <h3 style={{ color: 'var(--secondary-green)' }}>{t('common.success', 'Application Submitted!')}</h3>
                 <p style={{ color: 'var(--text-medium)', fontSize: '0.95rem' }}>
-                  Thank you for applying to Niyansh Pharma. Our HR department will review your resume and contact you if your profile matches our requirements.
+                  {t('career.successNotice', 'Your application has been received. Our HR team will review your profile and contact shortlisted candidates.')}
                 </p>
               </div>
             ) : (
@@ -150,12 +198,14 @@ function Career() {
                 )}
                 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                  <label htmlFor="career-name" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>Full Name *</label>
+                  <label htmlFor="career-name" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                    {t('cart.fullName', 'Full Name')} *
+                  </label>
                   <input 
                     id="career-name"
                     type="text" 
                     required 
-                    placeholder="Enter name"
+                    placeholder={language === 'gu' ? 'પૂરું નામ લખો' : language === 'hi' ? 'पूरा नाम लिखें' : 'Enter name'}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
@@ -164,7 +214,9 @@ function Career() {
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                    <label htmlFor="career-email" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>Email *</label>
+                    <label htmlFor="career-email" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                      {t('cart.email', 'Email')} *
+                    </label>
                     <input 
                       id="career-email"
                       type="email" 
@@ -176,12 +228,15 @@ function Career() {
                     />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                    <label htmlFor="career-phone" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>Phone Number *</label>
+                    <label htmlFor="career-phone" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                      {t('cart.phone', 'Phone Number')} *
+                    </label>
                     <input 
                       id="career-phone"
                       type="tel" 
                       required 
-                      placeholder="Enter mobile"
+                      maxLength={10}
+                      placeholder={language === 'gu' ? '૧૦ આંકડાનો મોબાઈલ' : language === 'hi' ? '१० अंकों का मोबाइल' : 'Enter mobile'}
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
@@ -191,7 +246,9 @@ function Career() {
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '15px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                    <label htmlFor="career-pos-select" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>Position Applying For *</label>
+                    <label htmlFor="career-pos-select" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                      {t('career.selectPosition', 'Position Applying For *')}
+                    </label>
                     <select 
                       id="career-pos-select"
                       required
@@ -199,14 +256,16 @@ function Career() {
                       onChange={(e) => setPosition(e.target.value)}
                       style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem', backgroundColor: '#fff' }}
                     >
-                      <option value="">Select Position</option>
+                      <option value="">{language === 'gu' ? 'જગ્યા પસંદ કરો' : language === 'hi' ? 'पद चुनें' : 'Select Position'}</option>
                       {positions.map((p, idx) => (
                         <option key={idx} value={p.title}>{p.title}</option>
                       ))}
                     </select>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                    <label htmlFor="career-exp-select" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>Experience *</label>
+                    <label htmlFor="career-exp-select" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                      {t('career.expLabel', 'Experience *')}
+                    </label>
                     <select 
                       id="career-exp-select"
                       required
@@ -214,20 +273,22 @@ function Career() {
                       onChange={(e) => setExperience(e.target.value)}
                       style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem', backgroundColor: '#fff' }}
                     >
-                      <option value="">Select Exp</option>
-                      <option value="Freshers">Fresher</option>
-                      <option value="1-2 Years">1-2 Years</option>
-                      <option value="3+ Years">3+ Years</option>
+                      <option value="">{language === 'gu' ? 'અનુભવ પસંદ કરો' : language === 'hi' ? 'अनुभव चुनें' : 'Select Exp'}</option>
+                      <option value="Freshers">{language === 'gu' ? 'ફ્રેશર (નવા)' : language === 'hi' ? 'फ्रेशर (नए)' : 'Fresher'}</option>
+                      <option value="1-2 Years">{language === 'gu' ? '૧-૨ વર્ષ' : language === 'hi' ? '१-२ वर्ष' : '1-2 Years'}</option>
+                      <option value="3+ Years">{language === 'gu' ? '૩+ વર્ષ' : language === 'hi' ? '३+ वर्ष' : '3+ Years'}</option>
                     </select>
                   </div>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                  <label htmlFor="career-cover" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>Cover Letter / Why should we hire you?</label>
+                  <label htmlFor="career-cover" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                    {t('career.coverLabel', 'Brief Introduction / Cover Note')}
+                  </label>
                   <textarea 
                     id="career-cover"
                     rows="3" 
-                    placeholder="Briefly introduce yourself..."
+                    placeholder={language === 'gu' ? 'આપનો ટૂંકો પરિચય અને અનુભવ જણાવો...' : language === 'hi' ? 'अपना संक्षिप्त परिचय और अनुभव बताएं...' : 'Briefly introduce yourself...'}
                     value={coverLetter}
                     onChange={(e) => setCoverLetter(e.target.value)}
                     style={{ padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem', resize: 'vertical' }}
@@ -235,7 +296,9 @@ function Career() {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                  <label htmlFor="career-resume" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>Upload Resume (PDF/Word) *</label>
+                  <label htmlFor="career-resume" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                    {t('career.resumeLabel', 'Upload Resume (PDF/Word) *')}
+                  </label>
                   <div style={{
                     border: '2px dashed #cbd5e1', borderRadius: '6px', padding: '15px',
                     textAlign: 'center', cursor: 'pointer', position: 'relative',
@@ -243,7 +306,7 @@ function Career() {
                   }}>
                     <Upload size={20} color="var(--text-light)" style={{ marginBottom: '5px' }} />
                     <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-medium)' }}>
-                      {resumeFile ? `Selected: ${resumeFile.name}` : 'Click to select PDF or Doc file'}
+                      {resumeFile ? `${language === 'gu' ? 'પસંદ કરેલ:' : language === 'hi' ? 'चयनित:' : 'Selected:'} ${resumeFile.name}` : (language === 'gu' ? 'PDF કે Doc ફાઇલ પસંદ કરવા અહીં ક્લિક કરો' : language === 'hi' ? 'PDF या Doc फ़ाइल चुनने के लिए यहाँ क्लिक करें' : 'Click to select PDF or Doc file')}
                     </span>
                     <input 
                       id="career-resume"
@@ -262,7 +325,7 @@ function Career() {
                   style={{ width: '100%', height: '45px', gap: '10px', marginTop: '10px' }}
                 >
                   <Send size={16} />
-                  {isSubmitting ? 'Submitting...' : 'Submit Application'}
+                  {isSubmitting ? t('career.submittingBtn', 'Submitting Application...') : t('career.submitBtn', 'Submit Job Application')}
                 </button>
               </form>
             )}

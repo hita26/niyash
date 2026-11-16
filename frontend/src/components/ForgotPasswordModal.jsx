@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, X, ShieldAlert, KeyRound, Mail, MessageCircle, Loader2, CheckCircle2 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 /**
  * Responsive, modern Forgot Password Modal Component
@@ -12,6 +13,7 @@ export default function ForgotPasswordModal({
   onCodeSent,
   supportPhone = '9316566894',
 }) {
+  const { t } = useLanguage();
   const [emailOrPhone, setEmailOrPhone] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -125,7 +127,7 @@ export default function ForgotPasswordModal({
             className="group inline-flex items-center gap-2 text-sm font-semibold text-slate-700 hover:text-blue-600 transition duration-150"
           >
             <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
-            <span>Back to Log In</span>
+            <span>{t('forgotPassword.backToLogin', 'Back to Log In')}</span>
           </button>
 
           {onClose && (
@@ -154,10 +156,9 @@ export default function ForgotPasswordModal({
             <div className="mx-auto w-14 h-14 bg-emerald-50 border border-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mb-4">
               <CheckCircle2 className="w-7 h-7" />
             </div>
-            <h3 className="text-2xl font-bold text-slate-900 tracking-tight">Code Generated</h3>
+            <h3 className="text-2xl font-bold text-slate-900 tracking-tight">{t('forgotPassword.codeGenerated', 'Code Generated')}</h3>
             <p className="text-sm text-slate-500 mt-2 leading-relaxed">
-              We have generated a 6-digit verification code for{' '}
-              <span className="font-semibold text-slate-800">{emailOrPhone}</span>.
+              {t('forgotPassword.codeGeneratedDesc', 'We have generated a 6-digit verification code for')} <span className="font-semibold text-slate-800">{emailOrPhone}</span>.
             </p>
             <button
               type="button"
@@ -167,7 +168,7 @@ export default function ForgotPasswordModal({
               }}
               className="mt-6 w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-3.5 rounded-xl transition duration-150 shadow-sm"
             >
-              Continue to Login
+              {t('forgotPassword.continueToLogin', 'Continue to Login')}
             </button>
           </div>
         ) : (
@@ -178,11 +179,10 @@ export default function ForgotPasswordModal({
                 <KeyRound className="w-7 h-7 text-blue-600" />
               </div>
               <h2 className="text-2xl font-bold text-slate-900 tracking-tight text-center mt-4">
-                Forgot Password?
+                {t('forgotPassword.title', 'Forgot Password?')}
               </h2>
               <p className="text-sm text-slate-500 text-center mt-2 leading-relaxed">
-                Enter your registered wholesale email address or mobile number. We will generate a
-                6-digit verification code to reset your password.
+                {t('forgotPassword.subtitle', 'Enter your registered wholesale email address or mobile number. We will generate a 6-digit verification code to reset your password.')}
               </p>
             </div>
 
@@ -193,7 +193,7 @@ export default function ForgotPasswordModal({
                   htmlFor="forgot-email-phone"
                   className="block text-sm font-semibold text-slate-800 mb-1.5"
                 >
-                  Registered Email or Phone *
+                  {t('forgotPassword.emailOrPhoneLabel', 'Registered Email or Phone *')}
                 </label>
                 <div className="relative">
                   <Mail className="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -206,7 +206,7 @@ export default function ForgotPasswordModal({
                       setEmailOrPhone(e.target.value);
                       if (error) setError('');
                     }}
-                    placeholder="Enter email or 10-digit mobile number"
+                    placeholder={t('forgotPassword.emailPlaceholder', 'Enter email or 10-digit mobile number')}
                     className="w-full border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 rounded-xl py-3 px-3.5 pl-10 text-slate-800 placeholder:text-slate-400 text-sm transition outline-none"
                   />
                 </div>
@@ -221,10 +221,10 @@ export default function ForgotPasswordModal({
                 {isLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Sending Code...</span>
+                    <span>{t('forgotPassword.sendingCode', 'Sending Code...')}</span>
                   </>
                 ) : (
-                  <span>Send Verification Code</span>
+                  <span>{t('forgotPassword.sendCodeBtn', 'Send Verification Code')}</span>
                 )}
               </button>
             </form>
@@ -236,9 +236,9 @@ export default function ForgotPasswordModal({
                   <MessageCircle className="w-5 h-5 text-[#25D366]" />
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500 leading-tight">Need urgent help?</p>
+                  <p className="text-xs text-slate-500 leading-tight">{t('forgotPassword.needUrgentHelp', 'Need urgent help?')}</p>
                   <p className="text-sm font-bold text-slate-800 leading-tight mt-0.5">
-                    Wholesale Desk Support
+                    {t('forgotPassword.wholesaleSupport', 'Wholesale Desk Support')}
                   </p>
                 </div>
               </div>
@@ -249,7 +249,7 @@ export default function ForgotPasswordModal({
                 rel="noopener noreferrer"
                 className="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-semibold px-3 py-1.5 rounded-lg transition inline-flex items-center"
               >
-                WhatsApp Desk
+                {t('nav.whatsappDesk', 'WhatsApp Desk')}
               </a>
             </div>
           </>

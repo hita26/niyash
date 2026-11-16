@@ -19,6 +19,7 @@ import {
   Radio
 } from 'lucide-react';
 import { useLiveSync, SYNC_EVENTS } from '../utils/liveSync';
+import { useLanguage } from '../context/LanguageContext';
 
 const FALLBACK_TICKER_ITEMS = [
   {
@@ -79,6 +80,7 @@ const FALLBACK_TICKER_ITEMS = [
 ];
 
 function NewsTicker() {
+  const { t } = useLanguage();
   const [newsList, setNewsList] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -150,7 +152,7 @@ function NewsTicker() {
       case 'Scheme':
         return {
           icon: <Flame size={13} />,
-          label: 'Scheme',
+          label: t('news.catScheme', 'Scheme'),
           bgColor: '#fff7ed',
           textColor: '#c2410c',
           borderColor: '#ffedd5',
@@ -159,7 +161,7 @@ function NewsTicker() {
       case 'Price Update':
         return {
           icon: <TrendingDown size={13} />,
-          label: 'Price Update',
+          label: t('news.catPrice', 'Price Update'),
           bgColor: '#ecfdf5',
           textColor: '#047857',
           borderColor: '#d1fae5',
@@ -168,7 +170,7 @@ function NewsTicker() {
       case 'New Launch':
         return {
           icon: <Sparkles size={13} />,
-          label: 'New Launch',
+          label: t('news.catLaunch', 'New Launch'),
           bgColor: '#f5f3ff',
           textColor: '#6d28d9',
           borderColor: '#ede9fe',
@@ -177,7 +179,7 @@ function NewsTicker() {
       case 'Notice':
         return {
           icon: <Bell size={13} />,
-          label: 'Notice',
+          label: t('news.catNotice', 'Notice'),
           bgColor: '#eff6ff',
           textColor: '#1d4ed8',
           borderColor: '#dbeafe',
@@ -186,7 +188,7 @@ function NewsTicker() {
       default:
         return {
           icon: <Globe size={13} />,
-          label: category || 'News',
+          label: category || t('news.catAll', 'News'),
           bgColor: '#f8fafc',
           textColor: '#334155',
           borderColor: '#e2e8f0',
@@ -202,19 +204,19 @@ function NewsTicker() {
     const diffDays = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
     
     if (diffDays < 0) {
-      return { text: 'Expired', isExpired: true };
+      return { text: t('news.expired', 'Expired'), isExpired: true };
     }
     if (diffDays === 0) {
-      return { text: 'Expires Today', isUrgent: true };
+      return { text: t('news.expiresToday', 'Expires Today'), isUrgent: true };
     }
     if (diffDays === 1) {
-      return { text: 'Expires Tomorrow', isUrgent: true };
+      return { text: t('news.expiresTomorrow', 'Expires Tomorrow'), isUrgent: true };
     }
     if (diffDays <= 7) {
-      return { text: `${diffDays} days left`, isUrgent: true };
+      return { text: `${diffDays} ${t('news.daysLeft', 'days left')}`, isUrgent: true };
     }
     return { 
-      text: `Valid till ${expiry.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}`,
+      text: `${t('news.validTill', 'Valid till')} ${expiry.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}`,
       isUrgent: false 
     };
   };
@@ -311,7 +313,7 @@ function NewsTicker() {
                 }} 
               />
               <Radio size={12} />
-              <span className="live-badge-text">LIVE SCHEMES</span>
+              <span className="live-badge-text">{t('news.liveSchemes', 'LIVE SCHEMES')}</span>
             </div>
           </div>
 
@@ -434,7 +436,7 @@ function NewsTicker() {
               title="Read Full Announcement"
             >
               <Info size={12} />
-              <span className="view-details-text">Details</span>
+              <span className="view-details-text">{t('common.details', 'Details')}</span>
             </button>
 
             {/* Manual Navigation Arrows */}
@@ -494,7 +496,7 @@ function NewsTicker() {
                 marginLeft: '4px'
               }}
             >
-              <span>All Feed</span>
+              <span>{t('news.allFeed', 'All Feed')}</span>
               <ArrowRight size={12} />
             </Link>
           </div>
@@ -666,10 +668,10 @@ function NewsTicker() {
                   </div>
                   <div>
                     <h4 style={{ fontSize: '0.95rem', fontWeight: '700', color: '#9a3412', marginBottom: '2px' }}>
-                      Special Wholesale Scheme Active
+                      {t('news.specialSchemeActive', 'Special Wholesale Scheme Active')}
                     </h4>
                     <p style={{ fontSize: '0.85rem', color: '#c2410c', margin: 0 }}>
-                      Qualifies for extra free goods and higher profit margins for registered pharmacies & medical stores.
+                      {t('news.specialSchemeDesc', 'Qualifies for extra free goods and higher profit margins for registered pharmacies & medical stores.')}
                     </p>
                   </div>
                 </div>
@@ -677,7 +679,7 @@ function NewsTicker() {
 
               {/* Order Guidance */}
               <div style={{ fontSize: '0.85rem', color: 'var(--text-medium)', marginBottom: '25px', lineHeight: '1.5' }}>
-                💡 <strong>How to claim:</strong> Mention this scheme notice when placing your purchase order through WhatsApp, phone booking, or via our online Enquiry Cart.
+                💡 <strong>{t('news.howToClaim', 'How to claim:')}</strong> {t('news.claimInstructions', 'Mention this scheme notice when placing your purchase order through WhatsApp, phone booking, or via our online Enquiry Cart.')}
               </div>
 
               {/* Action Buttons */}
@@ -702,7 +704,7 @@ function NewsTicker() {
                   }}
                 >
                   <MessageSquare size={18} />
-                  Claim Scheme / Share on WhatsApp
+                  {t('news.claimWhatsApp', 'Claim Scheme / Share on WhatsApp')}
                 </button>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
@@ -721,7 +723,7 @@ function NewsTicker() {
                     }}
                   >
                     <PhoneCall size={14} />
-                    Call +91 99099 23130
+                    {t('common.call', 'Call')} +91 99099 23130
                   </a>
 
                   <Link
@@ -743,7 +745,7 @@ function NewsTicker() {
                     }}
                   >
                     <ExternalLink size={14} />
-                    All Daily Schemes
+                    {t('news.allSchemes', 'All Daily Schemes')}
                   </Link>
                 </div>
               </div>

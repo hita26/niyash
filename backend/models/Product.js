@@ -45,6 +45,38 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 12,
     },
+    purchaseGst: {
+      type: Number,
+      default: 12,
+    },
+    salesGst: {
+      type: Number,
+      default: 12,
+    },
+    hsnCode: {
+      type: String,
+      default: '3004',
+      trim: true,
+    },
+    rackId: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    expiryDate: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    customFields: [
+      {
+        fieldKey: { type: String, trim: true },
+        fieldName: { type: String, trim: true },
+        fieldValue: { type: mongoose.Schema.Types.Mixed },
+        fieldType: { type: String, default: 'text' },
+        isRequired: { type: Boolean, default: false },
+      },
+    ],
     minReorderQty: {
       type: Number,
       default: 1,

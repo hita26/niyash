@@ -3,6 +3,8 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const Company = require('../models/Company');
 const Product = require('../models/Product');
+const User = require('../models/User');
+const jwt = require('jsonwebtoken');
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 
 // ========================================================

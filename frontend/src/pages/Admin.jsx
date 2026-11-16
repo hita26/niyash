@@ -691,6 +691,22 @@ function Admin() {
   const [newImageUrlInput, setNewImageUrlInput] = useState('');
   const [prodDescription, setProdDescription] = useState('');
 
+  // Fixed Pharma Inventory & Tax Fields
+  const [prodRackId, setProdRackId] = useState('');
+  const [prodHsnCode, setProdHsnCode] = useState('3004');
+  const [prodPurchaseGst, setProdPurchaseGst] = useState(12);
+  const [prodSalesGst, setProdSalesGst] = useState(12);
+  const [prodExpiryDate, setProdExpiryDate] = useState('');
+
+  // Dynamic Custom Field Definitions & Product Values
+  const [customFieldDefs, setCustomFieldDefs] = useState([]);
+  const [prodCustomValues, setProdCustomValues] = useState({});
+  const [isCustomFieldModalOpen, setIsCustomFieldModalOpen] = useState(false);
+  const [newCustomFieldName, setNewCustomFieldName] = useState('');
+  const [newCustomFieldType, setNewCustomFieldType] = useState('text');
+  const [newCustomFieldRequired, setNewCustomFieldRequired] = useState(false);
+  const [newCustomFieldPlaceholder, setNewCustomFieldPlaceholder] = useState('');
+
   // Bulk Import States
   const [bulkCsvText, setBulkCsvText] = useState('');
   const [bulkImportResults, setBulkImportResults] = useState(null);
@@ -851,6 +867,17 @@ function Admin() {
         }
       } catch {
         setCompanies([]);
+      }
+
+      // 8. Fetch Custom Field Definitions
+      try {
+        const cfRes = await fetch('/api/products/custom-fields');
+        if (cfRes.ok) {
+          const cfData = await cfRes.json();
+          setCustomFieldDefs(cfData.fields || []);
+        }
+      } catch (cfErr) {
+        console.warn('Custom fields fetch notice:', cfErr);
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -1624,6 +1651,18 @@ _Helpline: +91 9316566894_`;
       setProdComposition(product.composition || '');
       setProdForm(product.form || 'Tablet');
       setProdManufacturer(product.manufacturer || 'Daxia Healthcare Pvt. Ltd.');
+      setProdRackId(product.rackId || '');
+      setProdHsnCode(product.hsnCode || '3004');
+      setProdPurchaseGst(product.purchaseGst !== undefined ? product.purchaseGst : 12);
+      setProdSalesGst(product.salesGst !== undefined ? product.salesGst : (product.gstRate || 12));
+      setProdExpiryDate(product.expiryDate || '');
+      const customMap = {};
+      if (Array.isArray(product.customFields)) {
+        product.customFields.forEach(cf => {
+          if (cf && cf.fieldKey) customMap[cf.fieldKey] = cf.fieldValue;
+        });
+      }
+      setProdCustomValues(customMap);
       setProdImageUrl(product.imageUrl || '');
       const initialImages = Array.isArray(product.images) && product.images.length > 0
         ? product.images
@@ -1650,6 +1689,12 @@ _Helpline: +91 9316566894_`;
       setProdComposition('');
       setProdForm('Tablet');
       setProdManufacturer('Daxia Healthcare Pvt. Ltd.');
+      setProdRackId('');
+      setProdHsnCode('3004');
+      setProdPurchaseGst(12);
+      setProdSalesGst(12);
+      setProdExpiryDate('');
+      setProdCustomValues({});
       setProdImageUrl('');
       setProdImages([]);
       setProdDescription('');
@@ -1826,6 +1871,25 @@ _Helpline: +91 9316566894_`;
     const stockNum = parseInt(prodStockQuantity, 10);
     const validStock = !isNaN(stockNum) ? stockNum : (prodInStock ? 100 : 0);
 
+    // Validate required dynamic custom fields
+    for (const def of customFieldDefs) {
+      if (def.isRequired) {
+        const val = prodCustomValues[def.fieldKey];
+        if (val === undefined || val === null || String(val).trim() === '') {
+          showToast(`${def.fieldName} is required`, 'error');
+          return;
+        }
+      }
+    }
+
+    const customFieldsArr = customFieldDefs.map(def => ({
+      fieldKey: def.fieldKey,
+      fieldName: def.fieldName,
+      fieldValue: prodCustomValues[def.fieldKey] !== undefined ? prodCustomValues[def.fieldKey] : '',
+      fieldType: def.fieldType || 'text',
+      isRequired: Boolean(def.isRequired),
+    }));
+
     const payload = {
       name: prodName.trim(),
       brand: prodBrand.trim() || 'Daxia Healthcare',
@@ -1841,6 +1905,13 @@ _Helpline: +91 9316566894_`;
       composition: prodComposition.trim(),
       form: prodForm,
       manufacturer: prodManufacturer.trim(),
+      rackId: prodRackId.trim(),
+      hsnCode: prodHsnCode.trim() || '3004',
+      purchaseGst: parseFloat(prodPurchaseGst) || 12,
+      salesGst: parseFloat(prodSalesGst) || 12,
+      gstRate: parseFloat(prodSalesGst) || 12,
+      expiryDate: prodExpiryDate.trim(),
+      customFields: customFieldsArr,
       imageUrl: finalMainImage,
       images: finalImages,
       description: prodDescription.trim(),
@@ -2270,6 +2341,62 @@ _Helpline: +91 9316566894_`;
       showToast('Error clearing companies: ' + err.message, 'error');
     } finally {
       setIsClearingCompanies(false);
+    }
+  };
+
+  const handleSaveCustomFieldDef = async (e) => {
+    e.preventDefault();
+    if (!newCustomFieldName.trim()) {
+      showToast('Field name is required', 'error');
+      return;
+    }
+    try {
+      const res = await fetch('/api/products/custom-fields', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          fieldName: newCustomFieldName.trim(),
+          fieldType: newCustomFieldType,
+          isRequired: newCustomFieldRequired,
+          placeholder: newCustomFieldPlaceholder.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast(`Field "${newCustomFieldName}" added successfully!`);
+        setCustomFieldDefs(prev => {
+          const exists = prev.some(f => f.fieldKey === data.field.fieldKey);
+          return exists ? prev.map(f => f.fieldKey === data.field.fieldKey ? data.field : f) : [...prev, data.field];
+        });
+        setNewCustomFieldName('');
+        setNewCustomFieldType('text');
+        setNewCustomFieldRequired(false);
+        setNewCustomFieldPlaceholder('');
+        setIsCustomFieldModalOpen(false);
+      } else {
+        showToast(data.message || 'Error saving custom field', 'error');
+      }
+    } catch (err) {
+      showToast('Error saving field: ' + err.message, 'error');
+    }
+  };
+
+  const handleDeleteCustomFieldDef = async (fieldKey) => {
+    if (!window.confirm(`Delete custom field "${fieldKey}"?`)) return;
+    try {
+      const res = await fetch(`/api/products/custom-fields/${fieldKey}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast('Field definition removed');
+        setCustomFieldDefs(prev => prev.filter(f => f.fieldKey !== fieldKey));
+      } else {
+        showToast(data.message || 'Error deleting field', 'error');
+      }
+    } catch (err) {
+      showToast('Error deleting field: ' + err.message, 'error');
     }
   };
 
@@ -4213,10 +4340,30 @@ _Helpline: +91 9316566894_`;
                                         </span>
                                       )}
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px', flexWrap: 'wrap' }}>
                                       {p.sku && (
                                         <span style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: 'var(--primary-blue)', backgroundColor: '#eff6ff', padding: '1px 6px', borderRadius: '4px', fontWeight: '600' }}>
                                           {p.sku}
+                                        </span>
+                                      )}
+                                      {p.rackId && (
+                                        <span style={{ fontSize: '0.72rem', backgroundColor: '#fef3c7', color: '#92400e', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }} title="Warehouse Storage Rack">
+                                          Rack: {p.rackId}
+                                        </span>
+                                      )}
+                                      {p.hsnCode && (
+                                        <span style={{ fontSize: '0.72rem', backgroundColor: '#f1f5f9', color: '#475569', padding: '1px 6px', borderRadius: '4px', fontWeight: '600' }} title="HSN Pharma Tax Code">
+                                          HSN: {p.hsnCode}
+                                        </span>
+                                      )}
+                                      {(p.salesGst !== undefined || p.gstRate !== undefined) && (
+                                        <span style={{ fontSize: '0.72rem', backgroundColor: '#dcfce7', color: '#166534', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }} title="Sales GST Rate">
+                                          GST: {p.salesGst !== undefined ? p.salesGst : p.gstRate}%
+                                        </span>
+                                      )}
+                                      {p.expiryDate && (
+                                        <span style={{ fontSize: '0.72rem', backgroundColor: '#fee2e2', color: '#991b1b', padding: '1px 6px', borderRadius: '4px', fontWeight: '600' }} title="Expiry Date">
+                                          Exp: {p.expiryDate}
                                         </span>
                                       )}
                                       {p.composition && (
@@ -4460,6 +4607,29 @@ _Helpline: +91 9316566894_`;
                                   {p.composition}
                                 </p>
                               )}
+
+                              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                                {p.rackId && (
+                                  <span style={{ fontSize: '0.7rem', backgroundColor: '#fef3c7', color: '#92400e', padding: '1px 5px', borderRadius: '3px', fontWeight: '700' }}>
+                                    Rack: {p.rackId}
+                                  </span>
+                                )}
+                                {p.hsnCode && (
+                                  <span style={{ fontSize: '0.7rem', backgroundColor: '#f1f5f9', color: '#475569', padding: '1px 5px', borderRadius: '3px', fontWeight: '600' }}>
+                                    HSN: {p.hsnCode}
+                                  </span>
+                                )}
+                                {(p.salesGst !== undefined || p.gstRate !== undefined) && (
+                                  <span style={{ fontSize: '0.7rem', backgroundColor: '#dcfce7', color: '#166534', padding: '1px 5px', borderRadius: '3px', fontWeight: '700' }}>
+                                    GST: {p.salesGst !== undefined ? p.salesGst : p.gstRate}%
+                                  </span>
+                                )}
+                                {p.expiryDate && (
+                                  <span style={{ fontSize: '0.7rem', backgroundColor: '#fee2e2', color: '#991b1b', padding: '1px 5px', borderRadius: '3px', fontWeight: '600' }}>
+                                    Exp: {p.expiryDate}
+                                  </span>
+                                )}
+                              </div>
 
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
                                 <div>
@@ -6215,6 +6385,134 @@ _Helpline: +91 9316566894_`;
                     </div>
                   </div>
 
+                  {/* Row 7: Pharma Logistics - Rack ID, HSN Code, Expiry Date */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                      <label htmlFor="modal-rackid" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                        Rack ID / Location
+                      </label>
+                      <input 
+                        id="modal-rackid"
+                        type="text" placeholder="E.g., R-04, Shelf-B" 
+                        value={prodRackId} onChange={(e) => setProdRackId(e.target.value)}
+                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem' }}
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                      <label htmlFor="modal-hsn" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                        HSN Code
+                      </label>
+                      <input 
+                        id="modal-hsn"
+                        type="text" placeholder="E.g., 3004" 
+                        value={prodHsnCode} onChange={(e) => setProdHsnCode(e.target.value)}
+                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem' }}
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                      <label htmlFor="modal-expiry" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                        Expiry Date
+                      </label>
+                      <input 
+                        id="modal-expiry"
+                        type="text" placeholder="E.g., 12/2027 or MM/YYYY" 
+                        value={prodExpiryDate} onChange={(e) => setProdExpiryDate(e.target.value)}
+                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem' }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Row 8: GST Rates (Purchase & Sales) */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                      <label htmlFor="modal-purgst" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                        Purchase GST Rate (%)
+                      </label>
+                      <select 
+                        id="modal-purgst"
+                        value={prodPurchaseGst} 
+                        onChange={(e) => setProdPurchaseGst(Number(e.target.value))}
+                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', backgroundColor: '#ffffff' }}
+                      >
+                        <option value={0}>0% (Exempt)</option>
+                        <option value={5}>5% GST</option>
+                        <option value={12}>12% GST (Medicines)</option>
+                        <option value={18}>18% GST</option>
+                        <option value={28}>28% GST</option>
+                      </select>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                      <label htmlFor="modal-salesgst" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                        Sales GST Rate (%)
+                      </label>
+                      <select 
+                        id="modal-salesgst"
+                        value={prodSalesGst} 
+                        onChange={(e) => setProdSalesGst(Number(e.target.value))}
+                        style={{ padding: '9px 13px', border: '1px solid #86efac', borderRadius: '8px', fontSize: '0.9rem', backgroundColor: '#ffffff', fontWeight: '600' }}
+                      >
+                        <option value={0}>0% (Exempt)</option>
+                        <option value={5}>5% GST</option>
+                        <option value={12}>12% GST (Standard Medicines)</option>
+                        <option value={18}>18% GST</option>
+                        <option value={28}>28% GST</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Row 9: Dynamic Custom Fields Section */}
+                  <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <label style={{ fontSize: '0.88rem', fontWeight: '700', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span>⚡ Custom Parameters ({customFieldDefs.length})</span>
+                      </label>
+                      <button 
+                        type="button"
+                        onClick={() => setIsCustomFieldModalOpen(true)}
+                        style={{ backgroundColor: '#eff6ff', color: 'var(--primary-blue)', border: '1px solid #bfdbfe', borderRadius: '6px', padding: '5px 12px', fontSize: '0.8rem', fontWeight: '700', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                      >
+                        <Plus size={14} /> Add Custom Field
+                      </button>
+                    </div>
+
+                    {customFieldDefs.length === 0 ? (
+                      <div style={{ fontSize: '0.82rem', color: 'var(--text-light)', padding: '10px 14px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
+                        Need extra fields (Batch No, Schedule Drug, Storage Temp)? Click <strong>"Add Custom Field"</strong> above to create fields that will automatically save to all products.
+                      </div>
+                    ) : (
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+                        {customFieldDefs.map(def => (
+                          <div key={def.fieldKey} style={{ display: 'flex', flexDirection: 'column', gap: '4px', backgroundColor: '#f8fafc', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                                {def.fieldName} {def.isRequired && <span style={{ color: '#ef4444' }}>*</span>}
+                              </label>
+                              <button 
+                                type="button"
+                                onClick={() => handleDeleteCustomFieldDef(def.fieldKey)}
+                                title="Remove this field definition"
+                                style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '2px' }}
+                              >
+                                <X size={12} />
+                              </button>
+                            </div>
+                            <input 
+                              type={def.fieldType === 'number' ? 'number' : def.fieldType === 'date' ? 'date' : 'text'}
+                              placeholder={def.placeholder || `Enter ${def.fieldName}...`}
+                              required={def.isRequired}
+                              value={prodCustomValues[def.fieldKey] !== undefined ? prodCustomValues[def.fieldKey] : ''}
+                              onChange={(e) => setProdCustomValues(prev => ({ ...prev, [def.fieldKey]: e.target.value }))}
+                              style={{ padding: '6px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
                   {/* Row 7: Description */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                     <label htmlFor="modal-desc" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Product Description & Indications</label>
@@ -6486,6 +6784,70 @@ _Helpline: +91 9316566894_`;
                 <button type="submit" disabled={isSavingCompany} className="btn btn-primary btn-sm">
                   {isSavingCompany ? 'Saving...' : (editingCompany ? 'Save Changes' : 'Add Company')}
                 </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: ADD CUSTOM FIELD DEFINITION */}
+      {isCustomFieldModalOpen && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', zIndex: 1100, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
+          <div className="card" style={{ maxWidth: '480px', width: '100%', padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text-dark)' }}>➕ Create New Custom Field</h3>
+              <button type="button" onClick={() => setIsCustomFieldModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-medium)' }}><X size={20} /></button>
+            </div>
+            <form onSubmit={handleSaveCustomFieldDef} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>Field Name / Label *</label>
+                <input 
+                  type="text" 
+                  required 
+                  placeholder="E.g., Batch Number, Storage Temp, Schedule Drug..." 
+                  value={newCustomFieldName} 
+                  onChange={(e) => setNewCustomFieldName(e.target.value)} 
+                  style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '7px', fontSize: '0.9rem' }} 
+                />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>Field Type</label>
+                  <select 
+                    value={newCustomFieldType} 
+                    onChange={(e) => setNewCustomFieldType(e.target.value)} 
+                    style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '7px', fontSize: '0.9rem' }}
+                  >
+                    <option value="text">Text (Short Input)</option>
+                    <option value="number">Number (Numeric)</option>
+                    <option value="date">Date (Picker)</option>
+                  </select>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>Is Required?</label>
+                  <select 
+                    value={newCustomFieldRequired ? 'yes' : 'no'} 
+                    onChange={(e) => setNewCustomFieldRequired(e.target.value === 'yes')} 
+                    style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '7px', fontSize: '0.9rem' }}
+                  >
+                    <option value="no">Optional (No)</option>
+                    <option value="yes">Required (Yes *)</option>
+                  </select>
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>Placeholder Hint (Optional)</label>
+                <input 
+                  type="text" 
+                  placeholder="E.g., Enter batch code..." 
+                  value={newCustomFieldPlaceholder} 
+                  onChange={(e) => setNewCustomFieldPlaceholder(e.target.value)} 
+                  style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '7px', fontSize: '0.9rem' }} 
+                />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
+                <button type="button" onClick={() => setIsCustomFieldModalOpen(false)} className="btn btn-outline btn-sm">Cancel</button>
+                <button type="submit" className="btn btn-primary btn-sm">Create Field</button>
               </div>
             </form>
           </div>

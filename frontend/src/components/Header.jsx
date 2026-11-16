@@ -786,7 +786,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             </span>
             <span className="top-contact-item">
               <Mail size={14} aria-hidden="true" /> 
-              <a href="mailto:niyanshpharma@gmail.com" aria-label="Email Niyansh Pharma at niyanshpharma@gmail.com">niyanshpharma@gmail.com</a>
+              <a href="mailto:info@niyanshpharma.com" aria-label="Email Niyansh Pharma at info@niyanshpharma.com">info@niyanshpharma.com</a>
             </span>
           </div>
           <div className="top-tagline" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#4ade80', fontWeight: '700', fontSize: '0.88rem', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>

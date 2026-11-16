@@ -1226,7 +1226,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
     const orderNo = `NP-ORD-${Date.now().toString().slice(-6)}`;
     const subject = encodeURIComponent(`B2B Order Booking: ${shopName || 'Retailer'} - ${orderNo}`);
     const body = encodeURIComponent(generateWhatsAppText(orderNo).replace(/\*/g, ''));
-    const mailtoUrl = `mailto:niyanshpharma@gmail.com?cc=${encodeURIComponent(retailerEmail || '')}&subject=${subject}&body=${body}`;
+    const mailtoUrl = `mailto:info@niyanshpharma.com?cc=${encodeURIComponent(retailerEmail || '')}&subject=${subject}&body=${body}`;
     window.location.href = mailtoUrl;
   };
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Briefcase, Upload, Send, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { Briefcase, Upload, Send, CheckCircle2, Clock, AlertCircle, Mail } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 function Career() {
@@ -171,6 +171,26 @@ function Career() {
               </div>
             ))}
           </div>
+
+          {/* Direct HR & Careers Recruitment Desk */}
+          <div className="card" style={{ marginTop: '25px', padding: '22px', display: 'flex', alignItems: 'center', gap: '16px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-light)' }}>
+            <div style={{ backgroundColor: 'rgba(12, 61, 108, 0.08)', padding: '12px', borderRadius: '12px', color: 'var(--primary-blue)', display: 'flex', flexShrink: 0 }}>
+              <Mail size={24} />
+            </div>
+            <div>
+              <div style={{ fontSize: '0.78rem', fontWeight: '800', color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                {language === 'gu' ? 'એચઆર અને ભરતી ડેસ્ક' : language === 'hi' ? 'एचआर एवं भर्ती डेस्क' : 'HR & Recruitment Desk'}
+              </div>
+              <div style={{ fontSize: '1.08rem', fontWeight: '700', marginTop: '3px' }}>
+                <a href="mailto:career@niyanshpharma.com" style={{ color: 'var(--primary-blue)', textDecoration: 'none' }}>
+                  career@niyanshpharma.com
+                </a>
+              </div>
+              <div style={{ fontSize: '0.82rem', color: 'var(--text-medium)', marginTop: '3px' }}>
+                {language === 'gu' ? 'આપનો રેઝ્યુમે અથવા સીવી સીધા આ ઇમેઇલ પર પણ મોકલી શકો છો.' : language === 'hi' ? 'अपना बायोडाटा (CV) सीधे इस ईमेल पर भी भेज सकते हैं।' : 'Send your CV or resume directly to our HR recruitment desk.'}
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Right: Application Form */}
@@ -327,6 +347,13 @@ function Career() {
                   <Send size={16} />
                   {isSubmitting ? t('career.submittingBtn', 'Submitting Application...') : t('career.submitBtn', 'Submit Job Application')}
                 </button>
+
+                <div style={{ textAlign: 'center', marginTop: '14px', fontSize: '0.82rem', color: 'var(--text-medium)' }}>
+                  {language === 'gu' ? 'અથવા રેઝ્યુમે સીધો ઇમેઇલ કરો:' : language === 'hi' ? 'या बायोडाटा सीधे ईमेल करें:' : 'Or email resume directly:'}{' '}
+                  <a href="mailto:career@niyanshpharma.com" style={{ color: 'var(--primary-blue)', fontWeight: '700' }}>
+                    career@niyanshpharma.com
+                  </a>
+                </div>
               </form>
             )}
           </div>

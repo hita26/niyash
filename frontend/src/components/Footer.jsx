@@ -108,7 +108,7 @@ function Footer({ compact = false }) {
               </div>
               <div className="contact-item">
                 <Mail size={18} className="contact-icon" aria-hidden="true" />
-                <a href="mailto:niyanshpharma@gmail.com">niyanshpharma@gmail.com</a>
+                <a href="mailto:info@niyanshpharma.com">info@niyanshpharma.com</a>
               </div>
             </div>
           </div>

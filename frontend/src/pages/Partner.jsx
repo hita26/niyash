@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, CheckCircle2, ShieldCheck, Award, Handshake, AlertCircle, Building, User, Briefcase } from 'lucide-react';
+import { Send, CheckCircle2, ShieldCheck, Award, Handshake, AlertCircle, Building, User, Briefcase, Mail } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 function Partner() {
@@ -150,6 +150,26 @@ function Partner() {
                 <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem' }}>
                   {t('partner.adv4Desc', 'Direct assistance from a dedicated pharmaceutical trade representative for your supply needs.')}
                 </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Direct Business Partnership Desk */}
+          <div className="card" style={{ marginTop: '25px', padding: '22px', display: 'flex', alignItems: 'center', gap: '16px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-light)' }}>
+            <div style={{ backgroundColor: 'rgba(12, 61, 108, 0.08)', padding: '12px', borderRadius: '12px', color: 'var(--primary-blue)', display: 'flex', flexShrink: 0 }}>
+              <Mail size={24} />
+            </div>
+            <div>
+              <div style={{ fontSize: '0.78rem', fontWeight: '800', color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                {language === 'gu' ? 'બિઝનેસ જોડાણ ડેસ્ક' : language === 'hi' ? 'बिजनेस साझेदारी डेस्क' : 'Business Partnership Desk'}
+              </div>
+              <div style={{ fontSize: '1.08rem', fontWeight: '700', marginTop: '3px' }}>
+                <a href="mailto:info@niyanshpharma.com" style={{ color: 'var(--primary-blue)', textDecoration: 'none' }}>
+                  info@niyanshpharma.com
+                </a>
+              </div>
+              <div style={{ fontSize: '0.82rem', color: 'var(--text-medium)', marginTop: '3px' }}>
+                {language === 'gu' ? 'સંસ્થાકીય સપ્લાય, વિતરણ ભાગીદારી અને હોસ્પિટલ જોડાણ માટે.' : language === 'hi' ? 'संस्थागत आपूर्ति, वितरण साझेदारी और अस्पताल सहयोग के लिए।' : 'For institutional supply, distribution partnerships & hospital tenders.'}
               </div>
             </div>
           </div>
@@ -345,6 +365,13 @@ function Partner() {
                 <Send size={16} />
                 {isSubmitting ? t('partner.submittingBtn', 'Submitting...') : t('partner.submitBtn', 'Submit Business Registration')}
               </button>
+
+              <div style={{ textAlign: 'center', marginTop: '14px', fontSize: '0.82rem', color: 'var(--text-medium)' }}>
+                {language === 'gu' ? 'અથવા સીધો ઇમેઇલ કરો:' : language === 'hi' ? 'या सीधे ईमेल करें:' : 'Or email directly:'}{' '}
+                <a href="mailto:info@niyanshpharma.com" style={{ color: 'var(--primary-blue)', fontWeight: '700' }}>
+                  info@niyanshpharma.com
+                </a>
+              </div>
             </form>
           )}
         </div>

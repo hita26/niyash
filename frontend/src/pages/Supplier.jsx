@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, CheckCircle2, Factory, ShieldCheck, TrendingUp, AlertCircle, Upload, FileSpreadsheet, FileText, X, Check } from 'lucide-react';
+import { Send, CheckCircle2, Factory, ShieldCheck, TrendingUp, AlertCircle, Upload, FileSpreadsheet, FileText, X, Check, Mail } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 function Supplier() {
@@ -230,6 +230,26 @@ function Supplier() {
                 <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem' }}>
                   {t('supplier.benefit3Desc', 'WHO-GDP compliant storage facilities with strictly controlled temperature and humidity parameters.')}
                 </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Direct Supplier Sales Desk */}
+          <div className="card" style={{ marginTop: '25px', padding: '22px', display: 'flex', alignItems: 'center', gap: '16px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-light)' }}>
+            <div style={{ backgroundColor: 'rgba(12, 61, 108, 0.08)', padding: '12px', borderRadius: '12px', color: 'var(--primary-blue)', display: 'flex', flexShrink: 0 }}>
+              <Mail size={24} />
+            </div>
+            <div>
+              <div style={{ fontSize: '0.78rem', fontWeight: '800', color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                {language === 'gu' ? 'સપ્લાયર અને સેલ્સ પ્રોક્યોરમેન્ટ ડેસ્ક' : language === 'hi' ? 'आपूर्तिकर्ता और सेल्स खरीद डेस्क' : 'Supplier & Sales Procurement Desk'}
+              </div>
+              <div style={{ fontSize: '1.08rem', fontWeight: '700', marginTop: '3px' }}>
+                <a href="mailto:sales@niyanshpharma.com" style={{ color: 'var(--primary-blue)', textDecoration: 'none' }}>
+                  sales@niyanshpharma.com
+                </a>
+              </div>
+              <div style={{ fontSize: '0.82rem', color: 'var(--text-medium)', marginTop: '3px' }}>
+                {language === 'gu' ? 'પ્રોડક્ટ પોર્ટફોલિયો અને સપ્લાય ઓફર સીધા ઇમેઇલ કરવા માટે.' : language === 'hi' ? 'उत्पाद पोर्टफोलियो और आपूर्ति प्रस्ताव सीधे ईमेल करने के लिए।' : 'Direct inquiries and product rate sheets from pharma manufacturers.'}
               </div>
             </div>
           </div>
@@ -484,6 +504,13 @@ function Supplier() {
                 <Send size={16} />
                 {isSubmitting ? t('supplier.submittingBtn', 'Registering...') : t('supplier.submitBtn', 'Register as Supplier')}
               </button>
+
+              <div style={{ textAlign: 'center', marginTop: '14px', fontSize: '0.82rem', color: 'var(--text-medium)' }}>
+                {language === 'gu' ? 'અથવા સીધો ઇમેઇલ કરો:' : language === 'hi' ? 'या सीधे ईमेल करें:' : 'Or email directly:'}{' '}
+                <a href="mailto:sales@niyanshpharma.com" style={{ color: 'var(--primary-blue)', fontWeight: '700' }}>
+                  sales@niyanshpharma.com
+                </a>
+              </div>
             </form>
           )}
         </div>

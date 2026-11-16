@@ -121,7 +121,7 @@ function Contact() {
                   <div>
                     <h3 style={{ fontSize: '1.05rem', marginBottom: '4px' }}>{t('contact.emailUs', 'Official Email')}</h3>
                     <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem' }}>
-                      {language === 'gu' ? 'ઇમેઇલ:' : language === 'hi' ? 'ईमेल:' : 'Official:'} <a href="mailto:niyanshpharma@gmail.com" style={{ color: 'var(--text-dark)', fontWeight: '600' }}>niyanshpharma@gmail.com</a>
+                      {language === 'gu' ? 'ઇમેઇલ:' : language === 'hi' ? 'ईमेल:' : 'Official:'} <a href="mailto:info@niyanshpharma.com" style={{ color: 'var(--text-dark)', fontWeight: '600' }}>info@niyanshpharma.com</a>
                     </p>
                   </div>
                 </li>
@@ -131,9 +131,16 @@ function Contact() {
                     <Clock size={22} />
                   </div>
                   <div>
-                    <h3 style={{ fontSize: '1.05rem', marginBottom: '4px' }}>{t('contact.workingHours', 'Operating Hours')}</h3>
-                    <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem' }}>
-                      {t('contact.hoursValue', 'Monday – Saturday: 9:00 AM – 8:30 PM (Sunday Closed)')}
+                    <h3 style={{ fontSize: '1.05rem', marginBottom: '4px' }}>{t('contact.workingHours', 'Business Hours')}</h3>
+                    <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem', marginBottom: '3px', lineHeight: '1.4' }}>
+                      <strong>{t('contact.hoursLabel', 'Business Hours')}:</strong> 9:00 AM – 9:00 PM
+                    </p>
+                    <p style={{ color: 'var(--text-light)', fontSize: '0.82rem', marginBottom: '6px' }}>
+                      ({language === 'gu' ? 'સોમવાર – શનિવાર, રવિવાર રજા' : language === 'hi' ? 'सोमवार – शनिवार, रविवार बंद' : 'Monday – Saturday, Sunday Closed'})
+                    </p>
+                    <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px', lineHeight: '1.4' }}>
+                      <span style={{ display: 'inline-block', width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#f59e0b' }}></span>
+                      <strong>{t('contact.lunchBreakLabel', 'Lunch Break')}:</strong> 2:00 PM – 4:00 PM
                     </p>
                   </div>
                 </li>

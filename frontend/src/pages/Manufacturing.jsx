@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, CheckCircle2, ShieldAlert, CheckSquare, Layers, AlertCircle } from 'lucide-react';
+import { Send, CheckCircle2, ShieldAlert, CheckSquare, Layers, AlertCircle, Mail, Phone } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 function Manufacturing() {
@@ -126,6 +126,26 @@ function Manufacturing() {
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Direct Production Contact Desk */}
+          <div className="card" style={{ marginTop: '25px', padding: '22px', display: 'flex', alignItems: 'center', gap: '16px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-light)' }}>
+            <div style={{ backgroundColor: 'rgba(12, 61, 108, 0.08)', padding: '12px', borderRadius: '12px', color: 'var(--primary-blue)', display: 'flex', flexShrink: 0 }}>
+              <Mail size={24} />
+            </div>
+            <div>
+              <div style={{ fontSize: '0.78rem', fontWeight: '800', color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                {language === 'gu' ? 'ઉત્પાદન સંપર્ક ડેસ્ક' : language === 'hi' ? 'उत्पादन संपर्क डेस्क' : 'Manufacturing Contact Desk'}
+              </div>
+              <div style={{ fontSize: '1.08rem', fontWeight: '700', marginTop: '3px' }}>
+                <a href="mailto:production@niyanshpharma.com" style={{ color: 'var(--primary-blue)', textDecoration: 'none' }}>
+                  production@niyanshpharma.com
+                </a>
+              </div>
+              <div style={{ fontSize: '0.82rem', color: 'var(--text-medium)', marginTop: '3px' }}>
+                {language === 'gu' ? 'કોન્ટ્રાક્ટ ઉત્પાદન અને થર્ડ-પાર્ટી ઇન્ક્વાયરી માટે સીધો ઇમેઇલ કરો.' : language === 'hi' ? 'अनुबंध विनिर्माण और थर्ड-पार्टी पूछताछ के लिए सीधे ईमेल करें।' : 'Direct email for contract manufacturing & formulation enquiries.'}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -275,6 +295,13 @@ function Manufacturing() {
                   <Send size={16} />
                   {isSubmitting ? t('common.loading', 'Sending Request...') : t('manufacturing.submitBtn', 'Submit Manufacturing Enquiry')}
                 </button>
+
+                <div style={{ textAlign: 'center', marginTop: '14px', fontSize: '0.82rem', color: 'var(--text-medium)' }}>
+                  {language === 'gu' ? 'અથવા સીધો ઇમેઇલ કરો:' : language === 'hi' ? 'या सीधे ईमेल करें:' : 'Or email directly:'}{' '}
+                  <a href="mailto:production@niyanshpharma.com" style={{ color: 'var(--primary-blue)', fontWeight: '700' }}>
+                    production@niyanshpharma.com
+                  </a>
+                </div>
               </form>
             )}
           </div>

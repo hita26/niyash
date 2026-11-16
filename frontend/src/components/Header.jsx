@@ -195,7 +195,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             </div>
 
             {/* Center: Fast Wholesale Medicine Search */}
-            <div ref={searchContainerRef} className="search-wrapper" style={{ position: 'relative', flex: '1 1 320px', maxWidth: '540px' }}>
+            <div ref={searchContainerRef} className="search-wrapper" style={{ position: 'relative', flex: '1 1 220px', minWidth: 0, maxWidth: '540px' }}>
               <form 
                 onSubmit={handleSearchSubmit} 
                 style={{ 
@@ -816,7 +816,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
           </Link>
 
           {/* Search Form with Typeahead */}
-          <div className="search-wrapper" style={{ position: 'relative', flex: '1 1 300px', maxWidth: '580px' }}>
+          <div className="search-wrapper" style={{ position: 'relative', flex: '1 1 200px', minWidth: 0, maxWidth: '580px' }}>
             <form className="search-bar" onSubmit={handleSearchSubmit} role="search" style={{ position: 'relative' }}>
               <input
                 type="text"
@@ -1224,12 +1224,17 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               right: 0, 
               bottom: 0, 
               width: 'min(88vw, 380px)', 
-              height: '100vh',
+              height: '100dvh',
+              maxHeight: '100dvh',
               backgroundColor: 'var(--bg-card)', 
               color: 'var(--text-dark)',
               zIndex: 9999, 
               overflowY: 'auto', 
-              padding: '20px 18px 40px', 
+              WebkitOverflowScrolling: 'touch',
+              paddingTop: 'max(20px, env(safe-area-inset-top, 20px))', 
+              paddingBottom: 'max(40px, calc(30px + env(safe-area-inset-bottom, 0px)))', 
+              paddingLeft: 'max(18px, env(safe-area-inset-left, 18px))',
+              paddingRight: 'max(18px, env(safe-area-inset-right, 18px))',
               display: 'flex', 
               flexDirection: 'column', 
               gap: '12px',

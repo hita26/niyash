@@ -1495,7 +1495,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
   };
 
   return (
-    <div style={{ backgroundColor: 'var(--bg-main)', minHeight: '100vh', paddingBottom: '90px' }}>
+    <div className="quickorder-page-wrapper" style={{ backgroundColor: 'var(--bg-main)', minHeight: '100vh' }}>
       {/* Top Breadcrumb & Quick Portal Hero */}
       <div
         style={{

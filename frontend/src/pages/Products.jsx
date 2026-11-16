@@ -598,7 +598,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
             </div>
           ) : (
             <>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: '18px' }}>
+              <div className="responsive-product-grid">
                 {products.map((product) => (
                   <ProductCard key={product._id} product={product} addToCart={addToCart} />
                 ))}

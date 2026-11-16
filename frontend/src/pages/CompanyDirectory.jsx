@@ -241,7 +241,7 @@ function CompanyDirectory() {
             </p>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '24px' }}>
+          <div className="responsive-company-grid">
             {companies.map((company) => {
               const targetUrl = `/companies/${company.slug || company._id}`;
 

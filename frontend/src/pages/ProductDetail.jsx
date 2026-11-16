@@ -818,7 +818,7 @@ function ProductDetail({ addToCart }) {
               </Link>
             </div>
             
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 260px), 1fr))', gap: '20px' }}>
+            <div className="responsive-product-grid">
               {related.map((relProd) => (
                 <ProductCard key={relProd._id} product={relProd} addToCart={addToCart} />
               ))}

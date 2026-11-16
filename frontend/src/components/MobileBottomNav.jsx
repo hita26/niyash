@@ -37,15 +37,18 @@ function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
         bottom: 0,
         left: 0,
         right: 0,
-        height: '62px',
-        backgroundColor: '#ffffff',
-        borderTop: '1px solid #e2e8f0',
+        height: 'calc(60px + env(safe-area-inset-bottom, 0px))',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        backgroundColor: 'var(--bg-card, #ffffff)',
+        borderTop: '1px solid var(--border-light, #e2e8f0)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-around',
         zIndex: 9990,
         boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.08)',
-        padding: '0 8px',
+        paddingLeft: 'max(8px, env(safe-area-inset-left, 0px))',
+        paddingRight: 'max(8px, env(safe-area-inset-right, 0px))',
+        boxSizing: 'border-box'
       }}
     >
       {/* If in B2B Chemist Workstation mode, display specialized B2B quick tabs */}

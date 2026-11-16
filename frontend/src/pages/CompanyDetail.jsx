@@ -322,7 +322,7 @@ function CompanyDetail({ addToCart }) {
           </div>
         ) : viewMode === 'grid' ? (
           /* GRID VIEW */
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 240px), 1fr))', gap: '20px' }}>
+          <div className="responsive-product-grid">
             {filteredProducts.map((p) => {
               const photoUrl = (p.images && p.images.length > 0) ? p.images[0] : (p.imageUrl || '');
               const isAdded = addedItemIds.has(p._id);

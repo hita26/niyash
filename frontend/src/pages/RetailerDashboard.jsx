@@ -494,12 +494,7 @@ export default function RetailerDashboard() {
       <main style={{ maxWidth: '1240px', margin: '0 auto', padding: '24px 16px' }}>
 
         {/* 4 Financial & Operational Metric Cards - No stuck "..." */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-          gap: '16px',
-          marginBottom: '28px'
-        }}>
+        <div className="dashboard-metrics-grid" style={{ marginBottom: '28px' }}>
           
           {/* Card 1: Outstanding Due Balance */}
           <div style={{

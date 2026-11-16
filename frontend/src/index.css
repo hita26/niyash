@@ -159,7 +159,7 @@ button {
 
 @media (max-width: 768px) {
   .quickorder-mobile-sticky-bar {
-    bottom: 62px !important;
+    bottom: calc(60px + env(safe-area-inset-bottom, 0px)) !important;
   }
   .container {
     padding: 0 16px;
@@ -689,6 +689,8 @@ button {
   width: 100%;
   max-width: 450px;
   height: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
   background-color: #ffffff;
   box-shadow: -10px 0 40px rgba(0,0,0,0.15);
   display: flex;
@@ -697,7 +699,7 @@ button {
 }
 
 .sidebar-header {
-  padding: 20px;
+  padding: max(16px, env(safe-area-inset-top, 16px)) 20px 16px;
   border-bottom: 1px solid var(--border-light);
   display: flex;
   justify-content: space-between;
@@ -707,11 +709,12 @@ button {
 .sidebar-body {
   flex: 1;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 20px;
 }
 
 .sidebar-footer {
-  padding: 20px;
+  padding: 16px 20px max(16px, calc(15px + env(safe-area-inset-bottom, 0px)));
   border-top: 1px solid var(--border-light);
   background-color: #f8fafc;
 }
@@ -2462,20 +2465,53 @@ body.dark-theme {
 
 
 /* ========================================================
-   COMPREHENSIVE MULTILINGUAL & 100% RESPONSIVE SUITE
-   Supports: 320px, 375px, 425px, 768px, 1024px, 1366px, 1920px
+   ADVANCED DEVICE-SPECIFIC RESPONSIVE WEBSITE DESIGN SUITE
+   - Small Phones (320px–360px): iPhone SE 1st gen, Galaxy Mini/Fold cover
+   - Compact Phones (375px): iPhone SE 2nd/3rd gen, iPhone 12/13 Mini
+   - Standard Phones (390px–393px): iPhone 12/13/14/15/16, Galaxy S21-S24
+   - Large Phones (412px–430px): iPhone Pro Max, Pixel, Galaxy Ultra, OnePlus
+   - Tablets (768px–1024px): iPad Mini, iPad 10.2", Air, Pro 11", Galaxy Tab
+   - Laptops (1024px–1440px): MacBooks, 1080p Laptops
+   - Desktops (1440px–1920px): iMacs, 2K/FHD Displays
+   - Ultrawide Displays (1920px–2560px+): 21:9 & 32:9 Superwide Monitors
    ======================================================== */
 
-/* Viewport & Horizontal Overflow Prevention */
+/* Root Device & Safe Area Tokens */
+:root {
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+}
+
+/* Viewport & Horizontal Overflow Lock */
 html, body {
   width: 100%;
   max-width: 100vw;
   overflow-x: hidden !important;
   position: relative;
   -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
-/* Indic Typography Safeguards - Prevent Matra Diacritic Clipping & Overflow */
+/* Fluid Typography Tokens via clamp() */
+h1 {
+  font-size: clamp(1.45rem, 3.8vw, 2.3rem);
+  line-height: 1.25;
+}
+h2 {
+  font-size: clamp(1.22rem, 3.2vw, 1.85rem);
+  line-height: 1.3;
+}
+h3 {
+  font-size: clamp(1.05rem, 2.4vw, 1.45rem);
+  line-height: 1.35;
+}
+.section-title {
+  font-size: clamp(1.5rem, 3.6vw, 2.2rem);
+}
+
+/* Multilingual Typography Safeguards: Gujarati & Hindi Matra Clipping Prevention */
 html[lang="gu"], html[lang="hi"] {
   word-break: normal;
   overflow-wrap: break-word;
@@ -2486,91 +2522,166 @@ html[lang="gu"] input, html[lang="hi"] input,
 html[lang="gu"] select, html[lang="hi"] select,
 html[lang="gu"] .badge, html[lang="hi"] .badge,
 html[lang="gu"] .nav-link, html[lang="hi"] .nav-link {
-  line-height: 1.5;
+  line-height: 1.55;
   padding-top: max(4px, 0.35em);
   padding-bottom: max(4px, 0.35em);
 }
 
-/* Fluid Responsive Typography */
-@media (max-width: 480px) {
-  html {
-    font-size: 15px;
-  }
+/* Adaptive E-Commerce Product Grid (1 to 6 columns across devices) */
+.responsive-product-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
 
-  .container {
-    padding-left: 12px !important;
-    padding-right: 12px !important;
-  }
-
-  .section {
-    padding: 40px 0 !important;
-  }
-
-  .section-title {
-    font-size: 1.6rem !important;
-    margin-bottom: 10px !important;
-  }
-
-  .detail-layout {
-    padding: 14px !important;
-    gap: 16px !important;
-  }
-
-  /* Full-width touch buttons on small screens */
-  .product-detail-actions button {
-    flex: 1 1 100% !important;
-    min-height: 48px !important;
-  }
-
-  /* Modals full width with safe margin */
-  .modal-dialog,
-  [role="dialog"] {
-    width: 95vw !important;
-    max-width: 95vw !important;
-    margin: 8px auto !important;
-    border-radius: 12px !important;
+@media (min-width: 360px) {
+  .responsive-product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
   }
 }
 
-/* 320px Small Mobile Precision Rules */
-@media (max-width: 360px) {
-  html {
-    font-size: 14px;
-  }
-
-  .container {
-    padding-left: 8px !important;
-    padding-right: 8px !important;
-  }
-
-  h1 {
-    font-size: 1.4rem !important;
-  }
-
-  h2 {
-    font-size: 1.25rem !important;
-  }
-
-  h3 {
-    font-size: 1.1rem !important;
-  }
-
-  .card {
-    padding: 12px !important;
-    border-radius: 10px !important;
+@media (min-width: 640px) {
+  .responsive-product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
   }
 }
 
-/* Responsive Table Wrapper with Touch Momentum */
+@media (min-width: 768px) {
+  .responsive-product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .responsive-product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .responsive-product-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .responsive-product-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (min-width: 1920px) {
+  .responsive-product-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 22px;
+  }
+}
+
+/* Adaptive Dashboard Metrics Grid */
+.dashboard-metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+@media (min-width: 540px) {
+  .dashboard-metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-metrics-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+
+/* Adaptive Company Directory Grid */
+.responsive-company-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 500px) {
+  .responsive-company-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+}
+
+@media (min-width: 860px) {
+  .responsive-company-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .responsive-company-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 22px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .responsive-company-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 24px;
+  }
+}
+
+/* Quick Order Page Wrapper & Sticky Action Bar Safe Area Offsets */
+.quickorder-page-wrapper {
+  padding-bottom: 90px;
+}
+
+@media (max-width: 768px) {
+  .quickorder-page-wrapper {
+    padding-bottom: calc(170px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .quickorder-mobile-sticky-bar {
+    bottom: calc(60px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: 8px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 992px) {
+  .quickorder-mobile-sticky-bar {
+    bottom: 0px !important;
+    padding-bottom: max(10px, env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Smooth Table Touch Scrolling with Legibility Safeguards */
 .table-responsive {
   width: 100%;
   overflow-x: auto !important;
   -webkit-overflow-scrolling: touch;
   margin-bottom: 12px;
+  position: relative;
+  scrollbar-width: thin;
+}
+
+.table-responsive table {
+  min-width: 650px;
 }
 
 .table-responsive::-webkit-scrollbar {
   height: 6px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background: var(--bg-main);
 }
 
 .table-responsive::-webkit-scrollbar-thumb {
@@ -2578,7 +2689,7 @@ html[lang="gu"] .nav-link, html[lang="hi"] .nav-link {
   border-radius: 3px;
 }
 
-/* Touch targets: 44px minimum touch target on mobile */
+/* Mobile & Touch Target Ergonomics: >= 44px Minimum Tap Targets */
 @media (pointer: coarse) or (max-width: 768px) {
   button, 
   .btn,
@@ -2594,7 +2705,65 @@ html[lang="gu"] .nav-link, html[lang="hi"] .nav-link {
   }
 }
 
-/* Tablet (768px - 1024px) Optimizations */
+/* Modals & Dialogs Dynamic Viewport & Safe Area Rules */
+.modal-dialog,
+[role="dialog"] {
+  max-height: min(92vh, 92dvh) !important;
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  .modal-dialog,
+  [role="dialog"] {
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+    margin: 10px auto !important;
+    padding: 16px !important;
+    border-radius: 14px !important;
+  }
+
+  .container {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .section {
+    padding: 40px 0 !important;
+  }
+
+  .detail-layout {
+    padding: 14px !important;
+    gap: 16px !important;
+  }
+
+  .product-detail-actions button {
+    flex: 1 1 100% !important;
+    min-height: 48px !important;
+  }
+}
+
+/* 320px–360px Ultra-Compact Mobile Precision Rules (iPhone SE 1st gen, Fold Cover) */
+@media (max-width: 360px) {
+  html {
+    font-size: 13.5px;
+  }
+
+  .container {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  .card {
+    padding: 10px !important;
+    border-radius: 10px !important;
+  }
+
+  .responsive-product-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Tablet (768px - 1024px) Optimizations (iPad Mini, iPad 10.2", Galaxy Tab) */
 @media (min-width: 768px) and (max-width: 1024px) {
   .container {
     padding-left: 20px;
@@ -2610,13 +2779,31 @@ html[lang="gu"] .nav-link, html[lang="hi"] .nav-link {
   }
 }
 
-/* Large Displays (1920px+) */
+/* Desktop & Laptop Content Balancing (1440px+) */
+@media (min-width: 1440px) {
+  .container {
+    max-width: 1400px;
+  }
+}
+
+/* Large Displays (1920px+ Full HD / 2K) */
 @media (min-width: 1920px) {
   .container {
     max-width: 1600px !important;
   }
 
   html {
-    font-size: 17px;
+    font-size: 16.5px;
+  }
+}
+
+/* Ultrawide Displays (2560px+ 21:9 & 32:9 Superwide) */
+@media (min-width: 2560px) {
+  .container {
+    max-width: 1800px !important;
+  }
+
+  html {
+    font-size: 17.5px;
   }
 }

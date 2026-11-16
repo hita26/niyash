@@ -1,6 +1,7 @@
 export const en = {
   "nav": {
     "home": "Home",
+    "ourProducts": "Our Products",
     "products": "All Products",
     "companies": "Companies",
     "categories": "Categories",

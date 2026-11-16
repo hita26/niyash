@@ -121,6 +121,11 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isOurProduct: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
     isActive: {
       type: Boolean,
       default: true,

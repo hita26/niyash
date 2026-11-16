@@ -266,6 +266,7 @@ router.get('/', async (req, res) => {
       maxPrice,
       minPrice,
       featured,
+      isOurProduct,
       includeInactive,
     } = req.query;
 
@@ -279,6 +280,11 @@ router.get('/', async (req, res) => {
     // Featured filter
     if (featured === 'true' || featured === true) {
       query.featured = true;
+    }
+
+    // Our Products filter
+    if (isOurProduct === 'true' || isOurProduct === true) {
+      query.isOurProduct = true;
     }
 
     // Search filter across text fields
@@ -433,6 +439,7 @@ router.post('/', protect, adminOnly, async (req, res) => {
       images,
       description,
       featured,
+      isOurProduct,
       isActive,
       qualitySpecs,
       gstRate,
@@ -484,6 +491,7 @@ router.post('/', protect, adminOnly, async (req, res) => {
       images: imagesArr,
       description: (description && description.trim()) || '',
       featured: Boolean(featured),
+      isOurProduct: Boolean(isOurProduct),
       isActive: isActive !== undefined ? Boolean(isActive) : true,
       qualitySpecs: (qualitySpecs && qualitySpecs.trim()) || 'WHO-GMP Certified',
       gstRate: parseFloat(gstRate) || 12,
@@ -628,6 +636,7 @@ router.post('/bulk', protect, adminOnly, async (req, res) => {
           images,
           description: (p.description && p.description.trim()) || '',
           featured: Boolean(p.featured),
+          isOurProduct: Boolean(p.isOurProduct),
           isActive: p.isActive !== undefined ? Boolean(p.isActive) : true,
         };
 

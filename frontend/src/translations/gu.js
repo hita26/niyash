@@ -1,6 +1,7 @@
 export const gu = {
   "nav": {
     "home": "હોમ",
+    "ourProducts": "અમારી પ્રોડક્ટ્સ",
     "products": "તમામ પ્રોડક્ટ્સ",
     "companies": "કંપનીઓ",
     "categories": "કેટેગરીઝ",

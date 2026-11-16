@@ -37,7 +37,7 @@
     <script>
       (function() {
         try {
-          var saved = localStorage.getItem('niyansh_theme');
+          var saved = localStorage.getItem('niyansh_theme') || localStorage.getItem('theme');
           var theme = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
           document.documentElement.setAttribute('data-theme', theme);
           if (theme === 'dark') {
@@ -49,10 +49,10 @@
         } catch (e) {}
       })();
     </script>
-    <script type="module" crossorigin src="/assets/index-CpU0EnKT.js"></script>
+    <script type="module" crossorigin src="/assets/index-B3oYCPn8.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/vendor-core-BqIAhyqm.js">
     <link rel="modulepreload" crossorigin href="/assets/vendor-icons-RmuzAQbd.js">
-    <link rel="stylesheet" crossorigin href="/assets/index-BaNZqmIZ.css">
+    <link rel="stylesheet" crossorigin href="/assets/index-CxxRSMgM.css">
   </head>
   <body>
     <div id="root"></div>

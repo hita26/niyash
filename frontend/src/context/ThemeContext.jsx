@@ -6,7 +6,7 @@ export function ThemeProvider({ children }) {
   // Initialize theme from LocalStorage, falling back to system preference or 'light'
   const [theme, setTheme] = useState(() => {
     try {
-      const saved = localStorage.getItem('niyansh_theme');
+      const saved = localStorage.getItem('niyansh_theme') || localStorage.getItem('theme');
       if (saved === 'dark' || saved === 'light') return saved;
       if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
         return 'dark';
@@ -21,6 +21,7 @@ export function ThemeProvider({ children }) {
   useEffect(() => {
     try {
       localStorage.setItem('niyansh_theme', theme);
+      localStorage.setItem('theme', theme);
     } catch (e) {
       console.error('Error saving theme to localStorage:', e);
     }
@@ -63,7 +64,7 @@ export function ThemeProvider({ children }) {
     try {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       const handleSystemThemeChange = (e) => {
-        const saved = localStorage.getItem('niyansh_theme');
+        const saved = localStorage.getItem('niyansh_theme') || localStorage.getItem('theme');
         if (!saved) {
           setTheme(e.matches ? 'dark' : 'light');
         }

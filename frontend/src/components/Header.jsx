@@ -1295,9 +1295,9 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               <LanguageSelector variant="pill-buttons" />
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '10px 12px', borderRadius: '8px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', borderRadius: '8px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)' }}>
               <span style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>{t('nav.themeMode', 'Theme Mode')}</span>
-              <ThemeToggle variant="drawer" />
+              <ThemeToggle />
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>

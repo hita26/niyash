@@ -1878,7 +1878,115 @@ body.dark-theme {
   background: #334155;
 }
 
-/* Responsive Theme Switcher Control */
+/* =========================================================================
+   SINGLE-ICON RESPONSIVE THEME TOGGLE (Sun ☀️ / Moon 🌙)
+   ========================================================================= */
+@keyframes themeRotateIn {
+  from {
+    transform: rotate(-120deg) scale(0.6);
+    opacity: 0;
+  }
+  to {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+.theme-toggle-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  min-height: 42px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-light, #cbd5e1);
+  background-color: var(--bg-surface-alt, #f1f5f9);
+  color: var(--primary-blue, #0c3d6c);
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  outline: none;
+  box-shadow: 0 2px 6px rgba(12, 61, 108, 0.08);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), 
+              background-color 0.25s ease, 
+              border-color 0.25s ease, 
+              box-shadow 0.25s ease,
+              color 0.25s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+}
+
+.theme-toggle-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 14px rgba(12, 61, 108, 0.16);
+  border-color: var(--primary-blue, #1b75bc);
+}
+
+.theme-toggle-btn:active {
+  transform: scale(0.92);
+}
+
+.theme-toggle-btn:focus-visible {
+  outline: 2px solid var(--accent-blue, #0284c7);
+  outline-offset: 2px;
+}
+
+.theme-toggle-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.25s ease;
+  animation: themeRotateIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.theme-toggle-icon.rotating {
+  transform: rotate(360deg) scale(1.15);
+}
+
+/* Light Mode: Moon Icon Styling */
+.theme-toggle-btn[data-theme-state="light"] {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #0c3d6c;
+}
+.theme-toggle-btn[data-theme-state="light"]:hover {
+  background-color: #e2e8f0;
+  border-color: #0c3d6c;
+  color: #0284c7;
+}
+
+/* Dark Mode: Sun Icon Glowing Styling */
+.theme-toggle-btn[data-theme-state="dark"],
+[data-theme="dark"] .theme-toggle-btn {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #fbbf24 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+.theme-toggle-btn[data-theme-state="dark"]:hover,
+[data-theme="dark"] .theme-toggle-btn:hover {
+  background-color: #243049 !important;
+  border-color: #f59e0b !important;
+  color: #f59e0b !important;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.35) !important;
+}
+
+/* Mobile & Touch Target Ergonomics */
+@media (max-width: 768px) {
+  .theme-toggle-btn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+/* Legacy Theme Switcher Support (Fallback) */
 .theme-segmented-switch {
   user-select: none;
 }
@@ -1897,15 +2005,6 @@ body.dark-theme {
 .theme-segmented-switch .theme-segment-btn:focus-visible {
   outline: 2px solid var(--accent-blue);
   outline-offset: 1px;
-}
-
-@media (max-width: 520px) {
-  .theme-segmented-switch.header-control .theme-btn-label {
-    display: none;
-  }
-  .theme-segmented-switch.header-control .theme-segment-btn {
-    padding: 5px 8px !important;
-  }
 }
 
 
@@ -2760,6 +2859,27 @@ html[lang="gu"] .nav-link, html[lang="hi"] .nav-link {
 
   .responsive-product-grid {
     grid-template-columns: 1fr;
+  }
+
+  .header-actions {
+    gap: 5px !important;
+  }
+
+  .theme-toggle-btn {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+  }
+
+  .cart-icon-btn {
+    width: 38px !important;
+    height: 38px !important;
+  }
+
+  .mobile-menu-btn {
+    width: 38px !important;
+    height: 38px !important;
   }
 }
 

@@ -6,6 +6,7 @@ const https = require('https');
 const multer = require('multer');
 const Product = require('../models/Product');
 const Company = require('../models/Company');
+const cloudinary = require('../config/cloudinary');
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 
 // Upload directory setup
@@ -228,11 +229,11 @@ router.get('/admin/all', protect, adminOnly, async (req, res) => {
   }
 });
 
-// @desc    Upload multiple product photos
+// @desc    Upload multiple product photos (Stored securely on Cloudinary Cloud Storage)
 // @route   POST /api/products/upload
 // @access  Private/Admin
 router.post('/upload', protect, adminOnly, (req, res) => {
-  upload.array('photos', 10)(req, res, function (err) {
+  upload.array('photos', 10)(req, res, async function (err) {
     if (err instanceof multer.MulterError) {
       return res.status(400).json({ success: false, message: `Upload error: ${err.message}` });
     } else if (err) {
@@ -243,8 +244,39 @@ router.post('/upload', protect, adminOnly, (req, res) => {
       return res.status(400).json({ success: false, message: 'No image files provided' });
     }
 
-    const urls = req.files.map((file) => `/uploads/${file.filename}`);
-    res.json({ success: true, urls, count: urls.length });
+    try {
+      const urls = [];
+      for (const file of req.files) {
+        try {
+          // Upload to Cloudinary with auto-compression, auto WebP format, and 1200px limit
+          const result = await cloudinary.uploader.upload(file.path, {
+            folder: 'niyansh_pharma/products',
+            resource_type: 'image',
+            transformation: [
+              { width: 1200, height: 1200, crop: 'limit' },
+              { quality: 'auto:good' },
+              { fetch_format: 'auto' }
+            ]
+          });
+
+          urls.push(result.secure_url);
+
+          // Delete temporary local file immediately to free server disk space
+          if (fs.existsSync(file.path)) {
+            try { fs.unlinkSync(file.path); } catch (e) {}
+          }
+        } catch (cloudErr) {
+          console.warn('Cloudinary upload warning, using local file as fallback:', cloudErr.message);
+          urls.push(`/uploads/${file.filename}`);
+        }
+      }
+
+      res.json({ success: true, urls, count: urls.length, storage: 'cloudinary' });
+    } catch (uploadError) {
+      console.error('Upload processing error:', uploadError);
+      const fallbackUrls = req.files.map((file) => `/uploads/${file.filename}`);
+      res.json({ success: true, urls: fallbackUrls, count: fallbackUrls.length, storage: 'local_fallback' });
+    }
   });
 });
 

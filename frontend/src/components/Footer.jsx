@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, Mail, MapPin, Send, Facebook, Twitter, Instagram, Linkedin, CheckCircle2, Lock, ShieldCheck } from 'lucide-react';
+import { Phone, Mail, MapPin, Send, Facebook, Twitter, Instagram, Linkedin, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 function Footer({ compact = false }) {
@@ -72,6 +72,37 @@ function Footer({ compact = false }) {
   return (
     <footer className="footer" role="contentinfo">
       <div className="container">
+        {/* Top Contact Strip inside Footer */}
+        <div style={{
+          borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
+          padding: '16px 0 20px',
+          marginBottom: '32px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '16px',
+          fontSize: '0.88rem'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#93c5fd' }}>
+              <Phone size={14} aria-hidden="true" /> 
+              <a href="tel:+919909923130" style={{ color: '#ffffff', fontWeight: '600' }} aria-label="Call Niyansh Pharma at +91 99099 23130">+91 99099 23130</a>
+            </span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#93c5fd' }}>
+              <Mail size={14} aria-hidden="true" /> 
+              <a href="mailto:info@niyanshpharma.com" style={{ color: '#ffffff', fontWeight: '600' }} aria-label="Email Niyansh Pharma at info@niyanshpharma.com">info@niyanshpharma.com</a>
+            </span>
+          </div>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#4ade80', fontWeight: '700', fontSize: '0.9rem', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>
+            <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#4ade80', display: 'inline-block' }}></span>
+            {t('topbar.tagline', 'Care • Quality • Trust')}
+          </div>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#cbd5e1' }}>
+            <span>📍 {t('topbar.location', 'Rajkot, Gujarat')}</span>
+          </div>
+        </div>
+
         <div className="footer-top">
           {/* Brand Info */}
           <div className="footer-widget" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
@@ -85,15 +116,6 @@ function Footer({ compact = false }) {
             <p style={{ fontSize: '0.9rem', lineHeight: '1.6', color: '#cbd5e1' }}>
               {t('footer.about', 'Niyansh Pharma is a trusted pharmaceutical wholesale distributor based in Rajkot, Gujarat. We supply genuine, quality assured medicines, OTC products, and surgical supplies across Gujarat with reliable cold-chain and express dispatch.')}
             </p>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: 'var(--secondary-green)', fontSize: '0.85rem', fontWeight: '600' }}>
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--secondary-green)', display: 'inline-block' }}></span>
-              {t('footer.whoGmp', 'WHO-GMP Assured • GST Compliant')}
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.8rem', color: '#94a3b8', marginTop: '-4px' }}>
-              <div>D.L.No.: <span style={{ fontFamily: 'monospace', color: '#cbd5e1', fontWeight: '600' }}>20B, 264618, 21B, 264619</span></div>
-              <div>GSTIN: <span style={{ fontFamily: 'monospace', color: '#cbd5e1', fontWeight: '600' }}>24BVXPP6108F2Z7</span></div>
-              <div>Food License no.: <span style={{ fontFamily: 'monospace', color: '#cbd5e1', fontWeight: '600' }}>20726030000567</span></div>
-            </div>
           </div>
 
           {/* Quick Links */}
@@ -152,44 +174,6 @@ function Footer({ compact = false }) {
                 </button>
               </form>
             )}
-          </div>
-        </div>
-
-        {/* Official Statutory Licences & Registration Bar */}
-        <div style={{
-          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-          padding: '16px 0',
-          marginTop: '30px',
-          marginBottom: '20px',
-          display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: '14px',
-          fontSize: '0.82rem',
-          color: '#cbd5e1'
-        }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px 22px', alignItems: 'center' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <strong style={{ color: '#ffffff' }}>D.L.No.:</strong>
-              <span style={{ fontFamily: 'monospace', color: '#93c5fd', fontWeight: '700', letterSpacing: '0.5px' }}>20B, 264618, 21B, 264619</span>
-            </span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <strong style={{ color: '#ffffff' }}>GSTIN:</strong>
-              <span style={{ fontFamily: 'monospace', color: '#93c5fd', fontWeight: '700', letterSpacing: '0.5px' }}>24BVXPP6108F2Z7</span>
-            </span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <strong style={{ color: '#ffffff' }}>PAN No.:</strong>
-              <span style={{ fontFamily: 'monospace', color: '#93c5fd', fontWeight: '700', letterSpacing: '0.5px' }}>BVXPP6108F</span>
-            </span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <strong style={{ color: '#ffffff' }}>Food License no.:</strong>
-              <span style={{ fontFamily: 'monospace', color: '#93c5fd', fontWeight: '700', letterSpacing: '0.5px' }}>20726030000567</span>
-            </span>
-          </div>
-          <div style={{ color: '#4ade80', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem' }}>
-            <ShieldCheck size={16} /> WHO-GMP Assured Wholesale Stockist
           </div>
         </div>
 

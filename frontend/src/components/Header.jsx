@@ -797,9 +797,6 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
               📍 {t('topbar.location', 'Rajkot, Gujarat')}
             </span>
-            <span style={{ color: 'var(--secondary-green)', fontWeight: '600' }}>
-              • {t('topbar.certification', 'WHO-GMP Certified Wholesale')}
-            </span>
           </div>
         </div>
       </div>

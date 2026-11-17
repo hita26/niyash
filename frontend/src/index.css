@@ -2425,9 +2425,9 @@ body.dark-theme {
 /* Modern Enterprise 2-Column Product Workspace Modal */
 .admin-modal-workspace {
   width: 100%;
-  max-width: min(95vw, 1140px);
-  max-height: 88vh;
-  height: 85vh;
+  max-width: min(96vw, 1120px);
+  max-height: 90vh;
+  height: min(90vh, 880px);
   display: flex !important;
   flex-direction: column !important;
   padding: 0 !important;
@@ -2438,6 +2438,7 @@ body.dark-theme {
   position: relative;
   margin: auto;
   border: 1px solid var(--border-light);
+  box-sizing: border-box !important;
 }
 
 .admin-workspace-header {
@@ -2448,16 +2449,26 @@ body.dark-theme {
   align-items: center;
   flex-shrink: 0;
   background-color: var(--bg-card);
+  box-sizing: border-box;
 }
 
 .admin-workspace-body {
   flex: 1;
   overflow-y: auto;
-  padding: 20px 24px;
+  overflow-x: hidden !important;
+  padding: 20px 22px;
   display: grid;
-  grid-template-columns: 360px 1fr;
-  gap: 24px;
+  grid-template-columns: 330px minmax(0, 1fr);
+  gap: 20px;
   align-items: start;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.admin-workspace-body > * {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Custom sleek scrollbar for modal body */
@@ -2475,11 +2486,11 @@ body.dark-theme {
   background-color: rgba(148, 163, 184, 0.6);
 }
 
-@media (max-width: 992px) {
+@media (max-width: 1024px) {
   .admin-workspace-body {
-    grid-template-columns: 1fr;
-    gap: 18px;
-    padding: 18px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    padding: 16px;
   }
 }
 

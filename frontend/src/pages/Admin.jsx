@@ -5824,8 +5824,8 @@ _Helpline: +91 9316566894_`;
               {/* 2-COLUMN RESPONSIVE BODY */}
               <div className="admin-workspace-body">
                 
-                {/* ================= LEFT COLUMN: MEDIA & STATUS ================= */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', minWidth: 0, width: '100%', boxSizing: 'border-box' }}>
+                {/* ================= LEFT COLUMN: MEDIA & STATUS (FIXED) ================= */}
+                <div className="admin-workspace-left" style={{ display: 'flex', flexDirection: 'column', gap: '16px', minWidth: 0, width: '100%', boxSizing: 'border-box' }}>
                   
                   {/* Photo Upload & Gallery Card */}
                   <div className="admin-workspace-panel" style={{ padding: '16px', backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
@@ -6194,8 +6194,8 @@ _Helpline: +91 9316566894_`;
 
                 </div>
 
-                {/* ================= RIGHT COLUMN: PRODUCT FORM DETAILS ================= */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', minWidth: 0, width: '100%', boxSizing: 'border-box' }}>
+                {/* ================= RIGHT COLUMN: PRODUCT FORM DETAILS (SCROLLABLE) ================= */}
+                <div className="admin-workspace-right" style={{ display: 'flex', flexDirection: 'column', gap: '14px', minWidth: 0, width: '100%', boxSizing: 'border-box' }}>
                   
                   {/* Row 1: Product Name & SKU */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: '12px', width: '100%', boxSizing: 'border-box' }}>

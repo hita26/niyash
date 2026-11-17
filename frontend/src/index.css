@@ -2454,14 +2454,14 @@ body.dark-theme {
 
 .admin-workspace-body {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden !important;
+  overflow: hidden !important;
   padding: 20px 22px;
   display: grid;
-  grid-template-columns: 330px minmax(0, 1fr);
-  gap: 20px;
-  align-items: start;
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: 22px;
+  align-items: stretch;
   min-width: 0;
+  min-height: 0;
   box-sizing: border-box;
 }
 
@@ -2471,17 +2471,41 @@ body.dark-theme {
   box-sizing: border-box;
 }
 
-/* Custom sleek scrollbar for modal body */
+.admin-workspace-left {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 6px;
+  box-sizing: border-box;
+}
+
+.admin-workspace-right {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 8px;
+  box-sizing: border-box;
+}
+
+/* Custom sleek scrollbar for modal columns */
+.admin-workspace-right::-webkit-scrollbar,
+.admin-workspace-left::-webkit-scrollbar,
 .admin-workspace-body::-webkit-scrollbar {
   width: 6px;
 }
+.admin-workspace-right::-webkit-scrollbar-track,
+.admin-workspace-left::-webkit-scrollbar-track,
 .admin-workspace-body::-webkit-scrollbar-track {
   background: transparent;
 }
+.admin-workspace-right::-webkit-scrollbar-thumb,
+.admin-workspace-left::-webkit-scrollbar-thumb,
 .admin-workspace-body::-webkit-scrollbar-thumb {
   background-color: rgba(148, 163, 184, 0.35);
   border-radius: 10px;
 }
+.admin-workspace-right::-webkit-scrollbar-thumb:hover,
+.admin-workspace-left::-webkit-scrollbar-thumb:hover,
 .admin-workspace-body::-webkit-scrollbar-thumb:hover {
   background-color: rgba(148, 163, 184, 0.6);
 }
@@ -2489,8 +2513,15 @@ body.dark-theme {
 @media (max-width: 1024px) {
   .admin-workspace-body {
     grid-template-columns: minmax(0, 1fr);
+    overflow-y: auto !important;
     gap: 16px;
     padding: 16px;
+  }
+  .admin-workspace-left,
+  .admin-workspace-right {
+    height: auto;
+    overflow-y: visible;
+    padding-right: 0;
   }
 }
 
@@ -2524,9 +2555,13 @@ body.dark-theme {
   border-color: #243049 !important;
 }
 
+[data-theme="dark"] .admin-workspace-right::-webkit-scrollbar-thumb,
+[data-theme="dark"] .admin-workspace-left::-webkit-scrollbar-thumb,
 [data-theme="dark"] .admin-workspace-body::-webkit-scrollbar-thumb {
   background-color: rgba(255, 255, 255, 0.15);
 }
+[data-theme="dark"] .admin-workspace-right::-webkit-scrollbar-thumb:hover,
+[data-theme="dark"] .admin-workspace-left::-webkit-scrollbar-thumb:hover,
 [data-theme="dark"] .admin-workspace-body::-webkit-scrollbar-thumb:hover {
   background-color: rgba(255, 255, 255, 0.25);
 }

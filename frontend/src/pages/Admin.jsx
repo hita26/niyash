@@ -653,6 +653,8 @@ function Admin() {
   const [newCustomFieldType, setNewCustomFieldType] = useState('text');
   const [newCustomFieldRequired, setNewCustomFieldRequired] = useState(false);
   const [newCustomFieldPlaceholder, setNewCustomFieldPlaceholder] = useState('');
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
 
   // Lock body & document scroll whenever any modal is active to prevent page scrolling behind modals
   const hasActiveModal = Boolean(
@@ -711,8 +713,6 @@ function Admin() {
   const [prodImages, setProdImages] = useState([]);
   const [newImageUrlInput, setNewImageUrlInput] = useState('');
   const [prodDescription, setProdDescription] = useState('');
-  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
-  const [previewImage, setPreviewImage] = useState(null);
 
   // Fixed Pharma Inventory & Tax Fields
   const [prodRackId, setProdRackId] = useState('');

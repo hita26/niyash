@@ -406,7 +406,7 @@ export const en = {
     "selectPosition": "Select Position Applied For",
     "expLabel": "Total Experience",
     "coverLabel": "Brief Introduction / Cover Note",
-    "resumeLabel": "Upload Resume / CV (PDF or Word, Max 5MB)",
+    "resumeLabel": "Upload Resume / CV (PDF, Word, JPG, PNG, Max 5MB)",
     "submitBtn": "Submit Job Application",
     "submittingBtn": "Submitting Application...",
     "successNotice": "Your application has been received. Our HR team will review your profile and contact shortlisted candidates.",

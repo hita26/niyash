@@ -50,8 +50,37 @@ function Career() {
   ];
 
   const handleFileChange = (e) => {
-    setResumeFile(e.target.files[0]);
-    setErrorMessage('');
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      const allowedExts = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'webp'];
+      const ext = file.name.split('.').pop().toLowerCase();
+      if (!allowedExts.includes(ext)) {
+        setErrorMessage(
+          language === 'gu'
+            ? 'કૃપા કરીને માન્ય ફાઇલ (PDF, Word, JPG અથવા PNG) અપલોડ કરો.'
+            : language === 'hi'
+            ? 'कृपया वैध फ़ाइल (PDF, Word, JPG या PNG) अपलोड करें।'
+            : 'Please upload a valid file format (PDF, Word, JPG, or PNG).'
+        );
+        e.target.value = '';
+        setResumeFile(null);
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setErrorMessage(
+          language === 'gu'
+            ? 'ફાઇલનું કદ 5MB કરતાં ઓછું હોવું જોઈએ.'
+            : language === 'hi'
+            ? 'फ़ाइल का आकार 5MB से कम होना चाहिए।'
+            : 'File size must be less than 5MB.'
+        );
+        e.target.value = '';
+        setResumeFile(null);
+        return;
+      }
+      setResumeFile(file);
+      setErrorMessage('');
+    }
   };
 
   const handleFormSubmit = async (e) => {
@@ -61,10 +90,10 @@ function Career() {
     if (!resumeFile) {
       setErrorMessage(
         language === 'gu'
-          ? 'કૃપા કરીને આપનો રેઝ્યુમે (PDF કે Word ફાઇલ) અપલોડ કરો.'
+          ? 'કૃપા કરીને આપનો રેઝ્યુમે / બાયોડેટા (PDF, Word, JPG કે PNG ફાઇલ) અપલોડ કરો.'
           : language === 'hi'
-          ? 'कृपया अपना बायोडाटा (PDF या Word फ़ाइल) अपलोड करें।'
-          : 'Please upload your resume (PDF or Word document).'
+          ? 'कृपया अपना बायोडाटा (PDF, Word, JPG या PNG फ़ाइल) अपलोड करें।'
+          : 'Please upload your resume (PDF, Word, JPG, or PNG document).'
       );
       return;
     }
@@ -317,7 +346,7 @@ function Career() {
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="career-resume" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                    {t('career.resumeLabel', 'Upload Resume (PDF/Word)')} <span className="required-star">*</span>
+                    {t('career.resumeLabel', 'Upload Resume / CV (PDF, Word, JPG, PNG, Max 5MB)')} <span className="required-star">*</span>
                   </label>
                   <div style={{
                     border: '2px dashed #cbd5e1', borderRadius: '6px', padding: '15px',
@@ -326,12 +355,23 @@ function Career() {
                   }}>
                     <Upload size={20} color="var(--text-light)" style={{ marginBottom: '5px' }} />
                     <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-medium)' }}>
-                      {resumeFile ? `${language === 'gu' ? 'પસંદ કરેલ:' : language === 'hi' ? 'चयनित:' : 'Selected:'} ${resumeFile.name}` : (language === 'gu' ? 'PDF કે Doc ફાઇલ પસંદ કરવા અહીં ક્લિક કરો' : language === 'hi' ? 'PDF या Doc फ़ाइल चुनने के लिए यहाँ क्लिक करें' : 'Click to select PDF or Doc file')}
+                      {resumeFile ? (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: 'var(--primary-blue)', fontWeight: '600' }}>
+                          <CheckCircle2 size={16} color="var(--secondary-green)" />
+                          {resumeFile.name} ({(resumeFile.size / 1024).toFixed(0)} KB)
+                        </span>
+                      ) : (
+                        language === 'gu'
+                          ? 'PDF, Word, JPG કે PNG ફાઇલ પસંદ કરવા અહીં ક્લિક કરો'
+                          : language === 'hi'
+                          ? 'PDF, Word, JPG या PNG फ़ाइल चुनने के लिए यहाँ क्लिक करें'
+                          : 'Click to select PDF, Word, JPG or PNG file'
+                      )}
                     </span>
                     <input 
                       id="career-resume"
                       type="file" 
-                      accept=".pdf,.doc,.docx"
+                      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png,image/webp"
                       onChange={handleFileChange}
                       style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }}
                     />

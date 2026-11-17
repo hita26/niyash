@@ -26,20 +26,25 @@ const storage = multer.diskStorage({
 });
 
 function checkFileType(file, cb) {
-  const allowedExtensions = /pdf|doc|docx/;
+  const allowedExtensions = /pdf|doc|docx|jpg|jpeg|png|webp/;
   const extname = allowedExtensions.test(path.extname(file.originalname).toLowerCase());
   const allowedMimeTypes = [
     'application/pdf',
     'application/msword',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     'application/octet-stream',
+    'image/jpeg',
+    'image/jpg',
+    'image/pjpeg',
+    'image/png',
+    'image/webp',
   ];
-  const mimetype = allowedMimeTypes.includes(file.mimetype) || /pdf|msword|wordprocessingml/i.test(file.mimetype);
+  const mimetype = allowedMimeTypes.includes(file.mimetype) || /pdf|msword|wordprocessingml|image\/(jpeg|jpg|png|webp)|octet-stream/i.test(file.mimetype);
 
-  if (extname && mimetype) {
+  if (extname || mimetype) {
     return cb(null, true);
   } else {
-    cb(new Error('Only PDF and Word documents (.pdf, .doc, .docx) are allowed!'));
+    cb(new Error('Only PDF, Word (.doc, .docx), and Image (.jpg, .jpeg, .png, .webp) files are allowed!'));
   }
 }
 
@@ -55,6 +60,9 @@ const upload = multer({
 const handleUpload = (req, res, next) => {
   upload.single('resume')(req, res, function (err) {
     if (err instanceof multer.MulterError) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ message: 'File size exceeds limit (Max 10MB)' });
+      }
       return res.status(400).json({ message: `Upload error: ${err.message}` });
     } else if (err) {
       return res.status(400).json({ message: err.message || 'File upload failed' });
@@ -79,6 +87,20 @@ router.post('/', handleUpload, async (req, res) => {
       return res.status(400).json({ message: 'Phone number must contain exactly 10 numeric digits' });
     }
 
+    let resumePath = '';
+    if (req.file) {
+      if (process.env.VERCEL) {
+        try {
+          const buffer = fs.readFileSync(req.file.path);
+          resumePath = `data:${req.file.mimetype};base64,${buffer.toString('base64')}`;
+        } catch (err) {
+          resumePath = `/uploads/${req.file.filename}`;
+        }
+      } else {
+        resumePath = `/uploads/${req.file.filename}`;
+      }
+    }
+
     const careerData = {
       name,
       email: email.toLowerCase().trim(),
@@ -86,7 +108,7 @@ router.post('/', handleUpload, async (req, res) => {
       position,
       experience,
       coverLetter,
-      resumePath: req.file ? `/uploads/${req.file.filename}` : '',
+      resumePath,
     };
 
     const career = new Career(careerData);
@@ -124,7 +146,7 @@ router.delete('/:id', async (req, res) => {
       return res.status(404).json({ message: 'Application not found' });
     }
     
-    if (career.resumePath) {
+    if (career.resumePath && !career.resumePath.startsWith('data:')) {
       const filename = path.basename(career.resumePath);
       const filePath = path.join(uploadDir, filename);
       if (fs.existsSync(filePath)) {

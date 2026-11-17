@@ -664,7 +664,9 @@ function Admin() {
     selectedOrder || 
     selectedLedger ||
     isCustomFieldModalOpen ||
-    deleteConfirm
+    deleteConfirm ||
+    showSaveConfirm ||
+    previewImage
   );
 
   useEffect(() => {
@@ -709,6 +711,8 @@ function Admin() {
   const [prodImages, setProdImages] = useState([]);
   const [newImageUrlInput, setNewImageUrlInput] = useState('');
   const [prodDescription, setProdDescription] = useState('');
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
 
   // Fixed Pharma Inventory & Tax Fields
   const [prodRackId, setProdRackId] = useState('');
@@ -1683,12 +1687,12 @@ _Helpline: +91 9316566894_`;
     } else {
       setEditingProduct(null);
       setProdName('');
-      setProdBrand('Daxia Healthcare');
-      setProdCompany('DAXIA');
+      setProdBrand('');
+      setProdCompany('Daxia Healthcare');
       setProdCategory('Pharma Products');
       setProdCustomCategory('');
       setProdSubCategory('');
-      setProdSku(`NP-${Date.now().toString().slice(-6)}`);
+      setProdSku('');
       setProdPrice('');
       setProdMrp('');
       setProdStockQuantity('100');
@@ -1714,15 +1718,26 @@ _Helpline: +91 9316566894_`;
     setIsProductModalOpen(true);
   };
 
-  // Upload multiple product photos
+  // Upload multiple product photos (Max 5 photos allowed)
   const handlePhotoUpload = async (e) => {
     const files = e.target.files || e.dataTransfer?.files;
     if (!files || files.length === 0) return;
 
+    if (prodImages.length >= 5) {
+      showToast('મહત્તમ 5 ફોટો જ રાખી શકાય છે (Maximum 5 photos allowed per product)', 'warning');
+      return;
+    }
+
+    const availableSlots = 5 - prodImages.length;
+    const filesToUpload = Array.from(files).slice(0, availableSlots);
+    if (filesToUpload.length < files.length) {
+      showToast(`માત્ર ${availableSlots} ફોટો એડ થશે (મહત્તમ 5 ફોટો મર્યાદા)`, 'warning');
+    }
+
     setIsUploadingPhotos(true);
     const formData = new FormData();
-    for (let i = 0; i < Math.min(files.length, 10); i++) {
-      formData.append('photos', files[i]);
+    for (let i = 0; i < filesToUpload.length; i++) {
+      formData.append('photos', filesToUpload[i]);
     }
 
     try {
@@ -1737,7 +1752,7 @@ _Helpline: +91 9316566894_`;
       const data = await res.json();
       if (res.ok && data.urls) {
         setProdImages(prev => {
-          const combined = [...prev, ...data.urls];
+          const combined = [...prev, ...data.urls].slice(0, 5);
           if (!prodImageUrl && combined.length > 0) {
             setProdImageUrl(combined[0]);
           }
@@ -1789,8 +1804,19 @@ _Helpline: +91 9316566894_`;
 
   const handleAddImageUrl = () => {
     if (!newImageUrlInput || !newImageUrlInput.trim()) return;
+    if (prodImages.length >= 5) {
+      showToast('મહત્તમ 5 ફોટો જ રાખી શકાય છે (Maximum 5 photos allowed per product)', 'warning');
+      return;
+    }
     const trimmed = newImageUrlInput.trim();
-    setProdImages(prev => [...prev, trimmed]);
+    if (prodImages.includes(trimmed)) {
+      showToast('આ ફોટો URL પહેલેથી ગેલેરીમાં છે', 'warning');
+      return;
+    }
+    setProdImages(prev => {
+      const combined = [...prev, trimmed].slice(0, 5);
+      return combined;
+    });
     if (!prodImageUrl) setProdImageUrl(trimmed);
     setNewImageUrlInput('');
     showToast('Image URL added to gallery');
@@ -1844,7 +1870,7 @@ _Helpline: +91 9316566894_`;
       const data = await res.json();
       if (res.ok && data.success && data.images && data.images.length > 0) {
         setWebImageResults(data.images);
-        showToast(`Found ${data.images.length} photos! Click one to attach.`, 'success');
+        showToast(`Found ${data.images.length} photos! Click any photo to attach. (Max 5 photos)`, 'success');
       } else {
         showToast('No photos found automatically. Click Google Tab to search in browser.', 'error');
       }
@@ -1856,18 +1882,24 @@ _Helpline: +91 9316566894_`;
   };
 
   const handleSelectWebImage = (imgUrl) => {
-    setProdImages(prev => {
-      if (!prev.includes(imgUrl)) return [imgUrl, ...prev];
-      return prev;
-    });
+    if (prodImages.includes(imgUrl)) {
+      setProdImageUrl(imgUrl);
+      showToast('Photo designated as primary!');
+      return;
+    }
+    if (prodImages.length >= 5) {
+      showToast('મહત્તમ 5 ફોટો જ રાખી શકાય છે (Maximum 5 photos allowed per product)', 'warning');
+      return;
+    }
+    setProdImages(prev => [imgUrl, ...prev].slice(0, 5));
     setProdImageUrl(imgUrl);
-    showToast('Photo attached successfully!');
+    showToast('Photo attached to product!');
   };
 
   const handleSaveProduct = async (e) => {
     e.preventDefault();
     if (!prodName.trim()) {
-      showToast('Product name is required', 'error');
+      showToast('Product name / brand is required', 'error');
       return;
     }
     const finalCategory = prodCategory === 'Custom' ? prodCustomCategory.trim() : prodCategory;
@@ -1875,12 +1907,34 @@ _Helpline: +91 9316566894_`;
       showToast('Product category is required', 'error');
       return;
     }
+    if (!prodPrice || parseFloat(prodPrice) <= 0) {
+      showToast('Wholesale price is required and must be greater than 0', 'error');
+      return;
+    }
 
-    const finalImages = prodImages.filter(img => img && img.trim() !== '');
-    const finalMainImage = prodImageUrl || (finalImages.length > 0 ? finalImages[0] : '');
+    // DUPLICATION PREVENTION 1: Check duplicate product name (case-insensitive)
+    const trimmedName = prodName.trim();
+    const isDuplicateName = products.some(p => 
+      p.name?.trim().toLowerCase() === trimmedName.toLowerCase() && 
+      (!editingProduct || p._id !== editingProduct._id)
+    );
+    if (isDuplicateName) {
+      showToast(`પ્રોડક્ટ "${trimmedName}" પહેલેથી અસ્તિત્વમાં છે! ડુપ્લિકેટ પ્રોડક્ટ એડ કરી શકાશે નહીં.`, 'error');
+      return;
+    }
 
-    const stockNum = parseInt(prodStockQuantity, 10);
-    const validStock = !isNaN(stockNum) ? stockNum : (prodInStock ? 100 : 0);
+    // DUPLICATION PREVENTION 2: Check duplicate SKU if SKU is provided
+    const trimmedSku = prodSku.trim();
+    if (trimmedSku) {
+      const isDuplicateSku = products.some(p => 
+        p.sku?.trim().toLowerCase() === trimmedSku.toLowerCase() && 
+        (!editingProduct || p._id !== editingProduct._id)
+      );
+      if (isDuplicateSku) {
+        showToast(`SKU "${trimmedSku}" પહેલેથી બીજી પ્રોડક્ટમાં વપરાયેલ છે! કૃપા કરીને નવો SKU વાપરો.`, 'error');
+        return;
+      }
+    }
 
     // Validate required dynamic custom fields
     for (const def of customFieldDefs) {
@@ -1893,6 +1947,18 @@ _Helpline: +91 9316566894_`;
       }
     }
 
+    // Open verification confirmation modal before actually saving!
+    setShowSaveConfirm(true);
+  };
+
+  const executeActualSaveProduct = async () => {
+    const finalCategory = prodCategory === 'Custom' ? prodCustomCategory.trim() : prodCategory;
+    const finalImages = prodImages.filter(img => img && img.trim() !== '').slice(0, 5);
+    const finalMainImage = prodImageUrl || (finalImages.length > 0 ? finalImages[0] : '');
+
+    const stockNum = parseInt(prodStockQuantity, 10);
+    const validStock = !isNaN(stockNum) ? stockNum : (prodInStock ? 100 : 0);
+
     const customFieldsArr = customFieldDefs.map(def => ({
       fieldKey: def.fieldKey,
       fieldName: def.fieldName,
@@ -1901,10 +1967,12 @@ _Helpline: +91 9316566894_`;
       isRequired: Boolean(def.isRequired),
     }));
 
+    const assignedCompany = prodCompany.trim() || 'Daxia Healthcare';
+
     const payload = {
       name: prodName.trim(),
-      brand: prodBrand.trim() || 'Daxia Healthcare',
-      company: prodCompany.trim() || 'DAXIA',
+      brand: prodName.trim(), // Brand name unified with Product Name
+      company: assignedCompany,
       category: finalCategory,
       subCategory: prodSubCategory.trim(),
       sku: prodSku.trim(),
@@ -1915,7 +1983,7 @@ _Helpline: +91 9316566894_`;
       packing: prodPacking.trim(),
       composition: prodComposition.trim(),
       form: prodForm,
-      manufacturer: prodManufacturer.trim(),
+      manufacturer: prodManufacturer.trim() || assignedCompany,
       rackId: prodRackId.trim(),
       hsnCode: prodHsnCode.trim() || '3004',
       purchaseGst: parseFloat(prodPurchaseGst) || 12,
@@ -1951,12 +2019,23 @@ _Helpline: +91 9316566894_`;
       const data = await response.json();
       if (response.ok && data.success) {
         setIsProductModalOpen(false);
+
+        // Auto-add company to local state if brand new so it appears in suggestions immediately
+        if (assignedCompany && !companies.some(c => c.name?.toLowerCase() === assignedCompany.toLowerCase())) {
+          setCompanies(prev => [{ name: assignedCompany, category: finalCategory, status: 'Published' }, ...prev]);
+        }
+
         await fetchDashboardData();
         broadcastLiveEvent(
           editingProduct ? SYNC_EVENTS.PRODUCT_UPDATED : SYNC_EVENTS.PRODUCT_CREATED,
           { product: data.product || payload }
         );
-        showToast(editingProduct ? 'Product updated successfully!' : 'New product created with all photos!');
+        showToast(
+          editingProduct 
+            ? 'પ્રોડક્ટ વિગતો સફળતાપૂર્વક અપડેટ થઈ! (Product updated)' 
+            : 'નવી પ્રોડક્ટ સફળતાપૂર્વક પબ્લિશ થઈ! (Product published)',
+          'success'
+        );
       } else {
         showToast(data.message || 'Error saving product', 'error');
       }
@@ -2911,23 +2990,6 @@ _Helpline: +91 9316566894_`;
             </button>
 
             <button 
-              onClick={() => setActiveTab('companies')} 
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '10px 14px',
-                borderRadius: '8px', fontWeight: '600', fontSize: '0.9rem',
-                backgroundColor: activeTab === 'companies' ? 'rgba(12, 61, 108, 0.1)' : 'transparent',
-                color: activeTab === 'companies' ? 'var(--primary-blue)' : 'var(--text-medium)'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <Building2 size={16} /> Companies
-              </div>
-              <span style={{ fontSize: '0.7rem', padding: '2px 7px', borderRadius: '10px', backgroundColor: '#e2e8f0', color: 'var(--text-dark)' }}>
-                {totalCompaniesCount || companies.length}
-              </span>
-            </button>
-
-            <button 
               onClick={() => setActiveTab('enquiries')} 
               style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '10px 14px',
@@ -3028,9 +3090,6 @@ _Helpline: +91 9316566894_`;
               <button onClick={() => setActiveTab('products')} className={`admin-tab-chip ${activeTab === 'products' ? 'active' : ''}`}>
                 <ShoppingBag size={14} /> {t('admin.tabProducts', 'Products')} ({productStats.totalProducts || products.length})
               </button>
-              <button onClick={() => setActiveTab('companies')} className={`admin-tab-chip ${activeTab === 'companies' ? 'active' : ''}`}>
-                <Building2 size={14} /> {t('admin.tabCompanies', 'Companies')} ({totalCompaniesCount || companies.length})
-              </button>
               <button onClick={() => setActiveTab('enquiries')} className={`admin-tab-chip ${activeTab === 'enquiries' ? 'active' : ''}`}>
                 <MessageSquare size={14} /> {t('admin.tabEnquiries', 'Enquiries')} ({enquiries.length})
               </button>
@@ -3039,30 +3098,6 @@ _Helpline: +91 9316566894_`;
               </button>
             </div>
           </div>
-          {/* Toast Notification Banner */}
-          {toastMessage && (
-            <div style={{
-              backgroundColor: toastMessage.type === 'error' ? '#fee2e2' : '#ecfdf5',
-              color: toastMessage.type === 'error' ? '#ef4444' : '#059669',
-              border: `1px solid ${toastMessage.type === 'error' ? '#fca5a5' : '#a7f3d0'}`,
-              padding: '12px 18px',
-              borderRadius: '8px',
-              marginBottom: '20px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              fontSize: '0.9rem',
-              fontWeight: '600'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                {toastMessage.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
-                <span>{toastMessage.msg}</span>
-              </div>
-              <button onClick={() => setToastMessage(null)} style={{ color: 'inherit' }}>
-                <X size={16} />
-              </button>
-            </div>
-          )}
 
           {isLoading ? (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '350px' }}>
@@ -5831,10 +5866,10 @@ _Helpline: +91 9316566894_`;
                   <div className="admin-workspace-panel" style={{ padding: '16px', backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', width: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                       <label style={{ fontSize: '0.92rem', fontWeight: '700', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <ImageIcon size={18} color="var(--primary-blue)" /> Product Photos ({prodImages.length})
+                        <ImageIcon size={18} color="var(--primary-blue)" /> Product Photos ({prodImages.length}/5)
                       </label>
-                      <span style={{ fontSize: '0.76rem', color: 'var(--text-medium)' }}>
-                        ★ First photo is Primary
+                      <span style={{ fontSize: '0.74rem', color: prodImages.length >= 5 ? '#d97706' : 'var(--text-medium)', fontWeight: prodImages.length >= 5 ? '700' : '400' }}>
+                        {prodImages.length >= 5 ? '★ Max 5 Attached' : '★ First photo is Primary'}
                       </span>
                     </div>
 
@@ -5988,7 +6023,6 @@ _Helpline: +91 9316566894_`;
                             return (
                               <div
                                 key={idx}
-                                onClick={() => handleSelectWebImage(img)}
                                 style={{
                                   height: '80px',
                                   borderRadius: '6px',
@@ -6002,17 +6036,38 @@ _Helpline: +91 9316566894_`;
                                 }}
                                 onMouseOver={(e) => { e.currentTarget.style.transform = 'scale(1.05)'; }}
                                 onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
-                                title="Click to attach this photo directly!"
+                                title="Click to attach photo (or click eye to preview full size)"
                               >
                                 <img
                                   src={img}
                                   alt={`Result ${idx + 1}`}
+                                  onClick={() => handleSelectWebImage(img)}
                                   style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                                   onError={(e) => { e.target.parentElement.style.display = 'none'; }}
                                 />
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); setPreviewImage(img); }}
+                                  style={{
+                                    position: 'absolute',
+                                    top: '2px',
+                                    right: '2px',
+                                    backgroundColor: 'rgba(0,0,0,0.65)',
+                                    color: '#ffffff',
+                                    border: 'none',
+                                    borderRadius: '3px',
+                                    padding: '2px 5px',
+                                    fontSize: '0.65rem',
+                                    cursor: 'pointer',
+                                    zIndex: 2
+                                  }}
+                                  title="Preview in full size"
+                                >
+                                  👁
+                                </button>
                                 {isSelected && (
                                   <span style={{ position: 'absolute', bottom: '2px', right: '2px', backgroundColor: '#2563eb', color: '#fff', fontSize: '0.62rem', padding: '1px 5px', borderRadius: '3px', fontWeight: '800' }}>
-                                    ✓ Applied
+                                    ✓ Added
                                   </span>
                                 )}
                               </div>
@@ -6078,7 +6133,9 @@ _Helpline: +91 9316566894_`;
                               <img 
                                 src={img} 
                                 alt={`Photo ${idx + 1}`} 
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                onClick={() => setPreviewImage(img)}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'zoom-in' }} 
+                                title="Click to view full photo preview"
                                 onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=200&q=80'; }}
                               />
 
@@ -6092,19 +6149,29 @@ _Helpline: +91 9316566894_`;
                               {/* Thumbnail Controls */}
                               <div style={{
                                 position: 'absolute', bottom: 0, left: 0, right: 0,
-                                backgroundColor: 'rgba(0,0,0,0.72)', padding: '2px 4px',
+                                backgroundColor: 'rgba(0,0,0,0.78)', padding: '2px 4px',
                                 display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                               }}>
-                                {!isMain && (
+                                <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
                                   <button
                                     type="button"
-                                    onClick={() => handleSetMainPhoto(img)}
-                                    style={{ background: 'none', border: 'none', color: '#fef08a', fontSize: '0.66rem', cursor: 'pointer', padding: '1px' }}
-                                    title="Set as primary photo"
+                                    onClick={() => setPreviewImage(img)}
+                                    style={{ background: 'none', border: 'none', color: '#93c5fd', fontSize: '0.68rem', cursor: 'pointer', padding: '1px 2px', fontWeight: '700' }}
+                                    title="View full preview"
                                   >
-                                    Main
+                                    👁 View
                                   </button>
-                                )}
+                                  {!isMain && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleSetMainPhoto(img)}
+                                      style={{ background: 'none', border: 'none', color: '#fef08a', fontSize: '0.66rem', cursor: 'pointer', padding: '1px' }}
+                                      title="Set as primary photo"
+                                    >
+                                      Main
+                                    </button>
+                                  )}
+                                </div>
                                 <div style={{ display: 'flex', gap: '3px', marginLeft: 'auto' }}>
                                   {idx > 0 && (
                                     <button
@@ -6214,7 +6281,7 @@ _Helpline: +91 9316566894_`;
                         </div>
                       </div>
                       <div style={{ textAlign: 'right', fontSize: '0.8rem', color: 'var(--text-medium)' }}>
-                        <div>PTR: ₹{parseFloat(prodPrice).toFixed(2)}</div>
+                        <div>Wholesale: ₹{parseFloat(prodPrice).toFixed(2)}</div>
                         <div>MRP: ₹{parseFloat(prodMrp).toFixed(2)}</div>
                       </div>
                     </div>
@@ -6225,13 +6292,13 @@ _Helpline: +91 9316566894_`;
                 {/* ================= RIGHT COLUMN: PRODUCT FORM DETAILS (SCROLLABLE) ================= */}
                 <div className="admin-workspace-right" style={{ display: 'flex', flexDirection: 'column', gap: '14px', minWidth: 0, width: '100%', boxSizing: 'border-box' }}>
                   
-                  {/* Row 1: Product Name & SKU */}
+                  {/* Row 1: Product Name / Brand Name & SKU */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <label htmlFor="modal-name" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Product Name *</label>
+                      <label htmlFor="modal-name" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Product Name / Brand Name *</label>
                       <input 
                         id="modal-name"
-                        type="text" required placeholder="E.g., Paracetamol Tablet IP 500mg" 
+                        type="text" required placeholder="E.g., Paracetamol Tablet IP 500mg, Dolo 650, etc." 
                         value={prodName} onChange={(e) => setProdName(e.target.value)}
                         style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.92rem', width: '100%', boxSizing: 'border-box' }}
                       />
@@ -6250,32 +6317,39 @@ _Helpline: +91 9316566894_`;
                       </div>
                       <input 
                         id="modal-sku"
-                        type="text" placeholder="E.g., NP-PT-500" 
+                        type="text" placeholder="Optional SKU (or click Generate)" 
                         value={prodSku} onChange={(e) => setProdSku(e.target.value)}
                         style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.92rem', fontFamily: 'monospace', width: '100%', boxSizing: 'border-box' }}
                       />
                     </div>
                   </div>
 
-                  {/* Row 2: Manufacturer & Category */}
+                  {/* Row 2: Manufacturer / Company (Direct Input / Datalist) & Category */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <label htmlFor="modal-comp" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Manufacturer / Company *</label>
-                      <select 
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <label htmlFor="modal-comp" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Manufacturer / Company *</label>
+                        <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: '700' }}>⚡ Type new or pick</span>
+                      </div>
+                      <input 
                         id="modal-comp"
+                        type="text"
+                        list="modal-company-suggestions"
+                        required
+                        placeholder="Type or select company name..."
                         value={prodCompany} 
                         onChange={(e) => {
                           setProdCompany(e.target.value);
                           setProdManufacturer(e.target.value);
-                          setProdBrand(e.target.value);
                         }}
-                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' }}
-                      >
-                        <option value="DAXIA">Daxia Healthcare</option>
+                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box', backgroundColor: '#ffffff' }}
+                      />
+                      <datalist id="modal-company-suggestions">
+                        <option value="Daxia Healthcare" />
                         {companies.map(c => (
                           <option key={c._id || c.name} value={c.name}>{c.name}</option>
                         ))}
-                      </select>
+                      </datalist>
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
@@ -6307,18 +6381,8 @@ _Helpline: +91 9316566894_`;
                     </div>
                   </div>
 
-                  {/* Row 3: Brand & Subcategory */}
+                  {/* Row 3: Subcategory & Formulation Form */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <label htmlFor="modal-brand" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Brand Name</label>
-                      <input 
-                        id="modal-brand"
-                        type="text" placeholder="E.g., Daxia Healthcare" 
-                        value={prodBrand} onChange={(e) => setProdBrand(e.target.value)}
-                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' }}
-                      />
-                    </div>
-
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
                       <label htmlFor="modal-subcat" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Subcategory / Variant</label>
                       <input 
@@ -6328,43 +6392,7 @@ _Helpline: +91 9316566894_`;
                         style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' }}
                       />
                     </div>
-                  </div>
 
-                  {/* Row 4: Commercial Matrix (Price, MRP, Stock) */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px', padding: '12px 14px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0', width: '100%', boxSizing: 'border-box' }} className="admin-workspace-panel">
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
-                      <label htmlFor="modal-price" style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>Wholesale PTR (₹) *</label>
-                      <input 
-                        id="modal-price"
-                        type="number" step="0.01" required placeholder="E.g., 28.50" 
-                        value={prodPrice} onChange={(e) => setProdPrice(e.target.value)}
-                        style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '7px', fontSize: '0.95rem', fontWeight: '700', width: '100%', boxSizing: 'border-box' }}
-                      />
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
-                      <label htmlFor="modal-mrp" style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>Retail MRP (₹)</label>
-                      <input 
-                        id="modal-mrp"
-                        type="number" step="0.01" placeholder="E.g., 45.00" 
-                        value={prodMrp} onChange={(e) => setProdMrp(e.target.value)}
-                        style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '7px', fontSize: '0.95rem', width: '100%', boxSizing: 'border-box' }}
-                      />
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
-                      <label htmlFor="modal-stockqty" style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>Stock Units *</label>
-                      <input 
-                        id="modal-stockqty"
-                        type="number" required placeholder="E.g., 100" 
-                        value={prodStockQuantity} onChange={(e) => setProdStockQuantity(e.target.value)}
-                        style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '7px', fontSize: '0.95rem', width: '100%', boxSizing: 'border-box' }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Row 5: Formulation Form & Packing Specs */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
                       <label htmlFor="modal-form" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Formulation Form</label>
                       <select 
@@ -6389,13 +6417,59 @@ _Helpline: +91 9316566894_`;
                         <option value="Surgical">Surgical & Device</option>
                       </select>
                     </div>
+                  </div>
 
+                  {/* Row 4: Commercial Matrix (Wholesale, MRP, Stock Units) */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px', padding: '12px 14px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0', width: '100%', boxSizing: 'border-box' }} className="admin-workspace-panel">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
+                      <label htmlFor="modal-price" style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>Wholesale (₹) *</label>
+                      <input 
+                        id="modal-price"
+                        type="number" step="0.01" required placeholder="E.g., 28.50" 
+                        value={prodPrice} onChange={(e) => setProdPrice(e.target.value)}
+                        style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '7px', fontSize: '0.95rem', fontWeight: '700', width: '100%', boxSizing: 'border-box' }}
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
+                      <label htmlFor="modal-mrp" style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>MRP (₹)</label>
+                      <input 
+                        id="modal-mrp"
+                        type="number" step="0.01" placeholder="E.g., 45.00" 
+                        value={prodMrp} onChange={(e) => setProdMrp(e.target.value)}
+                        style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '7px', fontSize: '0.95rem', width: '100%', boxSizing: 'border-box' }}
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
+                      <label htmlFor="modal-stockqty" style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>Stock Units *</label>
+                      <input 
+                        id="modal-stockqty"
+                        type="number" required placeholder="E.g., 100" 
+                        value={prodStockQuantity} onChange={(e) => setProdStockQuantity(e.target.value)}
+                        style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '7px', fontSize: '0.95rem', width: '100%', boxSizing: 'border-box' }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Row 5: Packing Specifications & Active Composition */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
                       <label htmlFor="modal-packing" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Packing Specifications</label>
                       <input 
                         id="modal-packing"
                         type="text" placeholder="E.g., 10 x 10 Tablets or 100ml" 
                         value={prodPacking} onChange={(e) => setProdPacking(e.target.value)}
+                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' }}
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
+                      <label htmlFor="modal-composition" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Chemical / Active Composition</label>
+                      <input 
+                        id="modal-composition"
+                        type="text" placeholder="E.g., Paracetamol IP 500mg" 
+                        value={prodComposition} onChange={(e) => setProdComposition(e.target.value)}
                         style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' }}
                       />
                     </div>
@@ -6618,7 +6692,6 @@ _Helpline: +91 9316566894_`;
         </div>,
         document.body
       )}
-
 
       {/* ==========================================
           MODAL 7: BULK CSV IMPORT MODAL
@@ -6907,6 +6980,232 @@ _Helpline: +91 9316566894_`;
               </div>
             </form>
           </div>
+        </div>,
+        document.body
+      )}
+
+      {/* CONFIRMATION MODAL BEFORE CREATING / UPDATING PRODUCT */}
+      {showSaveConfirm && typeof document !== 'undefined' && createPortal(
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100vw',
+          height: '100vh',
+          backgroundColor: 'rgba(15, 23, 42, 0.78)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 100015,
+          padding: '16px',
+          boxSizing: 'border-box'
+        }}>
+          <div className="card" style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '16px',
+            width: '100%',
+            maxWidth: '520px',
+            boxShadow: '0 25px 65px -10px rgba(0, 0, 0, 0.5)',
+            border: '1px solid #cbd5e1',
+            overflow: 'hidden',
+            boxSizing: 'border-box'
+          }} role="dialog" aria-modal="true">
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: '#f8fafc' }}>
+              <div style={{ width: '42px', height: '42px', borderRadius: '50%', backgroundColor: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary-blue)', flexShrink: 0 }}>
+                <CheckCircle2 size={24} />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: '700' }}>
+                  {editingProduct ? 'Confirm Product Update' : 'Confirm New Product Creation'}
+                </h3>
+                <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: 'var(--text-medium)' }}>
+                  તમે ભરેલી વિગતો બરાબર ચકાસી લીધી છે?
+                </p>
+              </div>
+            </div>
+
+            <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ backgroundColor: '#f1f5f9', borderRadius: '10px', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '9px', fontSize: '0.88rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
+                  <span style={{ color: 'var(--text-medium)', fontWeight: '600' }}>Product / Brand:</span>
+                  <strong style={{ color: 'var(--text-dark)', textAlign: 'right' }}>{prodName}</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
+                  <span style={{ color: 'var(--text-medium)', fontWeight: '600' }}>Company:</span>
+                  <strong style={{ color: 'var(--primary-blue)', textAlign: 'right' }}>{prodCompany || 'Daxia Healthcare'}</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
+                  <span style={{ color: 'var(--text-medium)', fontWeight: '600' }}>Category:</span>
+                  <span style={{ color: 'var(--text-dark)', textAlign: 'right' }}>{prodCategory === 'Custom' ? prodCustomCategory : prodCategory}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
+                  <span style={{ color: 'var(--text-medium)', fontWeight: '600' }}>Wholesale Price:</span>
+                  <strong style={{ color: '#16a34a', fontSize: '0.95rem' }}>₹{parseFloat(prodPrice || 0).toFixed(2)}</strong>
+                </div>
+                {prodMrp && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
+                    <span style={{ color: 'var(--text-medium)', fontWeight: '600' }}>MRP:</span>
+                    <strong style={{ color: 'var(--text-dark)' }}>₹{parseFloat(prodMrp).toFixed(2)}</strong>
+                  </div>
+                )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
+                  <span style={{ color: 'var(--text-medium)', fontWeight: '600' }}>Stock Units:</span>
+                  <span style={{ color: 'var(--text-dark)' }}>{prodStockQuantity || 100} ({prodInStock ? '✓ In Stock' : '✕ Out of Stock'})</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
+                  <span style={{ color: 'var(--text-medium)', fontWeight: '600' }}>Attached Photos:</span>
+                  <span style={{ color: 'var(--text-dark)' }}>{prodImages.length} photo(s)</span>
+                </div>
+              </div>
+
+              <div style={{ fontSize: '0.88rem', color: '#1e293b', fontWeight: '500', lineHeight: 1.5 }}>
+                તમે ભરેલી વિગતો યોગ્ય છે? શું તમે આ પ્રોડક્ટ સેવ કરી પબ્લિક વેબસાઇટ પર લાઈવ કરવા માંગો છો?
+              </div>
+            </div>
+
+            <div style={{ padding: '14px 24px', backgroundColor: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <button
+                type="button"
+                onClick={() => setShowSaveConfirm(false)}
+                className="btn btn-outline"
+                style={{ padding: '9px 18px', fontSize: '0.88rem', fontWeight: '600' }}
+              >
+                ✕ Review Details (No)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowSaveConfirm(false);
+                  executeActualSaveProduct();
+                }}
+                className="btn btn-primary"
+                style={{ padding: '9px 24px', fontSize: '0.88rem', fontWeight: '700', backgroundColor: '#16a34a', borderColor: '#16a34a' }}
+              >
+                ✓ Yes, Save & Publish
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* PHOTO PREVIEW LIGHTBOX MODAL */}
+      {previewImage && typeof document !== 'undefined' && createPortal(
+        <div 
+          onClick={() => setPreviewImage(null)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            width: '100vw',
+            height: '100vh',
+            backgroundColor: 'rgba(0, 0, 0, 0.88)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 100020,
+            padding: '20px',
+            boxSizing: 'border-box'
+          }}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: 'relative',
+              maxWidth: '90vw',
+              maxHeight: '85vh',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center'
+            }}
+          >
+            <img 
+              src={previewImage} 
+              alt="Photo Preview"
+              style={{
+                maxWidth: '100%',
+                maxHeight: '78vh',
+                objectFit: 'contain',
+                borderRadius: '12px',
+                boxShadow: '0 25px 60px rgba(0, 0, 0, 0.8)',
+                border: '1px solid rgba(255, 255, 255, 0.2)'
+              }}
+            />
+            <div style={{ marginTop: '14px', display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <button
+                type="button"
+                onClick={() => setPreviewImage(null)}
+                style={{
+                  padding: '9px 24px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  color: '#ffffff',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  borderRadius: '24px',
+                  fontWeight: '600',
+                  fontSize: '0.88rem',
+                  cursor: 'pointer'
+                }}
+              >
+                ✕ Close Preview
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* GLOBAL TOAST NOTIFICATION (PORTAL TO BODY - ALWAYS ON TOP OF ANY MODAL, Z-INDEX 9999999) */}
+      {toastMessage && typeof document !== 'undefined' && createPortal(
+        <div style={{
+          position: 'fixed',
+          top: '24px',
+          right: '24px',
+          maxWidth: '460px',
+          width: 'calc(100vw - 48px)',
+          backgroundColor: toastMessage.type === 'error' ? '#fef2f2' : toastMessage.type === 'warning' ? '#fffbeb' : '#f0fdf4',
+          color: toastMessage.type === 'error' ? '#991b1b' : toastMessage.type === 'warning' ? '#92400e' : '#166534',
+          border: `1.5px solid ${toastMessage.type === 'error' ? '#f87171' : toastMessage.type === 'warning' ? '#fcd34d' : '#86efac'}`,
+          borderRadius: '12px',
+          padding: '14px 18px',
+          boxShadow: '0 20px 45px -10px rgba(0, 0, 0, 0.45)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '12px',
+          zIndex: 9999999,
+          animation: 'slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+          pointerEvents: 'auto',
+          boxSizing: 'border-box'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1 }}>
+            {toastMessage.type === 'error' ? (
+              <AlertCircle size={22} style={{ flexShrink: 0, color: '#dc2626' }} />
+            ) : toastMessage.type === 'warning' ? (
+              <AlertCircle size={22} style={{ flexShrink: 0, color: '#d97706' }} />
+            ) : (
+              <CheckCircle2 size={22} style={{ flexShrink: 0, color: '#16a34a' }} />
+            )}
+            <span style={{ fontSize: '0.9rem', fontWeight: '600', lineHeight: 1.4, wordBreak: 'break-word' }}>
+              {toastMessage.msg}
+            </span>
+          </div>
+          <button 
+            type="button" 
+            onClick={() => setToastMessage(null)} 
+            style={{ color: 'inherit', background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', flexShrink: 0 }}
+            aria-label="Close notification"
+          >
+            <X size={18} />
+          </button>
         </div>,
         document.body
       )}

@@ -556,12 +556,37 @@ router.post('/', protect, adminOnly, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Product category is required' });
     }
 
+    // Check duplicate product name (case-insensitive) - DUPLICATION PREVENTION
+    const escapedName = name.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const existingName = await Product.findOne({ name: { $regex: new RegExp(`^${escapedName}$`, 'i') } });
+    if (existingName) {
+      return res.status(400).json({ success: false, message: `Product "${name.trim()}" already exists in catalog. Duplicates are not allowed.` });
+    }
+
     // Check unique SKU if provided
     if (sku && sku.trim() !== '') {
       const existingSku = await Product.findOne({ sku: sku.trim() });
       if (existingSku) {
         return res.status(400).json({ success: false, message: `A product with SKU "${sku.trim()}" already exists` });
       }
+    }
+
+    // Auto-ensure Company exists in Company collection so it shows up in public website directory
+    const targetComp = (company && company.trim()) || 'DAXIA';
+    try {
+      const escapedComp = targetComp.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const compExists = await Company.findOne({ name: { $regex: new RegExp(`^${escapedComp}$`, 'i') } });
+      if (!compExists) {
+        const newComp = new Company({
+          name: targetComp,
+          category: (category && category.trim()) || 'Pharmaceutical Formulations',
+          status: 'Published',
+          isVerified: true
+        });
+        await newComp.save();
+      }
+    } catch (cErr) {
+      console.warn('Auto-create company info:', cErr.message);
     }
 
     // Prepare images array
@@ -630,6 +655,38 @@ router.put('/:id', protect, adminOnly, async (req, res) => {
       const existingSku = await Product.findOne({ sku: req.body.sku.trim(), _id: { $ne: product._id } });
       if (existingSku) {
         return res.status(400).json({ success: false, message: `SKU "${req.body.sku.trim()}" is already assigned to another product` });
+      }
+    }
+
+    // Check duplicate product name if changed (DUPLICATION PREVENTION)
+    if (req.body.name && req.body.name.trim() !== '' && req.body.name.trim().toLowerCase() !== product.name.toLowerCase()) {
+      const escapedName = req.body.name.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const existingName = await Product.findOne({
+        _id: { $ne: product._id },
+        name: { $regex: new RegExp(`^${escapedName}$`, 'i') }
+      });
+      if (existingName) {
+        return res.status(400).json({ success: false, message: `Another product with name "${req.body.name.trim()}" already exists` });
+      }
+    }
+
+    // Auto-ensure Company exists in Company collection so it shows up in public website directory
+    if (req.body.company && req.body.company.trim()) {
+      const targetComp = req.body.company.trim();
+      try {
+        const escapedComp = targetComp.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const compExists = await Company.findOne({ name: { $regex: new RegExp(`^${escapedComp}$`, 'i') } });
+        if (!compExists) {
+          const newComp = new Company({
+            name: targetComp,
+            category: (req.body.category && req.body.category.trim()) || 'Pharmaceutical Formulations',
+            status: 'Published',
+            isVerified: true
+          });
+          await newComp.save();
+        }
+      } catch (cErr) {
+        console.warn('Auto-create company info:', cErr.message);
       }
     }
 

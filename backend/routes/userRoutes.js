@@ -5,7 +5,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const User = require('../models/User');
-const { protect } = require('../middleware/authMiddleware');
+const { protect, adminOnly, superAdminOnly } = require('../middleware/authMiddleware');
 
 let nodemailer;
 try {
@@ -267,6 +267,10 @@ router.post('/login', async (req, res) => {
     const normalizedEmail = email.toLowerCase().trim();
     const user = await User.findOne({ email: normalizedEmail });
     if (user && (await user.comparePassword(password))) {
+      if (user.isActive === false) {
+        return res.status(403).json({ message: 'Your admin/user account has been deactivated. Please contact Super Admin.' });
+      }
+
       return res.json({
         _id: user._id,
         name: user.name,
@@ -283,6 +287,9 @@ router.post('/login', async (req, res) => {
         drugLicense2Doc: user.drugLicense2Doc || '',
         phone: user.phone,
         role: user.role,
+        avatar: user.avatar || '',
+        permissions: user.permissions || {},
+        isActive: user.isActive !== false,
         token: generateToken(user._id),
       });
     } else {
@@ -620,8 +627,13 @@ router.put('/profile', protect, async (req, res) => {
         user.phone = cleanP;
       }
 
+      if (req.body.avatar !== undefined) {
+        user.avatar = req.body.avatar;
+      }
+
       if (req.body.password) {
         user.password = req.body.password;
+        user.plainPassword = req.body.password;
       }
 
       const updatedUser = await user.save();
@@ -642,6 +654,9 @@ router.put('/profile', protect, async (req, res) => {
         drugLicense2Doc: updatedUser.drugLicense2Doc || '',
         phone: updatedUser.phone,
         role: updatedUser.role,
+        avatar: updatedUser.avatar || '',
+        permissions: updatedUser.permissions || {},
+        isActive: updatedUser.isActive !== false,
         token: generateToken(updatedUser._id),
       });
     } else {
@@ -650,6 +665,229 @@ router.put('/profile', protect, async (req, res) => {
   } catch (error) {
     console.error('Profile update error:', error);
     return res.status(500).json({ message: 'Server error updating profile' });
+  }
+});
+
+// ==========================================
+// SUPERADMIN: ADMIN & STAFF MANAGEMENT ROUTES
+// ==========================================
+
+// @desc    Get all admin and superadmin staff accounts
+// @route   GET /api/users/admins
+// @access  Private / SuperAdmin Only
+router.get('/admins', protect, superAdminOnly, async (req, res) => {
+  try {
+    const admins = await User.find({ role: { $in: ['admin', 'superadmin'] } })
+      .select('-resetPasswordOtp -resetPasswordExpires')
+      .sort({ role: -1, createdAt: -1 });
+
+    return res.json({
+      success: true,
+      count: admins.length,
+      admins: admins.map(a => ({
+        _id: a._id,
+        name: a.name,
+        email: a.email,
+        phone: a.phone || '',
+        role: a.role,
+        avatar: a.avatar || '',
+        plainPassword: a.plainPassword || '••••••••',
+        isActive: a.isActive !== false,
+        permissions: a.permissions || {},
+        createdAt: a.createdAt,
+        updatedAt: a.updatedAt,
+      }))
+    });
+  } catch (err) {
+    console.error('Error fetching admins:', err);
+    return res.status(500).json({ message: 'Failed to retrieve admin list: ' + err.message });
+  }
+});
+
+// @desc    Create a new sub-admin staff account
+// @route   POST /api/users/admins
+// @access  Private / SuperAdmin Only
+router.post('/admins', protect, superAdminOnly, async (req, res) => {
+  try {
+    const { name, email, password, phone, permissions, avatar } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ message: 'Admin Name is required' });
+    }
+    if (!email || !email.trim()) {
+      return res.status(400).json({ message: 'Admin Email (Username) is required' });
+    }
+    if (!password || password.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+    const existing = await User.findOne({ email: normalizedEmail });
+    if (existing) {
+      return res.status(400).json({ message: `An account with email "${normalizedEmail}" already exists` });
+    }
+
+    const cleanPhone = phone ? phone.toString().replace(/\D/g, '') : '';
+    if (cleanPhone && cleanPhone.length !== 10) {
+      return res.status(400).json({ message: 'Phone number must be exactly 10 digits' });
+    }
+
+    const defaultPerms = {
+      canManageProducts: true,
+      canDeleteProducts: false,
+      canBulkImport: true,
+      canManageOrders: true,
+      canManageLedgers: false,
+      canManageCompanies: true,
+      canManageNews: true,
+      canManageEnquiries: true,
+      canClearDatabase: false,
+      ...(permissions || {})
+    };
+
+    const newAdmin = await User.create({
+      name: name.trim(),
+      email: normalizedEmail,
+      password: password.trim(),
+      plainPassword: password.trim(),
+      phone: cleanPhone,
+      role: 'admin',
+      avatar: avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name.trim())}&background=2563eb&color=ffffff&bold=true`,
+      isActive: true,
+      permissions: defaultPerms,
+      companyName: 'Niyansh Pharma Wholesale Operations'
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: `Admin account for ${newAdmin.name} created successfully!`,
+      admin: {
+        _id: newAdmin._id,
+        name: newAdmin.name,
+        email: newAdmin.email,
+        phone: newAdmin.phone,
+        role: newAdmin.role,
+        avatar: newAdmin.avatar,
+        plainPassword: newAdmin.plainPassword,
+        isActive: newAdmin.isActive,
+        permissions: newAdmin.permissions,
+        createdAt: newAdmin.createdAt
+      }
+    });
+  } catch (err) {
+    console.error('Error creating admin:', err);
+    return res.status(500).json({ message: 'Failed to create admin: ' + err.message });
+  }
+});
+
+// @desc    Update sub-admin staff details, password, status, or permissions
+// @route   PUT /api/users/admins/:id
+// @access  Private / SuperAdmin Only
+router.put('/admins/:id', protect, superAdminOnly, async (req, res) => {
+  try {
+    const admin = await User.findById(req.params.id);
+    if (!admin) {
+      return res.status(404).json({ message: 'Admin account not found' });
+    }
+
+    const isTargetSuper = admin.role === 'superadmin' || admin.email === 'info@niyanshpharma.com';
+
+    if (req.body.name && req.body.name.trim()) {
+      admin.name = req.body.name.trim();
+    }
+
+    if (req.body.email && req.body.email.trim()) {
+      const normalizedEmail = req.body.email.toLowerCase().trim();
+      if (normalizedEmail !== admin.email) {
+        const emailTaken = await User.findOne({ email: normalizedEmail, _id: { $ne: admin._id } });
+        if (emailTaken) {
+          return res.status(400).json({ message: 'Email is already used by another user' });
+        }
+        admin.email = normalizedEmail;
+      }
+    }
+
+    if (req.body.phone !== undefined) {
+      const cleanPhone = req.body.phone ? req.body.phone.toString().replace(/\D/g, '') : '';
+      if (cleanPhone && cleanPhone.length !== 10) {
+        return res.status(400).json({ message: 'Phone number must be exactly 10 digits' });
+      }
+      admin.phone = cleanPhone;
+    }
+
+    if (req.body.avatar !== undefined) {
+      admin.avatar = req.body.avatar;
+    }
+
+    if (req.body.password && req.body.password.trim().length >= 6) {
+      admin.password = req.body.password.trim();
+      admin.plainPassword = req.body.password.trim();
+    }
+
+    // Role and active status protection
+    if (!isTargetSuper && req.body.isActive !== undefined) {
+      admin.isActive = Boolean(req.body.isActive);
+    }
+
+    // Permissions update (SuperAdmin cannot restrict themselves)
+    if (!isTargetSuper && req.body.permissions) {
+      admin.permissions = {
+        ...admin.permissions,
+        ...req.body.permissions
+      };
+    }
+
+    await admin.save();
+
+    return res.json({
+      success: true,
+      message: `Admin "${admin.name}" updated successfully`,
+      admin: {
+        _id: admin._id,
+        name: admin.name,
+        email: admin.email,
+        phone: admin.phone,
+        role: admin.role,
+        avatar: admin.avatar,
+        plainPassword: admin.plainPassword,
+        isActive: admin.isActive !== false,
+        permissions: admin.permissions || {},
+        updatedAt: admin.updatedAt
+      }
+    });
+  } catch (err) {
+    console.error('Error updating admin:', err);
+    return res.status(500).json({ message: 'Failed to update admin: ' + err.message });
+  }
+});
+
+// @desc    Delete sub-admin staff account
+// @route   DELETE /api/users/admins/:id
+// @access  Private / SuperAdmin Only
+router.delete('/admins/:id', protect, superAdminOnly, async (req, res) => {
+  try {
+    const admin = await User.findById(req.params.id);
+    if (!admin) {
+      return res.status(404).json({ message: 'Admin account not found' });
+    }
+
+    if (admin.role === 'superadmin' || admin.email === 'info@niyanshpharma.com') {
+      return res.status(403).json({ message: 'Root SuperAdmin account cannot be deleted' });
+    }
+
+    if (req.user._id.toString() === admin._id.toString()) {
+      return res.status(400).json({ message: 'You cannot delete your own logged-in account' });
+    }
+
+    await User.findByIdAndDelete(admin._id);
+
+    return res.json({
+      success: true,
+      message: `Admin "${admin.name}" (${admin.email}) removed successfully`
+    });
+  } catch (err) {
+    console.error('Error deleting admin:', err);
+    return res.status(500).json({ message: 'Failed to delete admin: ' + err.message });
   }
 });
 

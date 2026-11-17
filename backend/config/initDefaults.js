@@ -199,25 +199,98 @@ const initDefaults = async () => {
 
   initPromise = (async () => {
     try {
-      // 1. Ensure Admin User
+      // 1. Ensure SuperAdmin & Admin Users
+      // 1A. SuperAdmin User (Full Control Master Account)
+      const superAdminEmail = 'info@niyanshpharma.com';
+      let superAdmin = await User.findOne({ email: superAdminEmail });
+      const superPermissions = {
+        canManageProducts: true,
+        canDeleteProducts: true,
+        canBulkImport: true,
+        canManageOrders: true,
+        canManageLedgers: true,
+        canManageCompanies: true,
+        canManageNews: true,
+        canManageEnquiries: true,
+        canClearDatabase: true
+      };
+
+      if (!superAdmin) {
+        try {
+          await User.create({
+            name: 'Niyansh Super Admin',
+            email: superAdminEmail,
+            password: 'NiyanshSuper@2026',
+            plainPassword: 'NiyanshSuper@2026',
+            companyName: 'Niyansh Pharma Wholesale Distribution',
+            role: 'superadmin',
+            phone: '9316566894',
+            gstin: '24TESTG1234F1Z9',
+            avatar: 'https://ui-avatars.com/api/?name=Super+Admin&background=f59e0b&color=ffffff&bold=true',
+            isActive: true,
+            permissions: superPermissions
+          });
+          console.log(`✅ SuperAdmin user created: ${superAdminEmail}`);
+        } catch (sErr) {
+          if (!sErr.message.includes('E11000')) console.warn('SuperAdmin user setup:', sErr.message);
+        }
+      } else {
+        // Upgrade existing info user to superadmin if needed
+        let needSave = false;
+        if (superAdmin.role !== 'superadmin') {
+          superAdmin.role = 'superadmin';
+          needSave = true;
+        }
+        if (!superAdmin.plainPassword) {
+          superAdmin.plainPassword = 'NiyanshSuper@2026';
+          needSave = true;
+        }
+        if (!superAdmin.avatar) {
+          superAdmin.avatar = 'https://ui-avatars.com/api/?name=Super+Admin&background=f59e0b&color=ffffff&bold=true';
+          needSave = true;
+        }
+        if (needSave) {
+          await superAdmin.save();
+          console.log(`✅ SuperAdmin account updated: ${superAdminEmail}`);
+        }
+      }
+
+      // 1B. Standard Staff Admin User
       const adminUser = await User.findOne({ email: 'admin@niyanshpharma.com' });
       if (!adminUser) {
         try {
           await User.create({
-            name: 'Niyansh Admin',
+            name: 'Niyansh Staff Admin',
             email: 'admin@niyanshpharma.com',
             password: 'admin123',
+            plainPassword: 'admin123',
             companyName: 'Niyansh Pharma Wholesale Distribution',
             role: 'admin',
             phone: '9316566894',
             gstin: '24TESTG1234F1Z9',
+            avatar: 'https://ui-avatars.com/api/?name=Admin+Staff&background=2563eb&color=ffffff&bold=true',
+            isActive: true,
+            permissions: {
+              canManageProducts: true,
+              canDeleteProducts: false,
+              canBulkImport: true,
+              canManageOrders: true,
+              canManageLedgers: false,
+              canManageCompanies: true,
+              canManageNews: true,
+              canManageEnquiries: true,
+              canClearDatabase: false
+            }
           });
-          console.log('✅ Admin user created: admin@niyanshpharma.com');
+          console.log('✅ Staff Admin user created: admin@niyanshpharma.com');
         } catch (uErr) {
           if (!uErr.message.includes('E11000')) {
             console.warn('Admin user setup:', uErr.message);
           }
         }
+      } else if (!adminUser.plainPassword) {
+        adminUser.plainPassword = 'admin123';
+        await adminUser.save();
       }
 
       // 2. Ensure News / Schemes

@@ -19,6 +19,10 @@ const protect = async (req, res, next) => {
         return res.status(401).json({ message: 'Not authorized, user not found' });
       }
 
+      if (req.user.isActive === false) {
+        return res.status(403).json({ message: 'Account deactivated. Please contact Super Admin.' });
+      }
+
       return next();
     } catch (error) {
       console.error('JWT validation error:', error);
@@ -32,11 +36,19 @@ const protect = async (req, res, next) => {
 };
 
 const adminOnly = (req, res, next) => {
-  if (req.user && req.user.role === 'admin') {
+  if (req.user && (req.user.role === 'admin' || req.user.role === 'superadmin')) {
     return next();
   } else {
     return res.status(403).json({ message: 'Not authorized as an admin' });
   }
 };
 
-module.exports = { protect, adminOnly };
+const superAdminOnly = (req, res, next) => {
+  if (req.user && req.user.role === 'superadmin') {
+    return next();
+  } else {
+    return res.status(403).json({ message: 'Super Admin access required for this action' });
+  }
+};
+
+module.exports = { protect, adminOnly, superAdminOnly };

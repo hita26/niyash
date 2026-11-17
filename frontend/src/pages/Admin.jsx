@@ -9,7 +9,7 @@ import {
   Tag, ShieldCheck, Sparkles, Clock, AlertTriangle, Printer, Share2, Receipt,
   TrendingUp, Percent, Upload, Image as ImageIcon, Star, Grid, List,
   FileSpreadsheet, ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Layers,
-  Copy, CheckCheck, MapPin, Mail, Save
+  Copy, CheckCheck, MapPin, Mail, Save, EyeOff, Shield, Users, Key, Crown, UserCheck, UserX
 } from 'lucide-react';
 import { broadcastLiveEvent, SYNC_EVENTS } from '../utils/liveSync';
 import { useLanguage } from '../context/LanguageContext';
@@ -558,11 +558,59 @@ const formatDate = (dateStr) => {
 
 function Admin() {
   const { t, formatCurrency, formatDate, translateStatus, translatePaymentStatus } = useLanguage();
-  // Authentication State
+  // Authentication & Role State
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('niyansh_admin_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
+  });
+
+  const isSuperAdmin = currentUser?.role === 'superadmin' || currentUser?.email === 'info@niyanshpharma.com';
+  const hasPermission = (permKey) => {
+    if (isSuperAdmin) return true;
+    if (!currentUser || !currentUser.permissions) return false;
+    return Boolean(currentUser.permissions[permKey]);
+  };
+
+  // Staff & Admin Management State (SuperAdmin Only)
+  const [adminList, setAdminList] = useState([]);
+  const [isAdminListLoading, setIsAdminListLoading] = useState(false);
+  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+  const [editingAdmin, setEditingAdmin] = useState(null);
+  const [adminFormName, setAdminFormName] = useState('');
+  const [adminFormEmail, setAdminFormEmail] = useState('');
+  const [adminFormPassword, setAdminFormPassword] = useState('');
+  const [adminFormPhone, setAdminFormPhone] = useState('');
+  const [adminFormPermissions, setAdminFormPermissions] = useState({
+    canManageProducts: true,
+    canDeleteProducts: false,
+    canBulkImport: true,
+    canManageOrders: true,
+    canManageLedgers: false,
+    canManageCompanies: true,
+    canManageNews: true,
+    canManageEnquiries: true,
+    canClearDatabase: false
+  });
+  const [showPasswordMap, setShowPasswordMap] = useState({});
+  const [isSavingAdmin, setIsSavingAdmin] = useState(false);
+
+  // Profile Modal State (SuperAdmin & Admin)
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [profileName, setProfileName] = useState('');
+  const [profilePhone, setProfilePhone] = useState('');
+  const [profileEmail, setProfileEmail] = useState('');
+  const [profileAvatar, setProfileAvatar] = useState('');
+  const [profilePassword, setProfilePassword] = useState('');
+  const [profileConfirmPassword, setProfileConfirmPassword] = useState('');
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
 
   // Active Tab
   const [activeTab, setActiveTab] = useState('overview');
@@ -789,9 +837,15 @@ function Admin() {
   useEffect(() => {
     const adminSession = localStorage.getItem('niyansh_admin_session');
     const token = localStorage.getItem('niyansh_admin_token');
+    const savedUser = localStorage.getItem('niyansh_admin_user');
     if (adminSession === 'active' || token) {
       setIsAuthenticated(true);
       if (token) setAdminToken(token);
+      if (savedUser) {
+        try {
+          setCurrentUser(JSON.parse(savedUser));
+        } catch (e) {}
+      }
     }
   }, []);
 
@@ -799,8 +853,11 @@ function Admin() {
   useEffect(() => {
     if (isAuthenticated) {
       fetchDashboardData();
+      if (isSuperAdmin) {
+        fetchAdmins();
+      }
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isSuperAdmin]);
 
   const fetchDashboardData = async () => {
     setIsLoading(true);
@@ -952,9 +1009,23 @@ function Admin() {
       if (res.ok && data.token) {
         setIsAuthenticated(true);
         setAdminToken(data.token);
+        const userObj = {
+          _id: data._id,
+          name: data.name,
+          email: data.email,
+          role: data.role || 'admin',
+          phone: data.phone || '',
+          avatar: data.avatar || '',
+          permissions: data.permissions || {}
+        };
+        setCurrentUser(userObj);
         localStorage.setItem('niyansh_admin_session', 'active');
         localStorage.setItem('niyansh_admin_token', data.token);
-        showToast('Welcome back, Admin! Live console connected.');
+        localStorage.setItem('niyansh_admin_user', JSON.stringify(userObj));
+        showToast(`Welcome back, ${userObj.name}! (${userObj.role === 'superadmin' ? '👑 Super Admin Console' : '🛡️ Operations Admin Console'} active)`);
+        return;
+      } else if (data.message) {
+        setLoginError(data.message);
         return;
       }
     } catch (err) {
@@ -964,21 +1035,296 @@ function Admin() {
     }
 
     // Demo fallback login if backend unreachable
-    if (email === 'admin@niyanshpharma.com' && password === 'admin123') {
+    const normEmail = email.trim().toLowerCase();
+    if (normEmail === 'info@niyanshpharma.com' && password === 'NiyanshSuper@2026') {
+      const superUser = {
+        _id: 'super-root',
+        name: 'Niyansh Super Admin',
+        email: 'info@niyanshpharma.com',
+        role: 'superadmin',
+        phone: '9316566894',
+        avatar: 'https://ui-avatars.com/api/?name=Super+Admin&background=f59e0b&color=ffffff&bold=true',
+        permissions: {
+          canManageProducts: true,
+          canDeleteProducts: true,
+          canBulkImport: true,
+          canManageOrders: true,
+          canManageLedgers: true,
+          canManageCompanies: true,
+          canManageNews: true,
+          canManageEnquiries: true,
+          canClearDatabase: true
+        }
+      };
       setIsAuthenticated(true);
+      setCurrentUser(superUser);
       localStorage.setItem('niyansh_admin_session', 'active');
+      localStorage.setItem('niyansh_admin_user', JSON.stringify(superUser));
       setLoginError('');
-      showToast('Welcome back, Admin! (Offline demo session active)');
-    } else {
-      setLoginError('Invalid email or password. Use demo credentials: admin@niyanshpharma.com / admin123');
+      showToast('👑 Welcome back, Super Admin! Live console active.');
+      return;
     }
+
+    if (normEmail === 'admin@niyanshpharma.com' && password === 'admin123') {
+      const adminUser = {
+        _id: 'admin-staff-demo',
+        name: 'Niyansh Staff Admin',
+        email: 'admin@niyanshpharma.com',
+        role: 'admin',
+        phone: '9316566894',
+        avatar: 'https://ui-avatars.com/api/?name=Admin+Staff&background=2563eb&color=ffffff&bold=true',
+        permissions: {
+          canManageProducts: true,
+          canDeleteProducts: false,
+          canBulkImport: true,
+          canManageOrders: true,
+          canManageLedgers: false,
+          canManageCompanies: true,
+          canManageNews: true,
+          canManageEnquiries: true,
+          canClearDatabase: false
+        }
+      };
+      setIsAuthenticated(true);
+      setCurrentUser(adminUser);
+      localStorage.setItem('niyansh_admin_session', 'active');
+      localStorage.setItem('niyansh_admin_user', JSON.stringify(adminUser));
+      setLoginError('');
+      showToast('Welcome back, Admin! (Staff console active)');
+      return;
+    }
+
+    setLoginError('Invalid email or password. SuperAdmin: info@niyanshpharma.com / NiyanshSuper@2026 or Admin: admin@niyanshpharma.com / admin123');
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
     setAdminToken('');
+    setCurrentUser(null);
     localStorage.removeItem('niyansh_admin_session');
     localStorage.removeItem('niyansh_admin_token');
+    localStorage.removeItem('niyansh_admin_user');
+    showToast('Logged out successfully.');
+  };
+
+  // ==========================================
+  // SUPERADMIN: ADMIN & STAFF MANAGEMENT HANDLERS
+  // ==========================================
+
+  const fetchAdmins = async () => {
+    setIsAdminListLoading(true);
+    try {
+      const res = await fetch('/api/users/admins', { headers: getAuthHeaders() });
+      const data = await res.json();
+      if (res.ok && data.success && Array.isArray(data.admins)) {
+        setAdminList(data.admins);
+      }
+    } catch (err) {
+      console.warn('Error fetching admin accounts:', err);
+    } finally {
+      setIsAdminListLoading(false);
+    }
+  };
+
+  const handleOpenAdminModal = (admin = null) => {
+    if (admin) {
+      setEditingAdmin(admin);
+      setAdminFormName(admin.name || '');
+      setAdminFormEmail(admin.email || '');
+      setAdminFormPassword(admin.plainPassword || '');
+      setAdminFormPhone(admin.phone || '');
+      setAdminFormPermissions(admin.permissions || {
+        canManageProducts: true,
+        canDeleteProducts: false,
+        canBulkImport: true,
+        canManageOrders: true,
+        canManageLedgers: false,
+        canManageCompanies: true,
+        canManageNews: true,
+        canManageEnquiries: true,
+        canClearDatabase: false
+      });
+    } else {
+      setEditingAdmin(null);
+      setAdminFormName('');
+      setAdminFormEmail('');
+      const randNum = Math.floor(1000 + Math.random() * 9000);
+      setAdminFormPassword(`NpStaff@${randNum}`);
+      setAdminFormPhone('');
+      setAdminFormPermissions({
+        canManageProducts: true,
+        canDeleteProducts: false,
+        canBulkImport: true,
+        canManageOrders: true,
+        canManageLedgers: false,
+        canManageCompanies: true,
+        canManageNews: true,
+        canManageEnquiries: true,
+        canClearDatabase: false
+      });
+    }
+    setIsAdminModalOpen(true);
+  };
+
+  const handleSaveAdmin = async (e) => {
+    e.preventDefault();
+    if (!adminFormName.trim()) {
+      showToast('Admin full name is required', 'error');
+      return;
+    }
+    if (!adminFormEmail.trim()) {
+      showToast('Admin email (username) is required', 'error');
+      return;
+    }
+    if (!editingAdmin && (!adminFormPassword || adminFormPassword.length < 6)) {
+      showToast('Password must be at least 6 characters', 'error');
+      return;
+    }
+
+    setIsSavingAdmin(true);
+    try {
+      const payload = {
+        name: adminFormName.trim(),
+        email: adminFormEmail.trim().toLowerCase(),
+        phone: adminFormPhone.replace(/\D/g, ''),
+        permissions: adminFormPermissions
+      };
+      if (adminFormPassword) {
+        payload.password = adminFormPassword.trim();
+      }
+
+      const url = editingAdmin ? `/api/users/admins/${editingAdmin._id}` : '/api/users/admins';
+      const method = editingAdmin ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
+        headers: getAuthHeaders(),
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast(editingAdmin ? `✅ Updated admin "${data.admin.name}"` : `✅ Created new admin "${data.admin.name}"`);
+        setIsAdminModalOpen(false);
+        fetchAdmins();
+      } else {
+        showToast(data.message || 'Failed to save admin account', 'error');
+      }
+    } catch (err) {
+      showToast('Network error saving admin: ' + err.message, 'error');
+    } finally {
+      setIsSavingAdmin(false);
+    }
+  };
+
+  const handleToggleAdminStatus = async (admin) => {
+    if (admin.role === 'superadmin' || admin.email === 'info@niyanshpharma.com') {
+      showToast('Super Admin root account cannot be deactivated', 'error');
+      return;
+    }
+    try {
+      const newStatus = !admin.isActive;
+      const res = await fetch(`/api/users/admins/${admin._id}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ isActive: newStatus })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast(`Admin "${admin.name}" is now ${newStatus ? 'Active' : 'Deactivated'}`);
+        fetchAdmins();
+      } else {
+        showToast(data.message || 'Failed to update status', 'error');
+      }
+    } catch (err) {
+      showToast('Error updating status: ' + err.message, 'error');
+    }
+  };
+
+  const handleDeleteAdmin = async (admin) => {
+    if (admin.role === 'superadmin' || admin.email === 'info@niyanshpharma.com') {
+      showToast('Super Admin account cannot be deleted', 'error');
+      return;
+    }
+    if (window.confirm(`Are you sure you want to permanently delete Admin "${admin.name}" (${admin.email})?`)) {
+      try {
+        const res = await fetch(`/api/users/admins/${admin._id}`, {
+          method: 'DELETE',
+          headers: getAuthHeaders()
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          showToast(`Admin "${admin.name}" deleted successfully.`);
+          fetchAdmins();
+        } else {
+          showToast(data.message || 'Failed to delete admin', 'error');
+        }
+      } catch (err) {
+        showToast('Error deleting admin: ' + err.message, 'error');
+      }
+    }
+  };
+
+  // ==========================================
+  // SUPERADMIN: PROFILE MANAGEMENT HANDLERS
+  // ==========================================
+
+  const handleOpenProfileModal = () => {
+    setProfileName(currentUser?.name || (isSuperAdmin ? 'Niyansh Super Admin' : 'Admin Staff'));
+    setProfilePhone(currentUser?.phone || '9316566894');
+    setProfileEmail(currentUser?.email || (isSuperAdmin ? 'info@niyanshpharma.com' : 'admin@niyanshpharma.com'));
+    setProfileAvatar(currentUser?.avatar || '');
+    setProfilePassword('');
+    setProfileConfirmPassword('');
+    setIsProfileModalOpen(true);
+  };
+
+  const handleSaveProfile = async (e) => {
+    e.preventDefault();
+    if (profilePassword && profilePassword !== profileConfirmPassword) {
+      showToast('New passwords do not match!', 'error');
+      return;
+    }
+    if (profilePassword && profilePassword.length < 6) {
+      showToast('Password must be at least 6 characters', 'error');
+      return;
+    }
+
+    setIsSavingProfile(true);
+    try {
+      const payload = {
+        name: profileName.trim(),
+        phone: profilePhone.replace(/\D/g, ''),
+        avatar: profileAvatar.trim()
+      };
+      if (profilePassword) {
+        payload.password = profilePassword.trim();
+      }
+
+      const res = await fetch('/api/users/profile', {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (res.ok) {
+        const updatedUser = {
+          ...currentUser,
+          name: data.name,
+          phone: data.phone,
+          avatar: data.avatar || payload.avatar
+        };
+        setCurrentUser(updatedUser);
+        localStorage.setItem('niyansh_admin_user', JSON.stringify(updatedUser));
+        showToast('✅ Profile updated successfully!');
+        setIsProfileModalOpen(false);
+      } else {
+        showToast(data.message || 'Failed to update profile', 'error');
+      }
+    } catch (err) {
+      showToast('Network error updating profile: ' + err.message, 'error');
+    } finally {
+      setIsSavingProfile(false);
+    }
   };
 
   // ==========================================
@@ -1605,6 +1951,10 @@ _Helpline: +91 9316566894_`;
   };
 
   const handleRequestDeleteProduct = (product) => {
+    if (!isSuperAdmin && !hasPermission('canDeleteProducts')) {
+      showToast('⚠️ You do not have permission to delete products. Please contact Super Admin.', 'warning');
+      return;
+    }
     setDeleteConfirm({
       type: 'product',
       id: product._id,
@@ -1614,6 +1964,10 @@ _Helpline: +91 9316566894_`;
   };
 
   const handleRequestDeleteCompany = (company) => {
+    if (!isSuperAdmin && !hasPermission('canManageCompanies')) {
+      showToast('⚠️ You do not have permission to delete companies. Please contact Super Admin.', 'warning');
+      return;
+    }
     setDeleteConfirm({
       type: 'company',
       id: company._id,
@@ -3153,10 +3507,35 @@ _Helpline: +91 9316566894_`;
             </button>
           </form>
 
-          <div style={{ marginTop: '25px', padding: '12px', backgroundColor: 'var(--bg-surface-alt)', border: '1px dashed var(--border-light)', borderRadius: '8px', fontSize: '0.8rem', color: 'var(--text-medium)', textAlign: 'center' }}>
-            🔑 <strong>Demo Credentials:</strong><br />
-            Email: <span style={{ fontFamily: 'monospace', color: 'var(--primary-blue)', fontWeight: '600' }}>admin@niyanshpharma.com</span><br />
-            Password: <span style={{ fontFamily: 'monospace', color: 'var(--primary-blue)', fontWeight: '600' }}>admin123</span>
+          <div style={{ marginTop: '20px', padding: '14px', backgroundColor: '#f8fafc', border: '1px dashed #cbd5e1', borderRadius: '10px', fontSize: '0.8rem', color: 'var(--text-medium)' }}>
+            <div style={{ fontWeight: '700', color: 'var(--text-dark)', marginBottom: '8px', textAlign: 'center' }}>
+              🔑 Quick Login Credentials (Click to Auto-Fill):
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={() => { setEmail('info@niyanshpharma.com'); setPassword('NiyanshSuper@2026'); }}
+                style={{ padding: '8px 12px', borderRadius: '8px', border: '1.5px solid #fde68a', backgroundColor: '#fffbeb', color: '#92400e', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem' }}
+              >
+                <div>
+                  <strong>👑 Super Admin (Master Account)</strong><br />
+                  <span style={{ fontFamily: 'monospace' }}>info@niyanshpharma.com</span> • <span style={{ fontFamily: 'monospace' }}>NiyanshSuper@2026</span>
+                </div>
+                <span style={{ fontSize: '0.72rem', fontWeight: '800', backgroundColor: '#f59e0b', color: '#fff', padding: '2px 8px', borderRadius: '6px' }}>Auto-Fill</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => { setEmail('admin@niyanshpharma.com'); setPassword('admin123'); }}
+                style={{ padding: '8px 12px', borderRadius: '8px', border: '1.5px solid #bfdbfe', backgroundColor: '#eff6ff', color: '#1e40af', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem' }}
+              >
+                <div>
+                  <strong>🛡️ Staff Admin (Operations)</strong><br />
+                  <span style={{ fontFamily: 'monospace' }}>admin@niyanshpharma.com</span> • <span style={{ fontFamily: 'monospace' }}>admin123</span>
+                </div>
+                <span style={{ fontSize: '0.72rem', fontWeight: '800', backgroundColor: '#2563eb', color: '#fff', padding: '2px 8px', borderRadius: '6px' }}>Auto-Fill</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -3319,13 +3698,69 @@ _Helpline: +91 9316566894_`;
         {/* Sidebar Nav */}
         <aside className="card admin-desktop-sidebar" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ borderBottom: '1px solid var(--border-light)', paddingBottom: '15px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#22c55e', animation: 'pulse 2s infinite' }}></div>
-              <h3 style={{ fontSize: '1.15rem', color: 'var(--text-dark)', margin: 0 }}>{t('admin.consoleSidebarTitle', 'Admin Console')}</h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#22c55e', animation: 'pulse 2s infinite' }}></div>
+                <h3 style={{ fontSize: '1.15rem', color: 'var(--text-dark)', margin: 0 }}>{t('admin.consoleSidebarTitle', 'Admin Console')}</h3>
+              </div>
             </div>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', display: 'block', marginTop: '4px' }}>
               Niyansh Pharma B2B Portal
             </span>
+
+            {/* Logged in User Profile Card */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '10px 12px',
+              backgroundColor: isSuperAdmin ? '#fffbeb' : '#f8fafc',
+              border: `1.5px solid ${isSuperAdmin ? '#fde68a' : '#e2e8f0'}`,
+              borderRadius: '10px',
+              marginTop: '12px'
+            }}>
+              <img 
+                src={currentUser?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser?.name || (isSuperAdmin ? 'Super Admin' : 'Admin'))}&background=${isSuperAdmin ? 'f59e0b' : '2563eb'}&color=ffffff&bold=true`}
+                alt="Avatar"
+                style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover', border: `2px solid ${isSuperAdmin ? '#f59e0b' : '#2563eb'}`, flexShrink: 0 }}
+              />
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ fontSize: '0.86rem', fontWeight: '700', color: 'var(--text-dark)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {currentUser?.name || (isSuperAdmin ? 'Niyansh Super Admin' : 'Operations Admin')}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+                  {isSuperAdmin ? (
+                    <span style={{ fontSize: '0.68rem', fontWeight: '800', backgroundColor: '#f59e0b', color: '#ffffff', padding: '1px 7px', borderRadius: '10px', letterSpacing: '0.3px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                      <Crown size={10} /> Super Admin
+                    </span>
+                  ) : (
+                    <span style={{ fontSize: '0.68rem', fontWeight: '800', backgroundColor: '#2563eb', color: '#ffffff', padding: '1px 7px', borderRadius: '10px', letterSpacing: '0.3px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                      <Shield size={10} /> Staff Admin
+                    </span>
+                  )}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleOpenProfileModal}
+                title="Edit My Profile & Password"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: isSuperAdmin ? '#b45309' : '#2563eb',
+                  padding: '5px',
+                  borderRadius: '6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: '#ffffff',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.06)'
+                }}
+              >
+                <Edit2 size={13} />
+              </button>
+            </div>
           </div>
 
           <nav style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -3342,6 +3777,28 @@ _Helpline: +91 9316566894_`;
                 <LayoutDashboard size={16} /> Overview
               </div>
             </button>
+
+            {/* SUPERADMIN ONLY: MANAGE ADMINS TAB */}
+            {isSuperAdmin && (
+              <button 
+                onClick={() => { setActiveTab('manage-admins'); fetchAdmins(); }} 
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '10px 14px',
+                  borderRadius: '8px', fontWeight: '700', fontSize: '0.9rem',
+                  backgroundColor: activeTab === 'manage-admins' ? '#fef3c7' : '#fffbeb',
+                  color: '#92400e',
+                  border: `1.5px solid ${activeTab === 'manage-admins' ? '#f59e0b' : '#fde68a'}`,
+                  boxShadow: '0 1px 3px rgba(245, 158, 11, 0.1)'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <Users size={16} color="#d97706" /> 👥 Manage Admins
+                </div>
+                <span style={{ fontSize: '0.7rem', padding: '2px 7px', borderRadius: '10px', backgroundColor: '#f59e0b', color: '#ffffff', fontWeight: '800' }}>
+                  {adminList.length > 0 ? adminList.length : '👑'}
+                </span>
+              </button>
+            )}
 
             <button 
               onClick={() => setActiveTab('orders')} 
@@ -3360,24 +3817,26 @@ _Helpline: +91 9316566894_`;
               </span>
             </button>
 
-            <button 
-              onClick={() => setActiveTab('ledgers')} 
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '10px 14px',
-                borderRadius: '8px', fontWeight: '600', fontSize: '0.9rem',
-                backgroundColor: activeTab === 'ledgers' ? 'rgba(12, 61, 108, 0.1)' : 'transparent',
-                color: activeTab === 'ledgers' ? 'var(--primary-blue)' : 'var(--text-medium)'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <CreditCard size={16} /> 📊 Outstanding Ledger
-              </div>
-              {overdueLedgersCount > 0 && (
-                <span style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: '10px', backgroundColor: '#fee2e2', color: '#ef4444', fontWeight: '700' }}>
-                  {overdueLedgersCount} Due
-                </span>
-              )}
-            </button>
+            {(isSuperAdmin || hasPermission('canManageLedgers')) && (
+              <button 
+                onClick={() => setActiveTab('ledgers')} 
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '10px 14px',
+                  borderRadius: '8px', fontWeight: '600', fontSize: '0.9rem',
+                  backgroundColor: activeTab === 'ledgers' ? 'rgba(12, 61, 108, 0.1)' : 'transparent',
+                  color: activeTab === 'ledgers' ? 'var(--primary-blue)' : 'var(--text-medium)'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <CreditCard size={16} /> 📊 Outstanding Ledger
+                </div>
+                {overdueLedgersCount > 0 && (
+                  <span style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: '10px', backgroundColor: '#fee2e2', color: '#ef4444', fontWeight: '700' }}>
+                    {overdueLedgersCount} Due
+                  </span>
+                )}
+              </button>
+            )}
 
             <button 
               onClick={() => setActiveTab('news')} 
@@ -3463,6 +3922,26 @@ _Helpline: +91 9316566894_`;
                 Live
               </span>
             </button>
+
+            {/* QUICK PROFILE BUTTON */}
+            <button 
+              onClick={handleOpenProfileModal} 
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '10px 14px',
+                borderRadius: '8px', fontWeight: '600', fontSize: '0.9rem',
+                backgroundColor: 'transparent',
+                color: 'var(--text-medium)',
+                borderTop: '1px dashed #e2e8f0',
+                marginTop: '6px'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <User size={16} color="#059669" /> 👤 My Profile
+              </div>
+              <span style={{ fontSize: '0.7rem', color: '#059669', fontWeight: '700' }}>
+                Edit
+              </span>
+            </button>
           </nav>
 
           <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '15px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -3519,12 +3998,23 @@ _Helpline: +91 9316566894_`;
               <button onClick={() => setActiveTab('overview')} className={`admin-tab-chip ${activeTab === 'overview' ? 'active' : ''}`}>
                 <LayoutDashboard size={14} /> {t('admin.tabOverview', 'Overview')}
               </button>
+              {isSuperAdmin && (
+                <button 
+                  onClick={() => { setActiveTab('manage-admins'); fetchAdmins(); }} 
+                  className={`admin-tab-chip ${activeTab === 'manage-admins' ? 'active' : ''}`}
+                  style={{ backgroundColor: activeTab === 'manage-admins' ? '#f59e0b' : '#fffbeb', color: activeTab === 'manage-admins' ? '#fff' : '#b45309', border: '1.5px solid #fde68a', fontWeight: '700' }}
+                >
+                  <Users size={14} /> Admins ({adminList.length})
+                </button>
+              )}
               <button onClick={() => setActiveTab('orders')} className={`admin-tab-chip ${activeTab === 'orders' ? 'active' : ''}`}>
                 <Package size={14} /> {t('admin.tabOrders', 'Orders')} ({orders.length})
               </button>
-              <button onClick={() => setActiveTab('ledgers')} className={`admin-tab-chip ${activeTab === 'ledgers' ? 'active' : ''}`}>
-                <CreditCard size={14} /> {t('admin.tabLedgers', 'Ledgers')} {overdueLedgersCount > 0 ? `(${overdueLedgersCount} Due)` : `(${ledgers.length})`}
-              </button>
+              {(isSuperAdmin || hasPermission('canManageLedgers')) && (
+                <button onClick={() => setActiveTab('ledgers')} className={`admin-tab-chip ${activeTab === 'ledgers' ? 'active' : ''}`}>
+                  <CreditCard size={14} /> {t('admin.tabLedgers', 'Ledgers')} {overdueLedgersCount > 0 ? `(${overdueLedgersCount} Due)` : `(${ledgers.length})`}
+                </button>
+              )}
               <button onClick={() => setActiveTab('news')} className={`admin-tab-chip ${activeTab === 'news' ? 'active' : ''}`}>
                 <Flame size={14} /> {t('admin.tabBulletins', 'Schemes')} ({news.length})
               </button>
@@ -3539,6 +4029,9 @@ _Helpline: +91 9316566894_`;
               </button>
               <button onClick={() => setActiveTab('contact')} className={`admin-tab-chip ${activeTab === 'contact' ? 'active' : ''}`}>
                 <Phone size={14} /> 📞 Contact & Hub
+              </button>
+              <button onClick={handleOpenProfileModal} className="admin-tab-chip" style={{ color: '#059669', borderColor: '#a7f3d0' }}>
+                <User size={14} /> Profile
               </button>
             </div>
           </div>
@@ -4492,7 +4985,7 @@ _Helpline: +91 9316566894_`;
                         </button>
                       )}
 
-                      {products.length > 0 && (
+                      {products.length > 0 && (isSuperAdmin || hasPermission('canClearDatabase')) && (
                         <button 
                           onClick={handleClearAllProducts}
                           disabled={isClearingProducts}
@@ -5271,7 +5764,7 @@ _Helpline: +91 9316566894_`;
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                      {companies.length > 0 && (
+                      {companies.length > 0 && (isSuperAdmin || hasPermission('canClearDatabase')) && (
                         <button 
                           onClick={handleClearAllCompanies}
                           disabled={isClearingCompanies}
@@ -6034,6 +6527,292 @@ _Helpline: +91 9316566894_`;
                           loading="lazy"
                         />
                       </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ==========================================
+                  TAB 9: SUPERADMIN STAFF & ADMINS MANAGER
+                  ========================================== */}
+              {activeTab === 'manage-admins' && isSuperAdmin && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+                  
+                  {/* HEADER */}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '16px',
+                    padding: '20px 24px',
+                    backgroundColor: '#ffffff',
+                    borderRadius: '14px',
+                    border: '1.5px solid #fde68a',
+                    boxShadow: '0 4px 15px rgba(245, 158, 11, 0.08)'
+                  }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: '800', backgroundColor: '#fef3c7', color: '#b45309', padding: '2px 8px', borderRadius: '10px', textTransform: 'uppercase' }}>
+                          👑 Super Admin Exclusive
+                        </span>
+                        <span style={{ fontSize: '0.72rem', fontWeight: '700', backgroundColor: '#ecfdf5', color: '#047857', padding: '2px 8px', borderRadius: '10px' }}>
+                          ✓ Live Access Control
+                        </span>
+                      </div>
+                      <h2 style={{ fontSize: '1.45rem', fontWeight: '800', color: 'var(--text-dark)', margin: 0 }}>
+                        Admins & Staff Management
+                      </h2>
+                      <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: 'var(--text-medium)' }}>
+                        Create sub-admins, manage login credentials, and assign custom granular permissions.
+                      </p>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <button
+                        type="button"
+                        onClick={fetchAdmins}
+                        disabled={isAdminListLoading}
+                        className="btn btn-outline btn-sm"
+                        style={{ gap: '6px' }}
+                      >
+                        <RefreshCw size={14} className={isAdminListLoading ? 'animate-spin' : ''} /> Refresh
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleOpenAdminModal(null)}
+                        className="btn btn-primary btn-sm"
+                        style={{ gap: '6px', backgroundColor: '#f59e0b', borderColor: '#f59e0b', color: '#ffffff', fontWeight: '700', boxShadow: '0 2px 8px rgba(245, 158, 11, 0.3)' }}
+                      >
+                        <Plus size={16} /> + Add New Admin
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* KPI STATS */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px' }}>
+                    <div style={{ padding: '16px 20px', backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-medium)', textTransform: 'uppercase' }}>Total Admin Accounts</div>
+                      <div style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-dark)', marginTop: '4px' }}>{adminList.length}</div>
+                    </div>
+
+                    <div style={{ padding: '16px 20px', backgroundColor: '#f0fdf4', borderRadius: '12px', border: '1px solid #bbf7d0' }}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#166534', textTransform: 'uppercase' }}>Active Staff</div>
+                      <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#15803d', marginTop: '4px' }}>
+                        {adminList.filter(a => a.isActive !== false).length}
+                      </div>
+                    </div>
+
+                    <div style={{ padding: '16px 20px', backgroundColor: '#fffbeb', borderRadius: '12px', border: '1px solid #fde68a' }}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#92400e', textTransform: 'uppercase' }}>Super Admins</div>
+                      <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#b45309', marginTop: '4px' }}>
+                        {adminList.filter(a => a.role === 'superadmin').length || 1}
+                      </div>
+                    </div>
+
+                    <div style={{ padding: '16px 20px', backgroundColor: '#eff6ff', borderRadius: '12px', border: '1px solid #bfdbfe' }}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#1e40af', textTransform: 'uppercase' }}>Role Governance</div>
+                      <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#2563eb', marginTop: '4px' }}>
+                        Active RBAC
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ADMINS TABLE */}
+                  <div style={{
+                    backgroundColor: '#ffffff',
+                    borderRadius: '14px',
+                    border: '1px solid #cbd5e1',
+                    overflow: 'hidden',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.03)'
+                  }}>
+                    <div style={{ overflowX: 'auto' }}>
+                      <table style={{ width: '100%', minWidth: '950px', borderCollapse: 'collapse', fontSize: '0.86rem', textAlign: 'left' }}>
+                        <thead style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                          <tr>
+                            <th style={{ padding: '12px 16px', color: 'var(--text-dark)' }}>Admin Profile</th>
+                            <th style={{ padding: '12px 16px', color: 'var(--text-dark)' }}>Login Email / Username</th>
+                            <th style={{ padding: '12px 16px', color: 'var(--text-dark)' }}>Password</th>
+                            <th style={{ padding: '12px 16px', color: 'var(--text-dark)' }}>Mobile No.</th>
+                            <th style={{ padding: '12px 16px', color: 'var(--text-dark)' }}>Permissions</th>
+                            <th style={{ padding: '12px 16px', color: 'var(--text-dark)' }}>Status</th>
+                            <th style={{ padding: '12px 16px', textAlign: 'right', color: 'var(--text-dark)' }}>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {adminList.length === 0 ? (
+                            <tr>
+                              <td colSpan="7" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-medium)' }}>
+                                {isAdminListLoading ? 'Loading admin accounts...' : 'No additional sub-admins created yet. Click "+ Add New Admin" above to create one.'}
+                              </td>
+                            </tr>
+                          ) : (
+                            adminList.map((adm) => {
+                              const isRootSuper = adm.role === 'superadmin' || adm.email === 'info@niyanshpharma.com';
+                              const isPwRevealed = Boolean(showPasswordMap[adm._id]);
+                              const p = adm.permissions || {};
+
+                              return (
+                                <tr key={adm._id} style={{ borderBottom: '1px solid #f1f5f9', backgroundColor: adm.isActive === false ? '#f8fafc' : '#ffffff' }}>
+                                  
+                                  {/* Profile */}
+                                  <td style={{ padding: '12px 16px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                      <img 
+                                        src={adm.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(adm.name)}&background=${isRootSuper ? 'f59e0b' : '2563eb'}&color=ffffff&bold=true`}
+                                        alt={adm.name}
+                                        style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }}
+                                      />
+                                      <div>
+                                        <div style={{ fontWeight: '700', color: 'var(--text-dark)' }}>{adm.name}</div>
+                                        {isRootSuper ? (
+                                          <span style={{ fontSize: '0.68rem', fontWeight: '800', backgroundColor: '#fef3c7', color: '#b45309', padding: '1px 7px', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                                            <Crown size={10} /> Root SuperAdmin
+                                          </span>
+                                        ) : (
+                                          <span style={{ fontSize: '0.68rem', fontWeight: '700', backgroundColor: '#eff6ff', color: '#1d4ed8', padding: '1px 7px', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                                            <Shield size={10} /> Operations Admin
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </td>
+
+                                  {/* Email */}
+                                  <td style={{ padding: '12px 16px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                      <span style={{ fontFamily: 'monospace', fontWeight: '600', color: 'var(--text-dark)' }}>
+                                        {adm.email}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          navigator.clipboard.writeText(adm.email);
+                                          showToast('Email copied to clipboard!');
+                                        }}
+                                        title="Copy Email"
+                                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '2px' }}
+                                      >
+                                        <Copy size={13} />
+                                      </button>
+                                    </div>
+                                  </td>
+
+                                  {/* Password with View & Copy */}
+                                  <td style={{ padding: '12px 16px' }}>
+                                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '4px 8px', backgroundColor: '#f1f5f9', borderRadius: '6px' }}>
+                                      <span style={{ fontFamily: 'monospace', fontWeight: '700', color: isPwRevealed ? '#0f172a' : '#64748b', minWidth: '80px' }}>
+                                        {isPwRevealed ? (adm.plainPassword || '••••••••') : '••••••••'}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => setShowPasswordMap(prev => ({ ...prev, [adm._id]: !prev[adm._id] }))}
+                                        title={isPwRevealed ? 'Hide Password' : 'Show Password'}
+                                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2563eb', padding: '2px' }}
+                                      >
+                                        {isPwRevealed ? <EyeOff size={14} /> : <Eye size={14} />}
+                                      </button>
+                                      {adm.plainPassword && (
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            navigator.clipboard.writeText(adm.plainPassword);
+                                            showToast('Password copied to clipboard!');
+                                          }}
+                                          title="Copy Password"
+                                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#16a34a', padding: '2px' }}
+                                        >
+                                          <Copy size={13} />
+                                        </button>
+                                      )}
+                                    </div>
+                                  </td>
+
+                                  {/* Mobile */}
+                                  <td style={{ padding: '12px 16px', color: 'var(--text-dark)' }}>
+                                    {adm.phone ? (
+                                      <a href={`tel:${adm.phone}`} style={{ color: '#0369a1', textDecoration: 'none', fontWeight: '600' }}>
+                                        {adm.phone}
+                                      </a>
+                                    ) : '—'}
+                                  </td>
+
+                                  {/* Permissions Pill Badges */}
+                                  <td style={{ padding: '12px 16px' }}>
+                                    {isRootSuper ? (
+                                      <span style={{ fontSize: '0.74rem', backgroundColor: '#fef3c7', color: '#92400e', padding: '2px 8px', borderRadius: '6px', fontWeight: '800' }}>
+                                        ⚡ Full Access (All Granted)
+                                      </span>
+                                    ) : (
+                                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', maxWidth: '280px' }}>
+                                        {p.canManageProducts && <span style={{ fontSize: '0.68rem', backgroundColor: '#eff6ff', color: '#1e40af', padding: '1px 6px', borderRadius: '4px' }}>📦 Products</span>}
+                                        {p.canDeleteProducts && <span style={{ fontSize: '0.68rem', backgroundColor: '#fee2e2', color: '#991b1b', padding: '1px 6px', borderRadius: '4px' }}>🗑️ Del Prod</span>}
+                                        {p.canBulkImport && <span style={{ fontSize: '0.68rem', backgroundColor: '#ecfdf5', color: '#065f46', padding: '1px 6px', borderRadius: '4px' }}>📥 Excel</span>}
+                                        {p.canManageOrders && <span style={{ fontSize: '0.68rem', backgroundColor: '#f3e8ff', color: '#6b21a8', padding: '1px 6px', borderRadius: '4px' }}>📑 Orders</span>}
+                                        {p.canManageLedgers && <span style={{ fontSize: '0.68rem', backgroundColor: '#fef9c3', color: '#854d0e', padding: '1px 6px', borderRadius: '4px' }}>📊 Ledger</span>}
+                                        {p.canManageCompanies && <span style={{ fontSize: '0.68rem', backgroundColor: '#e0e7ff', color: '#3730a3', padding: '1px 6px', borderRadius: '4px' }}>🏢 Co.</span>}
+                                        {p.canManageNews && <span style={{ fontSize: '0.68rem', backgroundColor: '#ffedd5', color: '#9a3412', padding: '1px 6px', borderRadius: '4px' }}>🔥 News</span>}
+                                        {p.canManageEnquiries && <span style={{ fontSize: '0.68rem', backgroundColor: '#f1f5f9', color: '#334155', padding: '1px 6px', borderRadius: '4px' }}>💬 Enquiries</span>}
+                                        {p.canClearDatabase && <span style={{ fontSize: '0.68rem', backgroundColor: '#991b1b', color: '#fff', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }}>⚠️ Wipe DB</span>}
+                                      </div>
+                                    )}
+                                  </td>
+
+                                  {/* Status */}
+                                  <td style={{ padding: '12px 16px' }}>
+                                    {adm.isActive !== false ? (
+                                      <span style={{ fontSize: '0.72rem', backgroundColor: '#dcfce7', color: '#15803d', padding: '2px 8px', borderRadius: '6px', fontWeight: '700' }}>
+                                        ● Active
+                                      </span>
+                                    ) : (
+                                      <span style={{ fontSize: '0.72rem', backgroundColor: '#fee2e2', color: '#b91c1c', padding: '2px 8px', borderRadius: '6px', fontWeight: '700' }}>
+                                        ○ Inactive
+                                      </span>
+                                    )}
+                                  </td>
+
+                                  {/* Actions */}
+                                  <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                                    <div style={{ display: 'inline-flex', gap: '6px' }}>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleOpenAdminModal(adm)}
+                                        title="Edit Admin Account"
+                                        style={{ padding: '5px 8px', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff', cursor: 'pointer', color: '#0f172a' }}
+                                      >
+                                        <Edit2 size={14} />
+                                      </button>
+
+                                      {!isRootSuper && (
+                                        <>
+                                          <button
+                                            type="button"
+                                            onClick={() => handleToggleAdminStatus(adm)}
+                                            title={adm.isActive !== false ? 'Deactivate Admin' : 'Activate Admin'}
+                                            style={{ padding: '5px 8px', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff', cursor: 'pointer', color: adm.isActive !== false ? '#b45309' : '#15803d' }}
+                                          >
+                                            {adm.isActive !== false ? <UserX size={14} /> : <UserCheck size={14} />}
+                                          </button>
+
+                                          <button
+                                            type="button"
+                                            onClick={() => handleDeleteAdmin(adm)}
+                                            title="Delete Admin Account"
+                                            style={{ padding: '5px 8px', borderRadius: '6px', border: '1px solid #fee2e2', backgroundColor: '#fef2f2', cursor: 'pointer', color: '#ef4444' }}
+                                          >
+                                            <Trash2 size={14} />
+                                          </button>
+                                        </>
+                                      )}
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })
+                          )}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                 </div>
@@ -8367,6 +9146,518 @@ _Helpline: +91 9316566894_`;
                 ✕ Close Preview
               </button>
             </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ==========================================
+          MODAL: CREATE / EDIT SUB-ADMIN (SUPERADMIN ONLY)
+          ========================================== */}
+      {isAdminModalOpen && typeof document !== 'undefined' && createPortal(
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          width: '100vw', height: '100vh',
+          backgroundColor: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)',
+          zIndex: 100020,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '16px', boxSizing: 'border-box'
+        }}>
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '16px',
+            width: '100%',
+            maxWidth: '680px',
+            maxHeight: '90vh',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            boxShadow: '0 25px 60px -15px rgba(0,0,0,0.4)',
+            border: '1.5px solid #fde68a'
+          }}>
+            {/* Header */}
+            <div style={{
+              padding: '18px 24px',
+              backgroundColor: '#fffbeb',
+              borderBottom: '1px solid #fde68a',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '10px', backgroundColor: '#fef3c7', color: '#b45309', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Shield size={20} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.15rem', color: '#92400e', fontWeight: '800' }}>
+                    {editingAdmin ? `Edit Admin Account: ${editingAdmin.name}` : 'Create New Sub-Admin Staff'}
+                  </h3>
+                  <span style={{ fontSize: '0.78rem', color: '#b45309' }}>
+                    SuperAdmin Access Control • Assign credentials & granular permissions
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAdminModalOpen(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#92400e', padding: '4px' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Scrollable Form Body */}
+            <form onSubmit={handleSaveAdmin} style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1 }}>
+              <div style={{ padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
+                
+                {/* Row 1: Name & Phone */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                    <label style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>Admin Full Name *</label>
+                    <input 
+                      type="text"
+                      required
+                      placeholder="E.g., Rajesh Sharma"
+                      value={adminFormName}
+                      onChange={(e) => setAdminFormName(e.target.value)}
+                      style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                    <label style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>Mobile Number</label>
+                    <input 
+                      type="tel"
+                      placeholder="10-digit mobile number"
+                      maxLength={10}
+                      value={adminFormPhone}
+                      onChange={(e) => setAdminFormPhone(e.target.value)}
+                      style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
+                    />
+                  </div>
+                </div>
+
+                {/* Row 2: Email (Username) & Password */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                    <label style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>Login Email / Username *</label>
+                    <input 
+                      type="email"
+                      required
+                      placeholder="staff.name@niyanshpharma.com"
+                      value={adminFormEmail}
+                      onChange={(e) => setAdminFormEmail(e.target.value)}
+                      style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <label style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>
+                        {editingAdmin ? 'New Password (Optional)' : 'Password *'}
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const randNum = Math.floor(1000 + Math.random() * 9000);
+                          setAdminFormPassword(`NpStaff@${randNum}`);
+                        }}
+                        style={{ fontSize: '0.72rem', color: '#2563eb', background: 'none', border: 'none', cursor: 'pointer', fontWeight: '700' }}
+                      >
+                        ⚡ Generate Password
+                      </button>
+                    </div>
+                    <input 
+                      type="text"
+                      placeholder={editingAdmin ? 'Leave blank to keep unchanged' : 'Min 6 characters'}
+                      value={adminFormPassword}
+                      onChange={(e) => setAdminFormPassword(e.target.value)}
+                      style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem', fontFamily: 'monospace' }}
+                    />
+                    <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                      SuperAdmin can always view or change this password later.
+                    </span>
+                  </div>
+                </div>
+
+                {/* Permissions Section */}
+                <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
+                    <div>
+                      <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: '800', color: 'var(--text-dark)' }}>
+                        🛡️ Granular Access Permissions
+                      </h4>
+                      <span style={{ fontSize: '0.74rem', color: 'var(--text-medium)' }}>
+                        Choose what features this staff member is allowed to see or modify:
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <button
+                        type="button"
+                        onClick={() => setAdminFormPermissions({
+                          canManageProducts: true,
+                          canDeleteProducts: true,
+                          canBulkImport: true,
+                          canManageOrders: true,
+                          canManageLedgers: true,
+                          canManageCompanies: true,
+                          canManageNews: true,
+                          canManageEnquiries: true,
+                          canClearDatabase: false
+                        })}
+                        style={{ fontSize: '0.72rem', padding: '3px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', backgroundColor: '#f1f5f9', cursor: 'pointer', fontWeight: '600' }}
+                      >
+                        Select All
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAdminFormPermissions({
+                          canManageProducts: true,
+                          canDeleteProducts: false,
+                          canBulkImport: true,
+                          canManageOrders: true,
+                          canManageLedgers: false,
+                          canManageCompanies: true,
+                          canManageNews: true,
+                          canManageEnquiries: true,
+                          canClearDatabase: false
+                        })}
+                        style={{ fontSize: '0.72rem', padding: '3px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', backgroundColor: '#f1f5f9', cursor: 'pointer', fontWeight: '600' }}
+                      >
+                        Standard Staff
+                      </button>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '10px', backgroundColor: '#f8fafc', padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                    
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer' }}>
+                      <input 
+                        type="checkbox"
+                        checked={Boolean(adminFormPermissions.canManageProducts)}
+                        onChange={(e) => setAdminFormPermissions(prev => ({ ...prev, canManageProducts: e.target.checked }))}
+                        style={{ accentColor: '#2563eb', width: '16px', height: '16px' }}
+                      />
+                      <span>📦 Add & Edit Products</span>
+                    </label>
+
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer' }}>
+                      <input 
+                        type="checkbox"
+                        checked={Boolean(adminFormPermissions.canDeleteProducts)}
+                        onChange={(e) => setAdminFormPermissions(prev => ({ ...prev, canDeleteProducts: e.target.checked }))}
+                        style={{ accentColor: '#ef4444', width: '16px', height: '16px' }}
+                      />
+                      <span>🗑️ Delete Products</span>
+                    </label>
+
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer' }}>
+                      <input 
+                        type="checkbox"
+                        checked={Boolean(adminFormPermissions.canBulkImport)}
+                        onChange={(e) => setAdminFormPermissions(prev => ({ ...prev, canBulkImport: e.target.checked }))}
+                        style={{ accentColor: '#10b981', width: '16px', height: '16px' }}
+                      />
+                      <span>📥 Upload Excel / CSV Import</span>
+                    </label>
+
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer' }}>
+                      <input 
+                        type="checkbox"
+                        checked={Boolean(adminFormPermissions.canManageOrders)}
+                        onChange={(e) => setAdminFormPermissions(prev => ({ ...prev, canManageOrders: e.target.checked }))}
+                        style={{ accentColor: '#8b5cf6', width: '16px', height: '16px' }}
+                      />
+                      <span>📑 Manage B2B Orders & Status</span>
+                    </label>
+
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer' }}>
+                      <input 
+                        type="checkbox"
+                        checked={Boolean(adminFormPermissions.canManageLedgers)}
+                        onChange={(e) => setAdminFormPermissions(prev => ({ ...prev, canManageLedgers: e.target.checked }))}
+                        style={{ accentColor: '#eab308', width: '16px', height: '16px' }}
+                      />
+                      <span>📊 Access Outstanding Financial Ledgers</span>
+                    </label>
+
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer' }}>
+                      <input 
+                        type="checkbox"
+                        checked={Boolean(adminFormPermissions.canManageCompanies)}
+                        onChange={(e) => setAdminFormPermissions(prev => ({ ...prev, canManageCompanies: e.target.checked }))}
+                        style={{ accentColor: '#6366f1', width: '16px', height: '16px' }}
+                      />
+                      <span>🏢 Manage Companies & Manufacturers</span>
+                    </label>
+
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer' }}>
+                      <input 
+                        type="checkbox"
+                        checked={Boolean(adminFormPermissions.canManageNews)}
+                        onChange={(e) => setAdminFormPermissions(prev => ({ ...prev, canManageNews: e.target.checked }))}
+                        style={{ accentColor: '#f97316', width: '16px', height: '16px' }}
+                      />
+                      <span>🔥 Post Schemes, Tickers & News</span>
+                    </label>
+
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer' }}>
+                      <input 
+                        type="checkbox"
+                        checked={Boolean(adminFormPermissions.canManageEnquiries)}
+                        onChange={(e) => setAdminFormPermissions(prev => ({ ...prev, canManageEnquiries: e.target.checked }))}
+                        style={{ accentColor: '#0ea5e9', width: '16px', height: '16px' }}
+                      />
+                      <span>💬 View & Manage Enquiries</span>
+                    </label>
+
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', fontWeight: '700', color: '#b91c1c', cursor: 'pointer' }}>
+                      <input 
+                        type="checkbox"
+                        checked={Boolean(adminFormPermissions.canClearDatabase)}
+                        onChange={(e) => setAdminFormPermissions(prev => ({ ...prev, canClearDatabase: e.target.checked }))}
+                        style={{ accentColor: '#ef4444', width: '16px', height: '16px' }}
+                      />
+                      <span>⚠️ Danger Zone: Clear Entire Database</span>
+                    </label>
+
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Modal Footer */}
+              <div style={{
+                padding: '14px 24px',
+                backgroundColor: '#f8fafc',
+                borderTop: '1px solid #e2e8f0',
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '10px'
+              }}>
+                <button
+                  type="button"
+                  onClick={() => setIsAdminModalOpen(false)}
+                  className="btn btn-outline"
+                  style={{ padding: '8px 18px', fontWeight: '600' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingAdmin}
+                  className="btn btn-primary"
+                  style={{ padding: '8px 24px', fontWeight: '700', backgroundColor: '#f59e0b', borderColor: '#f59e0b', gap: '6px' }}
+                >
+                  {isSavingAdmin ? 'Saving...' : editingAdmin ? 'Save Changes' : 'Create Admin Account'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ==========================================
+          MODAL: SUPERADMIN / USER PROFILE & SETTINGS
+          ========================================== */}
+      {isProfileModalOpen && typeof document !== 'undefined' && createPortal(
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          width: '100vw', height: '100vh',
+          backgroundColor: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)',
+          zIndex: 100020,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '16px', boxSizing: 'border-box'
+        }}>
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '16px',
+            width: '100%',
+            maxWidth: '560px',
+            maxHeight: '90vh',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            boxShadow: '0 25px 60px -15px rgba(0,0,0,0.4)',
+            border: isSuperAdmin ? '1.5px solid #fde68a' : '1px solid #cbd5e1'
+          }}>
+            {/* Header */}
+            <div style={{
+              padding: '18px 24px',
+              backgroundColor: isSuperAdmin ? '#fffbeb' : '#f8fafc',
+              borderBottom: '1px solid #e2e8f0',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '10px', backgroundColor: isSuperAdmin ? '#fef3c7' : '#eff6ff', color: isSuperAdmin ? '#b45309' : '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <User size={20} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: '800' }}>
+                    {isSuperAdmin ? '👑 SuperAdmin Profile & Settings' : '👤 Admin Profile'}
+                  </h3>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--text-medium)' }}>
+                    Edit your account name, mobile number, avatar photo and password
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsProfileModalOpen(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '4px' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Form Body */}
+            <form onSubmit={handleSaveProfile} style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1 }}>
+              <div style={{ padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
+                
+                {/* Avatar Preview & Selection */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '12px', backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                  <img 
+                    src={profileAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(profileName || 'Admin')}&background=${isSuperAdmin ? 'f59e0b' : '2563eb'}&color=ffffff&bold=true`}
+                    alt="Preview"
+                    style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', border: `3px solid ${isSuperAdmin ? '#f59e0b' : '#2563eb'}` }}
+                  />
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>Avatar Photo</div>
+                    <input 
+                      type="url"
+                      placeholder="Image URL (e.g. https://...)"
+                      value={profileAvatar}
+                      onChange={(e) => setProfileAvatar(e.target.value)}
+                      style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.8rem', marginTop: '4px', boxSizing: 'border-box' }}
+                    />
+                    <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
+                      <button
+                        type="button"
+                        onClick={() => setProfileAvatar('https://ui-avatars.com/api/?name=Super+Admin&background=f59e0b&color=ffffff&bold=true')}
+                        style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', border: '1px solid #cbd5e1', cursor: 'pointer', backgroundColor: '#fff' }}
+                      >
+                        Gold Avatar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setProfileAvatar('https://ui-avatars.com/api/?name=Hari+Patel&background=0c3d6c&color=ffffff&bold=true')}
+                        style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', border: '1px solid #cbd5e1', cursor: 'pointer', backgroundColor: '#fff' }}
+                      >
+                        Corporate Avatar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setProfileAvatar('')}
+                        style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', border: '1px solid #cbd5e1', cursor: 'pointer', backgroundColor: '#fff' }}
+                      >
+                        Auto Initials
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Name */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>Full Name</label>
+                  <input 
+                    type="text"
+                    required
+                    value={profileName}
+                    onChange={(e) => setProfileName(e.target.value)}
+                    style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
+                  />
+                </div>
+
+                {/* Email (Read-only or display) */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>Registered Email / Login Username</label>
+                  <input 
+                    type="email"
+                    disabled
+                    value={profileEmail}
+                    style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.9rem', backgroundColor: '#f1f5f9', color: '#64748b' }}
+                  />
+                </div>
+
+                {/* Mobile */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>Mobile Number</label>
+                  <input 
+                    type="tel"
+                    placeholder="10-digit mobile number"
+                    maxLength={10}
+                    value={profilePhone}
+                    onChange={(e) => setProfilePhone(e.target.value)}
+                    style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
+                  />
+                </div>
+
+                {/* Change Password */}
+                <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div style={{ fontSize: '0.88rem', fontWeight: '800', color: 'var(--text-dark)' }}>
+                    🔐 Change Password (Optional)
+                  </div>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '0.8rem', color: 'var(--text-medium)' }}>New Password</label>
+                      <input 
+                        type="password"
+                        placeholder="Leave blank to keep current"
+                        value={profilePassword}
+                        onChange={(e) => setProfilePassword(e.target.value)}
+                        style={{ padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.88rem' }}
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '0.8rem', color: 'var(--text-medium)' }}>Confirm New Password</label>
+                      <input 
+                        type="password"
+                        placeholder="Retype new password"
+                        value={profileConfirmPassword}
+                        onChange={(e) => setProfileConfirmPassword(e.target.value)}
+                        style={{ padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.88rem' }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Footer */}
+              <div style={{
+                padding: '14px 24px',
+                backgroundColor: '#f8fafc',
+                borderTop: '1px solid #e2e8f0',
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '10px'
+              }}>
+                <button
+                  type="button"
+                  onClick={() => setIsProfileModalOpen(false)}
+                  className="btn btn-outline"
+                  style={{ padding: '8px 18px', fontWeight: '600' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingProfile}
+                  className="btn btn-primary"
+                  style={{ padding: '8px 24px', fontWeight: '700', backgroundColor: isSuperAdmin ? '#f59e0b' : '#2563eb', borderColor: isSuperAdmin ? '#f59e0b' : '#2563eb' }}
+                >
+                  {isSavingProfile ? 'Saving...' : 'Save Profile Changes'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>,
         document.body

@@ -75,6 +75,29 @@ const userSchema = new mongoose.Schema({
     type: String, 
     default: 'user' 
   },
+  avatar: {
+    type: String,
+    default: ''
+  },
+  plainPassword: {
+    type: String,
+    default: ''
+  },
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+  permissions: {
+    canManageProducts: { type: Boolean, default: true },
+    canDeleteProducts: { type: Boolean, default: false },
+    canBulkImport: { type: Boolean, default: true },
+    canManageOrders: { type: Boolean, default: true },
+    canManageLedgers: { type: Boolean, default: false },
+    canManageCompanies: { type: Boolean, default: true },
+    canManageNews: { type: Boolean, default: true },
+    canManageEnquiries: { type: Boolean, default: true },
+    canClearDatabase: { type: Boolean, default: false }
+  },
   resetPasswordOtp: {
     type: String,
     default: null

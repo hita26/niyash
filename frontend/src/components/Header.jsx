@@ -6,6 +6,7 @@ import {
   ArrowRight, MessageCircle, ExternalLink, Lock, Info, Building2, Store, Sparkles, RefreshCw
 } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
+import TopBar from './TopBar';
 import { useLanguage, LanguageSelector } from '../context/LanguageContext';
 
 function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogout, onOpenAuth, isB2BPortal }) {
@@ -206,7 +207,8 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
   // =========================================================================
   if (isB2B) {
     return (
-      <header className="b2b-header-shell" style={{ width: '100%', position: 'sticky', top: 0, zIndex: 1000, boxShadow: '0 4px 20px rgba(0,0,0,0.08)', backgroundColor: 'var(--bg-surface)' }}>
+      <header className="b2b-header-shell" style={{ width: '100%', position: 'sticky', top: 0, zIndex: 1000, boxShadow: '0 4px 20px rgba(0,0,0,0.08)', backgroundColor: 'var(--bg-surface)', margin: 0, padding: 0 }}>
+        <TopBar />
         
         {/* Main Workstation Header Bar */}
         <div style={{ backgroundColor: 'var(--bg-surface)', borderBottom: '1px solid var(--border-light)', padding: '10px 16px' }}>
@@ -918,7 +920,10 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
   // Clean marketing presentation with single, non-redundant B2B Chemist Login button
   // =========================================================================
   return (
-    <header className="public-header-shell" style={{ width: '100%', position: 'sticky', top: 0, zIndex: 1000, boxShadow: '0 4px 20px rgba(0,0,0,0.06)', backgroundColor: 'var(--bg-surface)' }}>
+    <header className="public-header-shell" style={{ width: '100%', position: 'sticky', top: 0, zIndex: 1000, boxShadow: '0 4px 20px rgba(0,0,0,0.06)', backgroundColor: 'var(--bg-surface)', margin: 0, padding: 0 }}>
+      {/* Top Information Bar */}
+      <TopBar />
+
       {/* Main Branding Header */}
       <div className="main-header">
         <div className="container main-header-content">

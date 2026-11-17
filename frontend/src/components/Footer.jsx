@@ -87,41 +87,6 @@ function Footer({ compact = false }) {
 
   return (
     <footer className="footer" role="contentinfo">
-      {/* 3. Top Information Bar */}
-      <div className="footer-topbar">
-        <div className="container">
-          <div className="footer-topbar-inner">
-            {/* Left: Phone & Business Email */}
-            <div className="footer-topbar-left">
-              <span className="footer-topbar-item">
-                <Phone size={14} color="#93c5fd" aria-hidden="true" />
-                <a href="tel:+919909923130" aria-label="Call Niyansh Pharma at +91 99099 23130">
-                  +91 99099 23130
-                </a>
-              </span>
-              <span className="footer-topbar-item">
-                <Mail size={14} color="#93c5fd" aria-hidden="true" />
-                <a href="mailto:info@niyanshpharma.com" aria-label="Email Niyansh Pharma at info@niyanshpharma.com">
-                  info@niyanshpharma.com
-                </a>
-              </span>
-            </div>
-
-            {/* Center: Care • Quality • Trust */}
-            <div className="footer-topbar-center">
-              <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#4ade80', display: 'inline-block' }}></span>
-              <span>{t('topbar.tagline', 'Care • Quality • Trust')}</span>
-            </div>
-
-            {/* Right: Location */}
-            <div className="footer-topbar-right">
-              <MapPin size={14} color="#93c5fd" aria-hidden="true" />
-              <span>{t('topbar.location', 'Rajkot, Gujarat')}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* 2. Main 4-Column Footer Layout */}
       <div className="container footer-main-container">
         <div className="footer-grid">

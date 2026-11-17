@@ -170,10 +170,10 @@ function Supplier() {
 
   return (
     <div className="section animate-fade-in" style={{ backgroundColor: 'var(--bg-main)' }}>
-      <div className="container" style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '40px', alignItems: 'center' }}>
+      <div className="container responsive-split-layout" style={{ alignItems: 'start' }}>
         
         {/* Info Column */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', minWidth: 0 }}>
           <div>
             <span style={{
               backgroundColor: 'rgba(27, 117, 188, 0.1)', color: 'var(--accent-blue)',
@@ -182,7 +182,7 @@ function Supplier() {
             }}>
               {t('supplier.badge', 'Pharmaceutical Manufacturer Onboarding')}
             </span>
-            <h1 style={{ fontSize: '2.5rem', marginBottom: '20px', lineHeight: '1.2' }}>
+            <h1 style={{ fontSize: 'clamp(1.6rem, 4.5vw, 2.5rem)', marginBottom: '20px', lineHeight: '1.2' }}>
               {t('supplier.title', 'Supply Your Formulations to Niyansh Pharma')}
             </h1>
             <p style={{ color: 'var(--text-medium)', fontSize: '1.05rem', lineHeight: '1.6' }}>
@@ -281,7 +281,7 @@ function Supplier() {
               )}
               
               {/* Row 1: Company Name & Contact Person */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="supplier-company" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
                     {t('supplier.companyLabel', 'Manufacturing / Pharmaceutical Firm')} <span className="required-star">*</span>
@@ -313,7 +313,7 @@ function Supplier() {
               </div>
 
               {/* Row 2: Designation & Mobile Number */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="supplier-designation" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
                     {t('supplier.designationLabel', 'Designation')} <span className="required-star">*</span>
@@ -346,7 +346,7 @@ function Supplier() {
               </div>
 
               {/* Row 3: Business Email & GSTIN */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="supplier-email" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
                     {t('cart.email', 'Business Email')} <span className="required-star">*</span>

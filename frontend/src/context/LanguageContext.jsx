@@ -220,19 +220,19 @@ export function LanguageSelector({ variant = 'default' }) {
 
   if (variant === 'pill-buttons') {
     return (
-      <div style={{ display: 'inline-flex', alignItems: 'center', backgroundColor: 'var(--bg-main, #f1f5f9)', padding: '3px', borderRadius: '24px', border: '1px solid var(--border-light, #e2e8f0)', gap: '3px' }}>
+      <div style={{ display: 'inline-flex', alignItems: 'center', flexWrap: 'wrap', backgroundColor: 'var(--bg-main, #f1f5f9)', padding: '3px', borderRadius: '24px', border: '1px solid var(--border-light, #e2e8f0)', gap: '3px' }}>
         {supportedLanguages.map((lang) => (
           <button
             key={lang.code}
             type="button"
             onClick={() => setLanguage(lang.code)}
             style={{
-              padding: '6px 14px',
+              padding: '6px 12px',
               borderRadius: '20px',
               border: 'none',
               backgroundColor: language === lang.code ? 'var(--primary-blue, #0c3d6c)' : 'transparent',
               color: language === lang.code ? '#ffffff' : 'var(--text-medium, #475569)',
-              fontSize: '0.84rem',
+              fontSize: '0.82rem',
               fontWeight: language === lang.code ? '800' : '600',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
@@ -278,9 +278,10 @@ export function LanguageSelector({ variant = 'default' }) {
           if (!isOpen) e.currentTarget.style.borderColor = 'var(--border-light, #e2e8f0)';
         }}
       >
-        <Globe size={16} color="var(--primary-blue, #0c3d6c)" />
-        <span>{currentLangObj.native}</span>
-        <ChevronDown size={13} style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }} />
+        <Globe size={16} color="var(--primary-blue, #0c3d6c)" style={{ flexShrink: 0 }} />
+        <span className="lang-label-full">{currentLangObj.native}</span>
+        <span className="lang-label-compact">{currentLangObj.code.toUpperCase()}</span>
+        <ChevronDown size={13} style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease', flexShrink: 0 }} />
       </button>
 
       {isOpen && (

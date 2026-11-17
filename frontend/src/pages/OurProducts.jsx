@@ -341,11 +341,7 @@ export default function OurProducts({ addToCart, searchTerm, setSearchTerm }) {
 
         {/* LOADING SKELETON */}
         {loading ? (
-          <div className="products-grid" style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-            gap: '18px'
-          }}>
+          <div className="responsive-product-grid">
             {[...Array(pageSize > 12 ? 12 : pageSize)].map((_, i) => (
               <SkeletonLoader key={i} type="product-card" />
             ))}
@@ -353,11 +349,7 @@ export default function OurProducts({ addToCart, searchTerm, setSearchTerm }) {
         ) : paginatedProducts.length > 0 ? (
           /* PRODUCTS GRID */
           <>
-            <div className="products-grid" style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-              gap: '18px'
-            }}>
+            <div className="responsive-product-grid">
               {paginatedProducts.map((product) => (
                 <ProductCard 
                   key={product._id || product.sku} 

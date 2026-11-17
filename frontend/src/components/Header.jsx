@@ -6,6 +6,7 @@ import {
   ArrowRight, MessageCircle, ExternalLink, Lock, Info, Building2, Store, Sparkles, RefreshCw
 } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
+import TopBar from './TopBar';
 import { useLanguage, LanguageSelector } from '../context/LanguageContext';
 
 function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogout, onOpenAuth, isB2BPortal }) {
@@ -851,22 +852,24 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(3px)' }}
               onClick={() => setIsMobileMenuOpen(false)}
             />
-            <div style={{
+            <div className="mobile-nav-drawer" style={{
               position: 'relative',
               marginLeft: 'auto',
-              width: '85%',
-              maxWidth: '340px',
-              backgroundColor: '#ffffff',
-              height: '100%',
+              width: 'min(88vw, 350px)',
+              backgroundColor: 'var(--bg-card, #ffffff)',
+              color: 'var(--text-dark)',
+              height: '100dvh',
+              maxHeight: '100dvh',
               boxShadow: '-4px 0 20px rgba(0,0,0,0.2)',
               display: 'flex',
               flexDirection: 'column',
-              padding: '20px 16px',
-              overflowY: 'auto'
+              padding: 'max(20px, env(safe-area-inset-top, 20px)) 16px max(32px, calc(24px + env(safe-area-inset-bottom, 0px))) 16px',
+              overflowY: 'auto',
+              WebkitOverflowScrolling: 'touch'
             }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '14px', borderBottom: '1px solid #e2e8f0' }}>
-                <span style={{ fontWeight: '800', color: '#0c3d6c', fontSize: '1rem' }}>{t('nav.b2bWorkstation', 'B2B Workstation')}</span>
-                <button onClick={() => setIsMobileMenuOpen(false)} style={{ border: 'none', background: 'none', cursor: 'pointer' }}><X size={22} /></button>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '14px', borderBottom: '1px solid var(--border-light)' }}>
+                <span style={{ fontWeight: '800', color: 'var(--primary-blue)', fontSize: '1rem' }}>{t('nav.b2bWorkstation', 'B2B Workstation')}</span>
+                <button onClick={() => setIsMobileMenuOpen(false)} style={{ width: '40px', height: '40px', borderRadius: '50%', border: '1px solid var(--border-light)', background: 'var(--bg-main)', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }} aria-label="Close menu"><X size={20} /></button>
               </div>
 
               {/* Chemist Profile Card in mobile */}
@@ -919,6 +922,9 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
   // =========================================================================
   return (
     <header className="public-header-shell" style={{ width: '100%', position: 'sticky', top: 0, zIndex: 1000, boxShadow: '0 4px 20px rgba(0,0,0,0.06)', backgroundColor: 'var(--bg-surface)' }}>
+      {/* Corporate Top Information Bar */}
+      <TopBar />
+
       {/* Main Branding Header */}
       <div className="main-header">
         <div className="container main-header-content">
@@ -926,14 +932,16 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             <img 
               src="/logo.jpg" 
               alt="Niyansh Pharma Wholesale Distribution Logo" 
-              style={{ height: '62px', width: 'auto', display: 'block', objectFit: 'contain' }} 
+              className="header-brand-logo"
+              style={{ width: 'auto', display: 'block', objectFit: 'contain' }} 
             />
           </Link>
 
           {/* Search Form with Typeahead */}
-          <div className="search-wrapper" style={{ position: 'relative', flex: '1 1 200px', minWidth: 0, maxWidth: '580px' }}>
+          <div ref={searchContainerRef} className="search-wrapper" style={{ position: 'relative', flex: '1 1 200px', minWidth: 0, maxWidth: '580px' }}>
             <form className="search-bar" onSubmit={handleSearchSubmit} role="search" style={{ position: 'relative' }}>
               <input
+                ref={searchInputRef}
                 type="text"
                 placeholder={t('nav.searchPlaceholder', 'Search 9,500+ medicines, companies, compositions...')}
                 value={searchTerm}
@@ -1078,7 +1086,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
 
             {/* SINGLE, NON-REDUNDANT B2B PORTAL ACCESS BUTTON */}
             {user ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderRight: '1px solid var(--border-light)', paddingRight: '12px', position: 'relative' }} ref={userMenuRef}>
+              <div className="header-user-controls" style={{ display: 'flex', alignItems: 'center', gap: '8px', borderRight: '1px solid var(--border-light)', paddingRight: '12px', position: 'relative' }} ref={userMenuRef}>
                 <Link
                   to="/dashboard"
                   className="hide-mobile"
@@ -1396,16 +1404,78 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               <ThemeToggle />
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-              <Link to="/" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600' }}>{t('nav.home', 'Home')}</Link>
-              <Link to="/our-products" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '700', color: 'var(--primary-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span>{t('nav.ourProducts', 'Our Products')}</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+              <Link to="/" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600', color: 'var(--text-dark)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Store size={17} color="var(--primary-blue)" /> {t('nav.home', 'Home')}
+              </Link>
+              <Link to="/our-products" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '700', color: 'var(--primary-color)', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <Sparkles size={17} color="#16a34a" /> {t('nav.ourProducts', 'Our Products')}
+                </span>
                 <span style={{ fontSize: '0.68rem', backgroundColor: '#dcfce7', color: '#15803d', fontWeight: '800', padding: '1px 6px', borderRadius: '10px' }}>Exclusive</span>
               </Link>
-              <Link to="/products" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600' }}>{t('nav.products', 'All Products Catalog')}</Link>
-              <Link to="/companies" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600' }}>{t('nav.companies', 'Companies & Manufacturers')} (252+)</Link>
-              <Link to="/about" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600' }}>{t('nav.about', 'About Us')}</Link>
-              <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600' }}>{t('nav.contact', 'Contact & Support')}</Link>
+              <Link to="/products" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600', color: 'var(--text-dark)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Package size={17} color="var(--primary-blue)" /> {t('nav.products', 'All Products Catalog')}
+              </Link>
+              <Link to="/companies" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600', color: 'var(--text-dark)', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <Building2 size={17} color="var(--primary-blue)" /> {t('nav.companies', 'Companies & Brands')}
+                </span>
+                <span style={{ fontSize: '0.72rem', backgroundColor: '#e0f2fe', color: '#0369a1', fontWeight: '800', padding: '1px 6px', borderRadius: '10px' }}>252+</span>
+              </Link>
+              <Link to="/about" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600', color: 'var(--text-dark)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Info size={17} color="var(--primary-blue)" /> {t('nav.about', 'About Us')}
+              </Link>
+              
+              {/* Corporate Services Group */}
+              <div style={{ marginTop: '6px', paddingTop: '8px', borderTop: '1px solid var(--border-light)' }}>
+                <div style={{ padding: '4px 12px', fontSize: '0.74rem', fontWeight: '800', color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
+                  {t('nav.services', 'Services & Opportunities')}
+                </div>
+                <Link to="/manufacturing" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '9px 12px', borderRadius: '8px', fontWeight: '600', color: 'var(--text-dark)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem' }}>
+                  <Factory size={16} color="#0284c7" /> {t('services.contractManufacturing', 'Manufacturing')}
+                </Link>
+                <Link to="/partner" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '9px 12px', borderRadius: '8px', fontWeight: '600', color: 'var(--text-dark)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem' }}>
+                  <Handshake size={16} color="#059669" /> {t('services.distributionSupply', 'Business With Us')}
+                </Link>
+                <Link to="/supplier" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '9px 12px', borderRadius: '8px', fontWeight: '600', color: 'var(--text-dark)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem' }}>
+                  <Shield size={16} color="#d97706" /> {t('services.thirdPartyManufacturing', 'Supplier Registration')}
+                </Link>
+                <Link to="/career" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '9px 12px', borderRadius: '8px', fontWeight: '600', color: 'var(--text-dark)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem' }}>
+                  <Users size={16} color="#7c3aed" /> {t('nav.career', 'Career With Us')}
+                </Link>
+                <Link to="/news" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '9px 12px', borderRadius: '8px', fontWeight: '600', color: 'var(--text-dark)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem' }}>
+                  <Sparkles size={16} color="#ea580c" /> {t('nav.marginSchemes', 'Margin Schemes & Bulletins')}
+                </Link>
+              </div>
+
+              <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600', color: 'var(--text-dark)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px', marginTop: '4px', borderTop: '1px solid var(--border-light)' }}>
+                <PhoneCall size={17} color="var(--primary-blue)" /> {t('nav.contact', 'Contact & Support')}
+              </Link>
+
+              {/* Direct WhatsApp Helpline in Drawer */}
+              <a 
+                href="https://wa.me/919909923130?text=Hello%20Niyansh%20Pharma%2C%20I%20would%20like%20to%20enquire%20about%20wholesale%20supply." 
+                target="_blank" 
+                rel="noopener noreferrer"
+                onClick={() => setIsMobileMenuOpen(false)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  backgroundColor: '#ecfdf5',
+                  color: '#059669',
+                  border: '1px solid #a7f3d0',
+                  padding: '9px 12px',
+                  borderRadius: '8px',
+                  fontSize: '0.86rem',
+                  fontWeight: '700',
+                  textDecoration: 'none',
+                  marginTop: '4px'
+                }}
+              >
+                <MessageCircle size={16} /> {t('nav.whatsappDesk', 'WhatsApp Wholesale Desk')}
+              </a>
             </div>
 
             <div style={{ marginTop: 'auto', paddingTop: '15px', borderTop: '1px solid var(--border-light)' }}>

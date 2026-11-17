@@ -112,35 +112,35 @@ function Home({ addToCart }) {
     <div style={{ width: '100%' }} className="animate-fade-in">
       
       {/* Hero Banner Section */}
-      <section style={{
+      <section className="home-hero-section" style={{
         background: 'linear-gradient(135deg, rgba(10, 48, 86, 0.97), rgba(20, 83, 138, 0.92)), url("https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=1600&q=80")',
         backgroundSize: 'cover', backgroundPosition: 'center', color: '#ffffff',
-        padding: '70px 0 85px 0', position: 'relative', overflow: 'hidden'
+        padding: 'clamp(36px, 6vw, 75px) 0 clamp(44px, 7vw, 85px) 0', position: 'relative', overflow: 'hidden'
       }}>
         <div className="container hero-container-grid">
-          <div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: 'rgba(34, 197, 94, 0.15)', border: '1px solid rgba(74, 222, 128, 0.35)', padding: '6px 14px', borderRadius: '30px', fontSize: '0.82rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.8px', color: '#86efac', marginBottom: '16px' }}>
-              <ShieldCheck size={15} /> {t('hero.badge', 'Authorized Wholesale & Distribution • PAN Gujarat')}
+          <div style={{ minWidth: 0 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: 'rgba(34, 197, 94, 0.15)', border: '1px solid rgba(74, 222, 128, 0.35)', padding: '6px 14px', borderRadius: '30px', fontSize: 'clamp(0.72rem, 2.5vw, 0.82rem)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.6px', color: '#86efac', marginBottom: '16px', maxWidth: '100%' }}>
+              <ShieldCheck size={15} style={{ flexShrink: 0 }} /> <span>{t('hero.badge', 'Authorized Wholesale & Distribution • PAN Gujarat')}</span>
             </div>
             
-            <h1 style={{ fontSize: 'clamp(2.1rem, 4.5vw, 3.2rem)', color: '#ffffff', lineHeight: '1.18', fontWeight: '800', marginBottom: '18px', fontFamily: 'Outfit' }}>
+            <h1 style={{ fontSize: 'clamp(1.75rem, 4.8vw, 3.2rem)', color: '#ffffff', lineHeight: '1.18', fontWeight: '800', marginBottom: '16px', fontFamily: 'Outfit' }}>
               {t('hero.title', 'Your Trusted Partner in')} <br />
               <span style={{ color: '#86efac' }}>{t('hero.titleHighlight', '9,500+ Pharma, OTC & Surgical')}</span> {t('hero.titleEnd', 'Supplies')}
             </h1>
             
-            <p style={{ fontSize: '1.08rem', color: '#e2e8f0', marginBottom: '28px', maxWidth: '620px', fontWeight: '400', lineHeight: '1.65' }}>
+            <p style={{ fontSize: 'clamp(0.92rem, 2.5vw, 1.08rem)', color: '#e2e8f0', marginBottom: '24px', maxWidth: '620px', fontWeight: '400', lineHeight: '1.65' }}>
               {t('hero.subtitle', 'Niyansh Pharma delivers 9,500+ genuine healthcare formulations, generic medicines, and hospital consumables from 252+ certified manufacturers with verified batch compliance and prompt delivery across Saurashtra & Gujarat.')}
             </p>
 
             {/* High-Impact Action CTAs for Chemists */}
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '25px' }}>
-              <Link to="/companies" className="btn btn-secondary" style={{ padding: '13px 24px', fontSize: '0.96rem', fontWeight: '700', borderRadius: '30px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+            <div className="hero-cta-buttons" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '22px' }}>
+              <Link to="/companies" className="btn btn-secondary" style={{ padding: '12px 22px', fontSize: '0.94rem', fontWeight: '700', borderRadius: '30px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
                 <Building2 size={18} /> {t('hero.browseCompanies', 'Browse 252+ Companies')}
               </Link>
-              <Link to="/quick-order" className="btn btn-primary" style={{ padding: '13px 24px', fontSize: '0.96rem', fontWeight: '700', borderRadius: '30px', display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#ffffff', color: 'var(--primary-blue)' }}>
+              <Link to="/quick-order" className="btn btn-primary" style={{ padding: '12px 22px', fontSize: '0.94rem', fontWeight: '700', borderRadius: '30px', display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#ffffff', color: 'var(--primary-blue)' }}>
                 <Package size={18} /> {t('hero.quickOrder', 'Fast Quick Order ⚡')}
               </Link>
-              <button onClick={handleQuickWhatsApp} className="btn btn-outline" style={{ borderColor: 'rgba(255,255,255,0.7)', color: '#ffffff', padding: '13px 22px', fontSize: '0.96rem', fontWeight: '600', borderRadius: '30px' }}>
+              <button onClick={handleQuickWhatsApp} className="btn btn-outline" style={{ borderColor: 'rgba(255,255,255,0.7)', color: '#ffffff', padding: '12px 20px', fontSize: '0.94rem', fontWeight: '600', borderRadius: '30px' }}>
                 <MessageSquare size={17} /> {t('hero.whatsappOrder', 'WhatsApp Order')}
               </button>
             </div>
@@ -148,23 +148,23 @@ function Home({ addToCart }) {
             {/* Quick Formulation Filter Shortcuts */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{t('hero.quickJump', 'Quick Jump:')}</span>
-              <Link to="/products?category=Pharma Products" style={{ fontSize: '0.8rem', color: '#e2e8f0', backgroundColor: 'rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: '15px', textDecoration: 'none', transition: 'all 0.2s' }}>{t('categories.pharmaTitle', 'Tablets & Capsules')}</Link>
-              <Link to="/products?category=Injectables" style={{ fontSize: '0.8rem', color: '#e2e8f0', backgroundColor: 'rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: '15px', textDecoration: 'none', transition: 'all 0.2s' }}>{t('categories.injectablesTitle', 'Critical Care Injectables')}</Link>
-              <Link to="/products?category=OTC Products" style={{ fontSize: '0.8rem', color: '#e2e8f0', backgroundColor: 'rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: '15px', textDecoration: 'none', transition: 'all 0.2s' }}>{t('categories.otcTitle', 'OTC & Wellness')}</Link>
-              <Link to="/products?category=Surgical %26 Medical Supplies" style={{ fontSize: '0.8rem', color: '#e2e8f0', backgroundColor: 'rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: '15px', textDecoration: 'none', transition: 'all 0.2s' }}>{t('categories.surgicalTitle', 'Surgical & Medical')}</Link>
+              <Link to="/products?category=Pharma Products" style={{ fontSize: '0.8rem', color: '#e2e8f0', backgroundColor: 'rgba(255,255,255,0.1)', padding: '6px 12px', borderRadius: '15px', textDecoration: 'none', transition: 'all 0.2s' }}>{t('categories.pharmaTitle', 'Tablets & Capsules')}</Link>
+              <Link to="/products?category=Injectables" style={{ fontSize: '0.8rem', color: '#e2e8f0', backgroundColor: 'rgba(255,255,255,0.1)', padding: '6px 12px', borderRadius: '15px', textDecoration: 'none', transition: 'all 0.2s' }}>{t('categories.injectablesTitle', 'Critical Care Injectables')}</Link>
+              <Link to="/products?category=OTC Products" style={{ fontSize: '0.8rem', color: '#e2e8f0', backgroundColor: 'rgba(255,255,255,0.1)', padding: '6px 12px', borderRadius: '15px', textDecoration: 'none', transition: 'all 0.2s' }}>{t('categories.otcTitle', 'OTC & Wellness')}</Link>
+              <Link to="/products?category=Surgical %26 Medical Supplies" style={{ fontSize: '0.8rem', color: '#e2e8f0', backgroundColor: 'rgba(255,255,255,0.1)', padding: '6px 12px', borderRadius: '15px', textDecoration: 'none', transition: 'all 0.2s' }}>{t('categories.surgicalTitle', 'Surgical & Medical')}</Link>
             </div>
           </div>
 
           {/* Wholesale Trust & Statistics Card */}
-          <div style={{
+          <div className="hero-trust-card" style={{
             backgroundColor: 'rgba(255, 255, 255, 0.12)', backdropFilter: 'blur(16px)',
-            borderRadius: '20px', padding: '30px', border: '1px solid rgba(255, 255, 255, 0.25)',
-            boxShadow: '0 25px 60px rgba(0,0,0,0.2)'
+            borderRadius: '20px', padding: 'clamp(16px, 3vw, 28px)', border: '1px solid rgba(255, 255, 255, 0.25)',
+            boxShadow: '0 25px 60px rgba(0,0,0,0.2)', minWidth: 0
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', borderBottom: '1px solid rgba(255, 255, 255, 0.15)', paddingBottom: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '18px', borderBottom: '1px solid rgba(255, 255, 255, 0.15)', paddingBottom: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Sparkles size={18} color="#86efac" />
-                <h3 style={{ color: '#ffffff', fontSize: '1.2rem', fontWeight: '700', margin: 0 }}>
+                <h3 style={{ color: '#ffffff', fontSize: 'clamp(1rem, 3vw, 1.2rem)', fontWeight: '700', margin: 0 }}>
                   {t('hero.wholesaleAdvantage', 'Wholesale Advantage')}
                 </h3>
               </div>
@@ -174,36 +174,36 @@ function Home({ addToCart }) {
             </div>
 
             {/* Stat Grid */}
-            <div className="hero-stat-grid" style={{ marginBottom: '22px' }}>
-              <div style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '14px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <div style={{ fontSize: '1.65rem', fontWeight: '800', color: '#ffffff', lineHeight: 1.1 }}>{t('hero.statFormulations', '9,500+')}</div>
-                <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '4px' }}>{t('hero.statFormulationsLabel', 'Genuine Formulations')}</div>
+            <div className="hero-stat-grid" style={{ marginBottom: '18px' }}>
+              <div style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div style={{ fontSize: 'clamp(1.3rem, 3.5vw, 1.65rem)', fontWeight: '800', color: '#ffffff', lineHeight: 1.1 }}>{t('hero.statFormulations', '9,500+')}</div>
+                <div style={{ fontSize: '0.76rem', color: '#cbd5e1', marginTop: '4px' }}>{t('hero.statFormulationsLabel', 'Genuine Formulations')}</div>
               </div>
-              <div style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '14px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <div style={{ fontSize: '1.65rem', fontWeight: '800', color: '#86efac', lineHeight: 1.1 }}>{t('hero.statCompanies', '252+')}</div>
-                <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '4px' }}>{t('hero.statCompaniesLabel', 'Pharma Companies')}</div>
+              <div style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div style={{ fontSize: 'clamp(1.3rem, 3.5vw, 1.65rem)', fontWeight: '800', color: '#86efac', lineHeight: 1.1 }}>{t('hero.statCompanies', '252+')}</div>
+                <div style={{ fontSize: '0.76rem', color: '#cbd5e1', marginTop: '4px' }}>{t('hero.statCompaniesLabel', 'Pharma Companies')}</div>
               </div>
-              <div style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '14px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#ffffff', lineHeight: 1.1 }}>{t('hero.statSupplyChain', 'WHO-GMP')}</div>
-                <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '4px' }}>{t('hero.statSupplyChainLabel', 'Certified Supply Chain')}</div>
+              <div style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div style={{ fontSize: 'clamp(1.05rem, 3vw, 1.25rem)', fontWeight: '800', color: '#ffffff', lineHeight: 1.1 }}>{t('hero.statSupplyChain', 'WHO-GMP')}</div>
+                <div style={{ fontSize: '0.76rem', color: '#cbd5e1', marginTop: '4px' }}>{t('hero.statSupplyChainLabel', 'Certified Supply Chain')}</div>
               </div>
-              <div style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '14px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#93c5fd', lineHeight: 1.1 }}>{t('hero.statDispatch', 'Same-Day')}</div>
-                <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '4px' }}>{t('hero.statDispatchLabel', 'Dispatch in Saurashtra')}</div>
+              <div style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div style={{ fontSize: 'clamp(1.05rem, 3vw, 1.25rem)', fontWeight: '800', color: '#93c5fd', lineHeight: 1.1 }}>{t('hero.statDispatch', 'Same-Day')}</div>
+                <div style={{ fontSize: '0.76rem', color: '#cbd5e1', marginTop: '4px' }}>{t('hero.statDispatchLabel', 'Dispatch in Saurashtra')}</div>
               </div>
             </div>
 
             {/* Direct Order Help */}
-            <div style={{ padding: '14px', backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+            <div style={{ padding: '12px 14px', backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
               <div>
                 <span style={{ fontSize: '0.74rem', color: '#cbd5e1', display: 'block' }}>{t('hero.callWholesaleDesk', 'Call Wholesale Desk:')}</span>
-                <a href="tel:+919909923130" style={{ color: '#ffffff', fontWeight: '700', fontSize: '1.02rem', textDecoration: 'none' }}>+91 99099 23130</a>
+                <a href="tel:+919909923130" style={{ color: '#ffffff', fontWeight: '700', fontSize: '1rem', textDecoration: 'none', whiteSpace: 'nowrap' }}>+91 99099 23130</a>
               </div>
               <a 
                 href="https://wa.me/919909923130?text=Hello%20Niyansh%20Pharma%2C%20I%20would%20like%20to%20place%20a%20wholesale%20order." 
                 target="_blank" 
                 rel="noopener noreferrer"
-                style={{ backgroundColor: '#22c55e', color: '#ffffff', padding: '8px 14px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '5px', textDecoration: 'none' }}
+                style={{ backgroundColor: '#22c55e', color: '#ffffff', padding: '8px 14px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '5px', textDecoration: 'none', minHeight: '38px' }}
               >
                 <MessageSquare size={14} /> WhatsApp
               </a>
@@ -327,24 +327,24 @@ function Home({ addToCart }) {
       {/* Quick Order Form / WhatsApp Integration Section */}
       <section className="section" style={{
         background: 'linear-gradient(135deg, #1b75bc, var(--primary-blue))',
-        color: '#ffffff', padding: '60px 0'
+        color: '#ffffff', padding: 'clamp(40px, 6vw, 60px) 0'
       }}>
-        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '30px' }}>
-          <div>
-            <h2 style={{ color: '#ffffff', fontSize: '2rem', marginBottom: '10px' }}>
+        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
+          <div style={{ flex: '1 1 280px', minWidth: 0 }}>
+            <h2 style={{ color: '#ffffff', fontSize: 'clamp(1.35rem, 4vw, 2rem)', marginBottom: '10px', lineHeight: 1.25 }}>
               {t('quickOrder.title', 'B2B Fast Quick Order Workstation')}
             </h2>
-            <p style={{ color: '#e2e8f0', fontSize: '1.05rem', maxWidth: '700px' }}>
+            <p style={{ color: '#e2e8f0', fontSize: 'clamp(0.9rem, 2.5vw, 1.05rem)', maxWidth: '700px', lineHeight: 1.55 }}>
               {t('quickOrder.subtitle', 'Search 9,500+ formulations, bulk add to cart, and download or print wholesale purchase invoices instantly.')}
             </p>
           </div>
-          <div>
+          <div style={{ flexShrink: 0 }}>
             <button 
               onClick={handleQuickWhatsApp} 
               className="btn btn-secondary" 
               style={{
-                backgroundColor: 'var(--secondary-green)', padding: '15px 35px',
-                fontSize: '1.05rem', boxShadow: '0 4px 15px rgba(56,142,60,0.3)', gap: '10px'
+                backgroundColor: 'var(--secondary-green)', padding: '14px 28px',
+                fontSize: '0.98rem', boxShadow: '0 4px 15px rgba(56,142,60,0.3)', gap: '10px'
               }}
             >
               <MessageSquare size={18} />

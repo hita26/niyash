@@ -7550,22 +7550,7 @@ _Helpline: +91 9316566894_`;
           MODAL 5: ADD / EDIT PRODUCT MODAL (UPGRADED ENTERPRISE 2-COLUMN WORKSPACE)
           ========================================== */}
       {isProductModalOpen && typeof document !== 'undefined' && createPortal(
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          width: '100vw',
-          height: '100vh',
-          backgroundColor: 'rgba(0, 0, 0, 0.72)',
-          backdropFilter: 'blur(6px)',
-          zIndex: 99999,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          padding: '20px'
-        }}>
+        <div className="admin-modal-overlay">
           <div className="card admin-modal-workspace" role="dialog" aria-modal="true">
             <form onSubmit={handleSaveProduct} style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', overflow: 'hidden', minWidth: 0 }}>
               

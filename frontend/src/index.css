@@ -3151,6 +3151,30 @@ body.dark-theme {
   }
 }
 
+@media (max-width: 768px) {
+  .admin-modal-workspace {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100% !important;
+    max-height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  .admin-workspace-header {
+    padding: 12px 14px !important;
+  }
+  .admin-workspace-body {
+    padding: 12px !important;
+    gap: 12px !important;
+  }
+  .admin-workspace-footer {
+    padding: 12px 14px !important;
+  }
+}
+
 .admin-workspace-footer {
   padding: 14px 24px;
   border-top: 1px solid var(--border-light);

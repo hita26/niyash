@@ -90,8 +90,9 @@ function Footer({ compact = false }) {
             <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#4ade80', display: 'inline-block' }}></span>
             {t('topbar.tagline', 'Care • Quality • Trust')}
           </div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#cbd5e1' }}>
-            <span>📍 {t('topbar.location', 'Rajkot, Gujarat')}</span>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#e2e8f0', fontSize: '0.86rem' }}>
+            <MapPin size={14} color="#93c5fd" aria-hidden="true" />
+            <span>{t('topbar.location', 'Rajkot, Gujarat')}</span>
           </div>
         </div>
       </div>

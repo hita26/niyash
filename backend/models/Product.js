@@ -63,6 +63,11 @@ const productSchema = new mongoose.Schema(
       default: '',
       trim: true,
     },
+    batchNumber: {
+      type: String,
+      default: '',
+      trim: true,
+    },
     expiryDate: {
       type: String,
       default: '',

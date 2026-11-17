@@ -187,7 +187,7 @@ function Contact() {
                     {/* Working Hours & Monday - Saturday */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
                       <strong style={{ color: 'var(--text-dark)', fontSize: '0.92rem' }}>
-                        Business Hours: {contactInfo.workingHours}
+                        {contactInfo.workingHours}
                       </strong>
                       <span style={{ fontSize: '0.78rem', backgroundColor: '#e0f2fe', color: '#0369a1', padding: '2px 8px', borderRadius: '12px', fontWeight: '700' }}>
                         ({contactInfo.workingDays})

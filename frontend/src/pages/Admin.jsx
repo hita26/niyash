@@ -789,6 +789,7 @@ function Admin() {
 
   // Fixed Pharma Inventory & Tax Fields
   const [prodRackId, setProdRackId] = useState('');
+  const [prodBatchNumber, setProdBatchNumber] = useState('');
   const [prodHsnCode, setProdHsnCode] = useState('3004');
   const [prodPurchaseGst, setProdPurchaseGst] = useState(12);
   const [prodSalesGst, setProdSalesGst] = useState(12);
@@ -2105,6 +2106,7 @@ _Helpline: +91 9316566894_`;
       setProdForm(product.form || 'Tablet');
       setProdManufacturer(product.manufacturer || 'Daxia Healthcare Pvt. Ltd.');
       setProdRackId(product.rackId || '');
+      setProdBatchNumber(product.batchNumber || product.batchNo || '');
       setProdHsnCode(product.hsnCode || '3004');
       setProdPurchaseGst(product.purchaseGst !== undefined ? product.purchaseGst : 12);
       setProdSalesGst(product.salesGst !== undefined ? product.salesGst : (product.gstRate || 12));
@@ -2143,6 +2145,7 @@ _Helpline: +91 9316566894_`;
       setProdForm('Tablet');
       setProdManufacturer('Daxia Healthcare Pvt. Ltd.');
       setProdRackId('');
+      setProdBatchNumber('');
       setProdHsnCode('3004');
       setProdPurchaseGst(12);
       setProdSalesGst(12);
@@ -2356,7 +2359,7 @@ _Helpline: +91 9316566894_`;
       return;
     }
     if (!prodComposition.trim()) {
-      showToast('Chemical / Active Composition is required', 'error');
+      showToast('Contains is required', 'error');
       return;
     }
     if (!prodForm) {
@@ -2387,6 +2390,10 @@ _Helpline: +91 9316566894_`;
       showToast('Manufacturer Details is required', 'error');
       return;
     }
+    if (!prodBatchNumber.trim()) {
+      showToast('Batch Number is required', 'error');
+      return;
+    }
     if (!prodRackId.trim()) {
       showToast('Rack ID / Location is required', 'error');
       return;
@@ -2397,10 +2404,6 @@ _Helpline: +91 9316566894_`;
     }
     if (!prodExpiryDate.trim()) {
       showToast('Expiry Date is required', 'error');
-      return;
-    }
-    if (!prodDescription.trim()) {
-      showToast('Product Description & Indications is required', 'error');
       return;
     }
 
@@ -2476,6 +2479,7 @@ _Helpline: +91 9316566894_`;
       form: prodForm,
       manufacturer: prodManufacturer.trim() || assignedCompany,
       rackId: prodRackId.trim(),
+      batchNumber: prodBatchNumber.trim(),
       hsnCode: prodHsnCode.trim() || '3004',
       purchaseGst: parseFloat(prodPurchaseGst) || 12,
       salesGst: parseFloat(prodSalesGst) || 12,
@@ -2484,7 +2488,7 @@ _Helpline: +91 9316566894_`;
       customFields: customFieldsArr,
       imageUrl: finalMainImage,
       images: finalImages,
-      description: prodDescription.trim(),
+      description: prodDescription.trim() || `${prodName.trim()} formulation by ${assignedCompany}.`,
       featured: prodFeatured,
       isOurProduct: prodIsOurProduct,
       isActive: prodIsActive,
@@ -5298,16 +5302,16 @@ _Helpline: +91 9316566894_`;
                        TABLE VIEW
                        ========================================== */
                     <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
-                      <div className="admin-table-container">
-                        <table className="admin-table" style={{ width: '100%', minWidth: '1150px' }}>
+                      <div className="admin-table-container" style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                        <table className="admin-table" style={{ width: '100%', minWidth: '1250px' }}>
                           <thead>
                             <tr>
                               <th style={{ width: '68px', minWidth: '68px', textAlign: 'center' }}>Photo</th>
-                              <th style={{ minWidth: '280px' }}>Product Details & SKU</th>
-                              <th style={{ minWidth: '140px', whiteSpace: 'nowrap' }}>Category</th>
+                              <th style={{ minWidth: '320px' }}>Product Details & SKU</th>
+                              <th style={{ minWidth: '160px' }}>Category</th>
                               <th style={{ minWidth: '140px' }}>Brand & Form</th>
                               <th style={{ minWidth: '130px', whiteSpace: 'nowrap' }}>Pricing (PTR / MRP)</th>
-                              <th style={{ minWidth: '120px', whiteSpace: 'nowrap' }}>Stock & Units</th>
+                              <th style={{ minWidth: '130px', whiteSpace: 'nowrap' }}>Stock & Units</th>
                               <th style={{ minWidth: '110px', textAlign: 'center', whiteSpace: 'nowrap' }}>Live Status</th>
                               <th style={{ minWidth: '100px', textAlign: 'center', whiteSpace: 'nowrap' }}>Actions</th>
                             </tr>
@@ -5367,6 +5371,11 @@ _Helpline: +91 9316566894_`;
                                           {p.sku}
                                         </span>
                                       )}
+                                      {(p.batchNumber || p.batchNo) && (
+                                        <span style={{ fontSize: '0.72rem', backgroundColor: '#e0e7ff', color: '#3730a3', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }} title="Batch Number">
+                                          Batch: {p.batchNumber || p.batchNo}
+                                        </span>
+                                      )}
                                       {p.rackId && (
                                         <span style={{ fontSize: '0.72rem', backgroundColor: '#fef3c7', color: '#92400e', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }} title="Warehouse Storage Rack">
                                           Rack: {p.rackId}
@@ -5387,22 +5396,24 @@ _Helpline: +91 9316566894_`;
                                           Exp: {p.expiryDate}
                                         </span>
                                       )}
-                                      {p.composition && (
-                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-medium)' }}>
-                                          {p.composition}
-                                        </span>
-                                      )}
                                     </div>
+                                    {p.composition && (
+                                      <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: '4px', lineHeight: '1.4' }}>
+                                        <strong style={{ color: '#1e293b' }}>Contains:</strong> {p.composition}
+                                      </div>
+                                    )}
                                   </td>
 
                                   {/* Category */}
                                   <td style={{ padding: '12px 16px', verticalAlign: 'middle' }}>
-                                    <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#475569' }}>
+                                    <div style={{ fontSize: '0.86rem', fontWeight: '700', color: '#334155' }}>
                                       {p.category}
-                                    </span>
+                                    </div>
                                     {p.subCategory && (
-                                      <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', marginTop: '2px' }}>
-                                        ↳ {p.subCategory}
+                                      <div style={{ marginTop: '4px' }}>
+                                        <span style={{ fontSize: '0.72rem', backgroundColor: '#f1f5f9', color: '#475569', padding: '2px 8px', borderRadius: '4px', fontWeight: '600', display: 'inline-block', maxWidth: '220px', wordBreak: 'break-word', lineHeight: '1.3' }}>
+                                          {p.subCategory}
+                                        </span>
                                       </div>
                                     )}
                                   </td>
@@ -6518,8 +6529,8 @@ _Helpline: +91 9316566894_`;
                               
                               {/* Hours + Monday-Saturday Badge */}
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
-                                <strong style={{ color: 'var(--text-dark)', fontSize: '0.9rem' }}>
-                                  Business Hours: {contactSettings.workingHours || '9:00 AM – 9:00 PM'}
+                                <strong style={{ color: 'var(--text-dark)', fontSize: '0.92rem' }}>
+                                  {contactSettings.workingHours || '9:00 AM – 9:00 PM'}
                                 </strong>
                                 <span style={{ fontSize: '0.78rem', backgroundColor: '#e0f2fe', color: '#0369a1', padding: '2px 8px', borderRadius: '12px', fontWeight: '700' }}>
                                   ({contactSettings.workingDays || 'Monday – Saturday'})
@@ -8176,11 +8187,11 @@ _Helpline: +91 9316566894_`;
                   <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
                       <label htmlFor="modal-composition" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                        Chemical / Active Composition <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                        Contains <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
                       </label>
                       <input 
                         id="modal-composition"
-                        type="text" placeholder="E.g., Paracetamol IP 500mg" 
+                        type="text" placeholder="E.g., Paracetamol IP 500mg, Amoxicillin 250mg" 
                         value={prodComposition} onChange={(e) => setProdComposition(e.target.value)}
                         style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' }}
                       />
@@ -8294,8 +8305,20 @@ _Helpline: +91 9316566894_`;
                     />
                   </div>
 
-                  {/* Row 7: Pharma Logistics - Rack ID, HSN Code, Expiry Date */}
+                  {/* Row 7: Pharma Logistics - Batch Number, Rack ID, HSN Code, Expiry Date */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
+                      <label htmlFor="modal-batch" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                        Batch Number <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                      </label>
+                      <input 
+                        id="modal-batch"
+                        type="text" required placeholder="E.g., B-9482, NB-102" 
+                        value={prodBatchNumber} onChange={(e) => setProdBatchNumber(e.target.value)}
+                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' }}
+                      />
+                    </div>
+
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
                       <label htmlFor="modal-rackid" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
                         Rack ID / Location <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
@@ -8337,7 +8360,7 @@ _Helpline: +91 9316566894_`;
                   <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
                       <label htmlFor="modal-purgst" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                        Purchase GST Rate (%) *
+                        Purchase GST Rate (%) <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
                       </label>
                       <select 
                         id="modal-purgst"
@@ -8356,7 +8379,7 @@ _Helpline: +91 9316566894_`;
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
                       <label htmlFor="modal-salesgst" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                        Sales GST Rate (%) *
+                        Sales GST Rate (%) <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
                       </label>
                       <select 
                         id="modal-salesgst"
@@ -8426,10 +8449,12 @@ _Helpline: +91 9316566894_`;
 
                   {/* Row 10: Description */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', width: '100%', boxSizing: 'border-box' }}>
-                    <label htmlFor="modal-desc" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Product Description & Indications *</label>
+                    <label htmlFor="modal-desc" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                      Product Description & Indications <span style={{ fontSize: '0.78rem', color: 'var(--text-light)', fontWeight: 'normal' }}>(Optional)</span>
+                    </label>
                     <textarea 
                       id="modal-desc"
-                      rows="3" required placeholder="Provide product indication, therapeutic dosage, age advisory or usage..." 
+                      rows="3" placeholder="Provide product indication, therapeutic dosage, age advisory or usage..." 
                       value={prodDescription} onChange={(e) => setProdDescription(e.target.value)}
                       style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', resize: 'vertical', width: '100%', boxSizing: 'border-box' }}
                     />
@@ -9218,8 +9243,12 @@ _Helpline: +91 9316566894_`;
                   <span style={{ color: 'var(--text-dark)', textAlign: 'right' }}>{prodCategory === 'Custom' ? prodCustomCategory : prodCategory}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
-                  <span style={{ color: 'var(--text-medium)', fontWeight: '600' }}>Composition:</span>
+                  <span style={{ color: 'var(--text-medium)', fontWeight: '600' }}>Contains:</span>
                   <span style={{ color: 'var(--text-dark)', textAlign: 'right' }}>{prodComposition}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
+                  <span style={{ color: 'var(--text-medium)', fontWeight: '600' }}>Batch No:</span>
+                  <span style={{ color: 'var(--text-dark)', fontFamily: 'monospace', fontWeight: '700', textAlign: 'right' }}>{prodBatchNumber}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
                   <span style={{ color: 'var(--text-medium)', fontWeight: '600' }}>Form & Packing:</span>

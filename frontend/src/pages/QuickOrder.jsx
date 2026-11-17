@@ -1672,6 +1672,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                 </label>
                 <input
                   type="tel"
+                  inputMode="tel"
                   maxLength={10}
                   placeholder="10-digit mobile number"
                   value={retailerMobile}
@@ -1730,7 +1731,8 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                   Destination WhatsApp Desk
                 </label>
                 <input
-                  type="text"
+                  type="tel"
+                  inputMode="tel"
                   placeholder="9316566894"
                   value={destinationWhatsApp}
                   onChange={(e) => setDestinationWhatsApp(e.target.value)}
@@ -2160,6 +2162,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                                   </button>
                                   <input
                                     type="number"
+                                    inputMode="numeric"
                                     min="0"
                                     value={boxQty === 0 ? '' : boxQty}
                                     placeholder="0"
@@ -2396,6 +2399,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                             </button>
                             <input
                               type="number"
+                              inputMode="numeric"
                               min="0"
                               value={boxQty === 0 ? '' : boxQty}
                               placeholder="0"

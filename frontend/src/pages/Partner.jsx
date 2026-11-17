@@ -174,18 +174,7 @@ function Partner() {
             </div>
           </div>
 
-          {/* Statutory Registration Badge */}
-          <div className="card" style={{ marginTop: '16px', padding: '16px 20px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-light)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--secondary-green)', fontWeight: '700', fontSize: '0.85rem' }}>
-              <ShieldCheck size={18} />
-              <span>{t('compliance.title', 'Official Business Registration & Statutory Licences')}</span>
-            </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 16px', fontSize: '0.82rem', color: 'var(--text-medium)' }}>
-              <span><strong>D.L.No.:</strong> <span style={{ fontFamily: 'monospace', fontWeight: '700', color: 'var(--primary-blue)' }}>20B, 264618, 21B, 264619</span></span>
-              <span><strong>GSTIN:</strong> <span style={{ fontFamily: 'monospace', fontWeight: '700', color: 'var(--primary-blue)' }}>24BVXPP6108F2Z7</span></span>
-              <span><strong>Food License no.:</strong> <span style={{ fontFamily: 'monospace', fontWeight: '700', color: 'var(--primary-blue)' }}>20726030000567</span></span>
-            </div>
-          </div>
+
         </div>
 
         {/* Form Column */}
@@ -215,7 +204,7 @@ function Partner() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="partner-distributor" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                    {t('partner.storeTypeDistributor', 'Sub-Stockist / Distributor')} *
+                    {t('partner.storeTypeDistributor', 'Sub-Stockist / Distributor')} <span className="required-star">*</span>
                   </label>
                   <input 
                     id="partner-distributor"
@@ -229,7 +218,7 @@ function Partner() {
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="partner-store" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                    {t('partner.storeNameLabel', 'Medical Store / Pharmacy Name *')}
+                    {t('partner.storeNameLabel', 'Medical Store / Pharmacy Name')} <span className="required-star">*</span>
                   </label>
                   <input 
                     id="partner-store"
@@ -247,7 +236,7 @@ function Partner() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="partner-owner" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                    {t('partner.ownerLabel', 'Owner / Purchaser Name *')}
+                    {t('partner.ownerLabel', 'Owner / Contact Person Name')} <span className="required-star">*</span>
                   </label>
                   <input 
                     id="partner-owner"
@@ -261,7 +250,7 @@ function Partner() {
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="partner-designation" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                    {t('supplier.designationLabel', 'Designation *')}
+                    {t('supplier.designationLabel', 'Designation')} <span className="required-star">*</span>
                   </label>
                   <input 
                     id="partner-designation"
@@ -279,7 +268,7 @@ function Partner() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="partner-phone" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                    {t('partner.phoneLabel', '10-Digit Mobile Number *')}
+                    {t('partner.phoneLabel', '10-Digit Mobile Number')} <span className="required-star">*</span>
                   </label>
                   <input 
                     id="partner-phone"
@@ -311,7 +300,7 @@ function Partner() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="partner-license" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                    {t('partner.drugLicenseLabel', 'Drug License Number (20B / 21B) *')}
+                    {t('partner.drugLicenseLabel', 'Drug License Number (20B / 21B)')} <span className="required-star">*</span>
                   </label>
                   <input 
                     id="partner-license"
@@ -341,7 +330,7 @@ function Partner() {
               {/* Row 5: Shop / Entity Address */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                 <label htmlFor="partner-address" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                  {t('partner.addressLabel', 'Complete Shop / Hospital Address *')}
+                  {t('partner.addressLabel', 'Complete Shop / Hospital Address')} <span className="required-star">*</span>
                 </label>
                 <input 
                   id="partner-address"
@@ -372,7 +361,7 @@ function Partner() {
               <button 
                 type="submit" 
                 disabled={isSubmitting}
-                className="btn btn-secondary" 
+                className="btn btn-primary" 
                 style={{ width: '100%', height: '45px', gap: '10px', marginTop: '10px' }}
               >
                 <Send size={16} />

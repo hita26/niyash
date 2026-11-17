@@ -229,6 +229,7 @@ function ProductDetail({ addToCart }) {
                 <img 
                   src={currentPhoto} 
                   alt={`${product.name} packaging`} 
+                  loading="lazy"
                   onError={(e) => {
                     // Hide image completely on failure to leave section empty per instructions
                     e.target.style.display = 'none';
@@ -336,6 +337,7 @@ function ProductDetail({ addToCart }) {
                     <img 
                       src={imgUrl} 
                       alt={`Thumbnail ${idx + 1}`} 
+                      loading="lazy"
                       onError={(e) => { e.target.style.display = 'none'; }}
                       style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                     />

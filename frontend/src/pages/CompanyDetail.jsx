@@ -156,6 +156,7 @@ function CompanyDetail({ addToCart }) {
               <img 
                 src={getCleanLogoUrl(company)}
                 alt={company.name}
+                loading="lazy"
                 style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                 onError={(e) => {
                   const cleanName = (company.name || '').replace(/\s*\([^)]*\)/g, '').trim() || company.name || 'Pharma';
@@ -336,6 +337,7 @@ function CompanyDetail({ addToCart }) {
                       <img 
                         src={photoUrl} 
                         alt={p.name} 
+                        loading="lazy"
                         style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                         onError={(e) => { e.target.style.display = 'none'; }}
                       />
@@ -479,7 +481,7 @@ function CompanyDetail({ addToCart }) {
                         <td style={{ padding: '10px 16px', verticalAlign: 'middle' }}>
                           <div style={{ width: '44px', height: '44px', borderRadius: '6px', overflow: 'hidden', backgroundColor: '#f1f5f9', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             {photoUrl ? (
-                              <img src={photoUrl} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none'; }} />
+                              <img src={photoUrl} alt={p.name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none'; }} />
                             ) : null}
                           </div>
                         </td>

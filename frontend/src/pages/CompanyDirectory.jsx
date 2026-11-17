@@ -277,6 +277,7 @@ function CompanyDirectory() {
                       <img 
                         src={getCleanLogoUrl(company)}
                         alt={`${company.name} logo`}
+                        loading="lazy"
                         style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                         onError={(e) => {
                           e.target.src = getCleanLogoUrl(company);

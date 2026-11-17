@@ -193,7 +193,7 @@ export default function ForgotPasswordModal({
                   htmlFor="forgot-email-phone"
                   className="block text-sm font-semibold text-slate-800 mb-1.5"
                 >
-                  {t('forgotPassword.emailOrPhoneLabel', 'Registered Email or Phone *')}
+                  {t('forgotPassword.emailOrPhoneLabel', 'Registered Email or Phone')} <span className="required-star">*</span>
                 </label>
                 <div className="relative">
                   <Mail className="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -216,7 +216,8 @@ export default function ForgotPasswordModal({
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:bg-blue-400 text-white font-semibold py-3.5 rounded-xl transition duration-150 shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+                className="w-full text-white font-semibold py-3.5 rounded-xl transition duration-150 shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+                style={{ background: 'linear-gradient(135deg, var(--primary-blue), var(--accent-blue))' }}
               >
                 {isLoading ? (
                   <>

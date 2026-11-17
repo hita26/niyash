@@ -254,18 +254,7 @@ function Supplier() {
             </div>
           </div>
 
-          {/* Statutory Registration Badge */}
-          <div className="card" style={{ marginTop: '16px', padding: '16px 20px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-light)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--secondary-green)', fontWeight: '700', fontSize: '0.85rem' }}>
-              <ShieldCheck size={18} />
-              <span>{t('compliance.title', 'Official Business Registration & Statutory Licences')}</span>
-            </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 16px', fontSize: '0.82rem', color: 'var(--text-medium)' }}>
-              <span><strong>D.L.No.:</strong> <span style={{ fontFamily: 'monospace', fontWeight: '700', color: 'var(--primary-blue)' }}>20B, 264618, 21B, 264619</span></span>
-              <span><strong>GSTIN:</strong> <span style={{ fontFamily: 'monospace', fontWeight: '700', color: 'var(--primary-blue)' }}>24BVXPP6108F2Z7</span></span>
-              <span><strong>Food License no.:</strong> <span style={{ fontFamily: 'monospace', fontWeight: '700', color: 'var(--primary-blue)' }}>20726030000567</span></span>
-            </div>
-          </div>
+
         </div>
 
         {/* Form Column */}
@@ -295,7 +284,7 @@ function Supplier() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="supplier-company" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                    {t('supplier.companyLabel', 'Manufacturing / Pharmaceutical Firm *')}
+                    {t('supplier.companyLabel', 'Manufacturing / Pharmaceutical Firm')} <span className="required-star">*</span>
                   </label>
                   <input 
                     id="supplier-company"
@@ -309,7 +298,7 @@ function Supplier() {
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="supplier-contact" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                    {t('supplier.contactLabel', 'Contact Person Name *')}
+                    {t('supplier.contactLabel', 'Contact Person Name')} <span className="required-star">*</span>
                   </label>
                   <input 
                     id="supplier-contact"
@@ -327,7 +316,7 @@ function Supplier() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="supplier-designation" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                    {t('supplier.designationLabel', 'Designation *')}
+                    {t('supplier.designationLabel', 'Designation')} <span className="required-star">*</span>
                   </label>
                   <input 
                     id="supplier-designation"
@@ -341,7 +330,7 @@ function Supplier() {
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="supplier-phone" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                    {t('partner.phoneLabel', '10-Digit Mobile Number *')}
+                    {t('partner.phoneLabel', '10-Digit Mobile Number')} <span className="required-star">*</span>
                   </label>
                   <input 
                     id="supplier-phone"
@@ -360,7 +349,7 @@ function Supplier() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="supplier-email" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                    {t('cart.email', 'Business Email *')}
+                    {t('cart.email', 'Business Email')} <span className="required-star">*</span>
                   </label>
                   <input 
                     id="supplier-email"
@@ -374,7 +363,7 @@ function Supplier() {
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="supplier-gst" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                    {t('supplier.gstLabel', 'GSTIN Number *')}
+                    {t('supplier.gstLabel', 'GSTIN Number')} <span className="required-star">*</span>
                   </label>
                   <input 
                     id="supplier-gst"
@@ -391,7 +380,7 @@ function Supplier() {
               {/* Row 4: Company Address */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                 <label htmlFor="supplier-address" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                  {t('supplier.addressLabel', 'Plant / Corporate Address *')}
+                  {t('supplier.addressLabel', 'Plant / Corporate Address')} <span className="required-star">*</span>
                 </label>
                 <input 
                   id="supplier-address"
@@ -408,7 +397,7 @@ function Supplier() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <label htmlFor="supplier-portfolio-upload" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                    {t('supplier.uploadPortfolio', 'Product Catalog / Price List (Excel, PDF or JPG) *')}
+                    {t('supplier.uploadPortfolio', 'Product Catalog / Price List (Excel, PDF or JPG)')} <span className="required-star">*</span>
                   </label>
                   <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Max 10 MB</span>
                 </div>
@@ -495,7 +484,7 @@ function Supplier() {
               {/* Row 6: Product Portfolio Details / Notes */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                 <label htmlFor="supplier-msg" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                  {t('supplier.notesLabel', 'Formulation Portfolio Details / Message')} *
+                  {t('supplier.notesLabel', 'Formulation Portfolio Details / Message')} <span className="required-star">*</span>
                 </label>
                 <textarea 
                   id="supplier-msg"

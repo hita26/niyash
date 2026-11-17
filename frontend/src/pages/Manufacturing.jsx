@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, CheckCircle2, ShieldAlert, CheckSquare, Layers, AlertCircle, Mail, Phone, ShieldCheck } from 'lucide-react';
+import { Send, CheckCircle2, ShieldAlert, CheckSquare, Layers, AlertCircle, Mail, Phone } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 function Manufacturing() {
@@ -148,18 +148,7 @@ function Manufacturing() {
             </div>
           </div>
 
-          {/* Statutory Registration Badge */}
-          <div className="card" style={{ marginTop: '16px', padding: '16px 20px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-light)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--secondary-green)', fontWeight: '700', fontSize: '0.85rem' }}>
-              <ShieldCheck size={18} />
-              <span>{t('compliance.title', 'Official Business Registration & Statutory Licences')}</span>
-            </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 16px', fontSize: '0.82rem', color: 'var(--text-medium)' }}>
-              <span><strong>D.L.No.:</strong> <span style={{ fontFamily: 'monospace', fontWeight: '700', color: 'var(--primary-blue)' }}>20B, 264618, 21B, 264619</span></span>
-              <span><strong>GSTIN:</strong> <span style={{ fontFamily: 'monospace', fontWeight: '700', color: 'var(--primary-blue)' }}>24BVXPP6108F2Z7</span></span>
-              <span><strong>Food License no.:</strong> <span style={{ fontFamily: 'monospace', fontWeight: '700', color: 'var(--primary-blue)' }}>20726030000567</span></span>
-            </div>
-          </div>
+
         </div>
 
         {/* Form Column */}
@@ -189,7 +178,7 @@ function Manufacturing() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                     <label htmlFor="mfg-name" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                      {t('contact.nameLabel', 'Your Name *')}
+                      {t('contact.nameLabel', 'Your Name')} <span className="required-star">*</span>
                     </label>
                     <input 
                       id="mfg-name"
@@ -203,7 +192,7 @@ function Manufacturing() {
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                     <label htmlFor="mfg-phone" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                      {t('contact.phoneLabel', 'Phone Number *')}
+                      {t('contact.phoneLabel', 'Phone Number')} <span className="required-star">*</span>
                     </label>
                     <input 
                       id="mfg-phone"
@@ -221,7 +210,7 @@ function Manufacturing() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                     <label htmlFor="mfg-email" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                      {t('cart.email', 'Email Address')} *
+                      {t('cart.email', 'Email Address')} <span className="required-star">*</span>
                     </label>
                     <input 
                       id="mfg-email"
@@ -235,7 +224,7 @@ function Manufacturing() {
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                     <label htmlFor="mfg-company" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                      {t('manufacturing.companyLabel', 'Company Name *')}
+                      {t('manufacturing.companyLabel', 'Company Name')} <span className="required-star">*</span>
                     </label>
                     <input 
                       id="mfg-company"
@@ -252,7 +241,7 @@ function Manufacturing() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                     <label htmlFor="mfg-formulations" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                      {t('manufacturing.formulationsLabel', 'Formulation Type *')}
+                      {t('manufacturing.formulationsLabel', 'Formulation Type')} <span className="required-star">*</span>
                     </label>
                     <select 
                       id="mfg-formulations"
@@ -271,7 +260,7 @@ function Manufacturing() {
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                     <label htmlFor="mfg-batch" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                      {t('manufacturing.batchSizeLabel', 'Est. Batch Size *')}
+                      {t('manufacturing.batchSizeLabel', 'Est. Batch Size')} <span className="required-star">*</span>
                     </label>
                     <input 
                       id="mfg-batch"

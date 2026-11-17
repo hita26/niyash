@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { 
   Sparkles, X, Send, Bot, RefreshCw, ShoppingBag, 
   ChevronDown, ArrowRight, Check, AlertCircle, Info, Package
@@ -7,6 +8,8 @@ import { useLanguage } from '../context/LanguageContext';
 
 export default function AIAssistant({ addToCart }) {
   const { t } = useLanguage();
+  const location = useLocation();
+  const isAdmin = location.pathname.startsWith('/admin');
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
@@ -222,27 +225,37 @@ export default function AIAssistant({ addToCart }) {
               border: '2px solid #0c3d6c',
             }} />
           </div>
-          <span>{t('aiAssistant.title', 'Ask Niyansh AI')}</span>
+          <span className="ai-chat-label">{t('aiAssistant.title', 'Ask Niyansh AI')}</span>
         </button>
       )}
 
-      {/* Responsive styles for floating button on mobile */}
+      {/* Responsive styles for floating button on mobile - compact FAB so it never covers content */}
       <style>{`
         @media (max-width: 768px) {
           .ai-chat-trigger {
-            bottom: 74px !important;
-            right: 14px !important;
-            padding: 10px 16px !important;
-            font-size: 13px !important;
+            width: 48px !important;
+            height: 48px !important;
+            min-width: 48px !important;
+            padding: 0 !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            bottom: ${isAdmin ? 'calc(20px + env(safe-area-inset-bottom, 0px))' : 'calc(74px + env(safe-area-inset-bottom, 0px))'} !important;
+            right: max(14px, env(safe-area-inset-right, 14px)) !important;
+            box-shadow: 0 4px 18px rgba(12, 61, 108, 0.45) !important;
+          }
+          .ai-chat-trigger .ai-chat-label {
+            display: none !important;
           }
           .ai-chat-window {
-            bottom: 74px !important;
-            right: 12px !important;
-            left: 12px !important;
+            bottom: ${isAdmin ? 'calc(16px + env(safe-area-inset-bottom, 0px))' : 'calc(74px + env(safe-area-inset-bottom, 0px))'} !important;
+            right: max(10px, env(safe-area-inset-right, 10px)) !important;
+            left: max(10px, env(safe-area-inset-left, 10px)) !important;
             width: auto !important;
             max-width: none !important;
-            height: 75vh !important;
-            max-height: 580px !important;
+            height: min(75vh, 75dvh) !important;
+            max-height: 560px !important;
           }
         }
       `}</style>

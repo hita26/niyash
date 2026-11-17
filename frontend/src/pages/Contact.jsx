@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Phone, Mail, MapPin, Send, CheckCircle2, Clock, AlertCircle, ShieldCheck } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Phone, Mail, MapPin, Send, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { useLiveSync, SYNC_EVENTS } from '../utils/liveSync';
 
 function Contact() {
   const { t, language } = useLanguage();
@@ -12,6 +13,44 @@ function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  // Dynamic Contact & Hub Details from Admin
+  const [contactInfo, setContactInfo] = useState({
+    hubAddress: 'Block no. 52B, Panchayat Nagar-3, Ram Park Main Road, University Rd, Rajkot, Gujarat - 360005.',
+    primaryPhone: '+91 99099 23130',
+    secondaryPhone: '+91 93165 66894',
+    email: 'info@niyanshpharma.com',
+    workingHours: '9:00 AM – 9:00 PM',
+    workingDays: 'Monday – Saturday',
+    sundayStatus: 'Sunday: Holiday',
+    lunchBreak: '2:00 PM – 4:00 PM',
+    mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3691.4650393043817!2d70.76194731589283!3d22.287219093721385!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3959cb33b44fc73f%3A0x3c79432bfa8b8b1d!2sNiyansh%20pharma!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin'
+  });
+
+  const fetchContactSettings = useCallback(async () => {
+    try {
+      const res = await fetch('/api/settings/contact');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.contact) {
+          setContactInfo(prev => ({ ...prev, ...data.contact }));
+        }
+      }
+    } catch (err) {
+      console.warn('Could not fetch dynamic contact details, using defaults:', err.message);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchContactSettings();
+  }, [fetchContactSettings]);
+
+  // Live multi-tab sync when admin updates contact settings
+  useLiveSync((event) => {
+    if (event.type === 'SETTINGS_UPDATED' || event.type === 'TAB_FOCUSED_REVALIDATE') {
+      fetchContactSettings();
+    }
+  }, [fetchContactSettings]);
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
@@ -89,87 +128,84 @@ function Contact() {
                 {t('contact.title', 'Contact & Dispatch Desk')}
               </h2>
               
-              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '22px' }}>
                 <li style={{ display: 'flex', gap: '15px', alignItems: 'flex-start' }}>
-                  <div style={{ backgroundColor: 'rgba(12, 61, 108, 0.08)', padding: '10px', borderRadius: '10px', color: 'var(--primary-blue)', display: 'flex' }}>
+                  <div style={{ backgroundColor: 'rgba(12, 61, 108, 0.08)', padding: '10px', borderRadius: '10px', color: 'var(--primary-blue)', display: 'flex', flexShrink: 0 }}>
                     <MapPin size={22} />
                   </div>
                   <div>
-                    <h3 style={{ fontSize: '1.05rem', marginBottom: '4px' }}>{t('contact.hubAddress', 'Wholesale Hub Address')}</h3>
+                    <h3 style={{ fontSize: '1.05rem', marginBottom: '4px', color: 'var(--text-dark)' }}>{t('contact.hubAddress', 'Wholesale Hub Address')}</h3>
                     <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem', lineHeight: '1.5' }}>
-                      {t('contact.addressValue', 'Block no. 52B, Panchayat Nagar-3, Ram Park Main Road, University Rd, Rajkot, Gujarat - 360005.')}
+                      {contactInfo.hubAddress}
                     </p>
                   </div>
                 </li>
 
                 <li style={{ display: 'flex', gap: '15px', alignItems: 'flex-start' }}>
-                  <div style={{ backgroundColor: 'rgba(12, 61, 108, 0.08)', padding: '10px', borderRadius: '10px', color: 'var(--primary-blue)', display: 'flex' }}>
+                  <div style={{ backgroundColor: 'rgba(12, 61, 108, 0.08)', padding: '10px', borderRadius: '10px', color: 'var(--primary-blue)', display: 'flex', flexShrink: 0 }}>
                     <Phone size={22} />
                   </div>
                   <div>
-                    <h3 style={{ fontSize: '1.05rem', marginBottom: '4px' }}>{t('contact.callUs', 'Phone Numbers')}</h3>
-                    <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem' }}>
-                      {language === 'gu' ? 'મોબાઈલ:' : language === 'hi' ? 'मोबाइल:' : 'Mobile:'} <a href="tel:+919909923130" style={{ color: 'var(--text-dark)', fontWeight: '600' }}>+91 99099 23130</a>
-                    </p>
+                    <h3 style={{ fontSize: '1.05rem', marginBottom: '4px', color: 'var(--text-dark)' }}>Direct Calling</h3>
+                    <div style={{ color: 'var(--text-dark)', fontSize: '0.95rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <a href={`tel:${(contactInfo.primaryPhone || '+919909923130').replace(/\s+/g, '')}`} style={{ color: 'var(--primary-blue)', textDecoration: 'none' }}>
+                        {contactInfo.primaryPhone || '+91 99099 23130'}
+                      </a>
+                      {contactInfo.secondaryPhone && (
+                        <>
+                          <span style={{ color: '#94a3b8', fontWeight: '400' }}>/</span>
+                          <a href={`tel:${contactInfo.secondaryPhone.replace(/\s+/g, '')}`} style={{ color: 'var(--primary-blue)', textDecoration: 'none' }}>
+                            {contactInfo.secondaryPhone}
+                          </a>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </li>
 
                 <li style={{ display: 'flex', gap: '15px', alignItems: 'flex-start' }}>
-                  <div style={{ backgroundColor: 'rgba(12, 61, 108, 0.08)', padding: '10px', borderRadius: '10px', color: 'var(--primary-blue)', display: 'flex' }}>
+                  <div style={{ backgroundColor: 'rgba(12, 61, 108, 0.08)', padding: '10px', borderRadius: '10px', color: 'var(--primary-blue)', display: 'flex', flexShrink: 0 }}>
                     <Mail size={22} />
                   </div>
                   <div>
-                    <h3 style={{ fontSize: '1.05rem', marginBottom: '4px' }}>{t('contact.emailUs', 'Official Email')}</h3>
-                    <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem' }}>
-                      {language === 'gu' ? 'ઇમેઇલ:' : language === 'hi' ? 'ईमेल:' : 'Official:'} <a href="mailto:info@niyanshpharma.com" style={{ color: 'var(--text-dark)', fontWeight: '600' }}>info@niyanshpharma.com</a>
+                    <h3 style={{ fontSize: '1.05rem', marginBottom: '4px', color: 'var(--text-dark)' }}>{t('contact.emailUs', 'Email Address')}</h3>
+                    <p style={{ color: 'var(--text-medium)', fontSize: '0.92rem' }}>
+                      <a href={`mailto:${contactInfo.email || 'info@niyanshpharma.com'}`} style={{ color: 'var(--primary-blue)', fontWeight: '600', textDecoration: 'none' }}>
+                        {contactInfo.email || 'info@niyanshpharma.com'}
+                      </a>
                     </p>
                   </div>
                 </li>
 
                 <li style={{ display: 'flex', gap: '15px', alignItems: 'flex-start' }}>
-                  <div style={{ backgroundColor: 'rgba(12, 61, 108, 0.08)', padding: '10px', borderRadius: '10px', color: 'var(--primary-blue)', display: 'flex' }}>
+                  <div style={{ backgroundColor: 'rgba(12, 61, 108, 0.08)', padding: '10px', borderRadius: '10px', color: 'var(--primary-blue)', display: 'flex', flexShrink: 0 }}>
                     <Clock size={22} />
                   </div>
                   <div>
-                    <h3 style={{ fontSize: '1.05rem', marginBottom: '4px' }}>{t('contact.workingHours', 'Business Hours')}</h3>
-                    <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem', marginBottom: '3px', lineHeight: '1.4' }}>
-                      <strong>{t('contact.hoursLabel', 'Business Hours')}:</strong> 9:00 AM – 9:00 PM
-                    </p>
-                    <p style={{ color: 'var(--text-light)', fontSize: '0.82rem', marginBottom: '6px' }}>
-                      ({language === 'gu' ? 'સોમવાર – શનિવાર, રવિવાર રજા' : language === 'hi' ? 'सोमवार – शनिवार, रविवार बंद' : 'Monday – Saturday, Sunday Closed'})
-                    </p>
-                    <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px', lineHeight: '1.4' }}>
-                      <span style={{ display: 'inline-block', width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#f59e0b' }}></span>
-                      <strong>{t('contact.lunchBreakLabel', 'Lunch Break')}:</strong> 2:00 PM – 4:00 PM
-                    </p>
-                  </div>
-                </li>
+                    <h3 style={{ fontSize: '1.05rem', marginBottom: '6px', color: 'var(--text-dark)' }}>{t('contact.workingHours', 'Business Hours')}</h3>
+                    
+                    {/* Working Hours & Monday - Saturday */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
+                      <strong style={{ color: 'var(--text-dark)', fontSize: '0.92rem' }}>
+                        Business Hours: {contactInfo.workingHours}
+                      </strong>
+                      <span style={{ fontSize: '0.78rem', backgroundColor: '#e0f2fe', color: '#0369a1', padding: '2px 8px', borderRadius: '12px', fontWeight: '700' }}>
+                        ({contactInfo.workingDays})
+                      </span>
+                    </div>
 
-                <li style={{ display: 'flex', gap: '15px', alignItems: 'flex-start' }}>
-                  <div style={{ backgroundColor: 'rgba(56, 142, 60, 0.08)', padding: '10px', borderRadius: '10px', color: 'var(--secondary-green)', display: 'flex' }}>
-                    <ShieldCheck size={22} />
-                  </div>
-                  <div>
-                    <h3 style={{ fontSize: '1.05rem', marginBottom: '6px' }}>
-                      {t('compliance.title', 'Official Business Registration & Licences')}
-                    </h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.88rem', color: 'var(--text-medium)' }}>
-                      <div>
-                        <strong style={{ color: 'var(--text-dark)' }}>{t('compliance.dlLabel', 'D.L.No.')}:</strong>{' '}
-                        <span style={{ fontFamily: 'monospace', fontWeight: '700', color: 'var(--primary-blue)' }}>20B, 264618, 21B, 264619</span>
-                      </div>
-                      <div>
-                        <strong style={{ color: 'var(--text-dark)' }}>{t('compliance.gstinLabel', 'GSTIN')}:</strong>{' '}
-                        <span style={{ fontFamily: 'monospace', fontWeight: '700', color: 'var(--primary-blue)' }}>24BVXPP6108F2Z7</span>
-                      </div>
-                      <div>
-                        <strong style={{ color: 'var(--text-dark)' }}>{t('compliance.panLabel', 'PAN No.')}:</strong>{' '}
-                        <span style={{ fontFamily: 'monospace', fontWeight: '700', color: 'var(--primary-blue)' }}>BVXPP6108F</span>
-                      </div>
-                      <div>
-                        <strong style={{ color: 'var(--text-dark)' }}>{t('compliance.fssaiLabel', 'Food License no.')}:</strong>{' '}
-                        <span style={{ fontFamily: 'monospace', fontWeight: '700', color: 'var(--primary-blue)' }}>20726030000567</span>
-                      </div>
+                    {/* Next line: Sunday Holiday (Prominent, formatted cleanly so it looks distinct!) */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '0.8rem', backgroundColor: '#fee2e2', color: '#b91c1c', border: '1px solid #fecaca', padding: '3px 10px', borderRadius: '14px', fontWeight: '800', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#ef4444' }}></span>
+                        {contactInfo.sundayStatus}
+                      </span>
+                    </div>
+
+                    {/* Lunch Break */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.86rem', color: 'var(--text-medium)' }}>
+                      <span style={{ display: 'inline-block', width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#f59e0b' }}></span>
+                      <strong>{t('contact.lunchBreakLabel', 'Lunch Break')}:</strong> {contactInfo.lunchBreak}
                     </div>
                   </div>
                 </li>
@@ -217,7 +253,7 @@ function Contact() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                     <label htmlFor="contact-name" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                      {t('contact.nameLabel', 'Your Name *')}
+                      {t('contact.nameLabel', 'Your Name')} <span className="required-star">*</span>
                     </label>
                     <input 
                       id="contact-name"
@@ -231,7 +267,7 @@ function Contact() {
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                     <label htmlFor="contact-phone" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                      {t('contact.phoneLabel', 'Phone Number *')}
+                      {t('contact.phoneLabel', 'Phone Number')} <span className="required-star">*</span>
                     </label>
                     <input 
                       id="contact-phone"
@@ -262,7 +298,7 @@ function Contact() {
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', flex: 1 }}>
                   <label htmlFor="contact-msg" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                    {t('contact.messageLabel', 'Medicines List / Message *')}
+                    {t('contact.messageLabel', 'Medicines List / Message')} <span className="required-star">*</span>
                   </label>
                   <textarea 
                     id="contact-msg"

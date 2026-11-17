@@ -271,7 +271,9 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                   )}
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <label htmlFor="name-input" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>{t('auth.nameLabel', 'Full Name *')}</label>
+                    <label htmlFor="name-input" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                      {t('auth.nameLabel', 'Full Name')} <span className="required-star">*</span>
+                    </label>
                     <input 
                       id="name-input"
                       type="text" 
@@ -284,7 +286,9 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <label htmlFor="phone-input" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>{t('auth.phoneLabel', 'Phone Number *')}</label>
+                    <label htmlFor="phone-input" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                      {t('auth.phoneLabel', 'Phone Number')} <span className="required-star">*</span>
+                    </label>
                     <input 
                       id="phone-input"
                       type="tel" 
@@ -336,7 +340,7 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                   <button 
                     type="submit" 
                     disabled={isSubmitting}
-                    className="btn btn-secondary" 
+                    className="btn btn-primary" 
                     style={{ width: '100%', marginTop: '10px', gap: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                   >
                     <Send size={16} />

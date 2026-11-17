@@ -104,6 +104,7 @@ function Footer({ compact = false }) {
               <img 
                 src="/logo.jpg" 
                 alt="Niyansh Pharma Wholesale Logo" 
+                loading="lazy"
                 style={{ height: '48px', width: 'auto', display: 'block', objectFit: 'contain' }} 
               />
             </div>

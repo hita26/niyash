@@ -174,7 +174,7 @@ function Home({ addToCart }) {
             </div>
 
             {/* Stat Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '22px' }}>
+            <div className="hero-stat-grid" style={{ marginBottom: '22px' }}>
               <div style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '14px', border: '1px solid rgba(255,255,255,0.1)' }}>
                 <div style={{ fontSize: '1.65rem', fontWeight: '800', color: '#ffffff', lineHeight: 1.1 }}>{t('hero.statFormulations', '9,500+')}</div>
                 <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '4px' }}>{t('hero.statFormulationsLabel', 'Genuine Formulations')}</div>
@@ -232,6 +232,7 @@ function Home({ addToCart }) {
                   <img 
                     src={cat.image} 
                     alt={cat.title} 
+                    loading="lazy"
                     onError={(e) => {
                       e.target.onerror = null;
                       e.target.src = '/pharma-products.jpg';

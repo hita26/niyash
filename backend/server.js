@@ -60,6 +60,7 @@ app.use('/api/enquiries', require('./routes/enquiryRoutes'));
 app.use('/api/careers', require('./routes/careerRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/ai', require('./routes/aiRoutes'));
+app.use('/api/settings', require('./routes/settingRoutes'));
 
 
 // Serve static frontend build if available

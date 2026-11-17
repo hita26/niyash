@@ -9,7 +9,7 @@ import {
   Tag, ShieldCheck, Sparkles, Clock, AlertTriangle, Printer, Share2, Receipt,
   TrendingUp, Percent, Upload, Image as ImageIcon, Star, Grid, List,
   FileSpreadsheet, ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Layers,
-  Copy, CheckCheck
+  Copy, CheckCheck, MapPin, Mail, Save
 } from 'lucide-react';
 import { broadcastLiveEvent, SYNC_EVENTS } from '../utils/liveSync';
 import { useLanguage } from '../context/LanguageContext';
@@ -584,6 +584,22 @@ function Admin() {
   const [isClearingProducts, setIsClearingProducts] = useState(false);
   const [isClearingCompanies, setIsClearingCompanies] = useState(false);
 
+  // Dynamic Contact & Wholesale Hub Settings
+  const [contactSettings, setContactSettings] = useState({
+    hubAddress: 'Block no. 52B, Panchayat Nagar-3, Ram Park Main Road, University Rd, Rajkot, Gujarat - 360005.',
+    primaryPhone: '+91 99099 23130',
+    secondaryPhone: '+91 93165 66894',
+    email: 'info@niyanshpharma.com',
+    workingHours: '9:00 AM – 9:00 PM',
+    workingDays: 'Monday – Saturday',
+    sundayStatus: 'Sunday: Holiday',
+    lunchBreak: '2:00 PM – 4:00 PM',
+    mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3691.4650393043817!2d70.76194731589283!3d22.287219093721385!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3959cb33b44fc73f%3A0x3c79432bfa8b8b1d!2sNiyansh%20pharma!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin'
+  });
+  const [isContactSaving, setIsContactSaving] = useState(false);
+  const [contactSaveSuccess, setContactSaveSuccess] = useState(false);
+  const [contactSaveError, setContactSaveError] = useState('');
+
   // Form Fields for Add/Edit Company
   const [compName, setCompName] = useState('');
   const [compCategory, setCompCategory] = useState('Pharmaceutical Formulations');
@@ -899,6 +915,19 @@ function Admin() {
         }
       } catch (cfErr) {
         console.warn('Custom fields fetch notice:', cfErr);
+      }
+
+      // 9. Fetch Contact & Wholesale Hub Settings
+      try {
+        const contactRes = await fetch('/api/settings/contact');
+        if (contactRes.ok) {
+          const contactData = await contactRes.json();
+          if (contactData && contactData.contact) {
+            setContactSettings(prev => ({ ...prev, ...contactData.contact }));
+          }
+        }
+      } catch (contactErr) {
+        console.warn('Contact settings fetch notice:', contactErr);
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -2852,6 +2881,39 @@ _Helpline: +91 9316566894_`;
     }
   };
 
+  // Save Dynamic Contact & Wholesale Hub Details
+  const handleSaveContactSettings = async (e) => {
+    if (e) e.preventDefault();
+    setIsContactSaving(true);
+    setContactSaveSuccess(false);
+    setContactSaveError('');
+    try {
+      const res = await fetch('/api/settings/contact', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders(),
+        },
+        body: JSON.stringify(contactSettings),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setContactSaveSuccess(true);
+        broadcastLiveEvent(SYNC_EVENTS.SETTINGS_UPDATED, { type: 'contact', contact: contactSettings });
+        showToast('Contact & Wholesale Hub details published live!');
+        setTimeout(() => setContactSaveSuccess(false), 4500);
+      } else {
+        setContactSaveError(data.message || 'Failed to update contact settings');
+        showToast(data.message || 'Error saving contact details', 'error');
+      }
+    } catch (err) {
+      setContactSaveError('Network error while saving settings: ' + err.message);
+      showToast('Network error while saving settings', 'error');
+    } finally {
+      setIsContactSaving(false);
+    }
+  };
+
   // ==========================================
   // FILTERED DATA COMPUTATIONS
   // ==========================================
@@ -3384,6 +3446,23 @@ _Helpline: +91 9316566894_`;
                 {careers.length}
               </span>
             </button>
+
+            <button 
+              onClick={() => setActiveTab('contact')} 
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '10px 14px',
+                borderRadius: '8px', fontWeight: '600', fontSize: '0.9rem',
+                backgroundColor: activeTab === 'contact' ? 'rgba(12, 61, 108, 0.1)' : 'transparent',
+                color: activeTab === 'contact' ? 'var(--primary-blue)' : 'var(--text-medium)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Phone size={16} /> 📞 Contact & Hub
+              </div>
+              <span style={{ fontSize: '0.68rem', padding: '2px 7px', borderRadius: '10px', backgroundColor: '#dcfce7', color: '#15803d', fontWeight: '700' }}>
+                Live
+              </span>
+            </button>
           </nav>
 
           <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '15px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -3457,6 +3536,9 @@ _Helpline: +91 9316566894_`;
               </button>
               <button onClick={() => setActiveTab('careers')} className={`admin-tab-chip ${activeTab === 'careers' ? 'active' : ''}`}>
                 <Briefcase size={14} /> {t('admin.tabCareers', 'Careers')} ({careers.length})
+              </button>
+              <button onClick={() => setActiveTab('contact')} className={`admin-tab-chip ${activeTab === 'contact' ? 'active' : ''}`}>
+                <Phone size={14} /> 📞 Contact & Hub
               </button>
             </div>
           </div>
@@ -5622,6 +5704,340 @@ _Helpline: +91 9316566894_`;
                   </div>
                 </div>
               )}
+
+              {/* ==========================================
+                  TAB 8: DYNAMIC CONTACT & HUB MANAGEMENT
+                  ========================================== */}
+              {activeTab === 'contact' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+                  {/* Header */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '15px' }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                        <h2 style={{ fontSize: '1.6rem', color: 'var(--primary-blue)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <Phone size={24} /> Contact & Wholesale Hub Management
+                        </h2>
+                        <span style={{ fontSize: '0.75rem', backgroundColor: '#dcfce7', color: '#15803d', border: '1px solid #bbf7d0', padding: '3px 10px', borderRadius: '12px', fontWeight: '700' }}>
+                          ⚡ Live Public Sync Active
+                        </span>
+                      </div>
+                      <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem', margin: 0 }}>
+                        Manage public contact coordinates, direct calling hotlines, business hours, and Sunday holiday status. Any edits saved here immediately reflect across the live website without requiring page refreshes.
+                      </p>
+                    </div>
+
+                    <button 
+                      type="button"
+                      onClick={handleSaveContactSettings}
+                      disabled={isContactSaving}
+                      className="btn btn-primary"
+                      style={{ padding: '10px 20px', gap: '8px', fontSize: '0.9rem', fontWeight: '700', boxShadow: '0 4px 12px rgba(12, 61, 108, 0.2)' }}
+                    >
+                      <Save size={16} /> {isContactSaving ? 'Publishing Live...' : 'Save & Publish Live'}
+                    </button>
+                  </div>
+
+                  {/* Feedback Alerts */}
+                  {contactSaveSuccess && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 18px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', color: '#166534', fontSize: '0.92rem', fontWeight: '600' }} role="status">
+                      <CheckCircle2 size={18} color="#16a34a" />
+                      <span>Contact & Wholesale Hub coordinates successfully updated and published to the live public website!</span>
+                    </div>
+                  )}
+
+                  {contactSaveError && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 18px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#991b1b', fontSize: '0.92rem', fontWeight: '600' }} role="alert">
+                      <AlertCircle size={18} color="#dc2626" />
+                      <span>{contactSaveError}</span>
+                    </div>
+                  )}
+
+                  {/* Split Layout: Form on Left, Live Preview Card on Right */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.25fr) minmax(0, 0.95fr)', gap: '22px', alignItems: 'start' }} className="admin-contact-split">
+                    {/* Left: Settings Form */}
+                    <form onSubmit={handleSaveContactSettings} className="card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                      <h3 style={{ fontSize: '1.15rem', color: 'var(--text-dark)', margin: 0, paddingBottom: '12px', borderBottom: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span>🏢 Wholesale Dispatch Desk Settings</span>
+                      </h3>
+
+                      {/* 1. Hub Physical Address */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <label htmlFor="hub-address" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                          Wholesale Hub Physical Address <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                        </label>
+                        <textarea
+                          id="hub-address"
+                          rows="3"
+                          required
+                          value={contactSettings.hubAddress}
+                          onChange={(e) => setContactSettings(prev => ({ ...prev, hubAddress: e.target.value }))}
+                          style={{ padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', resize: 'vertical' }}
+                          placeholder="Enter complete hub building, street, landmark, city, state and PIN..."
+                        />
+                      </div>
+
+                      {/* 2. Direct Calling Numbers */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          <label htmlFor="phone-primary" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                            Direct Calling - Line 1 (Primary) <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                          </label>
+                          <input
+                            id="phone-primary"
+                            type="text"
+                            required
+                            value={contactSettings.primaryPhone}
+                            onChange={(e) => setContactSettings(prev => ({ ...prev, primaryPhone: e.target.value }))}
+                            style={{ padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem' }}
+                            placeholder="+91 99099 23130"
+                          />
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          <label htmlFor="phone-secondary" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                            Direct Calling - Line 2 (Slash / Number)
+                          </label>
+                          <input
+                            id="phone-secondary"
+                            type="text"
+                            value={contactSettings.secondaryPhone}
+                            onChange={(e) => setContactSettings(prev => ({ ...prev, secondaryPhone: e.target.value }))}
+                            style={{ padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem' }}
+                            placeholder="+91 93165 66894"
+                          />
+                        </div>
+                      </div>
+
+                      {/* 3. Email Address */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <label htmlFor="contact-email-setting" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                          Wholesale Inquiry Email <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                        </label>
+                        <input
+                          id="contact-email-setting"
+                          type="email"
+                          required
+                          value={contactSettings.email}
+                          onChange={(e) => setContactSettings(prev => ({ ...prev, email: e.target.value }))}
+                          style={{ padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem' }}
+                          placeholder="info@niyanshpharma.com"
+                        />
+                      </div>
+
+                      {/* 4. Business Hours & Working Days */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          <label htmlFor="working-hours" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                            Business Working Hours <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                          </label>
+                          <input
+                            id="working-hours"
+                            type="text"
+                            required
+                            value={contactSettings.workingHours}
+                            onChange={(e) => setContactSettings(prev => ({ ...prev, workingHours: e.target.value }))}
+                            style={{ padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem' }}
+                            placeholder="9:00 AM – 9:00 PM"
+                          />
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          <label htmlFor="working-days" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                            Working Days Badge <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                          </label>
+                          <input
+                            id="working-days"
+                            type="text"
+                            required
+                            value={contactSettings.workingDays}
+                            onChange={(e) => setContactSettings(prev => ({ ...prev, workingDays: e.target.value }))}
+                            style={{ padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem' }}
+                            placeholder="Monday – Saturday"
+                          />
+                        </div>
+                      </div>
+
+                      {/* 5. Sunday Holiday Status & Lunch Break */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          <label htmlFor="sunday-status" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                            Sunday Status Badge (Next Line) <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                          </label>
+                          <input
+                            id="sunday-status"
+                            type="text"
+                            required
+                            value={contactSettings.sundayStatus}
+                            onChange={(e) => setContactSettings(prev => ({ ...prev, sundayStatus: e.target.value }))}
+                            style={{ padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem' }}
+                            placeholder="Sunday: Holiday"
+                          />
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          <label htmlFor="lunch-break" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                            Lunch Break Timing <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                          </label>
+                          <input
+                            id="lunch-break"
+                            type="text"
+                            required
+                            value={contactSettings.lunchBreak}
+                            onChange={(e) => setContactSettings(prev => ({ ...prev, lunchBreak: e.target.value }))}
+                            style={{ padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem' }}
+                            placeholder="2:00 PM – 4:00 PM"
+                          />
+                        </div>
+                      </div>
+
+                      {/* 6. Google Map Embed URL */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <label htmlFor="map-url" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                          Google Maps Embed URL (Iframe `src`)
+                        </label>
+                        <input
+                          id="map-url"
+                          type="text"
+                          value={contactSettings.mapEmbedUrl}
+                          onChange={(e) => setContactSettings(prev => ({ ...prev, mapEmbedUrl: e.target.value }))}
+                          style={{ padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.85rem', fontFamily: 'monospace' }}
+                          placeholder="https://www.google.com/maps/embed?..."
+                        />
+                      </div>
+
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '10px', paddingTop: '15px', borderTop: '1px solid var(--border-light)' }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (window.confirm('Reset form to current saved database values?')) {
+                              fetchDashboardData();
+                            }
+                          }}
+                          className="btn btn-outline btn-sm"
+                        >
+                          Discard Edits
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={isContactSaving}
+                          className="btn btn-primary"
+                          style={{ gap: '8px', fontWeight: '700' }}
+                        >
+                          <Save size={16} /> {isContactSaving ? 'Publishing Live...' : 'Save & Publish Live'}
+                        </button>
+                      </div>
+                    </form>
+
+                    {/* Right: Real-time Public Website Preview Card */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      <div className="card" style={{ padding: '20px', backgroundColor: '#ffffff', border: '1px solid #cbd5e1', boxShadow: '0 8px 24px rgba(0,0,0,0.06)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', paddingBottom: '10px', borderBottom: '1px solid var(--border-light)' }}>
+                          <span style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--primary-blue)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            👀 Live Public Preview (Chemist View)
+                          </span>
+                          <span style={{ fontSize: '0.72rem', backgroundColor: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '2px 8px', borderRadius: '10px', fontWeight: '700' }}>
+                            Real-time Mirror
+                          </span>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                          {/* Hub Address */}
+                          <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+                            <div style={{ backgroundColor: 'rgba(12, 61, 108, 0.08)', padding: '10px', borderRadius: '10px', color: 'var(--primary-blue)', display: 'flex', flexShrink: 0 }}>
+                              <MapPin size={20} />
+                            </div>
+                            <div>
+                              <div style={{ fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-dark)', marginBottom: '3px' }}>Wholesale Hub Address</div>
+                              <p style={{ color: 'var(--text-medium)', fontSize: '0.88rem', lineHeight: '1.5', margin: 0 }}>
+                                {contactSettings.hubAddress || 'Block no. 52B, Panchayat Nagar-3, Ram Park Main Road, University Rd, Rajkot, Gujarat - 360005.'}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Direct Calling */}
+                          <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+                            <div style={{ backgroundColor: 'rgba(12, 61, 108, 0.08)', padding: '10px', borderRadius: '10px', color: 'var(--primary-blue)', display: 'flex', flexShrink: 0 }}>
+                              <Phone size={20} />
+                            </div>
+                            <div>
+                              <div style={{ fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-dark)', marginBottom: '3px' }}>Direct Calling</div>
+                              <div style={{ color: 'var(--text-dark)', fontSize: '0.95rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                                <span style={{ color: 'var(--primary-blue)' }}>{contactSettings.primaryPhone || '+91 99099 23130'}</span>
+                                {contactSettings.secondaryPhone && (
+                                  <>
+                                    <span style={{ color: '#94a3b8', fontWeight: '400' }}>/</span>
+                                    <span style={{ color: 'var(--primary-blue)' }}>{contactSettings.secondaryPhone}</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Email Address */}
+                          <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+                            <div style={{ backgroundColor: 'rgba(12, 61, 108, 0.08)', padding: '10px', borderRadius: '10px', color: 'var(--primary-blue)', display: 'flex', flexShrink: 0 }}>
+                              <Mail size={20} />
+                            </div>
+                            <div>
+                              <div style={{ fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-dark)', marginBottom: '3px' }}>Email Address</div>
+                              <div style={{ color: 'var(--primary-blue)', fontWeight: '600', fontSize: '0.9rem' }}>
+                                {contactSettings.email || 'info@niyanshpharma.com'}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Business Hours */}
+                          <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+                            <div style={{ backgroundColor: 'rgba(12, 61, 108, 0.08)', padding: '10px', borderRadius: '10px', color: 'var(--primary-blue)', display: 'flex', flexShrink: 0 }}>
+                              <Clock size={20} />
+                            </div>
+                            <div>
+                              <div style={{ fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-dark)', marginBottom: '6px' }}>Business Hours</div>
+                              
+                              {/* Hours + Monday-Saturday Badge */}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
+                                <strong style={{ color: 'var(--text-dark)', fontSize: '0.9rem' }}>
+                                  Business Hours: {contactSettings.workingHours || '9:00 AM – 9:00 PM'}
+                                </strong>
+                                <span style={{ fontSize: '0.78rem', backgroundColor: '#e0f2fe', color: '#0369a1', padding: '2px 8px', borderRadius: '12px', fontWeight: '700' }}>
+                                  ({contactSettings.workingDays || 'Monday – Saturday'})
+                                </span>
+                              </div>
+
+                              {/* Next line: Sunday Holiday */}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                                <span style={{ fontSize: '0.8rem', backgroundColor: '#fee2e2', color: '#b91c1c', border: '1px solid #fecaca', padding: '3px 10px', borderRadius: '14px', fontWeight: '800', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                  <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#ef4444' }}></span>
+                                  {contactSettings.sundayStatus || 'Sunday: Holiday'}
+                                </span>
+                              </div>
+
+                              {/* Lunch Break */}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-medium)' }}>
+                                <span style={{ display: 'inline-block', width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#f59e0b' }}></span>
+                                <strong>Lunch Break:</strong> {contactSettings.lunchBreak || '2:00 PM – 4:00 PM'}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Map Preview */}
+                      <div className="card" style={{ padding: '0', overflow: 'hidden', height: '220px', borderRadius: '12px' }}>
+                        <iframe 
+                          title="Hub Location Preview"
+                          src={contactSettings.mapEmbedUrl || 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3691.4650393043817!2d70.76194731589283!3d22.287219093721385!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3959cb33b44fc73f%3A0x3c79432bfa8b8b1d!2sNiyansh%20pharma!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin'}
+                          width="100%" 
+                          height="100%" 
+                          style={{ border: 0 }} 
+                          allowFullScreen="" 
+                          loading="lazy"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </>
           )}
         </main>
@@ -5961,7 +6377,9 @@ _Helpline: +91 9316566894_`;
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <label htmlFor="pay-amount" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>Amount Received (₹) *</label>
+                <label htmlFor="pay-amount" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                  Amount Received (₹) <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                </label>
                 <input 
                   id="pay-amount"
                   type="number"
@@ -5976,7 +6394,9 @@ _Helpline: +91 9316566894_`;
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label htmlFor="pay-method" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>Payment Method *</label>
+                  <label htmlFor="pay-method" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                    Payment Method <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                  </label>
                   <select 
                     id="pay-method"
                     value={payMethod}
@@ -5992,7 +6412,9 @@ _Helpline: +91 9316566894_`;
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label htmlFor="pay-date" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>Payment Date *</label>
+                  <label htmlFor="pay-date" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                    Payment Date <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                  </label>
                   <input 
                     id="pay-date"
                     type="date"
@@ -6062,7 +6484,9 @@ _Helpline: +91 9316566894_`;
 
             <form onSubmit={handleSaveNews} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <label htmlFor="news-title" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>Announcement Title *</label>
+                <label htmlFor="news-title" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                  Announcement Title <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                </label>
                 <input 
                   id="news-title"
                   type="text"
@@ -6076,7 +6500,9 @@ _Helpline: +91 9316566894_`;
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label htmlFor="news-cat" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>Category *</label>
+                  <label htmlFor="news-cat" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                    Category <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                  </label>
                   <select 
                     id="news-cat"
                     value={newsCategory}
@@ -6092,7 +6518,9 @@ _Helpline: +91 9316566894_`;
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label htmlFor="news-comp" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>Company *</label>
+                  <label htmlFor="news-comp" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                    Company <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                  </label>
                   <input 
                     id="news-comp"
                     type="text"
@@ -6107,7 +6535,9 @@ _Helpline: +91 9316566894_`;
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label htmlFor="news-pri" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>Priority Level *</label>
+                  <label htmlFor="news-pri" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                    Priority Level <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                  </label>
                   <select 
                     id="news-pri"
                     value={newsPriority}
@@ -6134,7 +6564,9 @@ _Helpline: +91 9316566894_`;
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <label htmlFor="news-cont" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>Announcement Details & Scheme Terms *</label>
+                <label htmlFor="news-cont" style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-medium)' }}>
+                  Announcement Details & Scheme Terms <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                </label>
                 <textarea 
                   id="news-cont"
                   rows="4"
@@ -6666,7 +7098,9 @@ _Helpline: +91 9316566894_`;
                   {/* Row 1: Product Name / Brand Name & SKU */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <label htmlFor="modal-name" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Product Name / Brand Name *</label>
+                      <label htmlFor="modal-name" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                        Product Name / Brand Name <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                      </label>
                       <input 
                         id="modal-name"
                         type="text" required placeholder="E.g., Paracetamol Tablet IP 500mg, Dolo 650, etc." 
@@ -6677,7 +7111,9 @@ _Helpline: +91 9316566894_`;
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <label htmlFor="modal-sku" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>SKU / ID *</label>
+                        <label htmlFor="modal-sku" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                          SKU / ID <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                        </label>
                         <button 
                           type="button"
                           onClick={() => setProdSku(`NP-${Date.now().toString().slice(-6)}`)}
@@ -6699,7 +7135,9 @@ _Helpline: +91 9316566894_`;
                   <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <label htmlFor="modal-comp" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Manufacturer / Company *</label>
+                        <label htmlFor="modal-comp" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                          Manufacturer / Company <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                        </label>
                         <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: '700' }}>⚡ Type new or pick</span>
                       </div>
                       <input 
@@ -6724,7 +7162,9 @@ _Helpline: +91 9316566894_`;
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <label htmlFor="modal-cat" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Category *</label>
+                      <label htmlFor="modal-cat" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                        Category <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                      </label>
                       <select 
                         id="modal-cat"
                         required
@@ -6757,17 +7197,21 @@ _Helpline: +91 9316566894_`;
                   {/* Row 3: Chemical Composition & Formulation Form */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <label htmlFor="modal-composition" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Chemical / Active Composition *</label>
+                      <label htmlFor="modal-composition" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                        Chemical / Active Composition <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                      </label>
                       <input 
                         id="modal-composition"
-                        type="text" required placeholder="E.g., Paracetamol IP 500mg" 
+                        type="text" placeholder="E.g., Paracetamol IP 500mg" 
                         value={prodComposition} onChange={(e) => setProdComposition(e.target.value)}
                         style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' }}
                       />
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <label htmlFor="modal-form" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Formulation Form *</label>
+                      <label htmlFor="modal-form" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                        Formulation Form <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                      </label>
                       <select 
                         id="modal-form"
                         required
@@ -6796,7 +7240,9 @@ _Helpline: +91 9316566894_`;
                   {/* Row 4: Commercial Matrix (Wholesale, MRP, Stock Units) */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px', padding: '12px 14px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0', width: '100%', boxSizing: 'border-box' }} className="admin-workspace-panel">
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
-                      <label htmlFor="modal-price" style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>Wholesale (₹) *</label>
+                      <label htmlFor="modal-price" style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>
+                        Wholesale (₹) <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                      </label>
                       <input 
                         id="modal-price"
                         type="number" step="0.01" required placeholder="E.g., 28.50" 
@@ -6806,7 +7252,9 @@ _Helpline: +91 9316566894_`;
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
-                      <label htmlFor="modal-mrp" style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>MRP (₹) *</label>
+                      <label htmlFor="modal-mrp" style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>
+                        MRP (₹) <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                      </label>
                       <input 
                         id="modal-mrp"
                         type="number" step="0.01" required placeholder="E.g., 45.00" 
@@ -6816,7 +7264,9 @@ _Helpline: +91 9316566894_`;
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
-                      <label htmlFor="modal-stockqty" style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>Stock Units *</label>
+                      <label htmlFor="modal-stockqty" style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>
+                        Stock Units <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                      </label>
                       <input 
                         id="modal-stockqty"
                         type="number" required placeholder="E.g., 100" 
@@ -6829,20 +7279,24 @@ _Helpline: +91 9316566894_`;
                   {/* Row 5: Packing Specifications & Subcategory / Variant */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <label htmlFor="modal-packing" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Packing Specifications *</label>
+                      <label htmlFor="modal-packing" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                        Packing Specifications <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                      </label>
                       <input 
                         id="modal-packing"
-                        type="text" required placeholder="E.g., 10 x 10 Tablets or 100ml" 
+                        type="text" placeholder="E.g., 10 × 10 Tablets" 
                         value={prodPacking} onChange={(e) => setProdPacking(e.target.value)}
                         style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' }}
                       />
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <label htmlFor="modal-subcat" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Subcategory / Variant *</label>
+                      <label htmlFor="modal-subcat" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                        Subcategory / Variant <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                      </label>
                       <input 
                         id="modal-subcat"
-                        type="text" required placeholder="E.g., Effervescent, Pain Relief, Pediatric" 
+                        type="text" placeholder="E.g., Effervescent, Pain Relief, Pediatric" 
                         value={prodSubCategory} onChange={(e) => setProdSubCategory(e.target.value)}
                         style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' }}
                       />
@@ -6851,10 +7305,12 @@ _Helpline: +91 9316566894_`;
 
                   {/* Row 6: Manufacturer Details */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', width: '100%', boxSizing: 'border-box' }}>
-                    <label htmlFor="modal-mfg" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>Manufacturer Details *</label>
+                    <label htmlFor="modal-mfg" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                      Manufacturer Details <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                    </label>
                     <input 
                       id="modal-mfg"
-                      type="text" required placeholder="E.g., Daxia Healthcare Pvt. Ltd., Plot 12, GIDC, Rajkot" 
+                      type="text" placeholder="E.g., Daxia Healthcare Pvt. Ltd." 
                       value={prodManufacturer} onChange={(e) => setProdManufacturer(e.target.value)}
                       style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' }}
                     />
@@ -6864,7 +7320,7 @@ _Helpline: +91 9316566894_`;
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
                       <label htmlFor="modal-rackid" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                        Rack ID / Location *
+                        Rack ID / Location <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
                       </label>
                       <input 
                         id="modal-rackid"
@@ -6876,7 +7332,7 @@ _Helpline: +91 9316566894_`;
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
                       <label htmlFor="modal-hsn" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                        HSN Code *
+                        HSN Code <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
                       </label>
                       <input 
                         id="modal-hsn"
@@ -6888,7 +7344,7 @@ _Helpline: +91 9316566894_`;
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
                       <label htmlFor="modal-expiry" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                        Expiry Date *
+                        Expiry Date <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
                       </label>
                       <input 
                         id="modal-expiry"
@@ -7534,7 +7990,9 @@ _Helpline: +91 9316566894_`;
 
             <form onSubmit={handleSaveCompany} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>Company Name *</label>
+                <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                  Company Name <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                </label>
                 <input 
                   type="text" required placeholder="E.g., Cipla Ltd"
                   value={compName} onChange={(e) => setCompName(e.target.value)}
@@ -7662,7 +8120,9 @@ _Helpline: +91 9316566894_`;
             </div>
             <form onSubmit={handleSaveCustomFieldDef} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>Field Name / Label *</label>
+                <label style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>
+                  Field Name / Label <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                </label>
                 <input 
                   type="text" 
                   required 

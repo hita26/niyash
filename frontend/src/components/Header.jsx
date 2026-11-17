@@ -175,10 +175,75 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
         
         {/* Main Workstation Header Bar */}
         <div style={{ backgroundColor: 'var(--bg-surface)', borderBottom: '1px solid var(--border-light)', padding: '10px 16px' }}>
-          <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+          <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
             
-            {/* Left: Brand Logo & B2B Workstation Chip */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            {/* Top Row on Mobile: Logo & Portal Badge (Left) + Cart, Theme, Hamburger (Right) */}
+            <div className="hide-desktop" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Link to="/dashboard" aria-label="Niyansh Pharma B2B Dashboard" style={{ display: 'flex', alignItems: 'center' }}>
+                  <img 
+                    src="/logo.jpg" 
+                    alt="Niyansh Pharma B2B" 
+                    style={{ height: '38px', width: 'auto', display: 'block', objectFit: 'contain' }} 
+                  />
+                </Link>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', padding: '2px 8px', borderRadius: '16px' }}>
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#10b981', display: 'inline-block' }}></span>
+                  <span style={{ fontSize: '0.7rem', fontWeight: '800', color: '#065f46', letterSpacing: '0.4px', textTransform: 'uppercase' }}>
+                    {t('nav.chemistPortal', 'Chemist Portal')}
+                  </span>
+                </div>
+              </div>
+
+              {/* Mobile Action Controls: Cart, Theme, Hamburger */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button 
+                  onClick={onOpenCart}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    backgroundColor: cartCount > 0 ? '#ea580c' : '#f1f5f9',
+                    color: cartCount > 0 ? '#ffffff' : 'var(--text-dark)',
+                    border: cartCount > 0 ? 'none' : '1px solid #cbd5e1',
+                    borderRadius: '16px',
+                    padding: '4px 8px',
+                    cursor: 'pointer',
+                    fontWeight: '700',
+                    fontSize: '0.76rem'
+                  }}
+                  title={`Wholesale Cart (${cartCount})`}
+                >
+                  <ShoppingBag size={14} />
+                  <span>({cartCount})</span>
+                </button>
+
+                <ThemeToggle />
+
+                <button 
+                  className="mobile-menu-btn" 
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+                  aria-expanded={isMobileMenuOpen}
+                  style={{ 
+                    padding: '6px', 
+                    border: '1px solid var(--border-light)', 
+                    borderRadius: '8px', 
+                    background: 'var(--bg-surface-alt)', 
+                    color: 'var(--text-dark)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Left: Brand Logo & B2B Workstation Chip on Desktop */}
+            <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
               <Link to="/dashboard" aria-label="Niyansh Pharma B2B Dashboard" style={{ display: 'flex', alignItems: 'center' }}>
                 <img 
                   src="/logo.jpg" 
@@ -368,8 +433,8 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               )}
             </div>
 
-            {/* Right: Operational Controls & Store Profile */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {/* Right: Operational Controls & Store Profile (Desktop) */}
+            <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               
               {/* Language Selector in B2B Header */}
               <LanguageSelector />
@@ -568,135 +633,178 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
 
             </div>
 
+            {/* Mobile Sub-bar: Language & Profile dropdown (Mobile only) */}
+            <div className="hide-desktop" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '8px', paddingTop: '4px' }}>
+              <LanguageSelector />
+              <div style={{ position: 'relative' }}>
+                <button 
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    backgroundColor: 'var(--bg-surface-alt)',
+                    border: '1.5px solid var(--border-light)',
+                    borderRadius: '20px',
+                    padding: '4px 10px',
+                    cursor: 'pointer',
+                    fontSize: '0.78rem',
+                    fontWeight: '700',
+                    color: 'var(--primary-blue)'
+                  }}
+                  aria-expanded={isUserMenuOpen}
+                >
+                  <Building2 size={14} color="var(--primary-blue)" />
+                  <span style={{ maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {chemistInitial}
+                  </span>
+                  <ChevronDown size={13} style={{ transform: isUserMenuOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }} />
+                </button>
+              </div>
+            </div>
+
           </div>
         </div>
 
         {/* Dedicated B2B Navigation Tab Bar */}
-        <nav style={{ backgroundColor: '#0c3d6c', color: '#ffffff', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }} aria-label="B2B Workstation Navigation">
-          <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+        <nav 
+          style={{ 
+            backgroundColor: '#0c3d6c', 
+            color: '#ffffff', 
+            overflowX: 'auto', 
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none'
+          }} 
+          className="b2b-nav-scroll"
+          aria-label="B2B Workstation Navigation"
+        >
+          <div className="container" style={{ display: 'flex', alignItems: 'center', gap: '6px', overflowX: 'auto', whiteSpace: 'nowrap', padding: '6px 16px', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', overflowX: 'auto', whiteSpace: 'nowrap', padding: '4px 0' }}>
-              <Link 
-                to="/dashboard" 
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '10px 14px',
-                  borderRadius: '6px',
-                  color: '#ffffff',
-                  fontWeight: location.pathname === '/dashboard' || location.pathname === '/portal' ? '800' : '600',
-                  fontSize: '0.85rem',
-                  textDecoration: 'none',
-                  backgroundColor: location.pathname === '/dashboard' || location.pathname === '/portal' ? 'rgba(255,255,255,0.18)' : 'transparent',
-                  borderBottom: location.pathname === '/dashboard' || location.pathname === '/portal' ? '3px solid #38bdf8' : '3px solid transparent'
-                }}
-              >
-                <ShieldCheck size={16} color="#38bdf8" />
-                <span>{t('nav.dashboardOverview', 'Dashboard Overview')}</span>
-              </Link>
+            <Link 
+              to="/dashboard" 
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 12px',
+                borderRadius: '6px',
+                color: '#ffffff',
+                fontWeight: location.pathname === '/dashboard' || location.pathname === '/portal' ? '800' : '600',
+                fontSize: '0.84rem',
+                textDecoration: 'none',
+                backgroundColor: location.pathname === '/dashboard' || location.pathname === '/portal' ? 'rgba(255,255,255,0.18)' : 'transparent',
+                borderBottom: location.pathname === '/dashboard' || location.pathname === '/portal' ? '3px solid #38bdf8' : '3px solid transparent',
+                flexShrink: 0
+              }}
+            >
+              <ShieldCheck size={16} color="#38bdf8" />
+              <span>{t('nav.dashboardOverview', 'Dashboard Overview')}</span>
+            </Link>
 
-              <Link 
-                to="/quick-order" 
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '10px 14px',
-                  borderRadius: '6px',
-                  color: '#fed7aa',
-                  fontWeight: location.pathname.startsWith('/quick-order') || location.pathname.startsWith('/order') ? '800' : '600',
-                  fontSize: '0.85rem',
-                  textDecoration: 'none',
-                  backgroundColor: location.pathname.startsWith('/quick-order') ? 'rgba(234, 88, 12, 0.25)' : 'transparent',
-                  borderBottom: location.pathname.startsWith('/quick-order') ? '3px solid #ea580c' : '3px solid transparent'
-                }}
-              >
-                <Zap size={16} color="#fb923c" />
-                <span>{t('nav.quickOrder', 'Quick Order Pad')}</span>
-              </Link>
+            <Link 
+              to="/quick-order" 
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 12px',
+                borderRadius: '6px',
+                color: '#fed7aa',
+                fontWeight: location.pathname.startsWith('/quick-order') || location.pathname.startsWith('/order') ? '800' : '600',
+                fontSize: '0.84rem',
+                textDecoration: 'none',
+                backgroundColor: location.pathname.startsWith('/quick-order') ? 'rgba(234, 88, 12, 0.25)' : 'transparent',
+                borderBottom: location.pathname.startsWith('/quick-order') ? '3px solid #ea580c' : '3px solid transparent',
+                flexShrink: 0
+              }}
+            >
+              <Zap size={16} color="#fb923c" />
+              <span>{t('nav.quickOrder', 'Quick Order Pad')}</span>
+            </Link>
 
-              <Link 
-                to="/outstanding" 
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '10px 14px',
-                  borderRadius: '6px',
-                  color: '#ffffff',
-                  fontWeight: location.pathname.startsWith('/outstanding') || location.pathname.startsWith('/ledger') ? '800' : '600',
-                  fontSize: '0.85rem',
-                  textDecoration: 'none',
-                  backgroundColor: location.pathname.startsWith('/outstanding') ? 'rgba(255,255,255,0.18)' : 'transparent',
-                  borderBottom: location.pathname.startsWith('/outstanding') ? '3px solid #38bdf8' : '3px solid transparent'
-                }}
-              >
-                <FileText size={16} color="#93c5fd" />
-                <span>{t('nav.ledger', 'Ledger & GST Bills')}</span>
-              </Link>
+            <Link 
+              to="/outstanding" 
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 12px',
+                borderRadius: '6px',
+                color: '#ffffff',
+                fontWeight: location.pathname.startsWith('/outstanding') || location.pathname.startsWith('/ledger') ? '800' : '600',
+                fontSize: '0.84rem',
+                textDecoration: 'none',
+                backgroundColor: location.pathname.startsWith('/outstanding') ? 'rgba(255,255,255,0.18)' : 'transparent',
+                borderBottom: location.pathname.startsWith('/outstanding') ? '3px solid #38bdf8' : '3px solid transparent',
+                flexShrink: 0
+              }}
+            >
+              <FileText size={16} color="#93c5fd" />
+              <span>{t('nav.ledger', 'Ledger & GST Bills')}</span>
+            </Link>
 
-              <Link 
-                to="/products" 
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '10px 14px',
-                  borderRadius: '6px',
-                  color: '#ffffff',
-                  fontWeight: location.pathname === '/products' ? '800' : '600',
-                  fontSize: '0.85rem',
-                  textDecoration: 'none'
-                }}
-              >
-                <Package size={16} color="#a7f3d0" />
-                <span>{t('nav.wholesaleCatalog', 'Wholesale Catalog & PTR')}</span>
-              </Link>
+            <Link 
+              to="/products" 
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 12px',
+                borderRadius: '6px',
+                color: '#ffffff',
+                fontWeight: location.pathname === '/products' ? '800' : '600',
+                fontSize: '0.84rem',
+                textDecoration: 'none',
+                flexShrink: 0
+              }}
+            >
+              <Package size={16} color="#a7f3d0" />
+              <span>{t('nav.wholesaleCatalog', 'Wholesale Catalog & PTR')}</span>
+            </Link>
 
-              <Link 
-                to="/news" 
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '10px 14px',
-                  borderRadius: '6px',
-                  color: '#fdba74',
-                  fontWeight: location.pathname === '/news' ? '800' : '600',
-                  fontSize: '0.85rem',
-                  textDecoration: 'none'
-                }}
-              >
-                <Sparkles size={16} color="#fb923c" />
-                <span>{t('nav.marginSchemes', '10+1 & 15+2 Schemes')}</span>
-              </Link>
-            </div>
+            <Link 
+              to="/news" 
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 12px',
+                borderRadius: '6px',
+                color: '#fdba74',
+                fontWeight: location.pathname === '/news' ? '800' : '600',
+                fontSize: '0.84rem',
+                textDecoration: 'none',
+                flexShrink: 0
+              }}
+            >
+              <Sparkles size={16} color="#fb923c" />
+              <span>{t('nav.marginSchemes', '10+1 & 15+2 Schemes')}</span>
+            </Link>
 
             {/* Direct WhatsApp Ordering Desk */}
-            <div style={{ flexShrink: 0, padding: '4px 0' }}>
-              <a 
-                href="https://wa.me/919909923130?text=Hello%20Niyansh%20Pharma%20Wholesale%20Desk%2C%20I%20am%20ordering%20from%20B2B%20Portal."
-                target="_blank" 
-                rel="noopener noreferrer"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  backgroundColor: '#059669',
-                  color: '#ffffff',
-                  padding: '5px 12px',
-                  borderRadius: '20px',
-                  fontSize: '0.78rem',
-                  fontWeight: '700',
-                  textDecoration: 'none'
-                }}
-                title="Direct B2B Dispatch Helpline"
-              >
-                <MessageCircle size={14} />
-                <span>{t('nav.wholesaleDesk', 'Wholesale Desk')}</span>
-              </a>
-            </div>
+            <a 
+              href="https://wa.me/919909923130?text=Hello%20Niyansh%20Pharma%20Wholesale%20Desk%2C%20I%20am%20ordering%20from%20B2B%20Portal."
+              target="_blank" 
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                backgroundColor: '#059669',
+                color: '#ffffff',
+                padding: '6px 14px',
+                borderRadius: '20px',
+                fontSize: '0.78rem',
+                fontWeight: '700',
+                textDecoration: 'none',
+                flexShrink: 0
+              }}
+              title="Direct B2B Dispatch Helpline"
+            >
+              <MessageCircle size={14} />
+              <span>{t('nav.wholesaleDesk', 'Wholesale Desk')}</span>
+            </a>
 
           </div>
         </nav>
@@ -775,7 +883,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
   // Clean marketing presentation with single, non-redundant B2B Chemist Login button
   // =========================================================================
   return (
-    <header style={{ width: '100%', position: 'relative', zIndex: 100 }}>
+    <header className="public-header-shell" style={{ width: '100%', position: 'sticky', top: 0, zIndex: 1000, boxShadow: '0 4px 20px rgba(0,0,0,0.06)', backgroundColor: 'var(--bg-surface)' }}>
       {/* Main Branding Header */}
       <div className="main-header">
         <div className="container main-header-content">

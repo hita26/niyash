@@ -1070,7 +1070,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
             <form onSubmit={handleRequestResetOtp} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                 <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                  Registered Email or Phone *
+                  Registered Email or Phone <span className="required-star">*</span>
                 </label>
                 <div style={{ position: 'relative' }}>
                   <Mail size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
@@ -1177,7 +1177,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                    6-Digit Verification Code *
+                    6-Digit Verification Code <span className="required-star">*</span>
                   </label>
                   <button
                     type="button"
@@ -1216,7 +1216,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
               {/* New Password */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                 <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                  New Password *
+                  New Password <span className="required-star">*</span>
                 </label>
                 <div style={{ position: 'relative' }}>
                   <Lock size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
@@ -1249,7 +1249,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
               {/* Confirm New Password */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                 <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                  Confirm New Password *
+                  Confirm New Password <span className="required-star">*</span>
                 </label>
                 <div style={{ position: 'relative' }}>
                   <Lock size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />

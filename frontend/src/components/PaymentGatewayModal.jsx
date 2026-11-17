@@ -1036,7 +1036,7 @@ _${t('payment.support', 'Support: +91 99099 23130')}_`;
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155' }}>
-                      {t('payment.cardNumber', 'Card Number')}
+                      {t('payment.cardNumber', 'Card Number')} <span className="required-star">*</span>
                     </label>
                     <div style={{ position: 'relative' }}>
                       <CreditCard size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
@@ -1063,7 +1063,7 @@ _${t('payment.support', 'Support: +91 99099 23130')}_`;
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155' }}>
-                      {t('payment.cardholderName', 'Cardholder Name')}
+                      {t('payment.cardholderName', 'Cardholder Name')} <span className="required-star">*</span>
                     </label>
                     <input
                       type="text"
@@ -1085,7 +1085,7 @@ _${t('payment.support', 'Support: +91 99099 23130')}_`;
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                       <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155' }}>
-                        {t('payment.expiryDate', 'Expiry Date')}
+                        {t('payment.expiryDate', 'Expiry Date')} <span className="required-star">*</span>
                       </label>
                       <input
                         type="text"
@@ -1108,7 +1108,7 @@ _${t('payment.support', 'Support: +91 99099 23130')}_`;
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                       <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155' }}>
-                        {t('payment.cvv', 'CVV / CVC')}
+                        {t('payment.cvv', 'CVV / CVC')} <span className="required-star">*</span>
                       </label>
                       <input
                         type="password"
@@ -1379,7 +1379,7 @@ _${t('payment.support', 'Support: +91 99099 23130')}_`;
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: '8px' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                         <label style={{ fontSize: '0.78rem', fontWeight: 600, color: '#475569' }}>
-                          {t('payment.utrLabel', 'UTR / Cheque No. *')}
+                          {t('payment.utrLabel', 'UTR / Cheque No.')} <span className="required-star">*</span>
                         </label>
                         <input
                           type="text"
@@ -1400,7 +1400,7 @@ _${t('payment.support', 'Support: +91 99099 23130')}_`;
 
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                         <label style={{ fontSize: '0.78rem', fontWeight: 600, color: '#475569' }}>
-                          {t('payment.depositDate', 'Date of Transfer *')}
+                          {t('payment.depositDate', 'Date of Transfer')} <span className="required-star">*</span>
                         </label>
                         <input
                           type="date"

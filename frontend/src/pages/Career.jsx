@@ -219,7 +219,7 @@ function Career() {
                 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="career-name" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                    {t('cart.fullName', 'Full Name')} *
+                    {t('cart.fullName', 'Full Name')} <span className="required-star">*</span>
                   </label>
                   <input 
                     id="career-name"
@@ -235,7 +235,7 @@ function Career() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                     <label htmlFor="career-email" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                      {t('cart.email', 'Email')} *
+                      {t('cart.email', 'Email')} <span className="required-star">*</span>
                     </label>
                     <input 
                       id="career-email"
@@ -249,7 +249,7 @@ function Career() {
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                     <label htmlFor="career-phone" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                      {t('cart.phone', 'Phone Number')} *
+                      {t('cart.phone', 'Phone Number')} <span className="required-star">*</span>
                     </label>
                     <input 
                       id="career-phone"
@@ -267,7 +267,7 @@ function Career() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '15px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                     <label htmlFor="career-pos-select" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                      {t('career.selectPosition', 'Position Applying For *')}
+                      {t('career.selectPosition', 'Position Applying For')} <span className="required-star">*</span>
                     </label>
                     <select 
                       id="career-pos-select"
@@ -284,7 +284,7 @@ function Career() {
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                     <label htmlFor="career-exp-select" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                      {t('career.expLabel', 'Experience *')}
+                      {t('career.expLabel', 'Experience')} <span className="required-star">*</span>
                     </label>
                     <select 
                       id="career-exp-select"
@@ -317,7 +317,7 @@ function Career() {
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="career-resume" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
-                    {t('career.resumeLabel', 'Upload Resume (PDF/Word) *')}
+                    {t('career.resumeLabel', 'Upload Resume (PDF/Word)')} <span className="required-star">*</span>
                   </label>
                   <div style={{
                     border: '2px dashed #cbd5e1', borderRadius: '6px', padding: '15px',

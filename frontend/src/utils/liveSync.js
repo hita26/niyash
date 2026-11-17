@@ -22,6 +22,7 @@ export const SYNC_EVENTS = {
   SCHEME_MUTATED: 'SCHEME_MUTATED',
   LEDGER_MUTATED: 'LEDGER_MUTATED',
   ORDER_MUTATED: 'ORDER_MUTATED',
+  SETTINGS_UPDATED: 'SETTINGS_UPDATED',
 };
 
 // Singleton channel instance when supported

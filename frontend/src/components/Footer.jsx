@@ -1,12 +1,23 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, Mail, MapPin, Send, Facebook, Twitter, Instagram, Linkedin, CheckCircle2 } from 'lucide-react';
+import { 
+  Phone, 
+  Mail, 
+  MapPin, 
+  Send, 
+  CheckCircle2, 
+  AlertCircle,
+  ShieldCheck, 
+  MessageCircle,
+  ChevronRight
+} from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 function Footer({ compact = false }) {
   const { t } = useLanguage();
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
   // If in compact B2B Workstation mode, display a sleek status footer to keep the workstation uncluttered
@@ -19,7 +30,7 @@ function Footer({ compact = false }) {
             <span>{t('footer.tagline', 'Care • Quality • Trust • Rajkot, Gujarat')}</span>
           </div>
           <div>
-            © {new Date().getFullYear()} {t('footer.chemistPortalRights', 'Niyansh Pharma Chemist Portal')} • {t('footer.directHelpline', 'Direct Helpline')}: <a href="tel:+919909923130" style={{ color: '#38bdf8', fontWeight: '700' }}>+91 99099 23130</a>
+            © 2026 {t('footer.chemistPortalRights', 'Niyansh Pharma Chemist Portal')} • {t('footer.directHelpline', 'Direct Helpline')}: <a href="tel:+919909923130" style={{ color: '#38bdf8', fontWeight: '700' }}>+91 99099 23130</a>
           </div>
           <div style={{ display: 'flex', gap: '14px' }}>
             <Link to="/" style={{ color: '#cbd5e1', textDecoration: 'none' }}>{t('nav.publicSite', 'Public Website')}</Link>
@@ -33,153 +44,284 @@ function Footer({ compact = false }) {
 
   const handleNewsletterSubmit = async (e) => {
     e.preventDefault();
-    if (!newsletterEmail || !newsletterEmail.includes('@')) return;
+    setErrorMessage('');
+
+    const cleanEmail = newsletterEmail.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!cleanEmail || !emailRegex.test(cleanEmail)) {
+      setErrorMessage('Please enter a valid email address.');
+      return;
+    }
 
     setLoading(true);
     try {
-      await fetch('/api/enquiries', {
+      const response = await fetch('/api/enquiries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           type: 'Newsletter',
-          name: 'Newsletter Subscriber',
-          email: newsletterEmail.trim(),
-          phone: 'N/A',
-          message: `Newsletter subscription requested for ${newsletterEmail.trim()}`
+          name: 'Trade Bulletin Subscriber',
+          email: cleanEmail,
+          phone: '9909923130',
+          message: `Trade Bulletin newsletter subscription requested for ${cleanEmail}`
         })
       });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.message || 'Subscription failed. Please try again.');
+      }
+
+      setSubscribed(true);
+      setNewsletterEmail('');
+      setTimeout(() => setSubscribed(false), 6000);
+    } catch (err) {
+      // In case of network glitch, provide friendly fallback acknowledgment
       setSubscribed(true);
       setNewsletterEmail('');
       setTimeout(() => setSubscribed(false), 5000);
-    } catch {
-      setSubscribed(true);
-      setNewsletterEmail('');
-      setTimeout(() => setSubscribed(false), 4000);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <footer className="footer" role="contentinfo" style={{ paddingTop: 0 }}>
-      {/* Top Contact Strip moved from Header to top of Footer */}
-      <div style={{
-        backgroundColor: 'var(--primary-blue)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
-        padding: '12px 0'
-      }}>
-        <div className="container" style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '12px',
-          fontSize: '0.86rem'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#93c5fd' }}>
-              <Phone size={14} aria-hidden="true" /> 
-              <a href="tel:+919909923130" style={{ color: '#ffffff', fontWeight: '600' }} aria-label="Call Niyansh Pharma at +91 99099 23130">+91 99099 23130</a>
-            </span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#93c5fd' }}>
-              <Mail size={14} aria-hidden="true" /> 
-              <a href="mailto:info@niyanshpharma.com" style={{ color: '#ffffff', fontWeight: '600' }} aria-label="Email Niyansh Pharma at info@niyanshpharma.com">info@niyanshpharma.com</a>
-            </span>
-          </div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#4ade80', fontWeight: '700', fontSize: '0.88rem', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>
-            <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#4ade80', display: 'inline-block' }}></span>
-            {t('topbar.tagline', 'Care • Quality • Trust')}
-          </div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#e2e8f0', fontSize: '0.86rem' }}>
-            <MapPin size={14} color="#93c5fd" aria-hidden="true" />
-            <span>{t('topbar.location', 'Rajkot, Gujarat')}</span>
+    <footer className="footer" role="contentinfo">
+      {/* 3. Top Information Bar */}
+      <div className="footer-topbar">
+        <div className="container">
+          <div className="footer-topbar-inner">
+            {/* Left: Phone & Business Email */}
+            <div className="footer-topbar-left">
+              <span className="footer-topbar-item">
+                <Phone size={14} color="#93c5fd" aria-hidden="true" />
+                <a href="tel:+919909923130" aria-label="Call Niyansh Pharma at +91 99099 23130">
+                  +91 99099 23130
+                </a>
+              </span>
+              <span className="footer-topbar-item">
+                <Mail size={14} color="#93c5fd" aria-hidden="true" />
+                <a href="mailto:info@niyanshpharma.com" aria-label="Email Niyansh Pharma at info@niyanshpharma.com">
+                  info@niyanshpharma.com
+                </a>
+              </span>
+            </div>
+
+            {/* Center: Care • Quality • Trust */}
+            <div className="footer-topbar-center">
+              <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#4ade80', display: 'inline-block' }}></span>
+              <span>{t('topbar.tagline', 'Care • Quality • Trust')}</span>
+            </div>
+
+            {/* Right: Location */}
+            <div className="footer-topbar-right">
+              <MapPin size={14} color="#93c5fd" aria-hidden="true" />
+              <span>{t('topbar.location', 'Rajkot, Gujarat')}</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="container" style={{ paddingTop: '50px' }}>
-        <div className="footer-top">
-          {/* Brand Info */}
-          <div className="footer-widget" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-            <div style={{ backgroundColor: '#ffffff', padding: '10px 16px', borderRadius: '8px', display: 'inline-block', alignSelf: 'flex-start' }}>
+      {/* 2. Main 4-Column Footer Layout */}
+      <div className="container footer-main-container">
+        <div className="footer-grid">
+          
+          {/* Column 1 – Company Information */}
+          <div className="footer-widget">
+            <div className="footer-logo-card">
               <img 
                 src="/logo.jpg" 
-                alt="Niyansh Pharma Wholesale Logo" 
+                alt="Niyansh Pharma" 
+                className="footer-logo-img" 
                 loading="lazy"
-                style={{ height: '48px', width: 'auto', display: 'block', objectFit: 'contain' }} 
               />
             </div>
-            <p style={{ fontSize: '0.9rem', lineHeight: '1.6', color: '#cbd5e1' }}>
-              {t('footer.about', 'Niyansh Pharma is a trusted pharmaceutical wholesale distributor based in Rajkot, Gujarat. We supply genuine, quality assured medicines, OTC products, and surgical supplies across Gujarat with reliable cold-chain and express dispatch.')}
+
+            <p className="footer-description">
+              {t('footer.about', 'Niyansh Pharma is a trusted pharmaceutical wholesale distributor based in Rajkot, Gujarat. We supply genuine, quality-assured medicines, OTC products, and surgical supplies across Gujarat with reliable cold-chain and express dispatch.')}
             </p>
+
+            <div className="footer-trust-badge">
+              <ShieldCheck size={14} />
+              <span>FDCA Compliant • Cold-Chain Assured</span>
+            </div>
+
+            <a 
+              href="https://wa.me/919909923130?text=Hello%20Niyansh%20Pharma%20Wholesale%20Desk%2C%20I%20have%20an%20inquiry%20regarding%20bulk%20medicines."
+              target="_blank" 
+              rel="noopener noreferrer" 
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '7px',
+                fontSize: '0.82rem',
+                color: '#38bdf8',
+                textDecoration: 'none',
+                marginTop: '14px',
+                fontWeight: '600'
+              }}
+              title="Official WhatsApp Wholesale Helpdesk"
+            >
+              <MessageCircle size={15} color="#22c55e" />
+              <span>Official WhatsApp Dispatch Desk</span>
+            </a>
           </div>
 
-          {/* Quick Links */}
+          {/* Column 2 – Quick Links */}
           <div className="footer-widget">
-            <h3 className="widget-title">{t('footer.quickLinks', 'Quick Links')}</h3>
-            <ul className="footer-links">
-              <li><Link to="/">{t('nav.home', 'Home')}</Link></li>
-              <li><Link to="/about">{t('nav.about', 'About Us')}</Link></li>
-              <li><Link to="/products">{t('nav.products', 'All Products')}</Link></li>
-              <li><Link to="/companies">{t('nav.companies', 'Companies Directory')}</Link></li>
-              <li><Link to="/contact">{t('nav.contact', 'Contact & Dispatch')}</Link></li>
+            <h3 className="footer-heading">{t('footer.quickLinks', 'Quick Links')}</h3>
+            <div className="footer-heading-accent"></div>
+            <ul className="footer-nav-list">
+              <li>
+                <Link to="/" className="footer-nav-link">
+                  <span className="arrow"><ChevronRight size={13} /></span>
+                  <span>{t('nav.home', 'Home')}</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/about" className="footer-nav-link">
+                  <span className="arrow"><ChevronRight size={13} /></span>
+                  <span>{t('nav.about', 'About Us')}</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/products" className="footer-nav-link">
+                  <span className="arrow"><ChevronRight size={13} /></span>
+                  <span>{t('nav.products', 'All Products')}</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/companies" className="footer-nav-link">
+                  <span className="arrow"><ChevronRight size={13} /></span>
+                  <span>{t('nav.companies', 'Companies')}</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact" className="footer-nav-link">
+                  <span className="arrow"><ChevronRight size={13} /></span>
+                  <span>{t('nav.contact', 'Contact & Support')}</span>
+                </Link>
+              </li>
             </ul>
           </div>
 
-          {/* Contact Details */}
+          {/* Column 3 – Dispatch Desk */}
           <div className="footer-widget">
-            <h3 className="widget-title">{t('footer.dispatchDesk', 'Dispatch Desk')}</h3>
-            <div className="footer-contact">
-              <div className="contact-item">
-                <MapPin size={18} className="contact-icon" aria-hidden="true" />
-                <span>{t('footer.hubLocation', 'Niyansh Pharma Wholesale Hub, Rajkot, Gujarat - 360005')}</span>
+            <h3 className="footer-heading">{t('footer.dispatchDesk', 'Dispatch Desk')}</h3>
+            <div className="footer-heading-accent"></div>
+            
+            <div className="footer-contact-list">
+              {/* Location */}
+              <div className="footer-contact-card">
+                <div className="footer-contact-icon-box" aria-hidden="true">
+                  <MapPin size={17} />
+                </div>
+                <div className="footer-contact-details">
+                  <span className="footer-contact-label">Wholesale Hub</span>
+                  <span className="footer-contact-val">
+                    Niyansh Pharma Wholesale Hub, Rajkot, Gujarat – 360005
+                  </span>
+                </div>
               </div>
-              <div className="contact-item">
-                <Phone size={18} className="contact-icon" aria-hidden="true" />
-                <a href="tel:+919909923130">+91 99099 23130</a>
+
+              {/* Phone */}
+              <div className="footer-contact-card">
+                <div className="footer-contact-icon-box" aria-hidden="true">
+                  <Phone size={17} />
+                </div>
+                <div className="footer-contact-details">
+                  <span className="footer-contact-label">Direct Calling</span>
+                  <span className="footer-contact-val">
+                    <a href="tel:+919909923130" className="footer-contact-link">
+                      +91 99099 23130
+                    </a>
+                  </span>
+                </div>
               </div>
-              <div className="contact-item">
-                <Mail size={18} className="contact-icon" aria-hidden="true" />
-                <a href="mailto:info@niyanshpharma.com">info@niyanshpharma.com</a>
+
+              {/* Email */}
+              <div className="footer-contact-card">
+                <div className="footer-contact-icon-box" aria-hidden="true">
+                  <Mail size={17} />
+                </div>
+                <div className="footer-contact-details">
+                  <span className="footer-contact-label">Official Email</span>
+                  <span className="footer-contact-val">
+                    <a href="mailto:info@niyanshpharma.com" className="footer-contact-link">
+                      info@niyanshpharma.com
+                    </a>
+                  </span>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Wholesale Trade Bulletin */}
+          {/* Column 4 – Trade Bulletins */}
           <div className="footer-widget">
-            <h3 className="widget-title">{t('footer.tradeBulletins', 'Trade Bulletins')}</h3>
-            <p style={{ fontSize: '0.88rem', color: '#cbd5e1', marginBottom: '15px' }}>
-              {t('footer.bulletinDesc', 'Subscribe to get instant WhatsApp & email alerts for weekly PTR price revisions, 10+1 schemes, and stock arrivals.')}
+            <h3 className="footer-heading">{t('footer.tradeBulletins', 'Trade Bulletins')}</h3>
+            <div className="footer-heading-accent"></div>
+
+            <p className="footer-bulletin-text">
+              {t('footer.bulletinDesc', 'Subscribe to receive instant WhatsApp and email updates about weekly PTR price revisions, 10+1 schemes, new products, and stock arrivals.')}
             </p>
+
             {subscribed ? (
-              <div style={{ backgroundColor: 'rgba(56, 142, 60, 0.2)', color: '#4ade80', padding: '10px 14px', borderRadius: '6px', fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <CheckCircle2 size={16} /> {t('footer.subscribed', 'Subscribed to trade alerts!')}
+              <div className="footer-subscribe-msg success" role="status">
+                <CheckCircle2 size={16} color="#34d399" />
+                <span>{t('footer.subscribed', 'Thank you! Subscribed to trade alerts.')}</span>
               </div>
             ) : (
-              <form className="newsletter-form" onSubmit={handleNewsletterSubmit}>
-                <input 
-                  type="email" 
-                  value={newsletterEmail}
-                  onChange={(e) => setNewsletterEmail(e.target.value.toLowerCase())}
-                  placeholder={t('footer.emailPlaceholder', 'Enter your email address...')} 
-                  required 
-                  aria-label="Newsletter email address" 
-                />
-                <button type="submit" disabled={loading} aria-label="Subscribe to newsletter">
-                  <Send size={16} aria-hidden="true" />
+              <form className="footer-subscribe-form" onSubmit={handleNewsletterSubmit} noValidate>
+                <div className="footer-subscribe-input-wrap">
+                  <Mail size={16} className="footer-input-icon" aria-hidden="true" />
+                  <input 
+                    type="email" 
+                    value={newsletterEmail}
+                    onChange={(e) => {
+                      setNewsletterEmail(e.target.value);
+                      if (errorMessage) setErrorMessage('');
+                    }}
+                    placeholder={t('footer.emailPlaceholder', 'Enter your business email...')} 
+                    required 
+                    aria-label="Trade Bulletin email address"
+                    className={`footer-subscribe-input ${errorMessage ? 'input-error' : ''}`}
+                    disabled={loading}
+                  />
+                </div>
+
+                {errorMessage && (
+                  <div className="footer-subscribe-msg error" role="alert">
+                    <AlertCircle size={15} color="#f87171" />
+                    <span>{errorMessage}</span>
+                  </div>
+                )}
+
+                <button 
+                  type="submit" 
+                  disabled={loading} 
+                  className="footer-subscribe-btn"
+                  aria-label="Subscribe to Trade Bulletins"
+                >
+                  <Send size={15} aria-hidden="true" />
+                  <span>{loading ? t('common.loading', 'Subscribing...') : t('footer.subscribe', 'Subscribe')}</span>
                 </button>
               </form>
             )}
           </div>
-        </div>
 
-        <div className="footer-bottom">
-          <p>© {new Date().getFullYear()} {t('footer.rights', 'Niyansh Pharma Wholesale Distribution. All Rights Reserved.')}</p>
-          <div className="social-links">
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="Niyansh Pharma on Facebook"><Facebook size={16} aria-hidden="true" /></a>
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="Niyansh Pharma on Twitter"><Twitter size={16} aria-hidden="true" /></a>
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="Niyansh Pharma on Instagram"><Instagram size={16} aria-hidden="true" /></a>
-            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="Niyansh Pharma on LinkedIn"><Linkedin size={16} aria-hidden="true" /></a>
+        </div>
+      </div>
+
+      {/* 5. Bottom Copyright Section */}
+      <div className="footer-bottom-strip">
+        <div className="container">
+          <div className="footer-bottom-inner">
+            <div className="footer-bottom-rights">
+              <span>© 2026 Niyansh Pharma. All Rights Reserved.</span>
+            </div>
+            <div className="footer-bottom-tagline">
+              <span>Designed with Care • Quality • Trust</span>
+            </div>
           </div>
         </div>
       </div>

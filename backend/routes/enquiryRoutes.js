@@ -28,13 +28,22 @@ router.post('/', async (req, res) => {
       return res.status(401).json({ message: 'Authentication is required to request a wholesale quote.' });
     }
 
-    if (!name || !phone) {
-      return res.status(400).json({ message: 'Name and Phone number are required' });
-    }
+    let cleanPhone = '';
+    if (type === 'Newsletter') {
+      if (!email || !email.includes('@')) {
+        return res.status(400).json({ message: 'Valid email address is required for trade bulletin subscription' });
+      }
+      cleanPhone = phone ? phone.toString().replace(/\D/g, '') : '9909923130';
+      if (cleanPhone.length !== 10) cleanPhone = '9909923130';
+    } else {
+      if (!name || !phone) {
+        return res.status(400).json({ message: 'Name and Phone number are required' });
+      }
 
-    const cleanPhone = phone.toString().replace(/\D/g, '');
-    if (cleanPhone.length !== 10) {
-      return res.status(400).json({ message: 'Phone number must contain exactly 10 numeric digits' });
+      cleanPhone = phone.toString().replace(/\D/g, '');
+      if (cleanPhone.length !== 10) {
+        return res.status(400).json({ message: 'Phone number must contain exactly 10 numeric digits' });
+      }
     }
 
     const enquiryData = {

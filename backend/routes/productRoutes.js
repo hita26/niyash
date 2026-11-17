@@ -202,12 +202,12 @@ router.get('/admin/all', protect, adminOnly, async (req, res) => {
       await Promise.all([
         Product.find(query).sort(sortOptions).skip(skip).limit(limitNum).lean(),
         Product.countDocuments(query),
-        Product.countDocuments(),
+        Product.estimatedDocumentCount ? Product.estimatedDocumentCount() : Product.countDocuments(),
         Product.countDocuments({ isActive: { $ne: false } }),
         Product.countDocuments({ $or: [{ inStock: false }, { stockQuantity: { $lte: 0 } }] }),
         Product.distinct('category'),
         Product.countDocuments({ featured: true }),
-        Product.find().sort({ createdAt: -1 }).limit(5).lean(),
+        Product.find().sort({ createdAt: -1 }).limit(5).select('name brand sku price mrp inStock stockQuantity createdAt').lean(),
       ]);
 
     res.json({
@@ -557,16 +557,16 @@ router.post('/', protect, adminOnly, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Product category is required' });
     }
 
-    // Check duplicate product name (case-insensitive) - DUPLICATION PREVENTION
+    // Check duplicate product name (case-insensitive) - DUPLICATION PREVENTION (Indexed lean query)
     const escapedName = name.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const existingName = await Product.findOne({ name: { $regex: new RegExp(`^${escapedName}$`, 'i') } });
+    const existingName = await Product.findOne({ name: { $regex: new RegExp(`^${escapedName}$`, 'i') } }).select('_id').lean();
     if (existingName) {
       return res.status(400).json({ success: false, message: `Product "${name.trim()}" already exists in catalog. Duplicates are not allowed.` });
     }
 
-    // Check unique SKU if provided
+    // Check unique SKU if provided (Indexed lean query)
     if (sku && sku.trim() !== '') {
-      const existingSku = await Product.findOne({ sku: sku.trim() });
+      const existingSku = await Product.findOne({ sku: sku.trim() }).select('_id').lean();
       if (existingSku) {
         return res.status(400).json({ success: false, message: `A product with SKU "${sku.trim()}" already exists` });
       }
@@ -576,15 +576,14 @@ router.post('/', protect, adminOnly, async (req, res) => {
     const targetComp = (company && company.trim()) || 'DAXIA';
     try {
       const escapedComp = targetComp.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const compExists = await Company.findOne({ name: { $regex: new RegExp(`^${escapedComp}$`, 'i') } });
+      const compExists = await Company.findOne({ name: { $regex: new RegExp(`^${escapedComp}$`, 'i') } }).select('_id').lean();
       if (!compExists) {
-        const newComp = new Company({
+        await Company.create({
           name: targetComp,
           category: (category && category.trim()) || 'Pharmaceutical Formulations',
           status: 'Published',
           isVerified: true
         });
-        await newComp.save();
       }
     } catch (cErr) {
       console.warn('Auto-create company info:', cErr.message);
@@ -652,21 +651,21 @@ router.put('/:id', protect, adminOnly, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Product not found' });
     }
 
-    // Check SKU collision if SKU changed
+    // Check SKU collision if SKU changed (Indexed lean query)
     if (req.body.sku && req.body.sku.trim() !== '' && req.body.sku.trim() !== product.sku) {
-      const existingSku = await Product.findOne({ sku: req.body.sku.trim(), _id: { $ne: product._id } });
+      const existingSku = await Product.findOne({ sku: req.body.sku.trim(), _id: { $ne: product._id } }).select('_id').lean();
       if (existingSku) {
         return res.status(400).json({ success: false, message: `SKU "${req.body.sku.trim()}" is already assigned to another product` });
       }
     }
 
-    // Check duplicate product name if changed (DUPLICATION PREVENTION)
+    // Check duplicate product name if changed (DUPLICATION PREVENTION - Indexed lean query)
     if (req.body.name && req.body.name.trim() !== '' && req.body.name.trim().toLowerCase() !== product.name.toLowerCase()) {
       const escapedName = req.body.name.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const existingName = await Product.findOne({
         _id: { $ne: product._id },
         name: { $regex: new RegExp(`^${escapedName}$`, 'i') }
-      });
+      }).select('_id').lean();
       if (existingName) {
         return res.status(400).json({ success: false, message: `Another product with name "${req.body.name.trim()}" already exists` });
       }
@@ -677,15 +676,14 @@ router.put('/:id', protect, adminOnly, async (req, res) => {
       const targetComp = req.body.company.trim();
       try {
         const escapedComp = targetComp.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const compExists = await Company.findOne({ name: { $regex: new RegExp(`^${escapedComp}$`, 'i') } });
+        const compExists = await Company.findOne({ name: { $regex: new RegExp(`^${escapedComp}$`, 'i') } }).select('_id').lean();
         if (!compExists) {
-          const newComp = new Company({
+          await Company.create({
             name: targetComp,
             category: (req.body.category && req.body.category.trim()) || 'Pharmaceutical Formulations',
             status: 'Published',
             isVerified: true
           });
-          await newComp.save();
         }
       } catch (cErr) {
         console.warn('Auto-create company info:', cErr.message);

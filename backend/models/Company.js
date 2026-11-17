@@ -86,6 +86,10 @@ companySchema.pre('save', function (next) {
   next();
 });
 
+companySchema.index({ name: 1 });
+companySchema.index({ isPublished: 1 });
+companySchema.index({ createdAt: -1 });
+
 const Company = mongoose.model('Company', companySchema);
 
 module.exports = Company;

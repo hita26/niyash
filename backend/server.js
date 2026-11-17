@@ -33,6 +33,7 @@ try {
 app.use('/uploads', express.static(uploadDir));
 
 // Database readiness & cache-busting middleware for all /api routes
+let isDefaultsInitialized = false;
 app.use(async (req, res, next) => {
   if (req.path.startsWith('/api')) {
     // Ensure all API responses return fresh data and are never cached by browser or CDN
@@ -42,7 +43,10 @@ app.use(async (req, res, next) => {
     res.set('Surrogate-Control', 'no-store');
     try {
       await connectDB();
-      await initDefaults();
+      if (!isDefaultsInitialized) {
+        await initDefaults();
+        isDefaultsInitialized = true;
+      }
     } catch (err) {
       return res.status(503).json({ message: 'Database unavailable', error: err.message });
     }

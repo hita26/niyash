@@ -300,7 +300,7 @@ export function LanguageSelector({ variant = 'default' }) {
           }}
         >
           <div style={{ padding: '6px 10px 6px', fontSize: '0.72rem', fontWeight: '800', color: 'var(--text-muted, #94a3b8)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-            {language === 'gu' ? 'ભાષા પસંદ કરો' : language === 'hi' ? 'भाषा चुनें' : 'Select Language'}
+            Select Language
           </div>
           {supportedLanguages.map((lang) => {
             const isSelected = language === lang.code;
@@ -336,7 +336,6 @@ export function LanguageSelector({ variant = 'default' }) {
                 }}
               >
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                  <span>{lang.flag}</span>
                   <span>{lang.native}</span>
                 </span>
                 {isSelected && <Check size={15} color="var(--primary-blue, #0c3d6c)" />}

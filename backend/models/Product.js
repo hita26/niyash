@@ -211,6 +211,19 @@ productSchema.pre('save', function (next) {
   if (typeof next === 'function') next();
 });
 
+// High-performance query and sort indexes for bullet-train speed
+productSchema.index({ createdAt: -1 });
+productSchema.index({ name: 1 });
+productSchema.index({ sku: 1 });
+productSchema.index({ company: 1 });
+productSchema.index({ category: 1 });
+productSchema.index({ inStock: 1 });
+productSchema.index({ isActive: 1 });
+productSchema.index({ featured: 1 });
+productSchema.index({ isActive: 1, createdAt: -1 });
+productSchema.index({ inStock: 1, stockQuantity: 1 });
+productSchema.index({ category: 1, isActive: 1 });
+
 // Add text search index for name, brand, company, composition, form, sku, and description
 productSchema.index({
   name: 'text',

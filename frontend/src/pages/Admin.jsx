@@ -867,137 +867,111 @@ function Admin() {
     }
   }, [isAuthenticated, isSuperAdmin]);
 
-  const fetchDashboardData = async () => {
-    setIsLoading(true);
+  const fetchDashboardData = async (showSpinner = true) => {
+    if (showSpinner) setIsLoading(true);
     try {
-      // 1. Fetch Products
-      try {
-        const prodRes = await fetch('/api/products/admin/all?limit=15000', {
-          headers: getAuthHeaders(),
-        });
-        if (prodRes.ok) {
-          const prodData = await prodRes.json();
-          setProducts(Array.isArray(prodData.products) ? prodData.products : []);
-          if (prodData.stats) setProductAdminStats(prodData.stats);
-        } else {
-          const fallbackRes = await fetch('/api/products?limit=15000');
-          if (fallbackRes.ok) {
-            const prodData = await fallbackRes.json();
-            setProducts(Array.isArray(prodData.products) ? prodData.products : []);
-          } else {
-            setProducts([]);
-          }
-        }
-      } catch {
-        setProducts([]);
+      const headers = getAuthHeaders();
+
+      // Parallel high-speed fetch for all dashboard metrics and collections (Bullet train speed)
+      const [
+        prodResult,
+        ordResult,
+        ledResult,
+        newsResult,
+        enqResult,
+        carResult,
+        compResult,
+        cfResult,
+        contactResult
+      ] = await Promise.allSettled([
+        fetch('/api/products/admin/all?limit=15000', { headers })
+          .then(async (res) => {
+            if (res.ok) return res.json();
+            const fallback = await fetch('/api/products?limit=15000');
+            return fallback.ok ? fallback.json() : { products: [] };
+          })
+          .catch(() => ({ products: [] })),
+        fetch('/api/orders?limit=100', { headers })
+          .then(r => r.ok ? r.json() : { orders: FALLBACK_ORDERS })
+          .catch(() => ({ orders: FALLBACK_ORDERS })),
+        fetch('/api/ledger?limit=100', { headers })
+          .then(r => r.ok ? r.json() : { ledgers: FALLBACK_LEDGERS })
+          .catch(() => ({ ledgers: FALLBACK_LEDGERS })),
+        fetch('/api/news?limit=100', { headers })
+          .then(r => r.ok ? r.json() : { news: FALLBACK_NEWS })
+          .catch(() => ({ news: FALLBACK_NEWS })),
+        fetch('/api/enquiries', { headers })
+          .then(r => r.ok ? r.json() : [])
+          .catch(() => []),
+        fetch('/api/careers', { headers })
+          .then(r => r.ok ? r.json() : [])
+          .catch(() => []),
+        fetch('/api/companies?limit=1000&admin=true', { headers })
+          .then(r => r.ok ? r.json() : { companies: [] })
+          .catch(() => ({ companies: [] })),
+        fetch('/api/products/custom-fields', { headers })
+          .then(r => r.ok ? r.json() : { fields: [] })
+          .catch(() => ({ fields: [] })),
+        fetch('/api/settings/contact')
+          .then(r => r.ok ? r.json() : null)
+          .catch(() => null)
+      ]);
+
+      // 1. Products
+      if (prodResult.status === 'fulfilled' && prodResult.value) {
+        const pData = prodResult.value;
+        if (Array.isArray(pData.products)) setProducts(pData.products);
+        if (pData.stats) setProductAdminStats(pData.stats);
       }
 
-      // 2. Fetch Orders
-      try {
-        const ordRes = await fetch('/api/orders?limit=100');
-        if (ordRes.ok) {
-          const ordData = await ordRes.json();
-          setOrders(ordData.orders && ordData.orders.length > 0 ? ordData.orders : FALLBACK_ORDERS);
-        } else {
-          setOrders(FALLBACK_ORDERS);
-        }
-      } catch {
-        setOrders(FALLBACK_ORDERS);
+      // 2. Orders
+      if (ordResult.status === 'fulfilled' && ordResult.value) {
+        const oData = ordResult.value;
+        setOrders(oData.orders && oData.orders.length > 0 ? oData.orders : FALLBACK_ORDERS);
       }
 
-      // 3. Fetch Ledgers
-      try {
-        const ledRes = await fetch('/api/ledger?limit=100');
-        if (ledRes.ok) {
-          const ledData = await ledRes.json();
-          setLedgers(ledData.ledgers && ledData.ledgers.length > 0 ? ledData.ledgers : FALLBACK_LEDGERS);
-        } else {
-          setLedgers(FALLBACK_LEDGERS);
-        }
-      } catch {
-        setLedgers(FALLBACK_LEDGERS);
+      // 3. Ledgers
+      if (ledResult.status === 'fulfilled' && ledResult.value) {
+        const lData = ledResult.value;
+        setLedgers(lData.ledgers && lData.ledgers.length > 0 ? lData.ledgers : FALLBACK_LEDGERS);
       }
 
-      // 4. Fetch News / Schemes
-      try {
-        const newsRes = await fetch('/api/news?limit=100');
-        if (newsRes.ok) {
-          const newsData = await newsRes.json();
-          setNews(newsData.news && newsData.news.length > 0 ? newsData.news : FALLBACK_NEWS);
-        } else {
-          setNews(FALLBACK_NEWS);
-        }
-      } catch {
-        setNews(FALLBACK_NEWS);
+      // 4. News
+      if (newsResult.status === 'fulfilled' && newsResult.value) {
+        const nData = newsResult.value;
+        setNews(nData.news && nData.news.length > 0 ? nData.news : FALLBACK_NEWS);
       }
 
-      // 5. Fetch Enquiries
-      try {
-        const enqRes = await fetch('/api/enquiries');
-        if (enqRes.ok) {
-          const enqData = await enqRes.json();
-          setEnquiries(enqData || []);
-        } else {
-          setEnquiries([]);
-        }
-      } catch {
-        setEnquiries([]);
+      // 5. Enquiries
+      if (enqResult.status === 'fulfilled' && enqResult.value) {
+        setEnquiries(Array.isArray(enqResult.value) ? enqResult.value : []);
       }
 
-      // 6. Fetch Careers
-      try {
-        const carRes = await fetch('/api/careers');
-        if (carRes.ok) {
-          const carData = await carRes.json();
-          setCareers(carData || []);
-        } else {
-          setCareers([]);
-        }
-      } catch {
-        setCareers([]);
+      // 6. Careers
+      if (carResult.status === 'fulfilled' && carResult.value) {
+        setCareers(Array.isArray(carResult.value) ? carResult.value : []);
       }
 
-      // 7. Fetch Companies
-      try {
-        const compRes = await fetch('/api/companies?limit=1000&admin=true');
-        if (compRes.ok) {
-          const compData = await compRes.json();
-          setCompanies(compData.companies || []);
-          if (compData.total) setTotalCompaniesCount(compData.total);
-        } else {
-          setCompanies([]);
-        }
-      } catch {
-        setCompanies([]);
+      // 7. Companies
+      if (compResult.status === 'fulfilled' && compResult.value) {
+        const cData = compResult.value;
+        setCompanies(cData.companies || []);
+        if (cData.total) setTotalCompaniesCount(cData.total);
       }
 
-      // 8. Fetch Custom Field Definitions
-      try {
-        const cfRes = await fetch('/api/products/custom-fields');
-        if (cfRes.ok) {
-          const cfData = await cfRes.json();
-          setCustomFieldDefs(cfData.fields || []);
-        }
-      } catch (cfErr) {
-        console.warn('Custom fields fetch notice:', cfErr);
+      // 8. Custom fields
+      if (cfResult.status === 'fulfilled' && cfResult.value) {
+        setCustomFieldDefs(cfResult.value.fields || []);
       }
 
-      // 9. Fetch Contact & Wholesale Hub Settings
-      try {
-        const contactRes = await fetch('/api/settings/contact');
-        if (contactRes.ok) {
-          const contactData = await contactRes.json();
-          if (contactData && contactData.contact) {
-            setContactSettings(prev => ({ ...prev, ...contactData.contact }));
-          }
-        }
-      } catch (contactErr) {
-        console.warn('Contact settings fetch notice:', contactErr);
+      // 9. Contact settings
+      if (contactResult.status === 'fulfilled' && contactResult.value && contactResult.value.contact) {
+        setContactSettings(prev => ({ ...prev, ...contactResult.value.contact }));
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
-      setIsLoading(false);
+      if (showSpinner) setIsLoading(false);
     }
   };
 
@@ -2514,16 +2488,28 @@ _Helpline: +91 9316566894_`;
       const data = await response.json();
       if (response.ok && data.success) {
         setIsProductModalOpen(false);
+        const savedProd = data.product || { ...payload, _id: editingProduct?._id || ('p-' + Date.now()) };
+
+        // INSTANT OPTIMISTIC UPDATE: Update products list immediately without waiting
+        setProducts(prev => {
+          if (editingProduct && editingProduct._id) {
+            return prev.map(p => p._id === savedProd._id ? { ...p, ...savedProd } : p);
+          } else {
+            return [savedProd, ...prev];
+          }
+        });
 
         // Auto-add company to local state if brand new so it appears in suggestions immediately
         if (assignedCompany && !companies.some(c => c.name?.toLowerCase() === assignedCompany.toLowerCase())) {
           setCompanies(prev => [{ name: assignedCompany, category: finalCategory, status: 'Published' }, ...prev]);
         }
 
-        await fetchDashboardData();
+        // Silent background sync without blocking UI
+        fetchDashboardData(false);
+
         broadcastLiveEvent(
           editingProduct ? SYNC_EVENTS.PRODUCT_UPDATED : SYNC_EVENTS.PRODUCT_CREATED,
-          { product: data.product || payload }
+          { product: savedProd }
         );
         showToast(
           editingProduct 
@@ -3170,8 +3156,16 @@ _Helpline: +91 9316566894_`;
       const data = await res.json();
       if (res.ok && data.success) {
         setIsCompanyModalOpen(false);
-        await fetchDashboardData();
-        broadcastLiveEvent(SYNC_EVENTS.COMPANY_MUTATED, { action: editingCompany ? 'update' : 'create', company: data.company });
+        const savedComp = data.company || { ...payload, _id: editingCompany?._id || ('comp-' + Date.now()) };
+        setCompanies(prev => {
+          if (editingCompany && editingCompany._id) {
+            return prev.map(c => c._id === savedComp._id ? { ...c, ...savedComp } : c);
+          } else {
+            return [savedComp, ...prev];
+          }
+        });
+        fetchDashboardData(false);
+        broadcastLiveEvent(SYNC_EVENTS.COMPANY_MUTATED, { action: editingCompany ? 'update' : 'create', company: savedComp });
         showToast(editingCompany ? 'Company updated successfully!' : 'New company added to directory!');
       } else {
         showToast(data.message || 'Error saving company', 'error');
@@ -3700,48 +3694,23 @@ _Helpline: +91 9316566894_`;
           gap: '18px'
         }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
               <span style={{ fontSize: '0.72rem', fontWeight: '800', backgroundColor: '#e0f2fe', color: '#0369a1', padding: '3px 10px', borderRadius: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 Central B2B Portal
-              </span>
-              <span style={{ fontSize: '0.72rem', fontWeight: '700', backgroundColor: '#f0fdf4', color: '#15803d', padding: '3px 10px', borderRadius: '12px', border: '1px solid #bbf7d0' }}>
-                WHO-GMP Certified Distribution
               </span>
               <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '600' }}>
                 Rajkot Central Wholesale Hub (Gujarat)
               </span>
             </div>
-            <h1 style={{ fontSize: 'clamp(1.25rem, 2.5vw, 1.65rem)', fontWeight: '800', color: 'var(--text-dark)', margin: 0 }}>
+            <h1 style={{ fontSize: 'clamp(1.2rem, 2.5vw, 1.65rem)', fontWeight: '800', color: 'var(--text-dark)', margin: 0, lineHeight: 1.25 }}>
               Niyansh Pharma • Central B2B Operations Console
             </h1>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginTop: '6px', fontSize: '0.8rem', color: 'var(--text-medium)', flexWrap: 'wrap' }}>
-              <span>D.L.No.: <strong>20B, 264618, 21B, 264619</strong></span>
-              <span>•</span>
-              <span>GSTIN: <strong>24BVXPP6108F2Z7</strong></span>
-              <span>•</span>
-              <span>PAN: <strong>BVXPP6108F</strong></span>
-              <span>•</span>
-              <span>Food License no.: <strong>20726030000567</strong></span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '8px', flexWrap: 'wrap' }}>
+              <span className="admin-license-pill">D.L.No.: <strong>20B, 264618, 21B, 264619</strong></span>
+              <span className="admin-license-pill">GSTIN: <strong>24BVXPP6108F2Z7</strong></span>
+              <span className="admin-license-pill">PAN: <strong>BVXPP6108F</strong></span>
+              <span className="admin-license-pill">Food Lic.: <strong>20726030000567</strong></span>
             </div>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-            <a
-              href="/quick-order"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-outline btn-sm"
-              style={{ gap: '6px', fontSize: '0.82rem', fontWeight: '700' }}
-            >
-              <ExternalLink size={14} /> {t('admin.quickMatrixBtn', 'Quick Matrix')}
-            </a>
-            <button
-              onClick={handleDownloadOrdersCSV}
-              className="btn btn-primary btn-sm"
-              style={{ gap: '6px', fontSize: '0.82rem', fontWeight: '700' }}
-            >
-              <FileSpreadsheet size={14} /> {t('admin.exportOrdersBtn', 'Export Orders (Excel)')}
-            </button>
           </div>
         </div>
       </div>
@@ -4977,7 +4946,7 @@ _Helpline: +91 9316566894_`;
                       </p>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                    <div className="admin-action-toolbar">
                       <button 
                         onClick={handleExportCSV} 
                         className="btn btn-outline btn-sm"
@@ -5002,21 +4971,8 @@ _Helpline: +91 9316566894_`;
                         style={{ gap: '6px', color: '#15803d', borderColor: '#86efac', backgroundColor: '#f0fdf4', fontWeight: '700' }}
                         title="Download sample Excel template (.xlsx) with all fields and registered companies"
                       >
-                        <Download size={14} /> Download Excel Template
+                        <Download size={14} /> Download Template
                       </button>
-
-                      {productStats.totalProducts < 500 && (
-                        <button 
-                          onClick={handleSyncFullCatalog} 
-                          disabled={isSyncingCatalog}
-                          className="btn btn-sm"
-                          style={{ gap: '6px', backgroundColor: '#0284c7', color: '#fff', border: 'none', fontWeight: '700' }}
-                          title="Populate full 9,560 catalog into database"
-                        >
-                          <RefreshCw size={14} className={isSyncingCatalog ? 'animate-spin' : ''} /> 
-                          {isSyncingCatalog ? 'Syncing...' : 'Sync Full 9,560 Catalog'}
-                        </button>
-                      )}
 
                       {products.length > 0 && (isSuperAdmin || hasPermission('canClearDatabase')) && (
                         <button 
@@ -5026,13 +4982,13 @@ _Helpline: +91 9316566894_`;
                           style={{ gap: '6px', backgroundColor: '#fee2e2', color: '#b91c1c', border: '1px solid #fecaca', fontWeight: '700' }}
                           title="Delete all products to start manual entry from scratch"
                         >
-                          <Trash2 size={14} /> {isClearingProducts ? 'Clearing...' : 'Clear All Products'}
+                          <Trash2 size={14} /> {isClearingProducts ? 'Clearing...' : 'Clear All'}
                         </button>
                       )}
 
                       <button 
                         onClick={() => handleOpenProductModal(null)} 
-                        className="btn btn-primary btn-sm" 
+                        className="btn btn-primary btn-sm admin-add-prod-btn" 
                         style={{ gap: '6px' }}
                       >
                         <Plus size={16} /> Add New Product

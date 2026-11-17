@@ -389,16 +389,16 @@ input[type="submit"]:disabled {
   background-color: #123F6B;
   color: #FFFFFF;
   margin: 0;
-  padding: 0 clamp(16px, 3.5vw, 48px);
+  padding: 0 clamp(24px, 4vw, 56px);
   box-sizing: border-box;
   display: flex;
   align-items: center;
   position: relative;
-  z-index: 1001;
+  z-index: 10;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   font-family: 'Inter', 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.4;
   -webkit-font-smoothing: antialiased;
 }
@@ -417,7 +417,7 @@ input[type="submit"]:disabled {
   justify-self: start;
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 28px;
   white-space: nowrap;
 }
 
@@ -427,7 +427,7 @@ input[type="submit"]:disabled {
   gap: 8px;
   color: #FFFFFF;
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .website-topbar-item a {
@@ -478,9 +478,9 @@ input[type="submit"]:disabled {
   justify-self: end;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 600;
   color: #FFFFFF;
   white-space: nowrap;
 }
@@ -2763,6 +2763,92 @@ body.dark-theme {
   color: #ffffff;
   border-color: var(--primary-blue);
   box-shadow: 0 2px 8px rgba(12, 61, 108, 0.25);
+}
+
+/* License & Regulatory Pill Badges - Prevents wrapping bullets on mobile */
+.admin-license-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  background: var(--bg-main, #f1f5f9);
+  border: 1px solid var(--border-light, #e2e8f0);
+  border-radius: 6px;
+  font-size: 0.74rem;
+  color: var(--text-medium, #475569);
+  line-height: 1.35;
+  white-space: nowrap;
+}
+.admin-license-pill strong {
+  color: var(--text-dark, #0f172a);
+  margin-left: 3px;
+}
+[data-theme="dark"] .admin-license-pill {
+  background: rgba(30, 41, 59, 0.7);
+  border-color: rgba(51, 65, 85, 0.8);
+  color: #94a3b8;
+}
+[data-theme="dark"] .admin-license-pill strong {
+  color: #f1f5f9;
+}
+
+/* Catalog Action Toolbar - Native app-like layout on mobile screens */
+.admin-action-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+@media (max-width: 640px) {
+  .admin-action-toolbar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+  }
+  .admin-action-toolbar .btn {
+    width: 100%;
+    justify-content: center;
+    font-size: 0.78rem !important;
+    padding: 9px 8px !important;
+    text-align: center;
+  }
+  .admin-action-toolbar .admin-add-prod-btn {
+    grid-column: 1 / -1;
+    font-size: 0.88rem !important;
+    padding: 11px 16px !important;
+    font-weight: 800 !important;
+  }
+}
+@media (max-width: 380px) {
+  .admin-action-toolbar {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Modal Overlay Wrapper - Full bleed on mobile */
+.admin-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  background-color: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 99999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+@media (max-width: 768px) {
+  .admin-modal-overlay {
+    padding: 0 !important;
+  }
 }
 
 /* Responsive Metric Grids */

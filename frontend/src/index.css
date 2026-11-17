@@ -2424,10 +2424,10 @@ body.dark-theme {
 
 /* Modern Enterprise 2-Column Product Workspace Modal */
 .admin-modal-workspace {
-  width: 100%;
-  max-width: min(96vw, 1120px);
+  width: 96vw;
+  max-width: min(96vw, 1340px);
   max-height: 90vh;
-  height: min(90vh, 880px);
+  height: min(90vh, 900px);
   display: flex !important;
   flex-direction: column !important;
   padding: 0 !important;
@@ -2454,14 +2454,14 @@ body.dark-theme {
 
 .admin-workspace-body {
   flex: 1;
-  overflow: hidden !important;
-  padding: 20px 22px;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 24px;
   display: grid;
   grid-template-columns: 340px minmax(0, 1fr);
-  gap: 22px;
-  align-items: stretch;
+  gap: 24px;
+  align-items: start;
   min-width: 0;
-  min-height: 0;
   box-sizing: border-box;
 }
 
@@ -2472,56 +2472,59 @@ body.dark-theme {
 }
 
 .admin-workspace-left {
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding-right: 6px;
+  position: sticky;
+  top: 0;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  width: 100%;
   box-sizing: border-box;
+  z-index: 2;
 }
 
 .admin-workspace-right {
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding-right: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  width: 100%;
   box-sizing: border-box;
+  padding-bottom: 20px;
 }
 
-/* Custom sleek scrollbar for modal columns */
-.admin-workspace-right::-webkit-scrollbar,
-.admin-workspace-left::-webkit-scrollbar,
+/* Custom sleek scrollbar for modal body */
 .admin-workspace-body::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
-.admin-workspace-right::-webkit-scrollbar-track,
-.admin-workspace-left::-webkit-scrollbar-track,
 .admin-workspace-body::-webkit-scrollbar-track {
-  background: transparent;
-}
-.admin-workspace-right::-webkit-scrollbar-thumb,
-.admin-workspace-left::-webkit-scrollbar-thumb,
-.admin-workspace-body::-webkit-scrollbar-thumb {
-  background-color: rgba(148, 163, 184, 0.35);
+  background: rgba(0, 0, 0, 0.04);
   border-radius: 10px;
 }
-.admin-workspace-right::-webkit-scrollbar-thumb:hover,
-.admin-workspace-left::-webkit-scrollbar-thumb:hover,
+.admin-workspace-body::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.45);
+  border-radius: 10px;
+}
 .admin-workspace-body::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(148, 163, 184, 0.6);
+  background-color: rgba(148, 163, 184, 0.7);
 }
 
 @media (max-width: 1024px) {
+  .admin-modal-workspace {
+    width: 98vw;
+    max-width: 98vw;
+    height: 94vh;
+    max-height: 94vh;
+  }
   .admin-workspace-body {
     grid-template-columns: minmax(0, 1fr);
     overflow-y: auto !important;
-    gap: 16px;
+    gap: 18px;
     padding: 16px;
   }
-  .admin-workspace-left,
-  .admin-workspace-right {
-    height: auto;
-    overflow-y: visible;
-    padding-right: 0;
+  .admin-workspace-left {
+    position: static;
   }
 }
 

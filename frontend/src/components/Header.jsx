@@ -776,31 +776,6 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
   // =========================================================================
   return (
     <header style={{ width: '100%', position: 'relative', zIndex: 100 }}>
-      {/* Top Contact Strip */}
-      <div className="top-strip">
-        <div className="container top-strip-content">
-          <div className="top-contacts">
-            <span className="top-contact-item">
-              <Phone size={14} aria-hidden="true" /> 
-              <a href="tel:+919909923130" aria-label="Call Niyansh Pharma at +91 99099 23130">+91 99099 23130</a>
-            </span>
-            <span className="top-contact-item">
-              <Mail size={14} aria-hidden="true" /> 
-              <a href="mailto:info@niyanshpharma.com" aria-label="Email Niyansh Pharma at info@niyanshpharma.com">info@niyanshpharma.com</a>
-            </span>
-          </div>
-          <div className="top-tagline" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#4ade80', fontWeight: '700', fontSize: '0.88rem', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>
-            <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#4ade80', display: 'inline-block' }}></span>
-            {t('topbar.tagline', 'Care • Quality • Trust')}
-          </div>
-          <div className="top-links">
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              📍 {t('topbar.location', 'Rajkot, Gujarat')}
-            </span>
-          </div>
-        </div>
-      </div>
-
       {/* Main Branding Header */}
       <div className="main-header">
         <div className="container main-header-content">

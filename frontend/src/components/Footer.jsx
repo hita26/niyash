@@ -16,19 +16,10 @@ function Footer({ compact = false }) {
         <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ color: '#4ade80' }}>●</span>
-            <span>{t('footer.whoGmp', 'WHO-GMP Certified B2B Pharma Wholesale • Rajkot, Gujarat')}</span>
+            <span>{t('footer.tagline', 'Care • Quality • Trust • Rajkot, Gujarat')}</span>
           </div>
           <div>
             © {new Date().getFullYear()} {t('footer.chemistPortalRights', 'Niyansh Pharma Chemist Portal')} • {t('footer.directHelpline', 'Direct Helpline')}: <a href="tel:+919909923130" style={{ color: '#38bdf8', fontWeight: '700' }}>+91 99099 23130</a>
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center', fontSize: '0.78rem', color: '#cbd5e1' }}>
-            <span><strong>D.L.No.:</strong> 20B, 264618, 21B, 264619</span>
-            <span>•</span>
-            <span><strong>GSTIN:</strong> 24BVXPP6108F2Z7</span>
-            <span>•</span>
-            <span><strong>PAN No.:</strong> BVXPP6108F</span>
-            <span>•</span>
-            <span><strong>Food License no.:</strong> 20726030000567</span>
           </div>
           <div style={{ display: 'flex', gap: '14px' }}>
             <Link to="/" style={{ color: '#cbd5e1', textDecoration: 'none' }}>{t('nav.publicSite', 'Public Website')}</Link>
@@ -70,19 +61,20 @@ function Footer({ compact = false }) {
   };
 
   return (
-    <footer className="footer" role="contentinfo">
-      <div className="container">
-        {/* Top Contact Strip inside Footer */}
-        <div style={{
-          borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
-          padding: '16px 0 20px',
-          marginBottom: '32px',
+    <footer className="footer" role="contentinfo" style={{ paddingTop: 0 }}>
+      {/* Top Contact Strip moved from Header to top of Footer */}
+      <div style={{
+        backgroundColor: 'var(--primary-blue)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
+        padding: '12px 0'
+      }}>
+        <div className="container" style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           flexWrap: 'wrap',
-          gap: '16px',
-          fontSize: '0.88rem'
+          gap: '12px',
+          fontSize: '0.86rem'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#93c5fd' }}>
@@ -94,7 +86,7 @@ function Footer({ compact = false }) {
               <a href="mailto:info@niyanshpharma.com" style={{ color: '#ffffff', fontWeight: '600' }} aria-label="Email Niyansh Pharma at info@niyanshpharma.com">info@niyanshpharma.com</a>
             </span>
           </div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#4ade80', fontWeight: '700', fontSize: '0.9rem', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#4ade80', fontWeight: '700', fontSize: '0.88rem', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>
             <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#4ade80', display: 'inline-block' }}></span>
             {t('topbar.tagline', 'Care • Quality • Trust')}
           </div>
@@ -102,7 +94,9 @@ function Footer({ compact = false }) {
             <span>📍 {t('topbar.location', 'Rajkot, Gujarat')}</span>
           </div>
         </div>
+      </div>
 
+      <div className="container" style={{ paddingTop: '50px' }}>
         <div className="footer-top">
           {/* Brand Info */}
           <div className="footer-widget" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>

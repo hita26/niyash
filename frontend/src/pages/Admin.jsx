@@ -645,6 +645,15 @@ function Admin() {
   const [isNewsModalOpen, setIsNewsModalOpen] = useState(false);
   const [editingNews, setEditingNews] = useState(null);
 
+  // Dynamic Custom Field Definitions & Product Values
+  const [customFieldDefs, setCustomFieldDefs] = useState([]);
+  const [prodCustomValues, setProdCustomValues] = useState({});
+  const [isCustomFieldModalOpen, setIsCustomFieldModalOpen] = useState(false);
+  const [newCustomFieldName, setNewCustomFieldName] = useState('');
+  const [newCustomFieldType, setNewCustomFieldType] = useState('text');
+  const [newCustomFieldRequired, setNewCustomFieldRequired] = useState(false);
+  const [newCustomFieldPlaceholder, setNewCustomFieldPlaceholder] = useState('');
+
   // Lock body & document scroll whenever any modal is active to prevent page scrolling behind modals
   const hasActiveModal = Boolean(
     isProductModalOpen || 
@@ -708,14 +717,6 @@ function Admin() {
   const [prodSalesGst, setProdSalesGst] = useState(12);
   const [prodExpiryDate, setProdExpiryDate] = useState('');
 
-  // Dynamic Custom Field Definitions & Product Values
-  const [customFieldDefs, setCustomFieldDefs] = useState([]);
-  const [prodCustomValues, setProdCustomValues] = useState({});
-  const [isCustomFieldModalOpen, setIsCustomFieldModalOpen] = useState(false);
-  const [newCustomFieldName, setNewCustomFieldName] = useState('');
-  const [newCustomFieldType, setNewCustomFieldType] = useState('text');
-  const [newCustomFieldRequired, setNewCustomFieldRequired] = useState(false);
-  const [newCustomFieldPlaceholder, setNewCustomFieldPlaceholder] = useState('');
 
   // Bulk Import States
   const [bulkCsvText, setBulkCsvText] = useState('');

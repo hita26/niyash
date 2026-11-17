@@ -4,6 +4,10 @@ import { useLanguage } from '../context/LanguageContext';
 
 function TopBar() {
   const { t } = useLanguage();
+  const taglineParts = t('topbar.tagline', 'Care • Quality • Trust')
+    .split('•')
+    .map((part) => part.trim())
+    .filter(Boolean);
 
   return (
     <div className="website-topbar" role="region" aria-label="Website Top Information Bar">
@@ -28,10 +32,14 @@ function TopBar() {
           </span>
         </div>
 
-        {/* CENTER SECTION: Green indicator dot & Care • Quality • Trust */}
+        {/* CENTER SECTION: Uniform green indicator dots for Care • Quality • Trust */}
         <div className="website-topbar-center">
-          <span className="website-topbar-dot" aria-hidden="true"></span>
-          <span>{t('topbar.tagline', 'Care • Quality • Trust')}</span>
+          {taglineParts.map((word, idx) => (
+            <React.Fragment key={idx}>
+              <span className="website-topbar-dot" aria-hidden="true"></span>
+              <span>{word}</span>
+            </React.Fragment>
+          ))}
         </div>
 
         {/* RIGHT SECTION: Location */}

@@ -5828,7 +5828,7 @@ _Helpline: +91 9316566894_`;
                 <div className="admin-workspace-left" style={{ display: 'flex', flexDirection: 'column', gap: '16px', minWidth: 0, width: '100%', boxSizing: 'border-box' }}>
                   
                   {/* Photo Upload & Gallery Card */}
-                  <div className="admin-workspace-panel" style={{ padding: '16px', backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                  <div className="admin-workspace-panel" style={{ padding: '16px', backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', width: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                       <label style={{ fontSize: '0.92rem', fontWeight: '700', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <ImageIcon size={18} color="var(--primary-blue)" /> Product Photos ({prodImages.length})
@@ -5852,7 +5852,9 @@ _Helpline: +91 9316566894_`;
                         textAlign: 'center',
                         cursor: 'pointer',
                         transition: 'all 0.2s ease',
-                        marginBottom: '12px'
+                        marginBottom: '12px',
+                        boxSizing: 'border-box',
+                        width: '100%'
                       }}
                     >
                       <input 
@@ -5882,27 +5884,30 @@ _Helpline: +91 9316566894_`;
                     </div>
 
                     {/* Auto-Fetch Medicine Photos Button (In-Modal, Zero Manual Work!) */}
-                    <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '10px', width: '100%', boxSizing: 'border-box' }}>
                       <button
                         type="button"
                         onClick={handleAutoFetchImages}
                         disabled={isSearchingWebImages}
                         style={{
                           flex: 1,
-                          padding: '10px 14px',
+                          minWidth: 0,
+                          padding: '9px 10px',
                           backgroundColor: '#2563eb',
                           color: '#ffffff',
                           border: 'none',
                           borderRadius: '8px',
                           fontWeight: '700',
-                          fontSize: '0.86rem',
+                          fontSize: '0.82rem',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          gap: '8px',
+                          gap: '6px',
                           cursor: 'pointer',
                           boxShadow: '0 2px 6px rgba(37, 99, 235, 0.3)',
-                          transition: 'background-color 0.2s ease'
+                          transition: 'background-color 0.2s ease',
+                          boxSizing: 'border-box',
+                          whiteSpace: 'nowrap'
                         }}
                         onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#1d4ed8'; }}
                         onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#2563eb'; }}
@@ -5910,12 +5915,12 @@ _Helpline: +91 9316566894_`;
                       >
                         {isSearchingWebImages ? (
                           <>
-                            <div className="spinner" style={{ width: '16px', height: '16px', borderTopColor: '#fff' }}></div>
-                            Searching Photos...
+                            <div className="spinner" style={{ width: '14px', height: '14px', borderTopColor: '#fff' }}></div>
+                            Searching...
                           </>
                         ) : (
                           <>
-                            <Sparkles size={16} /> ⚡ 1-Click Auto-Find Photos
+                            <Sparkles size={15} /> ⚡ Auto-Find Photos
                           </>
                         )}
                       </button>
@@ -5924,21 +5929,24 @@ _Helpline: +91 9316566894_`;
                         type="button"
                         onClick={handleSearchGoogleImages}
                         style={{
-                          padding: '10px 12px',
+                          flexShrink: 0,
+                          padding: '9px 11px',
                           backgroundColor: '#f1f5f9',
                           color: '#475569',
                           border: '1px solid #cbd5e1',
                           borderRadius: '8px',
                           fontWeight: '600',
-                          fontSize: '0.82rem',
+                          fontSize: '0.80rem',
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '6px',
-                          cursor: 'pointer'
+                          gap: '5px',
+                          cursor: 'pointer',
+                          boxSizing: 'border-box',
+                          whiteSpace: 'nowrap'
                         }}
                         title="Open Google Images in browser tab as backup"
                       >
-                        <Search size={14} /> Google Tab
+                        <Search size={13} /> Google Tab
                       </button>
                     </div>
 
@@ -5949,7 +5957,9 @@ _Helpline: +91 9316566894_`;
                         backgroundColor: '#eff6ff',
                         borderRadius: '10px',
                         border: '1.5px solid #bfdbfe',
-                        marginBottom: '12px'
+                        marginBottom: '12px',
+                        boxSizing: 'border-box',
+                        width: '100%'
                       }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                           <span style={{ fontSize: '0.82rem', fontWeight: '700', color: '#1e40af' }}>
@@ -5969,7 +5979,9 @@ _Helpline: +91 9316566894_`;
                           gap: '8px',
                           maxHeight: '190px',
                           overflowY: 'auto',
-                          paddingRight: '2px'
+                          paddingRight: '2px',
+                          boxSizing: 'border-box',
+                          width: '100%'
                         }}>
                           {webImageResults.map((img, idx) => {
                             const isSelected = prodImageUrl === img || prodImages.includes(img);
@@ -6011,19 +6023,35 @@ _Helpline: +91 9316566894_`;
                     )}
 
                     {/* Or enter photo URL */}
-                    <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '10px', width: '100%', boxSizing: 'border-box' }}>
                       <input 
                         type="url"
                         placeholder="Or enter image URL (https://...)"
                         value={newImageUrlInput}
                         onChange={(e) => setNewImageUrlInput(e.target.value)}
-                        style={{ flex: 1, padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '7px', fontSize: '0.88rem' }}
+                        style={{ 
+                          flex: 1, 
+                          minWidth: 0, 
+                          width: '100%', 
+                          boxSizing: 'border-box', 
+                          padding: '8px 10px', 
+                          border: '1px solid #cbd5e1', 
+                          borderRadius: '7px', 
+                          fontSize: '0.82rem' 
+                        }}
                       />
                       <button 
                         type="button" 
                         onClick={handleAddImageUrl}
                         className="btn btn-outline btn-sm"
-                        style={{ whiteSpace: 'nowrap', padding: '8px 14px', fontSize: '0.84rem', fontWeight: '600' }}
+                        style={{ 
+                          flexShrink: 0, 
+                          whiteSpace: 'nowrap', 
+                          padding: '8px 12px', 
+                          fontSize: '0.82rem', 
+                          fontWeight: '600',
+                          boxSizing: 'border-box' 
+                        }}
                       >
                         + Add URL
                       </button>
@@ -6116,60 +6144,60 @@ _Helpline: +91 9316566894_`;
                   </div>
 
                   {/* Publishing Flags & Status */}
-                  <div className="admin-workspace-panel" style={{ padding: '14px', backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div className="admin-workspace-panel" style={{ padding: '14px', backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ fontSize: '0.84rem', fontWeight: '700', color: 'var(--text-dark)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                       Publishing & Visibility
                     </div>
 
-                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', fontSize: '0.88rem', fontWeight: '600' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', fontSize: '0.88rem', fontWeight: '600', gap: '8px' }}>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: prodInStock ? '#10b981' : '#94a3b8' }}></span>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: prodInStock ? '#10b981' : '#94a3b8', flexShrink: 0 }}></span>
                         Publish as &ldquo;In Stock&rdquo;
                       </span>
                       <input 
                         type="checkbox"
                         checked={prodInStock}
                         onChange={(e) => setProdInStock(e.target.checked)}
-                        style={{ accentColor: '#10b981', width: '18px', height: '18px' }}
+                        style={{ accentColor: '#10b981', width: '18px', height: '18px', flexShrink: 0 }}
                       />
                     </label>
 
-                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', fontSize: '0.88rem', fontWeight: '600' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', fontSize: '0.88rem', fontWeight: '600', gap: '8px' }}>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: prodFeatured ? '#f59e0b' : '#94a3b8' }}></span>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: prodFeatured ? '#f59e0b' : '#94a3b8', flexShrink: 0 }}></span>
                         Featured Showcase
                       </span>
                       <input 
                         type="checkbox"
                         checked={prodFeatured}
                         onChange={(e) => setProdFeatured(e.target.checked)}
-                        style={{ accentColor: '#f59e0b', width: '18px', height: '18px' }}
+                        style={{ accentColor: '#f59e0b', width: '18px', height: '18px', flexShrink: 0 }}
                       />
                     </label>
 
-                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', fontSize: '0.88rem', fontWeight: '600' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', fontSize: '0.88rem', fontWeight: '600', gap: '8px' }}>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: prodIsOurProduct ? '#059669' : '#94a3b8' }}></span>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: prodIsOurProduct ? '#059669' : '#94a3b8', flexShrink: 0 }}></span>
                         Our Product (અમારી પ્રોડક્ટ - Exclusive Page)
                       </span>
                       <input 
                         type="checkbox"
                         checked={prodIsOurProduct}
                         onChange={(e) => setProdIsOurProduct(e.target.checked)}
-                        style={{ accentColor: '#059669', width: '18px', height: '18px' }}
+                        style={{ accentColor: '#059669', width: '18px', height: '18px', flexShrink: 0 }}
                       />
                     </label>
 
-                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', fontSize: '0.88rem', fontWeight: '600' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', fontSize: '0.88rem', fontWeight: '600', gap: '8px' }}>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: prodIsActive ? '#2563eb' : '#94a3b8' }}></span>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: prodIsActive ? '#2563eb' : '#94a3b8', flexShrink: 0 }}></span>
                         Live on Public Website
                       </span>
                       <input 
                         type="checkbox"
                         checked={prodIsActive}
                         onChange={(e) => setProdIsActive(e.target.checked)}
-                        style={{ accentColor: '#2563eb', width: '18px', height: '18px' }}
+                        style={{ accentColor: '#2563eb', width: '18px', height: '18px', flexShrink: 0 }}
                       />
                     </label>
                   </div>

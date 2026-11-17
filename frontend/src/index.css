@@ -2458,7 +2458,7 @@ body.dark-theme {
   overflow-x: hidden !important;
   padding: 24px;
   display: grid;
-  grid-template-columns: 340px minmax(0, 1fr);
+  grid-template-columns: clamp(330px, 28vw, 380px) minmax(0, 1fr);
   gap: 24px;
   align-items: start;
   min-width: 0;
@@ -2468,6 +2468,16 @@ body.dark-theme {
 .admin-workspace-body > * {
   min-width: 0;
   max-width: 100%;
+  box-sizing: border-box;
+}
+
+.admin-workspace-panel {
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+.admin-workspace-panel * {
   box-sizing: border-box;
 }
 

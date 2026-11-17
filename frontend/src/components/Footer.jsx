@@ -12,6 +12,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import TopBar from './TopBar';
 
 function Footer({ compact = false }) {
   const { t } = useLanguage();
@@ -87,6 +88,9 @@ function Footer({ compact = false }) {
 
   return (
     <footer className="footer" role="contentinfo">
+      {/* 1. Full-Width Information Strip directly above Footer */}
+      <TopBar />
+
       {/* 2. Main 4-Column Footer Layout */}
       <div className="container footer-main-container">
         <div className="footer-grid">

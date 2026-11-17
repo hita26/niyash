@@ -166,6 +166,41 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
   };
 
   // =========================================================================
+  // RENDER 0: DEDICATED ADMIN CONSOLE HEADER (SUPER ADMIN & OPERATIONS ADMIN)
+  // Clean, distraction-free header: Logo, Language Selector & Theme Toggle only
+  // =========================================================================
+  if (location.pathname.startsWith('/admin')) {
+    return (
+      <header className="admin-header-shell" style={{ 
+        width: '100%', 
+        position: 'sticky', 
+        top: 0, 
+        zIndex: 1000, 
+        boxShadow: '0 2px 10px rgba(0,0,0,0.04)', 
+        backgroundColor: 'var(--bg-surface, #ffffff)',
+        borderBottom: '1px solid var(--border-light, #e2e8f0)' 
+      }}>
+        <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', gap: '16px' }}>
+          {/* Brand Logo */}
+          <Link to="/admin" aria-label="Niyansh Pharma Admin Console" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+            <img 
+              src="/logo.jpg" 
+              alt="Niyansh Pharma" 
+              style={{ height: '42px', width: 'auto', display: 'block', objectFit: 'contain' }} 
+            />
+          </Link>
+
+          {/* Right Action Controls: Language & Theme Toggle */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <LanguageSelector />
+            <ThemeToggle />
+          </div>
+        </div>
+      </header>
+    );
+  }
+
+  // =========================================================================
   // RENDER 1: AUTHENTICATED B2B CHEMIST WORKSTATION HEADER
   // Clean, focused, high-productivity interface modeled after Pharmarack & Retailio
   // =========================================================================

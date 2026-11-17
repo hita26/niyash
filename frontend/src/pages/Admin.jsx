@@ -9,7 +9,7 @@ import {
   Tag, ShieldCheck, Sparkles, Clock, AlertTriangle, Printer, Share2, Receipt,
   TrendingUp, Percent, Upload, Image as ImageIcon, Star, Grid, List,
   FileSpreadsheet, ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Layers,
-  Copy, CheckCheck, MapPin, Mail, Save, EyeOff, Shield, Users, Key, Crown, UserCheck, UserX
+  Copy, CheckCheck, MapPin, Mail, Save, EyeOff, Shield, Users, Key, Crown, UserCheck, UserX, Camera, UserPlus
 } from 'lucide-react';
 import { broadcastLiveEvent, SYNC_EVENTS } from '../utils/liveSync';
 import { useLanguage } from '../context/LanguageContext';
@@ -724,6 +724,8 @@ function Admin() {
 
   // Lock body & document scroll whenever any modal is active to prevent page scrolling behind modals
   const hasActiveModal = Boolean(
+    isAdminModalOpen ||
+    isProfileModalOpen ||
     isProductModalOpen || 
     isBulkImportOpen || 
     isCompanyModalOpen || 
@@ -743,15 +745,20 @@ function Admin() {
       const originalBodyOverflow = document.body.style.overflow;
       const originalHtmlOverflow = document.documentElement.style.overflow;
       const originalTouchAction = document.body.style.touchAction;
+      const originalOverscroll = document.body.style.overscrollBehavior;
 
       document.body.style.overflow = 'hidden';
       document.documentElement.style.overflow = 'hidden';
       document.body.style.touchAction = 'none';
+      document.body.style.overscrollBehavior = 'contain';
+      document.documentElement.style.overscrollBehavior = 'contain';
 
       return () => {
         document.body.style.overflow = originalBodyOverflow;
         document.documentElement.style.overflow = originalHtmlOverflow;
         document.body.style.touchAction = originalTouchAction;
+        document.body.style.overscrollBehavior = originalOverscroll;
+        document.documentElement.style.overscrollBehavior = originalOverscroll;
       };
     }
   }, [hasActiveModal]);
@@ -1022,7 +1029,7 @@ function Admin() {
         localStorage.setItem('niyansh_admin_session', 'active');
         localStorage.setItem('niyansh_admin_token', data.token);
         localStorage.setItem('niyansh_admin_user', JSON.stringify(userObj));
-        showToast(`Welcome back, ${userObj.name}! (${userObj.role === 'superadmin' ? '👑 Super Admin Console' : '🛡️ Operations Admin Console'} active)`);
+        showToast(`Welcome back, ${userObj.name}! (${userObj.role === 'superadmin' ? 'Super Admin Console' : 'Operations Admin Console'} active)`);
         return;
       } else if (data.message) {
         setLoginError(data.message);
@@ -1061,7 +1068,7 @@ function Admin() {
       localStorage.setItem('niyansh_admin_session', 'active');
       localStorage.setItem('niyansh_admin_user', JSON.stringify(superUser));
       setLoginError('');
-      showToast('👑 Welcome back, Super Admin! Live console active.');
+      showToast('Welcome back, Super Admin! Live console active.');
       return;
     }
 
@@ -1203,7 +1210,7 @@ function Admin() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        showToast(editingAdmin ? `✅ Updated admin "${data.admin.name}"` : `✅ Created new admin "${data.admin.name}"`);
+        showToast(editingAdmin ? `Updated admin "${data.admin.name}"` : `Created new admin "${data.admin.name}"`);
         setIsAdminModalOpen(false);
         fetchAdmins();
       } else {
@@ -1278,6 +1285,48 @@ function Admin() {
     setIsProfileModalOpen(true);
   };
 
+  const handleProfilePhotoUpload = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      showToast('Please upload an image file (JPG, PNG, WEBP)', 'error');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxDim = 320;
+        let w = img.width;
+        let h = img.height;
+        if (w > h) {
+          if (w > maxDim) {
+            h = Math.round((h * maxDim) / w);
+            w = maxDim;
+          }
+        } else {
+          if (h > maxDim) {
+            w = Math.round((w * maxDim) / h);
+            h = maxDim;
+          }
+        }
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+        setProfileAvatar(dataUrl);
+        showToast('Photo selected! Click "Save Profile Changes" below to apply.');
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
   const handleSaveProfile = async (e) => {
     e.preventDefault();
     if (profilePassword && profilePassword !== profileConfirmPassword) {
@@ -1315,7 +1364,7 @@ function Admin() {
         };
         setCurrentUser(updatedUser);
         localStorage.setItem('niyansh_admin_user', JSON.stringify(updatedUser));
-        showToast('✅ Profile updated successfully!');
+        showToast('Profile updated successfully!');
         setIsProfileModalOpen(false);
       } else {
         showToast(data.message || 'Failed to update profile', 'error');
@@ -1395,7 +1444,7 @@ function Admin() {
       `${idx + 1}. *${item.productName}* (${item.company || 'DAXIA'})\n   Qty: ${item.boxes} Box (${item.totalUnits || item.boxes * 10} Units) | Total: ₹${(item.itemTotal || 0).toFixed(2)}`
     ).join('\n');
 
-    const msg = `📦 *NIYANSH PHARMA - B2B ORDER UPDATE*
+    const msg = `*NIYANSH PHARMA - B2B ORDER UPDATE*
 ━━━━━━━━━━━━━━━━━━━━
 *Order Number:* ${order.orderNumber}
 *Store Name:* ${order.shopName}
@@ -1778,10 +1827,10 @@ _For assistance: +91 9316566894_`;
     const upiLink = `upi://pay?pa=9316566894@okbizaxis&pn=Niyansh%20Pharma&am=${ledger.outstandingBalance || 0}&cu=INR&tn=Ledger%20Settlement`;
     const overdueInvoices = (ledger.invoices || []).filter(inv => inv.balance > 0 && inv.status === 'Overdue');
     const overdueText = overdueInvoices.length > 0 
-      ? `\n⚠️ *OVERDUE NOTICE:* ${overdueInvoices.length} overdue invoice(s) totaling ${formatCurrency(overdueInvoices.reduce((s, i) => s + i.balance, 0))}. Please clear immediately.`
+      ? `\n*OVERDUE NOTICE:* ${overdueInvoices.length} overdue invoice(s) totaling ${formatCurrency(overdueInvoices.reduce((s, i) => s + i.balance, 0))}. Please clear immediately.`
       : '';
 
-    const text = `📊 *STATEMENT OF ACCOUNT - NIYANSH PHARMA*
+    const text = `*STATEMENT OF ACCOUNT - NIYANSH PHARMA*
 ━━━━━━━━━━━━━━━━━━━━
 *Retailer:* ${ledger.shopName}
 *Mobile:* ${ledger.retailerMobile}${ledger.gstin ? `\n*GSTIN:* ${ledger.gstin}` : ''}
@@ -1952,7 +2001,7 @@ _Helpline: +91 9316566894_`;
 
   const handleRequestDeleteProduct = (product) => {
     if (!isSuperAdmin && !hasPermission('canDeleteProducts')) {
-      showToast('⚠️ You do not have permission to delete products. Please contact Super Admin.', 'warning');
+      showToast('You do not have permission to delete products. Please contact Super Admin.', 'warning');
       return;
     }
     setDeleteConfirm({
@@ -1965,7 +2014,7 @@ _Helpline: +91 9316566894_`;
 
   const handleRequestDeleteCompany = (company) => {
     if (!isSuperAdmin && !hasPermission('canManageCompanies')) {
-      showToast('⚠️ You do not have permission to delete companies. Please contact Super Admin.', 'warning');
+      showToast('You do not have permission to delete companies. Please contact Super Admin.', 'warning');
       return;
     }
     setDeleteConfirm({
@@ -2293,7 +2342,7 @@ _Helpline: +91 9316566894_`;
     }
     const currentSku = prodSku.trim();
     if (!currentSku) {
-      showToast('SKU / ID is required (Click ⚡ Generate to create one)', 'error');
+      showToast('SKU / ID is required (Click Generate to create one)', 'error');
       return;
     }
     const assignedCompany = prodCompany.trim();
@@ -2563,7 +2612,7 @@ _Helpline: +91 9316566894_`;
   };
 
   const handleClearAllProducts = async () => {
-    if (!window.confirm('⚠️ ARE YOU SURE? This will permanently delete ALL products from the database so you can add products manually from scratch.')) {
+    if (!window.confirm('ARE YOU SURE? This will permanently delete ALL products from the database so you can add products manually from scratch.')) {
       return;
     }
     if (!window.confirm('Double Confirmation: Delete ALL products now? This action cannot be undone.')) {
@@ -2785,7 +2834,7 @@ _Helpline: +91 9316566894_`;
 
       // 6. Download file
       XLSX.writeFile(wb, 'Niyansh_Pharma_Product_Import_Template.xlsx');
-      showToast('📥 Excel Template downloaded successfully!');
+      showToast('Excel Template downloaded successfully!');
     } catch (err) {
       console.error('Download template error:', err);
       showToast('Failed to download Excel template: ' + err.message, 'error');
@@ -2939,7 +2988,7 @@ _Helpline: +91 9316566894_`;
         });
 
         setBulkParsedRows(parsed);
-        showToast(`📊 Parsed ${parsed.length} products from ${file.name}`);
+        showToast(`Parsed ${parsed.length} products from ${file.name}`);
       } catch (err) {
         console.error('Error parsing spreadsheet:', err);
         showToast('Error reading spreadsheet: ' + err.message, 'error');
@@ -3030,7 +3079,7 @@ _Helpline: +91 9316566894_`;
 
       if (res.ok && data.success) {
         setBulkImportResults(data);
-        showToast(`✅ Successfully imported ${data.successCount} products! ${data.skippedCount ? `(${data.skippedCount} duplicates skipped)` : ''}`);
+        showToast(`Successfully imported ${data.successCount} products! ${data.skippedCount ? `(${data.skippedCount} duplicates skipped)` : ''}`);
         broadcastLiveEvent(SYNC_EVENTS.PRODUCT_BULK_IMPORTED, { count: data.successCount });
         fetchProducts();
         fetchDashboardData();
@@ -3150,7 +3199,7 @@ _Helpline: +91 9316566894_`;
   };
 
   const handleClearAllCompanies = async () => {
-    if (!window.confirm('⚠️ ARE YOU SURE? This will permanently delete ALL companies from the database so you can add companies manually from scratch.')) {
+    if (!window.confirm('ARE YOU SURE? This will permanently delete ALL companies from the database so you can add companies manually from scratch.')) {
       return;
     }
     if (!window.confirm('Double Confirmation: Delete ALL companies now? This action cannot be undone.')) {
@@ -3509,7 +3558,7 @@ _Helpline: +91 9316566894_`;
 
           <div style={{ marginTop: '20px', padding: '14px', backgroundColor: '#f8fafc', border: '1px dashed #cbd5e1', borderRadius: '10px', fontSize: '0.8rem', color: 'var(--text-medium)' }}>
             <div style={{ fontWeight: '700', color: 'var(--text-dark)', marginBottom: '8px', textAlign: 'center' }}>
-              🔑 Quick Login Credentials (Click to Auto-Fill):
+              Quick Login Credentials (Click to Auto-Fill):
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <button
@@ -3518,7 +3567,7 @@ _Helpline: +91 9316566894_`;
                 style={{ padding: '8px 12px', borderRadius: '8px', border: '1.5px solid #fde68a', backgroundColor: '#fffbeb', color: '#92400e', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem' }}
               >
                 <div>
-                  <strong>👑 Super Admin (Master Account)</strong><br />
+                  <strong>Super Admin (Master Account)</strong><br />
                   <span style={{ fontFamily: 'monospace' }}>info@niyanshpharma.com</span> • <span style={{ fontFamily: 'monospace' }}>NiyanshSuper@2026</span>
                 </div>
                 <span style={{ fontSize: '0.72rem', fontWeight: '800', backgroundColor: '#f59e0b', color: '#fff', padding: '2px 8px', borderRadius: '6px' }}>Auto-Fill</span>
@@ -3530,7 +3579,7 @@ _Helpline: +91 9316566894_`;
                 style={{ padding: '8px 12px', borderRadius: '8px', border: '1.5px solid #bfdbfe', backgroundColor: '#eff6ff', color: '#1e40af', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem' }}
               >
                 <div>
-                  <strong>🛡️ Staff Admin (Operations)</strong><br />
+                  <strong>Staff Admin (Operations)</strong><br />
                   <span style={{ fontFamily: 'monospace' }}>admin@niyanshpharma.com</span> • <span style={{ fontFamily: 'monospace' }}>admin123</span>
                 </div>
                 <span style={{ fontSize: '0.72rem', fontWeight: '800', backgroundColor: '#2563eb', color: '#fff', padding: '2px 8px', borderRadius: '6px' }}>Auto-Fill</span>
@@ -3652,7 +3701,7 @@ _Helpline: +91 9316566894_`;
                 Central B2B Portal
               </span>
               <span style={{ fontSize: '0.72rem', fontWeight: '700', backgroundColor: '#f0fdf4', color: '#15803d', padding: '3px 10px', borderRadius: '12px', border: '1px solid #bbf7d0' }}>
-                🛡️ WHO-GMP Certified Distribution
+                WHO-GMP Certified Distribution
               </span>
               <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '600' }}>
                 Rajkot Central Wholesale Hub (Gujarat)
@@ -3662,13 +3711,13 @@ _Helpline: +91 9316566894_`;
               Niyansh Pharma • Central B2B Operations Console
             </h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginTop: '6px', fontSize: '0.8rem', color: 'var(--text-medium)', flexWrap: 'wrap' }}>
-              <span>🏛️ D.L.No.: <strong>20B, 264618, 21B, 264619</strong></span>
+              <span>D.L.No.: <strong>20B, 264618, 21B, 264619</strong></span>
               <span>•</span>
-              <span>📑 GSTIN: <strong>24BVXPP6108F2Z7</strong></span>
+              <span>GSTIN: <strong>24BVXPP6108F2Z7</strong></span>
               <span>•</span>
-              <span>💳 PAN: <strong>BVXPP6108F</strong></span>
+              <span>PAN: <strong>BVXPP6108F</strong></span>
               <span>•</span>
-              <span>🥗 Food License no.: <strong>20726030000567</strong></span>
+              <span>Food License no.: <strong>20726030000567</strong></span>
             </div>
           </div>
 
@@ -3792,10 +3841,10 @@ _Helpline: +91 9316566894_`;
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <Users size={16} color="#d97706" /> 👥 Manage Admins
+                  <Users size={16} color="#d97706" /> Manage Admins
                 </div>
                 <span style={{ fontSize: '0.7rem', padding: '2px 7px', borderRadius: '10px', backgroundColor: '#f59e0b', color: '#ffffff', fontWeight: '800' }}>
-                  {adminList.length > 0 ? adminList.length : '👑'}
+                  {adminList.length}
                 </span>
               </button>
             )}
@@ -3810,7 +3859,7 @@ _Helpline: +91 9316566894_`;
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <Package size={16} /> 📦 B2B Orders
+                <Package size={16} /> B2B Orders
               </div>
               <span style={{ fontSize: '0.7rem', padding: '2px 7px', borderRadius: '10px', backgroundColor: '#e2e8f0', color: 'var(--text-dark)' }}>
                 {orders.length}
@@ -3828,7 +3877,7 @@ _Helpline: +91 9316566894_`;
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <CreditCard size={16} /> 📊 Outstanding Ledger
+                  <CreditCard size={16} /> Outstanding Ledger
                 </div>
                 {overdueLedgersCount > 0 && (
                   <span style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: '10px', backgroundColor: '#fee2e2', color: '#ef4444', fontWeight: '700' }}>
@@ -3848,7 +3897,7 @@ _Helpline: +91 9316566894_`;
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <Flame size={16} /> 🔥 News & Schemes
+                <Flame size={16} /> News & Schemes
               </div>
               <span style={{ fontSize: '0.7rem', padding: '2px 7px', borderRadius: '10px', backgroundColor: '#e2e8f0', color: 'var(--text-dark)' }}>
                 {news.length}
@@ -3916,30 +3965,10 @@ _Helpline: +91 9316566894_`;
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <Phone size={16} /> 📞 Contact & Hub
+                <Phone size={16} /> Contact & Hub
               </div>
               <span style={{ fontSize: '0.68rem', padding: '2px 7px', borderRadius: '10px', backgroundColor: '#dcfce7', color: '#15803d', fontWeight: '700' }}>
                 Live
-              </span>
-            </button>
-
-            {/* QUICK PROFILE BUTTON */}
-            <button 
-              onClick={handleOpenProfileModal} 
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '10px 14px',
-                borderRadius: '8px', fontWeight: '600', fontSize: '0.9rem',
-                backgroundColor: 'transparent',
-                color: 'var(--text-medium)',
-                borderTop: '1px dashed #e2e8f0',
-                marginTop: '6px'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <User size={16} color="#059669" /> 👤 My Profile
-              </div>
-              <span style={{ fontSize: '0.7rem', color: '#059669', fontWeight: '700' }}>
-                Edit
               </span>
             </button>
           </nav>
@@ -4028,7 +4057,7 @@ _Helpline: +91 9316566894_`;
                 <Briefcase size={14} /> {t('admin.tabCareers', 'Careers')} ({careers.length})
               </button>
               <button onClick={() => setActiveTab('contact')} className={`admin-tab-chip ${activeTab === 'contact' ? 'active' : ''}`}>
-                <Phone size={14} /> 📞 Contact & Hub
+                <Phone size={14} /> Contact & Hub
               </button>
               <button onClick={handleOpenProfileModal} className="admin-tab-chip" style={{ color: '#059669', borderColor: '#a7f3d0' }}>
                 <User size={14} /> Profile
@@ -4146,25 +4175,25 @@ _Helpline: +91 9316566894_`;
 
                     <div className="admin-category-grid">
                       <div onClick={() => { setProductCategoryFilter('Generic Medicines'); setActiveTab('products'); }} style={{ padding: '16px', borderRadius: '10px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
-                        <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--primary-blue)', textTransform: 'uppercase' }}>💊 Generic Medicines</span>
+                        <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--primary-blue)', textTransform: 'uppercase' }}>Generic Medicines</span>
                         <div style={{ fontSize: '1.35rem', fontWeight: '800', color: 'var(--text-dark)', marginTop: '4px' }}>{genericMedicinesCount} SKUs</div>
                         <div style={{ fontSize: '0.72rem', color: 'var(--text-medium)' }}>Cardiac, Antibiotics, Pain, Neuro</div>
                       </div>
 
                       <div onClick={() => { setProductCategoryFilter('Surgical Supplies'); setActiveTab('products'); }} style={{ padding: '16px', borderRadius: '10px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
-                        <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#0369a1', textTransform: 'uppercase' }}>🩺 Surgical & Devices</span>
+                        <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#0369a1', textTransform: 'uppercase' }}>Surgical & Devices</span>
                         <div style={{ fontSize: '1.35rem', fontWeight: '800', color: 'var(--text-dark)', marginTop: '4px' }}>{surgicalCount || 18} SKUs</div>
                         <div style={{ fontSize: '0.72rem', color: 'var(--text-medium)' }}>Disposables, Bandages, BP Monitors</div>
                       </div>
 
                       <div onClick={() => { setProductCategoryFilter('OTC & Wellness'); setActiveTab('products'); }} style={{ padding: '16px', borderRadius: '10px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
-                        <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#15803d', textTransform: 'uppercase' }}>🧴 OTC & Wellness</span>
+                        <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#15803d', textTransform: 'uppercase' }}>OTC & Wellness</span>
                         <div style={{ fontSize: '1.35rem', fontWeight: '800', color: 'var(--text-dark)', marginTop: '4px' }}>{otcCount || 32} SKUs</div>
                         <div style={{ fontSize: '0.72rem', color: 'var(--text-medium)' }}>Daily Healthcare, Balms, Nutrition</div>
                       </div>
 
                       <div onClick={() => { setProductCategoryFilter('Ayurvedic & Herbal'); setActiveTab('products'); }} style={{ padding: '16px', borderRadius: '10px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
-                        <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#b45309', textTransform: 'uppercase' }}>🌿 Ayurvedic & Herbal</span>
+                        <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#b45309', textTransform: 'uppercase' }}>Ayurvedic & Herbal</span>
                         <div style={{ fontSize: '1.35rem', fontWeight: '800', color: 'var(--text-dark)', marginTop: '4px' }}>{ayurvedicCount || 24} SKUs</div>
                         <div style={{ fontSize: '0.72rem', color: 'var(--text-medium)' }}>Herbal Tonics, Syrups & Ointments</div>
                       </div>
@@ -4201,7 +4230,7 @@ _Helpline: +91 9316566894_`;
                       </div>
                       <div style={{ fontSize: '2rem', fontWeight: '800', color: '#ef4444' }}>{formatCurrency(totalOutstandingDues)}</div>
                       <span style={{ fontSize: '0.8rem', color: overdueLedgersCount > 0 ? '#ef4444' : 'var(--secondary-green)', fontWeight: '600' }}>
-                        {overdueLedgersCount > 0 ? `⚠️ ${overdueLedgersCount} Overdue Accounts` : '✓ All accounts within credit limit'}
+                        {overdueLedgersCount > 0 ? `${overdueLedgersCount} Overdue Accounts` : 'All accounts within credit limit'}
                       </span>
                     </div>
 
@@ -4326,13 +4355,13 @@ _Helpline: +91 9316566894_`;
               )}
 
               {/* ==========================================
-                  TAB 2: 📦 B2B ORDERS MANAGER
+                  TAB 2: B2B ORDERS MANAGER
                   ========================================== */}
               {activeTab === 'orders' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
                     <div>
-                      <h2 style={{ fontSize: '1.6rem', color: 'var(--primary-blue)', margin: 0 }}>📦 Wholesale B2B Orders</h2>
+                      <h2 style={{ fontSize: '1.6rem', color: 'var(--primary-blue)', margin: 0 }}>Wholesale B2B Orders</h2>
                       <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem', marginTop: '4px' }}>
                         Track booked chemist orders, update dispatch state, view itemized lists & trigger WhatsApp confirmations
                       </p>
@@ -4363,16 +4392,16 @@ _Helpline: +91 9316566894_`;
                           All Orders ({orders.length})
                         </button>
                         <button onClick={() => setOrderStatusFilter('Booked')} className={`btn btn-sm ${orderStatusFilter === 'Booked' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '6px 14px', fontSize: '0.8rem', borderRadius: '20px', backgroundColor: orderStatusFilter === 'Booked' ? '#f59e0b' : '#fff', color: orderStatusFilter === 'Booked' ? '#fff' : '#d97706', borderColor: '#f59e0b' }}>
-                          🟡 Booked ({bookedOrdersCount})
+                          Booked ({bookedOrdersCount})
                         </button>
                         <button onClick={() => setOrderStatusFilter('Confirmed')} className={`btn btn-sm ${orderStatusFilter === 'Confirmed' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '6px 14px', fontSize: '0.8rem', borderRadius: '20px', backgroundColor: orderStatusFilter === 'Confirmed' ? '#0284c7' : '#fff', color: orderStatusFilter === 'Confirmed' ? '#fff' : '#0369a1', borderColor: '#0284c7' }}>
-                          🔵 Confirmed ({confirmedOrdersCount})
+                          Confirmed ({confirmedOrdersCount})
                         </button>
                         <button onClick={() => setOrderStatusFilter('Dispatched')} className={`btn btn-sm ${orderStatusFilter === 'Dispatched' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '6px 14px', fontSize: '0.8rem', borderRadius: '20px', backgroundColor: orderStatusFilter === 'Dispatched' ? '#8b5cf6' : '#fff', color: orderStatusFilter === 'Dispatched' ? '#fff' : '#7c3aed', borderColor: '#8b5cf6' }}>
-                          🟣 Dispatched ({dispatchedOrdersCount})
+                          Dispatched ({dispatchedOrdersCount})
                         </button>
                         <button onClick={() => setOrderStatusFilter('Delivered')} className={`btn btn-sm ${orderStatusFilter === 'Delivered' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '6px 14px', fontSize: '0.8rem', borderRadius: '20px', backgroundColor: orderStatusFilter === 'Delivered' ? '#16a34a' : '#fff', color: orderStatusFilter === 'Delivered' ? '#fff' : '#15803d', borderColor: '#16a34a' }}>
-                          🟢 Delivered ({deliveredOrdersCount})
+                          Delivered ({deliveredOrdersCount})
                         </button>
                       </div>
 
@@ -4453,7 +4482,7 @@ _Helpline: +91 9316566894_`;
                                 </td>
                                 <td style={{ padding: '12px 14px', verticalAlign: 'middle' }}>
                                   <div style={{ fontWeight: '600' }}>{ord.shopName}</div>
-                                  <div style={{ fontSize: '0.8rem', color: 'var(--text-medium)' }}>📞 {ord.retailerMobile}</div>
+                                  <div style={{ fontSize: '0.8rem', color: 'var(--text-medium)' }}>Mobile: {ord.retailerMobile}</div>
                                   {ord.gstin && <div style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>GSTIN: {ord.gstin}</div>}
                                 </td>
                                 <td style={{ padding: '12px 14px', verticalAlign: 'middle' }}>
@@ -4541,13 +4570,13 @@ _Helpline: +91 9316566894_`;
               )}
 
               {/* ==========================================
-                  TAB 3: 📊 RETAILER LEDGERS & OUTSTANDING
+                  TAB 3: RETAILER LEDGERS & OUTSTANDING
                   ========================================== */}
               {activeTab === 'ledgers' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
                     <div>
-                      <h2 style={{ fontSize: '1.6rem', color: 'var(--primary-blue)', margin: 0 }}>📊 Outstanding Ledger</h2>
+                      <h2 style={{ fontSize: '1.6rem', color: 'var(--primary-blue)', margin: 0 }}>Outstanding Ledger</h2>
                       <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem', marginTop: '4px' }}>
                         Manage B2B credit accounts, check overdue balances, record manual/offline payments & send WhatsApp ledger statements
                       </p>
@@ -4663,7 +4692,7 @@ _Helpline: +91 9316566894_`;
                                         </span>
                                       )}
                                     </div>
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-medium)' }}>📞 {ledger.retailerMobile}</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-medium)' }}>Mobile: {ledger.retailerMobile}</div>
                                   </td>
                                   <td style={{ padding: '12px 14px', fontSize: '0.8rem', fontFamily: 'monospace', color: 'var(--text-medium)', verticalAlign: 'middle' }}>
                                     {ledger.gstin || 'N/A'}
@@ -4737,13 +4766,13 @@ _Helpline: +91 9316566894_`;
               )}
 
               {/* ==========================================
-                  TAB 4: 🔥 DYNAMIC NEWS & SCHEMES MANAGER
+                  TAB 4: DYNAMIC NEWS & SCHEMES MANAGER
                   ========================================== */}
               {activeTab === 'news' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
                     <div>
-                      <h2 style={{ fontSize: '1.6rem', color: 'var(--primary-blue)', margin: 0 }}>🔥 Dynamic News & Schemes Manager</h2>
+                      <h2 style={{ fontSize: '1.6rem', color: 'var(--primary-blue)', margin: 0 }}>Dynamic News & Schemes Manager</h2>
                       <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem', marginTop: '4px' }}>
                         Publish product schemes, price drops, new brand launches & live announcement tickers for retail chemists
                       </p>
@@ -4823,7 +4852,7 @@ _Helpline: +91 9316566894_`;
                                 backgroundColor: item.priority === 1 ? '#fee2e2' : '#fef3c7',
                                 color: item.priority === 1 ? '#ef4444' : '#b45309'
                               }}>
-                                {item.priority === 1 ? '🔥 PRIORITY P1' : `P${item.priority || 2}`}
+                                {item.priority === 1 ? 'PRIORITY P1' : `P${item.priority || 2}`}
                               </span>
 
                               {/* Category Pill */}
@@ -4840,7 +4869,7 @@ _Helpline: +91 9316566894_`;
                                 padding: '3px 8px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: '700',
                                 backgroundColor: '#f1f5f9', color: 'var(--text-dark)'
                               }}>
-                                🏢 {item.company}
+                                {item.company}
                               </span>
 
                               <strong style={{ fontSize: '1.05rem', color: 'var(--text-dark)' }}>{item.title}</strong>
@@ -5068,19 +5097,19 @@ _Helpline: +91 9316566894_`;
                         All Products ({productStats.totalProducts || products.length})
                       </button>
                       <button onClick={() => { setProductCategoryFilter('Our Products'); setProductPage(1); }} className={`btn btn-sm ${productCategoryFilter === 'Our Products' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '5px 12px', fontSize: '0.78rem', borderRadius: '20px', borderColor: '#10b981', color: productCategoryFilter === 'Our Products' ? '#fff' : '#047857' }}>
-                        ⭐ Our Products ({products.filter(p => p.isOurProduct).length})
+                        Our Products ({products.filter(p => p.isOurProduct).length})
                       </button>
                       <button onClick={() => { setProductCategoryFilter('Generic Medicines'); setProductPage(1); }} className={`btn btn-sm ${productCategoryFilter === 'Generic Medicines' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '5px 12px', fontSize: '0.78rem', borderRadius: '20px' }}>
-                        💊 Generic Formulations
+                        Generic Formulations
                       </button>
                       <button onClick={() => { setProductCategoryFilter('Surgical Supplies'); setProductPage(1); }} className={`btn btn-sm ${productCategoryFilter === 'Surgical Supplies' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '5px 12px', fontSize: '0.78rem', borderRadius: '20px' }}>
-                        🩺 Surgical & Devices
+                        Surgical & Devices
                       </button>
                       <button onClick={() => { setProductCategoryFilter('OTC & Wellness'); setProductPage(1); }} className={`btn btn-sm ${productCategoryFilter === 'OTC & Wellness' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '5px 12px', fontSize: '0.78rem', borderRadius: '20px' }}>
-                        🧴 OTC & Daily Care
+                        OTC & Daily Care
                       </button>
                       <button onClick={() => { setProductCategoryFilter('Ayurvedic & Herbal'); setProductPage(1); }} className={`btn btn-sm ${productCategoryFilter === 'Ayurvedic & Herbal' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '5px 12px', fontSize: '0.78rem', borderRadius: '20px' }}>
-                        🌿 Ayurvedic & Herbal
+                        Ayurvedic & Herbal
                       </button>
                     </div>
                     {/* Row 1: Search & View Modes */}
@@ -6078,9 +6107,9 @@ _Helpline: +91 9316566894_`;
                           {/* Row 2: Details */}
                           <div className="admin-form-grid-2-1" style={{ gap: '18px' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.85rem' }}>
-                              <div>📞 Phone: <a href={`tel:${enq.phone}`} style={{ fontWeight: '600', color: 'var(--primary-blue)' }}>{enq.phone}</a></div>
-                              {enq.email && <div>✉️ Email: <a href={`mailto:${enq.email}`} style={{ color: 'var(--text-dark)' }}>{enq.email}</a></div>}
-                              {enq.address && <div>📍 Address: <span style={{ color: 'var(--text-medium)' }}>{enq.address}</span></div>}
+                              <div>Phone: <a href={`tel:${enq.phone}`} style={{ fontWeight: '600', color: 'var(--primary-blue)' }}>{enq.phone}</a></div>
+                              {enq.email && <div>Email: <a href={`mailto:${enq.email}`} style={{ color: 'var(--text-dark)' }}>{enq.email}</a></div>}
+                              {enq.address && <div>Address: <span style={{ color: 'var(--text-medium)' }}>{enq.address}</span></div>}
                             </div>
                             <div style={{ borderLeft: '2px solid #f1f5f9', paddingLeft: '20px' }}>
                               <strong style={{ fontSize: '0.85rem', display: 'block', marginBottom: '5px' }}>Message details / Requirements:</strong>
@@ -6169,9 +6198,9 @@ _Helpline: +91 9316566894_`;
 
                           <div className="admin-form-grid-2-1" style={{ gap: '18px' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.85rem' }}>
-                              <div>📞 Phone: <a href={`tel:${app.phone}`} style={{ fontWeight: '600' }}>{app.phone}</a></div>
-                              <div>✉️ Email: <a href={`mailto:${app.email}`} style={{ color: 'var(--primary-blue)' }}>{app.email}</a></div>
-                              <div>💼 Experience: <strong>{app.experience}</strong></div>
+                              <div>Phone: <a href={`tel:${app.phone}`} style={{ fontWeight: '600' }}>{app.phone}</a></div>
+                              <div>Email: <a href={`mailto:${app.email}`} style={{ color: 'var(--primary-blue)' }}>{app.email}</a></div>
+                              <div>Experience: <strong>{app.experience}</strong></div>
                               {app.resumePath && (
                                 <a 
                                   href={app.resumePath} 
@@ -6211,7 +6240,7 @@ _Helpline: +91 9316566894_`;
                           <Phone size={24} /> Contact & Wholesale Hub Management
                         </h2>
                         <span style={{ fontSize: '0.75rem', backgroundColor: '#dcfce7', color: '#15803d', border: '1px solid #bbf7d0', padding: '3px 10px', borderRadius: '12px', fontWeight: '700' }}>
-                          ⚡ Live Public Sync Active
+                          Live Public Sync Active
                         </span>
                       </div>
                       <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem', margin: 0 }}>
@@ -6250,7 +6279,7 @@ _Helpline: +91 9316566894_`;
                     {/* Left: Settings Form */}
                     <form onSubmit={handleSaveContactSettings} className="card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
                       <h3 style={{ fontSize: '1.15rem', color: 'var(--text-dark)', margin: 0, paddingBottom: '12px', borderBottom: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span>🏢 Wholesale Dispatch Desk Settings</span>
+                        <span>Wholesale Dispatch Desk Settings</span>
                       </h3>
 
                       {/* 1. Hub Physical Address */}
@@ -6426,7 +6455,7 @@ _Helpline: +91 9316566894_`;
                       <div className="card" style={{ padding: '20px', backgroundColor: '#ffffff', border: '1px solid #cbd5e1', boxShadow: '0 8px 24px rgba(0,0,0,0.06)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', paddingBottom: '10px', borderBottom: '1px solid var(--border-light)' }}>
                           <span style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--primary-blue)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                            👀 Live Public Preview (Chemist View)
+                            Live Public Preview (Chemist View)
                           </span>
                           <span style={{ fontSize: '0.72rem', backgroundColor: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '2px 8px', borderRadius: '10px', fontWeight: '700' }}>
                             Real-time Mirror
@@ -6552,12 +6581,12 @@ _Helpline: +91 9316566894_`;
                     boxShadow: '0 4px 15px rgba(245, 158, 11, 0.08)'
                   }}>
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
                         <span style={{ fontSize: '0.72rem', fontWeight: '800', backgroundColor: '#fef3c7', color: '#b45309', padding: '2px 8px', borderRadius: '10px', textTransform: 'uppercase' }}>
-                          👑 Super Admin Exclusive
+                          Super Admin Exclusive
                         </span>
                         <span style={{ fontSize: '0.72rem', fontWeight: '700', backgroundColor: '#ecfdf5', color: '#047857', padding: '2px 8px', borderRadius: '10px' }}>
-                          ✓ Live Access Control
+                          Live Access Control
                         </span>
                       </div>
                       <h2 style={{ fontSize: '1.45rem', fontWeight: '800', color: 'var(--text-dark)', margin: 0 }}>
@@ -6568,7 +6597,7 @@ _Helpline: +91 9316566894_`;
                       </p>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '10px' }}>
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                       <button
                         type="button"
                         onClick={fetchAdmins}
@@ -6585,41 +6614,41 @@ _Helpline: +91 9316566894_`;
                         className="btn btn-primary btn-sm"
                         style={{ gap: '6px', backgroundColor: '#f59e0b', borderColor: '#f59e0b', color: '#ffffff', fontWeight: '700', boxShadow: '0 2px 8px rgba(245, 158, 11, 0.3)' }}
                       >
-                        <Plus size={16} /> + Add New Admin
+                        <UserPlus size={15} /> Add New Admin
                       </button>
                     </div>
                   </div>
 
                   {/* KPI STATS */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px' }}>
-                    <div style={{ padding: '16px 20px', backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
-                      <div style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-medium)', textTransform: 'uppercase' }}>Total Admin Accounts</div>
-                      <div style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-dark)', marginTop: '4px' }}>{adminList.length}</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px' }}>
+                    <div style={{ padding: '14px 16px', backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                      <div style={{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--text-medium)', textTransform: 'uppercase' }}>Total Admin Accounts</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--text-dark)', marginTop: '4px' }}>{adminList.length}</div>
                     </div>
 
-                    <div style={{ padding: '16px 20px', backgroundColor: '#f0fdf4', borderRadius: '12px', border: '1px solid #bbf7d0' }}>
-                      <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#166534', textTransform: 'uppercase' }}>Active Staff</div>
-                      <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#15803d', marginTop: '4px' }}>
+                    <div style={{ padding: '14px 16px', backgroundColor: '#f0fdf4', borderRadius: '12px', border: '1px solid #bbf7d0' }}>
+                      <div style={{ fontSize: '0.72rem', fontWeight: '700', color: '#166534', textTransform: 'uppercase' }}>Active Staff</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: '800', color: '#15803d', marginTop: '4px' }}>
                         {adminList.filter(a => a.isActive !== false).length}
                       </div>
                     </div>
 
-                    <div style={{ padding: '16px 20px', backgroundColor: '#fffbeb', borderRadius: '12px', border: '1px solid #fde68a' }}>
-                      <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#92400e', textTransform: 'uppercase' }}>Super Admins</div>
-                      <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#b45309', marginTop: '4px' }}>
+                    <div style={{ padding: '14px 16px', backgroundColor: '#fffbeb', borderRadius: '12px', border: '1px solid #fde68a' }}>
+                      <div style={{ fontSize: '0.72rem', fontWeight: '700', color: '#92400e', textTransform: 'uppercase' }}>Super Admins</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: '800', color: '#b45309', marginTop: '4px' }}>
                         {adminList.filter(a => a.role === 'superadmin').length || 1}
                       </div>
                     </div>
 
-                    <div style={{ padding: '16px 20px', backgroundColor: '#eff6ff', borderRadius: '12px', border: '1px solid #bfdbfe' }}>
-                      <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#1e40af', textTransform: 'uppercase' }}>Role Governance</div>
-                      <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#2563eb', marginTop: '4px' }}>
+                    <div style={{ padding: '14px 16px', backgroundColor: '#eff6ff', borderRadius: '12px', border: '1px solid #bfdbfe' }}>
+                      <div style={{ fontSize: '0.72rem', fontWeight: '700', color: '#1e40af', textTransform: 'uppercase' }}>Role Governance</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: '800', color: '#2563eb', marginTop: '4px' }}>
                         Active RBAC
                       </div>
                     </div>
                   </div>
 
-                  {/* ADMINS TABLE */}
+                  {/* ADMINS TABLE & RESPONSIVE CARDS */}
                   <div style={{
                     backgroundColor: '#ffffff',
                     borderRadius: '14px',
@@ -6627,8 +6656,9 @@ _Helpline: +91 9316566894_`;
                     overflow: 'hidden',
                     boxShadow: '0 4px 15px rgba(0,0,0,0.03)'
                   }}>
-                    <div style={{ overflowX: 'auto' }}>
-                      <table style={{ width: '100%', minWidth: '950px', borderCollapse: 'collapse', fontSize: '0.86rem', textAlign: 'left' }}>
+                    {/* DESKTOP TABLE (>= 768px) */}
+                    <div className="hide-mobile" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                      <table style={{ width: '100%', minWidth: '920px', borderCollapse: 'collapse', fontSize: '0.86rem', textAlign: 'left' }}>
                         <thead style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
                           <tr>
                             <th style={{ padding: '12px 16px', color: 'var(--text-dark)' }}>Admin Profile</th>
@@ -6668,7 +6698,7 @@ _Helpline: +91 9316566894_`;
                                         <div style={{ fontWeight: '700', color: 'var(--text-dark)' }}>{adm.name}</div>
                                         {isRootSuper ? (
                                           <span style={{ fontSize: '0.68rem', fontWeight: '800', backgroundColor: '#fef3c7', color: '#b45309', padding: '1px 7px', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                                            <Crown size={10} /> Root SuperAdmin
+                                            <ShieldCheck size={11} /> Root Super Admin
                                           </span>
                                         ) : (
                                           <span style={{ fontSize: '0.68rem', fontWeight: '700', backgroundColor: '#eff6ff', color: '#1d4ed8', padding: '1px 7px', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
@@ -6738,23 +6768,23 @@ _Helpline: +91 9316566894_`;
                                     ) : '—'}
                                   </td>
 
-                                  {/* Permissions Pill Badges */}
+                                  {/* Permissions Pill Badges (Professional Clean No Emojis) */}
                                   <td style={{ padding: '12px 16px' }}>
                                     {isRootSuper ? (
                                       <span style={{ fontSize: '0.74rem', backgroundColor: '#fef3c7', color: '#92400e', padding: '2px 8px', borderRadius: '6px', fontWeight: '800' }}>
-                                        ⚡ Full Access (All Granted)
+                                        Full Access (All Permissions)
                                       </span>
                                     ) : (
                                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', maxWidth: '280px' }}>
-                                        {p.canManageProducts && <span style={{ fontSize: '0.68rem', backgroundColor: '#eff6ff', color: '#1e40af', padding: '1px 6px', borderRadius: '4px' }}>📦 Products</span>}
-                                        {p.canDeleteProducts && <span style={{ fontSize: '0.68rem', backgroundColor: '#fee2e2', color: '#991b1b', padding: '1px 6px', borderRadius: '4px' }}>🗑️ Del Prod</span>}
-                                        {p.canBulkImport && <span style={{ fontSize: '0.68rem', backgroundColor: '#ecfdf5', color: '#065f46', padding: '1px 6px', borderRadius: '4px' }}>📥 Excel</span>}
-                                        {p.canManageOrders && <span style={{ fontSize: '0.68rem', backgroundColor: '#f3e8ff', color: '#6b21a8', padding: '1px 6px', borderRadius: '4px' }}>📑 Orders</span>}
-                                        {p.canManageLedgers && <span style={{ fontSize: '0.68rem', backgroundColor: '#fef9c3', color: '#854d0e', padding: '1px 6px', borderRadius: '4px' }}>📊 Ledger</span>}
-                                        {p.canManageCompanies && <span style={{ fontSize: '0.68rem', backgroundColor: '#e0e7ff', color: '#3730a3', padding: '1px 6px', borderRadius: '4px' }}>🏢 Co.</span>}
-                                        {p.canManageNews && <span style={{ fontSize: '0.68rem', backgroundColor: '#ffedd5', color: '#9a3412', padding: '1px 6px', borderRadius: '4px' }}>🔥 News</span>}
-                                        {p.canManageEnquiries && <span style={{ fontSize: '0.68rem', backgroundColor: '#f1f5f9', color: '#334155', padding: '1px 6px', borderRadius: '4px' }}>💬 Enquiries</span>}
-                                        {p.canClearDatabase && <span style={{ fontSize: '0.68rem', backgroundColor: '#991b1b', color: '#fff', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }}>⚠️ Wipe DB</span>}
+                                        {p.canManageProducts && <span style={{ fontSize: '0.68rem', backgroundColor: '#eff6ff', color: '#1e40af', padding: '1px 6px', borderRadius: '4px' }}>Products</span>}
+                                        {p.canDeleteProducts && <span style={{ fontSize: '0.68rem', backgroundColor: '#fee2e2', color: '#991b1b', padding: '1px 6px', borderRadius: '4px' }}>Delete Prod</span>}
+                                        {p.canBulkImport && <span style={{ fontSize: '0.68rem', backgroundColor: '#ecfdf5', color: '#065f46', padding: '1px 6px', borderRadius: '4px' }}>Excel Import</span>}
+                                        {p.canManageOrders && <span style={{ fontSize: '0.68rem', backgroundColor: '#f3e8ff', color: '#6b21a8', padding: '1px 6px', borderRadius: '4px' }}>Orders</span>}
+                                        {p.canManageLedgers && <span style={{ fontSize: '0.68rem', backgroundColor: '#fef9c3', color: '#854d0e', padding: '1px 6px', borderRadius: '4px' }}>Ledgers</span>}
+                                        {p.canManageCompanies && <span style={{ fontSize: '0.68rem', backgroundColor: '#e0e7ff', color: '#3730a3', padding: '1px 6px', borderRadius: '4px' }}>Companies</span>}
+                                        {p.canManageNews && <span style={{ fontSize: '0.68rem', backgroundColor: '#ffedd5', color: '#9a3412', padding: '1px 6px', borderRadius: '4px' }}>News</span>}
+                                        {p.canManageEnquiries && <span style={{ fontSize: '0.68rem', backgroundColor: '#f1f5f9', color: '#334155', padding: '1px 6px', borderRadius: '4px' }}>Enquiries</span>}
+                                        {p.canClearDatabase && <span style={{ fontSize: '0.68rem', backgroundColor: '#991b1b', color: '#fff', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }}>Wipe DB</span>}
                                       </div>
                                     )}
                                   </td>
@@ -6763,11 +6793,11 @@ _Helpline: +91 9316566894_`;
                                   <td style={{ padding: '12px 16px' }}>
                                     {adm.isActive !== false ? (
                                       <span style={{ fontSize: '0.72rem', backgroundColor: '#dcfce7', color: '#15803d', padding: '2px 8px', borderRadius: '6px', fontWeight: '700' }}>
-                                        ● Active
+                                        Active
                                       </span>
                                     ) : (
                                       <span style={{ fontSize: '0.72rem', backgroundColor: '#fee2e2', color: '#b91c1c', padding: '2px 8px', borderRadius: '6px', fontWeight: '700' }}>
-                                        ○ Inactive
+                                        Inactive
                                       </span>
                                     )}
                                   </td>
@@ -6814,6 +6844,172 @@ _Helpline: +91 9316566894_`;
                         </tbody>
                       </table>
                     </div>
+
+                    {/* MOBILE CARD VIEW (< 768px): HARD RESPONSIVE */}
+                    <div className="hide-desktop" style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '12px' }}>
+                      {adminList.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '30px', color: 'var(--text-medium)', fontSize: '0.86rem' }}>
+                          {isAdminListLoading ? 'Loading admin accounts...' : 'No sub-admins created yet.'}
+                        </div>
+                      ) : (
+                        adminList.map((adm) => {
+                          const isRootSuper = adm.role === 'superadmin' || adm.email === 'info@niyanshpharma.com';
+                          const isPwRevealed = Boolean(showPasswordMap[adm._id]);
+                          const p = adm.permissions || {};
+
+                          return (
+                            <div key={adm._id} style={{
+                              backgroundColor: adm.isActive === false ? '#f8fafc' : '#ffffff',
+                              border: '1px solid #e2e8f0',
+                              borderRadius: '12px',
+                              padding: '14px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '10px',
+                              boxShadow: '0 2px 6px rgba(0,0,0,0.03)'
+                            }}>
+                              {/* Card Header: Avatar, Name, Role & Status */}
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                  <img 
+                                    src={adm.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(adm.name)}&background=${isRootSuper ? 'f59e0b' : '2563eb'}&color=ffffff&bold=true`}
+                                    alt={adm.name}
+                                    style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+                                  />
+                                  <div>
+                                    <div style={{ fontWeight: '700', fontSize: '0.92rem', color: 'var(--text-dark)' }}>{adm.name}</div>
+                                    {isRootSuper ? (
+                                      <span style={{ fontSize: '0.68rem', fontWeight: '800', backgroundColor: '#fef3c7', color: '#b45309', padding: '1px 7px', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                                        <ShieldCheck size={11} /> Root Super Admin
+                                      </span>
+                                    ) : (
+                                      <span style={{ fontSize: '0.68rem', fontWeight: '700', backgroundColor: '#eff6ff', color: '#1d4ed8', padding: '1px 7px', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                                        <Shield size={10} /> Operations Admin
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                                <span style={{ fontSize: '0.72rem', backgroundColor: adm.isActive !== false ? '#dcfce7' : '#fee2e2', color: adm.isActive !== false ? '#15803d' : '#b91c1c', padding: '2px 8px', borderRadius: '6px', fontWeight: '700' }}>
+                                  {adm.isActive !== false ? 'Active' : 'Inactive'}
+                                </span>
+                              </div>
+
+                              {/* Email & Mobile */}
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.8rem', backgroundColor: '#f8fafc', padding: '8px 10px', borderRadius: '8px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                  <span style={{ color: 'var(--text-medium)' }}>Email:</span>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <span style={{ fontFamily: 'monospace', fontWeight: '600' }}>{adm.email}</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        navigator.clipboard.writeText(adm.email);
+                                        showToast('Email copied to clipboard!');
+                                      }}
+                                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '2px' }}
+                                    >
+                                      <Copy size={12} />
+                                    </button>
+                                  </div>
+                                </div>
+
+                                {adm.phone && (
+                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <span style={{ color: 'var(--text-medium)' }}>Mobile:</span>
+                                    <a href={`tel:${adm.phone}`} style={{ color: '#0369a1', fontWeight: '600', textDecoration: 'none' }}>
+                                      {adm.phone}
+                                    </a>
+                                  </div>
+                                )}
+
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                  <span style={{ color: 'var(--text-medium)' }}>Password:</span>
+                                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                    <span style={{ fontFamily: 'monospace', fontWeight: '700', color: isPwRevealed ? '#0f172a' : '#64748b' }}>
+                                      {isPwRevealed ? (adm.plainPassword || '••••••••') : '••••••••'}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => setShowPasswordMap(prev => ({ ...prev, [adm._id]: !prev[adm._id] }))}
+                                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2563eb', padding: '2px' }}
+                                    >
+                                      {isPwRevealed ? <EyeOff size={13} /> : <Eye size={13} />}
+                                    </button>
+                                    {adm.plainPassword && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          navigator.clipboard.writeText(adm.plainPassword);
+                                          showToast('Password copied to clipboard!');
+                                        }}
+                                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#16a34a', padding: '2px' }}
+                                      >
+                                        <Copy size={12} />
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Permissions Pills */}
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                {isRootSuper ? (
+                                  <span style={{ fontSize: '0.72rem', backgroundColor: '#fef3c7', color: '#92400e', padding: '2px 8px', borderRadius: '6px', fontWeight: '800' }}>
+                                    Full Access (All Permissions)
+                                  </span>
+                                ) : (
+                                  <>
+                                    {p.canManageProducts && <span style={{ fontSize: '0.68rem', backgroundColor: '#eff6ff', color: '#1e40af', padding: '1px 6px', borderRadius: '4px' }}>Products</span>}
+                                    {p.canDeleteProducts && <span style={{ fontSize: '0.68rem', backgroundColor: '#fee2e2', color: '#991b1b', padding: '1px 6px', borderRadius: '4px' }}>Delete Prod</span>}
+                                    {p.canBulkImport && <span style={{ fontSize: '0.68rem', backgroundColor: '#ecfdf5', color: '#065f46', padding: '1px 6px', borderRadius: '4px' }}>Excel Import</span>}
+                                    {p.canManageOrders && <span style={{ fontSize: '0.68rem', backgroundColor: '#f3e8ff', color: '#6b21a8', padding: '1px 6px', borderRadius: '4px' }}>Orders</span>}
+                                    {p.canManageLedgers && <span style={{ fontSize: '0.68rem', backgroundColor: '#fef9c3', color: '#854d0e', padding: '1px 6px', borderRadius: '4px' }}>Ledgers</span>}
+                                    {p.canManageCompanies && <span style={{ fontSize: '0.68rem', backgroundColor: '#e0e7ff', color: '#3730a3', padding: '1px 6px', borderRadius: '4px' }}>Companies</span>}
+                                    {p.canManageNews && <span style={{ fontSize: '0.68rem', backgroundColor: '#ffedd5', color: '#9a3412', padding: '1px 6px', borderRadius: '4px' }}>News</span>}
+                                    {p.canManageEnquiries && <span style={{ fontSize: '0.68rem', backgroundColor: '#f1f5f9', color: '#334155', padding: '1px 6px', borderRadius: '4px' }}>Enquiries</span>}
+                                    {p.canClearDatabase && <span style={{ fontSize: '0.68rem', backgroundColor: '#991b1b', color: '#fff', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }}>Wipe DB</span>}
+                                  </>
+                                )}
+                              </div>
+
+                              {/* Card Actions */}
+                              <div style={{ display: 'flex', gap: '8px', paddingTop: '6px', borderTop: '1px solid #f1f5f9' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenAdminModal(adm)}
+                                  className="btn btn-outline btn-sm"
+                                  style={{ flex: 1, justifyContent: 'center', fontSize: '0.78rem', gap: '6px' }}
+                                >
+                                  <Edit2 size={13} /> Edit Account
+                                </button>
+                                {!isRootSuper && (
+                                  <>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleToggleAdminStatus(adm)}
+                                      className="btn btn-outline btn-sm"
+                                      style={{ padding: '6px 10px', color: adm.isActive !== false ? '#b45309' : '#15803d' }}
+                                      title={adm.isActive !== false ? 'Deactivate' : 'Activate'}
+                                    >
+                                      {adm.isActive !== false ? <UserX size={13} /> : <UserCheck size={13} />}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDeleteAdmin(adm)}
+                                      className="btn btn-sm"
+                                      style={{ padding: '6px 10px', backgroundColor: '#fee2e2', color: '#ef4444', border: 'none' }}
+                                      title="Delete"
+                                    >
+                                      <Trash2 size={13} />
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
                   </div>
                 </div>
               )}
@@ -6846,17 +7042,17 @@ _Helpline: +91 9316566894_`;
             <div className="admin-form-grid-2" style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '8px', marginBottom: '20px' }}>
               <div>
                 <strong style={{ fontSize: '1rem', display: 'block', color: 'var(--primary-blue)' }}>{selectedOrder.shopName}</strong>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-medium)', marginTop: '4px' }}>📞 Mobile: {selectedOrder.retailerMobile}</div>
-                {selectedOrder.retailerEmail && <div style={{ fontSize: '0.85rem', color: 'var(--text-medium)' }}>✉️ Email: {selectedOrder.retailerEmail}</div>}
-                {selectedOrder.gstin && <div style={{ fontSize: '0.85rem', color: 'var(--text-medium)' }}>🏛️ GSTIN: {selectedOrder.gstin}</div>}
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-medium)', marginTop: '4px' }}>Mobile: {selectedOrder.retailerMobile}</div>
+                {selectedOrder.retailerEmail && <div style={{ fontSize: '0.85rem', color: 'var(--text-medium)' }}>Email: {selectedOrder.retailerEmail}</div>}
+                {selectedOrder.gstin && <div style={{ fontSize: '0.85rem', color: 'var(--text-medium)' }}>GSTIN: {selectedOrder.gstin}</div>}
               </div>
               <div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-medium)' }}>📅 Order Date: <strong>{formatDate(selectedOrder.createdAt)}</strong></div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-medium)' }}>Order Date: <strong>{formatDate(selectedOrder.createdAt)}</strong></div>
                 <div style={{ fontSize: '0.85rem', color: 'var(--text-medium)', marginTop: '4px' }}>
-                  📦 Status: <strong>{selectedOrder.orderStatus || 'Booked'}</strong>
+                  Status: <strong>{selectedOrder.orderStatus || 'Booked'}</strong>
                 </div>
                 <div style={{ fontSize: '0.85rem', color: 'var(--text-medium)', marginTop: '4px' }}>
-                  💳 Payment: <strong>{selectedOrder.paymentStatus || 'Pending'}</strong>
+                  Payment: <strong>{selectedOrder.paymentStatus || 'Pending'}</strong>
                 </div>
               </div>
             </div>
@@ -7537,7 +7733,7 @@ _Helpline: +91 9316566894_`;
                           </>
                         ) : (
                           <>
-                            <Sparkles size={15} /> ⚡ Auto-Find Photos
+                            <Sparkles size={15} /> Auto-Find Photos
                           </>
                         )}
                       </button>
@@ -7580,7 +7776,7 @@ _Helpline: +91 9316566894_`;
                       }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                           <span style={{ fontSize: '0.82rem', fontWeight: '700', color: '#1e40af' }}>
-                            👉 Found {webImageResults.length} photos! Click one to attach:
+                            Found {webImageResults.length} photos! Click one to attach:
                           </span>
                           <button
                             type="button"
@@ -7641,11 +7837,14 @@ _Helpline: +91 9316566894_`;
                                     padding: '2px 5px',
                                     fontSize: '0.65rem',
                                     cursor: 'pointer',
-                                    zIndex: 2
+                                    zIndex: 2,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
                                   }}
                                   title="Preview in full size"
                                 >
-                                  👁
+                                  <Eye size={12} />
                                 </button>
                                 {isSelected && (
                                   <span style={{ position: 'absolute', bottom: '2px', right: '2px', backgroundColor: '#2563eb', color: '#fff', fontSize: '0.62rem', padding: '1px 5px', borderRadius: '3px', fontWeight: '800' }}>
@@ -7738,10 +7937,10 @@ _Helpline: +91 9316566894_`;
                                   <button
                                     type="button"
                                     onClick={() => setPreviewImage(img)}
-                                    style={{ background: 'none', border: 'none', color: '#93c5fd', fontSize: '0.68rem', cursor: 'pointer', padding: '1px 2px', fontWeight: '700' }}
+                                    style={{ background: 'none', border: 'none', color: '#93c5fd', fontSize: '0.68rem', cursor: 'pointer', padding: '1px 2px', fontWeight: '700', display: 'inline-flex', alignItems: 'center' }}
                                     title="View full preview"
                                   >
-                                    👁 View
+                                    <Eye size={11} style={{ marginRight: '3px' }} /> View
                                   </button>
                                   {!isMain && (
                                     <button
@@ -7898,12 +8097,12 @@ _Helpline: +91 9316566894_`;
                           onClick={() => setProdSku(`NP-${Date.now().toString().slice(-6)}`)}
                           style={{ background: 'none', border: 'none', color: 'var(--primary-blue)', fontSize: '0.78rem', cursor: 'pointer', fontWeight: '700' }}
                         >
-                          ⚡ Generate
+                          Generate
                         </button>
                       </div>
                       <input 
                         id="modal-sku"
-                        type="text" required placeholder="Click ⚡ Generate or enter SKU" 
+                        type="text" required placeholder="Click Generate or enter SKU" 
                         value={prodSku} onChange={(e) => setProdSku(e.target.value)}
                         style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.92rem', fontFamily: 'monospace', width: '100%', boxSizing: 'border-box' }}
                       />
@@ -7917,7 +8116,7 @@ _Helpline: +91 9316566894_`;
                         <label htmlFor="modal-comp" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
                           Manufacturer / Company <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
                         </label>
-                        <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: '700' }}>⚡ Type new or pick</span>
+                        <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: '700' }}>Type new or pick</span>
                       </div>
                       <input 
                         id="modal-comp"
@@ -8179,7 +8378,7 @@ _Helpline: +91 9316566894_`;
                   <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '12px', display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <label style={{ fontSize: '0.88rem', fontWeight: '700', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span>⚡ Custom Parameters ({customFieldDefs.length})</span>
+                        <span>Custom Parameters ({customFieldDefs.length})</span>
                       </label>
                       <button 
                         type="button"
@@ -8379,7 +8578,7 @@ _Helpline: +91 9316566894_`;
 
                   {uploadedFileName && (
                     <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#1e293b', backgroundColor: '#ffffff', padding: '6px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
-                      📄 {uploadedFileName} ({bulkParsedRows.length} rows detected)
+                      {uploadedFileName} ({bulkParsedRows.length} rows detected)
                     </span>
                   )}
                 </div>
@@ -8399,7 +8598,7 @@ _Helpline: +91 9316566894_`;
                   }}
                   title="Download ready sample Excel spreadsheet with all columns and registered companies"
                 >
-                  <Download size={15} /> 📥 Download Sample Excel Template
+                  <Download size={15} /> Download Sample Excel Template
                 </button>
               </div>
 
@@ -8440,7 +8639,7 @@ _Helpline: +91 9316566894_`;
 
                   <div style={{ backgroundColor: '#f8fafc', padding: '16px 20px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '0.85rem' }}>
                     <div style={{ fontWeight: '700', color: 'var(--text-dark)', marginBottom: '8px' }}>
-                      ⚡ Supported Spreadsheet Columns (All auto-mapped):
+                      Supported Spreadsheet Columns (All auto-mapped):
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '8px', color: 'var(--text-medium)', fontSize: '0.82rem' }}>
                       <div>• <strong>Product Name / Brand Name *</strong></div>
@@ -8540,7 +8739,7 @@ _Helpline: +91 9316566894_`;
                           onChange={(e) => setBulkSkipDuplicates(e.target.checked)}
                           style={{ accentColor: '#2563eb', width: '16px', height: '16px' }}
                         />
-                        <span>⚡ Automatically skip duplicates (prevent duplicates from being added)</span>
+                        <span>Automatically skip duplicates (prevent duplicates from being added)</span>
                       </label>
                     </div>
 
@@ -8620,7 +8819,7 @@ _Helpline: +91 9316566894_`;
                                       </span>
                                     ) : isRowDuplicate ? (
                                       <span style={{ backgroundColor: '#fef3c7', color: '#b45309', fontSize: '0.72rem', padding: '2px 7px', borderRadius: '4px', fontWeight: '700', whiteSpace: 'nowrap' }} title={r.duplicateReason}>
-                                        ⚠️ {r.duplicateReason}
+                                        Duplicate: {r.duplicateReason}
                                       </span>
                                     ) : (
                                       <span style={{ backgroundColor: '#dcfce7', color: '#15803d', fontSize: '0.72rem', padding: '2px 7px', borderRadius: '4px', fontWeight: '700', whiteSpace: 'nowrap' }}>
@@ -8894,7 +9093,7 @@ _Helpline: +91 9316566894_`;
         }}>
           <div className="card" style={{ maxWidth: '480px', width: '100%', padding: '24px', borderRadius: '16px', boxShadow: '0 25px 60px -15px rgba(0,0,0,0.5)', border: '1px solid var(--border-light)' }} role="dialog" aria-modal="true">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text-dark)', fontWeight: '700' }}>➕ Create New Custom Field</h3>
+              <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text-dark)', fontWeight: '700' }}>Create New Custom Field</h3>
               <button type="button" onClick={() => setIsCustomFieldModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-medium)', padding: '4px' }} aria-label="Close custom field modal"><X size={20} /></button>
             </div>
             <form onSubmit={handleSaveCustomFieldDef} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
@@ -9162,7 +9361,8 @@ _Helpline: +91 9316566894_`;
           backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)',
           zIndex: 100020,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: '16px', boxSizing: 'border-box'
+          padding: '16px', boxSizing: 'border-box',
+          overscrollBehavior: 'contain'
         }}>
           <div style={{
             backgroundColor: '#ffffff',
@@ -9263,9 +9463,9 @@ _Helpline: +91 9316566894_`;
                           const randNum = Math.floor(1000 + Math.random() * 9000);
                           setAdminFormPassword(`NpStaff@${randNum}`);
                         }}
-                        style={{ fontSize: '0.72rem', color: '#2563eb', background: 'none', border: 'none', cursor: 'pointer', fontWeight: '700' }}
+                        style={{ fontSize: '0.72rem', color: '#2563eb', background: 'none', border: 'none', cursor: 'pointer', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                       >
-                        ⚡ Generate Password
+                        <Sparkles size={12} /> Generate Password
                       </button>
                     </div>
                     <input 
@@ -9286,7 +9486,7 @@ _Helpline: +91 9316566894_`;
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
                     <div>
                       <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: '800', color: 'var(--text-dark)' }}>
-                        🛡️ Granular Access Permissions
+                        Granular Access Permissions
                       </h4>
                       <span style={{ fontSize: '0.74rem', color: 'var(--text-medium)' }}>
                         Choose what features this staff member is allowed to see or modify:
@@ -9340,7 +9540,7 @@ _Helpline: +91 9316566894_`;
                         onChange={(e) => setAdminFormPermissions(prev => ({ ...prev, canManageProducts: e.target.checked }))}
                         style={{ accentColor: '#2563eb', width: '16px', height: '16px' }}
                       />
-                      <span>📦 Add & Edit Products</span>
+                      <span>Add & Edit Products</span>
                     </label>
 
                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer' }}>
@@ -9350,7 +9550,7 @@ _Helpline: +91 9316566894_`;
                         onChange={(e) => setAdminFormPermissions(prev => ({ ...prev, canDeleteProducts: e.target.checked }))}
                         style={{ accentColor: '#ef4444', width: '16px', height: '16px' }}
                       />
-                      <span>🗑️ Delete Products</span>
+                      <span>Delete Products</span>
                     </label>
 
                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer' }}>
@@ -9360,7 +9560,7 @@ _Helpline: +91 9316566894_`;
                         onChange={(e) => setAdminFormPermissions(prev => ({ ...prev, canBulkImport: e.target.checked }))}
                         style={{ accentColor: '#10b981', width: '16px', height: '16px' }}
                       />
-                      <span>📥 Upload Excel / CSV Import</span>
+                      <span>Upload Excel / CSV Import</span>
                     </label>
 
                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer' }}>
@@ -9370,7 +9570,7 @@ _Helpline: +91 9316566894_`;
                         onChange={(e) => setAdminFormPermissions(prev => ({ ...prev, canManageOrders: e.target.checked }))}
                         style={{ accentColor: '#8b5cf6', width: '16px', height: '16px' }}
                       />
-                      <span>📑 Manage B2B Orders & Status</span>
+                      <span>Manage B2B Orders & Status</span>
                     </label>
 
                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer' }}>
@@ -9380,7 +9580,7 @@ _Helpline: +91 9316566894_`;
                         onChange={(e) => setAdminFormPermissions(prev => ({ ...prev, canManageLedgers: e.target.checked }))}
                         style={{ accentColor: '#eab308', width: '16px', height: '16px' }}
                       />
-                      <span>📊 Access Outstanding Financial Ledgers</span>
+                      <span>Access Outstanding Financial Ledgers</span>
                     </label>
 
                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer' }}>
@@ -9390,7 +9590,7 @@ _Helpline: +91 9316566894_`;
                         onChange={(e) => setAdminFormPermissions(prev => ({ ...prev, canManageCompanies: e.target.checked }))}
                         style={{ accentColor: '#6366f1', width: '16px', height: '16px' }}
                       />
-                      <span>🏢 Manage Companies & Manufacturers</span>
+                      <span>Manage Companies & Manufacturers</span>
                     </label>
 
                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer' }}>
@@ -9400,7 +9600,7 @@ _Helpline: +91 9316566894_`;
                         onChange={(e) => setAdminFormPermissions(prev => ({ ...prev, canManageNews: e.target.checked }))}
                         style={{ accentColor: '#f97316', width: '16px', height: '16px' }}
                       />
-                      <span>🔥 Post Schemes, Tickers & News</span>
+                      <span>Post Schemes, Tickers & News</span>
                     </label>
 
                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer' }}>
@@ -9410,7 +9610,7 @@ _Helpline: +91 9316566894_`;
                         onChange={(e) => setAdminFormPermissions(prev => ({ ...prev, canManageEnquiries: e.target.checked }))}
                         style={{ accentColor: '#0ea5e9', width: '16px', height: '16px' }}
                       />
-                      <span>💬 View & Manage Enquiries</span>
+                      <span>View & Manage Enquiries</span>
                     </label>
 
                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', fontWeight: '700', color: '#b91c1c', cursor: 'pointer' }}>
@@ -9420,7 +9620,7 @@ _Helpline: +91 9316566894_`;
                         onChange={(e) => setAdminFormPermissions(prev => ({ ...prev, canClearDatabase: e.target.checked }))}
                         style={{ accentColor: '#ef4444', width: '16px', height: '16px' }}
                       />
-                      <span>⚠️ Danger Zone: Clear Entire Database</span>
+                      <span>Danger Zone: Clear Entire Database</span>
                     </label>
 
                   </div>
@@ -9471,7 +9671,8 @@ _Helpline: +91 9316566894_`;
           backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)',
           zIndex: 100020,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: '16px', boxSizing: 'border-box'
+          padding: '16px', boxSizing: 'border-box',
+          overscrollBehavior: 'contain'
         }}>
           <div style={{
             backgroundColor: '#ffffff',
@@ -9500,7 +9701,7 @@ _Helpline: +91 9316566894_`;
                 </div>
                 <div>
                   <h3 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: '800' }}>
-                    {isSuperAdmin ? '👑 SuperAdmin Profile & Settings' : '👤 Admin Profile'}
+                    {isSuperAdmin ? 'SuperAdmin Profile & Settings' : 'Admin Profile'}
                   </h3>
                   <span style={{ fontSize: '0.78rem', color: 'var(--text-medium)' }}>
                     Edit your account name, mobile number, avatar photo and password
@@ -9521,44 +9722,80 @@ _Helpline: +91 9316566894_`;
               <div style={{ padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
                 
                 {/* Avatar Preview & Selection */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '12px', backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                  <img 
-                    src={profileAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(profileName || 'Admin')}&background=${isSuperAdmin ? 'f59e0b' : '2563eb'}&color=ffffff&bold=true`}
-                    alt="Preview"
-                    style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', border: `3px solid ${isSuperAdmin ? '#f59e0b' : '#2563eb'}` }}
-                  />
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>Avatar Photo</div>
-                    <input 
-                      type="url"
-                      placeholder="Image URL (e.g. https://...)"
-                      value={profileAvatar}
-                      onChange={(e) => setProfileAvatar(e.target.value)}
-                      style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.8rem', marginTop: '4px', boxSizing: 'border-box' }}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '14px', backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', flexWrap: 'wrap' }}>
+                  <div style={{ position: 'relative' }}>
+                    <img 
+                      src={profileAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(profileName || 'Admin')}&background=${isSuperAdmin ? 'f59e0b' : '2563eb'}&color=ffffff&bold=true`}
+                      alt="Preview"
+                      style={{ width: '70px', height: '70px', borderRadius: '50%', objectFit: 'cover', border: `3px solid ${isSuperAdmin ? '#f59e0b' : '#2563eb'}` }}
                     />
-                    <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
+                  </div>
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ fontSize: '0.86rem', fontWeight: '700', color: 'var(--text-dark)', marginBottom: '6px' }}>Profile Photo</div>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                      <label 
+                        className="btn btn-sm btn-primary"
+                        style={{ 
+                          cursor: 'pointer', 
+                          display: 'inline-flex', 
+                          alignItems: 'center', 
+                          gap: '6px', 
+                          fontSize: '0.8rem', 
+                          backgroundColor: isSuperAdmin ? '#f59e0b' : '#2563eb', 
+                          borderColor: isSuperAdmin ? '#f59e0b' : '#2563eb',
+                          margin: 0
+                        }}
+                      >
+                        <Camera size={14} /> Upload / Choose Photo
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          onChange={handleProfilePhotoUpload} 
+                          style={{ display: 'none' }} 
+                        />
+                      </label>
+
+                      {profileAvatar && (
+                        <button
+                          type="button"
+                          onClick={() => setProfileAvatar('')}
+                          className="btn btn-sm btn-outline"
+                          style={{ fontSize: '0.78rem', color: '#ef4444', borderColor: '#fca5a5', padding: '4px 10px' }}
+                        >
+                          Remove Photo
+                        </button>
+                      )}
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px', marginTop: '8px', flexWrap: 'wrap' }}>
                       <button
                         type="button"
                         onClick={() => setProfileAvatar('https://ui-avatars.com/api/?name=Super+Admin&background=f59e0b&color=ffffff&bold=true')}
-                        style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', border: '1px solid #cbd5e1', cursor: 'pointer', backgroundColor: '#fff' }}
+                        style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', cursor: 'pointer', backgroundColor: '#fff', color: '#64748b' }}
                       >
                         Gold Avatar
                       </button>
                       <button
                         type="button"
                         onClick={() => setProfileAvatar('https://ui-avatars.com/api/?name=Hari+Patel&background=0c3d6c&color=ffffff&bold=true')}
-                        style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', border: '1px solid #cbd5e1', cursor: 'pointer', backgroundColor: '#fff' }}
+                        style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', cursor: 'pointer', backgroundColor: '#fff', color: '#64748b' }}
                       >
                         Corporate Avatar
                       </button>
                       <button
                         type="button"
                         onClick={() => setProfileAvatar('')}
-                        style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', border: '1px solid #cbd5e1', cursor: 'pointer', backgroundColor: '#fff' }}
+                        style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', cursor: 'pointer', backgroundColor: '#fff', color: '#64748b' }}
                       >
                         Auto Initials
                       </button>
                     </div>
+                    <input 
+                      type="url"
+                      placeholder="Or enter image URL (e.g. https://...)"
+                      value={profileAvatar && profileAvatar.startsWith('data:') ? '' : profileAvatar}
+                      onChange={(e) => setProfileAvatar(e.target.value)}
+                      style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.78rem', marginTop: '6px', boxSizing: 'border-box' }}
+                    />
                   </div>
                 </div>
 
@@ -9600,8 +9837,8 @@ _Helpline: +91 9316566894_`;
 
                 {/* Change Password */}
                 <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <div style={{ fontSize: '0.88rem', fontWeight: '800', color: 'var(--text-dark)' }}>
-                    🔐 Change Password (Optional)
+                  <div style={{ fontSize: '0.88rem', fontWeight: '800', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Lock size={15} /> Change Password (Optional)
                   </div>
                   
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>

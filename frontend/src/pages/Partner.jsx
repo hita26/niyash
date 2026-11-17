@@ -201,7 +201,7 @@ function Partner() {
               )}
               
               {/* Row 1: Distributor Name & Medical Store / Hospital Name */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="partner-distributor" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
                     {t('partner.storeTypeDistributor', 'Sub-Stockist / Distributor')} <span className="required-star">*</span>
@@ -233,7 +233,7 @@ function Partner() {
               </div>
 
               {/* Row 2: Owner / Contact Person & Designation */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="partner-owner" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
                     {t('partner.ownerLabel', 'Owner / Contact Person Name')} <span className="required-star">*</span>
@@ -265,7 +265,7 @@ function Partner() {
               </div>
 
               {/* Row 3: Mobile Number & Email Address */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="partner-phone" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
                     {t('partner.phoneLabel', '10-Digit Mobile Number')} <span className="required-star">*</span>
@@ -297,7 +297,7 @@ function Partner() {
               </div>
 
               {/* Row 4: Drug License Number & GSTIN */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '15px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <label htmlFor="partner-license" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
                     {t('partner.drugLicenseLabel', 'Drug License Number (20B / 21B)')} <span className="required-star">*</span>

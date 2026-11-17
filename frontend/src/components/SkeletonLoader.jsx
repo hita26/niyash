@@ -9,7 +9,7 @@ export default function SkeletonLoader({ variant = 'product-grid', count = 8, ro
   // 1. Shimmering Product Catalog Grid
   if (variant === 'product-grid') {
     return (
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '18px', width: '100%' }}>
+      <div className="responsive-product-grid" style={{ width: '100%' }}>
         {Array.from({ length: count }).map((_, idx) => (
           <div
             key={idx}
@@ -56,8 +56,8 @@ export default function SkeletonLoader({ variant = 'product-grid', count = 8, ro
   // 2. Shimmering Table Rows (for Orders & Ledger)
   if (variant === 'table') {
     return (
-      <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '12px', border: '1px solid var(--border-light)', padding: '16px', overflow: 'hidden' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '12px', border: '1px solid var(--border-light)', padding: '16px', overflowX: 'auto' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', minWidth: '520px' }}>
           {Array.from({ length: rows }).map((_, idx) => (
             <div
               key={idx}
@@ -85,7 +85,7 @@ export default function SkeletonLoader({ variant = 'product-grid', count = 8, ro
   // 3. Shimmering KPI Metric Cards
   if (variant === 'metrics') {
     return (
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px', marginBottom: '28px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '16px', marginBottom: '28px' }}>
         {Array.from({ length: 4 }).map((_, idx) => (
           <div
             key={idx}

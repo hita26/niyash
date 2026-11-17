@@ -126,26 +126,26 @@ function CompanyDetail({ addToCart }) {
       <div className="container">
         
         {/* Breadcrumb Navigation */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--text-medium)', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', fontSize: '0.85rem', color: 'var(--text-medium)', marginBottom: '20px' }}>
           <Link to="/" style={{ color: 'var(--text-medium)', textDecoration: 'none' }}>{t('nav.home', 'Home')}</Link>
           <ChevronRight size={14} />
           <Link to="/companies" style={{ color: 'var(--text-medium)', textDecoration: 'none' }}>{t('nav.companies', 'Companies')}</Link>
           <ChevronRight size={14} />
-          <span style={{ color: 'var(--primary-blue)', fontWeight: '600' }}>{company.name}</span>
+          <span style={{ color: 'var(--primary-blue)', fontWeight: '600', wordBreak: 'break-word' }}>{company.name}</span>
         </div>
 
         {/* Company Profile Hero Banner */}
-        <div className="card" style={{ padding: '30px', marginBottom: '30px', overflow: 'hidden' }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '25px', alignItems: 'flex-start' }}>
+        <div className="card" style={{ padding: 'clamp(16px, 3vw, 30px)', marginBottom: '30px', overflow: 'hidden' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', alignItems: 'flex-start' }}>
             
             {/* Company Logo Box */}
             <div style={{
-              width: '110px',
-              height: '110px',
+              width: 'clamp(76px, 18vw, 110px)',
+              height: 'clamp(76px, 18vw, 110px)',
               borderRadius: '16px',
               backgroundColor: '#fff',
               border: '2px solid #e2e8f0',
-              padding: '12px',
+              padding: '10px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -166,7 +166,7 @@ function CompanyDetail({ addToCart }) {
             </div>
 
             {/* Profile Info */}
-            <div style={{ flex: '1 1 340px' }}>
+            <div style={{ flex: '1 1 240px', minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                 <h1 style={{ fontSize: 'clamp(1.3rem, 4vw, 1.8rem)', color: 'var(--text-dark)', margin: 0, fontWeight: '800' }}>
                   {company.name}

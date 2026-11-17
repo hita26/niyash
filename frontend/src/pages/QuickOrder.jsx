@@ -1643,7 +1643,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                 paddingTop: '16px',
                 borderTop: '1px solid #f1f5f9',
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))',
                 gap: '12px'
               }}
             >

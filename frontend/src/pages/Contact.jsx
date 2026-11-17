@@ -169,7 +169,7 @@ function Contact() {
                   </div>
                   <div>
                     <h3 style={{ fontSize: '1.05rem', marginBottom: '4px', color: 'var(--text-dark)' }}>{t('contact.emailUs', 'Email Address')}</h3>
-                    <p style={{ color: 'var(--text-medium)', fontSize: '0.92rem' }}>
+                    <p style={{ color: 'var(--text-medium)', fontSize: '0.92rem', wordBreak: 'break-word' }}>
                       <a href={`mailto:${contactInfo.email || 'info@niyanshpharma.com'}`} style={{ color: 'var(--primary-blue)', fontWeight: '600', textDecoration: 'none' }}>
                         {contactInfo.email || 'info@niyanshpharma.com'}
                       </a>
@@ -250,7 +250,7 @@ function Contact() {
                   </div>
                 )}
                 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '15px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                     <label htmlFor="contact-name" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
                       {t('contact.nameLabel', 'Your Name')} <span className="required-star">*</span>

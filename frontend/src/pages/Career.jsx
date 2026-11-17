@@ -293,7 +293,7 @@ function Career() {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '15px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '15px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                     <label htmlFor="career-pos-select" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>
                       {t('career.selectPosition', 'Position Applying For')} <span className="required-star">*</span>

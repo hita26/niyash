@@ -98,14 +98,14 @@ function CompanyDirectory() {
       <div className="container">
         
         {/* Header Hero Section */}
-        <div style={{ textAlign: 'center', marginBottom: '35px' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: 'rgba(26, 86, 160, 0.08)', color: 'var(--primary-blue)', padding: '6px 16px', borderRadius: '30px', fontSize: '0.85rem', fontWeight: '700', marginBottom: '12px' }}>
-            <Building2 size={16} /> {t('companies.title', 'Authorized Manufacturers & Partners Directory')}
+        <div style={{ textAlign: 'center', marginBottom: 'clamp(22px, 4vw, 35px)' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: 'rgba(26, 86, 160, 0.08)', color: 'var(--primary-blue)', padding: '6px 14px', borderRadius: '30px', fontSize: 'clamp(0.74rem, 2.5vw, 0.85rem)', fontWeight: '700', marginBottom: '12px', maxWidth: '100%' }}>
+            <Building2 size={16} style={{ flexShrink: 0 }} /> <span>{t('companies.title', 'Authorized Manufacturers & Partners Directory')}</span>
           </div>
-          <h1 style={{ fontSize: '2.4rem', color: 'var(--text-dark)', margin: '0 0 10px', fontWeight: '800' }}>
+          <h1 style={{ fontSize: 'clamp(1.55rem, 4.5vw, 2.4rem)', color: 'var(--text-dark)', margin: '0 0 10px', fontWeight: '800', lineHeight: 1.2 }}>
             {t('companies.title', 'Browse Pharmaceutical Companies & Brands')}
           </h1>
-          <p style={{ color: 'var(--text-medium)', fontSize: '1.05rem', maxWidth: '720px', margin: '0 auto', lineHeight: 1.6 }}>
+          <p style={{ color: 'var(--text-medium)', fontSize: 'clamp(0.9rem, 2.5vw, 1.05rem)', maxWidth: '720px', margin: '0 auto', lineHeight: 1.6 }}>
             {t('companies.subtitle', 'Discover authorized formulation manufacturers, critical care laboratories, and certified medical surgical suppliers distributed wholesale across Gujarat by Niyansh Pharma.')}
           </p>
         </div>

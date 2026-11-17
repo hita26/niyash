@@ -143,9 +143,9 @@ function About() {
       </section>
 
       {/* Metrics Counter Strip */}
-      <section style={{ backgroundColor: '#ffffff', borderBottom: '1px solid var(--border-light)', padding: '40px 0' }}>
+      <section style={{ backgroundColor: '#ffffff', borderBottom: '1px solid var(--border-light)', padding: 'clamp(28px, 5vw, 40px) 0' }}>
         <div className="container">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '25px', textAlign: 'center' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 155px), 1fr))', gap: 'clamp(14px, 3vw, 25px)', textAlign: 'center' }}>
             {stats.map((item, idx) => (
               <div key={idx} style={{ padding: '10px' }}>
                 <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--primary-blue)', lineHeight: '1' }}>
@@ -180,7 +180,7 @@ function About() {
             }}>
               {t('about.backgroundBadge', 'Our Background')}
             </span>
-            <h2 style={{ fontSize: '2.2rem', marginBottom: '18px', color: 'var(--text-dark)' }}>
+            <h2 style={{ fontSize: 'clamp(1.5rem, 4vw, 2.2rem)', marginBottom: '18px', color: 'var(--text-dark)' }}>
               {t('about.backgroundTitle', 'A Trusted Partner for Healthcare Retailers & Institutions')}
             </h2>
             <p style={{ color: 'var(--text-medium)', fontSize: '1rem', lineHeight: '1.7', marginBottom: '18px' }}>
@@ -190,7 +190,7 @@ function About() {
               {t('about.backgroundP2', 'Today, our catalogue comprises over 9,500 medicinal formulations ranging from essential antibiotics, cardiovascular and diabetic medications, dermatology topicals, and critical injectables to disposable medical supplies and wellness OTC brands.')}
             </p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '15px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '15px' }}>
               <div className="card" style={{ padding: '20px', borderLeft: '4px solid var(--primary-blue)' }}>
                 <h3 style={{ fontSize: '1.1rem', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Target size={18} color="var(--primary-blue)" /> {t('about.ourMission', 'Our Mission')}

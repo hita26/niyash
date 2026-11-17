@@ -83,21 +83,22 @@ function ProductCard({ product, addToCart }) {
 
   return (
     <div 
-      className="card card-hover-lift" 
+      className="card card-hover-lift product-card-item" 
       style={{ 
-        padding: '16px', 
         display: 'flex', 
         flexDirection: 'column', 
         height: '100%',
         borderRadius: '14px',
         border: '1px solid var(--border-light)',
         position: 'relative',
-        transition: 'all 0.25s ease'
+        transition: 'all 0.25s ease',
+        minWidth: 0
       }}
     >
       {/* Product Image Container - Fixed 1:1 Square Aspect Ratio */}
       <Link 
         to={`/products/${product._id}`} 
+        className="product-card-img-wrap"
         style={{ 
           display: 'flex', 
           alignItems: 'center',
@@ -105,11 +106,11 @@ function ProductCard({ product, addToCart }) {
           position: 'relative', 
           overflow: 'hidden', 
           borderRadius: '12px', 
-          marginBottom: '14px', 
+          marginBottom: '12px', 
           backgroundColor: '#ffffff',
           width: '100%',
           aspectRatio: '1 / 1',
-          padding: '14px',
+          padding: '12px',
           boxSizing: 'border-box',
           border: '1px solid var(--border-light)'
         }}
@@ -247,7 +248,7 @@ function ProductCard({ product, addToCart }) {
         )}
 
         {/* Pricing Block */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 'auto', paddingTop: '10px', borderTop: '1px solid var(--border-light)' }}>
+        <div className="product-card-price-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '6px', marginTop: 'auto', paddingTop: '10px', borderTop: '1px solid var(--border-light)' }}>
           <div>
             {isLoggedIn ? (
               <>
@@ -329,7 +330,7 @@ function ProductCard({ product, addToCart }) {
       </div>
 
       {/* Actions: Inline Stepper when qty > 0 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '12px' }}>
+      <div className="product-card-actions" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '12px' }}>
         {quantity > 0 ? (
           <div 
             style={{ 

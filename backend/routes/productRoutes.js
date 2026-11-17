@@ -800,14 +800,17 @@ router.delete('/:id', protect, adminOnly, async (req, res) => {
 // @access  Private/Admin
 router.post('/bulk', protect, adminOnly, async (req, res) => {
   try {
-    const { products } = req.body;
+    const { products, skipDuplicates = true } = req.body;
     if (!Array.isArray(products) || products.length === 0) {
       return res.status(400).json({ success: false, message: 'Please provide an array of products to import' });
     }
 
     let successCount = 0;
+    let skippedCount = 0;
     let errorCount = 0;
     const errors = [];
+    const seenNamesInBatch = new Set();
+    const seenSkusInBatch = new Set();
 
     for (let i = 0; i < products.length; i++) {
       const p = products[i];
@@ -816,14 +819,74 @@ router.post('/bulk', protect, adminOnly, async (req, res) => {
           throw new Error(`Row ${i + 1}: Product name is required`);
         }
 
-        const sku = p.sku && p.sku.trim() ? p.sku.trim() : `NP-${Date.now()}-${i}`;
+        const trimmedName = p.name.trim();
+        const normalizedName = trimmedName.toLowerCase();
+        const sku = p.sku && p.sku.trim() ? p.sku.trim() : `NP-${Date.now().toString().slice(-6)}-${i + 1}`;
+        const normalizedSku = sku.toLowerCase();
+
+        // Duplication prevention: Check against batch itself
+        if (seenNamesInBatch.has(normalizedName)) {
+          if (skipDuplicates) {
+            skippedCount++;
+            continue;
+          }
+        }
+        if (seenSkusInBatch.has(normalizedSku)) {
+          if (skipDuplicates) {
+            skippedCount++;
+            continue;
+          }
+        }
+
+        // Duplication prevention: Check against existing MongoDB collection
+        if (skipDuplicates) {
+          const escapedName = trimmedName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const existingProduct = await Product.findOne({
+            $or: [
+              { name: { $regex: new RegExp(`^${escapedName}$`, 'i') } },
+              { sku: { $regex: new RegExp(`^${sku.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') } }
+            ]
+          });
+          if (existingProduct) {
+            skippedCount++;
+            continue; // Skip duplicate without throwing an error
+          }
+        }
+
+        seenNamesInBatch.add(normalizedName);
+        seenSkusInBatch.add(normalizedSku);
+
+        const assignedCompany = (p.company && p.company.trim()) || 'Daxia Healthcare';
+
+        // Auto-ensure Company exists in Company collection so it shows up on public website
+        try {
+          const escapedComp = assignedCompany.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const compExists = await Company.findOne({ name: { $regex: new RegExp(`^${escapedComp}$`, 'i') } });
+          if (!compExists) {
+            const initials = assignedCompany.replace(/[^A-Za-z0-9]/g, '').slice(0, 3).toUpperCase() || 'PH';
+            const newComp = new Company({
+              name: assignedCompany,
+              category: p.category || 'Pharmaceutical Formulations',
+              location: 'Gujarat, India',
+              isPartner: true,
+              isPublished: true,
+              logoUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=0c3d6c&color=ffffff&bold=true&size=128`,
+              description: `Authorized pharmaceutical manufacturer for ${assignedCompany} formulations.`
+            });
+            await newComp.save();
+          }
+        } catch (cErr) {
+          console.warn('Auto-create company info in bulk import:', cErr.message);
+        }
+
         const images = Array.isArray(p.images) ? p.images : p.imageUrl ? [p.imageUrl] : [];
         const mainImage = p.imageUrl || (images.length > 0 ? images[0] : '');
+        const salesGstVal = parseFloat(p.salesGst) || parseFloat(p.gstRate) || 12;
 
         const productData = {
-          name: p.name.trim(),
-          brand: (p.brand && p.brand.trim()) || 'Daxia Healthcare',
-          company: (p.company && p.company.trim()) || 'DAXIA',
+          name: trimmedName,
+          brand: (p.brand && p.brand.trim()) || trimmedName,
+          company: assignedCompany,
           category: (p.category && p.category.trim()) || 'Pharma Products',
           subCategory: (p.subCategory && p.subCategory.trim()) || '',
           sku,
@@ -831,10 +894,16 @@ router.post('/bulk', protect, adminOnly, async (req, res) => {
           mrp: parseFloat(p.mrp) || parseFloat(p.price) || 0,
           stockQuantity: parseInt(p.stockQuantity, 10) || 100,
           inStock: p.inStock !== undefined ? Boolean(p.inStock) : true,
-          packing: (p.packing && p.packing.trim()) || '',
+          packing: (p.packing && p.packing.trim()) || '10 x 10 Tablets',
           composition: (p.composition && p.composition.trim()) || '',
           form: (p.form && p.form.trim()) || 'Tablet',
-          manufacturer: (p.manufacturer && p.manufacturer.trim()) || 'Daxia Healthcare Pvt. Ltd.',
+          manufacturer: (p.manufacturer && p.manufacturer.trim()) || assignedCompany,
+          rackId: (p.rackId && p.rackId.trim()) || '',
+          hsnCode: (p.hsnCode && p.hsnCode.trim()) || '3004',
+          purchaseGst: parseFloat(p.purchaseGst) || 12,
+          salesGst: salesGstVal,
+          gstRate: salesGstVal,
+          expiryDate: (p.expiryDate && p.expiryDate.trim()) || '',
           imageUrl: mainImage,
           images,
           description: (p.description && p.description.trim()) || '',
@@ -843,7 +912,7 @@ router.post('/bulk', protect, adminOnly, async (req, res) => {
           isActive: p.isActive !== undefined ? Boolean(p.isActive) : true,
         };
 
-        // If product with matching SKU exists, update it; otherwise insert
+        // If product with matching SKU exists and not skipping, update; otherwise insert
         await Product.findOneAndUpdate({ sku }, { $set: productData }, { upsert: true, new: true });
         successCount++;
       } catch (rowErr) {
@@ -854,10 +923,11 @@ router.post('/bulk', protect, adminOnly, async (req, res) => {
 
     res.json({
       success: true,
-      message: `Bulk import completed: ${successCount} products imported successfully`,
+      message: `Bulk import completed: ${successCount} products imported, ${skippedCount} duplicates skipped.`,
       successCount,
+      skippedCount,
       errorCount,
-      errors: errors.slice(0, 10), // return first 10 errors if any
+      errors: errors.slice(0, 10),
     });
   } catch (error) {
     console.error('Bulk import error:', error);

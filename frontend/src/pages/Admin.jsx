@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import * as XLSX from 'xlsx';
 import { 
   Lock, LayoutDashboard, ShoppingBag, MessageSquare, Briefcase, LogOut, 
   Plus, Edit2, Truck, Trash2, CheckCircle2, XCircle, ChevronDown, Download, AlertCircle,
@@ -634,6 +635,7 @@ function Admin() {
   const [isUploadingPhotos, setIsUploadingPhotos] = useState(false);
   const [photoDragActive, setPhotoDragActive] = useState(false);
   const fileInputRef = useRef(null);
+  const excelFileInputRef = useRef(null);
   const [isSearchingWebImages, setIsSearchingWebImages] = useState(false);
   const [webImageResults, setWebImageResults] = useState([]);
 
@@ -722,8 +724,12 @@ function Admin() {
   const [prodExpiryDate, setProdExpiryDate] = useState('');
 
 
-  // Bulk Import States
+  // Bulk Excel & CSV Import States
   const [bulkCsvText, setBulkCsvText] = useState('');
+  const [bulkParsedRows, setBulkParsedRows] = useState([]);
+  const [bulkPreviewFilter, setBulkPreviewFilter] = useState('all'); // 'all' | 'valid' | 'duplicates'
+  const [uploadedFileName, setUploadedFileName] = useState('');
+  const [bulkSkipDuplicates, setBulkSkipDuplicates] = useState(true);
   const [bulkImportResults, setBulkImportResults] = useState(null);
   const [isImportingBulk, setIsImportingBulk] = useState(false);
 
@@ -2268,89 +2274,392 @@ _Helpline: +91 9316566894_`;
     }
   };
 
+  // ==========================================
+  // BULK EXCEL & CSV TEMPLATE GENERATOR & IMPORTER
+  // ==========================================
+
+  const handleDownloadExcelTemplate = () => {
+    try {
+      // 1. Column Headers for Sheet 1
+      const headers = [
+        'Product Name / Brand Name *',
+        'SKU / ID',
+        'Manufacturer / Company *',
+        'Category *',
+        'Chemical / Active Composition *',
+        'Formulation Form *',
+        'Wholesale Price (₹) *',
+        'MRP (₹) *',
+        'Stock Units *',
+        'Packing Specifications *',
+        'Subcategory / Variant *',
+        'Manufacturer Details *',
+        'Rack ID / Location *',
+        'HSN Code *',
+        'Expiry Date *',
+        'Purchase GST (%) *',
+        'Sales GST (%) *',
+        'Product Description & Indications *',
+        'In Stock (YES/NO)',
+        'Featured Showcase (YES/NO)',
+        'Our Product Exclusive (YES/NO)',
+        'Live on Website (YES/NO)'
+      ];
+
+      // 2. Sample Data Rows
+      const sampleCompany1 = companies[0]?.name || 'Daxia Healthcare';
+      const sampleCompany2 = companies[1]?.name || companies[0]?.name || 'BIOCHEM';
+
+      const sampleRows = [
+        [
+          'Paracetamol Tablet IP 500mg',
+          'NP-825665',
+          sampleCompany1,
+          'Pharma Products',
+          'Paracetamol IP 500mg',
+          'Tablet',
+          28.50,
+          45.00,
+          100,
+          '10 x 10 Tablets',
+          'Pain Relief & Antipyretic',
+          `${sampleCompany1} Pvt. Ltd., Plot 12, GIDC, Rajkot, Gujarat`,
+          'R-04, Shelf-B',
+          '3004',
+          '12/2027',
+          12,
+          12,
+          'Effective relief of fever, mild to moderate body pain and headache.',
+          'YES',
+          'NO',
+          'YES',
+          'YES'
+        ],
+        [
+          'Pantoprazole Gastro-Resistant Tabs IP 40mg',
+          'NP-825666',
+          sampleCompany2,
+          'Pharma Products',
+          'Pantoprazole Sodium IP 40mg',
+          'Tablet',
+          34.00,
+          65.00,
+          150,
+          '10 x 10 Strips',
+          'Gastro Care',
+          `${sampleCompany2} Pharma Labs, Ahmedabad, Gujarat`,
+          'R-02, Shelf-A',
+          '3004',
+          '08/2027',
+          12,
+          12,
+          'Provides fast and sustained relief from acidity, heartburn, and GERD symptoms.',
+          'YES',
+          'YES',
+          'NO',
+          'YES'
+        ]
+      ];
+
+      // 3. Create Worksheet for Products Template
+      const wsTemplate = XLSX.utils.aoa_to_sheet([headers, ...sampleRows]);
+      wsTemplate['!cols'] = [
+        { wch: 34 }, // Product Name
+        { wch: 16 }, // SKU
+        { wch: 26 }, // Company
+        { wch: 22 }, // Category
+        { wch: 32 }, // Composition
+        { wch: 16 }, // Form
+        { wch: 18 }, // Wholesale Price
+        { wch: 14 }, // MRP
+        { wch: 14 }, // Stock
+        { wch: 22 }, // Packing
+        { wch: 26 }, // Subcategory
+        { wch: 38 }, // Manufacturer Details
+        { wch: 18 }, // Rack ID
+        { wch: 14 }, // HSN Code
+        { wch: 16 }, // Expiry Date
+        { wch: 18 }, // Purchase GST
+        { wch: 18 }, // Sales GST
+        { wch: 42 }, // Description
+        { wch: 18 }, // In Stock
+        { wch: 22 }, // Featured
+        { wch: 24 }, // Our Product
+        { wch: 20 }  // Live
+      ];
+
+      // 4. Create Worksheet for Companies List
+      const companyHeaders = ['Registered Company / Manufacturer Name', 'Live Status'];
+      const compList = companies.length > 0 ? companies : [{ name: 'Daxia Healthcare' }, { name: 'BIOCHEM' }];
+      const companyData = compList.map(c => [c.name, 'Active Live Partner']);
+      const wsCompanies = XLSX.utils.aoa_to_sheet([companyHeaders, ...companyData]);
+      wsCompanies['!cols'] = [{ wch: 36 }, { wch: 20 }];
+
+      // 5. Build Workbook
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, wsTemplate, 'Products_Template');
+      XLSX.utils.book_append_sheet(wb, wsCompanies, 'Companies_List');
+
+      // 6. Download file
+      XLSX.writeFile(wb, 'Niyansh_Pharma_Product_Import_Template.xlsx');
+      showToast('📥 Excel Template downloaded successfully!');
+    } catch (err) {
+      console.error('Download template error:', err);
+      showToast('Failed to download Excel template: ' + err.message, 'error');
+    }
+  };
+
+  const handleBulkFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadedFileName(file.name);
+    setBulkImportResults(null);
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const data = new Uint8Array(evt.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const rawJson = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+
+        if (!rawJson || rawJson.length === 0) {
+          showToast('The selected file has no data rows', 'error');
+          return;
+        }
+
+        const seenNamesInSheet = new Set();
+        const seenSkusInSheet = new Set();
+
+        const parsed = rawJson.map((row, idx) => {
+          const getVal = (...keys) => {
+            for (const k of keys) {
+              const matchedKey = Object.keys(row).find(
+                rk => rk.toLowerCase().trim() === k.toLowerCase().trim() ||
+                      rk.toLowerCase().replace(/[^a-z0-9]/g, '') === k.toLowerCase().replace(/[^a-z0-9]/g, '')
+              );
+              if (matchedKey && row[matchedKey] !== undefined && row[matchedKey] !== null) {
+                return String(row[matchedKey]).trim();
+              }
+            }
+            return '';
+          };
+
+          const name = getVal('Product Name / Brand Name *', 'Product Name', 'Name', 'Product', 'Brand Name');
+          const rawSku = getVal('SKU / ID', 'SKU', 'Product ID', 'Item Code');
+          const sku = rawSku || `NP-${Date.now().toString().slice(-6)}-${idx + 1}`;
+          const company = getVal('Manufacturer / Company *', 'Manufacturer / Company', 'Company', 'Manufacturer') || 'Daxia Healthcare';
+          const category = getVal('Category *', 'Category') || 'Pharma Products';
+          const composition = getVal('Chemical / Active Composition *', 'Chemical / Active Composition', 'Composition', 'Chemical');
+          const form = getVal('Formulation Form *', 'Formulation Form', 'Form') || 'Tablet';
+          const price = parseFloat(getVal('Wholesale Price (₹) *', 'Wholesale Price', 'Wholesale', 'Price', 'PTR')) || 0;
+          const mrp = parseFloat(getVal('MRP (₹) *', 'MRP', 'Retail MRP')) || (price > 0 ? Math.round(price * 1.35) : 0);
+          const stockQuantity = parseInt(getVal('Stock Units *', 'Stock Units', 'Stock', 'Quantity', 'Qty') || '100', 10);
+          const packing = getVal('Packing Specifications *', 'Packing Specifications', 'Packing', 'Pack') || '10 x 10 Tablets';
+          const subCategory = getVal('Subcategory / Variant *', 'Subcategory / Variant', 'Subcategory', 'Variant') || '';
+          const manufacturer = getVal('Manufacturer Details *', 'Manufacturer Details') || `${company} Pvt. Ltd.`;
+          const rackId = getVal('Rack ID / Location *', 'Rack ID / Location', 'Rack ID', 'Rack', 'Location') || 'R-01';
+          const hsnCode = getVal('HSN Code *', 'HSN Code', 'HSN') || '3004';
+          const expiryDate = getVal('Expiry Date *', 'Expiry Date', 'Expiry', 'Exp') || '12/2027';
+          const purchaseGst = parseFloat(getVal('Purchase GST (%) *', 'Purchase GST', 'Purchase GST Rate (%)')) || 12;
+          const salesGst = parseFloat(getVal('Sales GST (%) *', 'Sales GST', 'Sales GST Rate (%)')) || 12;
+          const description = getVal('Product Description & Indications *', 'Product Description', 'Description') || `${name} formulation by ${company}.`;
+
+          const inStockVal = getVal('In Stock (YES/NO)', 'In Stock', 'Publish as In Stock').toUpperCase();
+          const inStock = inStockVal === 'NO' || inStockVal === 'FALSE' ? false : true;
+
+          const featuredVal = getVal('Featured Showcase (YES/NO)', 'Featured').toUpperCase();
+          const featured = featuredVal === 'YES' || featuredVal === 'TRUE';
+
+          const ourProductVal = getVal('Our Product Exclusive (YES/NO)', 'Our Product').toUpperCase();
+          const isOurProduct = ourProductVal === 'YES' || ourProductVal === 'TRUE';
+
+          const liveVal = getVal('Live on Website (YES/NO)', 'Live on Public Website', 'Live').toUpperCase();
+          const isActive = liveVal === 'NO' || liveVal === 'FALSE' ? false : true;
+
+          // DUPLICATION & ERROR CHECKS
+          let isDuplicate = false;
+          let duplicateReason = '';
+          let hasError = false;
+          let errorMessage = '';
+
+          if (!name) {
+            hasError = true;
+            errorMessage = 'Product name is missing';
+          } else {
+            const normName = name.toLowerCase();
+            if (seenNamesInSheet.has(normName)) {
+              isDuplicate = true;
+              duplicateReason = 'Duplicate Name in file';
+            } else {
+              seenNamesInSheet.add(normName);
+              const existsInCatalog = products.find(p => p.name?.toLowerCase().trim() === normName);
+              if (existsInCatalog) {
+                isDuplicate = true;
+                duplicateReason = `Already in catalog (SKU: ${existsInCatalog.sku || 'N/A'})`;
+              }
+            }
+          }
+
+          if (rawSku) {
+            const normSku = rawSku.toLowerCase();
+            if (seenSkusInSheet.has(normSku)) {
+              isDuplicate = true;
+              duplicateReason = duplicateReason || 'Duplicate SKU in file';
+            } else {
+              seenSkusInSheet.add(normSku);
+              const existsSku = products.find(p => p.sku?.toLowerCase().trim() === normSku);
+              if (existsSku) {
+                isDuplicate = true;
+                duplicateReason = duplicateReason || `SKU already used by "${existsSku.name}"`;
+              }
+            }
+          }
+
+          if (price <= 0) {
+            hasError = true;
+            errorMessage = errorMessage || 'Wholesale price must be > 0';
+          }
+
+          return {
+            _rowId: idx + 1,
+            selected: !isDuplicate && !hasError,
+            name,
+            sku,
+            company,
+            category,
+            composition,
+            form,
+            price,
+            mrp,
+            stockQuantity,
+            packing,
+            subCategory,
+            manufacturer,
+            rackId,
+            hsnCode,
+            expiryDate,
+            purchaseGst,
+            salesGst,
+            description,
+            inStock,
+            featured,
+            isOurProduct,
+            isActive,
+            isDuplicate,
+            duplicateReason,
+            hasError,
+            errorMessage
+          };
+        });
+
+        setBulkParsedRows(parsed);
+        showToast(`📊 Parsed ${parsed.length} products from ${file.name}`);
+      } catch (err) {
+        console.error('Error parsing spreadsheet:', err);
+        showToast('Error reading spreadsheet: ' + err.message, 'error');
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  const handleToggleRowSelection = (rowId) => {
+    setBulkParsedRows(prev => prev.map(r => r._rowId === rowId ? { ...r, selected: !r.selected } : r));
+  };
+
+  const handleToggleSelectAll = (checked) => {
+    setBulkParsedRows(prev => prev.map(r => {
+      // Don't select error rows or duplicates if skipping
+      if (r.hasError) return { ...r, selected: false };
+      if (bulkSkipDuplicates && r.isDuplicate) return { ...r, selected: false };
+      return { ...r, selected: checked };
+    }));
+  };
+
   const handleExecuteBulkImport = async () => {
-    if (!bulkCsvText.trim()) {
-      showToast('Please paste CSV text or select a file to import', 'error');
+    let rowsToImport = [];
+
+    if (bulkParsedRows.length > 0) {
+      rowsToImport = bulkParsedRows.filter(r => {
+        if (!r.selected) return false;
+        if (r.hasError) return false;
+        if (bulkSkipDuplicates && r.isDuplicate) return false;
+        return true;
+      });
+    } else if (bulkCsvText.trim()) {
+      // Manual text fallback
+      const lines = bulkCsvText.trim().split(/\r?\n/).filter(line => line.trim() !== '');
+      if (lines.length >= 2) {
+        const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/["']/g, ''));
+        for (let i = 1; i < lines.length; i++) {
+          const parts = lines[i].split(',').map(p => p.trim().replace(/^["']|["']$/g, ''));
+          const rowObj = {};
+          headers.forEach((h, colIdx) => { rowObj[h] = parts[colIdx] || ''; });
+          if (rowObj.name || rowObj['product name']) {
+            rowsToImport.push({
+              name: rowObj.name || rowObj['product name'],
+              sku: rowObj.sku || `NP-${Date.now().toString().slice(-6)}-${i}`,
+              company: rowObj.company || 'Daxia Healthcare',
+              category: rowObj.category || 'Pharma Products',
+              composition: rowObj.composition || '',
+              form: rowObj.form || 'Tablet',
+              price: parseFloat(rowObj.price || rowObj.ptr || 0),
+              mrp: parseFloat(rowObj.mrp || 0),
+              stockQuantity: parseInt(rowObj.stockquantity || 100, 10),
+              packing: rowObj.packing || '10 x 10 Tablets',
+              subCategory: rowObj.subcategory || '',
+              manufacturer: rowObj.manufacturer || 'Daxia Healthcare Pvt. Ltd.',
+              rackId: rowObj.rackid || 'R-01',
+              hsnCode: rowObj.hsncode || '3004',
+              expiryDate: rowObj.expirydate || '12/2027',
+              purchaseGst: parseFloat(rowObj.purchasegst || 12),
+              salesGst: parseFloat(rowObj.salesgst || 12),
+              description: rowObj.description || '',
+              inStock: true,
+              featured: false,
+              isOurProduct: false,
+              isActive: true
+            });
+          }
+        }
+      }
+    }
+
+    if (rowsToImport.length === 0) {
+      showToast('No valid products selected to import. Check preview for errors or duplicates.', 'error');
       return;
     }
 
     setIsImportingBulk(true);
     setBulkImportResults(null);
     try {
-      // Parse CSV rows
-      const lines = bulkCsvText.trim().split(/\r?\n/).filter(line => line.trim() !== '');
-      if (lines.length < 2) {
-        showToast('CSV must have a header row and at least one data row', 'error');
-        setIsImportingBulk(false);
-        return;
-      }
-
-      const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/["']/g, ''));
-      const parsedProducts = [];
-
-      for (let i = 1; i < lines.length; i++) {
-        // Handle basic comma parsing
-        const regex = /(?:,|\n|^)("(?:(?:"")*[^"]*)*"|[^",\n]*|(?:\n|$))/g;
-        const matches = [];
-        let match;
-        while ((match = regex.exec(lines[i])) !== null) {
-          if (match.index === regex.lastIndex) regex.lastIndex++;
-          let val = match[1] || '';
-          if (val.startsWith('"') && val.endsWith('"')) {
-            val = val.slice(1, -1).replace(/""/g, '"');
-          }
-          matches.push(val.trim());
-          if (regex.lastIndex >= lines[i].length) break;
-        }
-
-        const rowObj = {};
-        headers.forEach((h, colIdx) => {
-          rowObj[h] = matches[colIdx] || '';
-        });
-
-        if (rowObj.name || rowObj['product name']) {
-          parsedProducts.push({
-            name: rowObj.name || rowObj['product name'],
-            sku: rowObj.sku || rowObj['product id'] || rowObj['sku code'] || '',
-            category: rowObj.category || 'Pharma Products',
-            subCategory: rowObj.subcategory || rowObj['sub category'] || '',
-            brand: rowObj.brand || 'Daxia Healthcare',
-            price: parseFloat(rowObj.price || rowObj['price (ptr)'] || rowObj['ptr'] || 0),
-            mrp: parseFloat(rowObj.mrp || rowObj['regular price'] || 0),
-            stockQuantity: parseInt(rowObj.stockquantity || rowObj['stock quantity'] || rowObj.stock || 100, 10),
-            packing: rowObj.packing || '',
-            composition: rowObj.composition || '',
-            form: rowObj.form || 'Tablet',
-            imageUrl: rowObj.imageurl || rowObj['image url'] || rowObj.image || '',
-            description: rowObj.description || '',
-          });
-        }
-      }
-
-      if (parsedProducts.length === 0) {
-        showToast('No valid product rows found in CSV', 'error');
-        setIsImportingBulk(false);
-        return;
-      }
-
       const res = await fetch('/api/products/bulk', {
         method: 'POST',
         headers: getAuthHeaders(),
-        body: JSON.stringify({ products: parsedProducts })
+        body: JSON.stringify({
+          products: rowsToImport,
+          skipDuplicates: bulkSkipDuplicates
+        })
       });
       const data = await res.json();
 
       if (res.ok && data.success) {
         setBulkImportResults(data);
-        showToast(`Successfully imported ${data.successCount} products!`);
+        showToast(`✅ Successfully imported ${data.successCount} products! ${data.skippedCount ? `(${data.skippedCount} duplicates skipped)` : ''}`);
         broadcastLiveEvent(SYNC_EVENTS.PRODUCT_BULK_IMPORTED, { count: data.successCount });
+        fetchProducts();
         fetchDashboardData();
+        // Clear preview after successful import
+        setBulkParsedRows([]);
+        setUploadedFileName('');
+        setBulkCsvText('');
       } else {
         showToast(data.message || 'Bulk import failed', 'error');
       }
     } catch (err) {
-      console.error('Bulk import error:', err);
-      showToast('Error parsing or importing CSV: ' + err.message, 'error');
+      showToast('Error executing bulk import: ' + err.message, 'error');
     } finally {
       setIsImportingBulk(false);
     }
@@ -4074,9 +4383,18 @@ _Helpline: +91 9316566894_`;
                         onClick={() => { setBulkImportResults(null); setIsBulkImportOpen(true); }} 
                         className="btn btn-outline btn-sm"
                         style={{ gap: '6px' }}
-                        title="Import multiple products from CSV"
+                        title="Import multiple products from Excel or CSV with live preview"
                       >
-                        <FileSpreadsheet size={14} /> Import CSV
+                        <FileSpreadsheet size={14} /> Import Excel / CSV
+                      </button>
+
+                      <button 
+                        onClick={handleDownloadExcelTemplate} 
+                        className="btn btn-outline btn-sm"
+                        style={{ gap: '6px', color: '#15803d', borderColor: '#86efac', backgroundColor: '#f0fdf4', fontWeight: '700' }}
+                        title="Download sample Excel template (.xlsx) with all fields and registered companies"
+                      >
+                        <Download size={14} /> Download Excel Template
                       </button>
 
                       {productStats.totalProducts < 500 && (
@@ -6740,85 +7058,454 @@ _Helpline: +91 9316566894_`;
       )}
 
       {/* ==========================================
-          MODAL 7: BULK CSV IMPORT MODAL
+          MODAL 7: BULK EXCEL & CSV IMPORT MODAL (WITH LIVE PREVIEW & DUPLICATION PREVENTER)
           ========================================== */}
-      {isBulkImportOpen && (
+      {isBulkImportOpen && typeof document !== 'undefined' && createPortal(
         <div style={{
-          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-          backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', zIndex: 1000,
-          display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px'
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          width: '100vw', height: '100vh',
+          backgroundColor: 'rgba(15, 23, 42, 0.78)', backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          zIndex: 100010,
+          display: 'flex', justifyContent: 'center', alignItems: 'center',
+          padding: '16px', boxSizing: 'border-box'
         }}>
-          <div className="card admin-modal-card" style={{ maxWidth: '720px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light)', paddingBottom: '15px', marginBottom: '15px' }}>
-              <div>
-                <h3 style={{ fontSize: '1.25rem', color: 'var(--text-dark)', margin: 0 }}>Bulk Import Products (CSV)</h3>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-medium)' }}>Paste CSV content or select a .csv file from your computer</span>
+          <div className="card" style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '16px',
+            width: '100%',
+            maxWidth: '1240px',
+            maxHeight: '92vh',
+            display: 'flex',
+            flexDirection: 'column',
+            boxShadow: '0 25px 65px -10px rgba(0, 0, 0, 0.5)',
+            border: '1px solid #cbd5e1',
+            overflow: 'hidden',
+            boxSizing: 'border-box'
+          }} role="dialog" aria-modal="true">
+
+            {/* MODAL HEADER */}
+            <div style={{
+              padding: '18px 24px',
+              borderBottom: '1px solid #e2e8f0',
+              backgroundColor: '#f8fafc',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexShrink: 0
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '42px', height: '42px', borderRadius: '10px', backgroundColor: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <FileSpreadsheet size={24} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text-dark)', fontWeight: '700' }}>
+                    Bulk Import Products via Excel / CSV
+                  </h3>
+                  <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: 'var(--text-medium)' }}>
+                    Upload spreadsheet, inspect live table preview, verify duplication checks, and import all products in 1 click.
+                  </p>
+                </div>
               </div>
-              <button onClick={() => setIsBulkImportOpen(false)} style={{ color: 'var(--text-medium)', background: 'none', border: 'none', cursor: 'pointer' }}>
-                <XCircle size={22} />
+              <button 
+                onClick={() => {
+                  setIsBulkImportOpen(false);
+                  setBulkParsedRows([]);
+                  setUploadedFileName('');
+                }} 
+                style={{ color: 'var(--text-medium)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}
+                aria-label="Close"
+              >
+                <XCircle size={24} />
               </button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <div style={{ backgroundColor: '#f8fafc', padding: '12px 16px', borderRadius: '8px', fontSize: '0.8rem', color: 'var(--text-medium)' }}>
-                <strong>Supported CSV Header Format:</strong><br />
-                <code>Name, SKU, Category, Brand, Price, MRP, StockQuantity, Packing, Composition, Form, ImageUrl, Description</code>
-              </div>
+            {/* MODAL BODY (SCROLLABLE & RESPONSIVE) */}
+            <div style={{ padding: '20px 24px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '16px', boxSizing: 'border-box' }}>
+              
+              {/* TOP ACTION BAR: UPLOAD BUTTON & DOWNLOAD TEMPLATE BUTTON */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', padding: '14px 18px', backgroundColor: '#f1f5f9', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                  <input 
+                    type="file" 
+                    ref={excelFileInputRef}
+                    accept=".xlsx, .xls, .csv, text/csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                    style={{ display: 'none' }}
+                    onChange={handleBulkFileChange}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => excelFileInputRef.current?.click()}
+                    className="btn btn-primary btn-sm"
+                    style={{ gap: '6px', padding: '9px 16px', fontWeight: '700' }}
+                  >
+                    <Upload size={16} /> {uploadedFileName ? 'Change Excel / CSV File' : 'Select Excel (.xlsx) or CSV File'}
+                  </button>
 
-              <div>
-                <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)', display: 'block', marginBottom: '6px' }}>
-                  Upload CSV File:
-                </label>
-                <input 
-                  type="file" 
-                  accept=".csv,text/csv"
-                  onChange={(e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onload = (event) => setBulkCsvText(event.target.result);
-                      reader.readAsText(file);
-                    }
+                  {uploadedFileName && (
+                    <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#1e293b', backgroundColor: '#ffffff', padding: '6px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+                      📄 {uploadedFileName} ({bulkParsedRows.length} rows detected)
+                    </span>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleDownloadExcelTemplate}
+                  className="btn btn-sm"
+                  style={{
+                    gap: '6px',
+                    padding: '9px 16px',
+                    backgroundColor: '#16a34a',
+                    color: '#ffffff',
+                    border: 'none',
+                    fontWeight: '700',
+                    boxShadow: '0 2px 6px rgba(22, 163, 74, 0.25)'
                   }}
-                  style={{ fontSize: '0.85rem' }}
-                />
+                  title="Download ready sample Excel spreadsheet with all columns and registered companies"
+                >
+                  <Download size={15} /> 📥 Download Sample Excel Template
+                </button>
               </div>
 
-              <div>
-                <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)', display: 'block', marginBottom: '6px' }}>
-                  Or Paste CSV Text Here:
-                </label>
-                <textarea 
-                  rows={7}
-                  placeholder={`Name, SKU, Category, Price, MRP, StockQuantity\nMUCIDAX 600, DAX-MUC-600, Pharma Products, 185.0, 260.0, 100\nAMLOSKY - 2.5, DAX-AML-25, Pharma Products, 28.5, 45.0, 100`}
-                  value={bulkCsvText}
-                  onChange={(e) => setBulkCsvText(e.target.value)}
-                  style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem', fontFamily: 'monospace' }}
-                />
-              </div>
+              {/* STATE 1: NO FILE UPLOADED YET (DRAG & DROP ZONE & INSTRUCTIONS) */}
+              {bulkParsedRows.length === 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div 
+                    onClick={() => excelFileInputRef.current?.click()}
+                    style={{
+                      border: '2px dashed #94a3b8',
+                      borderRadius: '14px',
+                      padding: '40px 20px',
+                      textAlign: 'center',
+                      backgroundColor: '#f8fafc',
+                      cursor: 'pointer',
+                      transition: 'border-color 0.2s ease'
+                    }}
+                    onMouseOver={(e) => { e.currentTarget.style.borderColor = '#2563eb'; e.currentTarget.style.backgroundColor = '#eff6ff'; }}
+                    onMouseOut={(e) => { e.currentTarget.style.borderColor = '#94a3b8'; e.currentTarget.style.backgroundColor = '#f8fafc'; }}
+                  >
+                    <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: '#dbeafe', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+                      <FileSpreadsheet size={30} />
+                    </div>
+                    <h4 style={{ margin: '0 0 6px', fontSize: '1.05rem', color: 'var(--text-dark)', fontWeight: '700' }}>
+                      Click or Drag & Drop Excel (.xlsx, .xls) or CSV file here
+                    </h4>
+                    <p style={{ margin: '0 0 14px', fontSize: '0.85rem', color: 'var(--text-medium)' }}>
+                      Supports all pharma formulation columns. Images can be left empty and added later.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); handleDownloadExcelTemplate(); }}
+                      style={{ fontSize: '0.84rem', color: '#16a34a', background: 'none', border: 'none', cursor: 'pointer', fontWeight: '700', textDecoration: 'underline' }}
+                    >
+                      Don&apos;t have a format? Click here to download the ready Excel Template (.xlsx)
+                    </button>
+                  </div>
 
-              {bulkImportResults && (
-                <div style={{ padding: '12px 16px', backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '8px', fontSize: '0.85rem', color: '#065f46' }}>
-                  <strong>Import Summary:</strong> Successfully created/updated {bulkImportResults.successCount} products.
+                  <div style={{ backgroundColor: '#f8fafc', padding: '16px 20px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '0.85rem' }}>
+                    <div style={{ fontWeight: '700', color: 'var(--text-dark)', marginBottom: '8px' }}>
+                      ⚡ Supported Spreadsheet Columns (All auto-mapped):
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '8px', color: 'var(--text-medium)', fontSize: '0.82rem' }}>
+                      <div>• <strong>Product Name / Brand Name *</strong></div>
+                      <div>• <strong>SKU / ID</strong> (Auto-generated if blank)</div>
+                      <div>• <strong>Manufacturer / Company *</strong></div>
+                      <div>• <strong>Category *</strong></div>
+                      <div>• <strong>Chemical / Active Composition *</strong></div>
+                      <div>• <strong>Formulation Form *</strong></div>
+                      <div>• <strong>Wholesale Price (₹) *</strong></div>
+                      <div>• <strong>MRP (₹) *</strong></div>
+                      <div>• <strong>Stock Units *</strong></div>
+                      <div>• <strong>Packing Specifications *</strong></div>
+                      <div>• <strong>Subcategory / Variant *</strong></div>
+                      <div>• <strong>Manufacturer Details *</strong></div>
+                      <div>• <strong>Rack ID / Location *</strong></div>
+                      <div>• <strong>HSN Code *</strong></div>
+                      <div>• <strong>Expiry Date *</strong></div>
+                      <div>• <strong>Purchase & Sales GST (%) *</strong></div>
+                    </div>
+                  </div>
                 </div>
               )}
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', borderTop: '1px solid var(--border-light)', paddingTop: '15px' }}>
-                <button type="button" onClick={() => setIsBulkImportOpen(false)} className="btn btn-outline btn-sm">
-                  Close
-                </button>
-                <button 
-                  type="button" 
-                  onClick={handleExecuteBulkImport}
-                  disabled={isImportingBulk || !bulkCsvText.trim()}
-                  className="btn btn-primary btn-sm"
+              {/* STATE 2: FILE PARSED -> INTERACTIVE RESPONSIVE PREVIEW TABLE WITH DUPLICATION PREVENTER */}
+              {bulkParsedRows.length > 0 && (() => {
+                const totalCount = bulkParsedRows.length;
+                const duplicateCount = bulkParsedRows.filter(r => r.isDuplicate).length;
+                const errorCount = bulkParsedRows.filter(r => r.hasError).length;
+                const validCount = bulkParsedRows.filter(r => !r.isDuplicate && !r.hasError).length;
+                const selectedCount = bulkParsedRows.filter(r => r.selected && !r.hasError && (!bulkSkipDuplicates || !r.isDuplicate)).length;
+
+                const displayedRows = bulkParsedRows.filter(r => {
+                  if (bulkPreviewFilter === 'valid') return !r.isDuplicate && !r.hasError;
+                  if (bulkPreviewFilter === 'duplicates') return r.isDuplicate;
+                  if (bulkPreviewFilter === 'errors') return r.hasError;
+                  return true;
+                });
+
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1, minHeight: 0 }}>
+                    
+                    {/* STATS SUMMARY BAR */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '10px' }}>
+                      <div style={{ padding: '12px 14px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-medium)', fontWeight: '700', textTransform: 'uppercase' }}>Total In File</div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--text-dark)' }}>{totalCount}</div>
+                      </div>
+
+                      <div style={{ padding: '12px 14px', backgroundColor: '#ecfdf5', borderRadius: '10px', border: '1px solid #a7f3d0' }}>
+                        <div style={{ fontSize: '0.72rem', color: '#047857', fontWeight: '700', textTransform: 'uppercase' }}>Ready to Import</div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#059669' }}>{validCount}</div>
+                      </div>
+
+                      <div style={{ padding: '12px 14px', backgroundColor: duplicateCount > 0 ? '#fffbeb' : '#f8fafc', borderRadius: '10px', border: `1px solid ${duplicateCount > 0 ? '#fde68a' : '#e2e8f0'}` }}>
+                        <div style={{ fontSize: '0.72rem', color: duplicateCount > 0 ? '#b45309' : 'var(--text-medium)', fontWeight: '700', textTransform: 'uppercase' }}>Duplicates Flagged</div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: '800', color: duplicateCount > 0 ? '#d97706' : 'var(--text-dark)' }}>{duplicateCount}</div>
+                      </div>
+
+                      <div style={{ padding: '12px 14px', backgroundColor: '#eff6ff', borderRadius: '10px', border: '1px solid #bfdbfe' }}>
+                        <div style={{ fontSize: '0.72rem', color: '#1d4ed8', fontWeight: '700', textTransform: 'uppercase' }}>Selected for Import</div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#2563eb' }}>{selectedCount}</div>
+                      </div>
+                    </div>
+
+                    {/* CONTROLS BAR: FILTER TABS & DUPLICATION CHECKBOX */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', padding: '10px 14px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        <button 
+                          type="button" 
+                          onClick={() => setBulkPreviewFilter('all')}
+                          style={{ padding: '5px 12px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: '700', border: 'none', cursor: 'pointer', backgroundColor: bulkPreviewFilter === 'all' ? '#2563eb' : '#e2e8f0', color: bulkPreviewFilter === 'all' ? '#fff' : '#475569' }}
+                        >
+                          All Rows ({totalCount})
+                        </button>
+                        <button 
+                          type="button" 
+                          onClick={() => setBulkPreviewFilter('valid')}
+                          style={{ padding: '5px 12px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: '700', border: 'none', cursor: 'pointer', backgroundColor: bulkPreviewFilter === 'valid' ? '#059669' : '#e2e8f0', color: bulkPreviewFilter === 'valid' ? '#fff' : '#475569' }}
+                        >
+                          Ready ({validCount})
+                        </button>
+                        {duplicateCount > 0 && (
+                          <button 
+                            type="button" 
+                            onClick={() => setBulkPreviewFilter('duplicates')}
+                            style={{ padding: '5px 12px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: '700', border: 'none', cursor: 'pointer', backgroundColor: bulkPreviewFilter === 'duplicates' ? '#d97706' : '#e2e8f0', color: bulkPreviewFilter === 'duplicates' ? '#fff' : '#475569' }}
+                          >
+                            Duplicates ({duplicateCount})
+                          </button>
+                        )}
+                      </div>
+
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.84rem', fontWeight: '700', color: '#1e293b' }}>
+                        <input 
+                          type="checkbox" 
+                          checked={bulkSkipDuplicates}
+                          onChange={(e) => setBulkSkipDuplicates(e.target.checked)}
+                          style={{ accentColor: '#2563eb', width: '16px', height: '16px' }}
+                        />
+                        <span>⚡ Automatically skip duplicates (prevent duplicates from being added)</span>
+                      </label>
+                    </div>
+
+                    {/* RESPONSIVE SCROLLABLE DATA PREVIEW TABLE */}
+                    <div style={{
+                      maxHeight: '380px',
+                      overflowX: 'auto',
+                      overflowY: 'auto',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '10px',
+                      backgroundColor: '#ffffff',
+                      boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.05)'
+                    }}>
+                      <table style={{ width: '100%', minWidth: '1100px', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
+                        <thead style={{ position: 'sticky', top: 0, backgroundColor: '#f1f5f9', zIndex: 5, boxShadow: '0 1px 2px rgba(0,0,0,0.08)' }}>
+                          <tr>
+                            <th style={{ padding: '10px 12px', width: '38px', textAlign: 'center' }}>
+                              <input 
+                                type="checkbox"
+                                checked={selectedCount > 0 && selectedCount === validCount}
+                                onChange={(e) => handleToggleSelectAll(e.target.checked)}
+                                style={{ accentColor: '#2563eb', width: '15px', height: '15px', cursor: 'pointer' }}
+                                title="Select / Deselect all valid rows"
+                              />
+                            </th>
+                            <th style={{ padding: '10px 12px', width: '70px' }}>Row</th>
+                            <th style={{ padding: '10px 12px', minWidth: '130px' }}>Status</th>
+                            <th style={{ padding: '10px 12px', minWidth: '190px' }}>Product Name / Brand</th>
+                            <th style={{ padding: '10px 12px', minWidth: '110px' }}>SKU / ID</th>
+                            <th style={{ padding: '10px 12px', minWidth: '140px' }}>Company</th>
+                            <th style={{ padding: '10px 12px', minWidth: '170px' }}>Composition</th>
+                            <th style={{ padding: '10px 12px', minWidth: '130px' }}>Packing & Form</th>
+                            <th style={{ padding: '10px 12px', minWidth: '95px' }}>Wholesale</th>
+                            <th style={{ padding: '10px 12px', minWidth: '85px' }}>MRP</th>
+                            <th style={{ padding: '10px 12px', minWidth: '70px' }}>Stock</th>
+                            <th style={{ padding: '10px 12px', minWidth: '80px' }}>GST</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {displayedRows.length === 0 ? (
+                            <tr>
+                              <td colSpan="12" style={{ textAlign: 'center', padding: '30px', color: 'var(--text-medium)' }}>
+                                No products found matching this filter.
+                              </td>
+                            </tr>
+                          ) : (
+                            displayedRows.map((r) => {
+                              const isRowDuplicate = r.isDuplicate;
+                              const isRowError = r.hasError;
+                              const rowBg = isRowError ? '#fef2f2' : isRowDuplicate ? '#fffbeb' : (r.selected ? '#ffffff' : '#f8fafc');
+
+                              return (
+                                <tr 
+                                  key={r._rowId} 
+                                  style={{ 
+                                    backgroundColor: rowBg, 
+                                    borderBottom: '1px solid #f1f5f9',
+                                    transition: 'background-color 0.15s ease'
+                                  }}
+                                >
+                                  <td style={{ padding: '8px 12px', textAlign: 'center' }}>
+                                    <input 
+                                      type="checkbox"
+                                      checked={r.selected && (!bulkSkipDuplicates || !isRowDuplicate) && !isRowError}
+                                      disabled={isRowError || (bulkSkipDuplicates && isRowDuplicate)}
+                                      onChange={() => handleToggleRowSelection(r._rowId)}
+                                      style={{ accentColor: '#2563eb', cursor: (isRowError || (bulkSkipDuplicates && isRowDuplicate)) ? 'not-allowed' : 'pointer' }}
+                                    />
+                                  </td>
+                                  <td style={{ padding: '8px 12px', color: '#64748b', fontWeight: '600' }}>
+                                    #{r._rowId}
+                                  </td>
+                                  <td style={{ padding: '8px 12px' }}>
+                                    {isRowError ? (
+                                      <span style={{ backgroundColor: '#fee2e2', color: '#b91c1c', fontSize: '0.72rem', padding: '2px 7px', borderRadius: '4px', fontWeight: '700', whiteSpace: 'nowrap' }}>
+                                        ✕ {r.errorMessage}
+                                      </span>
+                                    ) : isRowDuplicate ? (
+                                      <span style={{ backgroundColor: '#fef3c7', color: '#b45309', fontSize: '0.72rem', padding: '2px 7px', borderRadius: '4px', fontWeight: '700', whiteSpace: 'nowrap' }} title={r.duplicateReason}>
+                                        ⚠️ {r.duplicateReason}
+                                      </span>
+                                    ) : (
+                                      <span style={{ backgroundColor: '#dcfce7', color: '#15803d', fontSize: '0.72rem', padding: '2px 7px', borderRadius: '4px', fontWeight: '700', whiteSpace: 'nowrap' }}>
+                                        ✓ Ready
+                                      </span>
+                                    )}
+                                  </td>
+                                  <td style={{ padding: '8px 12px', fontWeight: '700', color: 'var(--text-dark)' }}>
+                                    {r.name || <span style={{ color: '#ef4444' }}>[Missing Name]</span>}
+                                  </td>
+                                  <td style={{ padding: '8px 12px', fontFamily: 'monospace', color: '#334155' }}>
+                                    {r.sku}
+                                  </td>
+                                  <td style={{ padding: '8px 12px', color: '#1d4ed8', fontWeight: '600' }}>
+                                    {r.company}
+                                  </td>
+                                  <td style={{ padding: '8px 12px', color: 'var(--text-medium)' }}>
+                                    {r.composition || '—'}
+                                  </td>
+                                  <td style={{ padding: '8px 12px', color: 'var(--text-medium)' }}>
+                                    {r.form} • {r.packing}
+                                  </td>
+                                  <td style={{ padding: '8px 12px', fontWeight: '700', color: '#16a34a' }}>
+                                    ₹{r.price.toFixed(2)}
+                                  </td>
+                                  <td style={{ padding: '8px 12px', color: 'var(--text-dark)' }}>
+                                    ₹{r.mrp.toFixed(2)}
+                                  </td>
+                                  <td style={{ padding: '8px 12px', color: 'var(--text-dark)' }}>
+                                    {r.stockQuantity}
+                                  </td>
+                                  <td style={{ padding: '8px 12px', color: 'var(--text-medium)' }}>
+                                    {r.salesGst}%
+                                  </td>
+                                </tr>
+                              );
+                            })
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+
+                  </div>
+                );
+              })()}
+
+              {/* SUCCESS RESULTS SUMMARY IF AVAILABLE */}
+              {bulkImportResults && (
+                <div style={{ padding: '14px 18px', backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '10px', fontSize: '0.88rem', color: '#065f46', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <CheckCircle2 size={20} color="#059669" />
+                  <div>
+                    <strong>Import Successful:</strong> Added <strong>{bulkImportResults.successCount}</strong> products to catalog. {bulkImportResults.skippedCount > 0 && `(${bulkImportResults.skippedCount} duplicates skipped)`}
+                  </div>
+                </div>
+              )}
+
+            </div>
+
+            {/* MODAL FOOTER */}
+            <div style={{
+              padding: '14px 24px',
+              backgroundColor: '#f8fafc',
+              borderTop: '1px solid #e2e8f0',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '12px',
+              flexShrink: 0
+            }}>
+              <div style={{ fontSize: '0.86rem', color: 'var(--text-medium)', fontWeight: '600' }}>
+                {bulkParsedRows.length > 0 ? (
+                  <span>
+                    Selected <strong style={{ color: '#2563eb' }}>
+                      {bulkParsedRows.filter(r => r.selected && !r.hasError && (!bulkSkipDuplicates || !r.isDuplicate)).length}
+                    </strong> of {bulkParsedRows.length} products
+                  </span>
+                ) : (
+                  <span>Ready to parse Excel or CSV spreadsheet</span>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsBulkImportOpen(false);
+                    setBulkParsedRows([]);
+                    setUploadedFileName('');
+                  }}
+                  className="btn btn-outline btn-sm"
+                  style={{ padding: '8px 16px', fontWeight: '600' }}
                 >
-                  {isImportingBulk ? 'Importing Products...' : 'Execute Bulk Import'}
+                  Cancel / Close
                 </button>
+
+                {bulkParsedRows.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleExecuteBulkImport}
+                    disabled={isImportingBulk || bulkParsedRows.filter(r => r.selected && !r.hasError && (!bulkSkipDuplicates || !r.isDuplicate)).length === 0}
+                    className="btn btn-primary btn-sm"
+                    style={{ padding: '8px 22px', fontWeight: '700', gap: '6px' }}
+                  >
+                    {isImportingBulk ? (
+                      <>
+                        <div className="spinner" style={{ width: '14px', height: '14px', borderTopColor: '#fff' }}></div>
+                        Importing Products...
+                      </>
+                    ) : (
+                      `✓ Confirm & Import (${bulkParsedRows.filter(r => r.selected && !r.hasError && (!bulkSkipDuplicates || !r.isDuplicate)).length}) Products`
+                    )}
+                  </button>
+                )}
               </div>
             </div>
+
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ==========================================

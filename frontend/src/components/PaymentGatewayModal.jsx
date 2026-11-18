@@ -104,6 +104,27 @@ export default function PaymentGatewayModal({
   const [errorMessage, setErrorMessage] = useState('');
   const [completedReceipt, setCompletedReceipt] = useState(null);
 
+  // Dynamic Payment & Bank Account Settings from Admin
+  const [paymentSettings, setPaymentSettings] = useState({
+    merchantUpiId: '9316566894@okbizaxis',
+    accountNumber: '924020012345678',
+    ifscCode: 'UTIB0000123',
+    accountName: 'Niyansh Pharma Wholesale',
+    bankName: 'Axis Bank Ltd, University Road Branch',
+    paymentNotes: ''
+  });
+
+  useEffect(() => {
+    fetch('/api/settings/payment')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.payment) {
+          setPaymentSettings(prev => ({ ...prev, ...data.payment }));
+        }
+      })
+      .catch(err => console.warn('Could not fetch payment settings:', err));
+  }, []);
+
   // Synchronize amount when modal opens or dueAmount changes
   useEffect(() => {
     if (isOpen) {
@@ -193,8 +214,8 @@ export default function PaymentGatewayModal({
   };
 
   // UPI QR and Deep Link strings
-  const merchantUpiId = '9316566894@okbizaxis';
-  const merchantName = 'Niyansh Pharma Wholesale';
+  const merchantUpiId = paymentSettings.merchantUpiId || '9316566894@okbizaxis';
+  const merchantName = paymentSettings.accountName || 'Niyansh Pharma Wholesale';
   const safePayAmount = Math.max(1, amountToPay || 0).toFixed(2);
   const upiTransactionNote = invoiceNumber
     ? `Settlement Inv ${invoiceNumber}`
@@ -1273,7 +1294,7 @@ _${t('payment.support', 'Support: +91 99099 23130')}_`;
                         <span style={{ color: '#64748b', display: 'block', fontSize: '0.72rem' }}>
                           {t('payment.bankAndBranch', 'Bank & Branch')}
                         </span>
-                        <strong style={{ color: '#1e293b' }}>Axis Bank, Rajkot Main Branch</strong>
+                        <strong style={{ color: '#1e293b' }}>{paymentSettings.bankName || 'Axis Bank, University Road Branch'}</strong>
                       </div>
                       <div>
                         <span style={{ color: '#64748b', display: 'block', fontSize: '0.72rem' }}>
@@ -1300,12 +1321,12 @@ _${t('payment.support', 'Support: +91 99099 23130')}_`;
                           {t('payment.accountNumber', 'Account Number')}
                         </span>
                         <span style={{ fontFamily: 'monospace', fontWeight: 800, fontSize: '0.9rem', color: '#0c3d6c', wordBreak: 'break-all' }}>
-                          923020048192019
+                          {paymentSettings.accountNumber || '924020012345678'}
                         </span>
                       </div>
                       <button
                         type="button"
-                        onClick={() => copyToClipboard('923020048192019', 'account')}
+                        onClick={() => copyToClipboard(paymentSettings.accountNumber || '924020012345678', 'account')}
                         style={{
                           display: 'flex',
                           alignItems: 'center',
@@ -1343,12 +1364,12 @@ _${t('payment.support', 'Support: +91 99099 23130')}_`;
                           {t('payment.ifscCode', 'IFSC Code')}
                         </span>
                         <span style={{ fontFamily: 'monospace', fontWeight: 800, fontSize: '0.9rem', color: '#0c3d6c' }}>
-                          UTIB0000123
+                          {paymentSettings.ifscCode || 'UTIB0000123'}
                         </span>
                       </div>
                       <button
                         type="button"
-                        onClick={() => copyToClipboard('UTIB0000123', 'ifsc')}
+                        onClick={() => copyToClipboard(paymentSettings.ifscCode || 'UTIB0000123', 'ifsc')}
                         style={{
                           display: 'flex',
                           alignItems: 'center',

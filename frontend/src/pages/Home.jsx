@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   ShieldCheck, Truck, Percent, Headset, Globe, ShoppingCart, MessageSquare, 
@@ -11,15 +11,14 @@ function Home({ addToCart }) {
   const navigate = useNavigate();
   const [heroSearch, setHeroSearch] = useState('');
 
-  const handleHeroSearchSubmit = (e) => {
-    e.preventDefault();
-    if (heroSearch.trim()) {
-      navigate(`/products?search=${encodeURIComponent(heroSearch.trim())}`);
-    } else {
-      navigate('/products');
-    }
-  };
-  const categories = [
+  // Dynamic Banners & Home Content Settings
+  const [heroBgImage, setHeroBgImage] = useState('https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=1600&q=80');
+  const [brandsList, setBrandsList] = useState([
+    'Abbott', 'Alkem', 'Biochem', 'Cipla', 'Dr. Morepen', 'Daxia',
+    'Glenmark', 'Healing Pharma', 'Intas', 'Leeford Healthcare',
+    'Mankind', 'Sun Pharma', 'Torrent', 'Troikaa Pharmaceuticals', 'Zydus'
+  ]);
+  const [dynamicCategories, setDynamicCategories] = useState([
     {
       name: 'Pharma Products',
       title: t('categories.pharmaTitle', 'Pharma Medicines'),
@@ -48,7 +47,45 @@ function Home({ addToCart }) {
       image: '/surgical-supplies.jpg',
       link: '/products?category=Surgical %26 Medical Supplies'
     }
-  ];
+  ]);
+
+  useEffect(() => {
+    // 1. Fetch dynamic banners
+    fetch('/api/settings/banners')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.banners?.homeHeroImage) {
+          setHeroBgImage(data.banners.homeHeroImage);
+        }
+      })
+      .catch(err => console.warn('Could not load banner settings:', err));
+
+    // 2. Fetch dynamic home brands & categories
+    fetch('/api/settings/home-content')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          if (Array.isArray(data.brands) && data.brands.length > 0) {
+            setBrandsList(data.brands);
+          }
+          if (Array.isArray(data.categories) && data.categories.length > 0) {
+            setDynamicCategories(data.categories);
+          }
+        }
+      })
+      .catch(err => console.warn('Could not load home content:', err));
+  }, []);
+
+  const handleHeroSearchSubmit = (e) => {
+    e.preventDefault();
+    if (heroSearch.trim()) {
+      navigate(`/products?search=${encodeURIComponent(heroSearch.trim())}`);
+    } else {
+      navigate('/products');
+    }
+  };
+
+  const categories = dynamicCategories;
 
   const features = [
     {
@@ -113,7 +150,7 @@ function Home({ addToCart }) {
       
       {/* Hero Banner Section */}
       <section className="home-hero-section" style={{
-        background: 'linear-gradient(135deg, rgba(10, 48, 86, 0.97), rgba(20, 83, 138, 0.92)), url("https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=1600&q=80")',
+        background: `linear-gradient(135deg, rgba(10, 48, 86, 0.97), rgba(20, 83, 138, 0.92)), url("${heroBgImage}")`,
         backgroundSize: 'cover', backgroundPosition: 'center', color: '#ffffff',
         padding: 'clamp(36px, 6vw, 75px) 0 clamp(44px, 7vw, 85px) 0', position: 'relative', overflow: 'hidden'
       }}>
@@ -125,17 +162,17 @@ function Home({ addToCart }) {
             
             <h1 style={{ fontSize: 'clamp(1.75rem, 4.8vw, 3.2rem)', color: '#ffffff', lineHeight: '1.18', fontWeight: '800', marginBottom: '16px', fontFamily: 'Outfit' }}>
               {t('hero.title', 'Your Trusted Partner in')} <br />
-              <span style={{ color: '#86efac' }}>{t('hero.titleHighlight', '9,500+ Pharma, OTC & Surgical')}</span> {t('hero.titleEnd', 'Supplies')}
+              <span style={{ color: '#86efac' }}>{t('hero.titleHighlight', 'Pharma, OTC & Surgical')}</span> {t('hero.titleEnd', 'Supplies')}
             </h1>
             
             <p style={{ fontSize: 'clamp(0.92rem, 2.5vw, 1.08rem)', color: '#e2e8f0', marginBottom: '24px', maxWidth: '620px', fontWeight: '400', lineHeight: '1.65' }}>
-              {t('hero.subtitle', 'Niyansh Pharma delivers 9,500+ genuine healthcare formulations, generic medicines, and hospital consumables from 252+ certified manufacturers with verified batch compliance and prompt delivery across Saurashtra & Gujarat.')}
+              {t('hero.subtitle', 'Niyansh Pharma delivers genuine healthcare formulations, generic medicines, and hospital consumables from certified manufacturers with verified batch compliance and prompt delivery across Saurashtra & Gujarat.')}
             </p>
 
             {/* High-Impact Action CTAs for Chemists */}
             <div className="hero-cta-buttons" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '22px' }}>
               <Link to="/companies" className="btn btn-secondary" style={{ padding: '12px 22px', fontSize: '0.94rem', fontWeight: '700', borderRadius: '30px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <Building2 size={18} /> {t('hero.browseCompanies', 'Browse 252+ Companies')}
+                <Building2 size={18} /> {t('hero.browseCompanies', 'Browse Pharma Companies')}
               </Link>
               <Link to="/quick-order" className="btn btn-primary" style={{ padding: '12px 22px', fontSize: '0.94rem', fontWeight: '700', borderRadius: '30px', display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#ffffff', color: 'var(--primary-blue)' }}>
                 <Package size={18} /> {t('hero.quickOrder', 'Fast Quick Order ⚡')}
@@ -176,12 +213,12 @@ function Home({ addToCart }) {
             {/* Stat Grid */}
             <div className="hero-stat-grid" style={{ marginBottom: '18px' }}>
               <div style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <div style={{ fontSize: 'clamp(1.3rem, 3.5vw, 1.65rem)', fontWeight: '800', color: '#ffffff', lineHeight: 1.1 }}>{t('hero.statFormulations', '9,500+')}</div>
-                <div style={{ fontSize: '0.76rem', color: '#cbd5e1', marginTop: '4px' }}>{t('hero.statFormulationsLabel', 'Genuine Formulations')}</div>
+                <div style={{ fontSize: 'clamp(1.15rem, 3.2vw, 1.45rem)', fontWeight: '800', color: '#ffffff', lineHeight: 1.1 }}>{t('hero.statFormulations', '100% Genuine')}</div>
+                <div style={{ fontSize: '0.76rem', color: '#cbd5e1', marginTop: '4px' }}>{t('hero.statFormulationsLabel', 'Quality Formulations')}</div>
               </div>
               <div style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <div style={{ fontSize: 'clamp(1.3rem, 3.5vw, 1.65rem)', fontWeight: '800', color: '#86efac', lineHeight: 1.1 }}>{t('hero.statCompanies', '252+')}</div>
-                <div style={{ fontSize: '0.76rem', color: '#cbd5e1', marginTop: '4px' }}>{t('hero.statCompaniesLabel', 'Pharma Companies')}</div>
+                <div style={{ fontSize: 'clamp(1.15rem, 3.2vw, 1.45rem)', fontWeight: '800', color: '#86efac', lineHeight: 1.1 }}>{t('hero.statCompanies', 'Certified')}</div>
+                <div style={{ fontSize: '0.76rem', color: '#cbd5e1', marginTop: '4px' }}>{t('hero.statCompaniesLabel', 'Pharma Network')}</div>
               </div>
               <div style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
                 <div style={{ fontSize: 'clamp(1.05rem, 3vw, 1.25rem)', fontWeight: '800', color: '#ffffff', lineHeight: 1.1 }}>{t('hero.statSupplyChain', 'WHO-GMP')}</div>
@@ -222,7 +259,7 @@ function Home({ addToCart }) {
             {categories.map((cat, i) => (
               <div 
                 key={i} 
-                className="card" 
+                className="card category-card-hover" 
                 style={{
                   padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column',
                   border: '1px solid #f1f5f9'
@@ -337,7 +374,7 @@ function Home({ addToCart }) {
               {t('quickOrder.title', 'B2B Fast Quick Order Workstation')}
             </h2>
             <p style={{ color: '#e2e8f0', fontSize: 'clamp(0.9rem, 2.5vw, 1.05rem)', maxWidth: '700px', lineHeight: 1.55 }}>
-              {t('quickOrder.subtitle', 'Search 9,500+ formulations, bulk add to cart, and download or print wholesale purchase invoices instantly.')}
+              {t('quickOrder.subtitle', 'Search all formulations, bulk add to cart, and download or print wholesale purchase invoices instantly.')}
             </p>
           </div>
           <div style={{ flexShrink: 0 }}>
@@ -356,42 +393,45 @@ function Home({ addToCart }) {
         </div>
       </section>
 
-      {/* Brands We Deal In Section */}
-      <section className="section" style={{ backgroundColor: '#ffffff' }}>
+      {/* Brands We Deal In Section - Animated Marquee + Grid */}
+      <section className="section" style={{ backgroundColor: '#ffffff', overflow: 'hidden' }}>
         <div className="container">
-          <h2 className="section-title">{t('about.brandNetworkTitle', 'Brands We Deal In')}</h2>
-          <p className="section-subtitle">{t('about.brandNetworkSubtitle', 'We distribute high-quality medical supplies from reputed pharmaceutical corporations.')}</p>
-          
+          <div style={{ textAlign: 'center', maxWidth: '750px', margin: '0 auto 20px auto' }}>
+            <h2 className="section-title">{t('about.brandNetworkTitle', 'Brands We Deal In')}</h2>
+            <p className="section-subtitle">{t('about.brandNetworkSubtitle', 'We distribute high-quality medical supplies from reputed pharmaceutical corporations.')}</p>
+          </div>
+
+          {/* Animated Infinite Marquee Banner */}
+          <div className="brands-marquee-container">
+            <div className="brands-marquee-track">
+              {[...brandsList, ...brandsList].map((brand, i) => (
+                <Link 
+                  key={i} 
+                  to={`/products?brand=${encodeURIComponent(brand)}`}
+                  title={`Browse medicines manufactured by ${brand}`}
+                  className="brand-pill-card"
+                >
+                  <Building2 size={15} style={{ opacity: 0.65, color: 'var(--primary-blue)' }} />
+                  <span>{brand}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Clean Interactive Grid */}
           <div style={{
-            display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '12px',
-            marginTop: '20px'
+            display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '10px',
+            marginTop: '15px'
           }}>
-            {brands.map((brand, i) => (
+            {brandsList.map((brand, i) => (
               <Link 
                 key={i} 
                 to={`/products?brand=${encodeURIComponent(brand)}`}
                 title={`Browse medicines manufactured by ${brand}`}
-                style={{
-                  padding: '10px 22px', backgroundColor: '#f8fafc', borderRadius: '30px',
-                  fontWeight: '600', color: 'var(--primary-blue)', border: '1px solid var(--border-light)',
-                  fontSize: '0.9rem', boxShadow: '0 2px 5px rgba(0,0,0,0.02)',
-                  textDecoration: 'none', transition: 'all 0.2s ease',
-                  display: 'inline-flex', alignItems: 'center'
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--primary-blue)';
-                  e.currentTarget.style.color = '#ffffff';
-                  e.currentTarget.style.borderColor = 'var(--primary-blue)';
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f8fafc';
-                  e.currentTarget.style.color = 'var(--primary-blue)';
-                  e.currentTarget.style.borderColor = 'var(--border-light)';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
+                className="brand-pill-card"
+                style={{ fontSize: '0.86rem', padding: '7px 18px' }}
               >
-                {brand}
+                <span>{brand}</span>
               </Link>
             ))}
           </div>

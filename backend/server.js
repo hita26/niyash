@@ -65,6 +65,7 @@ app.use('/api/careers', require('./routes/careerRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/ai', require('./routes/aiRoutes'));
 app.use('/api/settings', require('./routes/settingRoutes'));
+app.use('/api/sync', require('./routes/syncRoutes'));
 
 
 // Serve static frontend build if available

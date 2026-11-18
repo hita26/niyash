@@ -20,26 +20,38 @@ import { useLanguage } from '../context/LanguageContext';
 
 function About() {
   const { t, language } = useLanguage();
+  const [heroImage, setHeroImage] = React.useState('https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=1600&q=80');
+
+  React.useEffect(() => {
+    fetch('/api/settings/banners')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.banners?.aboutHeroImage) {
+          setHeroImage(data.banners.aboutHeroImage);
+        }
+      })
+      .catch(err => console.warn('Could not fetch banner settings:', err));
+  }, []);
 
   const stats = [
     { 
-      number: t('about.statFormulationsNumber', '9,500+'), 
+      number: t('about.statFormulationsNumber', 'Verified'), 
       label: t('about.statFormulationsLabel', 'Registered Formulations'), 
       desc: t('about.statFormulationsDesc', 'Tablets, Capsules, Syrups, Injectables & Surgicals') 
     },
     { 
-      number: t('about.statClientsNumber', '1,200+'), 
+      number: t('about.statClientsNumber', 'Extensive'), 
       label: t('about.statClientsLabel', 'Retail & Hospital Clients'), 
       desc: t('about.statClientsDesc', 'Medical stores and healthcare institutions across Gujarat') 
     },
     { 
-      number: t('about.statPartnersNumber', '252+'), 
+      number: t('about.statPartnersNumber', 'Direct'), 
       label: t('about.statPartnersLabel', 'Reputed Pharma Partners'), 
       desc: t('about.statPartnersDesc', 'Cipla, Sun Pharma, Abbott, Zydus, Daxia & more') 
     },
     { 
-      number: t('about.statComplianceNumber', '100%'), 
-      label: t('about.statComplianceLabel', 'WHO-GMP Compliant'), 
+      number: t('about.statComplianceNumber', 'WHO-GMP'), 
+      label: t('about.statComplianceLabel', 'Quality Standards'), 
       desc: t('about.statComplianceDesc', 'Strict regulatory quality and batch compliance') 
     }
   ];
@@ -81,8 +93,8 @@ function About() {
       desc: t('services.supplierDesc', 'Instant digital order booking through our online Quick Order portal, WhatsApp automated dispatch desk, and direct phone order coordination.')
     },
     {
-      title: t('about.warehousePill1', 'Regulatory & GST Compliance'),
-      desc: t('hero.badge', 'Complete statutory compliance with Form 20B/21B Drug Licenses, valid GST invoicing, and transparent credit accounting.')
+      title: t('about.warehousePill1', 'Regulatory & Quality Compliance'),
+      desc: t('hero.badge', 'Complete statutory compliance with licensed wholesale drug storage, valid GST invoicing, and verified batch tracking.')
     }
   ];
 
@@ -100,7 +112,7 @@ function About() {
       
       {/* Hero Section */}
       <section style={{
-        background: 'linear-gradient(135deg, rgba(12, 61, 108, 0.95), rgba(27, 117, 188, 0.88)), url("https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=1600&q=80")',
+        background: `linear-gradient(135deg, rgba(12, 61, 108, 0.95), rgba(27, 117, 188, 0.88)), url("${heroImage}")`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         color: '#ffffff',
@@ -187,7 +199,7 @@ function About() {
               {t('about.backgroundP1', 'Headquartered at University Road in Rajkot, Niyansh Pharma was established with a singular objective: to eliminate supply-chain bottlenecks in the pharmaceutical distribution network by providing immediate access to genuine formulations at wholesale rates.')}
             </p>
             <p style={{ color: 'var(--text-medium)', fontSize: '1rem', lineHeight: '1.7', marginBottom: '25px' }}>
-              {t('about.backgroundP2', 'Today, our catalogue comprises over 9,500 medicinal formulations ranging from essential antibiotics, cardiovascular and diabetic medications, dermatology topicals, and critical injectables to disposable medical supplies and wellness OTC brands.')}
+              {t('about.backgroundP2', 'Today, our catalogue comprises an extensive range of medicinal formulations ranging from essential antibiotics, cardiovascular and diabetic medications, dermatology topicals, and critical injectables to disposable medical supplies and wellness OTC brands.')}
             </p>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '15px' }}>
@@ -234,7 +246,7 @@ function About() {
               <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '15px', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.88rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-medium)' }}>
                   <CheckCircle2 size={16} color="var(--secondary-green)" />
-                  <span>{t('about.warehousePill1', 'Licensed wholesale drug storage (20B & 21B)')}</span>
+                  <span>{t('about.warehousePill1', 'Licensed wholesale drug storage & cold-chain distribution')}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-medium)' }}>
                   <CheckCircle2 size={16} color="var(--secondary-green)" />

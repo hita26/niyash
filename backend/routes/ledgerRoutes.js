@@ -285,7 +285,7 @@ router.post('/send-statement', async (req, res) => {
 router.get('/:mobile', async (req, res) => {
   try {
     const rawMobile = req.params.mobile.trim();
-    const cleanMobile = rawMobile.replace(/\D/g, '');
+    const cleanMobile = cleanMobileDigits(rawMobile);
     if (cleanMobile.length !== 10) {
       return res.status(400).json({ message: 'Retailer mobile number must contain exactly 10 numeric digits' });
     }

@@ -488,11 +488,181 @@ router.delete('/custom-fields/:key', protect, adminOnly, checkPermission('canMan
   }
 });
 
+// @desc    Delete ALL products from catalog (SuperAdmin / canClearDatabase permission only)
+// @route   DELETE /api/products/clear-all or POST /api/products/clear-all
+// @access  Private / Admin
+router.all('/clear-all', protect, adminOnly, checkPermission('canClearDatabase'), async (req, res) => {
+  try {
+    const result = await Product.deleteMany({});
+    console.log(`[ADMIN ACTION] Cleared all products from database by ${req.user.name} (${req.user.email}). Count: ${result.deletedCount}`);
+    res.json({
+      success: true,
+      message: `All ${result.deletedCount} products have been deleted successfully.`,
+      deletedCount: result.deletedCount,
+    });
+  } catch (error) {
+    console.error('Clear all products error:', error);
+    res.status(500).json({ success: false, message: 'Server error clearing products', error: error.message });
+  }
+});
+
+// @route   POST /api/products/sync-batch
+// @desc    High-speed chunked upsert for live catalog sync
+// @access  Private / SuperAdmin Only
+router.post('/sync-batch', protect, superAdminOnly, async (req, res) => {
+  try {
+    const { companies, products, secret, clearProducts } = req.body;
+    if (secret !== 'niyansh_sync_2026') {
+      return res.status(401).json({ success: false, message: 'Invalid sync secret' });
+    }
+
+    if (clearProducts) {
+      await Product.deleteMany({});
+      console.log('Cleared existing products for exact catalog sync');
+    }
+
+    let compCount = 0;
+    if (Array.isArray(companies) && companies.length > 0) {
+      try {
+        const compOps = companies.map(c => {
+          const compData = { ...c };
+          const compId = compData._id;
+          delete compData._id;
+          return {
+            updateOne: {
+              filter: compId ? { _id: compId } : { name: c.name },
+              update: { $set: { ...compData, isPublished: true, isVerified: true } },
+              upsert: true
+            }
+          };
+        });
+        await Company.bulkWrite(compOps, { ordered: false });
+        compCount = companies.length;
+      } catch (cErr) {
+        console.warn('Sync batch companies error:', cErr.message);
+      }
+    }
+
+    let prodCount = 0;
+    if (Array.isArray(products) && products.length > 0) {
+      try {
+        const prodOps = products.map(p => {
+          const prodData = { ...p };
+          const prodId = prodData._id;
+          delete prodData._id;
+          return {
+            updateOne: {
+              filter: prodId ? { _id: prodId } : { name: p.name, company: p.company },
+              update: { $set: prodData },
+              upsert: true
+            }
+          };
+        });
+        await Product.bulkWrite(prodOps, { ordered: false });
+        prodCount = products.length;
+      } catch (pErr) {
+        console.warn('Sync batch products error:', pErr.message);
+      }
+    }
+
+    const totalInDb = await Product.countDocuments();
+    res.json({
+      success: true,
+      companiesSynced: compCount,
+      productsSynced: prodCount,
+      totalInDatabase: totalInDb
+    });
+  } catch (error) {
+    console.error('Sync batch endpoint error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @route   ALL /api/products/sync-catalog
+// @desc    Synchronize full 9,560+ catalog into MongoDB
+// @access  Private / Admin with canBulkImport
+router.all('/sync-catalog', protect, adminOnly, checkPermission('canBulkImport'), async (req, res) => {
+  try {
+    let productsData = [];
+    let companiesData = [];
+    let errorDetails = null;
+
+    try {
+      const catalog = require('../data/catalogData');
+      productsData = catalog.products || [];
+      companiesData = catalog.companies || [];
+    } catch (e) {
+      errorDetails = {
+        message: e.message,
+        stack: e.stack
+      };
+      console.warn('Could not load catalogData.js:', e.message);
+    }
+
+    if (!productsData || productsData.length === 0) {
+      let debugInfo = {};
+      try { debugInfo.cwd = process.cwd(); } catch(e){}
+      try { debugInfo.dirname = __dirname; } catch(e){}
+      try { debugInfo.dirContents = fs.readdirSync(path.join(__dirname, '../data')); } catch(e){ debugInfo.dirErr = e.message; }
+      return res.status(404).json({
+        success: false,
+        message: 'catalogData.js could not be loaded on server',
+        loadError: errorDetails,
+        debug: debugInfo
+      });
+    }
+
+    let compCount = 0;
+    if (companiesData && companiesData.length > 0) {
+      try {
+        const compOps = companiesData.map(c => ({
+          updateOne: {
+            filter: { name: c.name },
+            update: { $set: { ...c, isPublished: true, isVerified: true } },
+            upsert: true
+          }
+        }));
+        await Company.bulkWrite(compOps, { ordered: false });
+        compCount = companiesData.length;
+      } catch (cErr) {
+        console.warn('Sync companies notice:', cErr.message);
+      }
+    }
+
+    const BATCH_SIZE = 1500;
+    for (let i = 0; i < productsData.length; i += BATCH_SIZE) {
+      const chunk = productsData.slice(i, i + BATCH_SIZE);
+      const bulkOps = chunk.map(p => ({
+        updateOne: {
+          filter: { sku: p.sku },
+          update: { $set: p },
+          upsert: true
+        }
+      }));
+      await Product.bulkWrite(bulkOps, { ordered: false });
+    }
+
+    const totalCount = await Product.countDocuments();
+    res.json({
+      success: true,
+      message: `Full catalog synced: ${productsData.length} records processed. Current database total: ${totalCount} products.`,
+      companiesSynced: compCount,
+      totalProducts: totalCount
+    });
+  } catch (error) {
+    console.error('Catalog sync error:', error);
+    res.status(500).json({ success: false, message: 'Server error during catalog sync', error: error.message });
+  }
+});
+
 // @desc    Get single product by ID
 // @route   GET /api/products/:id
 // @access  Public
 router.get('/:id', async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
     const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found' });
@@ -646,6 +816,9 @@ router.post('/', protect, adminOnly, checkPermission('canManageProducts'), async
 // @access  Private/Admin
 router.put('/:id', protect, adminOnly, checkPermission('canManageProducts'), async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
     const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found' });
@@ -716,29 +889,14 @@ router.put('/:id', protect, adminOnly, checkPermission('canManageProducts'), asy
   }
 });
 
-// @desc    Delete ALL products from catalog (SuperAdmin / canClearDatabase permission only)
-// @route   DELETE /api/products/clear-all or POST /api/products/clear-all
-// @access  Private/Admin
-router.all('/clear-all', protect, adminOnly, checkPermission('canClearDatabase'), async (req, res) => {
-  try {
-    const result = await Product.deleteMany({});
-    console.log(`[ADMIN ACTION] Cleared all products from database by ${req.user.name} (${req.user.email}). Count: ${result.deletedCount}`);
-    res.json({
-      success: true,
-      message: `All ${result.deletedCount} products have been deleted successfully.`,
-      deletedCount: result.deletedCount,
-    });
-  } catch (error) {
-    console.error('Clear all products error:', error);
-    res.status(500).json({ success: false, message: 'Server error clearing products', error: error.message });
-  }
-});
-
 // @desc    Delete a product and cleanup uploaded files
 // @route   DELETE /api/products/:id
 // @access  Private/Admin
 router.delete('/:id', protect, adminOnly, checkPermission('canDeleteProducts'), async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
     const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found' });
@@ -914,155 +1072,6 @@ router.post('/bulk', protect, adminOnly, checkPermission('canBulkImport'), async
   } catch (error) {
     console.error('Bulk import error:', error);
     res.status(500).json({ success: false, message: 'Server error during bulk import', error: error.message });
-  }
-});
-
-// @route   POST /api/products/sync-batch
-// @desc    High-speed chunked upsert for live catalog sync
-// @access  Private / SuperAdmin Only
-router.post('/sync-batch', protect, superAdminOnly, async (req, res) => {
-  try {
-    const { companies, products, secret, clearProducts } = req.body;
-    if (secret !== 'niyansh_sync_2026') {
-      return res.status(401).json({ success: false, message: 'Invalid sync secret' });
-    }
-
-    if (clearProducts) {
-      await Product.deleteMany({});
-      console.log('Cleared existing products for exact catalog sync');
-    }
-
-    let compCount = 0;
-    if (Array.isArray(companies) && companies.length > 0) {
-      try {
-        const compOps = companies.map(c => {
-          const compData = { ...c };
-          const compId = compData._id;
-          delete compData._id;
-          return {
-            updateOne: {
-              filter: compId ? { _id: compId } : { name: c.name },
-              update: { $set: { ...compData, isPublished: true, isVerified: true } },
-              upsert: true
-            }
-          };
-        });
-        await Company.bulkWrite(compOps, { ordered: false });
-        compCount = companies.length;
-      } catch (cErr) {
-        console.warn('Sync batch companies error:', cErr.message);
-      }
-    }
-
-    let prodCount = 0;
-    if (Array.isArray(products) && products.length > 0) {
-      try {
-        const prodOps = products.map(p => {
-          const prodData = { ...p };
-          const prodId = prodData._id;
-          delete prodData._id;
-          return {
-            updateOne: {
-              filter: prodId ? { _id: prodId } : { name: p.name, company: p.company },
-              update: { $set: prodData },
-              upsert: true
-            }
-          };
-        });
-        await Product.bulkWrite(prodOps, { ordered: false });
-        prodCount = products.length;
-      } catch (pErr) {
-        console.warn('Sync batch products error:', pErr.message);
-      }
-    }
-
-    const totalInDb = await Product.countDocuments();
-    res.json({
-      success: true,
-      companiesSynced: compCount,
-      productsSynced: prodCount,
-      totalInDatabase: totalInDb
-    });
-  } catch (error) {
-    console.error('Sync batch endpoint error:', error);
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// @route   ALL /api/products/sync-catalog
-// @desc    Synchronize full 9,560+ catalog into MongoDB
-// @access  Public / Admin
-router.all('/sync-catalog', async (req, res) => {
-  try {
-    let productsData = [];
-    let companiesData = [];
-    let errorDetails = null;
-
-    try {
-      const catalog = require('../data/catalogData');
-      productsData = catalog.products || [];
-      companiesData = catalog.companies || [];
-    } catch (e) {
-      errorDetails = {
-        message: e.message,
-        stack: e.stack
-      };
-      console.warn('Could not load catalogData.js:', e.message);
-    }
-
-    if (!productsData || productsData.length === 0) {
-      let debugInfo = {};
-      try { debugInfo.cwd = process.cwd(); } catch(e){}
-      try { debugInfo.dirname = __dirname; } catch(e){}
-      try { debugInfo.dirContents = fs.readdirSync(path.join(__dirname, '../data')); } catch(e){ debugInfo.dirErr = e.message; }
-      return res.status(404).json({
-        success: false,
-        message: 'catalogData.js could not be loaded on server',
-        loadError: errorDetails,
-        debug: debugInfo
-      });
-    }
-
-    let compCount = 0;
-    if (companiesData && companiesData.length > 0) {
-      try {
-        const compOps = companiesData.map(c => ({
-          updateOne: {
-            filter: { name: c.name },
-            update: { $set: { ...c, isPublished: true, isVerified: true } },
-            upsert: true
-          }
-        }));
-        await Company.bulkWrite(compOps, { ordered: false });
-        compCount = companiesData.length;
-      } catch (cErr) {
-        console.warn('Sync companies notice:', cErr.message);
-      }
-    }
-
-    const BATCH_SIZE = 1500;
-    for (let i = 0; i < productsData.length; i += BATCH_SIZE) {
-      const chunk = productsData.slice(i, i + BATCH_SIZE);
-      const bulkOps = chunk.map(p => ({
-        updateOne: {
-          filter: { sku: p.sku },
-          update: { $set: p },
-          upsert: true
-        }
-      }));
-      await Product.bulkWrite(bulkOps, { ordered: false });
-    }
-
-    const totalCount = await Product.countDocuments();
-    res.json({
-      success: true,
-      message: `Full catalog synced: ${productsData.length} records processed. Current database total: ${totalCount} products.`,
-      companiesSynced: compCount,
-      totalProducts: totalCount
-    });
-  } catch (error) {
-    console.error('Catalog sync error:', error);
-    res.status(500).json({ success: false, message: 'Server error during catalog sync', error: error.message });
   }
 });
 

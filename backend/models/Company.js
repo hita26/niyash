@@ -86,7 +86,6 @@ companySchema.pre('save', function (next) {
   next();
 });
 
-companySchema.index({ name: 1 });
 companySchema.index({ isPublished: 1 });
 companySchema.index({ createdAt: -1 });
 

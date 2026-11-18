@@ -620,7 +620,7 @@ router.put('/profile', protect, async (req, res) => {
       if (req.body.drugLicense2Doc !== undefined) user.drugLicense2Doc = req.body.drugLicense2Doc;
 
       if (req.body.phone !== undefined) {
-        const cleanP = req.body.phone ? req.body.phone.toString().replace(/\D/g, '') : '';
+        const cleanP = req.body.phone ? req.body.phone.toString().replace(/\D/g, '').replace(/^91/, '').slice(-10) : '';
         if (cleanP && cleanP.length !== 10) {
           return res.status(400).json({ message: 'Phone number must contain exactly 10 numeric digits' });
         }
@@ -727,7 +727,7 @@ router.post('/admins', protect, superAdminOnly, async (req, res) => {
       return res.status(400).json({ message: `An account with email "${normalizedEmail}" already exists` });
     }
 
-    const cleanPhone = phone ? phone.toString().replace(/\D/g, '') : '';
+    const cleanPhone = phone ? phone.toString().replace(/\D/g, '').replace(/^91/, '').slice(-10) : '';
     if (cleanPhone && cleanPhone.length !== 10) {
       return res.status(400).json({ message: 'Phone number must be exactly 10 digits' });
     }
@@ -808,7 +808,7 @@ router.put('/admins/:id', protect, superAdminOnly, async (req, res) => {
     }
 
     if (req.body.phone !== undefined) {
-      const cleanPhone = req.body.phone ? req.body.phone.toString().replace(/\D/g, '') : '';
+      const cleanPhone = req.body.phone ? req.body.phone.toString().replace(/\D/g, '').replace(/^91/, '').slice(-10) : '';
       if (cleanPhone && cleanPhone.length !== 10) {
         return res.status(400).json({ message: 'Phone number must be exactly 10 digits' });
       }

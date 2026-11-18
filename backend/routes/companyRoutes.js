@@ -7,6 +7,12 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const { protect, adminOnly, superAdminOnly, checkPermission } = require('../middleware/authMiddleware');
 
+// Helper to escape special regex characters to prevent crashes and ReDoS
+const escapeRegex = (str) => {
+  if (!str) return '';
+  return str.toString().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+};
+
 // ========================================================
 // GET /api/companies
 // List all public companies with product counts and filtering
@@ -21,11 +27,12 @@ router.get('/', async (req, res) => {
     }
 
     if (search && search.trim() !== '') {
+      const escaped = escapeRegex(search.trim());
       query.$or = [
-        { name: { $regex: search.trim(), $options: 'i' } },
-        { description: { $regex: search.trim(), $options: 'i' } },
-        { location: { $regex: search.trim(), $options: 'i' } },
-        { category: { $regex: search.trim(), $options: 'i' } },
+        { name: { $regex: escaped, $options: 'i' } },
+        { description: { $regex: escaped, $options: 'i' } },
+        { location: { $regex: escaped, $options: 'i' } },
+        { category: { $regex: escaped, $options: 'i' } },
       ];
     }
 
@@ -139,7 +146,7 @@ router.get('/:id', async (req, res) => {
       company = await Company.findOne({ slug: id.toLowerCase() }).lean();
     }
     if (!company) {
-      company = await Company.findOne({ name: { $regex: new RegExp(`^${id}$`, 'i') } }).lean();
+      company = await Company.findOne({ name: { $regex: new RegExp(`^${escapeRegex(id)}$`, 'i') } }).lean();
     }
 
     if (!company) {

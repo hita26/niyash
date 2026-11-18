@@ -113,7 +113,6 @@ const ledgerSchema = new mongoose.Schema(
   }
 );
 
-ledgerSchema.index({ retailerMobile: 1 });
 ledgerSchema.index({ createdAt: -1 });
 
 module.exports = mongoose.model('Ledger', ledgerSchema);

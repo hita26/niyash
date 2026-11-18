@@ -2037,15 +2037,30 @@ _Helpline: +91 9316566894_`;
         }
       } else if (type === 'news') {
         const res = await fetch(`/api/news/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          showToast(err.message || 'Failed to delete announcement', 'error');
+          return;
+        }
         setNews(prev => prev.filter(n => n._id !== id));
         showToast('Announcement deleted successfully.');
         broadcastLiveEvent(SYNC_EVENTS.SCHEME_MUTATED, { action: 'delete', id });
       } else if (type === 'enquiry') {
-        await fetch(`/api/enquiries/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+        const res = await fetch(`/api/enquiries/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          showToast(err.message || 'Failed to delete enquiry', 'error');
+          return;
+        }
         setEnquiries(prev => prev.filter(e => e._id !== id));
         showToast('Enquiry deleted');
       } else if (type === 'career') {
-        await fetch(`/api/careers/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+        const res = await fetch(`/api/careers/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          showToast(err.message || 'Failed to delete application', 'error');
+          return;
+        }
         setCareers(prev => prev.filter(c => c._id !== id));
         showToast('Applicant record deleted');
       }
@@ -2536,70 +2551,84 @@ _Helpline: +91 9316566894_`;
     const newStock = !product.inStock;
     const newQuantity = newStock ? (product.stockQuantity > 0 ? product.stockQuantity : 100) : 0;
     try {
-      await fetch(`/api/products/${product._id}`, {
+      const res = await fetch(`/api/products/${product._id}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify({ inStock: newStock, stockQuantity: newQuantity })
       });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        showToast(err.message || 'Failed to update product stock', 'error');
+        return;
+      }
       setProducts(prev => prev.map(p => p._id === product._id ? { ...p, inStock: newStock, stockQuantity: newQuantity } : p));
       broadcastLiveEvent(SYNC_EVENTS.PRODUCT_UPDATED, { id: product._id, inStock: newStock, stockQuantity: newQuantity });
       showToast(`Product marked as ${newStock ? 'In Stock' : 'Out of Stock'}`);
-    } catch {
-      setProducts(prev => prev.map(p => p._id === product._id ? { ...p, inStock: newStock, stockQuantity: newQuantity } : p));
-      broadcastLiveEvent(SYNC_EVENTS.PRODUCT_UPDATED, { id: product._id, inStock: newStock, stockQuantity: newQuantity });
-      showToast(`Product stock updated`);
+    } catch (err) {
+      showToast(`Network error updating stock: ${err.message}`, 'error');
     }
   };
 
   const handleToggleActive = async (product) => {
     const newActive = product.isActive === false ? true : false;
     try {
-      await fetch(`/api/products/${product._id}`, {
+      const res = await fetch(`/api/products/${product._id}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify({ isActive: newActive })
       });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        showToast(err.message || 'Failed to update product visibility', 'error');
+        return;
+      }
       setProducts(prev => prev.map(p => p._id === product._id ? { ...p, isActive: newActive } : p));
       broadcastLiveEvent(SYNC_EVENTS.PRODUCT_UPDATED, { id: product._id, isActive: newActive });
       showToast(`Product visibility set to ${newActive ? 'Active (Live)' : 'Inactive (Hidden)'}`);
-    } catch {
-      setProducts(prev => prev.map(p => p._id === product._id ? { ...p, isActive: newActive } : p));
-      broadcastLiveEvent(SYNC_EVENTS.PRODUCT_UPDATED, { id: product._id, isActive: newActive });
-      showToast(`Product visibility updated`);
+    } catch (err) {
+      showToast(`Network error updating visibility: ${err.message}`, 'error');
     }
   };
 
   const handleToggleFeatured = async (product) => {
     const newFeatured = !product.featured;
     try {
-      await fetch(`/api/products/${product._id}`, {
+      const res = await fetch(`/api/products/${product._id}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify({ featured: newFeatured })
       });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        showToast(err.message || 'Failed to update featured status', 'error');
+        return;
+      }
       setProducts(prev => prev.map(p => p._id === product._id ? { ...p, featured: newFeatured } : p));
       broadcastLiveEvent(SYNC_EVENTS.PRODUCT_UPDATED, { id: product._id, featured: newFeatured });
       showToast(`Product ${newFeatured ? 'featured on homepage' : 'removed from featured'}`);
-    } catch {
-      setProducts(prev => prev.map(p => p._id === product._id ? { ...p, featured: newFeatured } : p));
-      broadcastLiveEvent(SYNC_EVENTS.PRODUCT_UPDATED, { id: product._id, featured: newFeatured });
+    } catch (err) {
+      showToast(`Network error updating featured: ${err.message}`, 'error');
     }
   };
 
   const handleToggleOurProduct = async (product) => {
     const newOurProduct = !product.isOurProduct;
     try {
-      await fetch(`/api/products/${product._id}`, {
+      const res = await fetch(`/api/products/${product._id}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify({ isOurProduct: newOurProduct })
       });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        showToast(err.message || 'Failed to update Our Product status', 'error');
+        return;
+      }
       setProducts(prev => prev.map(p => p._id === product._id ? { ...p, isOurProduct: newOurProduct } : p));
       broadcastLiveEvent(SYNC_EVENTS.PRODUCT_UPDATED, { id: product._id, isOurProduct: newOurProduct });
       showToast(`Product ${newOurProduct ? 'marked as Our Product' : 'removed from Our Products'}`);
-    } catch {
-      setProducts(prev => prev.map(p => p._id === product._id ? { ...p, isOurProduct: newOurProduct } : p));
-      broadcastLiveEvent(SYNC_EVENTS.PRODUCT_UPDATED, { id: product._id, isOurProduct: newOurProduct });
+    } catch (err) {
+      showToast(`Network error updating Our Product: ${err.message}`, 'error');
     }
   };
 
@@ -3184,17 +3213,21 @@ _Helpline: +91 9316566894_`;
   const handleToggleCompanyPublish = async (company) => {
     const newStatus = !company.isPublished;
     try {
-      await fetch(`/api/companies/${company._id}`, {
+      const res = await fetch(`/api/companies/${company._id}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify({ isPublished: newStatus })
       });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        showToast(err.message || 'Failed to update company visibility', 'error');
+        return;
+      }
       setCompanies(prev => prev.map(c => c._id === company._id ? { ...c, isPublished: newStatus } : c));
       broadcastLiveEvent(SYNC_EVENTS.COMPANY_MUTATED, { action: 'toggle', id: company._id, isPublished: newStatus });
       showToast(`Company visibility set to ${newStatus ? 'Published (Live)' : 'Unpublished (Hidden)'}`);
-    } catch {
-      setCompanies(prev => prev.map(c => c._id === company._id ? { ...c, isPublished: newStatus } : c));
-      broadcastLiveEvent(SYNC_EVENTS.COMPANY_MUTATED, { action: 'toggle', id: company._id, isPublished: newStatus });
+    } catch (err) {
+      showToast(`Network error updating company: ${err.message}`, 'error');
     }
   };
 

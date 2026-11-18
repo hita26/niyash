@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const Order = require('../models/Order');
+const Ledger = require('../models/Ledger');
 const { protect, adminOnly, checkPermission } = require('../middleware/authMiddleware');
 
 // Helper to escape special regex characters
@@ -86,7 +88,7 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ message: 'Shop name and retailer mobile are required' });
     }
 
-    const cleanMobile = retailerMobile.toString().replace(/\D/g, '');
+    const cleanMobile = retailerMobile.toString().replace(/\D/g, '').replace(/^91/, '').slice(-10);
     if (cleanMobile.length !== 10) {
       return res.status(400).json({ message: 'Retailer mobile number must contain exactly 10 numeric digits' });
     }
@@ -162,6 +164,53 @@ router.post('/', async (req, res) => {
     });
 
     const createdOrder = await order.save();
+
+    // Automatically record this B2B order into the Chemist's live Ledger
+    try {
+      let ledger = await Ledger.findOne({
+        $or: [
+          { retailerMobile: cleanMobile },
+          { retailerMobile: retailerMobile.toString().trim() }
+        ]
+      });
+
+      const invoiceItem = {
+        invoiceNumber: createdOrder.orderNumber,
+        date: createdOrder.createdAt || new Date(),
+        dueDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000), // Standard 21 days credit terms
+        amount: createdOrder.grandTotal,
+        paidAmount: 0,
+        balance: createdOrder.grandTotal,
+        status: 'Pending',
+      };
+
+      if (!ledger) {
+        ledger = new Ledger({
+          retailerMobile: cleanMobile,
+          shopName: shopName.trim(),
+          email: retailerEmail ? retailerEmail.trim() : '',
+          gstin: gstin ? gstin.trim() : '',
+          totalBilled: createdOrder.grandTotal,
+          totalPaid: 0,
+          outstandingBalance: createdOrder.grandTotal,
+          creditLimit: 100000,
+          invoices: [invoiceItem],
+          payments: []
+        });
+      } else {
+        const exists = (ledger.invoices || []).some(inv => inv.invoiceNumber === createdOrder.orderNumber);
+        if (!exists) {
+          ledger.invoices.unshift(invoiceItem);
+          ledger.totalBilled = Math.round(((ledger.totalBilled || 0) + createdOrder.grandTotal) * 100) / 100;
+          ledger.outstandingBalance = Math.round(((ledger.outstandingBalance || 0) + createdOrder.grandTotal) * 100) / 100;
+          if (gstin && !ledger.gstin) ledger.gstin = gstin.trim();
+          if (retailerEmail && !ledger.email) ledger.email = retailerEmail.trim();
+        }
+      }
+      await ledger.save();
+    } catch (ledgerSyncErr) {
+      console.warn('Notice: Order saved but automatic ledger invoice sync skipped:', ledgerSyncErr.message);
+    }
 
     const whatsappMessage = generateWhatsAppOrderMessage(createdOrder);
     const whatsappUrl = buildWhatsAppUrl(destinationWhatsApp, whatsappMessage);
@@ -272,6 +321,9 @@ router.get('/', async (req, res) => {
 // @access  Public
 router.get('/:id', async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
     const order = await Order.findById(req.params.id).populate(
       'items.product',
       'name brand company price imageUrl'
@@ -308,6 +360,10 @@ router.put('/:id/status', protect, adminOnly, checkPermission('canManageOrders')
       return res.status(400).json({
         message: `Invalid order status. Allowed values: ${validStatuses.join(', ')}`,
       });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: 'Order not found' });
     }
 
     const order = await Order.findById(req.params.id);

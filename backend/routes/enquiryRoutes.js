@@ -34,14 +34,14 @@ router.post('/', async (req, res) => {
       if (!email || !email.includes('@')) {
         return res.status(400).json({ message: 'Valid email address is required for trade bulletin subscription' });
       }
-      cleanPhone = phone ? phone.toString().replace(/\D/g, '') : '9909923130';
+      cleanPhone = phone ? phone.toString().replace(/\D/g, '').replace(/^91/, '').slice(-10) : '9909923130';
       if (cleanPhone.length !== 10) cleanPhone = '9909923130';
     } else {
       if (!name || !phone) {
         return res.status(400).json({ message: 'Name and Phone number are required' });
       }
 
-      cleanPhone = phone.toString().replace(/\D/g, '');
+      cleanPhone = phone.toString().replace(/\D/g, '').replace(/^91/, '').slice(-10);
       if (cleanPhone.length !== 10) {
         return res.status(400).json({ message: 'Phone number must contain exactly 10 numeric digits' });
       }

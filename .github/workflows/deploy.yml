@@ -7,10 +7,26 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to Live Server via SSH
+    name: Deploy to Live Server via SCP
     runs-on: ubuntu-latest
     steps:
-      - name: Execute Remote SSH Commands
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Deploy build to GoDaddy via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          port: 22
+          source: "frontend/dist/**,frontend/dist/.htaccess"
+          target: "public_html"
+          strip_components: 2
+          overwrite: true
+
+      - name: Verify Live Deployment
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -20,9 +36,6 @@ jobs:
           port: 22
           script: |
             cd ~/public_html
-            rm -rf temp_repo
-            git clone --depth 1 https://github.com/hkPateL26/Pharma.git temp_repo
-            cp -r temp_repo/frontend/dist/* ./
-            cp temp_repo/frontend/dist/.htaccess ./
-            rm -rf temp_repo
-            echo "Deployment to niyanshpharma.com completed successfully!"
+            echo "=== Live index.html check ==="
+            grep "index-" index.html || true
+            echo "=== Deployment to niyanshpharma.com completed successfully ==="

@@ -4269,6 +4269,48 @@ _Helpline: +91 9316566894_`;
                       <RefreshCw size={14} /> Refresh Metrics
                     </button>
                   </div>
+
+                  {/* Prompt ERP Live Sync Quick Access Banner */}
+                  <div 
+                    onClick={() => { setActiveTab('sync'); fetchSyncStatus(); }}
+                    style={{
+                      padding: '16px 20px',
+                      backgroundColor: '#fffbeb',
+                      border: '1.5px solid #fde68a',
+                      borderRadius: '12px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                      gap: '12px',
+                      cursor: 'pointer',
+                      boxShadow: '0 2px 8px rgba(217, 119, 6, 0.08)'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                      <div style={{ width: '42px', height: '42px', borderRadius: '10px', backgroundColor: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0 }}>
+                        <Zap size={22} />
+                      </div>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          <strong style={{ fontSize: '0.98rem', color: '#92400e' }}>⚡ Prompt ERP ↔ Cloud Live Sync Hub</strong>
+                          <span style={{ fontSize: '0.7rem', backgroundColor: '#dcfce7', color: '#15803d', padding: '2px 8px', borderRadius: '10px', fontWeight: '800' }}>
+                            🟢 100% Active & Operational
+                          </span>
+                        </div>
+                        <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: '#b45309' }}>
+                          Desktop billing inventory bridge is live. Click to view real-time audit logs, run instant test sync, or view connection proof.
+                        </p>
+                      </div>
+                    </div>
+                    <button 
+                      type="button" 
+                      className="btn btn-sm btn-primary"
+                      style={{ padding: '6px 14px', fontSize: '0.82rem', backgroundColor: '#d97706', borderColor: '#b45309', fontWeight: '700' }}
+                    >
+                      Open ERP Sync Hub →
+                    </button>
+                  </div>
                   
                   {/* 4-Stage B2B Fulfillment Pipeline Funnel */}
                   <div className="card" style={{ padding: '20px 24px' }}>

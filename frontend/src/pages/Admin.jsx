@@ -691,6 +691,7 @@ function Admin() {
 
   // Modals & Drawers States
   const [deleteConfirm, setDeleteConfirm] = useState(null); // In-page top confirmation state (no alert box)
+  const [copiedLicenseKey, setCopiedLicenseKey] = useState(null);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
@@ -3681,35 +3682,165 @@ _Helpline: +91 9316566894_`;
 
       {/* Central B2B Operations Header */}
       <div className="admin-workspace-container" style={{ marginBottom: '22px' }}>
-        <div className="card" style={{
-          padding: 'clamp(16px, 2.5vw, 24px)',
-          backgroundColor: 'var(--bg-card)',
-          borderRadius: '14px',
-          border: '1.5px solid var(--border-light)',
-          boxShadow: '0 4px 20px rgba(12, 61, 108, 0.04)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '18px'
-        }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
-              <span style={{ fontSize: '0.72rem', fontWeight: '800', backgroundColor: '#e0f2fe', color: '#0369a1', padding: '3px 10px', borderRadius: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                Central B2B Portal
-              </span>
-              <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '600' }}>
-                Rajkot Central Wholesale Hub (Gujarat)
-              </span>
+        <div className="admin-b2b-header-card">
+          {/* Identity & Compliance Details */}
+          <div className="admin-b2b-identity-wrap">
+            <div className="admin-b2b-emblem">
+              <ShieldCheck size={28} color="#ffffff" />
+              <div className="admin-b2b-emblem-badge" />
             </div>
-            <h1 style={{ fontSize: 'clamp(1.2rem, 2.5vw, 1.65rem)', fontWeight: '800', color: 'var(--text-dark)', margin: 0, lineHeight: 1.25 }}>
-              Niyansh Pharma • Central B2B Operations Console
-            </h1>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '8px', flexWrap: 'wrap' }}>
-              <span className="admin-license-pill">D.L.No.: <strong>20B, 264618, 21B, 264619</strong></span>
-              <span className="admin-license-pill">GSTIN: <strong>24BVXPP6108F2Z7</strong></span>
-              <span className="admin-license-pill">PAN: <strong>BVXPP6108F</strong></span>
-              <span className="admin-license-pill">Food Lic.: <strong>20726030000567</strong></span>
+
+            <div className="admin-b2b-title-area">
+              <div className="admin-b2b-badges-row">
+                {isSuperAdmin ? (
+                  <span className="admin-role-badge superadmin">
+                    <Crown size={12} /> Super Admin Console
+                  </span>
+                ) : (
+                  <span className="admin-role-badge admin">
+                    <Shield size={12} /> Operations Admin
+                  </span>
+                )}
+                <span className="admin-live-badge">
+                  <span className="admin-live-dot" /> Live System Online
+                </span>
+                <span className="admin-hub-badge">
+                  <MapPin size={11} color="#0284c7" /> Rajkot Wholesale Hub (Gujarat)
+                </span>
+              </div>
+
+              <h1 className="admin-b2b-title">
+                Niyansh Pharma • Central B2B Operations Console
+              </h1>
+
+              <div className="admin-b2b-licenses-row">
+                {[
+                  { key: 'dl', label: 'D.L.No.', val: '20B, 264618, 21B, 264619' },
+                  { key: 'gstin', label: 'GSTIN', val: '24BVXPP6108F2Z7' },
+                  { key: 'pan', label: 'PAN', val: 'BVXPP6108F' },
+                  { key: 'food', label: 'Food Lic.', val: '20726030000567' }
+                ].map(lic => (
+                  <button
+                    key={lic.key}
+                    type="button"
+                    onClick={() => {
+                      if (navigator.clipboard) {
+                        navigator.clipboard.writeText(lic.val);
+                        setCopiedLicenseKey(lic.key);
+                        showToast(`${lic.label} copied to clipboard!`, 'info');
+                        setTimeout(() => setCopiedLicenseKey(null), 1800);
+                      }
+                    }}
+                    className="admin-license-pill-interactive"
+                    title={`Click to copy ${lic.label}`}
+                  >
+                    <span>{lic.label}:</span>
+                    <strong>{lic.val}</strong>
+                    {copiedLicenseKey === lic.key ? (
+                      <Check size={11} color="#16a34a" />
+                    ) : (
+                      <Copy size={10} style={{ opacity: 0.5, marginLeft: '2px' }} />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Metrics & Actions Bar */}
+          <div className="admin-b2b-controls-wrap">
+            <div className="admin-b2b-kpis-grid">
+              {/* Orders KPI */}
+              <div 
+                className="admin-b2b-kpi-chip" 
+                onClick={() => setActiveTab('orders')}
+                title="View Active Orders"
+              >
+                <div className="admin-b2b-kpi-icon" style={{ backgroundColor: '#e0f2fe' }}>
+                  <ShoppingBag size={16} color="#0284c7" />
+                </div>
+                <div>
+                  <div className="admin-b2b-kpi-val">
+                    {(orders || []).filter(o => o.orderStatus === 'Pending' || o.orderStatus === 'Processing' || o.orderStatus === 'Booked').length}
+                  </div>
+                  <div className="admin-b2b-kpi-lbl">Active Orders</div>
+                </div>
+              </div>
+
+              {/* Products KPI */}
+              <div 
+                className="admin-b2b-kpi-chip" 
+                onClick={() => setActiveTab('products')}
+                title="View All Catalog Products"
+              >
+                <div className="admin-b2b-kpi-icon" style={{ backgroundColor: '#dcfce7' }}>
+                  <Package size={16} color="#16a34a" />
+                </div>
+                <div>
+                  <div className="admin-b2b-kpi-val">{(products || []).length}</div>
+                  <div className="admin-b2b-kpi-lbl">Live Products</div>
+                </div>
+              </div>
+
+              {/* Low Stock Alert KPI */}
+              {(() => {
+                const lowCount = (products || []).filter(p => (Number(p.stock) || 0) <= (Number(p.minOrderQty) || 5)).length;
+                return (
+                  <div 
+                    className="admin-b2b-kpi-chip" 
+                    onClick={() => { setActiveTab('products'); setProductStockFilter('low'); }}
+                    title={lowCount > 0 ? `${lowCount} products low in stock` : 'All products well stocked'}
+                    style={{ borderColor: lowCount > 0 ? '#fde68a' : undefined }}
+                  >
+                    <div className="admin-b2b-kpi-icon" style={{ backgroundColor: lowCount > 0 ? '#fef3c7' : '#f1f5f9' }}>
+                      <AlertTriangle size={16} color={lowCount > 0 ? '#d97706' : '#94a3b8'} />
+                    </div>
+                    <div>
+                      <div className="admin-b2b-kpi-val" style={{ color: lowCount > 0 ? '#b45309' : undefined }}>
+                        {lowCount}
+                      </div>
+                      <div className="admin-b2b-kpi-lbl">Low Stock</div>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Quick Actions */}
+            <div className="admin-b2b-actions-group">
+              <button 
+                type="button" 
+                onClick={() => handleOpenProductModal()} 
+                className="admin-b2b-btn admin-b2b-btn-primary"
+                title="Quick Add New Product to Catalog"
+              >
+                <Plus size={14} />
+                <span>Add Product</span>
+              </button>
+
+              <button 
+                type="button" 
+                onClick={() => { 
+                  fetchDashboardData(true); 
+                  showToast('Live dashboard data synced!', 'info'); 
+                }} 
+                className="admin-b2b-btn admin-b2b-btn-secondary"
+                title="Sync Live Orders & Catalog"
+              >
+                <RefreshCw size={13} className={isLoading ? 'spin-anim' : ''} />
+                <span>Sync</span>
+              </button>
+
+              <a 
+                href="/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="admin-b2b-btn admin-b2b-btn-outline"
+                title="Open Retailer B2B Storefront in New Tab"
+              >
+                <ExternalLink size={13} />
+                <span>Storefront</span>
+              </a>
             </div>
           </div>
         </div>

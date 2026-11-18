@@ -228,40 +228,57 @@ function ProductCard({ product, addToCart }) {
         <Link to={`/products/${product._id}`}>
           <h3 
             style={{
-              fontSize: '0.98rem', fontWeight: '800', color: 'var(--text-dark)', minHeight: '2.6rem',
+              fontSize: '0.98rem', fontWeight: '800', color: 'var(--text-dark)', minHeight: '2.8rem', height: '2.8rem',
               overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-              lineHeight: '1.3', margin: '2px 0 4px 0'
+              lineHeight: '1.4', margin: '2px 0 4px 0'
             }}
           >
             {product.name}
           </h3>
         </Link>
         
-        <p style={{ fontSize: '0.82rem', color: 'var(--text-medium)', marginBottom: '4px' }}>
+        <p style={{ fontSize: '0.82rem', color: 'var(--text-medium)', marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {t('products.packing', 'Packing')}: <strong style={{ color: 'var(--text-dark)' }}>{product.packing || 'Standard'}</strong>
         </p>
 
-        {product.composition && (
-          <p style={{ fontSize: '0.78rem', color: 'var(--text-light)', marginBottom: '6px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={product.composition}>
-            {t('products.composition', 'Composition')}: <span style={{ fontStyle: 'italic', color: 'var(--text-medium)' }}>{product.composition}</span>
-          </p>
-        )}
+        <p 
+          style={{ 
+            fontSize: '0.78rem', 
+            color: 'var(--text-light)', 
+            marginBottom: '6px', 
+            minHeight: '1.35rem', 
+            overflow: 'hidden', 
+            textOverflow: 'ellipsis', 
+            whiteSpace: 'nowrap' 
+          }} 
+          title={product.composition || ''}
+        >
+          {product.composition ? (
+            <>{t('products.composition', 'Composition')}: <span style={{ fontStyle: 'italic', color: 'var(--text-medium)' }}>{product.composition}</span></>
+          ) : (
+            <span style={{ visibility: 'hidden' }}>&nbsp;</span>
+          )}
+        </p>
 
         {/* Pricing Block */}
-        <div className="product-card-price-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '6px', marginTop: 'auto', paddingTop: '10px', borderTop: '1px solid var(--border-light)' }}>
+        <div className="product-card-price-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '6px', marginTop: 'auto', paddingTop: '10px', borderTop: '1px solid var(--border-light)', minHeight: '68px' }}>
           <div>
             {isLoggedIn ? (
               <>
-                {hasMargin && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px', flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: '0.74rem', color: 'var(--text-light)', textDecoration: 'line-through' }} className="tabular-nums">
-                      {t('products.mrp', 'MRP')} {formatCurrency(displayMrp)}
-                    </span>
-                    <span style={{ fontSize: '0.7rem', backgroundColor: '#ecfdf5', color: '#059669', fontWeight: '800', padding: '1px 6px', borderRadius: '4px' }}>
-                      {marginPercent}% {language === 'gu' ? 'માર્જિન' : language === 'hi' ? 'मार्जिन' : 'MARGIN'}
-                    </span>
-                  </div>
-                )}
+                <div style={{ minHeight: '20px', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px', flexWrap: 'wrap' }}>
+                  {hasMargin ? (
+                    <>
+                      <span style={{ fontSize: '0.74rem', color: 'var(--text-light)', textDecoration: 'line-through' }} className="tabular-nums">
+                        {t('products.mrp', 'MRP')} {formatCurrency(displayMrp)}
+                      </span>
+                      <span style={{ fontSize: '0.7rem', backgroundColor: '#ecfdf5', color: '#059669', fontWeight: '800', padding: '1px 6px', borderRadius: '4px' }}>
+                        {marginPercent}% {language === 'gu' ? 'માર્જિન' : language === 'hi' ? 'મार्जिन' : 'MARGIN'}
+                      </span>
+                    </>
+                  ) : (
+                    <span style={{ visibility: 'hidden' }}>&nbsp;</span>
+                  )}
+                </div>
                 <div>
                   <span style={{ fontSize: '0.7rem', color: 'var(--primary-blue)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'block' }}>
                     {t('products.ptr', 'PTR Rate')}:
@@ -274,41 +291,43 @@ function ProductCard({ product, addToCart }) {
               </>
             ) : (
               <div>
-                <div style={{ marginBottom: '3px' }}>
+                <div style={{ minHeight: '20px', marginBottom: '2px', display: 'flex', alignItems: 'center' }}>
                   <span style={{ fontSize: '0.7rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'block' }}>
                     {t('products.mrp', 'MRP')}:
                   </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                   <span style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--text-dark)' }} className="tabular-nums">
                     {formatCurrency(displayMrp)}
                     <span style={{ fontSize: '0.74rem', fontWeight: '500', color: 'var(--text-medium)' }}> /{language === 'gu' ? 'નંગ' : language === 'hi' ? 'यूनिट' : 'unit'}</span>
                   </span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      openAuth();
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      backgroundColor: '#eff6ff',
+                      border: '1px dashed #3b82f6',
+                      color: 'var(--primary-blue)',
+                      padding: '3px 8px',
+                      borderRadius: '5px',
+                      fontSize: '0.74rem',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      transition: 'var(--transition-smooth)'
+                    }}
+                    title="Login as verified chemist to view Wholesale PTR Rate"
+                  >
+                    <Lock size={12} color="var(--primary-blue)" />
+                    <span>{t('products.loginForPtr', 'Login for PTR Rate')}</span>
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    openAuth();
-                  }}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    backgroundColor: '#eff6ff',
-                    border: '1px dashed #3b82f6',
-                    color: 'var(--primary-blue)',
-                    padding: '3px 8px',
-                    borderRadius: '5px',
-                    fontSize: '0.74rem',
-                    fontWeight: '700',
-                    cursor: 'pointer',
-                    transition: 'var(--transition-smooth)'
-                  }}
-                  title="Login as verified chemist to view Wholesale PTR Rate"
-                >
-                  <Lock size={12} color="var(--primary-blue)" />
-                  <span>{t('products.loginForPtr', 'Login for PTR Rate')}</span>
-                </button>
               </div>
             )}
           </div>
@@ -341,6 +360,9 @@ function ProductCard({ product, addToCart }) {
               border: '1.5px solid #10b981', 
               borderRadius: '8px', 
               padding: '3px 6px',
+              minHeight: '40px',
+              height: '40px',
+              boxSizing: 'border-box',
               animation: 'fadeIn 0.2s ease'
             }}
           >
@@ -377,7 +399,7 @@ function ProductCard({ product, addToCart }) {
             onClick={onAddCartClick}
             disabled={!product.inStock}
             className={`btn ${isAdded ? 'btn-secondary' : 'btn-primary'} btn-sm`}
-            style={{ padding: '8px 6px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: '700', opacity: product.inStock ? 1 : 0.6, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+            style={{ padding: '8px 6px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: '700', minHeight: '40px', height: '40px', opacity: product.inStock ? 1 : 0.6, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
             title={product.inStock ? t('products.addToCart', 'Add to Cart') : t('products.outOfStock', 'Product Out of Stock')}
           >
             {isAdded ? <Check size={14} /> : <ShoppingBag size={14} />}
@@ -388,7 +410,7 @@ function ProductCard({ product, addToCart }) {
         <button 
           onClick={handleWhatsAppOrder}
           className="btn btn-secondary btn-sm"
-          style={{ padding: '8px 6px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+          style={{ padding: '8px 6px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: '700', minHeight: '40px', height: '40px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
         >
           {t('common.whatsapp', 'WhatsApp')}
         </button>

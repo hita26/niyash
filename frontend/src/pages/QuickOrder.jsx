@@ -2329,12 +2329,12 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                           </span>
                         </div>
 
-                        <h3 style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--text-dark)', margin: '10px 0 4px 0', lineHeight: '1.3' }}>
+                        <h3 style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--text-dark)', margin: '10px 0 4px 0', lineHeight: '1.3', minHeight: '2.6rem', height: '2.6rem', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                           {product.name}
                         </h3>
 
-                        <div style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '8px', minHeight: '32px' }}>
-                          {product.composition}
+                        <div style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '8px', minHeight: '2.4rem', height: '2.4rem', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }} title={product.composition || ''}>
+                          {product.composition || <span style={{ visibility: 'hidden' }}>&nbsp;</span>}
                         </div>
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: 'var(--text-medium)', backgroundColor: 'var(--bg-surface-alt)', padding: '6px 10px', borderRadius: '6px', marginBottom: '10px' }}>

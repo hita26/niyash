@@ -242,10 +242,12 @@ function Home({ addToCart }) {
                     onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
                   />
                 </div>
-                <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column', justifyItems: 'space-between' }}>
-                  <h3 style={{ fontSize: '1.15rem', marginBottom: '8px' }}>{cat.title}</h3>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-medium)', marginBottom: '15px', flex: 1 }}>{cat.desc}</p>
-                  <Link to={cat.link} className="btn btn-outline btn-sm" style={{ width: '100%', textAlign: 'center' }}>
+                <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div>
+                    <h3 style={{ fontSize: '1.15rem', marginBottom: '8px', minHeight: '2.8rem', lineHeight: '1.4' }}>{cat.title}</h3>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-medium)', marginBottom: '15px', minHeight: '3.6rem', lineHeight: '1.5' }}>{cat.desc}</p>
+                  </div>
+                  <Link to={cat.link} className="btn btn-outline btn-sm" style={{ width: '100%', textAlign: 'center', marginTop: 'auto', minHeight: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {t('categories.viewProducts', 'View Products')}
                   </Link>
                 </div>
@@ -305,7 +307,7 @@ function Home({ addToCart }) {
                 style={{
                   padding: '30px 20px', border: '1px solid var(--border-light)',
                   borderRadius: '12px', backgroundColor: '#f8fafc', position: 'relative',
-                  textAlign: 'center'
+                  textAlign: 'center', height: '100%', display: 'flex', flexDirection: 'column'
                 }}
               >
                 <span style={{
@@ -316,8 +318,8 @@ function Home({ addToCart }) {
                 }}>
                   {step.step}
                 </span>
-                <h3 style={{ fontSize: '1.1rem', margin: '15px 0 10px 0' }}>{step.title}</h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-medium)' }}>{step.desc}</p>
+                <h3 style={{ fontSize: '1.1rem', margin: '15px 0 10px 0', minHeight: '2.4rem', lineHeight: '1.3' }}>{step.title}</h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-medium)', minHeight: '3.6rem', lineHeight: '1.5', margin: 0 }}>{step.desc}</p>
               </div>
             ))}
           </div>

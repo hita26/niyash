@@ -5258,20 +5258,17 @@ _Helpline: +91 9316566894_`;
                        TABLE & MOBILE CARDS DUAL-MODE VIEW
                        ========================================== */
                     <>
-                      {/* Desktop Data Grid View (Screens >= 993px) */}
+                      {/* Desktop Data Grid View (Screens >= 993px - Streamlined 5-Column Single View, Zero Horizontal Scroll) */}
                       <div className="admin-product-desktop-table card" style={{ padding: '0', overflow: 'hidden' }}>
                         <div className="admin-table-container" style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-                          <table className="admin-table" style={{ width: '100%', minWidth: '920px' }}>
+                          <table className="admin-table" style={{ width: '100%', tableLayout: 'auto', borderCollapse: 'collapse' }}>
                             <thead>
                               <tr>
-                                <th style={{ width: '56px', minWidth: '56px', textAlign: 'center' }}>Photo</th>
-                                <th style={{ minWidth: '260px' }}>Product Details & SKU</th>
-                                <th style={{ minWidth: '150px' }}>Category</th>
-                                <th style={{ minWidth: '140px' }}>Form & Packing</th>
-                                <th style={{ minWidth: '120px', whiteSpace: 'nowrap' }}>Pricing (PTR / MRP)</th>
-                                <th style={{ minWidth: '130px', whiteSpace: 'nowrap' }}>Stock & Units</th>
-                                <th style={{ minWidth: '110px', textAlign: 'center', whiteSpace: 'nowrap' }}>Live Status</th>
-                                <th style={{ width: '90px', minWidth: '90px', textAlign: 'center', whiteSpace: 'nowrap', position: 'sticky', right: 0, backgroundColor: '#f8fafc', zIndex: 6, boxShadow: '-3px 0 6px rgba(0,0,0,0.04)' }}>Actions</th>
+                                <th style={{ width: '42%', padding: '12px 14px' }}>Product & Formulation</th>
+                                <th style={{ width: '18%', padding: '12px 12px' }}>Category & Tax</th>
+                                <th style={{ width: '15%', padding: '12px 12px' }}>Wholesale Price</th>
+                                <th style={{ width: '13%', padding: '12px 12px' }}>Stock & Live</th>
+                                <th style={{ width: '12%', padding: '12px 12px', textAlign: 'right' }}>Actions</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -5285,166 +5282,142 @@ _Helpline: +91 9316566894_`;
 
                                 return (
                                   <tr key={p._id} style={{ borderBottom: '1px solid var(--border-light)', backgroundColor: isTargetedForDelete ? '#fef2f2' : 'transparent', transition: 'background-color 0.15s ease' }}>
-                                    {/* Photo Thumbnail - Standard 1:1 Square */}
+                                    {/* Column 1: Photo + Name + SKU + Form + Packing + Composition */}
                                     <td style={{ padding: '10px 14px', verticalAlign: 'middle' }}>
-                                      <div style={{ position: 'relative', width: '46px', height: '46px', aspectRatio: '1 / 1', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#ffffff', padding: '3px', boxSizing: 'border-box', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        {photoUrl ? (
-                                          <img 
-                                            src={photoUrl} 
-                                            alt={p.name} 
-                                            style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
-                                            onError={(e) => { e.target.style.display = 'none'; }}
-                                          />
-                                        ) : (
-                                          <ImageIcon size={18} color="#94a3b8" />
-                                        )}
-                                        {hasMultiplePhotos && (
-                                          <span 
-                                            style={{
-                                              position: 'absolute', bottom: '2px', right: '2px',
-                                              backgroundColor: 'rgba(0,0,0,0.7)', color: '#fff',
-                                              fontSize: '0.62rem', padding: '1px 3px', borderRadius: '3px', fontWeight: '700'
-                                            }}
-                                            title={`${p.images.length} photos available`}
-                                          >
-                                            +{p.images.length - 1}
-                                          </span>
-                                        )}
+                                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                                        <div style={{ position: 'relative', width: '44px', height: '44px', minWidth: '44px', aspectRatio: '1 / 1', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#ffffff', padding: '2px', boxSizing: 'border-box', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                          {photoUrl ? (
+                                            <img 
+                                              src={photoUrl} 
+                                              alt={p.name} 
+                                              style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
+                                              onError={(e) => { e.target.style.display = 'none'; }}
+                                            />
+                                          ) : (
+                                            <ImageIcon size={18} color="#94a3b8" />
+                                          )}
+                                          {hasMultiplePhotos && (
+                                            <span 
+                                              style={{
+                                                position: 'absolute', bottom: '2px', right: '2px',
+                                                backgroundColor: 'rgba(0,0,0,0.7)', color: '#fff',
+                                                fontSize: '0.62rem', padding: '1px 3px', borderRadius: '3px', fontWeight: '700'
+                                              }}
+                                              title={`${p.images.length} photos available`}
+                                            >
+                                              +{p.images.length - 1}
+                                            </span>
+                                          )}
+                                        </div>
+
+                                        <div style={{ minWidth: 0, flex: 1 }}>
+                                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                            <span style={{ fontWeight: '700', color: 'var(--text-dark)', fontSize: '0.94rem' }}>{p.name}</span>
+                                            {p.featured && (
+                                              <span style={{ backgroundColor: '#fef3c7', color: '#b45309', fontSize: '0.68rem', fontWeight: '700', padding: '1px 6px', borderRadius: '4px', display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+                                                <Star size={10} fill="#b45309" /> Featured
+                                              </span>
+                                            )}
+                                            {p.isOurProduct && (
+                                              <span style={{ backgroundColor: '#dcfce7', color: '#15803d', fontSize: '0.68rem', fontWeight: '700', padding: '1px 6px', borderRadius: '4px' }}>
+                                                ★ Our Brand
+                                              </span>
+                                            )}
+                                          </div>
+
+                                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '3px', flexWrap: 'wrap', fontSize: '0.74rem' }}>
+                                            <span style={{ fontWeight: '700', color: '#475569' }}>{p.company || p.brand}</span>
+                                            <span>•</span>
+                                            <span style={{ backgroundColor: '#e0f2fe', color: '#0369a1', padding: '1px 6px', borderRadius: '4px', fontWeight: '600' }}>{p.form || 'Tablet'}</span>
+                                            <span>•</span>
+                                            <span style={{ color: '#64748b' }}>{p.packing || 'Standard'}</span>
+                                            {p.sku && (
+                                              <>
+                                                <span>•</span>
+                                                <span style={{ fontFamily: 'monospace', color: 'var(--primary-blue)', backgroundColor: '#eff6ff', padding: '1px 6px', borderRadius: '4px', fontWeight: '600' }}>
+                                                  {p.sku}
+                                                </span>
+                                              </>
+                                            )}
+                                          </div>
+
+                                          {p.composition && (
+                                            <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '380px' }} title={p.composition}>
+                                              <em>{p.composition}</em>
+                                            </div>
+                                          )}
+                                        </div>
                                       </div>
                                     </td>
 
-                                    {/* Product Details & SKU */}
-                                    <td style={{ padding: '10px 14px', verticalAlign: 'middle' }}>
-                                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <span style={{ fontWeight: '700', color: 'var(--text-dark)', fontSize: '0.94rem' }}>{p.name}</span>
-                                        {p.featured && (
-                                          <span style={{ backgroundColor: '#fef3c7', color: '#b45309', fontSize: '0.7rem', fontWeight: '700', padding: '2px 6px', borderRadius: '4px', display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
-                                            <Star size={10} fill="#b45309" /> Featured
-                                          </span>
-                                        )}
+                                    {/* Column 2: Category & Tax */}
+                                    <td style={{ padding: '10px 12px', verticalAlign: 'middle' }}>
+                                      <div style={{ fontSize: '0.84rem', fontWeight: '700', color: '#334155' }}>
+                                        {p.category}
                                       </div>
-                                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px', flexWrap: 'wrap' }}>
-                                        {p.sku && (
-                                          <span style={{ fontSize: '0.74rem', fontFamily: 'monospace', color: 'var(--primary-blue)', backgroundColor: '#eff6ff', padding: '1px 6px', borderRadius: '4px', fontWeight: '600' }}>
-                                            {p.sku}
-                                          </span>
-                                        )}
-                                        {(p.batchNumber || p.batchNo) && (
-                                          <span style={{ fontSize: '0.72rem', backgroundColor: '#e0e7ff', color: '#3730a3', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }} title="Batch Number">
-                                            Batch: {p.batchNumber || p.batchNo}
-                                          </span>
-                                        )}
-                                        {p.rackId && (
-                                          <span style={{ fontSize: '0.72rem', backgroundColor: '#fef3c7', color: '#92400e', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }} title="Warehouse Storage Rack">
-                                            Rack: {p.rackId}
-                                          </span>
-                                        )}
-                                        {p.hsnCode && (
-                                          <span style={{ fontSize: '0.72rem', backgroundColor: '#f1f5f9', color: '#475569', padding: '1px 6px', borderRadius: '4px', fontWeight: '600' }} title="HSN Pharma Tax Code">
-                                            HSN: {p.hsnCode}
-                                          </span>
-                                        )}
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '3px', flexWrap: 'wrap' }}>
                                         {(p.salesGst !== undefined || p.gstRate !== undefined) && (
-                                          <span style={{ fontSize: '0.72rem', backgroundColor: '#dcfce7', color: '#166534', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }} title="Sales GST Rate">
+                                          <span style={{ fontSize: '0.7rem', backgroundColor: '#dcfce7', color: '#166534', padding: '1px 5px', borderRadius: '4px', fontWeight: '700' }}>
                                             GST: {p.salesGst !== undefined ? p.salesGst : p.gstRate}%
                                           </span>
                                         )}
-                                        {p.expiryDate && (
-                                          <span style={{ fontSize: '0.72rem', backgroundColor: '#fee2e2', color: '#991b1b', padding: '1px 6px', borderRadius: '4px', fontWeight: '600' }} title="Expiry Date">
-                                            Exp: {p.expiryDate}
+                                        {p.hsnCode && (
+                                          <span style={{ fontSize: '0.7rem', backgroundColor: '#f1f5f9', color: '#475569', padding: '1px 5px', borderRadius: '4px' }}>
+                                            HSN: {p.hsnCode}
+                                          </span>
+                                        )}
+                                        {(p.batchNumber || p.batchNo) && (
+                                          <span style={{ fontSize: '0.7rem', backgroundColor: '#e0e7ff', color: '#3730a3', padding: '1px 5px', borderRadius: '4px', fontWeight: '600' }}>
+                                            B:{p.batchNumber || p.batchNo}
                                           </span>
                                         )}
                                       </div>
-                                      {p.composition && (
-                                        <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: '4px', lineHeight: '1.4' }}>
-                                          <strong style={{ color: '#1e293b' }}>Contains:</strong> {p.composition}
-                                        </div>
-                                      )}
                                     </td>
 
-                                    {/* Category */}
-                                    <td style={{ padding: '10px 14px', verticalAlign: 'middle' }}>
-                                      <div style={{ fontSize: '0.86rem', fontWeight: '700', color: '#334155' }}>
-                                        {p.category}
-                                      </div>
-                                      {p.subCategory && (
-                                        <div style={{ marginTop: '4px' }}>
-                                          <span style={{ fontSize: '0.72rem', backgroundColor: '#f1f5f9', color: '#475569', padding: '2px 8px', borderRadius: '4px', fontWeight: '600', display: 'inline-block', maxWidth: '220px', wordBreak: 'break-word', lineHeight: '1.3' }}>
-                                            {p.subCategory}
-                                          </span>
-                                        </div>
-                                      )}
-                                    </td>
-
-                                    {/* Form & Packing (Streamlined, no duplicate product name) */}
-                                    <td style={{ padding: '10px 14px', verticalAlign: 'middle' }}>
-                                      <div style={{ fontSize: '0.86rem', fontWeight: '700', color: 'var(--text-dark)' }}>
-                                        {p.form || 'Tablet'}
-                                      </div>
-                                      {p.packing && (
-                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-medium)', backgroundColor: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', display: 'inline-block', marginTop: '3px' }}>
-                                          {p.packing}
-                                        </span>
-                                      )}
-                                      {p.brand && p.brand !== p.name && (
-                                        <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
-                                          {p.brand}
-                                        </div>
-                                      )}
-                                    </td>
-
-                                    {/* Pricing */}
-                                    <td style={{ padding: '10px 14px', verticalAlign: 'middle' }}>
-                                      <div style={{ fontWeight: '700', color: 'var(--primary-blue)', fontSize: '0.95rem' }}>
+                                    {/* Column 3: Wholesale Pricing & MRP */}
+                                    <td style={{ padding: '10px 12px', verticalAlign: 'middle' }}>
+                                      <div style={{ fontWeight: '800', color: 'var(--primary-blue)', fontSize: '0.98rem' }}>
                                         {formatCurrency(p.price)}
                                       </div>
                                       {p.mrp && p.mrp > p.price && (
-                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <div style={{ fontSize: '0.74rem', color: 'var(--text-light)', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
                                           <span style={{ textDecoration: 'line-through' }}>{formatCurrency(p.mrp)}</span>
                                           <span style={{ color: '#16a34a', fontWeight: '700' }}>({discountPercent}% OFF)</span>
                                         </div>
                                       )}
                                     </td>
 
-                                    {/* Stock & Quantity */}
-                                    <td style={{ padding: '10px 14px', verticalAlign: 'middle' }}>
-                                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    {/* Column 4: Stock & Live Status */}
+                                    <td style={{ padding: '10px 12px', verticalAlign: 'middle' }}>
+                                      <div>
                                         <button 
                                           type="button"
                                           onClick={() => handleToggleStock(p)}
                                           style={{
-                                            border: 'none', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: '700',
+                                            border: 'none', padding: '2px 8px', borderRadius: '12px', fontSize: '0.72rem', fontWeight: '700',
                                             backgroundColor: !isOutOfStock ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
                                             color: !isOutOfStock ? '#059669' : '#dc2626', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px'
                                           }}
                                           title="Click to toggle stock status"
                                         >
-                                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: !isOutOfStock ? '#059669' : '#dc2626' }}></span>
-                                          {!isOutOfStock ? 'In Stock' : 'Out of Stock'}
+                                          <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: !isOutOfStock ? '#059669' : '#dc2626' }}></span>
+                                          {!isOutOfStock ? 'In Stock' : 'Out'}
                                         </button>
-                                        <span style={{ fontSize: '0.8rem', color: 'var(--text-medium)', fontWeight: '600' }}>
-                                          ({p.stockQuantity !== undefined ? p.stockQuantity : (p.inStock ? 100 : 0)} units)
-                                        </span>
                                       </div>
-                                    </td>
-
-                                    {/* Live Status & Featured */}
-                                    <td style={{ padding: '10px 14px', verticalAlign: 'middle', textAlign: 'center' }}>
-                                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
                                         <button
                                           type="button"
                                           onClick={() => handleToggleActive(p)}
                                           style={{
-                                            border: 'none', padding: '3px 8px', borderRadius: '6px', fontSize: '0.74rem', fontWeight: '700',
+                                            border: 'none', padding: '1px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: '700',
                                             backgroundColor: p.isActive !== false ? '#ecfdf5' : '#f1f5f9',
                                             color: p.isActive !== false ? '#059669' : '#94a3b8',
                                             cursor: 'pointer'
                                           }}
-                                          title={p.isActive !== false ? 'Live on public website (click to hide)' : 'Hidden from public website (click to publish)'}
+                                          title={p.isActive !== false ? 'Live on website' : 'Hidden from website'}
                                         >
-                                          {p.isActive !== false ? '● Live' : '○ Hidden'}
+                                          {p.isActive !== false ? '● Live' : '○ Off'}
                                         </button>
-
                                         <button
                                           type="button"
                                           onClick={() => handleToggleFeatured(p)}
@@ -5452,51 +5425,37 @@ _Helpline: +91 9316566894_`;
                                             border: 'none', background: 'none', cursor: 'pointer', padding: '2px',
                                             color: p.featured ? '#f59e0b' : '#cbd5e1'
                                           }}
-                                          title={p.featured ? 'Featured on website (click to remove)' : 'Mark as featured product'}
+                                          title={p.featured ? 'Featured on website' : 'Mark as featured'}
                                         >
-                                          <Star size={15} fill={p.featured ? '#f59e0b' : 'none'} />
-                                        </button>
-
-                                        <button
-                                          type="button"
-                                          onClick={() => handleToggleOurProduct(p)}
-                                          style={{
-                                            border: 'none', padding: '3px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: '700',
-                                            backgroundColor: p.isOurProduct ? '#dcfce7' : '#f1f5f9',
-                                            color: p.isOurProduct ? '#15803d' : '#94a3b8',
-                                            cursor: 'pointer'
-                                          }}
-                                          title={p.isOurProduct ? 'In Our Products (click to remove)' : 'Add to Our Products page'}
-                                        >
-                                          {p.isOurProduct ? '★ Our' : '+ Our'}
+                                          <Star size={13} fill={p.featured ? '#f59e0b' : 'none'} />
                                         </button>
                                       </div>
                                     </td>
 
-                                    {/* Actions - Pinned Sticky on the Right */}
-                                    <td style={{ padding: '10px 12px', verticalAlign: 'middle', textAlign: 'center', position: 'sticky', right: 0, backgroundColor: isTargetedForDelete ? '#fef2f2' : '#ffffff', zIndex: 5, boxShadow: '-3px 0 6px rgba(0,0,0,0.04)' }}>
+                                    {/* Column 5: Actions */}
+                                    <td style={{ padding: '10px 12px', verticalAlign: 'middle', textAlign: 'right' }}>
                                       {isTargetedForDelete ? (
-                                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                                           <button 
                                             type="button"
                                             onClick={handleExecuteDelete} 
-                                            style={{ color: '#ffffff', backgroundColor: '#ef4444', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '5px 9px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.78rem', fontWeight: '700' }}
+                                            style={{ color: '#ffffff', backgroundColor: '#ef4444', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '3px', padding: '4px 8px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.74rem', fontWeight: '700' }}
                                             title="Confirm Delete"
                                           >
-                                            <Trash2 size={12} />
+                                            <Trash2 size={11} />
                                             <span>Delete</span>
                                           </button>
                                           <button 
                                             type="button"
                                             onClick={() => setDeleteConfirm(null)} 
-                                            style={{ color: '#475569', backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1', display: 'inline-flex', alignItems: 'center', padding: '5px 7px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.78rem' }}
+                                            style={{ color: '#475569', backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1', display: 'inline-flex', alignItems: 'center', padding: '4px 6px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.74rem' }}
                                             title="Cancel"
                                           >
-                                            <X size={12} />
+                                            <X size={11} />
                                           </button>
                                         </div>
                                       ) : (
-                                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
                                           <button 
                                             type="button"
                                             onClick={() => handleOpenProductModal(p)} 
@@ -5504,7 +5463,7 @@ _Helpline: +91 9316566894_`;
                                             title="Edit Product Details & Photos"
                                             aria-label="Edit product"
                                           >
-                                            <Edit2 size={14} />
+                                            <Edit2 size={13} />
                                           </button>
                                           <button 
                                             type="button"
@@ -5513,7 +5472,7 @@ _Helpline: +91 9316566894_`;
                                             title="Delete Product"
                                             aria-label="Delete product"
                                           >
-                                            <Trash2 size={14} />
+                                            <Trash2 size={13} />
                                           </button>
                                         </div>
                                       )}

@@ -341,11 +341,7 @@ export default function OurProducts({ addToCart, searchTerm, setSearchTerm }) {
 
         {/* LOADING SKELETON */}
         {loading ? (
-          <div className="responsive-product-grid">
-            {[...Array(pageSize > 12 ? 12 : pageSize)].map((_, i) => (
-              <SkeletonLoader key={i} type="product-card" />
-            ))}
-          </div>
+          <SkeletonLoader variant="product-grid" count={pageSize > 12 ? 12 : pageSize} />
         ) : paginatedProducts.length > 0 ? (
           /* PRODUCTS GRID */
           <>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import SkeletonLoader from '../components/SkeletonLoader';
 import { useLiveSync, SYNC_EVENTS } from '../utils/liveSync';
 import { 
   Flame, 
@@ -701,10 +702,7 @@ function NewsFeed() {
 
         {/* News & Schemes Grid */}
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '80px 20px', color: 'var(--text-medium)' }}>
-            <RefreshCw size={36} style={{ animation: 'spin 1s linear infinite', color: 'var(--primary-blue)', margin: '0 auto 15px auto' }} />
-            <p style={{ fontSize: '1.1rem', fontWeight: '600' }}>Fetching live pharma announcements & schemes...</p>
-          </div>
+          <SkeletonLoader variant="news-list" count={4} />
         ) : filteredNews.length === 0 ? (
           /* Empty State */
           <div 

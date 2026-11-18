@@ -3180,9 +3180,9 @@ body.dark-theme {
   flex-direction: column;
   gap: 16px;
   position: sticky !important;
-  top: 80px !important;
-  align-self: start !important;
-  max-height: calc(100vh - 95px);
+  top: 75px !important;
+  align-self: flex-start !important;
+  max-height: calc(100vh - 85px);
   overflow-y: auto;
   overflow-x: hidden;
   padding: 18px;

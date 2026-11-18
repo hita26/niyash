@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import SkeletonLoader from '../components/SkeletonLoader';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useLiveSync, SYNC_EVENTS } from '../utils/liveSync';
@@ -612,6 +613,7 @@ function QuickOrder() {
 
   // Catalog & Filter State
   const [products, setProducts] = useState([]);
+  const [isCatalogLoading, setIsCatalogLoading] = useState(true);
   const [companiesList, setCompaniesList] = useState(DEFAULT_COMPANIES);
   const [formsList, setFormsList] = useState(ALL_FORMS);
   const [searchQuery, setSearchQuery] = useState('');
@@ -682,6 +684,7 @@ function QuickOrder() {
   // Fetch live products & metadata filters
   const fetchCatalog = useCallback(async () => {
     try {
+      setIsCatalogLoading(true);
       // Fetch products
       const prodRes = await fetch('/api/products?limit=15000');
       if (prodRes.ok) {
@@ -704,6 +707,8 @@ function QuickOrder() {
       }
     } catch (err) {
       console.warn('Using offline mock products for Quick Order matrix:', err);
+    } finally {
+      setIsCatalogLoading(false);
     }
   }, []);
 
@@ -1924,8 +1929,12 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
               </div>
             </div>
 
-            {/* Empty State */}
-            {filteredProducts.length === 0 && (
+            {/* Catalog Loading Skeleton vs Empty State */}
+            {isCatalogLoading ? (
+              <div style={{ padding: '16px 0' }}>
+                <SkeletonLoader variant={viewMode === 'card' ? 'product-grid' : 'table'} count={8} rows={8} />
+              </div>
+            ) : filteredProducts.length === 0 ? (
               <div
                 style={{
                   backgroundColor: 'var(--bg-card)',
@@ -1952,7 +1961,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                   Clear All Filters
                 </button>
               </div>
-            )}
+            ) : null}
 
             {/* TABLE / MATRIX VIEW MODE */}
             {viewMode === 'table' && filteredProducts.length > 0 && (
@@ -3362,9 +3371,8 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
             </div>
 
             {ledgerLoading && (
-              <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                <RefreshCw size={28} className="animate-spin" color="#0c3d6c" style={{ margin: '0 auto 10px auto' }} />
-                <p style={{ fontSize: '0.88rem', color: '#64748b' }}>Fetching real-time ledger statement from server...</p>
+              <div style={{ padding: '16px 0' }}>
+                <SkeletonLoader variant="ledger-statement" rows={3} />
               </div>
             )}
 

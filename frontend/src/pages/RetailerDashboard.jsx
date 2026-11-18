@@ -1228,12 +1228,23 @@ export default function RetailerDashboard() {
               </p>
             </div>
 
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 240px), 1fr))',
-              gap: '16px'
-            }}>
-              {schemes.map((p) => {
+            {loadingSchemes ? (
+              <SkeletonLoader variant="product-grid" count={6} />
+            ) : schemes.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '50px 20px', backgroundColor: '#ffffff', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
+                <Sparkles size={40} color="#94a3b8" style={{ marginBottom: '10px' }} />
+                <h4 style={{ fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-dark)', margin: 0 }}>No Active Schemes</h4>
+                <p style={{ marginTop: '6px', color: 'var(--text-medium)', fontSize: '0.86rem' }}>
+                  New batch schemes and bonus offers will be listed here as soon as published by wholesale desk.
+                </p>
+              </div>
+            ) : (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 240px), 1fr))',
+                gap: '16px'
+              }}>
+                {schemes.map((p) => {
                 const ptr = Number(p.price) || 0;
                 const mrp = Number(p.mrp) || ptr * 1.35;
                 const marginPct = mrp > ptr ? Math.round(((mrp - ptr) / mrp) * 100) : 25;
@@ -1315,6 +1326,7 @@ export default function RetailerDashboard() {
                 );
               })}
             </div>
+            )}
           </div>
         )}
 

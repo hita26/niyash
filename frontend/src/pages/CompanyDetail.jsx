@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import SkeletonLoader from '../components/SkeletonLoader';
 import { 
   Building2, MapPin, Globe, ExternalLink, ShieldCheck, 
   Search, Package, ArrowLeft, Filter, CheckCircle2,
@@ -96,12 +97,7 @@ function CompanyDetail({ addToCart }) {
   };
 
   if (loading) {
-    return (
-      <div style={{ padding: '80px 20px', textAlign: 'center', minHeight: '60vh' }}>
-        <div className="spinner" style={{ margin: '0 auto 15px' }}></div>
-        <p style={{ color: 'var(--text-medium)' }}>{t('common.loading', 'Loading company profile and catalog...')}</p>
-      </div>
-    );
+    return <SkeletonLoader variant="company-detail" />;
   }
 
   if (error || !company) {

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { broadcastLiveEvent, SYNC_EVENTS } from '../utils/liveSync';
 import { useLanguage } from '../context/LanguageContext';
+import SkeletonLoader from '../components/SkeletonLoader';
 
 // ==========================================
 // FALLBACK DATASETS FOR OFFLINE / ROBUST DEMO
@@ -3826,7 +3827,7 @@ _Helpline: +91 9316566894_`;
       <div className="admin-workspace-container admin-layout-container">
         
         {/* Sidebar Nav */}
-        <aside className="card admin-desktop-sidebar" style={{ display: 'flex', flexDirection: 'column', gap: '16px', position: 'sticky', top: '80px', alignSelf: 'start', maxHeight: 'calc(100vh - 95px)', overflowY: 'auto' }}>
+        <aside className="card admin-desktop-sidebar" style={{ display: 'flex', flexDirection: 'column', gap: '16px', position: 'sticky', top: '75px', alignSelf: 'flex-start', maxHeight: 'calc(100vh - 85px)', overflowY: 'auto' }}>
           <div style={{ borderBottom: '1px solid var(--border-light)', paddingBottom: '15px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -4147,9 +4148,11 @@ _Helpline: +91 9316566894_`;
           </div>
 
           {isLoading ? (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '350px' }}>
-              <div style={{ border: '4px solid #cbd5e1', borderTop: '4px solid var(--primary-blue)', borderRadius: '50%', width: '40px', height: '40px', animation: 'spin 1s linear infinite' }}></div>
-            </div>
+            activeTab === 'overview' ? (
+              <SkeletonLoader variant="admin-overview" />
+            ) : (
+              <SkeletonLoader variant="admin-table" rows={6} />
+            )
           ) : (
             <>
               {/* ==========================================
@@ -5369,7 +5372,7 @@ _Helpline: +91 9316566894_`;
                       {/* Desktop Data Grid View (Screens >= 993px - Streamlined 5-Column Single View, Zero Horizontal Scroll) */}
                       <div className="admin-product-desktop-table card" style={{ padding: '0', overflow: 'hidden' }}>
                         <div className="admin-table-container" style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-                          <table className="admin-table" style={{ width: '100%', tableLayout: 'auto', borderCollapse: 'collapse' }}>
+                          <table className="admin-table" style={{ width: '100%', minWidth: '780px', tableLayout: 'auto', borderCollapse: 'collapse' }}>
                             <thead>
                               <tr>
                                 <th style={{ width: '42%', padding: '12px 14px' }}>Product & Formulation</th>
@@ -6928,8 +6931,12 @@ _Helpline: +91 9316566894_`;
                         <tbody>
                           {adminList.length === 0 ? (
                             <tr>
-                              <td colSpan="7" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-medium)' }}>
-                                {isAdminListLoading ? 'Loading admin accounts...' : 'No additional sub-admins created yet. Click "+ Add New Admin" above to create one.'}
+                              <td colSpan="7" style={{ textAlign: 'center', padding: isAdminListLoading ? '10px 0' : '40px', color: 'var(--text-medium)' }}>
+                                {isAdminListLoading ? (
+                                  <SkeletonLoader variant="admin-subadmins" rows={3} />
+                                ) : (
+                                  'No additional sub-admins created yet. Click "+ Add New Admin" above to create one.'
+                                )}
                               </td>
                             </tr>
                           ) : (
@@ -7103,8 +7110,12 @@ _Helpline: +91 9316566894_`;
                     {/* MOBILE CARD VIEW (< 768px): HARD RESPONSIVE */}
                     <div className="hide-desktop" style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '12px' }}>
                       {adminList.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: '30px', color: 'var(--text-medium)', fontSize: '0.86rem' }}>
-                          {isAdminListLoading ? 'Loading admin accounts...' : 'No sub-admins created yet.'}
+                        <div style={{ textAlign: 'center', padding: isAdminListLoading ? '10px 0' : '30px', color: 'var(--text-medium)', fontSize: '0.86rem' }}>
+                          {isAdminListLoading ? (
+                            <SkeletonLoader variant="table" rows={3} />
+                          ) : (
+                            'No sub-admins created yet.'
+                          )}
                         </div>
                       ) : (
                         adminList.map((adm) => {

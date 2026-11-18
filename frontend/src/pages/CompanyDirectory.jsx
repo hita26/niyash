@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import SkeletonLoader from '../components/SkeletonLoader';
 import { useLiveSync, SYNC_EVENTS } from '../utils/liveSync';
 import { 
   Building2, Search, ExternalLink, ShieldCheck, MapPin, 
@@ -228,10 +229,7 @@ function CompanyDirectory() {
 
         {/* Company Cards Grid */}
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '80px 20px', color: 'var(--text-light)' }}>
-            <div className="spinner" style={{ margin: '0 auto 15px' }}></div>
-            <p style={{ margin: 0, fontSize: '1rem', color: 'var(--text-medium)' }}>{t('common.loading', 'Loading verified company catalog...')}</p>
-          </div>
+          <SkeletonLoader variant="company-grid" count={limit > 12 ? 8 : limit} />
         ) : companies.length === 0 ? (
           <div className="card" style={{ padding: '60px 20px', textAlign: 'center' }}>
             <Building2 size={40} color="var(--text-light)" style={{ margin: '0 auto 15px' }} />

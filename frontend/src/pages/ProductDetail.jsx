@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
+import SkeletonLoader from '../components/SkeletonLoader';
 import { useAuth } from '../context/AuthContext';
 import { useLiveSync, SYNC_EVENTS } from '../utils/liveSync';
 import { 
@@ -62,12 +63,7 @@ function ProductDetail({ addToCart }) {
   }, [fetchProduct, id]);
 
   if (loading) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', gap: '15px' }}>
-        <div style={{ border: '4px solid #cbd5e1', borderTop: '4px solid var(--primary-blue)', borderRadius: '50%', width: '44px', height: '44px', animation: 'spin 1s linear infinite' }}></div>
-        <p style={{ color: 'var(--text-medium)', fontSize: '0.95rem' }}>{t('common.loading', 'Loading formulation details...')}</p>
-      </div>
-    );
+    return <SkeletonLoader variant="product-detail" />;
   }
 
   if (!product) {

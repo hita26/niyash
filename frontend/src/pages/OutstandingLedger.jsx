@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
+import SkeletonLoader from '../components/SkeletonLoader';
 import {
   FileText,
   CreditCard,
@@ -1309,7 +1310,13 @@ Rajkot, Gujarat`);
                 </tr>
               </thead>
               <tbody>
-                {filteredInvoices.length > 0 ? (
+                {isLoading ? (
+                  <tr>
+                    <td colSpan="8" style={{ padding: '16px' }}>
+                      <SkeletonLoader variant="table" rows={4} />
+                    </td>
+                  </tr>
+                ) : filteredInvoices.length > 0 ? (
                   filteredInvoices.map((inv, idx) => {
                     const isOverdue = inv.status === 'Overdue' || (inv.dueDate && new Date(inv.dueDate) < now && inv.balance > 0);
                     return (

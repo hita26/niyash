@@ -505,7 +505,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
 
               <div style={{ fontSize: '0.88rem', color: 'var(--text-medium)' }}>
                 {loading ? (
-                  <span>{t('common.loading', 'Loading catalog...')}</span>
+                  <span className="skeleton-shimmer" style={{ display: 'inline-block', width: '130px', height: '16px', verticalAlign: 'middle', borderRadius: '4px' }}></span>
                 ) : (
                   <span>{t('products.showing', 'Showing')} <strong className="tabular-nums">{products.length}</strong> {t('products.of', 'of')} <strong className="tabular-nums">{total}</strong> {t('products.productsCount', 'products')}</span>
                 )}

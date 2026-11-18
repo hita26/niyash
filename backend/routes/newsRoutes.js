@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const NewsUpdate = require('../models/NewsUpdate');
+const { protect, adminOnly, checkPermission } = require('../middleware/authMiddleware');
 
 // Helper to escape special regex characters
 const escapeRegex = (str) => {
@@ -88,8 +89,8 @@ router.get('/:id', async (req, res) => {
 
 // @desc    Create a new news / scheme announcement
 // @route   POST /api/news
-// @access  Public
-router.post('/', async (req, res) => {
+// @access  Private / Admin with canManageNews
+router.post('/', protect, adminOnly, checkPermission('canManageNews'), async (req, res) => {
   try {
     const {
       title,
@@ -130,8 +131,8 @@ router.post('/', async (req, res) => {
 
 // @desc    Update a news announcement / toggle ticker status
 // @route   PUT /api/news/:id
-// @access  Public
-router.put('/:id', async (req, res) => {
+// @access  Private / Admin with canManageNews
+router.put('/:id', protect, adminOnly, checkPermission('canManageNews'), async (req, res) => {
   try {
     const newsItem = await NewsUpdate.findById(req.params.id);
     if (!newsItem) {
@@ -164,8 +165,8 @@ router.put('/:id', async (req, res) => {
 
 // @desc    Delete a news update
 // @route   DELETE /api/news/:id
-// @access  Public
-router.delete('/:id', async (req, res) => {
+// @access  Private / Admin with canManageNews
+router.delete('/:id', protect, adminOnly, checkPermission('canManageNews'), async (req, res) => {
   try {
     const newsItem = await NewsUpdate.findById(req.params.id);
     if (!newsItem) {

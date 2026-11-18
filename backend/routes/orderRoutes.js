@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Order = require('../models/Order');
+const { protect, adminOnly, checkPermission } = require('../middleware/authMiddleware');
 
 // Helper to escape special regex characters
 const escapeRegex = (str) => {
@@ -177,10 +178,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// @desc    Get all orders with optional filtering by retailerMobile and sorting
-// @route   GET /api/orders
-// @access  Public
-router.get('/', async (req, res) => {
+// Helper function for querying orders
+const executeGetOrders = async (req, res) => {
   try {
     const {
       retailerMobile,
@@ -226,7 +225,6 @@ router.get('/', async (req, res) => {
       }
     }
 
-
     const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
     const total = await Order.countDocuments(query);
     const orders = await Order.find(query)
@@ -246,6 +244,27 @@ router.get('/', async (req, res) => {
     console.error('Get orders error:', error);
     res.status(500).json({ message: 'Server error fetching orders', error: error.message });
   }
+};
+
+// @desc    Get all orders (Admin with canManageOrders sees all, or retailer filters by their mobile)
+// @route   GET /api/orders
+// @access  Protected for All Orders / Public for Chemist Own Mobile Filter
+router.get('/', async (req, res) => {
+  const { retailerMobile } = req.query;
+
+  // If fetching full platform orders (Admin view)
+  if (!retailerMobile || !retailerMobile.trim()) {
+    return protect(req, res, () => {
+      return adminOnly(req, res, () => {
+        return checkPermission('canManageOrders')(req, res, async () => {
+          return executeGetOrders(req, res);
+        });
+      });
+    });
+  }
+
+  // Retailer querying their own mobile number
+  return executeGetOrders(req, res);
 });
 
 // @desc    Get single order by ID
@@ -279,8 +298,8 @@ router.get('/:id', async (req, res) => {
 
 // @desc    Update order status (Booked, Confirmed, Dispatched, Delivered)
 // @route   PUT /api/orders/:id/status
-// @access  Public
-router.put('/:id/status', async (req, res) => {
+// @access  Private / Admin with canManageOrders
+router.put('/:id/status', protect, adminOnly, checkPermission('canManageOrders'), async (req, res) => {
   try {
     const { orderStatus, paymentStatus } = req.body;
 

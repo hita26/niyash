@@ -4,6 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const Career = require('../models/Career');
+const { protect, adminOnly } = require('../middleware/authMiddleware');
 
 // Ensure uploads directory exists (use /tmp on Vercel serverless)
 const uploadDir = process.env.VERCEL ? path.join('/tmp', 'uploads') : path.join(__dirname, '../uploads');
@@ -126,8 +127,8 @@ router.post('/', handleUpload, async (req, res) => {
 
 // @desc    Get all applications (admin dashboard view)
 // @route   GET /api/careers
-// @access  Public (simplified, can be authenticated in production)
-router.get('/', async (req, res) => {
+// @access  Private / Admin
+router.get('/', protect, adminOnly, async (req, res) => {
   try {
     const applications = await Career.find().sort({ createdAt: -1 });
     res.json(applications);
@@ -138,8 +139,8 @@ router.get('/', async (req, res) => {
 
 // @desc    Delete a career application
 // @route   DELETE /api/careers/:id
-// @access  Public
-router.delete('/:id', async (req, res) => {
+// @access  Private / Admin
+router.delete('/:id', protect, adminOnly, async (req, res) => {
   try {
     const career = await Career.findById(req.params.id);
     if (!career) {

@@ -3,6 +3,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const Enquiry = require('../models/Enquiry');
 const User = require('../models/User');
+const { protect, adminOnly, checkPermission } = require('../middleware/authMiddleware');
 
 // @desc    Submit a new enquiry (general message, partner, supplier, or quote cart)
 // @route   POST /api/enquiries
@@ -87,8 +88,8 @@ router.post('/', async (req, res) => {
 
 // @desc    Get all enquiries (admin dashboard view)
 // @route   GET /api/enquiries
-// @access  Public (simplified, can be authenticated in production)
-router.get('/', async (req, res) => {
+// @access  Private / Admin with canManageEnquiries
+router.get('/', protect, adminOnly, checkPermission('canManageEnquiries'), async (req, res) => {
   try {
     const enquiries = await Enquiry.find()
       .populate('items.product')
@@ -101,8 +102,8 @@ router.get('/', async (req, res) => {
 
 // @desc    Update enquiry status
 // @route   PUT /api/enquiries/:id
-// @access  Public
-router.put('/:id', async (req, res) => {
+// @access  Private / Admin with canManageEnquiries
+router.put('/:id', protect, adminOnly, checkPermission('canManageEnquiries'), async (req, res) => {
   try {
     const enquiry = await Enquiry.findById(req.params.id);
     if (!enquiry) {
@@ -121,8 +122,8 @@ router.put('/:id', async (req, res) => {
 
 // @desc    Delete an enquiry
 // @route   DELETE /api/enquiries/:id
-// @access  Public
-router.delete('/:id', async (req, res) => {
+// @access  Private / Admin with canManageEnquiries
+router.delete('/:id', protect, adminOnly, checkPermission('canManageEnquiries'), async (req, res) => {
   try {
     const enquiry = await Enquiry.findById(req.params.id);
     if (!enquiry) {

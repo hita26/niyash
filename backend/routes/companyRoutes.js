@@ -5,7 +5,7 @@ const Company = require('../models/Company');
 const Product = require('../models/Product');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
-const { protect, adminOnly } = require('../middleware/authMiddleware');
+const { protect, adminOnly, superAdminOnly, checkPermission } = require('../middleware/authMiddleware');
 
 // ========================================================
 // GET /api/companies
@@ -171,9 +171,9 @@ router.get('/:id', async (req, res) => {
 
 // ========================================================
 // POST /api/companies
-// Create a new company (Admin only)
+// Create a new company (Admin with canManageCompanies only)
 // ========================================================
-router.post('/', protect, adminOnly, async (req, res) => {
+router.post('/', protect, adminOnly, checkPermission('canManageCompanies'), async (req, res) => {
   try {
     const {
       name,
@@ -221,9 +221,9 @@ router.post('/', protect, adminOnly, async (req, res) => {
 
 // ========================================================
 // PUT /api/companies/:id
-// Update an existing company (Admin only)
+// Update an existing company (Admin with canManageCompanies only)
 // ========================================================
-router.put('/:id', protect, adminOnly, async (req, res) => {
+router.put('/:id', protect, adminOnly, checkPermission('canManageCompanies'), async (req, res) => {
   try {
     const { id } = req.params;
     const company = await Company.findById(id);
@@ -254,12 +254,12 @@ router.put('/:id', protect, adminOnly, async (req, res) => {
 
 // ========================================================
 // DELETE /api/companies/clear-all
-// Delete ALL companies (Admin only)
+// Delete ALL companies (SuperAdmin / canClearDatabase only)
 // ========================================================
-router.delete('/clear-all', protect, adminOnly, async (req, res) => {
+router.delete('/clear-all', protect, adminOnly, checkPermission('canClearDatabase'), async (req, res) => {
   try {
     const result = await Company.deleteMany({});
-    console.log(`[ADMIN ACTION] Cleared all companies from database. Count: ${result.deletedCount}`);
+    console.log(`[ADMIN ACTION] Cleared all companies from database by ${req.user.name} (${req.user.email}). Count: ${result.deletedCount}`);
     res.json({
       success: true,
       message: `All ${result.deletedCount} companies have been deleted successfully.`,
@@ -273,9 +273,9 @@ router.delete('/clear-all', protect, adminOnly, async (req, res) => {
 
 // ========================================================
 // DELETE /api/companies/:id
-// Delete a company (Admin only)
+// Delete a company (Admin with canManageCompanies only)
 // ========================================================
-router.delete('/:id', protect, adminOnly, async (req, res) => {
+router.delete('/:id', protect, adminOnly, checkPermission('canManageCompanies'), async (req, res) => {
   try {
     const { id } = req.params;
     const company = await Company.findById(id);

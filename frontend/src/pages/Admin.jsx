@@ -1782,7 +1782,7 @@ _For assistance: +91 9316566894_`;
     try {
       const res = await fetch('/api/ledger/send-statement', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ retailerMobile: ledger.retailerMobile })
       });
 
@@ -3555,34 +3555,11 @@ _Helpline: +91 9316566894_`;
             </button>
           </form>
 
-          <div style={{ marginTop: '20px', padding: '14px', backgroundColor: '#f8fafc', border: '1px dashed #cbd5e1', borderRadius: '10px', fontSize: '0.8rem', color: 'var(--text-medium)' }}>
-            <div style={{ fontWeight: '700', color: 'var(--text-dark)', marginBottom: '8px', textAlign: 'center' }}>
-              Quick Login Credentials (Click to Auto-Fill):
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <button
-                type="button"
-                onClick={() => { setEmail('info@niyanshpharma.com'); setPassword('NiyanshSuper@2026'); }}
-                style={{ padding: '8px 12px', borderRadius: '8px', border: '1.5px solid #fde68a', backgroundColor: '#fffbeb', color: '#92400e', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem' }}
-              >
-                <div>
-                  <strong>Super Admin (Master Account)</strong><br />
-                  <span style={{ fontFamily: 'monospace' }}>info@niyanshpharma.com</span> • <span style={{ fontFamily: 'monospace' }}>NiyanshSuper@2026</span>
-                </div>
-                <span style={{ fontSize: '0.72rem', fontWeight: '800', backgroundColor: '#f59e0b', color: '#fff', padding: '2px 8px', borderRadius: '6px' }}>Auto-Fill</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => { setEmail('admin@niyanshpharma.com'); setPassword('admin123'); }}
-                style={{ padding: '8px 12px', borderRadius: '8px', border: '1.5px solid #bfdbfe', backgroundColor: '#eff6ff', color: '#1e40af', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem' }}
-              >
-                <div>
-                  <strong>Staff Admin (Operations)</strong><br />
-                  <span style={{ fontFamily: 'monospace' }}>admin@niyanshpharma.com</span> • <span style={{ fontFamily: 'monospace' }}>admin123</span>
-                </div>
-                <span style={{ fontSize: '0.72rem', fontWeight: '800', backgroundColor: '#2563eb', color: '#fff', padding: '2px 8px', borderRadius: '6px' }}>Auto-Fill</span>
-              </button>
+          <div style={{ marginTop: '20px', padding: '12px 14px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', fontSize: '0.8rem', color: '#166534', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '1.1rem' }}>🔒</span>
+            <div style={{ lineHeight: '1.4' }}>
+              <strong>Protected Operations Gateway:</strong><br />
+              Authorized SuperAdmin & Operations personnel only. All access attempts are strictly authenticated via encrypted JWT sessions.
             </div>
           </div>
         </div>

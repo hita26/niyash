@@ -10,7 +10,7 @@ const User = require('../models/User');
 const CustomFieldDef = require('../models/CustomFieldDef');
 const jwt = require('jsonwebtoken');
 const cloudinary = require('../config/cloudinary');
-const { protect, adminOnly } = require('../middleware/authMiddleware');
+const { protect, adminOnly, superAdminOnly, checkPermission } = require('../middleware/authMiddleware');
 
 // Upload directory setup
 const uploadDir = process.env.VERCEL ? path.join('/tmp', 'uploads') : path.join(__dirname, '../uploads');
@@ -445,8 +445,8 @@ router.get('/custom-fields', async (req, res) => {
 
 // @desc    Add or update a custom field definition
 // @route   POST /api/products/custom-fields
-// @access  Public / Admin (protected with secret/token)
-router.post('/custom-fields', async (req, res) => {
+// @access  Private / Admin
+router.post('/custom-fields', protect, adminOnly, checkPermission('canManageProducts'), async (req, res) => {
   try {
     const { fieldName, fieldType = 'text', isRequired = false, placeholder = '', options = [] } = req.body;
     if (!fieldName || !fieldName.trim()) {
@@ -477,8 +477,8 @@ router.post('/custom-fields', async (req, res) => {
 
 // @desc    Delete a custom field definition
 // @route   DELETE /api/products/custom-fields/:key
-// @access  Public / Admin
-router.delete('/custom-fields/:key', async (req, res) => {
+// @access  Private / Admin
+router.delete('/custom-fields/:key', protect, adminOnly, checkPermission('canManageProducts'), async (req, res) => {
   try {
     await CustomFieldDef.deleteOne({ fieldKey: req.params.key });
     res.json({ success: true, message: `Field ${req.params.key} deleted successfully` });
@@ -515,7 +515,7 @@ router.get('/:id', async (req, res) => {
 // @desc    Create a product
 // @route   POST /api/products
 // @access  Private/Admin
-router.post('/', protect, adminOnly, async (req, res) => {
+router.post('/', protect, adminOnly, checkPermission('canManageProducts'), async (req, res) => {
   try {
     const {
       name,
@@ -644,7 +644,7 @@ router.post('/', protect, adminOnly, async (req, res) => {
 // @desc    Update a product
 // @route   PUT /api/products/:id
 // @access  Private/Admin
-router.put('/:id', protect, adminOnly, async (req, res) => {
+router.put('/:id', protect, adminOnly, checkPermission('canManageProducts'), async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     if (!product) {
@@ -716,32 +716,13 @@ router.put('/:id', protect, adminOnly, async (req, res) => {
   }
 });
 
-// @desc    Delete ALL products from catalog (Admin only)
+// @desc    Delete ALL products from catalog (SuperAdmin / canClearDatabase permission only)
 // @route   DELETE /api/products/clear-all or POST /api/products/clear-all
 // @access  Private/Admin
-router.all('/clear-all', async (req, res) => {
+router.all('/clear-all', protect, adminOnly, checkPermission('canClearDatabase'), async (req, res) => {
   try {
-    const authHeader = req.headers.authorization;
-    const adminSecret = req.headers['x-admin-secret'] || req.query.secret;
-    let isAuth = false;
-
-    if (adminSecret === 'niyansh_admin_2026' || adminSecret === 'niyansh_sync_2026') {
-      isAuth = true;
-    } else if (authHeader && authHeader.startsWith('Bearer')) {
-      try {
-        const token = authHeader.split(' ')[1];
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'niyansh_pharma_jwt_secret_key_2026');
-        const user = await User.findById(decoded.id);
-        if (user && (user.role === 'admin' || user.isAdmin)) isAuth = true;
-      } catch (e) {}
-    }
-
-    if (!isAuth && process.env.NODE_ENV === 'production' && !req.headers.referer?.includes('/admin')) {
-      return res.status(401).json({ success: false, message: 'Not authorized as admin' });
-    }
-
     const result = await Product.deleteMany({});
-    console.log(`[ADMIN ACTION] Cleared all products from database. Count: ${result.deletedCount}`);
+    console.log(`[ADMIN ACTION] Cleared all products from database by ${req.user.name} (${req.user.email}). Count: ${result.deletedCount}`);
     res.json({
       success: true,
       message: `All ${result.deletedCount} products have been deleted successfully.`,
@@ -756,7 +737,7 @@ router.all('/clear-all', async (req, res) => {
 // @desc    Delete a product and cleanup uploaded files
 // @route   DELETE /api/products/:id
 // @access  Private/Admin
-router.delete('/:id', protect, adminOnly, async (req, res) => {
+router.delete('/:id', protect, adminOnly, checkPermission('canDeleteProducts'), async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     if (!product) {
@@ -798,7 +779,7 @@ router.delete('/:id', protect, adminOnly, async (req, res) => {
 // @desc    Bulk import products (from CSV or JSON)
 // @route   POST /api/products/bulk
 // @access  Private/Admin
-router.post('/bulk', protect, adminOnly, async (req, res) => {
+router.post('/bulk', protect, adminOnly, checkPermission('canBulkImport'), async (req, res) => {
   try {
     const { products, skipDuplicates = true } = req.body;
     if (!Array.isArray(products) || products.length === 0) {
@@ -938,8 +919,8 @@ router.post('/bulk', protect, adminOnly, async (req, res) => {
 
 // @route   POST /api/products/sync-batch
 // @desc    High-speed chunked upsert for live catalog sync
-// @access  Public / Admin
-router.post('/sync-batch', async (req, res) => {
+// @access  Private / SuperAdmin Only
+router.post('/sync-batch', protect, superAdminOnly, async (req, res) => {
   try {
     const { companies, products, secret, clearProducts } = req.body;
     if (secret !== 'niyansh_sync_2026') {

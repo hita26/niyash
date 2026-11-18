@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Ledger = require('../models/Ledger');
+const { protect, adminOnly, checkPermission } = require('../middleware/authMiddleware');
 
 // Helper to escape special regex characters
 const escapeRegex = (str) => {
@@ -98,8 +99,8 @@ const buildWhatsAppUrl = (mobile, message) => {
 
 // @desc    Get all retailer ledgers (for Admin dashboard)
 // @route   GET /api/ledger
-// @access  Public
-router.get('/', async (req, res) => {
+// @access  Private / Admin with canManageLedgers
+router.get('/', protect, adminOnly, checkPermission('canManageLedgers'), async (req, res) => {
   try {
     const { search, sortBy = 'updatedAt', order = 'desc', page = 1, limit = 50 } = req.query;
 

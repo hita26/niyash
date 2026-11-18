@@ -3,6 +3,7 @@ const router = express.Router();
 const fs = require('fs');
 const path = require('path');
 const SiteSetting = require('../models/SiteSetting');
+const { protect, adminOnly } = require('../middleware/authMiddleware');
 
 const SETTINGS_FILE = path.join(__dirname, '../data/siteSettings.json');
 
@@ -80,8 +81,8 @@ router.get('/contact', async (req, res) => {
 
 // @route   PUT /api/settings/contact
 // @desc    Update dynamic contact & hub details
-// @access  Admin
-router.put('/contact', async (req, res) => {
+// @access  Private / Admin
+router.put('/contact', protect, adminOnly, async (req, res) => {
   try {
     const payload = req.body;
     if (!payload || typeof payload !== 'object') {

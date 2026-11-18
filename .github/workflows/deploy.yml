@@ -22,19 +22,22 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          eval $(ssh-agent -s)
-          printf '%s\n' "$SSH_PASSPHRASE" | ssh-add - <<< "$SSH_KEY"
-          ssh-keyscan -H -p 22 "$SSH_HOST" >> ~/.ssh/known_hosts
           
-          echo "Syncing frontend/dist to ~/public_html on GoDaddy..."
-          if rsync -avz frontend/dist/ "$SSH_USER@$SSH_HOST:public_html/"; then
-            echo "Rsync transfer successful!"
-          else
-            echo "Rsync unavailable, falling back to standard SCP..."
-            scp -r frontend/dist/* "$SSH_USER@$SSH_HOST:public_html/"
-            scp frontend/dist/.htaccess "$SSH_USER@$SSH_HOST:public_html/" || true
+          # Write raw key to temp file
+          echo "$SSH_KEY" > /tmp/id_rsa
+          chmod 600 /tmp/id_rsa
+
+          # Decrypt key with passphrase if protected
+          if ! openssl pkey -in /tmp/id_rsa -out /tmp/id_rsa_decrypted -passin "pass:$SSH_PASSPHRASE" 2>/dev/null; then
+            echo "Key unencrypted or fallback, using directly"
+            cp /tmp/id_rsa /tmp/id_rsa_decrypted
           fi
+          chmod 600 /tmp/id_rsa_decrypted
+
+          echo "Pushing frontend/dist files to GoDaddy public_html..."
+          scp -o StrictHostKeyChecking=no -i /tmp/id_rsa_decrypted -r frontend/dist/* "$SSH_USER@$SSH_HOST:public_html/"
+          scp -o StrictHostKeyChecking=no -i /tmp/id_rsa_decrypted frontend/dist/.htaccess "$SSH_USER@$SSH_HOST:public_html/" || true
 
           echo "Verifying deployment on live server..."
-          ssh "$SSH_USER@$SSH_HOST" "cd ~/public_html && echo 'Live index.html JS bundle:' && grep 'index-' index.html"
+          ssh -o StrictHostKeyChecking=no -i /tmp/id_rsa_decrypted "$SSH_USER@$SSH_HOST" "cd ~/public_html && echo 'Live index.html JS bundle:' && grep 'index-' index.html"
           echo "Deployment to niyanshpharma.com finished successfully!"

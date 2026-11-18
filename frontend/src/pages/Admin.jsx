@@ -2203,14 +2203,14 @@ _Helpline: +91 9316566894_`;
     if (!files || files.length === 0) return;
 
     if (prodImages.length >= 5) {
-      showToast('મહત્તમ 5 ફોટો જ રાખી શકાય છે (Maximum 5 photos allowed per product)', 'warning');
+      showToast('Maximum 5 photos allowed per product', 'warning');
       return;
     }
 
     const availableSlots = 5 - prodImages.length;
     const filesToUpload = Array.from(files).slice(0, availableSlots);
     if (filesToUpload.length < files.length) {
-      showToast(`માત્ર ${availableSlots} ફોટો એડ થશે (મહત્તમ 5 ફોટો મર્યાદા)`, 'warning');
+      showToast(`Only ${availableSlots} more photo(s) can be added (Maximum 5 photos limit)`, 'warning');
     }
 
     setIsUploadingPhotos(true);
@@ -2284,12 +2284,12 @@ _Helpline: +91 9316566894_`;
   const handleAddImageUrl = () => {
     if (!newImageUrlInput || !newImageUrlInput.trim()) return;
     if (prodImages.length >= 5) {
-      showToast('મહત્તમ 5 ફોટો જ રાખી શકાય છે (Maximum 5 photos allowed per product)', 'warning');
+      showToast('Maximum 5 photos allowed per product', 'warning');
       return;
     }
     const trimmed = newImageUrlInput.trim();
     if (prodImages.includes(trimmed)) {
-      showToast('આ ફોટો URL પહેલેથી ગેલેરીમાં છે', 'warning');
+      showToast('This photo URL is already in the gallery', 'warning');
       return;
     }
     setProdImages(prev => {
@@ -2367,7 +2367,7 @@ _Helpline: +91 9316566894_`;
       return;
     }
     if (prodImages.length >= 5) {
-      showToast('મહત્તમ 5 ફોટો જ રાખી શકાય છે (Maximum 5 photos allowed per product)', 'warning');
+      showToast('Maximum 5 photos allowed per product', 'warning');
       return;
     }
     setProdImages(prev => [imgUrl, ...prev].slice(0, 5));
@@ -2452,7 +2452,7 @@ _Helpline: +91 9316566894_`;
       (!editingProduct || p._id !== editingProduct._id)
     );
     if (isDuplicateName) {
-      showToast(`પ્રોડક્ટ "${trimmedName}" પહેલેથી અસ્તિત્વમાં છે! ડુપ્લિકેટ પ્રોડક્ટ એડ કરી શકાશે નહીં.`, 'error');
+      showToast(`Product "${trimmedName}" already exists! Duplicates cannot be added.`, 'error');
       return;
     }
 
@@ -2463,7 +2463,7 @@ _Helpline: +91 9316566894_`;
         (!editingProduct || p._id !== editingProduct._id)
       );
       if (isDuplicateSku) {
-        showToast(`SKU "${currentSku}" પહેલેથી બીજી પ્રોડક્ટમાં વપરાયેલ છે! કૃપા કરીને નવો SKU વાપરો.`, 'error');
+        showToast(`SKU "${currentSku}" is already used by another product! Please enter a unique SKU.`, 'error');
         return;
       }
     }
@@ -2577,8 +2577,8 @@ _Helpline: +91 9316566894_`;
         );
         showToast(
           editingProduct 
-            ? 'પ્રોડક્ટ વિગતો સફળતાપૂર્વક અપડેટ થઈ! (Product updated)' 
-            : 'નવી પ્રોડક્ટ સફળતાપૂર્વક પબ્લિશ થઈ! (Product published)',
+            ? 'Product details updated successfully!' 
+            : 'New product published successfully!',
           'success'
         );
       } else {
@@ -7062,10 +7062,10 @@ _Helpline: +91 9316566894_`;
                           <strong style={{ fontSize: '0.92rem', color: '#9a3412' }}>Super Admin (Full Control)</strong>
                         </div>
                         <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '0.82rem', color: 'var(--text-medium)', lineHeight: 1.6 }}>
-                          <li>સિંક હિસ્ટ્રીના તમામ રો-ઓડિટ (Raw Logs) જોઈ શકે.</li>
-                          <li>ઇન્સ્ટન્ટ "Simulate / Sync Now" બટન દબાવીને સિંક કરી શકે.</li>
-                          <li>સિક્રેટ API કી (`x-sync-api-key`) બદલી અને કોન્ફિગર કરી શકે.</li>
-                          <li>કોઈપણ એરર કે મિસમેચનું તાત્કાલિક રોલબેક કરી શકે.</li>
+                          <li>View complete raw immutable audit logs and sync history.</li>
+                          <li>Trigger instant live verification or manual sync anytime.</li>
+                          <li>Manage and rotate secret ERP API sync keys (`x-sync-api-key`).</li>
+                          <li>Instant rollback and transaction recovery on any batch mismatch.</li>
                         </ul>
                       </div>
 
@@ -7075,10 +7075,10 @@ _Helpline: +91 9316566894_`;
                           <strong style={{ fontSize: '0.92rem', color: '#0369a1' }}>Operations Admin / Staff (Read-Only)</strong>
                         </div>
                         <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '0.82rem', color: 'var(--text-medium)', lineHeight: 1.6 }}>
-                          <li>માત્ર લાઈવ સ્ટેટસ અને છેલ્લો સિંક ટાઈમ જોઈ શકે.</li>
-                          <li>સ્ટોક અને ભાવ અપડેટ થયાની પુષ્ટિ જોઈ શકે.</li>
-                          <li>કોઈપણ સિક્રેટ કી કે સર્વર સેટિંગ્સ બદલવાની પરવાનગી નથી.</li>
-                          <li>સિસ્ટમ આપોઆપ સુરક્ષિત રહે છે.</li>
+                          <li>View live synchronization status and latest sync timestamp.</li>
+                          <li>Inspect updated stock quantities and active wholesale rates.</li>
+                          <li>Restricted from viewing or altering secret API credentials.</li>
+                          <li>Protected read-only access for day-to-day warehouse dispatch.</li>
                         </ul>
                       </div>
                     </div>
@@ -8656,7 +8656,7 @@ _Helpline: +91 9316566894_`;
                     <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', fontSize: '0.88rem', fontWeight: '600', gap: '8px' }}>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: prodIsOurProduct ? '#059669' : '#94a3b8', flexShrink: 0 }}></span>
-                        Our Product (અમારી પ્રોડક્ટ - Exclusive Page)
+                        Our Product (Exclusive Showcase Page)
                       </span>
                       <input 
                         type="checkbox"
@@ -9838,7 +9838,7 @@ _Helpline: +91 9316566894_`;
                   {editingProduct ? 'Confirm Product Update' : 'Confirm New Product Creation'}
                 </h3>
                 <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: 'var(--text-medium)' }}>
-                  તમે ભરેલી વિગતો બરાબર ચકાસી લીધી છે?
+                  Please verify the entered details before publishing.
                 </p>
               </div>
             </div>
@@ -9898,7 +9898,7 @@ _Helpline: +91 9316566894_`;
               </div>
 
               <div style={{ fontSize: '0.88rem', color: '#1e293b', fontWeight: '500', lineHeight: 1.5 }}>
-                તમે ભરેલી વિગતો યોગ્ય છે? શું તમે આ પ્રોડક્ટ સેવ કરી પબ્લિક વેબસાઇટ પર લાઈવ કરવા માંગો છો?
+                Are all details verified and ready to be published live to the wholesale catalog?
               </div>
             </div>
 

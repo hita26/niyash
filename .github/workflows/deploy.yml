@@ -7,35 +7,34 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to Live Server via SCP
+    name: Deploy to Live Server via Native SSH/SCP
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Deploy build to GoDaddy via SCP
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          port: 22
-          source: "frontend/dist/**,frontend/dist/.htaccess"
-          target: "public_html"
-          strip_components: 2
-          overwrite: true
+      - name: Setup SSH and Push Dist to GoDaddy
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_PASSPHRASE: ${{ secrets.SSH_PASSPHRASE }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          eval $(ssh-agent -s)
+          printf '%s\n' "$SSH_PASSPHRASE" | ssh-add - <<< "$SSH_KEY"
+          ssh-keyscan -H -p 22 "$SSH_HOST" >> ~/.ssh/known_hosts
+          
+          echo "Syncing frontend/dist to ~/public_html on GoDaddy..."
+          if rsync -avz frontend/dist/ "$SSH_USER@$SSH_HOST:public_html/"; then
+            echo "Rsync transfer successful!"
+          else
+            echo "Rsync unavailable, falling back to standard SCP..."
+            scp -r frontend/dist/* "$SSH_USER@$SSH_HOST:public_html/"
+            scp frontend/dist/.htaccess "$SSH_USER@$SSH_HOST:public_html/" || true
+          fi
 
-      - name: Verify Live Deployment
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          port: 22
-          script: |
-            cd ~/public_html
-            echo "=== Live index.html check ==="
-            grep "index-" index.html || true
-            echo "=== Deployment to niyanshpharma.com completed successfully ==="
+          echo "Verifying deployment on live server..."
+          ssh "$SSH_USER@$SSH_HOST" "cd ~/public_html && echo 'Live index.html JS bundle:' && grep 'index-' index.html"
+          echo "Deployment to niyanshpharma.com finished successfully!"

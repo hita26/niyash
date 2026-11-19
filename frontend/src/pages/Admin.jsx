@@ -4258,14 +4258,6 @@ _Helpline: +91 9316566894_`;
               Sign In to Admin Panel
             </button>
           </form>
-
-          <div style={{ marginTop: '20px', padding: '12px 14px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', fontSize: '0.8rem', color: '#166534', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '1.1rem' }}>🔒</span>
-            <div style={{ lineHeight: '1.4' }}>
-              <strong>Protected Operations Gateway:</strong><br />
-              Authorized SuperAdmin & Operations personnel only. All access attempts are strictly authenticated via encrypted JWT sessions.
-            </div>
-          </div>
         </div>
       </div>
     );

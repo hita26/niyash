@@ -166,8 +166,9 @@ function Sync-PromptStock {
         # Send in batches of 500 to optimize network transfer
         $batchSize = 500
         $totalUploaded = 0
+        $totalUpdated = 0
+        $totalUnmatched = 0
 
-        $lastProof = $null
         for ($i = 0; $i -lt $items.Count; $i += $batchSize) {
             $slice = $items[$i..[Math]::Min($i + $batchSize - 1, $items.Count - 1)]
             
@@ -185,7 +186,8 @@ function Sync-PromptStock {
             $response = Invoke-RestMethod -Uri $ApiUrl -Method Post -Headers $headers -Body $payload
             if ($response.success) {
                 $totalUploaded += $slice.Count
-                $lastProof = $response.proof
+                $totalUpdated += [int]($response.proof.stockRatesUpdated)
+                $totalUnmatched += [int]($response.proof.unmatchedCount)
                 Write-Host "   ├─ Batch $([Math]::Floor($i / $batchSize) + 1): $($slice.Count) items evaluated" -ForegroundColor Green
             } else {
                 Write-Host "   ❌ Batch Error: $($response.message)" -ForegroundColor Red
@@ -193,12 +195,10 @@ function Sync-PromptStock {
         }
 
         Write-Host "`n✅ SYNC SUCCESS! Prompt ERP Batch Evaluated against Live Catalog." -ForegroundColor Green
-        if ($lastProof) {
-            Write-Host "   ├─ Existing Products Updated : $($lastProof.stockRatesUpdated)" -ForegroundColor Green
-            Write-Host "   ├─ Unmatched (Not in Catalog): $($lastProof.unmatchedCount) items safely excluded" -ForegroundColor Yellow
-            Write-Host "   ├─ New Products Auto-Created : 0 (100% Strict Protection - No fake data)" -ForegroundColor Cyan
-            Write-Host "   └─ Cloud Status              : LIVE ON niyanshpharma.com`n" -ForegroundColor Green
-        }
+        Write-Host "   ├─ Existing Products Updated : $totalUpdated items" -ForegroundColor Green
+        Write-Host "   ├─ Unmatched (Not in Catalog): $totalUnmatched items safely excluded" -ForegroundColor Yellow
+        Write-Host "   ├─ New Products Auto-Created : 0 (100% Strict Protection - No fake data)" -ForegroundColor Cyan
+        Write-Host "   └─ Cloud Status              : LIVE ON niyanshpharma.com`n" -ForegroundColor Green
         $script:lastHash = $currentHash
     }
     catch {

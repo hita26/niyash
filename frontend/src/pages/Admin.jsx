@@ -1000,17 +1000,37 @@ function Admin() {
     return `SKU-${String(nextNum).padStart(6, '0')}`;
   };
 
-  // Normalization for HTML5 Date Picker (YYYY-MM-DD)
+  // Normalization for HTML5 Month Picker (YYYY-MM)
   const normalizeExpiryForPicker = (dateVal) => {
     if (!dateVal) return '';
     const s = String(dateVal).trim();
-    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-    if (/^\d{4}-\d{2}$/.test(s)) return `${s}-01`;
+    if (/^\d{4}-\d{2}$/.test(s)) return s;
+    if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 7);
     const m = s.match(/^(\d{1,2})[\/\-](\d{4})$/);
     if (m) {
       const month = m[1].padStart(2, '0');
       const year = m[2];
-      return `${year}-${month}-01`;
+      return `${year}-${month}`;
+    }
+    const d = new Date(s);
+    if (!isNaN(d.getTime())) {
+      const yr = d.getFullYear();
+      const mo = String(d.getMonth() + 1).padStart(2, '0');
+      return `${yr}-${mo}`;
+    }
+    return s;
+  };
+
+  // Pharma Standard Expiry Formatter (e.g., "Nov 2026" or "11/2026")
+  const formatPharmaExpiry = (dateVal) => {
+    if (!dateVal) return '';
+    const s = String(dateVal).trim();
+    const m = s.match(/^(\d{4})-(\d{2})/);
+    if (m) {
+      const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const moIdx = parseInt(m[2], 10) - 1;
+      const moName = MONTHS[moIdx] || m[2];
+      return `${moName} ${m[1]}`;
     }
     return s;
   };
@@ -2923,14 +2943,13 @@ _Helpline: +91 9316566894_`;
       return;
     }
     if (!prodExpiryDate || !prodExpiryDate.trim()) {
-      showToast('Expiry Date is required', 'error');
+      showToast('Expiry Date (Month & Year) is required', 'error');
       return;
     }
-    const expDate = new Date(prodExpiryDate);
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-    if (!isNaN(expDate.getTime()) && expDate < todayStart) {
-      showToast('Expiry Date cannot be in the past. Please select a valid future date.', 'error');
+    const currentYm = new Date().toISOString().slice(0, 7);
+    const expYm = prodExpiryDate.trim().slice(0, 7);
+    if (expYm < currentYm) {
+      showToast('Expiry cannot be in the past. Please select a valid current or future Month & Year.', 'error');
       return;
     }
 
@@ -6262,7 +6281,7 @@ _Helpline: +91 9316566894_`;
                                 )}
                                 {p.expiryDate && (
                                   <span style={{ backgroundColor: '#fee2e2', color: '#991b1b', padding: '2px 7px', borderRadius: '4px', fontWeight: '700' }}>
-                                    Exp: {p.expiryDate}
+                                    Exp: {formatPharmaExpiry(p.expiryDate)}
                                   </span>
                                 )}
                                 {p.hsnCode && (
@@ -6504,7 +6523,7 @@ _Helpline: +91 9316566894_`;
                                 )}
                                 {p.expiryDate && (
                                   <span style={{ fontSize: '0.7rem', backgroundColor: '#fee2e2', color: '#991b1b', padding: '1px 5px', borderRadius: '3px', fontWeight: '600' }}>
-                                    Exp: {p.expiryDate}
+                                    Exp: {formatPharmaExpiry(p.expiryDate)}
                                   </span>
                                 )}
                               </div>
@@ -9946,17 +9965,22 @@ _Helpline: +91 9316566894_`;
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <label htmlFor="modal-expiry" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                        Expiry Date <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
-                      </label>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <label htmlFor="modal-expiry" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                          Expiry (Month & Year) <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                        </label>
+                        <span style={{ fontSize: '0.72rem', color: '#0369a1', fontWeight: '700', backgroundColor: '#e0f2fe', padding: '1px 6px', borderRadius: '4px' }}>
+                          MM / YYYY
+                        </span>
+                      </div>
                       <input 
                         id="modal-expiry"
-                        type="date" 
+                        type="month" 
                         required
-                        min={new Date().toISOString().split('T')[0]}
+                        min={new Date().toISOString().slice(0, 7)}
                         value={prodExpiryDate} 
                         onChange={(e) => setProdExpiryDate(e.target.value)}
-                        style={{ padding: '8.5px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box', backgroundColor: '#ffffff' }}
+                        style={{ padding: '8.5px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box', backgroundColor: '#ffffff', cursor: 'pointer' }}
                       />
                     </div>
                   </div>

@@ -24,6 +24,8 @@ import {
   CheckCircle2,
   Landmark,
   BadgeCheck,
+  Eye,
+  EyeOff,
   Send
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
@@ -82,6 +84,7 @@ export default function PaymentGatewayModal({
   const [cardName, setCardName] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
   const [cardCvv, setCardCvv] = useState('');
+  const [showCvv, setShowCvv] = useState(false);
   const [cardType, setCardType] = useState('Visa');
 
   // 3. Net Banking State
@@ -1131,25 +1134,48 @@ _${t('payment.support', 'Support: +91 99099 23130')}_`;
                       <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155' }}>
                         {t('payment.cvv', 'CVV / CVC')} <span className="required-star">*</span>
                       </label>
-                      <input
-                        type="password"
-                        required
-                        maxLength={4}
-                        inputMode="numeric"
-                        placeholder="•••"
-                        value={cardCvv}
-                        onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, ''))}
-                        style={{
-                          width: '100%',
-                          padding: '10px 12px',
-                          borderRadius: '8px',
-                          border: '1px solid #cbd5e1',
-                          fontSize: '0.9rem',
-                          textAlign: 'center',
-                          letterSpacing: '2px',
-                          boxSizing: 'border-box'
-                        }}
-                      />
+                      <div style={{ position: 'relative' }}>
+                        <input
+                          type={showCvv ? 'text' : 'password'}
+                          required
+                          maxLength={4}
+                          inputMode="numeric"
+                          placeholder="•••"
+                          value={cardCvv}
+                          onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, ''))}
+                          style={{
+                            width: '100%',
+                            padding: '10px 36px 10px 12px',
+                            borderRadius: '8px',
+                            border: '1px solid #cbd5e1',
+                            fontSize: '0.9rem',
+                            textAlign: 'center',
+                            letterSpacing: showCvv ? 'normal' : '2px',
+                            boxSizing: 'border-box'
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowCvv(!showCvv)}
+                          style={{
+                            position: 'absolute',
+                            right: '8px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            color: '#64748b',
+                            padding: '2px',
+                            display: 'flex',
+                            alignItems: 'center'
+                          }}
+                          title={showCvv ? 'Hide CVV' : 'Show CVV'}
+                          aria-label={showCvv ? 'Hide CVV' : 'Show CVV'}
+                        >
+                          {showCvv ? <EyeOff size={15} /> : <Eye size={15} />}
+                        </button>
+                      </div>
                     </div>
                   </div>
 

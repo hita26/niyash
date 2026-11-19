@@ -731,6 +731,7 @@ function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showAdminLoginPassword, setShowAdminLoginPassword] = useState(false);
   const [loginError, setLoginError] = useState('');
   const [currentUser, setCurrentUser] = useState(() => {
     try {
@@ -771,6 +772,7 @@ function Admin() {
   const [showPasswordMap, setShowPasswordMap] = useState({});
   const [isSavingAdmin, setIsSavingAdmin] = useState(false);
   const [adminFormSendEmail, setAdminFormSendEmail] = useState(true);
+  const [showSubAdminFormPassword, setShowSubAdminFormPassword] = useState(false);
   const [resendingAdminId, setResendingAdminId] = useState(null);
 
   // Profile Modal State (SuperAdmin & Admin)
@@ -793,6 +795,8 @@ function Admin() {
   const [profileAvatar, setProfileAvatar] = useState('');
   const [profilePassword, setProfilePassword] = useState('');
   const [profileConfirmPassword, setProfileConfirmPassword] = useState('');
+  const [showProfilePassword, setShowProfilePassword] = useState(false);
+  const [showProfileConfirmPassword, setShowProfileConfirmPassword] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
 
   // Active Tab
@@ -4239,15 +4243,39 @@ _Helpline: +91 9316566894_`;
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label htmlFor="admin-pwd" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>Password</label>
-              <input 
-                id="admin-pwd"
-                type="password" 
-                required
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                style={{ padding: '12px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
-              />
+              <div style={{ position: 'relative' }}>
+                <input 
+                  id="admin-pwd"
+                  type={showAdminLoginPassword ? 'text' : 'password'} 
+                  required
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  style={{ width: '100%', padding: '12px 42px 12px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem', boxSizing: 'border-box' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowAdminLoginPassword(!showAdminLoginPassword)}
+                  style={{
+                    position: 'absolute',
+                    right: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: '#64748b',
+                    padding: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                  title={showAdminLoginPassword ? 'Hide password' : 'Show password'}
+                  aria-label={showAdminLoginPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showAdminLoginPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
 
             <button 
@@ -11755,13 +11783,37 @@ _Helpline: +91 9316566894_`;
                         <Sparkles size={12} /> Generate Password
                       </button>
                     </div>
-                    <input 
-                      type="text"
-                      placeholder={editingAdmin ? 'Leave blank to keep unchanged' : 'Min 6 characters'}
-                      value={adminFormPassword}
-                      onChange={(e) => setAdminFormPassword(e.target.value)}
-                      style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem', fontFamily: 'monospace' }}
-                    />
+                    <div style={{ position: 'relative' }}>
+                      <input 
+                        type={showSubAdminFormPassword ? 'text' : 'password'}
+                        placeholder={editingAdmin ? 'Leave blank to keep unchanged' : 'Min 6 characters'}
+                        value={adminFormPassword}
+                        onChange={(e) => setAdminFormPassword(e.target.value)}
+                        style={{ width: '100%', padding: '10px 42px 10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem', fontFamily: 'monospace', boxSizing: 'border-box' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowSubAdminFormPassword(!showSubAdminFormPassword)}
+                        style={{
+                          position: 'absolute',
+                          right: '12px',
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          color: '#64748b',
+                          padding: '2px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                        title={showSubAdminFormPassword ? 'Hide password' : 'Show password'}
+                        aria-label={showSubAdminFormPassword ? 'Hide password' : 'Show password'}
+                      >
+                        {showSubAdminFormPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
                     <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
                       SuperAdmin can always view or change this password later.
                     </span>
@@ -12146,24 +12198,70 @@ _Helpline: +91 9316566894_`;
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                       <label style={{ fontSize: '0.8rem', color: 'var(--text-medium)' }}>New Password</label>
-                      <input 
-                        type="password"
-                        placeholder="Leave blank to keep current"
-                        value={profilePassword}
-                        onChange={(e) => setProfilePassword(e.target.value)}
-                        style={{ padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.88rem' }}
-                      />
+                      <div style={{ position: 'relative' }}>
+                        <input 
+                          type={showProfilePassword ? 'text' : 'password'}
+                          placeholder="Leave blank to keep current"
+                          value={profilePassword}
+                          onChange={(e) => setProfilePassword(e.target.value)}
+                          style={{ width: '100%', padding: '9px 38px 9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.88rem', boxSizing: 'border-box' }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowProfilePassword(!showProfilePassword)}
+                          style={{
+                            position: 'absolute',
+                            right: '10px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            color: '#64748b',
+                            padding: '2px',
+                            display: 'flex',
+                            alignItems: 'center'
+                          }}
+                          title={showProfilePassword ? 'Hide password' : 'Show password'}
+                          aria-label={showProfilePassword ? 'Hide password' : 'Show password'}
+                        >
+                          {showProfilePassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      </div>
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                       <label style={{ fontSize: '0.8rem', color: 'var(--text-medium)' }}>Confirm New Password</label>
-                      <input 
-                        type="password"
-                        placeholder="Retype new password"
-                        value={profileConfirmPassword}
-                        onChange={(e) => setProfileConfirmPassword(e.target.value)}
-                        style={{ padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.88rem' }}
-                      />
+                      <div style={{ position: 'relative' }}>
+                        <input 
+                          type={showProfileConfirmPassword ? 'text' : 'password'}
+                          placeholder="Retype new password"
+                          value={profileConfirmPassword}
+                          onChange={(e) => setProfileConfirmPassword(e.target.value)}
+                          style={{ width: '100%', padding: '9px 38px 9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.88rem', boxSizing: 'border-box' }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowProfileConfirmPassword(!showProfileConfirmPassword)}
+                          style={{
+                            position: 'absolute',
+                            right: '10px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            color: '#64748b',
+                            padding: '2px',
+                            display: 'flex',
+                            alignItems: 'center'
+                          }}
+                          title={showProfileConfirmPassword ? 'Hide password' : 'Show password'}
+                          aria-label={showProfileConfirmPassword ? 'Hide password' : 'Show password'}
+                        >
+                          {showProfileConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

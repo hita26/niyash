@@ -95,6 +95,7 @@ const auditLogSchema = new mongoose.Schema({
 });
 
 auditLogSchema.index({ createdAt: -1 });
+auditLogSchema.index({ createdAt: 1 }, { expireAfterSeconds: 7 * 24 * 60 * 60 }); // 7-day automatic MongoDB TTL retention
 auditLogSchema.index({ category: 1, action: 1 });
 auditLogSchema.index({ adminEmail: 1 });
 auditLogSchema.index({ ipAddress: 1 });

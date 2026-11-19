@@ -158,16 +158,20 @@ router.get('/export', protect, superAdminOnly, async (req, res) => {
   }
 });
 
-// @desc    Clear older audit logs (SuperAdmin only retention policy)
+// @desc    Clear older audit logs (7-day default retention policy)
 // @route   DELETE /api/audit/cleanup
-// @access  Private / SuperAdmin
-router.delete('/cleanup', protect, superAdminOnly, async (req, res) => {
+// @access  Private / SuperAdmin & Admin
+router.delete('/cleanup', protect, adminOnly, async (req, res) => {
   try {
-    const { days = 90 } = req.body;
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - parseInt(days, 10));
+    const days = parseInt(req.body?.days || req.query?.days || 7, 10);
+    const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
-    const result = await AuditLog.deleteMany({ timestamp: { $lt: cutoffDate } });
+    const result = await AuditLog.deleteMany({
+      $or: [
+        { timestamp: { $lt: cutoffDate } },
+        { createdAt: { $lt: cutoffDate } }
+      ]
+    });
 
     res.json({
       success: true,

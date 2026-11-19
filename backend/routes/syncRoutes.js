@@ -36,6 +36,8 @@ const syncLogSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+syncLogSchema.index({ createdAt: 1 }, { expireAfterSeconds: 7 * 24 * 60 * 60 }); // 7-day automatic MongoDB TTL retention
+
 const SyncLog = mongoose.models.SyncLog || mongoose.model('SyncLog', syncLogSchema);
 
 // Helper to read sync logs from persistent MongoDB

@@ -1,8 +1,10 @@
+const mongoose = require('mongoose');
 const User = require('../models/User');
 const NewsUpdate = require('../models/NewsUpdate');
 const Ledger = require('../models/Ledger');
 const Product = require('../models/Product');
 const Company = require('../models/Company');
+const AuditLog = require('../models/AuditLog');
 const fs = require('fs');
 const path = require('path');
 
@@ -210,6 +212,30 @@ const initDefaults = async () => {
         }
       } catch (errHari) {
         console.warn('Warning during haripatel267998 account purge:', errHari.message);
+      }
+
+      // 0B. Storage Safety Guard: Automatically purge audit & ERP sync logs older than 7 days
+      try {
+        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        const [auditClean, syncClean] = await Promise.all([
+          AuditLog.deleteMany({
+            $or: [
+              { timestamp: { $lt: sevenDaysAgo } },
+              { createdAt: { $lt: sevenDaysAgo } }
+            ]
+          }),
+          mongoose.models.SyncLog
+            ? mongoose.models.SyncLog.deleteMany({ createdAt: { $lt: sevenDaysAgo } })
+            : Promise.resolve({ deletedCount: 0 })
+        ]);
+        if (auditClean && auditClean.deletedCount > 0) {
+          console.log(`[Storage Guard] Cleaned ${auditClean.deletedCount} audit logs older than 7 days`);
+        }
+        if (syncClean && syncClean.deletedCount > 0) {
+          console.log(`[Storage Guard] Cleaned ${syncClean.deletedCount} ERP sync logs older than 7 days`);
+        }
+      } catch (errClean) {
+        console.warn('Warning during 7-day log purge:', errClean.message);
       }
 
       // 1. Ensure SuperAdmin & Admin Users

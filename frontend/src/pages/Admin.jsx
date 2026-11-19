@@ -1545,6 +1545,30 @@ function Admin() {
     }
   };
 
+  const handleCleanAuditLogs = async () => {
+    if (!window.confirm('Delete all audit logs older than 7 days now? Logs from the last 7 days will be safely kept to protect storage.')) return;
+    try {
+      const token = adminToken || localStorage.getItem('niyansh_admin_token');
+      const res = await fetch('/api/audit/cleanup', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ days: 7 })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast(data.message || 'Audit logs older than 7 days purged successfully!');
+        fetchAuditLogs(1, auditCategoryFilter, auditActionFilter, auditSearch, auditLimit);
+      } else {
+        showToast(data.message || 'Failed to cleanup audit logs', 'error');
+      }
+    } catch (err) {
+      showToast('Cleanup failed: ' + err.message, 'error');
+    }
+  };
+
   const handleOpenAdminModal = (admin = null) => {
     if (admin) {
       setEditingAdmin(admin);
@@ -8484,13 +8508,26 @@ _Helpline: +91 9316566894_`;
                         <span style={{ fontSize: '0.72rem', fontWeight: '700', backgroundColor: '#e0f2fe', color: '#0369a1', padding: '3px 9px', borderRadius: '12px' }}>
                           Forensic Level
                         </span>
+                        <span style={{ fontSize: '0.72rem', fontWeight: '700', backgroundColor: '#dcfce7', color: '#15803d', border: '1px solid #bbf7d0', padding: '3px 9px', borderRadius: '12px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          <CheckCircle2 size={12} color="#15803d" /> Auto-Purge: 7 Days Active
+                        </span>
                       </div>
                       <p style={{ margin: '4px 0 0 0', fontSize: '0.84rem', color: 'var(--text-medium)' }}>
-                        Strict second-by-second forensic monitoring: tracks every login, resource addition, modification, deletion, and IP address across all staff.
+                        Strict forensic monitoring with zero storage bloat: events are safely auto-retained for exactly 7 days, older records auto-purge.
                       </p>
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                      <button
+                        type="button"
+                        onClick={handleCleanAuditLogs}
+                        className="btn btn-outline btn-sm"
+                        style={{ gap: '6px', color: '#b91c1c', borderColor: '#fca5a5', backgroundColor: '#fff5f5' }}
+                        title="Delete logs older than 7 days now"
+                      >
+                        <Trash2 size={13} color="#b91c1c" /> Purge &gt;7 Days
+                      </button>
+
                       <button
                         type="button"
                         onClick={() => fetchAuditLogs(auditPage, auditCategoryFilter, auditActionFilter, auditSearch)}

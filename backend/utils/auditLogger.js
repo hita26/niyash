@@ -54,6 +54,28 @@ function getDeviceSummary(req) {
   return `${isMobile ? 'Mobile' : 'Desktop'} (${os}) • ${browser}`;
 }
 
+let lastAutoPruneTime = 0;
+async function autoPruneOldLogs() {
+  const now = Date.now();
+  // Throttle to run at most once per hour
+  if (now - lastAutoPruneTime < 60 * 60 * 1000) return;
+  lastAutoPruneTime = now;
+  try {
+    const sevenDaysAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+    const res = await AuditLog.deleteMany({
+      $or: [
+        { timestamp: { $lt: sevenDaysAgo } },
+        { createdAt: { $lt: sevenDaysAgo } }
+      ]
+    });
+    if (res && res.deletedCount > 0) {
+      console.log(`[AutoPrune] Cleaned up ${res.deletedCount} audit logs older than 7 days`);
+    }
+  } catch (e) {
+    // Non-fatal background task
+  }
+}
+
 /**
  * Non-blocking Audit Logger
  * @param {Object} params
@@ -106,6 +128,8 @@ async function logAuditEvent({
       device,
       status,
       timestamp: new Date()
+    }).then(() => {
+      autoPruneOldLogs().catch(() => {});
     }).catch(err => {
       console.warn('Non-fatal: failed to write audit log to DB:', err.message);
     });

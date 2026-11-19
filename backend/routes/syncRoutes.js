@@ -158,11 +158,13 @@ router.all('/test-welcome-email', async (req, res) => {
       return res.status(401).json({ success: false, message: 'Invalid API key' });
     }
     const nodemailer = require('nodemailer');
+    const testHost = req.query.host || process.env.SMTP_HOST || 'smtp.titan.email';
+    const testPort = Number(req.query.port) || 465;
     const testPass = req.query.pass || process.env.SMTP_PASS || '@Neeya232026';
     const transporter = nodemailer.createTransport({
-      host: 'smtp.titan.email',
-      port: 465,
-      secure: true,
+      host: testHost,
+      port: testPort,
+      secure: testPort === 465,
       auth: { user: 'info@niyanshpharma.com', pass: testPass },
       tls: { rejectUnauthorized: false }
     });

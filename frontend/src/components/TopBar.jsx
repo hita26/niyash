@@ -1,5 +1,6 @@
 import React from 'react';
-import { Phone, Mail, MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Phone, Mail, MapPin, Lock } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 function TopBar() {
@@ -42,12 +43,34 @@ function TopBar() {
           ))}
         </div>
 
-        {/* RIGHT SECTION: Location */}
-        <div className="website-topbar-right">
-          <span className="website-topbar-icon" aria-hidden="true">
-            <MapPin size={16} color="#A9D3F5" />
+        {/* RIGHT SECTION: Location & Staff Portal */}
+        <div className="website-topbar-right" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+            <span className="website-topbar-icon" aria-hidden="true">
+              <MapPin size={15} color="#A9D3F5" />
+            </span>
+            <span>{t('topbar.location', 'Rajkot, Gujarat')}</span>
           </span>
-          <span>{t('topbar.location', 'Rajkot, Gujarat')}</span>
+          <span style={{ color: 'rgba(255,255,255,0.3)', userSelect: 'none' }}>•</span>
+          <Link 
+            to="/admin" 
+            style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: '4px', 
+              color: '#dbeafe', 
+              textDecoration: 'none', 
+              fontSize: '0.78rem',
+              fontWeight: '700',
+              padding: '2px 6px',
+              borderRadius: '4px',
+              backgroundColor: 'rgba(255, 255, 255, 0.12)'
+            }}
+            title="Internal Staff & Operations Portal"
+          >
+            <Lock size={12} color="#93c5fd" />
+            <span>Staff Portal</span>
+          </Link>
         </div>
       </div>
     </div>

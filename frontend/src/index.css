@@ -372,6 +372,80 @@ input[type="submit"]:disabled {
   font-size: 0.85rem;
 }
 
+/* Chemist Header Button with Robust Contrasting Hover */
+.chemist-header-btn {
+  padding: 8px 18px;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 0.86rem;
+  border: 1.5px solid var(--primary-blue);
+  color: var(--primary-blue);
+  background-color: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+}
+
+.chemist-header-btn:hover {
+  background-color: var(--primary-blue) !important;
+  color: #ffffff !important;
+  border-color: var(--primary-blue) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(12, 61, 108, 0.25);
+}
+
+.chemist-header-btn:hover svg,
+.chemist-header-btn:hover span {
+  color: #ffffff !important;
+  stroke: #ffffff;
+}
+
+[data-theme="dark"] .chemist-header-btn {
+  border-color: #38bdf8;
+  color: #38bdf8;
+  background-color: transparent;
+}
+
+[data-theme="dark"] .chemist-header-btn:hover {
+  background-color: #0284c7 !important;
+  color: #ffffff !important;
+  border-color: #0284c7 !important;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+}
+
+[data-theme="dark"] .chemist-header-btn:hover svg,
+[data-theme="dark"] .chemist-header-btn:hover span {
+  color: #ffffff !important;
+  stroke: #ffffff;
+}
+
+.admin-nav-pill {
+  transition: all 0.2s ease;
+}
+
+.admin-nav-pill:hover {
+  background-color: #f1f5f9 !important;
+  color: var(--primary-blue) !important;
+  border-color: var(--primary-blue) !important;
+  transform: translateY(-1px);
+}
+
+[data-theme="dark"] .admin-nav-pill {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .admin-nav-pill:hover {
+  background-color: #334155 !important;
+  color: #f8fafc !important;
+  border-color: #64748b !important;
+}
+
 /* Grid layouts */
 .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: clamp(16px, 2.5vw, 30px); align-items: stretch; }
 .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(16px, 2.5vw, 30px); align-items: stretch; }

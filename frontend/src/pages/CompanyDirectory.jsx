@@ -119,7 +119,7 @@ function CompanyDirectory() {
               <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
               <input 
                 type="text" 
-                placeholder={t('companies.searchPlaceholder', 'Search 252 companies, location, or specialty...')}
+                placeholder={t('companies.searchPlaceholder', 'Search companies, location, or specialty...')}
                 value={searchTerm}
                 onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
                 style={{ width: '100%', padding: '10px 16px 10px 42px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none' }}

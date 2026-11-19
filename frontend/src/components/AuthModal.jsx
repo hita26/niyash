@@ -14,6 +14,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
   const navigate = useNavigate();
   // Modes: 'login' | 'register' | 'forgot-request' | 'forgot-verify' | 'forgot-success'
   const [authMode, setAuthMode] = useState('login');
+  const [registerStep, setRegisterStep] = useState(1); // Step 1: Store & Contact Info, Step 2: Licenses & KYC
   const [error, setError] = useState('');
   const [infoMessage, setInfoMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -68,11 +69,16 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
     return () => clearInterval(timer);
   }, [countdown]);
 
-  // Lock body scroll and listen for Escape key
+  // Lock body & documentElement scroll and listen for Escape key
   useEffect(() => {
     if (!isOpen) return;
-    const originalOverflow = document.body.style.overflow;
+    const originalBodyOverflow = document.body.style.overflow;
+    const originalHtmlOverflow = document.documentElement.style.overflow;
+    const originalBodyTouch = document.body.style.touchAction;
+
     document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.touchAction = 'none';
 
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') onClose();
@@ -80,7 +86,9 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      document.body.style.overflow = originalOverflow;
+      document.body.style.overflow = originalBodyOverflow;
+      document.documentElement.style.overflow = originalHtmlOverflow;
+      document.body.style.touchAction = originalBodyTouch;
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen, onClose]);
@@ -90,6 +98,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
     if (isOpen) {
       setError('');
       setInfoMessage('');
+      setRegisterStep(1);
     }
   }, [isOpen]);
 
@@ -220,6 +229,35 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
     setInfoMessage('');
   };
 
+  const handleProceedToStep2 = (e) => {
+    if (e) e.preventDefault();
+    setError('');
+    if (!formData.companyName || !formData.companyName.trim()) {
+      setError('Chemist / Store Name is required.');
+      return;
+    }
+    if (!formData.name || !formData.name.trim()) {
+      setError('Contact Person Name is required.');
+      return;
+    }
+    const cleanPhone = (formData.phone || '').replace(/\D/g, '');
+    if (cleanPhone.length !== 10) {
+      setError('Phone number is required and must contain exactly 10 digits.');
+      return;
+    }
+    const cleanEmail = (formData.email || '').trim().toLowerCase();
+    if (!cleanEmail || !cleanEmail.includes('@') || !cleanEmail.includes('.')) {
+      setError('A valid business email address is required.');
+      return;
+    }
+    if (!formData.password || formData.password.length < 6) {
+      setError('Password is required and must be at least 6 characters.');
+      return;
+    }
+    setRegisterStep(2);
+    setError('');
+  };
+
   // 1. Submit Login or Register
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -228,33 +266,48 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
     setLoading(true);
 
     if (isRegister) {
-      // All fields are strictly required
-      if (!formData.name || !formData.name.trim()) {
-        setError('Contact Name is required.');
-        setLoading(false);
-        return;
-      }
-      if (!formData.email || !formData.email.trim()) {
-        setError('Email Address is required.');
-        setLoading(false);
-        return;
-      }
-      if (!formData.password || formData.password.length < 6) {
-        setError('Password is required and must be at least 6 characters.');
-        setLoading(false);
-        return;
-      }
+      // Step 1 Validation
       if (!formData.companyName || !formData.companyName.trim()) {
         setError('Chemist / Store Name is required.');
+        setRegisterStep(1);
+        setLoading(false);
+        return;
+      }
+      if (!formData.name || !formData.name.trim()) {
+        setError('Contact Person Name is required.');
+        setRegisterStep(1);
         setLoading(false);
         return;
       }
       const cleanPhone = (formData.phone || '').replace(/\D/g, '');
       if (cleanPhone.length !== 10) {
         setError('Phone number is required and must contain exactly 10 digits.');
+        setRegisterStep(1);
         setLoading(false);
         return;
       }
+      const cleanEmail = (formData.email || '').trim().toLowerCase();
+      if (!cleanEmail || !cleanEmail.includes('@') || !cleanEmail.includes('.')) {
+        setError('A valid business email address is required.');
+        setRegisterStep(1);
+        setLoading(false);
+        return;
+      }
+      if (!formData.password || formData.password.length < 6) {
+        setError('Password is required and must be at least 6 characters.');
+        setRegisterStep(1);
+        setLoading(false);
+        return;
+      }
+
+      // If user somehow triggers submit while on Step 1, advance to Step 2
+      if (registerStep === 1) {
+        setRegisterStep(2);
+        setLoading(false);
+        return;
+      }
+
+      // Step 2 Validation (KYC)
       const cleanGstin = (formData.gstin || '').trim().toUpperCase();
       let cleanPan = (formData.pan || '').trim().toUpperCase();
 
@@ -323,6 +376,11 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
 
       onSuccess(data);
       onClose();
+
+      // In real-world B2B pharma flow: redirect chemist straight into their Wholesale Dashboard
+      if (!window.location.pathname.startsWith('/admin') && !window.location.pathname.startsWith('/dashboard')) {
+        navigate('/dashboard');
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -435,10 +493,12 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
   return (
     <div 
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      onWheel={(e) => { if (e.target === e.currentTarget) e.preventDefault(); }}
       style={{
         position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-        backgroundColor: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(5px)',
-        zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
+        backgroundColor: 'rgba(15, 23, 42, 0.78)', backdropFilter: 'blur(6px)',
+        zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px',
+        overscrollBehavior: 'contain'
       }}
     >
       <div 
@@ -454,60 +514,92 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
         className="card animate-fade-in" 
         style={{
           width: '100%', 
-          maxWidth: isRegister ? '640px' : '430px', 
-          padding: '28px',
+          maxWidth: isRegister ? '640px' : '440px', 
+          padding: '24px 26px',
           position: 'relative', 
           backgroundColor: 'var(--card-bg, #ffffff)', 
           maxHeight: '92vh', 
           overflowY: 'auto',
-          borderRadius: '16px',
+          overflowX: 'hidden',
+          borderRadius: '18px',
           boxShadow: '0 25px 50px -12px rgba(12, 61, 108, 0.25)',
+          overscrollBehavior: 'contain'
         }}
       >
         {/* Close Button */}
         <button 
           onClick={onClose}
           style={{ 
-            position: 'absolute', top: '18px', right: '18px', 
+            position: 'absolute', top: '16px', right: '16px', 
             color: 'var(--text-light)', background: 'var(--bg-main, #f8fafc)', 
             border: '1px solid var(--border-light, #e2e8f0)', 
             borderRadius: '50%', cursor: 'pointer', padding: '6px',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transition: 'var(--transition-smooth)'
+            transition: 'var(--transition-smooth)',
+            zIndex: 10
           }}
           aria-label="Close dialog"
         >
           <X size={18} />
         </button>
 
-        {/* Top Navigation Tabs (Only in Login / Register mode) */}
+        {/* Top Segmented Mode Pill Switcher */}
         {(isLogin || isRegister) && (
-          <div style={{ display: 'flex', borderBottom: '1px solid var(--border-light, #e2e8f0)', marginBottom: '22px' }}>
-            <button 
+          <div style={{
+            display: 'flex',
+            backgroundColor: 'var(--bg-main, #f1f5f9)',
+            padding: '4px',
+            borderRadius: '12px',
+            marginBottom: '18px',
+            border: '1px solid var(--border-light, #e2e8f0)'
+          }}>
+            <button
               type="button"
               onClick={() => { setAuthMode('login'); setError(''); setInfoMessage(''); }}
               style={{
-                flex: 1, padding: '12px', fontWeight: '700', fontSize: '1rem',
+                flex: 1,
+                padding: '9px 12px',
+                borderRadius: '9px',
+                fontSize: '0.88rem',
+                fontWeight: '700',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '7px',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: isLogin ? 'var(--card-bg, #ffffff)' : 'transparent',
                 color: isLogin ? 'var(--primary-blue, #2563eb)' : 'var(--text-medium, #64748b)',
-                borderBottom: isLogin ? '3px solid var(--primary-blue, #2563eb)' : '3px solid transparent',
-                background: 'none', border: 'none', cursor: 'pointer',
-                transition: 'var(--transition-smooth)'
+                boxShadow: isLogin ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
+                transition: 'all 0.2s ease'
               }}
             >
-              {t('auth.loginTitle', 'Log In')}
+              <Lock size={15} />
+              <span>{t('auth.loginTitle', 'Chemist Sign In')}</span>
             </button>
-            <button 
+            <button
               type="button"
               onClick={() => { setAuthMode('register'); setError(''); setInfoMessage(''); }}
               style={{
-                flex: 1, padding: '12px', fontWeight: '700', fontSize: '1rem',
+                flex: 1,
+                padding: '9px 12px',
+                borderRadius: '9px',
+                fontSize: '0.88rem',
+                fontWeight: '700',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '7px',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: isRegister ? 'var(--card-bg, #ffffff)' : 'transparent',
                 color: isRegister ? 'var(--primary-blue, #2563eb)' : 'var(--text-medium, #64748b)',
-                borderBottom: isRegister ? '3px solid var(--primary-blue, #2563eb)' : '3px solid transparent',
-                background: 'none', border: 'none', cursor: 'pointer',
-                transition: 'var(--transition-smooth)'
+                boxShadow: isRegister ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
+                transition: 'all 0.2s ease'
               }}
             >
-              {t('auth.registerTitle', 'Chemist Register')}
+              <Building size={15} />
+              <span>{t('auth.registerTitle', 'Register Store')}</span>
             </button>
           </div>
         )}
@@ -542,7 +634,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
         {error && (
           <div style={{
             display: 'flex', gap: '10px', alignItems: 'center', backgroundColor: '#fef2f2',
-            color: '#b91c1c', padding: '12px 14px', borderRadius: '8px', marginBottom: '18px',
+            color: '#b91c1c', padding: '12px 14px', borderRadius: '8px', marginBottom: '16px',
             fontSize: '0.85rem', border: '1px solid #fee2e2', lineHeight: '1.4'
           }}>
             <ShieldAlert size={17} style={{ flexShrink: 0 }} />
@@ -554,7 +646,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
         {infoMessage && (
           <div style={{
             display: 'flex', gap: '10px', alignItems: 'flex-start', backgroundColor: '#eff6ff',
-            color: '#1d4ed8', padding: '12px 14px', borderRadius: '8px', marginBottom: '18px',
+            color: '#1d4ed8', padding: '12px 14px', borderRadius: '8px', marginBottom: '16px',
             fontSize: '0.85rem', border: '1px solid #dbeafe', lineHeight: '1.4'
           }}>
             <CheckCircle2 size={17} style={{ flexShrink: 0, marginTop: '2px', color: '#2563eb' }} />
@@ -563,34 +655,13 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
         )}
 
         {/* ======================================================== */}
-        {/* VIEW 1 & 2: LOGIN / REGISTER FORMS                       */}
+        {/* VIEW 1: CHEMIST SIGN IN                                  */}
         {/* ======================================================== */}
-        {(isLogin || isRegister) && (
+        {isLogin && (
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-            
-            {isRegister && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                  {t('auth.nameLabel', 'Contact Name')} <span style={{ color: '#ef4444' }}>*</span>
-                </label>
-                <div style={{ position: 'relative' }}>
-                  <User size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
-                  <input 
-                    type="text" 
-                    name="name" 
-                    required 
-                    value={formData.name} 
-                    onChange={handleChange}
-                    placeholder={t('auth.namePlaceholder', 'John Doe')}
-                    style={{ width: '100%', padding: '10px 10px 10px 38px', borderRadius: '6px', border: '1px solid var(--border-light)' }}
-                  />
-                </div>
-              </div>
-            )}
-
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
               <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                {t('auth.emailLabel', 'Email Address')} <span style={{ color: '#ef4444' }}>*</span>
+                {t('auth.emailLabel', 'Email Address or Mobile')} <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <div style={{ position: 'relative' }}>
                 <Mail size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
@@ -601,7 +672,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                   value={formData.email} 
                   onChange={handleChange}
                   placeholder={t('auth.emailPlaceholder', 'example@mail.com')}
-                  style={{ width: '100%', padding: '10px 10px 10px 38px', borderRadius: '6px', border: '1px solid var(--border-light)' }}
+                  style={{ width: '100%', padding: '10px 10px 10px 38px', borderRadius: '8px', border: '1px solid var(--border-light)', fontSize: '0.9rem' }}
                 />
               </div>
             </div>
@@ -619,7 +690,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                   value={formData.password} 
                   onChange={handleChange}
                   placeholder="••••••••"
-                  style={{ width: '100%', padding: '10px 40px 10px 38px', borderRadius: '6px', border: '1px solid var(--border-light)' }}
+                  style={{ width: '100%', padding: '10px 40px 10px 38px', borderRadius: '8px', border: '1px solid var(--border-light)', fontSize: '0.9rem' }}
                 />
                 <button
                   type="button"
@@ -636,30 +707,162 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                 </button>
               </div>
 
-              {/* ONLY ONE Forgot Password link: right below the password field */}
-              {isLogin && (
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
-                  <button
-                    type="button"
-                    onClick={openForgotPassword}
-                    style={{
-                      background: 'none', border: 'none', color: 'var(--primary-blue)',
-                      fontSize: '0.82rem', fontWeight: '700', cursor: 'pointer', padding: '2px 0',
-                      textDecoration: 'underline'
-                    }}
-                  >
-                    {t('auth.forgotPassword', 'Forgot Password?')}
-                  </button>
-                </div>
-              )}
+              {/* Forgot Password Link */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
+                <button
+                  type="button"
+                  onClick={openForgotPassword}
+                  style={{
+                    background: 'none', border: 'none', color: 'var(--primary-blue)',
+                    fontSize: '0.82rem', fontWeight: '700', cursor: 'pointer', padding: '2px 0',
+                    textDecoration: 'underline'
+                  }}
+                >
+                  {t('auth.forgotPassword', 'Forgot Password?')}
+                </button>
+              </div>
             </div>
 
-            {isRegister && (
-              <>
-                {/* Store Name & Mobile Number (Both Required) */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '15px' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                    <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="btn btn-primary"
+              style={{ width: '100%', padding: '11px', marginTop: '4px', borderRadius: '8px', fontWeight: '700', fontSize: '0.92rem' }}
+            >
+              {loading ? t('auth.authenticating', 'Signing In...') : t('auth.loginBtn', 'Sign In to Account')}
+            </button>
+
+            {/* B2B Onboarding Welcome Card (Replaces redundant register link) */}
+            <div style={{
+              marginTop: '16px',
+              padding: '14px 16px',
+              borderRadius: '12px',
+              backgroundColor: 'var(--bg-main, #f8fafc)',
+              border: '1px solid var(--border-light, #e2e8f0)',
+              textAlign: 'center'
+            }}>
+              <div style={{ fontSize: '0.86rem', fontWeight: '800', color: 'var(--text-dark)', marginBottom: '3px' }}>
+                🏪 New Retail Chemist or Hospital?
+              </div>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-medium, #64748b)', margin: '0 0 10px 0', lineHeight: '1.4' }}>
+                Join Niyansh Pharma's B2B distribution network for live PTR pricing, 10+1 bonus schemes, credit billing, and same-day delivery across Gujarat.
+              </p>
+              <button
+                type="button"
+                onClick={() => { setAuthMode('register'); setRegisterStep(1); setError(''); setInfoMessage(''); }}
+                style={{
+                  width: '100%',
+                  padding: '9px 14px',
+                  borderRadius: '7px',
+                  fontSize: '0.82rem',
+                  fontWeight: '700',
+                  backgroundColor: '#ffffff',
+                  color: 'var(--primary-blue, #2563eb)',
+                  border: '1.5px solid var(--primary-blue, #2563eb)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px'
+                }}
+              >
+                <span>Register New Medical Store ➔</span>
+              </button>
+            </div>
+
+            {/* Discreet Admin Console Access Link */}
+            <div style={{ textAlign: 'center', marginTop: '6px', paddingTop: '10px', borderTop: '1px solid var(--border-light, #f1f5f9)' }}>
+              <span style={{ fontSize: '0.78rem', color: 'var(--text-light, #94a3b8)' }}>
+                Niyansh Pharma Operations or Staff?{' '}
+                <button
+                  type="button"
+                  onClick={() => { onClose(); navigate('/admin'); }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--primary-blue, #2563eb)',
+                    fontSize: '0.78rem',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    textDecoration: 'underline'
+                  }}
+                >
+                  Access Admin Console ➔
+                </button>
+              </span>
+            </div>
+          </form>
+        )}
+
+        {/* ======================================================== */}
+        {/* VIEW 2: SMART 2-STEP CHEMIST REGISTRATION                */}
+        {/* ======================================================== */}
+        {isRegister && (
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            
+            {/* Step Progress Stepper Header */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '10px',
+              paddingBottom: '12px',
+              borderBottom: '1px solid var(--border-light, #e2e8f0)'
+            }}>
+              <div 
+                onClick={() => { if (registerStep === 2) setRegisterStep(1); }}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: registerStep === 2 ? 'pointer' : 'default' }}
+              >
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '24px',
+                  height: '24px',
+                  borderRadius: '50%',
+                  backgroundColor: registerStep === 1 ? 'var(--primary-blue, #2563eb)' : '#10b981',
+                  color: '#ffffff',
+                  fontSize: '0.76rem',
+                  fontWeight: '800'
+                }}>
+                  {registerStep === 2 ? '✓' : '1'}
+                </span>
+                <span style={{ fontSize: '0.84rem', fontWeight: '700', color: registerStep === 1 ? 'var(--primary-blue, #2563eb)' : '#10b981' }}>
+                  1. Store & Contact Info
+                </span>
+              </div>
+
+              <span style={{ color: 'var(--border-light, #cbd5e1)', fontWeight: 'bold' }}>➔</span>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '24px',
+                  height: '24px',
+                  borderRadius: '50%',
+                  backgroundColor: registerStep === 2 ? 'var(--primary-blue, #2563eb)' : '#94a3b8',
+                  color: '#ffffff',
+                  fontSize: '0.76rem',
+                  fontWeight: '800'
+                }}>
+                  2
+                </span>
+                <span style={{ fontSize: '0.84rem', fontWeight: '700', color: registerStep === 2 ? 'var(--primary-blue, #2563eb)' : 'var(--text-light, #94a3b8)' }}>
+                  2. Licenses & KYC
+                </span>
+              </div>
+            </div>
+
+            {/* STEP 1: STORE & CONTACT DETAILS */}
+            {registerStep === 1 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {/* Store Name & Contact Name */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: '12px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <label style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-dark)' }}>
                       {t('auth.companyLabel', 'Chemist / Store Name')} <span style={{ color: '#ef4444' }}>*</span>
                     </label>
                     <div style={{ position: 'relative' }}>
@@ -670,15 +873,36 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                         required
                         value={formData.companyName} 
                         onChange={handleChange}
-                        placeholder={t('auth.companyPlaceholder', 'Niyansh Medicals')}
-                        style={{ width: '100%', padding: '10px 10px 10px 38px', borderRadius: '6px', border: '1px solid var(--border-light)', fontSize: '0.85rem' }}
+                        placeholder={t('auth.companyPlaceholder', 'e.g. Niyansh Medical Store')}
+                        style={{ width: '100%', padding: '9px 10px 9px 36px', borderRadius: '7px', border: '1px solid var(--border-light)', fontSize: '0.86rem' }}
                       />
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                    <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                      {t('auth.phoneLabel', 'Phone Number')} <span style={{ color: '#ef4444' }}>*</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <label style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-dark)' }}>
+                      {t('auth.nameLabel', 'Contact Person Name')} <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                      <User size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
+                      <input 
+                        type="text" 
+                        name="name" 
+                        required 
+                        value={formData.name} 
+                        onChange={handleChange}
+                        placeholder={t('auth.namePlaceholder', 'e.g. John Doe')}
+                        style={{ width: '100%', padding: '9px 10px 9px 36px', borderRadius: '7px', border: '1px solid var(--border-light)', fontSize: '0.86rem' }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mobile Phone & Business Email */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: '12px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <label style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-dark)' }}>
+                      {t('auth.phoneLabel', '10-Digit Mobile Number')} <span style={{ color: '#ef4444' }}>*</span>
                     </label>
                     <div style={{ position: 'relative' }}>
                       <Phone size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
@@ -690,360 +914,336 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                         value={formData.phone} 
                         onChange={handleChange}
                         placeholder={t('auth.phonePlaceholder', '10-digit mobile number')}
-                        style={{ width: '100%', padding: '10px 10px 10px 38px', borderRadius: '6px', border: '1px solid var(--border-light)', fontSize: '0.85rem' }}
+                        style={{ width: '100%', padding: '9px 10px 9px 36px', borderRadius: '7px', border: '1px solid var(--border-light)', fontSize: '0.86rem' }}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <label style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-dark)' }}>
+                      {t('auth.emailLabel', 'Business Email Address')} <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                      <Mail size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
+                      <input 
+                        type="email" 
+                        name="email" 
+                        required 
+                        value={formData.email} 
+                        onChange={handleChange}
+                        placeholder={t('auth.emailPlaceholder', 'pharmacy@example.com')}
+                        style={{ width: '100%', padding: '9px 10px 9px 36px', borderRadius: '7px', border: '1px solid var(--border-light)', fontSize: '0.86rem' }}
                       />
                     </div>
                   </div>
                 </div>
 
-                {/* Tax Credentials Section: GSTIN (Optional) & PAN (Required if no GST) */}
-                <div style={{ 
-                  backgroundColor: 'var(--bg-main, #f8fafc)', 
-                  padding: '14px', 
-                  borderRadius: '10px', 
-                  border: '1px solid var(--border-light, #e2e8f0)', 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  gap: '12px' 
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
-                    <span style={{ fontSize: '0.84rem', fontWeight: '800', color: 'var(--primary-blue, #2563eb)' }}>
-                      {t('auth.taxCredentials', 'Tax Credentials (GSTIN / PAN)')}
-                    </span>
-                    <span style={{ fontSize: '0.74rem', color: '#0369a1', backgroundColor: '#e0f2fe', padding: '3px 9px', borderRadius: '12px', fontWeight: '700' }}>
-                      {t('auth.taxGuidance', 'GSTIN is Optional • Max 500 KB per document')}
-                    </span>
-                  </div>
-
-                  {/* Informational banner about document formats and size */}
-                  <div style={{ fontSize: '0.76rem', color: '#0f766e', backgroundColor: '#ccfbf1', padding: '6px 10px', borderRadius: '6px', border: '1px solid #99f6e4', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span>📄</span>
-                    <span>{t('auth.docGuidanceText', 'Accepted documents: PDF, JPG, PNG (Max 500 KB). Leave blank if no GST and enter PAN only.')}</span>
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '14px' }}>
-                    
-                    {/* GSTIN Field (OPTIONAL) with Upload Button */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
-                        <label style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-dark)', whiteSpace: 'nowrap' }}>
-                          {t('auth.gstinOptional', 'GSTIN Number (Optional)')}
-                        </label>
-                        <label style={{
-                          display: 'inline-flex', alignItems: 'center', gap: '5px',
-                          fontSize: '0.72rem', fontWeight: '700', color: '#ffffff',
-                          backgroundColor: docFiles.gstin ? '#10b981' : '#0284c7',
-                          padding: '3px 8px', borderRadius: '5px', cursor: 'pointer',
-                          whiteSpace: 'nowrap', flexShrink: 0
-                        }}>
-                          <Upload size={12} />
-                          <span>{docFiles.gstin ? t('auth.changeFile', 'Change File') : t('auth.upload500kb', 'Upload (≤500 KB)')}</span>
-                          <input 
-                            type="file" 
-                            accept=".pdf, .jpg, .jpeg, .png, .webp, application/pdf, image/jpeg, image/png, image/webp" 
-                            style={{ display: 'none' }} 
-                            onChange={(e) => handleFileUpload(e, 'gstin')} 
-                          />
-                        </label>
-                      </div>
-                      <div style={{ position: 'relative' }}>
-                        <FileText size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
-                        <input 
-                          type="text" 
-                          name="gstin" 
-                          maxLength={15}
-                          value={formData.gstin} 
-                          onChange={handleChange}
-                          placeholder="e.g. 24AAAAA0000A1Z (Leave blank if no GST)"
-                          style={{ width: '100%', padding: '9px 10px 9px 36px', borderRadius: '6px', border: '1px solid var(--border-light)', fontSize: '0.84rem' }}
-                        />
-                      </div>
-                      {docFiles.gstin && (
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', backgroundColor: '#ecfdf5', color: '#065f46', padding: '3px 8px', borderRadius: '4px', border: '1px solid #a7f3d0' }}>
-                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '180px', fontWeight: '600' }}>
-                            ✓ {docFiles.gstin.name} ({docFiles.gstin.sizeKB} KB)
-                          </span>
-                          <button type="button" onClick={() => handleRemoveFile('gstin')} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', padding: '0 2px', fontWeight: '800' }}>✕</button>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* PAN Card Field with Upload Button (Required if no GSTIN) */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
-                        <label style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-dark)', whiteSpace: 'nowrap' }}>
-                          {t('auth.panNumber', 'PAN Number')} {!formData.gstin ? <span style={{ color: '#ef4444' }}>* ({t('auth.requiredWithoutGst', 'Required without GST')})</span> : <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: '600' }}>({t('auth.optional', 'Optional')})</span>}
-                        </label>
-                        <label style={{
-                          display: 'inline-flex', alignItems: 'center', gap: '5px',
-                          fontSize: '0.72rem', fontWeight: '700', color: '#ffffff',
-                          backgroundColor: docFiles.pan ? '#10b981' : '#0284c7',
-                          padding: '3px 8px', borderRadius: '5px', cursor: 'pointer',
-                          whiteSpace: 'nowrap', flexShrink: 0
-                        }}>
-                          <Upload size={12} />
-                          <span>{docFiles.pan ? t('auth.changeFile', 'Change File') : t('auth.upload500kb', 'Upload (≤500 KB)')}</span>
-                          <input 
-                            type="file" 
-                            accept=".pdf, .jpg, .jpeg, .png, .webp, application/pdf, image/jpeg, image/png, image/webp" 
-                            style={{ display: 'none' }} 
-                            onChange={(e) => handleFileUpload(e, 'pan')} 
-                          />
-                        </label>
-                      </div>
-                      <div style={{ position: 'relative' }}>
-                        <FileText size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
-                        <input 
-                          type="text" 
-                          name="pan" 
-                          required={!formData.gstin}
-                          maxLength={10}
-                          value={formData.pan} 
-                          onChange={handleChange}
-                          placeholder="ABCDE1234F"
-                          style={{ width: '100%', padding: '9px 10px 9px 36px', borderRadius: '6px', border: '1px solid var(--border-light)', fontSize: '0.84rem' }}
-                        />
-                      </div>
-                      {docFiles.pan && (
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', backgroundColor: '#ecfdf5', color: '#065f46', padding: '3px 8px', borderRadius: '4px', border: '1px solid #a7f3d0' }}>
-                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '180px', fontWeight: '600' }}>
-                            ✓ {docFiles.pan.name} ({docFiles.pan.sizeKB} KB)
-                          </span>
-                          <button type="button" onClick={() => handleRemoveFile('pan')} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', padding: '0 2px', fontWeight: '800' }}>✕</button>
-                        </div>
-                      )}
-                    </div>
-
+                {/* Password Field */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-dark)' }}>
+                    {t('auth.passwordLabel', 'Account Password')} <span style={{ color: '#ef4444' }}>* (Minimum 6 characters)</span>
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <Lock size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
+                    <input 
+                      type={showLoginPassword ? 'text' : 'password'} 
+                      name="password" 
+                      required 
+                      value={formData.password} 
+                      onChange={handleChange}
+                      placeholder="••••••••"
+                      style={{ width: '100%', padding: '9px 40px 9px 36px', borderRadius: '7px', border: '1px solid var(--border-light)', fontSize: '0.86rem' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowLoginPassword(!showLoginPassword)}
+                      style={{
+                        position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
+                        background: 'none', border: 'none', color: 'var(--text-light)', cursor: 'pointer', padding: '2px',
+                        display: 'flex', alignItems: 'center'
+                      }}
+                      title={showLoginPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showLoginPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
                   </div>
                 </div>
 
-                {/* Drug Licenses Section: Form 20 (Required) & Form 21 (Optional) */}
-                <div style={{ 
-                  backgroundColor: 'var(--bg-main, #f8fafc)', 
-                  padding: '14px', 
-                  borderRadius: '10px', 
-                  border: '1px solid var(--border-light, #e2e8f0)', 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  gap: '12px' 
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
-                    <span style={{ fontSize: '0.84rem', fontWeight: '800', color: 'var(--primary-blue, #2563eb)' }}>
-                      {t('auth.drugLicenses', 'Drug Licenses (Form 20 & 21)')}
-                    </span>
-                    <span style={{ fontSize: '0.74rem', color: '#0369a1', backgroundColor: '#e0f2fe', padding: '3px 9px', borderRadius: '12px', fontWeight: '700' }}>
-                      {t('auth.dlGuidance', 'Form 20 Required • Form 21 Optional • Max 500 KB')}
-                    </span>
-                  </div>
-
-                  {/* Informational banner about document formats and size */}
-                  <div style={{ fontSize: '0.76rem', color: '#0f766e', backgroundColor: '#ccfbf1', padding: '6px 10px', borderRadius: '6px', border: '1px solid #99f6e4', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span>📄</span>
-                    <span>{t('auth.dlDocGuidance', 'Accepted documents: PDF, JPG, PNG (Max 500 KB). Form 20 is required, Form 21 is optional.')}</span>
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '14px' }}>
-                    
-                    {/* Drug License No 1 Field (REQUIRED) with Upload Button */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
-                        <label style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-dark)', whiteSpace: 'nowrap' }}>
-                          {t('auth.dl1Label', 'Drug License No 1 (Form 20)')} <span style={{ color: '#ef4444' }}>*</span>
-                        </label>
-                        <label style={{
-                          display: 'inline-flex', alignItems: 'center', gap: '5px',
-                          fontSize: '0.72rem', fontWeight: '700', color: '#ffffff',
-                          backgroundColor: docFiles.drugLicense1 ? '#10b981' : '#0284c7',
-                          padding: '3px 8px', borderRadius: '5px', cursor: 'pointer',
-                          whiteSpace: 'nowrap', flexShrink: 0
-                        }}>
-                          <Upload size={12} />
-                          <span>{docFiles.drugLicense1 ? t('auth.changeFile', 'Change File') : t('auth.upload500kb', 'Upload (≤500 KB)')}</span>
-                          <input 
-                            type="file" 
-                            accept=".pdf, .jpg, .jpeg, .png, .webp, application/pdf, image/jpeg, image/png, image/webp" 
-                            style={{ display: 'none' }} 
-                            onChange={(e) => handleFileUpload(e, 'drugLicense1')} 
-                          />
-                        </label>
-                      </div>
-                      <div style={{ position: 'relative' }}>
-                        <FileText size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
-                        <input 
-                          type="text" 
-                          name="drugLicense1" 
-                          required
-                          value={formData.drugLicense1} 
-                          onChange={handleChange}
-                          placeholder="e.g. 20B/1234 or G/20/1234"
-                          style={{ width: '100%', padding: '9px 10px 9px 36px', borderRadius: '6px', border: '1px solid var(--border-light)', fontSize: '0.84rem' }}
-                        />
-                      </div>
-                      {docFiles.drugLicense1 && (
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', backgroundColor: '#ecfdf5', color: '#065f46', padding: '3px 8px', borderRadius: '4px', border: '1px solid #a7f3d0' }}>
-                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '180px', fontWeight: '600' }}>
-                            ✓ {docFiles.drugLicense1.name} ({docFiles.drugLicense1.sizeKB} KB)
-                          </span>
-                          <button type="button" onClick={() => handleRemoveFile('drugLicense1')} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', padding: '0 2px', fontWeight: '800' }}>✕</button>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Drug License No 2 Field (OPTIONAL) with Upload Button */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
-                        <label style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-dark)', whiteSpace: 'nowrap' }}>
-                          {t('auth.dl2Label', 'Drug License No 2 (Form 21) (Optional)')}
-                        </label>
-                        <label style={{
-                          display: 'inline-flex', alignItems: 'center', gap: '5px',
-                          fontSize: '0.72rem', fontWeight: '700', color: '#ffffff',
-                          backgroundColor: docFiles.drugLicense2 ? '#10b981' : '#0284c7',
-                          padding: '3px 8px', borderRadius: '5px', cursor: 'pointer',
-                          whiteSpace: 'nowrap', flexShrink: 0
-                        }}>
-                          <Upload size={12} />
-                          <span>{docFiles.drugLicense2 ? t('auth.changeFile', 'Change File') : t('auth.upload500kb', 'Upload (≤500 KB)')}</span>
-                          <input 
-                            type="file" 
-                            accept=".pdf, .jpg, .jpeg, .png, .webp, application/pdf, image/jpeg, image/png, image/webp" 
-                            style={{ display: 'none' }} 
-                            onChange={(e) => handleFileUpload(e, 'drugLicense2')} 
-                          />
-                        </label>
-                      </div>
-                      <div style={{ position: 'relative' }}>
-                        <FileText size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
-                        <input 
-                          type="text" 
-                          name="drugLicense2" 
-                          value={formData.drugLicense2} 
-                          onChange={handleChange}
-                          placeholder="e.g. 21B/5678 or G/21/5678 (Optional)"
-                          style={{ width: '100%', padding: '9px 10px 9px 36px', borderRadius: '6px', border: '1px solid var(--border-light)', fontSize: '0.84rem' }}
-                        />
-                      </div>
-                      {docFiles.drugLicense2 && (
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', backgroundColor: '#ecfdf5', color: '#065f46', padding: '3px 8px', borderRadius: '4px', border: '1px solid #a7f3d0' }}>
-                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '180px', fontWeight: '600' }}>
-                            ✓ {docFiles.drugLicense2.name} ({docFiles.drugLicense2.sizeKB} KB)
-                          </span>
-                          <button type="button" onClick={() => handleRemoveFile('drugLicense2')} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', padding: '0 2px', fontWeight: '800' }}>✕</button>
-                        </div>
-                      )}
-                    </div>
-
-                  </div>
-                </div>
-              </>
+                {/* Continue to Step 2 Button */}
+                <button 
+                  type="button" 
+                  onClick={handleProceedToStep2}
+                  className="btn btn-primary"
+                  style={{
+                    width: '100%',
+                    padding: '11px',
+                    marginTop: '8px',
+                    borderRadius: '8px',
+                    fontWeight: '700',
+                    fontSize: '0.92rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <span>Continue to Licenses & KYC ➔</span>
+                </button>
+              </div>
             )}
 
-            <button 
-              type="submit" 
-              disabled={loading}
-              className="btn btn-primary"
-              style={{ width: '100%', padding: '12px', marginTop: '10px', borderRadius: '6px', fontWeight: '700' }}
-            >
-              {loading ? t('auth.authenticating', 'Authenticating...') : isLogin ? t('auth.loginBtn', 'Sign In to Account') : t('auth.registerBtn', 'Create Chemist Account')}
-            </button>
+            {/* STEP 2: LICENSES & KYC DOCUMENT UPLOADS */}
+            {registerStep === 2 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                
+                {/* Back button link */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <button
+                    type="button"
+                    onClick={() => { setRegisterStep(1); setError(''); }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--primary-blue, #2563eb)',
+                      fontSize: '0.82rem',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      padding: '2px 0'
+                    }}
+                  >
+                    <ArrowLeft size={15} />
+                    <span>← Edit Store & Contact Info</span>
+                  </button>
+                  <span style={{ fontSize: '0.74rem', color: '#059669', backgroundColor: '#ecfdf5', padding: '3px 8px', borderRadius: '12px', fontWeight: '700' }}>
+                    Step 2 of 2
+                  </span>
+                </div>
+
+                {/* Section 1: Tax Credentials (GSTIN / PAN) */}
+                <div style={{
+                  backgroundColor: 'var(--bg-main, #f8fafc)',
+                  padding: '12px 14px',
+                  borderRadius: '10px',
+                  border: '1px solid var(--border-light, #e2e8f0)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px' }}>
+                    <span style={{ fontSize: '0.84rem', fontWeight: '800', color: 'var(--primary-blue, #2563eb)' }}>
+                      1. Tax Credentials (GSTIN or PAN)
+                    </span>
+                    <span style={{ fontSize: '0.72rem', color: '#0369a1', backgroundColor: '#e0f2fe', padding: '2px 8px', borderRadius: '10px', fontWeight: '700' }}>
+                      GSTIN Optional • PAN Required if no GST
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: '12px' }}>
+                    {/* GSTIN Card */}
+                    <div style={{ backgroundColor: '#ffffff', border: '1px solid var(--border-light, #cbd5e1)', borderRadius: '8px', padding: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-dark)' }}>GSTIN Number</span>
+                        <span style={{ fontSize: '0.7rem', color: '#64748b' }}>(Optional)</span>
+                      </div>
+                      <input 
+                        type="text" 
+                        name="gstin" 
+                        maxLength={15}
+                        value={formData.gstin} 
+                        onChange={handleChange}
+                        placeholder="e.g. 24AAAAA0000A1Z"
+                        style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }}
+                      />
+                      {docFiles.gstin ? (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', backgroundColor: '#ecfdf5', color: '#065f46', padding: '4px 8px', borderRadius: '5px', border: '1px solid #a7f3d0' }}>
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '170px', fontWeight: '600' }}>✓ {docFiles.gstin.name}</span>
+                          <button type="button" onClick={() => handleRemoveFile('gstin')} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontWeight: '800' }}>✕</button>
+                        </div>
+                      ) : (
+                        <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', fontSize: '0.74rem', fontWeight: '700', color: '#0284c7', backgroundColor: '#e0f2fe', padding: '5px 8px', borderRadius: '5px', cursor: 'pointer' }}>
+                          <Upload size={12} />
+                          <span>Attach GST Certificate</span>
+                          <input type="file" accept=".pdf, .jpg, .jpeg, .png, .webp" style={{ display: 'none' }} onChange={(e) => handleFileUpload(e, 'gstin')} />
+                        </label>
+                      )}
+                    </div>
+
+                    {/* PAN Card */}
+                    <div style={{ backgroundColor: '#ffffff', border: '1px solid var(--border-light, #cbd5e1)', borderRadius: '8px', padding: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-dark)' }}>
+                          PAN Number {!formData.gstin && <span style={{ color: '#ef4444' }}>*</span>}
+                        </span>
+                        <span style={{ fontSize: '0.7rem', color: formData.gstin ? '#64748b' : '#ef4444', fontWeight: '600' }}>
+                          {formData.gstin ? '(Optional)' : '(Required)'}
+                        </span>
+                      </div>
+                      <input 
+                        type="text" 
+                        name="pan" 
+                        required={!formData.gstin}
+                        maxLength={10}
+                        value={formData.pan} 
+                        onChange={handleChange}
+                        placeholder="e.g. ABCDE1234F"
+                        style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }}
+                      />
+                      {docFiles.pan ? (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', backgroundColor: '#ecfdf5', color: '#065f46', padding: '4px 8px', borderRadius: '5px', border: '1px solid #a7f3d0' }}>
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '170px', fontWeight: '600' }}>✓ {docFiles.pan.name}</span>
+                          <button type="button" onClick={() => handleRemoveFile('pan')} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontWeight: '800' }}>✕</button>
+                        </div>
+                      ) : (
+                        <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', fontSize: '0.74rem', fontWeight: '700', color: '#ffffff', backgroundColor: !formData.gstin ? '#0284c7' : '#64748b', padding: '5px 8px', borderRadius: '5px', cursor: 'pointer' }}>
+                          <Upload size={12} />
+                          <span>Attach PAN Card Photo</span>
+                          <input type="file" accept=".pdf, .jpg, .jpeg, .png, .webp" style={{ display: 'none' }} onChange={(e) => handleFileUpload(e, 'pan')} />
+                        </label>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 2: Drug Licenses (Form 20 & 21) */}
+                <div style={{
+                  backgroundColor: 'var(--bg-main, #f8fafc)',
+                  padding: '12px 14px',
+                  borderRadius: '10px',
+                  border: '1px solid var(--border-light, #e2e8f0)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px' }}>
+                    <span style={{ fontSize: '0.84rem', fontWeight: '800', color: 'var(--primary-blue, #2563eb)' }}>
+                      2. Drug Licenses (Form 20 & 21)
+                    </span>
+                    <span style={{ fontSize: '0.72rem', color: '#059669', backgroundColor: '#ecfdf5', padding: '2px 8px', borderRadius: '10px', fontWeight: '700' }}>
+                      Form 20 Required • Form 21 Optional
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: '12px' }}>
+                    {/* Drug License 1 (Form 20) */}
+                    <div style={{ backgroundColor: '#ffffff', border: '1px solid var(--border-light, #cbd5e1)', borderRadius: '8px', padding: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-dark)' }}>
+                          Drug License 1 (Form 20) <span style={{ color: '#ef4444' }}>*</span>
+                        </span>
+                        <span style={{ fontSize: '0.7rem', color: '#ef4444', fontWeight: '700' }}>(Required)</span>
+                      </div>
+                      <input 
+                        type="text" 
+                        name="drugLicense1" 
+                        required
+                        value={formData.drugLicense1} 
+                        onChange={handleChange}
+                        placeholder="e.g. 20B/1234 or G/20/1234"
+                        style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }}
+                      />
+                      {docFiles.drugLicense1 ? (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', backgroundColor: '#ecfdf5', color: '#065f46', padding: '4px 8px', borderRadius: '5px', border: '1px solid #a7f3d0' }}>
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '170px', fontWeight: '600' }}>✓ {docFiles.drugLicense1.name}</span>
+                          <button type="button" onClick={() => handleRemoveFile('drugLicense1')} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontWeight: '800' }}>✕</button>
+                        </div>
+                      ) : (
+                        <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', fontSize: '0.74rem', fontWeight: '700', color: '#ffffff', backgroundColor: '#0284c7', padding: '5px 8px', borderRadius: '5px', cursor: 'pointer' }}>
+                          <Upload size={12} />
+                          <span>Attach Form 20 License</span>
+                          <input type="file" accept=".pdf, .jpg, .jpeg, .png, .webp" style={{ display: 'none' }} onChange={(e) => handleFileUpload(e, 'drugLicense1')} />
+                        </label>
+                      )}
+                    </div>
+
+                    {/* Drug License 2 (Form 21) */}
+                    <div style={{ backgroundColor: '#ffffff', border: '1px solid var(--border-light, #cbd5e1)', borderRadius: '8px', padding: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-dark)' }}>Drug License 2 (Form 21)</span>
+                        <span style={{ fontSize: '0.7rem', color: '#64748b' }}>(Optional)</span>
+                      </div>
+                      <input 
+                        type="text" 
+                        name="drugLicense2" 
+                        value={formData.drugLicense2} 
+                        onChange={handleChange}
+                        placeholder="e.g. 21B/5678 or G/21/5678"
+                        style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }}
+                      />
+                      {docFiles.drugLicense2 ? (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', backgroundColor: '#ecfdf5', color: '#065f46', padding: '4px 8px', borderRadius: '5px', border: '1px solid #a7f3d0' }}>
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '170px', fontWeight: '600' }}>✓ {docFiles.drugLicense2.name}</span>
+                          <button type="button" onClick={() => handleRemoveFile('drugLicense2')} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontWeight: '800' }}>✕</button>
+                        </div>
+                      ) : (
+                        <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', fontSize: '0.74rem', fontWeight: '700', color: '#0284c7', backgroundColor: '#e0f2fe', padding: '5px 8px', borderRadius: '5px', cursor: 'pointer' }}>
+                          <Upload size={12} />
+                          <span>Attach Form 21 (Optional)</span>
+                          <input type="file" accept=".pdf, .jpg, .jpeg, .png, .webp" style={{ display: 'none' }} onChange={(e) => handleFileUpload(e, 'drugLicense2')} />
+                        </label>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Free Online Image Compressor Info Strip */}
+                <div style={{
+                  padding: '10px 12px',
+                  borderRadius: '8px',
+                  backgroundColor: 'var(--bg-main, #f8fafc)',
+                  border: '1px dashed var(--border-light, #cbd5e1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '8px'
+                }}>
+                  <div style={{ fontSize: '0.76rem', color: 'var(--text-medium, #64748b)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <FileText size={14} style={{ color: '#2563eb', flexShrink: 0 }} />
+                    <span>Max 500 KB per file. Need compression?</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <a href="https://www.iloveimg.com/compress-image" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.74rem', color: '#0284c7', fontWeight: '700', textDecoration: 'underline' }}>iLoveIMG ↗</a>
+                    <a href="https://tinypng.com/" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.74rem', color: '#0284c7', fontWeight: '700', textDecoration: 'underline' }}>TinyPNG ↗</a>
+                  </div>
+                </div>
+
+                {/* Action Buttons: Back & Complete Registration */}
+                <div style={{ display: 'flex', gap: '10px', marginTop: '4px' }}>
+                  <button 
+                    type="button" 
+                    onClick={() => { setRegisterStep(1); setError(''); }}
+                    className="btn btn-outline"
+                    style={{ flex: 1, padding: '11px', borderRadius: '8px', fontWeight: '700', fontSize: '0.88rem' }}
+                  >
+                    ← Back
+                  </button>
+                  <button 
+                    type="submit" 
+                    disabled={loading}
+                    className="btn btn-primary"
+                    style={{ flex: 2, padding: '11px', borderRadius: '8px', fontWeight: '700', fontSize: '0.88rem' }}
+                  >
+                    {loading ? 'Submitting Application...' : 'Complete Registration ✓'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Bottom Switch back to Sign In */}
+            <div style={{ textAlign: 'center', marginTop: '10px', fontSize: '0.84rem', color: 'var(--text-medium)' }}>
+              <span>Already have an approved account? </span>
+              <button 
+                type="button"
+                onClick={() => { setAuthMode('login'); setError(''); setInfoMessage(''); }}
+                style={{ color: 'var(--primary-blue)', fontWeight: '700', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
+              >
+                Sign In ➔
+              </button>
+            </div>
           </form>
-        )}
-
-        {/* Bottom Switch between Login / Register */}
-        {(isLogin || isRegister) && (
-          <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '0.85rem', color: 'var(--text-medium)' }}>
-            {isLogin ? (
-              <span>
-                {t('auth.newChemist', 'New Chemist / Retailer?')}{' '}
-                <button 
-                  type="button"
-                  onClick={() => { setAuthMode('register'); setError(''); setInfoMessage(''); }}
-                  style={{ color: 'var(--primary-blue)', fontWeight: '700', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
-                >
-                  {t('auth.registerTitle', 'Chemist Register')}
-                </button>
-              </span>
-            ) : (
-              <span>
-                {t('auth.alreadyAccount', 'Already have an account?')}{' '}
-                <button 
-                  type="button"
-                  onClick={() => { setAuthMode('login'); setError(''); setInfoMessage(''); }}
-                  style={{ color: 'var(--primary-blue)', fontWeight: '700', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
-                >
-                  {t('auth.loginTitle', 'Log In')}
-                </button>
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Free Online Image Compressor Tool Link (At bottom of "Already have an account?") */}
-        {isRegister && (
-          <div style={{
-            marginTop: '18px',
-            padding: '12px 16px',
-            borderRadius: '10px',
-            backgroundColor: 'var(--bg-main, #f8fafc)',
-            border: '1.5px dashed var(--border-light, #cbd5e1)',
-            textAlign: 'center',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '8px'
-          }}>
-            <div style={{ fontSize: '0.82rem', fontWeight: '800', color: 'var(--text-dark, #1e293b)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <FileText size={15} style={{ color: '#2563eb' }} />
-              <span>Document Size Limit: Max 500 KB</span>
-            </div>
-            <div style={{ fontSize: '0.78rem', color: 'var(--text-medium, #64748b)', lineHeight: '1.4' }}>
-              Need to compress your document photo under 500 KB? Use these free online tools:
-            </div>
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center', marginTop: '2px' }}>
-              <a 
-                href="https://www.iloveimg.com/compress-image" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  fontSize: '0.78rem',
-                  fontWeight: '700',
-                  color: '#ffffff',
-                  backgroundColor: '#2563eb',
-                  padding: '6px 14px',
-                  borderRadius: '6px',
-                  textDecoration: 'none',
-                  boxShadow: '0 2px 4px rgba(37,99,235,0.2)'
-                }}
-              >
-                <ExternalLink size={13} />
-                <span>iLoveIMG Compressor ↗</span>
-              </a>
-              <a 
-                href="https://tinypng.com/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  fontSize: '0.78rem',
-                  fontWeight: '700',
-                  color: 'var(--text-dark, #1e293b)',
-                  backgroundColor: 'var(--card-bg, #ffffff)',
-                  border: '1px solid var(--border-light, #cbd5e1)',
-                  padding: '6px 14px',
-                  borderRadius: '6px',
-                  textDecoration: 'none'
-                }}
-              >
-                <ExternalLink size={13} />
-                <span>TinyPNG Compressor ↗</span>
-              </a>
-            </div>
-          </div>
         )}
 
         {/* ======================================================== */}

@@ -388,7 +388,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
                   <Building2 size={15} color="var(--primary-blue)" /> {t('nav.companies', 'Pharma Companies')}
                 </h4>
                 <Link to="/companies" style={{ fontSize: '0.74rem', color: 'var(--primary-blue)', fontWeight: '700', textDecoration: 'none' }}>
-                  {t('common.viewAll', 'All 252 →')}
+                  {t('common.viewAll', 'All Companies →')}
                 </Link>
               </div>
 
@@ -397,7 +397,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
                 <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                 <input 
                   type="text"
-                  placeholder={t('products.searchCompaniesPlaceholder', 'Search 252 companies...')}
+                  placeholder={t('products.searchCompaniesPlaceholder', 'Search companies...')}
                   value={companySearchTerm}
                   onChange={(e) => setCompanySearchTerm(e.target.value)}
                   style={{

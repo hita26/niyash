@@ -333,7 +333,6 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                   }}
                   aria-label="Fast search for wholesale medicines"
                 />
-                <span className="kbd-shortcut hide-mobile" style={{ marginRight: '8px', whiteSpace: 'nowrap', flexShrink: 0 }}>Ctrl K</span>
                 <button 
                   type="submit" 
                   style={{ 
@@ -950,7 +949,6 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 }}
                 aria-label="Search pharmaceutical products"
               />
-              <span className="kbd-shortcut hide-mobile" style={{ position: 'absolute', right: '48px', top: '50%', transform: 'translateY(-50%)', whiteSpace: 'nowrap', flexShrink: 0 }}>Ctrl K</span>
               <button type="submit" className="search-button" aria-label="Submit search">
                 <Search size={18} aria-hidden="true" />
               </button>
@@ -1080,6 +1078,29 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             {/* Dark / Light Mode Toggle */}
             <ThemeToggle />
 
+            {/* Direct Admin Console Access Button */}
+            <Link
+              to="/admin"
+              className="admin-nav-pill hide-mobile"
+              title="Admin & Operations Console"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '6px 12px',
+                borderRadius: '20px',
+                fontSize: '0.78rem',
+                fontWeight: '700',
+                color: 'var(--text-medium, #64748b)',
+                border: '1px solid var(--border-light, #cbd5e1)',
+                backgroundColor: 'var(--bg-main, #f8fafc)',
+                textDecoration: 'none'
+              }}
+            >
+              <Shield size={13} style={{ color: 'var(--primary-blue, #2563eb)' }} />
+              <span>Admin</span>
+            </Link>
+
             {/* SINGLE, NON-REDUNDANT B2B PORTAL ACCESS BUTTON */}
             {user ? (
               <div className="header-user-controls" style={{ display: 'flex', alignItems: 'center', gap: '8px', borderRight: '1px solid var(--border-light)', paddingRight: '12px', position: 'relative' }} ref={userMenuRef}>
@@ -1181,8 +1202,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             ) : (
               <button 
                 onClick={onOpenAuth}
-                className="btn btn-outline btn-sm hide-mobile"
-                style={{ padding: '8px 18px', borderRadius: '30px', fontWeight: '800', border: '1.5px solid var(--primary-blue)', color: 'var(--primary-blue)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                className="chemist-header-btn hide-mobile"
                 aria-label="Open Chemist login and registration modal"
               >
                 <LogIn size={15} aria-hidden="true" /> <span>{t('nav.login', 'Chemist Login / Register')}</span>
@@ -1223,9 +1243,8 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               <Link to="/products" className={`nav-link ${isActive('/products')}`}>{t('nav.products', 'All Products')}</Link>
             </li>
             <li className="nav-item">
-              <Link to="/companies" className={`nav-link ${isActive('/companies') ? 'active' : ''}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <Link to="/companies" className={`nav-link ${isActive('/companies') ? 'active' : ''}`}>
                 {t('nav.companies', 'Companies')}
-                <span style={{ fontSize: '0.72rem', backgroundColor: '#e0f2fe', color: '#0369a1', fontWeight: '800', padding: '1px 6px', borderRadius: '10px' }}>252+</span>
               </Link>
             </li>
             <li className="nav-item">
@@ -1413,11 +1432,8 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               <Link to="/products" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600', color: 'var(--text-dark)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <Package size={17} color="var(--primary-blue)" /> {t('nav.products', 'All Products Catalog')}
               </Link>
-              <Link to="/companies" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600', color: 'var(--text-dark)', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <Building2 size={17} color="var(--primary-blue)" /> {t('nav.companies', 'Companies & Brands')}
-                </span>
-                <span style={{ fontSize: '0.72rem', backgroundColor: '#e0f2fe', color: '#0369a1', fontWeight: '800', padding: '1px 6px', borderRadius: '10px' }}>252+</span>
+              <Link to="/companies" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600', color: 'var(--text-dark)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Building2 size={17} color="var(--primary-blue)" /> {t('nav.companies', 'Companies & Brands')}
               </Link>
               <Link to="/about" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600', color: 'var(--text-dark)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <Info size={17} color="var(--primary-blue)" /> {t('nav.about', 'About Us')}
@@ -1490,6 +1506,32 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                   <LogIn size={16} /> {t('nav.login', 'Chemist Login / Register')}
                 </button>
               )}
+
+              {/* Direct Link to Admin & Operations Portal in Mobile Drawer */}
+              <div style={{ marginTop: '12px', textAlign: 'center' }}>
+                <Link
+                  to="/admin"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '0.82rem',
+                    color: 'var(--text-medium, #64748b)',
+                    textDecoration: 'none',
+                    fontWeight: '700',
+                    padding: '6px 12px',
+                    borderRadius: '6px',
+                    backgroundColor: 'var(--bg-main, #f8fafc)',
+                    border: '1px solid var(--border-light, #e2e8f0)',
+                    width: '100%',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <Shield size={14} style={{ color: 'var(--primary-blue, #2563eb)' }} />
+                  <span>Admin & Operations Console ➔</span>
+                </Link>
+              </div>
             </div>
           </div>
         </>

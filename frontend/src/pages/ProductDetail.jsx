@@ -75,9 +75,14 @@ function ProductDetail({ addToCart }) {
           <p style={{ margin: '0 0 24px', color: 'var(--text-medium)' }}>
             The medicine or formulation you requested does not exist or has been removed from catalog.
           </p>
-          <Link to="/products" className="btn btn-primary btn-sm">
-            {t('productDetail.returnToProducts', '← Return to All Products')}
-          </Link>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <button onClick={() => fetchProduct()} className="btn btn-outline btn-sm" style={{ cursor: 'pointer' }}>
+              ↻ {t('common.tryAgain', 'Try Again')}
+            </button>
+            <Link to="/products" className="btn btn-primary btn-sm">
+              {t('productDetail.returnToProducts', '← Return to All Products')}
+            </Link>
+          </div>
         </div>
       </div>
     );

@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const path = require('path');
 const fs = require('fs');
 const https = require('https');
@@ -655,15 +656,28 @@ router.all('/sync-catalog', protect, adminOnly, checkPermission('canBulkImport')
   }
 });
 
-// @desc    Get single product by ID
+// @desc    Get single product by ID or SKU
 // @route   GET /api/products/:id
 // @access  Public
 router.get('/:id', async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(404).json({ success: false, message: 'Product not found' });
+    const rawId = (req.params.id || '').trim();
+    let product = null;
+
+    if (mongoose.Types.ObjectId.isValid(rawId)) {
+      product = await Product.findById(rawId);
     }
-    const product = await Product.findById(req.params.id);
+
+    // Fallback: look up by SKU or exact name
+    if (!product && rawId) {
+      product = await Product.findOne({
+        $or: [
+          { sku: rawId },
+          { name: new RegExp(`^${escapeRegex(rawId)}$`, 'i') }
+        ]
+      });
+    }
+
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found' });
     }

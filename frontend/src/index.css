@@ -1368,8 +1368,9 @@ input[type="submit"]:disabled {
 /* Responsive Layout Helper Classes */
 .products-layout {
   display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 30px;
+  grid-template-columns: 260px 1fr;
+  gap: 24px;
+  align-items: start;
 }
 
 .responsive-split-layout {
@@ -4015,11 +4016,11 @@ html[lang="gu"] .nav-link, html[lang="hi"] .nav-link {
   padding-bottom: max(4px, 0.35em);
 }
 
-/* Adaptive E-Commerce Product Grid (Mobile-First: 1 col narrow phones -> 2 cols standard phones -> 3/4/5/6 cols) */
+/* Adaptive E-Commerce Product Grid (Amazon / Flipkart / Tata 1mg Responsive Standard) */
 .responsive-product-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
   align-items: stretch;
 }
 
@@ -4028,87 +4029,91 @@ html[lang="gu"] .nav-link, html[lang="hi"] .nav-link {
   flex-direction: column !important;
   justify-content: space-between !important;
   height: 100% !important;
-  padding: 16px;
+  padding: 14px !important;
+  border-radius: 12px !important;
+  background-color: #ffffff;
+  border: 1px solid var(--border-light);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease, border-color 0.22s ease !important;
   container-type: inline-size;
 }
 
-@container (max-width: 230px) {
+.product-card-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -4px rgba(12, 61, 108, 0.12), 0 4px 10px -2px rgba(12, 61, 108, 0.06);
+  border-color: #cbd5e1;
+}
+
+@container (max-width: 195px) {
   .product-card-actions {
     grid-template-columns: 1fr !important;
     gap: 6px !important;
   }
 }
 
-@media (min-width: 376px) {
+/* Compact 2-Column Product Card ergonomics on mobile phones */
+@media (max-width: 480px) {
+  .responsive-product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .product-card-item {
+    padding: 10px !important;
+  }
+  .product-card-img-wrap {
+    padding: 6px !important;
+    margin-bottom: 6px !important;
+  }
+  .product-card-item h3 {
+    font-size: 0.88rem !important;
+    min-height: 2.4rem !important;
+    height: 2.4rem !important;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 640px) {
   .responsive-product-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
   }
 }
 
-/* Compact 2-Column Product Card ergonomics on 376px - 600px phones */
-@media (min-width: 376px) and (max-width: 600px) {
-  .product-card-item {
-    padding: 10px;
-  }
-  .product-card-img-wrap {
-    padding: 8px !important;
-    margin-bottom: 8px !important;
-  }
-  .product-card-actions {
-    grid-template-columns: 1fr !important;
-    gap: 6px !important;
-  }
-  .product-card-item h3 {
-    font-size: 0.88rem !important;
-    min-height: 2.5rem !important;
-    height: 2.5rem !important;
-  }
-}
-
-@media (min-width: 601px) {
+@media (min-width: 641px) and (max-width: 820px) {
   .responsive-product-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
   }
 }
 
-@media (min-width: 768px) {
+@media (min-width: 821px) and (max-width: 1023px) {
   .responsive-product-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+
+/* Small desktop & standard laptop (1024px to 1439px): 
+   With 260px sidebar + 24px gap, 3 columns gives optimal 255px-285px card width (Amazon/Flipkart sweet spot) */
+@media (min-width: 1024px) {
+  .responsive-product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 18px;
   }
 }
 
-/* Small desktop & tablet landscape (1024px) up to standard laptop (1366px) */
-@media (min-width: 992px) {
-  .responsive-product-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 20px;
-  }
-}
-
-/* Standard HD / Large desktop (1280px - 1600px) */
-@media (min-width: 1280px) {
+/* Large Desktop (1440px to 1799px): 4 columns */
+@media (min-width: 1440px) {
   .responsive-product-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 20px;
   }
 }
 
-/* Large Widescreen (1600px+) */
-@media (min-width: 1600px) {
+/* Ultra-Wide Widescreen (1800px+): 5 columns */
+@media (min-width: 1800px) {
   .responsive-product-grid {
     grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 22px;
-  }
-}
-
-/* Ultra-wide desktop (2560px+) */
-@media (min-width: 2560px) {
-  .responsive-product-grid {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 26px;
   }
 }
 

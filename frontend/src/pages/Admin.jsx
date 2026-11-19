@@ -2671,7 +2671,7 @@ _Helpline: +91 9316566894_`;
       return;
     }
     if (!prodComposition.trim()) {
-      showToast('Content is required', 'error');
+      showToast('Containt is required', 'error');
       return;
     }
     if (!prodForm || !prodForm.trim()) {
@@ -3004,7 +3004,7 @@ _Helpline: +91 9316566894_`;
       showToast('No products to export', 'error');
       return;
     }
-    const headers = ['Name', 'SKU', 'Brand', 'Category', 'SubCategory', 'Price (PTR)', 'MRP', 'Stock Quantity', 'In Stock', 'Featured', 'Active', 'Packing', 'Content', 'Form', 'Image URL'];
+    const headers = ['Name', 'SKU', 'Brand', 'Category', 'SubCategory', 'Price (PTR)', 'MRP', 'Stock Quantity', 'In Stock', 'Featured', 'Active', 'Packing', 'Containt', 'Form', 'Image URL'];
     const rows = products.map(p => [
       `"${(p.name || '').replace(/"/g, '""')}"`,
       `"${p.sku || ''}"`,
@@ -3070,7 +3070,7 @@ _Helpline: +91 9316566894_`;
         'SKU / ID',
         'Manufacturer / Company *',
         'Category *',
-        'Content *',
+        'Containt *',
         'Formulation Form *',
         'Wholesale Price (₹) *',
         'MRP (₹) *',
@@ -3158,7 +3158,7 @@ _Helpline: +91 9316566894_`;
         { wch: 16 }, // SKU
         { wch: 26 }, // Company
         { wch: 22 }, // Category
-        { wch: 32 }, // Content
+        { wch: 32 }, // Containt
         { wch: 16 }, // Form
         { wch: 18 }, // Wholesale Price
         { wch: 14 }, // MRP
@@ -3243,7 +3243,7 @@ _Helpline: +91 9316566894_`;
           const sku = rawSku || getNextSequentialSku(products, idx);
           const company = getVal('Manufacturer / Company *', 'Manufacturer / Company', 'Company', 'Manufacturer') || 'Daxia Healthcare';
           const category = getVal('Category *', 'Category') || 'Pharma Products';
-          const composition = getVal('Content *', 'Content', 'Contain', 'Chemical / Active Composition *', 'Chemical / Active Composition', 'Composition', 'Chemical');
+          const composition = getVal('Containt *', 'Containt', 'Content *', 'Content', 'Contain', 'Chemical / Active Composition *', 'Chemical / Active Composition', 'Composition', 'Chemical');
           const form = getVal('Formulation Form *', 'Formulation Form', 'Form') || 'Tablet';
           const price = parseFloat(getVal('Wholesale Price (₹) *', 'Wholesale Price', 'Wholesale', 'Price', 'PTR')) || 0;
           const mrp = parseFloat(getVal('MRP (₹) *', 'MRP', 'Retail MRP')) || (price > 0 ? Math.round(price * 1.35) : 0);
@@ -9084,11 +9084,11 @@ _Helpline: +91 9316566894_`;
                     </div>
                   </div>
 
-                  {/* Row 3: Content & Formulation Form */}
+                  {/* Row 3: Containt & Formulation Form */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
                       <label htmlFor="modal-composition" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                        Content <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                        Containt <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
                       </label>
                       <input 
                         id="modal-composition"
@@ -9630,7 +9630,7 @@ _Helpline: +91 9316566894_`;
                       <div>• <strong>SKU / ID</strong> (Auto-generated if blank)</div>
                       <div>• <strong>Manufacturer / Company *</strong></div>
                       <div>• <strong>Category *</strong></div>
-                      <div>• <strong>Content *</strong> (or Chemical / Active Composition)</div>
+                      <div>• <strong>Containt *</strong> (or Chemical / Active Composition / Content)</div>
                       <div>• <strong>Formulation Form *</strong></div>
                       <div>• <strong>Wholesale Price (₹) *</strong></div>
                       <div>• <strong>MRP (₹) *</strong></div>
@@ -9754,7 +9754,7 @@ _Helpline: +91 9316566894_`;
                             <th style={{ padding: '10px 12px', minWidth: '190px' }}>Product Name / Brand</th>
                             <th style={{ padding: '10px 12px', minWidth: '110px' }}>SKU / ID</th>
                             <th style={{ padding: '10px 12px', minWidth: '140px' }}>Company</th>
-                            <th style={{ padding: '10px 12px', minWidth: '170px' }}>Content</th>
+                            <th style={{ padding: '10px 12px', minWidth: '170px' }}>Containt</th>
                             <th style={{ padding: '10px 12px', minWidth: '130px' }}>Packing & Form</th>
                             <th style={{ padding: '10px 12px', minWidth: '95px' }}>Wholesale</th>
                             <th style={{ padding: '10px 12px', minWidth: '85px' }}>MRP</th>
@@ -10202,7 +10202,7 @@ _Helpline: +91 9316566894_`;
                   <span style={{ color: 'var(--text-dark)', textAlign: 'right' }}>{prodCategory}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
-                  <span style={{ color: 'var(--text-medium)', fontWeight: '600' }}>Content:</span>
+                  <span style={{ color: 'var(--text-medium)', fontWeight: '600' }}>Containt:</span>
                   <span style={{ color: 'var(--text-dark)', textAlign: 'right' }}>{prodComposition}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>

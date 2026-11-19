@@ -1135,7 +1135,10 @@ function Admin() {
     localStorage.removeItem('niyansh_admin_session');
     localStorage.removeItem('niyansh_admin_token');
     localStorage.removeItem('niyansh_admin_user');
+    sessionStorage.clear();
     showToast('Logged out successfully.');
+    // Invalidate history so pressing browser Back always requires Admin login
+    window.history.replaceState(null, '', '/admin');
   };
 
   // ==========================================

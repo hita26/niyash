@@ -28,6 +28,24 @@ import ScrollToTop from './components/ScrollToTop';
 import MobileBottomNav from './components/MobileBottomNav';
 import AIAssistant from './components/AIAssistant';
 
+// Security Auth Guard: blocks unauthenticated access and forces login if user presses Back after logout
+function ProtectedRoute({ children }) {
+  const { isLoggedIn, user, openAuth } = useAuth();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!isLoggedIn && !user) {
+      openAuth();
+    }
+  }, [isLoggedIn, user, openAuth]);
+
+  if (!isLoggedIn && !user) {
+    return <Navigate to="/" replace state={{ from: location }} />;
+  }
+
+  return children;
+}
+
 function AppContent() {
   const [enquiryCart, setEnquiryCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -45,6 +63,32 @@ function AppContent() {
                       location.pathname.startsWith('/order') || 
                       location.pathname.startsWith('/outstanding') || 
                       location.pathname.startsWith('/ledger');
+
+  // Security guard for back-forward cache (bfcache) and browser history navigation
+  useEffect(() => {
+    const handleNavigationSecurity = () => {
+      const savedUser = localStorage.getItem('niyansh_user');
+      const isProtected = ['/dashboard', '/portal', '/retailer-dashboard', '/quick-order', '/order', '/outstanding', '/ledger']
+        .some(path => location.pathname.startsWith(path));
+
+      if (!savedUser && isProtected) {
+        openAuth();
+      }
+    };
+
+    const handlePageShow = (event) => {
+      if (event.persisted) {
+        handleNavigationSecurity();
+      }
+    };
+
+    window.addEventListener('pageshow', handlePageShow);
+    window.addEventListener('popstate', handleNavigationSecurity);
+    return () => {
+      window.removeEventListener('pageshow', handlePageShow);
+      window.removeEventListener('popstate', handleNavigationSecurity);
+    };
+  }, [location.pathname, openAuth]);
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -145,14 +189,14 @@ function AppContent() {
             <Route path="/brands" element={<Navigate to="/companies" replace />} />
             <Route path="/news" element={<NewsFeed />} />
             <Route path="/schemes" element={<NewsFeed />} />
-            <Route path="/dashboard" element={<RetailerDashboard />} />
-            <Route path="/portal" element={<RetailerDashboard />} />
-            <Route path="/retailer-dashboard" element={<RetailerDashboard />} />
-            <Route path="/quick-order" element={<QuickOrder />} />
-            <Route path="/order" element={<QuickOrder />} />
-            <Route path="/ledger" element={<OutstandingLedger />} />
-            <Route path="/outstanding" element={<OutstandingLedger />} />
-            <Route path="/outstanding-ledger" element={<OutstandingLedger />} />
+            <Route path="/dashboard" element={<ProtectedRoute><RetailerDashboard /></ProtectedRoute>} />
+            <Route path="/portal" element={<ProtectedRoute><RetailerDashboard /></ProtectedRoute>} />
+            <Route path="/retailer-dashboard" element={<ProtectedRoute><RetailerDashboard /></ProtectedRoute>} />
+            <Route path="/quick-order" element={<ProtectedRoute><QuickOrder /></ProtectedRoute>} />
+            <Route path="/order" element={<ProtectedRoute><QuickOrder /></ProtectedRoute>} />
+            <Route path="/ledger" element={<ProtectedRoute><OutstandingLedger /></ProtectedRoute>} />
+            <Route path="/outstanding" element={<ProtectedRoute><OutstandingLedger /></ProtectedRoute>} />
+            <Route path="/outstanding-ledger" element={<ProtectedRoute><OutstandingLedger /></ProtectedRoute>} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/career" element={<Career />} />
             <Route path="/partner" element={<Partner />} />

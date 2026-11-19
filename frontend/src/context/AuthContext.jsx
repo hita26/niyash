@@ -67,10 +67,17 @@ export function AuthProvider({ children }) {
     try {
       localStorage.removeItem('niyansh_user');
       localStorage.removeItem('niyansh_token');
+      sessionStorage.clear();
     } catch (e) {
       console.error('Error clearing auth from storage', e);
     }
     window.dispatchEvent(new CustomEvent('auth-change', { detail: null }));
+
+    // Invalidate protected browser history: if on a protected B2B route, replace location to home
+    const protectedPrefixes = ['/dashboard', '/portal', '/retailer-dashboard', '/quick-order', '/order', '/outstanding', '/ledger'];
+    if (protectedPrefixes.some(prefix => window.location.pathname.startsWith(prefix))) {
+      window.location.replace('/');
+    }
   };
 
   const openAuth = () => setIsAuthOpen(true);

@@ -609,7 +609,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                     </Link>
 
                     <button 
-                      onClick={() => { setIsUserMenuOpen(false); onLogout(); }}
+                      onClick={() => { setIsUserMenuOpen(false); onLogout(); navigate('/', { replace: true }); }}
                       style={{ 
                         width: '100%', 
                         display: 'flex', 
@@ -900,7 +900,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
 
               <div style={{ marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid #e2e8f0' }}>
                 <button 
-                  onClick={() => { setIsMobileMenuOpen(false); onLogout(); }}
+                  onClick={() => { setIsMobileMenuOpen(false); onLogout(); navigate('/', { replace: true }); }}
                   style={{ width: '100%', padding: '11px', borderRadius: '8px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                 >
                   <LogOut size={16} /> {t('nav.logout', 'Sign Out')}
@@ -1190,7 +1190,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                         <FileText size={16} color="#3b82f6" /> Ledger & Invoices
                       </Link>
                       <button 
-                        onClick={() => { setIsUserMenuOpen(false); onLogout(); }}
+                        onClick={() => { setIsUserMenuOpen(false); onLogout(); navigate('/', { replace: true }); }}
                         style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', fontSize: '0.84rem', color: '#dc2626', background: 'none', border: 'none', borderTop: '1px solid #f1f5f9', cursor: 'pointer', fontWeight: '600', textAlign: 'left' }}
                       >
                         <LogOut size={16} /> Sign Out
@@ -1493,7 +1493,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             <div style={{ marginTop: 'auto', paddingTop: '15px', borderTop: '1px solid var(--border-light)' }}>
               {user ? (
                 <button 
-                  onClick={() => { onLogout(); setIsMobileMenuOpen(false); }}
+                  onClick={() => { onLogout(); setIsMobileMenuOpen(false); navigate('/', { replace: true }); }}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px 15px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)', borderRadius: '8px', color: 'var(--text-medium)', fontWeight: '600', cursor: 'pointer', width: '100%' }}
                 >
                   <LogOut size={16} /> {t('nav.logout', 'Log Out')}

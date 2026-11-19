@@ -543,64 +543,59 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
           <X size={18} />
         </button>
 
-        {/* Top Segmented Mode Pill Switcher */}
-        {(isLogin || isRegister) && (
+        {/* Top Header: Clean Header in Sign In mode, Back Link in Register mode */}
+        {isLogin && (
+          <div style={{ marginBottom: '18px', textAlign: 'left', paddingRight: '36px' }}>
+            <h3 style={{
+              fontSize: '1.22rem',
+              fontWeight: '800',
+              color: 'var(--text-dark, #0f172a)',
+              margin: '0 0 4px 0',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              <Lock size={19} style={{ color: 'var(--primary-blue, #2563eb)' }} />
+              <span>{t('auth.loginTitle', 'Chemist & Hospital Sign In')}</span>
+            </h3>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-medium, #64748b)', margin: 0, lineHeight: '1.4' }}>
+              Access live wholesale PTR rates, stock availability, and your pharmacy ledger.
+            </p>
+          </div>
+        )}
+
+        {isRegister && (
           <div style={{
             display: 'flex',
-            backgroundColor: 'var(--bg-main, #f1f5f9)',
-            padding: '4px',
-            borderRadius: '12px',
-            marginBottom: '18px',
-            border: '1px solid var(--border-light, #e2e8f0)'
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '16px',
+            paddingBottom: '10px',
+            borderBottom: '1px solid var(--border-light, #e2e8f0)',
+            paddingRight: '36px'
           }}>
             <button
               type="button"
               onClick={() => { setAuthMode('login'); setError(''); setInfoMessage(''); }}
               style={{
-                flex: 1,
-                padding: '9px 12px',
-                borderRadius: '9px',
-                fontSize: '0.88rem',
-                fontWeight: '700',
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                gap: '7px',
+                gap: '6px',
+                background: 'none',
                 border: 'none',
+                color: 'var(--primary-blue, #2563eb)',
+                fontSize: '0.85rem',
+                fontWeight: '700',
                 cursor: 'pointer',
-                backgroundColor: isLogin ? 'var(--card-bg, #ffffff)' : 'transparent',
-                color: isLogin ? 'var(--primary-blue, #2563eb)' : 'var(--text-medium, #64748b)',
-                boxShadow: isLogin ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
-                transition: 'all 0.2s ease'
+                padding: 0
               }}
             >
-              <Lock size={15} />
-              <span>{t('auth.loginTitle', 'Chemist Sign In')}</span>
+              <ArrowLeft size={16} />
+              <span>← Back to Sign In</span>
             </button>
-            <button
-              type="button"
-              onClick={() => { setAuthMode('register'); setError(''); setInfoMessage(''); }}
-              style={{
-                flex: 1,
-                padding: '9px 12px',
-                borderRadius: '9px',
-                fontSize: '0.88rem',
-                fontWeight: '700',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '7px',
-                border: 'none',
-                cursor: 'pointer',
-                backgroundColor: isRegister ? 'var(--card-bg, #ffffff)' : 'transparent',
-                color: isRegister ? 'var(--primary-blue, #2563eb)' : 'var(--text-medium, #64748b)',
-                boxShadow: isRegister ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              <Building size={15} />
-              <span>{t('auth.registerTitle', 'Register Store')}</span>
-            </button>
+            <span style={{ fontSize: '0.88rem', fontWeight: '800', color: 'var(--text-dark)' }}>
+              Register Medical Store
+            </span>
           </div>
         )}
 
@@ -769,28 +764,6 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
               >
                 <span>Register New Medical Store ➔</span>
               </button>
-            </div>
-
-            {/* Discreet Admin Console Access Link */}
-            <div style={{ textAlign: 'center', marginTop: '6px', paddingTop: '10px', borderTop: '1px solid var(--border-light, #f1f5f9)' }}>
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-light, #94a3b8)' }}>
-                Niyansh Pharma Operations or Staff?{' '}
-                <button
-                  type="button"
-                  onClick={() => { onClose(); navigate('/admin'); }}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: 'var(--primary-blue, #2563eb)',
-                    fontSize: '0.78rem',
-                    fontWeight: '700',
-                    cursor: 'pointer',
-                    textDecoration: 'underline'
-                  }}
-                >
-                  Access Admin Console ➔
-                </button>
-              </span>
             </div>
           </form>
         )}

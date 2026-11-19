@@ -10,7 +10,7 @@ router.get('/', protect, adminOnly, async (req, res) => {
   try {
     const {
       page = 1,
-      limit = 50,
+      limit = 10,
       category = 'All',
       action = 'All',
       search = '',
@@ -20,7 +20,7 @@ router.get('/', protect, adminOnly, async (req, res) => {
     } = req.query;
 
     const pageNum = Math.max(1, parseInt(page, 10) || 1);
-    const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 50));
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 10));
     const skip = (pageNum - 1) * limitNum;
 
     const query = {};

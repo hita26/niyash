@@ -8,7 +8,7 @@ import {
   Calendar, CreditCard, Check, X, Eye, Send, ArrowUpDown, User, Building2,
   Tag, ShieldCheck, Sparkles, Clock, AlertTriangle, Printer, Share2, Receipt,
   TrendingUp, Percent, Upload, Image as ImageIcon, Star, Grid, List,
-  FileSpreadsheet, ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Layers,
+  FileSpreadsheet, ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Layers,
   Copy, CheckCheck, MapPin, Mail, Save, EyeOff, Shield, Users, Key, Crown, UserCheck, UserX, Camera, UserPlus,
   Zap, Activity, Cpu, Server, Terminal, Play
 } from 'lucide-react';
@@ -780,6 +780,8 @@ function Admin() {
   const [auditLoading, setAuditLoading] = useState(false);
   const [auditPage, setAuditPage] = useState(1);
   const [auditTotalPages, setAuditTotalPages] = useState(1);
+  const [auditLimit, setAuditLimit] = useState(10);
+  const [auditTotalCount, setAuditTotalCount] = useState(0);
   const [auditCategoryFilter, setAuditCategoryFilter] = useState('All');
   const [auditActionFilter, setAuditActionFilter] = useState('All');
   const [auditSearch, setAuditSearch] = useState('');
@@ -1238,9 +1240,9 @@ function Admin() {
   // Refetch audit logs on tab switch or filter changes
   useEffect(() => {
     if (activeTab === 'audit' && isSuperAdmin) {
-      fetchAuditLogs(1, auditCategoryFilter, auditActionFilter, auditSearch);
+      fetchAuditLogs(1, auditCategoryFilter, auditActionFilter, auditSearch, auditLimit);
     }
-  }, [activeTab, auditCategoryFilter, auditActionFilter]);
+  }, [activeTab, auditCategoryFilter, auditActionFilter, auditLimit]);
 
   const fetchDashboardData = async (showSpinner = true) => {
     if (showSpinner) setIsLoading(true);
@@ -1486,13 +1488,19 @@ function Admin() {
     }
   };
 
-  const fetchAuditLogs = async (targetPage = 1, cat = auditCategoryFilter, act = auditActionFilter, searchVal = auditSearch) => {
+  const fetchAuditLogs = async (
+    targetPage = 1,
+    cat = auditCategoryFilter,
+    act = auditActionFilter,
+    searchVal = auditSearch,
+    lim = auditLimit
+  ) => {
     setAuditLoading(true);
     try {
       const token = adminToken || localStorage.getItem('niyansh_admin_token');
       const params = new URLSearchParams({
         page: String(targetPage),
-        limit: '50',
+        limit: String(lim),
         category: cat,
         action: act,
         search: (searchVal || '').trim()
@@ -1504,6 +1512,7 @@ function Admin() {
       if (res.ok && data.success) {
         setAuditLogs(data.logs || []);
         if (data.stats) setAuditStats(data.stats);
+        if (data.total !== undefined) setAuditTotalCount(data.total);
         setAuditPage(data.page || 1);
         setAuditTotalPages(data.pages || 1);
       }
@@ -8688,9 +8697,9 @@ _Helpline: +91 9316566894_`;
                     boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
                   }}>
                     {/* DESKTOP TABLE */}
-                    <div className="hide-mobile" style={{ overflowX: 'auto' }}>
+                    <div className="hide-mobile" style={{ overflowX: 'auto', maxHeight: '620px', overflowY: 'auto' }}>
                       <table style={{ width: '100%', minWidth: '940px', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.84rem' }}>
-                        <thead>
+                        <thead style={{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: '#f8fafc', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
                           <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: 'var(--text-medium)', fontSize: '0.74rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                             <th style={{ padding: '12px 16px' }}>Date & Exact Time (Seconds)</th>
                             <th style={{ padding: '12px 16px' }}>Admin / User</th>
@@ -8954,35 +8963,127 @@ _Helpline: +91 9316566894_`;
                       borderTop: '1px solid #e2e8f0',
                       backgroundColor: '#f8fafc',
                       flexWrap: 'wrap',
-                      gap: '10px'
+                      gap: '12px'
                     }}>
-                      <div style={{ fontSize: '0.82rem', color: 'var(--text-medium)' }}>
-                        Showing Page <strong>{auditPage}</strong> of <strong>{auditTotalPages}</strong> ({auditStats?.totalAllTime || 0} Total Records)
+                      {/* Left: Range and records count + Page Size selector */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+                        <div style={{ fontSize: '0.84rem', color: 'var(--text-medium)' }}>
+                          Showing <strong>{auditLogs.length > 0 ? (auditPage - 1) * auditLimit + 1 : 0}</strong> - <strong>{Math.min(auditPage * auditLimit, auditTotalCount || auditStats?.totalAllTime || auditLogs.length)}</strong> of <strong>{auditTotalCount || auditStats?.totalAllTime || 0}</strong> logs
+                        </div>
+
+                        {/* Page Size Selector */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-medium)' }}>Show:</span>
+                          <select
+                            value={auditLimit}
+                            onChange={(e) => {
+                              const newLim = parseInt(e.target.value, 10);
+                              setAuditLimit(newLim);
+                              fetchAuditLogs(1, auditCategoryFilter, auditActionFilter, auditSearch, newLim);
+                            }}
+                            style={{
+                              padding: '4px 8px',
+                              fontSize: '0.82rem',
+                              borderRadius: '6px',
+                              border: '1px solid #cbd5e1',
+                              backgroundColor: '#ffffff',
+                              fontWeight: '600',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            <option value={10}>10 rows</option>
+                            <option value={20}>20 rows</option>
+                            <option value={50}>50 rows</option>
+                          </select>
+                        </div>
                       </div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {/* Right: Page Navigation with Numbers */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        {/* First Page */}
                         <button
                           type="button"
                           disabled={auditPage <= 1 || auditLoading}
-                          onClick={() => fetchAuditLogs(auditPage - 1, auditCategoryFilter, auditActionFilter, auditSearch)}
+                          onClick={() => fetchAuditLogs(1, auditCategoryFilter, auditActionFilter, auditSearch, auditLimit)}
                           className="btn btn-sm btn-outline"
-                          style={{ padding: '6px 14px', fontSize: '0.8rem', gap: '4px' }}
+                          title="First Page"
+                          style={{ padding: '6px 10px', fontSize: '0.8rem', opacity: auditPage <= 1 ? 0.4 : 1 }}
+                        >
+                          <ChevronsLeft size={14} />
+                        </button>
+
+                        {/* Previous Page */}
+                        <button
+                          type="button"
+                          disabled={auditPage <= 1 || auditLoading}
+                          onClick={() => fetchAuditLogs(auditPage - 1, auditCategoryFilter, auditActionFilter, auditSearch, auditLimit)}
+                          className="btn btn-sm btn-outline"
+                          style={{ padding: '6px 12px', fontSize: '0.8rem', gap: '4px', opacity: auditPage <= 1 ? 0.4 : 1 }}
                         >
                           <ChevronLeft size={14} /> Previous
                         </button>
 
-                        <span style={{ fontSize: '0.82rem', fontWeight: '700', padding: '0 4px' }}>
-                          {auditPage} / {auditTotalPages}
-                        </span>
+                        {/* Page Numbers */}
+                        {Array.from({ length: auditTotalPages }, (_, i) => i + 1)
+                          .filter(p => p === 1 || p === auditTotalPages || Math.abs(p - auditPage) <= 1)
+                          .reduce((acc, p, idx, arr) => {
+                            if (idx > 0 && p - arr[idx - 1] > 1) {
+                              acc.push('ellipsis-' + p);
+                            }
+                            acc.push(p);
+                            return acc;
+                          }, [])
+                          .map((item) => {
+                            if (typeof item === 'string') {
+                              return <span key={item} style={{ padding: '0 4px', color: '#94a3b8' }}>...</span>;
+                            }
+                            const isCurrent = item === auditPage;
+                            return (
+                              <button
+                                key={item}
+                                type="button"
+                                disabled={auditLoading}
+                                onClick={() => fetchAuditLogs(item, auditCategoryFilter, auditActionFilter, auditSearch, auditLimit)}
+                                style={{
+                                  minWidth: '32px',
+                                  height: '32px',
+                                  padding: '0 6px',
+                                  borderRadius: '6px',
+                                  border: isCurrent ? '1px solid var(--primary-blue)' : '1px solid #cbd5e1',
+                                  backgroundColor: isCurrent ? 'var(--primary-blue)' : '#ffffff',
+                                  color: isCurrent ? '#ffffff' : 'var(--text-dark)',
+                                  fontWeight: isCurrent ? '700' : '500',
+                                  fontSize: '0.82rem',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.15s ease'
+                                }}
+                              >
+                                {item}
+                              </button>
+                            );
+                          })}
 
+                        {/* Next Page */}
                         <button
                           type="button"
                           disabled={auditPage >= auditTotalPages || auditLoading}
-                          onClick={() => fetchAuditLogs(auditPage + 1, auditCategoryFilter, auditActionFilter, auditSearch)}
+                          onClick={() => fetchAuditLogs(auditPage + 1, auditCategoryFilter, auditActionFilter, auditSearch, auditLimit)}
                           className="btn btn-sm btn-outline"
-                          style={{ padding: '6px 14px', fontSize: '0.8rem', gap: '4px' }}
+                          style={{ padding: '6px 12px', fontSize: '0.8rem', gap: '4px', opacity: auditPage >= auditTotalPages ? 0.4 : 1 }}
                         >
                           Next <ChevronRight size={14} />
+                        </button>
+
+                        {/* Last Page */}
+                        <button
+                          type="button"
+                          disabled={auditPage >= auditTotalPages || auditLoading}
+                          onClick={() => fetchAuditLogs(auditTotalPages, auditCategoryFilter, auditActionFilter, auditSearch, auditLimit)}
+                          className="btn btn-sm btn-outline"
+                          title="Last Page"
+                          style={{ padding: '6px 10px', fontSize: '0.8rem', opacity: auditPage >= auditTotalPages ? 0.4 : 1 }}
+                        >
+                          <ChevronsRight size={14} />
                         </button>
                       </div>
                     </div>

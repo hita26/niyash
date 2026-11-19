@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import * as XLSX from 'xlsx';
 import { 
   Lock, LayoutDashboard, ShoppingBag, MessageSquare, Briefcase, LogOut, 
-  Plus, Edit2, Truck, Trash2, CheckCircle2, XCircle, ChevronDown, Download, AlertCircle,
+  Plus, Edit2, Truck, Trash2, CheckCircle2, XCircle, ChevronDown, ChevronUp, Download, AlertCircle,
   Package, FileText, Flame, Phone, Search, RefreshCw, Filter, ExternalLink,
   Calendar, CreditCard, Check, X, Eye, Send, ArrowUpDown, User, Building2,
   Tag, ShieldCheck, Sparkles, Clock, AlertTriangle, Printer, Share2, Receipt,
@@ -774,6 +774,49 @@ function Admin() {
   const [adminFormSendEmail, setAdminFormSendEmail] = useState(true);
   const [showSubAdminFormPassword, setShowSubAdminFormPassword] = useState(false);
   const [resendingAdminId, setResendingAdminId] = useState(null);
+
+  // Admin Management View & Filter State
+  const [adminSearch, setAdminSearch] = useState('');
+  const [adminRoleFilter, setAdminRoleFilter] = useState('all');
+  const [adminViewMode, setAdminViewMode] = useState('table'); // 'table' or 'cards'
+  const [expandedAdminPerms, setExpandedAdminPerms] = useState({});
+
+  const ADMIN_PERM_DEFS = useMemo(() => [
+    { key: 'canManageProducts', label: 'Products', short: 'Products', color: '#1e40af', bg: '#eff6ff', border: '#bfdbfe' },
+    { key: 'canBulkImport', label: 'Bulk ERP Import', short: 'ERP Import', color: '#065f46', bg: '#ecfdf5', border: '#a7f3d0' },
+    { key: 'canManageOrders', label: 'B2B Orders', short: 'Orders', color: '#6b21a8', bg: '#f3e8ff', border: '#ddd6fe' },
+    { key: 'canManageCompanies', label: 'Companies', short: 'Companies', color: '#3730a3', bg: '#e0e7ff', border: '#c7d2fe' },
+    { key: 'canManageNews', label: 'Schemes & News', short: 'Schemes', color: '#9a3412', bg: '#ffedd5', border: '#fed7aa' },
+    { key: 'canManageEnquiries', label: 'Inquiries', short: 'Inquiries', color: '#334155', bg: '#f1f5f9', border: '#cbd5e1' },
+    { key: 'canManageLedgers', label: 'Financial Ledgers', short: 'Ledgers', color: '#854d0e', bg: '#fef9c3', border: '#fef08a' },
+    { key: 'canDeleteProducts', label: 'Delete Products', short: 'Delete Prod', color: '#991b1b', bg: '#fee2e2', border: '#fecaca' },
+    { key: 'canClearDatabase', label: 'Wipe Database', short: 'Wipe DB', color: '#ffffff', bg: '#991b1b', border: '#7f1d1d' },
+  ], []);
+
+  const filteredAdminList = useMemo(() => {
+    return adminList.filter((adm) => {
+      if (adminRoleFilter === 'superadmin' && adm.role !== 'superadmin' && adm.email !== 'info@niyanshpharma.com') {
+        return false;
+      }
+      if (adminRoleFilter === 'staff' && (adm.role === 'superadmin' || adm.email === 'info@niyanshpharma.com')) {
+        return false;
+      }
+      if (adminRoleFilter === 'active' && adm.isActive === false) {
+        return false;
+      }
+      if (adminRoleFilter === 'inactive' && adm.isActive !== false) {
+        return false;
+      }
+      if (adminSearch.trim()) {
+        const q = adminSearch.toLowerCase().trim();
+        const nameMatch = (adm.name || '').toLowerCase().includes(q);
+        const emailMatch = (adm.email || '').toLowerCase().includes(q);
+        const phoneMatch = (adm.phone || '').includes(q);
+        if (!nameMatch && !emailMatch && !phoneMatch) return false;
+      }
+      return true;
+    });
+  }, [adminList, adminRoleFilter, adminSearch]);
 
   // Profile Modal State (SuperAdmin & Admin)
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -8079,45 +8122,38 @@ _Helpline: +91 9316566894_`;
                   TAB 9: SUPERADMIN STAFF & ADMINS MANAGER
                   ========================================== */}
               {activeTab === 'manage-admins' && isSuperAdmin && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+                <div className="admin-mgmt-container">
                   
                   {/* HEADER */}
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    flexWrap: 'wrap',
-                    gap: '16px',
-                    padding: '20px 24px',
-                    backgroundColor: '#ffffff',
-                    borderRadius: '14px',
-                    border: '1.5px solid #fde68a',
-                    boxShadow: '0 4px 15px rgba(245, 158, 11, 0.08)'
-                  }}>
+                  <div className="admin-mgmt-header">
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: '0.72rem', fontWeight: '800', backgroundColor: '#fef3c7', color: '#b45309', padding: '2px 8px', borderRadius: '10px', textTransform: 'uppercase' }}>
-                          Super Admin Exclusive
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: '800', backgroundColor: '#fef3c7', color: '#b45309', border: '1px solid #fde68a', padding: '2px 8px', borderRadius: '10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                          SuperAdmin Exclusive
                         </span>
-                        <span style={{ fontSize: '0.72rem', fontWeight: '700', backgroundColor: '#ecfdf5', color: '#047857', padding: '2px 8px', borderRadius: '10px' }}>
-                          Live Access Control
+                        <span style={{ fontSize: '0.72rem', fontWeight: '700', backgroundColor: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '2px 8px', borderRadius: '10px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          <CheckCircle2 size={11} color="#047857" /> Live Access Control
+                        </span>
+                        <span style={{ fontSize: '0.72rem', fontWeight: '700', backgroundColor: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '2px 8px', borderRadius: '10px' }}>
+                          Strict RBAC
                         </span>
                       </div>
-                      <h2 style={{ fontSize: '1.45rem', fontWeight: '800', color: 'var(--text-dark)', margin: 0 }}>
+                      <h2 style={{ fontSize: '1.45rem', fontWeight: '800', color: 'var(--text-dark)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Users size={24} style={{ color: '#0c3d6c' }} />
                         Admins & Staff Management
                       </h2>
                       <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: 'var(--text-medium)' }}>
-                        Create sub-admins, manage login credentials, and assign custom granular permissions.
+                        Create sub-admins, manage login credentials, and assign granular feature permissions.
                       </p>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
                       <button
                         type="button"
                         onClick={fetchAdmins}
                         disabled={isAdminListLoading}
                         className="btn btn-outline btn-sm"
-                        style={{ gap: '6px' }}
+                        style={{ gap: '6px', height: '36px', padding: '0 14px' }}
                       >
                         <RefreshCw size={14} className={isAdminListLoading ? 'animate-spin' : ''} /> Refresh
                       </button>
@@ -8126,450 +8162,873 @@ _Helpline: +91 9316566894_`;
                         type="button"
                         onClick={() => handleOpenAdminModal(null)}
                         className="btn btn-primary btn-sm"
-                        style={{ gap: '6px', backgroundColor: '#f59e0b', borderColor: '#f59e0b', color: '#ffffff', fontWeight: '700', boxShadow: '0 2px 8px rgba(245, 158, 11, 0.3)' }}
+                        style={{
+                          gap: '6px',
+                          backgroundColor: '#0c3d6c',
+                          borderColor: '#0c3d6c',
+                          color: '#ffffff',
+                          fontWeight: '700',
+                          height: '36px',
+                          padding: '0 16px',
+                          boxShadow: '0 2px 8px rgba(12, 61, 108, 0.25)'
+                        }}
                       >
                         <UserPlus size={15} /> Add New Admin
                       </button>
                     </div>
                   </div>
 
-                  {/* KPI STATS */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px' }}>
-                    <div style={{ padding: '14px 16px', backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
-                      <div style={{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--text-medium)', textTransform: 'uppercase' }}>Total Admin Accounts</div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--text-dark)', marginTop: '4px' }}>{adminList.length}</div>
-                    </div>
-
-                    <div style={{ padding: '14px 16px', backgroundColor: '#f0fdf4', borderRadius: '12px', border: '1px solid #bbf7d0' }}>
-                      <div style={{ fontSize: '0.72rem', fontWeight: '700', color: '#166534', textTransform: 'uppercase' }}>Active Staff</div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: '800', color: '#15803d', marginTop: '4px' }}>
-                        {adminList.filter(a => a.isActive !== false).length}
+                  {/* KPI STATS CARDS */}
+                  <div className="admin-mgmt-kpis">
+                    {/* Total Admins */}
+                    <div className="admin-kpi-card">
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--text-medium)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                          Total Admin Accounts
+                        </span>
+                        <div style={{ width: '34px', height: '34px', borderRadius: '10px', backgroundColor: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb' }}>
+                          <Users size={18} />
+                        </div>
+                      </div>
+                      <div style={{ marginTop: '12px' }}>
+                        <div style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--text-dark)', lineHeight: 1 }}>{adminList.length}</div>
+                        <div style={{ fontSize: '0.76rem', color: 'var(--text-medium)', marginTop: '4px' }}>Authorized management logins</div>
                       </div>
                     </div>
 
-                    <div style={{ padding: '14px 16px', backgroundColor: '#fffbeb', borderRadius: '12px', border: '1px solid #fde68a' }}>
-                      <div style={{ fontSize: '0.72rem', fontWeight: '700', color: '#92400e', textTransform: 'uppercase' }}>Super Admins</div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: '800', color: '#b45309', marginTop: '4px' }}>
-                        {adminList.filter(a => a.role === 'superadmin').length}
+                    {/* Active Staff */}
+                    <div className="admin-kpi-card">
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: '700', color: '#166534', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                          Active Staff
+                        </span>
+                        <div style={{ width: '34px', height: '34px', borderRadius: '10px', backgroundColor: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#16a34a' }}>
+                          <UserCheck size={18} />
+                        </div>
+                      </div>
+                      <div style={{ marginTop: '12px' }}>
+                        <div style={{ fontSize: '1.6rem', fontWeight: '800', color: '#15803d', lineHeight: 1 }}>
+                          {adminList.filter(a => a.isActive !== false).length}
+                        </div>
+                        <div style={{ fontSize: '0.76rem', color: '#166534', marginTop: '4px' }}>Active sessions authorized</div>
                       </div>
                     </div>
 
-                    <div style={{ padding: '14px 16px', backgroundColor: '#eff6ff', borderRadius: '12px', border: '1px solid #bfdbfe' }}>
-                      <div style={{ fontSize: '0.72rem', fontWeight: '700', color: '#1e40af', textTransform: 'uppercase' }}>Role Governance</div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: '800', color: '#2563eb', marginTop: '4px' }}>
-                        Active RBAC
+                    {/* Super Admins */}
+                    <div className="admin-kpi-card">
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: '700', color: '#92400e', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                          Super Admins
+                        </span>
+                        <div style={{ width: '34px', height: '34px', borderRadius: '10px', backgroundColor: '#fffbeb', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#d97706' }}>
+                          <ShieldCheck size={18} />
+                        </div>
+                      </div>
+                      <div style={{ marginTop: '12px' }}>
+                        <div style={{ fontSize: '1.6rem', fontWeight: '800', color: '#b45309', lineHeight: 1 }}>
+                          {adminList.filter(a => a.role === 'superadmin').length}
+                        </div>
+                        <div style={{ fontSize: '0.76rem', color: '#92400e', marginTop: '4px' }}>Unrestricted root privileges</div>
+                      </div>
+                    </div>
+
+                    {/* Security Policy */}
+                    <div className="admin-kpi-card">
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: '700', color: '#4338ca', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                          Role Governance
+                        </span>
+                        <div style={{ width: '34px', height: '34px', borderRadius: '10px', backgroundColor: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4f46e5' }}>
+                          <Key size={18} />
+                        </div>
+                      </div>
+                      <div style={{ marginTop: '12px' }}>
+                        <div style={{ fontSize: '1.4rem', fontWeight: '800', color: '#3730a3', lineHeight: 1 }}>Active RBAC</div>
+                        <div style={{ fontSize: '0.76rem', color: '#4338ca', marginTop: '4px' }}>JWT Auth • Granular Permissions</div>
                       </div>
                     </div>
                   </div>
 
-                  {/* ADMINS TABLE & RESPONSIVE CARDS */}
-                  <div style={{
-                    backgroundColor: '#ffffff',
-                    borderRadius: '14px',
-                    border: '1px solid #cbd5e1',
-                    overflow: 'hidden',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.03)'
-                  }}>
-                    {/* DESKTOP TABLE (>= 768px) */}
-                    <div className="hide-mobile" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-                      <table style={{ width: '100%', minWidth: '920px', borderCollapse: 'collapse', fontSize: '0.86rem', textAlign: 'left' }}>
-                        <thead style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                          <tr>
-                            <th style={{ padding: '12px 16px', color: 'var(--text-dark)' }}>Admin Profile</th>
-                            <th style={{ padding: '12px 16px', color: 'var(--text-dark)' }}>Login Email / Username</th>
-                            <th style={{ padding: '12px 16px', color: 'var(--text-dark)' }}>Password</th>
-                            <th style={{ padding: '12px 16px', color: 'var(--text-dark)' }}>Mobile No.</th>
-                            <th style={{ padding: '12px 16px', color: 'var(--text-dark)' }}>Permissions</th>
-                            <th style={{ padding: '12px 16px', color: 'var(--text-dark)' }}>Status</th>
-                            <th style={{ padding: '12px 16px', textAlign: 'right', color: 'var(--text-dark)' }}>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {adminList.length === 0 ? (
-                            <tr>
-                              <td colSpan="7" style={{ textAlign: 'center', padding: isAdminListLoading ? '10px 0' : '40px', color: 'var(--text-medium)' }}>
-                                {isAdminListLoading ? (
-                                  <SkeletonLoader variant="admin-subadmins" rows={3} />
-                                ) : (
-                                  'No additional sub-admins created yet. Click "+ Add New Admin" above to create one.'
-                                )}
-                              </td>
-                            </tr>
-                          ) : (
-                            adminList.map((adm) => {
-                              const isRootSuper = adm.role === 'superadmin' || adm.email === 'info@niyanshpharma.com';
-                              const isPwRevealed = Boolean(showPasswordMap[adm._id]);
-                              const p = adm.permissions || {};
-
-                              return (
-                                <tr key={adm._id} style={{ borderBottom: '1px solid #f1f5f9', backgroundColor: adm.isActive === false ? '#f8fafc' : '#ffffff' }}>
-                                  
-                                  {/* Profile */}
-                                  <td style={{ padding: '12px 16px' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                      <img 
-                                        src={adm.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(adm.name)}&background=${isRootSuper ? 'f59e0b' : '2563eb'}&color=ffffff&bold=true`}
-                                        alt={adm.name}
-                                        style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }}
-                                      />
-                                      <div>
-                                        <div style={{ fontWeight: '700', color: 'var(--text-dark)' }}>{adm.name}</div>
-                                        {isRootSuper ? (
-                                          <span style={{ fontSize: '0.68rem', fontWeight: '800', backgroundColor: '#fef3c7', color: '#b45309', padding: '1px 7px', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                                            <ShieldCheck size={11} /> Root Super Admin
-                                          </span>
-                                        ) : (
-                                          <span style={{ fontSize: '0.68rem', fontWeight: '700', backgroundColor: '#eff6ff', color: '#1d4ed8', padding: '1px 7px', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                                            <Shield size={10} /> Operations Admin
-                                          </span>
-                                        )}
-                                      </div>
-                                    </div>
-                                  </td>
-
-                                  {/* Email */}
-                                  <td style={{ padding: '12px 16px' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                      <span style={{ fontFamily: 'monospace', fontWeight: '600', color: 'var(--text-dark)' }}>
-                                        {adm.email}
-                                      </span>
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          navigator.clipboard.writeText(adm.email);
-                                          showToast('Email copied to clipboard!');
-                                        }}
-                                        title="Copy Email"
-                                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '2px' }}
-                                      >
-                                        <Copy size={13} />
-                                      </button>
-                                    </div>
-                                  </td>
-
-                                  {/* Password with View & Copy */}
-                                  <td style={{ padding: '12px 16px' }}>
-                                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '4px 8px', backgroundColor: '#f1f5f9', borderRadius: '6px' }}>
-                                      <span style={{ fontFamily: 'monospace', fontWeight: '700', color: isPwRevealed ? '#0f172a' : '#64748b', minWidth: '80px' }}>
-                                        {isPwRevealed ? (adm.plainPassword || '••••••••') : '••••••••'}
-                                      </span>
-                                      <button
-                                        type="button"
-                                        onClick={() => setShowPasswordMap(prev => ({ ...prev, [adm._id]: !prev[adm._id] }))}
-                                        title={isPwRevealed ? 'Hide Password' : 'Show Password'}
-                                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2563eb', padding: '2px' }}
-                                      >
-                                        {isPwRevealed ? <EyeOff size={14} /> : <Eye size={14} />}
-                                      </button>
-                                      {adm.plainPassword && (
-                                        <button
-                                          type="button"
-                                          onClick={() => {
-                                            navigator.clipboard.writeText(adm.plainPassword);
-                                            showToast('Password copied to clipboard!');
-                                          }}
-                                          title="Copy Password"
-                                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#16a34a', padding: '2px' }}
-                                        >
-                                          <Copy size={13} />
-                                        </button>
-                                      )}
-                                    </div>
-                                  </td>
-
-                                  {/* Mobile */}
-                                  <td style={{ padding: '12px 16px', color: 'var(--text-dark)' }}>
-                                    {adm.phone ? (
-                                      <a href={`tel:${adm.phone}`} style={{ color: '#0369a1', textDecoration: 'none', fontWeight: '600' }}>
-                                        {adm.phone}
-                                      </a>
-                                    ) : '—'}
-                                  </td>
-
-                                  {/* Permissions Pill Badges (Professional Clean No Emojis) */}
-                                  <td style={{ padding: '12px 16px' }}>
-                                    {isRootSuper ? (
-                                      <span style={{ fontSize: '0.74rem', backgroundColor: '#fef3c7', color: '#92400e', padding: '2px 8px', borderRadius: '6px', fontWeight: '800' }}>
-                                        Full Access (All Permissions)
-                                      </span>
-                                    ) : (
-                                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', maxWidth: '280px' }}>
-                                        {p.canManageProducts && <span style={{ fontSize: '0.68rem', backgroundColor: '#eff6ff', color: '#1e40af', padding: '1px 6px', borderRadius: '4px' }}>Products</span>}
-                                        {p.canDeleteProducts && <span style={{ fontSize: '0.68rem', backgroundColor: '#fee2e2', color: '#991b1b', padding: '1px 6px', borderRadius: '4px' }}>Delete Prod</span>}
-                                        {p.canBulkImport && <span style={{ fontSize: '0.68rem', backgroundColor: '#ecfdf5', color: '#065f46', padding: '1px 6px', borderRadius: '4px' }}>Excel Import</span>}
-                                        {p.canManageOrders && <span style={{ fontSize: '0.68rem', backgroundColor: '#f3e8ff', color: '#6b21a8', padding: '1px 6px', borderRadius: '4px' }}>Orders</span>}
-                                        {p.canManageLedgers && <span style={{ fontSize: '0.68rem', backgroundColor: '#fef9c3', color: '#854d0e', padding: '1px 6px', borderRadius: '4px' }}>Ledgers</span>}
-                                        {p.canManageCompanies && <span style={{ fontSize: '0.68rem', backgroundColor: '#e0e7ff', color: '#3730a3', padding: '1px 6px', borderRadius: '4px' }}>Companies</span>}
-                                        {p.canManageNews && <span style={{ fontSize: '0.68rem', backgroundColor: '#ffedd5', color: '#9a3412', padding: '1px 6px', borderRadius: '4px' }}>News</span>}
-                                        {p.canManageEnquiries && <span style={{ fontSize: '0.68rem', backgroundColor: '#f1f5f9', color: '#334155', padding: '1px 6px', borderRadius: '4px' }}>Enquiries</span>}
-                                        {p.canClearDatabase && <span style={{ fontSize: '0.68rem', backgroundColor: '#991b1b', color: '#fff', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }}>Wipe DB</span>}
-                                      </div>
-                                    )}
-                                  </td>
-
-                                  {/* Status */}
-                                  <td style={{ padding: '12px 16px' }}>
-                                    {adm.isActive !== false ? (
-                                      <span style={{ fontSize: '0.72rem', backgroundColor: '#dcfce7', color: '#15803d', padding: '2px 8px', borderRadius: '6px', fontWeight: '700' }}>
-                                        Active
-                                      </span>
-                                    ) : (
-                                      <span style={{ fontSize: '0.72rem', backgroundColor: '#fee2e2', color: '#b91c1c', padding: '2px 8px', borderRadius: '6px', fontWeight: '700' }}>
-                                        Inactive
-                                      </span>
-                                    )}
-                                  </td>
-
-                                  {/* Actions */}
-                                  <td style={{ padding: '12px 16px', textAlign: 'right' }}>
-                                    <div style={{ display: 'inline-flex', gap: '6px' }}>
-                                      <button
-                                        type="button"
-                                        onClick={() => handleOpenAdminModal(adm)}
-                                        title="Edit Admin Account"
-                                        style={{ padding: '5px 8px', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff', cursor: 'pointer', color: '#0f172a' }}
-                                      >
-                                        <Edit2 size={14} />
-                                      </button>
-
-                                      <button
-                                        type="button"
-                                        onClick={() => handleResendCredentials(adm)}
-                                        disabled={resendingAdminId === adm._id}
-                                        title={`Resend Welcome & Credentials Email from info@niyanshpharma.com to ${adm.email}`}
-                                        style={{ padding: '5px 8px', borderRadius: '6px', border: '1px solid #bfdbfe', backgroundColor: '#eff6ff', cursor: 'pointer', color: '#1d4ed8' }}
-                                      >
-                                        {resendingAdminId === adm._id ? <RefreshCw size={14} className="spin" /> : <Mail size={14} />}
-                                      </button>
-
-                                      <button
-                                        type="button"
-                                        onClick={() => handleShareCredentialsWhatsApp(adm)}
-                                        title={`Share Credentials via WhatsApp (${adm.phone || 'Admin'})`}
-                                        style={{ padding: '5px 8px', borderRadius: '6px', border: '1px solid #bbf7d0', backgroundColor: '#f0fdf4', cursor: 'pointer', color: '#15803d' }}
-                                      >
-                                        <MessageSquare size={14} />
-                                      </button>
-
-                                      {!isRootSuper && (
-                                        <>
-                                          <button
-                                            type="button"
-                                            onClick={() => handleToggleAdminStatus(adm)}
-                                            title={adm.isActive !== false ? 'Deactivate Admin' : 'Activate Admin'}
-                                            style={{ padding: '5px 8px', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff', cursor: 'pointer', color: adm.isActive !== false ? '#b45309' : '#15803d' }}
-                                          >
-                                            {adm.isActive !== false ? <UserX size={14} /> : <UserCheck size={14} />}
-                                          </button>
-
-                                          <button
-                                            type="button"
-                                            onClick={() => handleDeleteAdmin(adm)}
-                                            title="Delete Admin Account"
-                                            style={{ padding: '5px 8px', borderRadius: '6px', border: '1px solid #fee2e2', backgroundColor: '#fef2f2', cursor: 'pointer', color: '#ef4444' }}
-                                          >
-                                            <Trash2 size={14} />
-                                          </button>
-                                        </>
-                                      )}
-                                    </div>
-                                  </td>
-                                </tr>
-                              );
-                            })
-                          )}
-                        </tbody>
-                      </table>
+                  {/* CONTROLS TOOLBAR: SEARCH & FILTERS & VIEW MODE */}
+                  <div className="admin-mgmt-controls">
+                    {/* Live Search */}
+                    <div style={{ position: 'relative', flex: '1 1 240px', maxWidth: '400px' }}>
+                      <Search size={15} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                      <input
+                        type="text"
+                        placeholder="Search admin by name, email, or mobile..."
+                        value={adminSearch}
+                        onChange={(e) => setAdminSearch(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px 8px 34px',
+                          fontSize: '0.84rem',
+                          borderRadius: '8px',
+                          border: '1px solid #cbd5e1',
+                          outline: 'none',
+                          backgroundColor: '#ffffff'
+                        }}
+                      />
                     </div>
 
-                    {/* MOBILE CARD VIEW (< 768px): HARD RESPONSIVE */}
-                    <div className="hide-desktop" style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '12px' }}>
-                      {adminList.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: isAdminListLoading ? '10px 0' : '30px', color: 'var(--text-medium)', fontSize: '0.86rem' }}>
-                          {isAdminListLoading ? (
-                            <SkeletonLoader variant="table" rows={3} />
-                          ) : (
-                            'No sub-admins created yet.'
-                          )}
-                        </div>
-                      ) : (
-                        adminList.map((adm) => {
-                          const isRootSuper = adm.role === 'superadmin' || adm.email === 'info@niyanshpharma.com';
-                          const isPwRevealed = Boolean(showPasswordMap[adm._id]);
-                          const p = adm.permissions || {};
+                    {/* Role & Status Filter */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Filter size={14} style={{ color: '#64748b' }} />
+                        <select
+                          value={adminRoleFilter}
+                          onChange={(e) => setAdminRoleFilter(e.target.value)}
+                          style={{
+                            padding: '8px 12px',
+                            fontSize: '0.82rem',
+                            borderRadius: '8px',
+                            border: '1px solid #cbd5e1',
+                            backgroundColor: '#ffffff',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <option value="all">All Accounts ({adminList.length})</option>
+                          <option value="superadmin">Super Admins ({adminList.filter(a => a.role === 'superadmin').length})</option>
+                          <option value="staff">Operations Staff ({adminList.filter(a => a.role !== 'superadmin').length})</option>
+                          <option value="active">Active Only ({adminList.filter(a => a.isActive !== false).length})</option>
+                          <option value="inactive">Suspended ({adminList.filter(a => a.isActive === false).length})</option>
+                        </select>
+                      </div>
 
-                          return (
-                            <div key={adm._id} style={{
-                              backgroundColor: adm.isActive === false ? '#f8fafc' : '#ffffff',
+                      {/* View Mode Switcher (Large Screens) */}
+                      <div className="hide-mobile" style={{ display: 'inline-flex', border: '1px solid #cbd5e1', borderRadius: '8px', overflow: 'hidden' }}>
+                        <button
+                          type="button"
+                          onClick={() => setAdminViewMode('table')}
+                          style={{
+                            padding: '7px 12px',
+                            border: 'none',
+                            backgroundColor: adminViewMode === 'table' ? '#0c3d6c' : '#ffffff',
+                            color: adminViewMode === 'table' ? '#ffffff' : '#64748b',
+                            fontSize: '0.78rem',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <List size={14} /> Table
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setAdminViewMode('cards')}
+                          style={{
+                            padding: '7px 12px',
+                            border: 'none',
+                            backgroundColor: adminViewMode === 'cards' ? '#0c3d6c' : '#ffffff',
+                            color: adminViewMode === 'cards' ? '#ffffff' : '#64748b',
+                            fontSize: '0.78rem',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <Grid size={14} /> Cards
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* DESKTOP TABLE VIEW (ACTIVE WHEN TABLE MODE ON SCREENS >= 981px) */}
+                  {adminViewMode === 'table' && (
+                    <div className="admin-mgmt-table-desktop-only admin-mgmt-table-wrap">
+                      <div className="admin-table-scroll">
+                        <table className="admin-mgmt-table">
+                          <thead>
+                            <tr>
+                              <th style={{ width: '22%' }}>Admin Profile</th>
+                              <th style={{ width: '22%' }}>Login & Contact</th>
+                              <th style={{ width: '15%' }}>Password Vault</th>
+                              <th style={{ width: '21%' }}>Permissions</th>
+                              <th style={{ width: '8%', textAlign: 'center' }}>Status</th>
+                              <th style={{ width: '12%', textAlign: 'right' }}>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {isAdminListLoading ? (
+                              <tr>
+                                <td colSpan="6" style={{ textAlign: 'center', padding: '36px', color: 'var(--text-medium)' }}>
+                                  <SkeletonLoader variant="admin-subadmins" rows={3} />
+                                </td>
+                              </tr>
+                            ) : filteredAdminList.length === 0 ? (
+                              <tr>
+                                <td colSpan="6" style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-medium)' }}>
+                                  <Users size={32} style={{ color: '#94a3b8', margin: '0 auto 8px', display: 'block' }} />
+                                  <div style={{ fontWeight: '700', fontSize: '0.92rem', color: 'var(--text-dark)' }}>No Admin Accounts Found</div>
+                                  <div style={{ fontSize: '0.8rem', marginTop: '4px' }}>
+                                    {adminSearch ? `No matches found for "${adminSearch}".` : 'Click "+ Add New Admin" above to create an account.'}
+                                  </div>
+                                </td>
+                              </tr>
+                            ) : (
+                              filteredAdminList.map((adm) => {
+                                const isRootSuper = adm.role === 'superadmin' || adm.email === 'info@niyanshpharma.com';
+                                const isPwRevealed = Boolean(showPasswordMap[adm._id]);
+                                const activePerms = ADMIN_PERM_DEFS.filter(item => Boolean(adm.permissions?.[item.key]));
+                                const isExpanded = Boolean(expandedAdminPerms[adm._id]);
+
+                                return (
+                                  <tr key={adm._id}>
+                                    {/* Profile */}
+                                    <td>
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <div style={{ position: 'relative', flexShrink: 0 }}>
+                                          <img 
+                                            src={adm.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(adm.name)}&background=${isRootSuper ? 'f59e0b' : '0284c7'}&color=ffffff&bold=true`}
+                                            alt={adm.name}
+                                            style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #e2e8f0' }}
+                                          />
+                                          <span style={{
+                                            position: 'absolute',
+                                            bottom: 0,
+                                            right: 0,
+                                            width: '10px',
+                                            height: '10px',
+                                            borderRadius: '50%',
+                                            backgroundColor: adm.isActive !== false ? '#16a34a' : '#dc2626',
+                                            border: '2px solid #ffffff'
+                                          }} />
+                                        </div>
+                                        <div style={{ minWidth: 0 }}>
+                                          <div style={{ fontWeight: '700', fontSize: '0.92rem', color: 'var(--text-dark)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                            {adm.name}
+                                          </div>
+                                          <div style={{ marginTop: '2px' }}>
+                                            {isRootSuper ? (
+                                              <span style={{
+                                                fontSize: '0.68rem',
+                                                fontWeight: '800',
+                                                backgroundColor: '#fef3c7',
+                                                color: '#b45309',
+                                                border: '1px solid #fde68a',
+                                                padding: '1px 8px',
+                                                borderRadius: '10px',
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: '4px',
+                                                whiteSpace: 'nowrap'
+                                              }}>
+                                                <ShieldCheck size={11} /> Root Super Admin
+                                              </span>
+                                            ) : (
+                                              <span style={{
+                                                fontSize: '0.68rem',
+                                                fontWeight: '700',
+                                                backgroundColor: '#eff6ff',
+                                                color: '#1d4ed8',
+                                                border: '1px solid #bfdbfe',
+                                                padding: '1px 8px',
+                                                borderRadius: '10px',
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: '4px',
+                                                whiteSpace: 'nowrap'
+                                              }}>
+                                                <Shield size={10} /> Operations Admin
+                                              </span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </td>
+
+                                    {/* Login & Phone */}
+                                    <td>
+                                      <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                          <span style={{ fontFamily: 'monospace', fontWeight: '600', color: 'var(--text-dark)', fontSize: '0.84rem' }}>
+                                            {adm.email}
+                                          </span>
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              navigator.clipboard.writeText(adm.email);
+                                              showToast('Email copied to clipboard!');
+                                            }}
+                                            title="Copy Email"
+                                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '2px', display: 'flex', alignItems: 'center' }}
+                                          >
+                                            <Copy size={12} />
+                                          </button>
+                                        </div>
+                                        {adm.phone ? (
+                                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', color: '#0369a1' }}>
+                                            <Phone size={11} />
+                                            <a href={`tel:${adm.phone}`} style={{ color: '#0369a1', textDecoration: 'none', fontWeight: '600' }}>
+                                              {adm.phone}
+                                            </a>
+                                          </div>
+                                        ) : (
+                                          <span style={{ fontSize: '0.74rem', color: '#94a3b8' }}>— No mobile</span>
+                                        )}
+                                      </div>
+                                    </td>
+
+                                    {/* Password Vault */}
+                                    <td>
+                                      <div style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '6px',
+                                        padding: '4px 8px',
+                                        backgroundColor: '#f8fafc',
+                                        borderRadius: '8px',
+                                        border: '1px solid #e2e8f0'
+                                      }}>
+                                        <span style={{
+                                          fontFamily: 'monospace',
+                                          fontWeight: '700',
+                                          fontSize: '0.82rem',
+                                          color: isPwRevealed ? '#0f172a' : '#64748b',
+                                          minWidth: '65px',
+                                          letterSpacing: isPwRevealed ? '0.5px' : '2px'
+                                        }}>
+                                          {isPwRevealed ? (adm.plainPassword || '••••••••') : '••••••••'}
+                                        </span>
+                                        <button
+                                          type="button"
+                                          onClick={() => setShowPasswordMap(prev => ({ ...prev, [adm._id]: !prev[adm._id] }))}
+                                          title={isPwRevealed ? 'Hide Password' : 'Show Password'}
+                                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2563eb', padding: '3px', display: 'flex', alignItems: 'center' }}
+                                        >
+                                          {isPwRevealed ? <EyeOff size={14} /> : <Eye size={14} />}
+                                        </button>
+                                        {adm.plainPassword && (
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              navigator.clipboard.writeText(adm.plainPassword);
+                                              showToast('Password copied to clipboard!');
+                                            }}
+                                            title="Copy Password"
+                                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#16a34a', padding: '3px', display: 'flex', alignItems: 'center' }}
+                                          >
+                                            <Copy size={13} />
+                                          </button>
+                                        )}
+                                      </div>
+                                    </td>
+
+                                    {/* Permissions */}
+                                    <td>
+                                      {isRootSuper ? (
+                                        <span style={{
+                                          display: 'inline-flex',
+                                          alignItems: 'center',
+                                          gap: '5px',
+                                          backgroundColor: '#fef3c7',
+                                          color: '#92400e',
+                                          padding: '4px 10px',
+                                          borderRadius: '20px',
+                                          fontSize: '0.74rem',
+                                          fontWeight: '800',
+                                          border: '1px solid #fde68a',
+                                          whiteSpace: 'nowrap'
+                                        }}>
+                                          <ShieldCheck size={12} /> Full Access (All 9 Modules)
+                                        </span>
+                                      ) : (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
+                                            <span style={{
+                                              display: 'inline-flex',
+                                              alignItems: 'center',
+                                              gap: '3px',
+                                              fontSize: '0.72rem',
+                                              fontWeight: '700',
+                                              backgroundColor: '#eff6ff',
+                                              color: '#1d4ed8',
+                                              padding: '2px 7px',
+                                              borderRadius: '6px',
+                                              border: '1px solid #bfdbfe',
+                                              whiteSpace: 'nowrap'
+                                            }}>
+                                              <Shield size={10} /> {activePerms.length} Active
+                                            </span>
+                                            {activePerms.slice(0, 2).map(p => (
+                                              <span key={p.key} style={{
+                                                fontSize: '0.68rem',
+                                                fontWeight: '600',
+                                                backgroundColor: p.bg,
+                                                color: p.color,
+                                                border: `1px solid ${p.border}`,
+                                                padding: '2px 6px',
+                                                borderRadius: '6px',
+                                                whiteSpace: 'nowrap'
+                                              }}>
+                                                {p.short}
+                                              </span>
+                                            ))}
+                                            {activePerms.length > 2 && (
+                                              <button
+                                                type="button"
+                                                onClick={() => setExpandedAdminPerms(prev => ({ ...prev, [adm._id]: !prev[adm._id] }))}
+                                                style={{
+                                                  border: '1px solid #cbd5e1',
+                                                  backgroundColor: isExpanded ? '#0c3d6c' : '#f8fafc',
+                                                  color: isExpanded ? '#ffffff' : '#475569',
+                                                  borderRadius: '6px',
+                                                  padding: '2px 6px',
+                                                  fontSize: '0.68rem',
+                                                  fontWeight: '700',
+                                                  cursor: 'pointer',
+                                                  display: 'inline-flex',
+                                                  alignItems: 'center',
+                                                  gap: '3px',
+                                                  whiteSpace: 'nowrap'
+                                                }}
+                                                title={isExpanded ? 'Hide module list' : 'Show all module permissions'}
+                                              >
+                                                {isExpanded ? <ChevronUp size={11} /> : `+${activePerms.length - 2} more`}
+                                              </button>
+                                            )}
+                                          </div>
+                                          {isExpanded && (
+                                            <div style={{
+                                              display: 'flex',
+                                              flexWrap: 'wrap',
+                                              gap: '4px',
+                                              padding: '8px 10px',
+                                              backgroundColor: '#f8fafc',
+                                              borderRadius: '8px',
+                                              border: '1px solid #e2e8f0',
+                                              maxWidth: '320px'
+                                            }}>
+                                              {activePerms.map(p => (
+                                                <span key={p.key} style={{
+                                                  fontSize: '0.68rem',
+                                                  fontWeight: '600',
+                                                  backgroundColor: p.bg,
+                                                  color: p.color,
+                                                  border: `1px solid ${p.border}`,
+                                                  padding: '2px 6px',
+                                                  borderRadius: '6px'
+                                                }}>
+                                                  {p.label}
+                                                </span>
+                                              ))}
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
+                                    </td>
+
+                                    {/* Status */}
+                                    <td style={{ textAlign: 'center' }}>
+                                      <span style={{
+                                        fontSize: '0.74rem',
+                                        backgroundColor: adm.isActive !== false ? '#dcfce7' : '#fee2e2',
+                                        color: adm.isActive !== false ? '#15803d' : '#b91c1c',
+                                        border: `1px solid ${adm.isActive !== false ? '#bbf7d0' : '#fecaca'}`,
+                                        padding: '3px 10px',
+                                        borderRadius: '12px',
+                                        fontWeight: '700',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '5px'
+                                      }}>
+                                        <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: adm.isActive !== false ? '#16a34a' : '#dc2626' }} />
+                                        {adm.isActive !== false ? 'Active' : 'Suspended'}
+                                      </span>
+                                    </td>
+
+                                    {/* Actions */}
+                                    <td style={{ textAlign: 'right' }}>
+                                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', justifyContent: 'flex-end' }}>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleOpenAdminModal(adm)}
+                                          title="Edit Admin Account"
+                                          className="btn btn-outline btn-sm"
+                                          style={{ padding: '5px 9px', height: '32px', borderRadius: '8px', gap: '4px', fontSize: '0.78rem' }}
+                                        >
+                                          <Edit2 size={13} /> Edit
+                                        </button>
+
+                                        <button
+                                          type="button"
+                                          onClick={() => handleShareCredentialsWhatsApp(adm)}
+                                          title={`Share Credentials via WhatsApp (${adm.phone || 'Admin'})`}
+                                          style={{
+                                            width: '32px',
+                                            height: '32px',
+                                            borderRadius: '8px',
+                                            border: '1px solid #bbf7d0',
+                                            backgroundColor: '#f0fdf4',
+                                            cursor: 'pointer',
+                                            color: '#15803d',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
+                                          }}
+                                        >
+                                          <MessageSquare size={13} />
+                                        </button>
+
+                                        <button
+                                          type="button"
+                                          onClick={() => handleResendCredentials(adm)}
+                                          disabled={resendingAdminId === adm._id}
+                                          title={`Resend Welcome & Credentials Email to ${adm.email}`}
+                                          style={{
+                                            width: '32px',
+                                            height: '32px',
+                                            borderRadius: '8px',
+                                            border: '1px solid #bfdbfe',
+                                            backgroundColor: '#eff6ff',
+                                            cursor: 'pointer',
+                                            color: '#1d4ed8',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
+                                          }}
+                                        >
+                                          {resendingAdminId === adm._id ? <RefreshCw size={13} className="animate-spin" /> : <Mail size={14} />}
+                                        </button>
+
+                                        {!isRootSuper && (
+                                          <>
+                                            <button
+                                              type="button"
+                                              onClick={() => handleToggleAdminStatus(adm)}
+                                              title={adm.isActive !== false ? 'Deactivate Admin' : 'Activate Admin'}
+                                              style={{
+                                                width: '32px',
+                                                height: '32px',
+                                                borderRadius: '8px',
+                                                border: '1px solid #fed7aa',
+                                                backgroundColor: adm.isActive !== false ? '#fff7ed' : '#f0fdf4',
+                                                cursor: 'pointer',
+                                                color: adm.isActive !== false ? '#c2410c' : '#15803d',
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center'
+                                              }}
+                                            >
+                                              {adm.isActive !== false ? <UserX size={13} /> : <UserCheck size={13} />}
+                                            </button>
+
+                                            <button
+                                              type="button"
+                                              onClick={() => handleDeleteAdmin(adm)}
+                                              title="Delete Admin Account"
+                                              style={{
+                                                width: '32px',
+                                                height: '32px',
+                                                borderRadius: '8px',
+                                                border: '1px solid #fecaca',
+                                                backgroundColor: '#fef2f2',
+                                                cursor: 'pointer',
+                                                color: '#ef4444',
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center'
+                                              }}
+                                            >
+                                              <Trash2 size={13} />
+                                            </button>
+                                          </>
+                                        )}
+                                      </div>
+                                    </td>
+                                  </tr>
+                                );
+                              })
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* CARDS VIEW (ALWAYS SHOWN ON MOBILE/TABLET <= 980px, OR WHEN CARDS TOGGLED ON DESKTOP) */}
+                  <div className={adminViewMode === 'cards' ? 'admin-cards-grid' : 'admin-mgmt-cards-mobile-only admin-cards-grid'}>
+                    {isAdminListLoading ? (
+                      <div style={{ gridColumn: '1 / -1', padding: '30px', textAlign: 'center' }}>
+                        <SkeletonLoader variant="admin-subadmins" rows={2} />
+                      </div>
+                    ) : filteredAdminList.length === 0 ? (
+                      <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px 20px', color: 'var(--text-medium)', backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
+                        <Users size={32} style={{ color: '#94a3b8', margin: '0 auto 8px', display: 'block' }} />
+                        <div style={{ fontWeight: '700', fontSize: '0.92rem', color: 'var(--text-dark)' }}>No Admin Accounts Found</div>
+                        <div style={{ fontSize: '0.8rem', marginTop: '4px' }}>
+                          {adminSearch ? `No matches found for "${adminSearch}".` : 'Click "+ Add New Admin" above to create an account.'}
+                        </div>
+                      </div>
+                    ) : (
+                      filteredAdminList.map((adm) => {
+                        const isRootSuper = adm.role === 'superadmin' || adm.email === 'info@niyanshpharma.com';
+                        const isPwRevealed = Boolean(showPasswordMap[adm._id]);
+                        const activePerms = ADMIN_PERM_DEFS.filter(item => Boolean(adm.permissions?.[item.key]));
+
+                        return (
+                          <div key={adm._id} className="admin-card-item">
+                            {/* Card Top: Role Tag & Status Pill */}
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                              {isRootSuper ? (
+                                <span style={{
+                                  fontSize: '0.72rem',
+                                  fontWeight: '800',
+                                  backgroundColor: '#fef3c7',
+                                  color: '#b45309',
+                                  border: '1px solid #fde68a',
+                                  padding: '2px 8px',
+                                  borderRadius: '8px',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px'
+                                }}>
+                                  <ShieldCheck size={12} /> Root Super Admin
+                                </span>
+                              ) : (
+                                <span style={{
+                                  fontSize: '0.72rem',
+                                  fontWeight: '700',
+                                  backgroundColor: '#eff6ff',
+                                  color: '#1d4ed8',
+                                  border: '1px solid #bfdbfe',
+                                  padding: '2px 8px',
+                                  borderRadius: '8px',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px'
+                                }}>
+                                  <Shield size={11} /> Operations Admin
+                                </span>
+                              )}
+
+                              <span style={{
+                                fontSize: '0.72rem',
+                                backgroundColor: adm.isActive !== false ? '#dcfce7' : '#fee2e2',
+                                color: adm.isActive !== false ? '#15803d' : '#b91c1c',
+                                border: `1px solid ${adm.isActive !== false ? '#bbf7d0' : '#fecaca'}`,
+                                padding: '2px 8px',
+                                borderRadius: '12px',
+                                fontWeight: '700',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}>
+                                <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: adm.isActive !== false ? '#16a34a' : '#dc2626' }} />
+                                {adm.isActive !== false ? 'Active' : 'Suspended'}
+                              </span>
+                            </div>
+
+                            {/* Profile Info */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <img 
+                                src={adm.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(adm.name)}&background=${isRootSuper ? 'f59e0b' : '0284c7'}&color=ffffff&bold=true`}
+                                alt={adm.name}
+                                style={{ width: '46px', height: '46px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #e2e8f0', flexShrink: 0 }}
+                              />
+                              <div style={{ minWidth: 0, flex: 1 }}>
+                                <div style={{ fontWeight: '800', fontSize: '1rem', color: 'var(--text-dark)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  {adm.name}
+                                </div>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-medium)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  {adm.email}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Credentials Box */}
+                            <div style={{
+                              backgroundColor: '#f8fafc',
+                              borderRadius: '10px',
                               border: '1px solid #e2e8f0',
-                              borderRadius: '12px',
-                              padding: '14px',
+                              padding: '10px 12px',
                               display: 'flex',
                               flexDirection: 'column',
-                              gap: '10px',
-                              boxShadow: '0 2px 6px rgba(0,0,0,0.03)'
+                              gap: '8px',
+                              fontSize: '0.82rem'
                             }}>
-                              {/* Card Header: Avatar, Name, Role & Status */}
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                  <img 
-                                    src={adm.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(adm.name)}&background=${isRootSuper ? 'f59e0b' : '2563eb'}&color=ffffff&bold=true`}
-                                    alt={adm.name}
-                                    style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
-                                  />
-                                  <div>
-                                    <div style={{ fontWeight: '700', fontSize: '0.92rem', color: 'var(--text-dark)' }}>{adm.name}</div>
-                                    {isRootSuper ? (
-                                      <span style={{ fontSize: '0.68rem', fontWeight: '800', backgroundColor: '#fef3c7', color: '#b45309', padding: '1px 7px', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                                        <ShieldCheck size={11} /> Root Super Admin
-                                      </span>
-                                    ) : (
-                                      <span style={{ fontSize: '0.68rem', fontWeight: '700', backgroundColor: '#eff6ff', color: '#1d4ed8', padding: '1px 7px', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                                        <Shield size={10} /> Operations Admin
-                                      </span>
-                                    )}
-                                  </div>
+                              {/* Email row */}
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                                <span style={{ color: 'var(--text-medium)', fontSize: '0.76rem', fontWeight: '600' }}>Login ID:</span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  <span style={{ fontFamily: 'monospace', fontWeight: '600', fontSize: '0.8rem', color: 'var(--text-dark)' }}>
+                                    {adm.email}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(adm.email);
+                                      showToast('Email copied to clipboard!');
+                                    }}
+                                    title="Copy Email"
+                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '2px' }}
+                                  >
+                                    <Copy size={12} />
+                                  </button>
                                 </div>
-                                <span style={{ fontSize: '0.72rem', backgroundColor: adm.isActive !== false ? '#dcfce7' : '#fee2e2', color: adm.isActive !== false ? '#15803d' : '#b91c1c', padding: '2px 8px', borderRadius: '6px', fontWeight: '700' }}>
-                                  {adm.isActive !== false ? 'Active' : 'Inactive'}
-                                </span>
                               </div>
 
-                              {/* Email & Mobile */}
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.8rem', backgroundColor: '#f8fafc', padding: '8px 10px', borderRadius: '8px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                  <span style={{ color: 'var(--text-medium)' }}>Email:</span>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <span style={{ fontFamily: 'monospace', fontWeight: '600' }}>{adm.email}</span>
+                              {/* Phone row */}
+                              {adm.phone && (
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                                  <span style={{ color: 'var(--text-medium)', fontSize: '0.76rem', fontWeight: '600' }}>Mobile:</span>
+                                  <a href={`tel:${adm.phone}`} style={{ color: '#0369a1', fontWeight: '700', textDecoration: 'none' }}>
+                                    {adm.phone}
+                                  </a>
+                                </div>
+                              )}
+
+                              {/* Password row */}
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                                <span style={{ color: 'var(--text-medium)', fontSize: '0.76rem', fontWeight: '600' }}>Password:</span>
+                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                  <span style={{
+                                    fontFamily: 'monospace',
+                                    fontWeight: '700',
+                                    color: isPwRevealed ? '#0f172a' : '#64748b',
+                                    letterSpacing: isPwRevealed ? '0.5px' : '2px'
+                                  }}>
+                                    {isPwRevealed ? (adm.plainPassword || '••••••••') : '••••••••'}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowPasswordMap(prev => ({ ...prev, [adm._id]: !prev[adm._id] }))}
+                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2563eb', padding: '2px' }}
+                                    title={isPwRevealed ? 'Hide Password' : 'Show Password'}
+                                  >
+                                    {isPwRevealed ? <EyeOff size={13} /> : <Eye size={13} />}
+                                  </button>
+                                  {adm.plainPassword && (
                                     <button
                                       type="button"
                                       onClick={() => {
-                                        navigator.clipboard.writeText(adm.email);
-                                        showToast('Email copied to clipboard!');
+                                        navigator.clipboard.writeText(adm.plainPassword);
+                                        showToast('Password copied to clipboard!');
                                       }}
-                                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '2px' }}
+                                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#16a34a', padding: '2px' }}
+                                      title="Copy Password"
                                     >
                                       <Copy size={12} />
                                     </button>
-                                  </div>
+                                  )}
                                 </div>
-
-                                {adm.phone && (
-                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                    <span style={{ color: 'var(--text-medium)' }}>Mobile:</span>
-                                    <a href={`tel:${adm.phone}`} style={{ color: '#0369a1', fontWeight: '600', textDecoration: 'none' }}>
-                                      {adm.phone}
-                                    </a>
-                                  </div>
-                                )}
-
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                  <span style={{ color: 'var(--text-medium)' }}>Password:</span>
-                                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                                    <span style={{ fontFamily: 'monospace', fontWeight: '700', color: isPwRevealed ? '#0f172a' : '#64748b' }}>
-                                      {isPwRevealed ? (adm.plainPassword || '••••••••') : '••••••••'}
-                                    </span>
-                                    <button
-                                      type="button"
-                                      onClick={() => setShowPasswordMap(prev => ({ ...prev, [adm._id]: !prev[adm._id] }))}
-                                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2563eb', padding: '2px' }}
-                                    >
-                                      {isPwRevealed ? <EyeOff size={13} /> : <Eye size={13} />}
-                                    </button>
-                                    {adm.plainPassword && (
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          navigator.clipboard.writeText(adm.plainPassword);
-                                          showToast('Password copied to clipboard!');
-                                        }}
-                                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#16a34a', padding: '2px' }}
-                                      >
-                                        <Copy size={12} />
-                                      </button>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Permissions Pills */}
-                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                                {isRootSuper ? (
-                                  <span style={{ fontSize: '0.72rem', backgroundColor: '#fef3c7', color: '#92400e', padding: '2px 8px', borderRadius: '6px', fontWeight: '800' }}>
-                                    Full Access (All Permissions)
-                                  </span>
-                                ) : (
-                                  <>
-                                    {p.canManageProducts && <span style={{ fontSize: '0.68rem', backgroundColor: '#eff6ff', color: '#1e40af', padding: '1px 6px', borderRadius: '4px' }}>Products</span>}
-                                    {p.canDeleteProducts && <span style={{ fontSize: '0.68rem', backgroundColor: '#fee2e2', color: '#991b1b', padding: '1px 6px', borderRadius: '4px' }}>Delete Prod</span>}
-                                    {p.canBulkImport && <span style={{ fontSize: '0.68rem', backgroundColor: '#ecfdf5', color: '#065f46', padding: '1px 6px', borderRadius: '4px' }}>Excel Import</span>}
-                                    {p.canManageOrders && <span style={{ fontSize: '0.68rem', backgroundColor: '#f3e8ff', color: '#6b21a8', padding: '1px 6px', borderRadius: '4px' }}>Orders</span>}
-                                    {p.canManageLedgers && <span style={{ fontSize: '0.68rem', backgroundColor: '#fef9c3', color: '#854d0e', padding: '1px 6px', borderRadius: '4px' }}>Ledgers</span>}
-                                    {p.canManageCompanies && <span style={{ fontSize: '0.68rem', backgroundColor: '#e0e7ff', color: '#3730a3', padding: '1px 6px', borderRadius: '4px' }}>Companies</span>}
-                                    {p.canManageNews && <span style={{ fontSize: '0.68rem', backgroundColor: '#ffedd5', color: '#9a3412', padding: '1px 6px', borderRadius: '4px' }}>News</span>}
-                                    {p.canManageEnquiries && <span style={{ fontSize: '0.68rem', backgroundColor: '#f1f5f9', color: '#334155', padding: '1px 6px', borderRadius: '4px' }}>Enquiries</span>}
-                                    {p.canClearDatabase && <span style={{ fontSize: '0.68rem', backgroundColor: '#991b1b', color: '#fff', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }}>Wipe DB</span>}
-                                  </>
-                                )}
-                              </div>
-
-                              {/* Card Actions */}
-                              <div style={{ display: 'flex', gap: '8px', paddingTop: '6px', borderTop: '1px solid #f1f5f9' }}>
-                                <button
-                                  type="button"
-                                  onClick={() => handleOpenAdminModal(adm)}
-                                  className="btn btn-outline btn-sm"
-                                  style={{ flex: 1, justifyContent: 'center', fontSize: '0.78rem', gap: '6px' }}
-                                >
-                                  <Edit2 size={13} /> Edit
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleResendCredentials(adm)}
-                                  disabled={resendingAdminId === adm._id}
-                                  className="btn btn-outline btn-sm"
-                                  style={{ padding: '6px 10px', color: '#1d4ed8', backgroundColor: '#eff6ff' }}
-                                  title="Resend Credentials Email"
-                                >
-                                  {resendingAdminId === adm._id ? <RefreshCw size={13} className="spin" /> : <Mail size={13} />}
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleShareCredentialsWhatsApp(adm)}
-                                  className="btn btn-outline btn-sm"
-                                  style={{ padding: '6px 10px', color: '#15803d', backgroundColor: '#f0fdf4' }}
-                                  title="Share on WhatsApp"
-                                >
-                                  <MessageSquare size={13} />
-                                </button>
-                                {!isRootSuper && (
-                                  <>
-                                    <button
-                                      type="button"
-                                      onClick={() => handleToggleAdminStatus(adm)}
-                                      className="btn btn-outline btn-sm"
-                                      style={{ padding: '6px 10px', color: adm.isActive !== false ? '#b45309' : '#15803d' }}
-                                      title={adm.isActive !== false ? 'Deactivate' : 'Activate'}
-                                    >
-                                      {adm.isActive !== false ? <UserX size={13} /> : <UserCheck size={13} />}
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => handleDeleteAdmin(adm)}
-                                      className="btn btn-sm"
-                                      style={{ padding: '6px 10px', backgroundColor: '#fee2e2', color: '#ef4444', border: 'none' }}
-                                      title="Delete"
-                                    >
-                                      <Trash2 size={13} />
-                                    </button>
-                                  </>
-                                )}
                               </div>
                             </div>
-                          );
-                        })
-                      )}
-                    </div>
+
+                            {/* Permissions Module Access */}
+                            <div>
+                              <div style={{ fontSize: '0.74rem', fontWeight: '700', color: 'var(--text-medium)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>
+                                Module Access Permissions ({isRootSuper ? 'All 9' : `${activePerms.length}/9`})
+                              </div>
+                              {isRootSuper ? (
+                                <span style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '5px',
+                                  backgroundColor: '#fef3c7',
+                                  color: '#92400e',
+                                  border: '1px solid #fde68a',
+                                  padding: '4px 10px',
+                                  borderRadius: '8px',
+                                  fontSize: '0.75rem',
+                                  fontWeight: '700'
+                                }}>
+                                  <ShieldCheck size={13} /> Full Unrestricted SuperAdmin Privileges
+                                </span>
+                              ) : (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                                  {activePerms.map(p => (
+                                    <span key={p.key} style={{
+                                      fontSize: '0.7rem',
+                                      fontWeight: '600',
+                                      backgroundColor: p.bg,
+                                      color: p.color,
+                                      border: `1px solid ${p.border}`,
+                                      padding: '2px 8px',
+                                      borderRadius: '6px',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '3px'
+                                    }}>
+                                      <Check size={10} /> {p.short}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Action Toolbar */}
+                            <div style={{ display: 'flex', gap: '8px', paddingTop: '10px', borderTop: '1px solid #f1f5f9', marginTop: 'auto' }}>
+                              <button
+                                type="button"
+                                onClick={() => handleOpenAdminModal(adm)}
+                                className="btn btn-outline btn-sm"
+                                style={{ flex: 1, justifyContent: 'center', fontSize: '0.8rem', gap: '6px', fontWeight: '600', height: '34px' }}
+                              >
+                                <Edit2 size={13} /> Edit
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleShareCredentialsWhatsApp(adm)}
+                                className="btn btn-outline btn-sm"
+                                style={{ padding: '0 12px', height: '34px', color: '#15803d', backgroundColor: '#f0fdf4', borderColor: '#bbf7d0' }}
+                                title="Share credentials on WhatsApp"
+                              >
+                                <MessageSquare size={14} />
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleResendCredentials(adm)}
+                                disabled={resendingAdminId === adm._id}
+                                className="btn btn-outline btn-sm"
+                                style={{ padding: '0 12px', height: '34px', color: '#1d4ed8', backgroundColor: '#eff6ff', borderColor: '#bfdbfe' }}
+                                title="Resend Credentials Email"
+                              >
+                                {resendingAdminId === adm._id ? <RefreshCw size={14} className="animate-spin" /> : <Mail size={14} />}
+                              </button>
+
+                              {!isRootSuper && (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleToggleAdminStatus(adm)}
+                                    className="btn btn-outline btn-sm"
+                                    style={{
+                                      padding: '0 12px',
+                                      height: '34px',
+                                      color: adm.isActive !== false ? '#c2410c' : '#15803d',
+                                      backgroundColor: adm.isActive !== false ? '#fff7ed' : '#f0fdf4',
+                                      borderColor: adm.isActive !== false ? '#fed7aa' : '#bbf7d0'
+                                    }}
+                                    title={adm.isActive !== false ? 'Deactivate Account' : 'Activate Account'}
+                                  >
+                                    {adm.isActive !== false ? <UserX size={14} /> : <UserCheck size={14} />}
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteAdmin(adm)}
+                                    className="btn btn-sm"
+                                    style={{ padding: '0 12px', height: '34px', backgroundColor: '#fee2e2', color: '#ef4444', border: 'none' }}
+                                    title="Delete Admin"
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
                   </div>
                 </div>
               )}

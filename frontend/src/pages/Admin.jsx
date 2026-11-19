@@ -9776,7 +9776,7 @@ _Helpline: +91 9316566894_`;
                   </div>
 
                   {/* Row 2: Manufacturer / Company & Category (Smart Autocomplete / Direct Entry) */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <label htmlFor="modal-comp" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
@@ -9816,7 +9816,7 @@ _Helpline: +91 9316566894_`;
                   </div>
 
                   {/* Row 3: Contain & Formulation Form */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
                       <label htmlFor="modal-composition" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
                         Contain <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
@@ -9887,7 +9887,7 @@ _Helpline: +91 9316566894_`;
                   </div>
 
                   {/* Row 5: Packing Specifications & Subcategory / Variant */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
                       <label htmlFor="modal-packing" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
                         Packing Specifications <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
@@ -9926,51 +9926,51 @@ _Helpline: +91 9316566894_`;
                     />
                   </div>
 
-                  {/* Row 7: Pharma Logistics - Batch Number, Rack ID, HSN Code, Expiry Date with Date Picker */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
+                  {/* Row 7: Pharma Logistics - Batch Number, Rack ID, HSN Code, Expiry Date (Responsive 2x2 or 4-col Grid) */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <label htmlFor="modal-batch" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                      <label htmlFor="modal-batch" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)', whiteSpace: 'nowrap' }}>
                         Batch Number <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
                       </label>
                       <input 
                         id="modal-batch"
                         type="text" required placeholder="E.g., B-9482, NB-102" 
                         value={prodBatchNumber} onChange={(e) => setProdBatchNumber(e.target.value)}
-                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' }}
+                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', height: '42px', boxSizing: 'border-box' }}
                       />
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <label htmlFor="modal-rackid" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                      <label htmlFor="modal-rackid" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)', whiteSpace: 'nowrap' }}>
                         Rack ID / Location <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
                       </label>
                       <input 
                         id="modal-rackid"
                         type="text" required placeholder="E.g., R-04, Shelf-B" 
                         value={prodRackId} onChange={(e) => setProdRackId(e.target.value)}
-                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' }}
+                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', height: '42px', boxSizing: 'border-box' }}
                       />
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <label htmlFor="modal-hsn" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                      <label htmlFor="modal-hsn" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)', whiteSpace: 'nowrap' }}>
                         HSN Code <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
                       </label>
                       <input 
                         id="modal-hsn"
                         type="text" required placeholder="E.g., 3004" 
                         value={prodHsnCode} onChange={(e) => setProdHsnCode(e.target.value)}
-                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' }}
+                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', height: '42px', boxSizing: 'border-box' }}
                       />
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <label htmlFor="modal-expiry" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                          Expiry (Month & Year) <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                        <label htmlFor="modal-expiry" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)', whiteSpace: 'nowrap' }}>
+                          Expiry Date <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
                         </label>
-                        <span style={{ fontSize: '0.72rem', color: '#0369a1', fontWeight: '700', backgroundColor: '#e0f2fe', padding: '1px 6px', borderRadius: '4px' }}>
-                          MM / YYYY
+                        <span style={{ fontSize: '0.72rem', color: '#0369a1', fontWeight: '700', backgroundColor: '#e0f2fe', padding: '2px 8px', borderRadius: '4px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                          Month & Year (MM/YY)
                         </span>
                       </div>
                       <input 
@@ -9980,13 +9980,13 @@ _Helpline: +91 9316566894_`;
                         min={new Date().toISOString().slice(0, 7)}
                         value={prodExpiryDate} 
                         onChange={(e) => setProdExpiryDate(e.target.value)}
-                        style={{ padding: '8.5px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box', backgroundColor: '#ffffff', cursor: 'pointer' }}
+                        style={{ padding: '8.5px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', height: '42px', boxSizing: 'border-box', backgroundColor: '#ffffff', cursor: 'pointer' }}
                       />
                     </div>
                   </div>
 
-                  {/* Row 8: GST Rates (Purchase & Sales) with Custom Rate Support */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
+                  {/* Row 8: GST Rates (Purchase & Sales) with Custom Rate Support (Responsive Grid) */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <label htmlFor="modal-purgst" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>

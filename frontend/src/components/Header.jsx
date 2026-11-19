@@ -1081,7 +1081,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             {/* Direct Admin Console Access Button */}
             <Link
               to="/admin"
-              className="admin-nav-pill hide-mobile"
+              className="admin-nav-pill"
               title="Admin & Operations Console"
               style={{
                 display: 'inline-flex',
@@ -1506,32 +1506,6 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                   <LogIn size={16} /> {t('nav.login', 'Chemist Login / Register')}
                 </button>
               )}
-
-              {/* Direct Link to Admin & Operations Portal in Mobile Drawer */}
-              <div style={{ marginTop: '12px', textAlign: 'center' }}>
-                <Link
-                  to="/admin"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    fontSize: '0.82rem',
-                    color: 'var(--text-medium, #64748b)',
-                    textDecoration: 'none',
-                    fontWeight: '700',
-                    padding: '6px 12px',
-                    borderRadius: '6px',
-                    backgroundColor: 'var(--bg-main, #f8fafc)',
-                    border: '1px solid var(--border-light, #e2e8f0)',
-                    width: '100%',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <Shield size={14} style={{ color: 'var(--primary-blue, #2563eb)' }} />
-                  <span>Admin & Operations Console ➔</span>
-                </Link>
-              </div>
             </div>
           </div>
         </>

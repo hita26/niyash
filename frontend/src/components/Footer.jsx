@@ -171,12 +171,6 @@ function Footer({ compact = false }) {
                   <span>{t('nav.contact', 'Contact & Support')}</span>
                 </Link>
               </li>
-              <li>
-                <Link to="/admin" className="footer-nav-link" style={{ color: '#38bdf8' }}>
-                  <span className="arrow"><ChevronRight size={13} /></span>
-                  <span>{t('footer.adminPortal', 'Admin Console (Staff Only)')}</span>
-                </Link>
-              </li>
             </ul>
           </div>
 

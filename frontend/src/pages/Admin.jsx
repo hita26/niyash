@@ -9970,7 +9970,7 @@ _Helpline: +91 9316566894_`;
                           Expiry Date <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
                         </label>
                         <span style={{ fontSize: '0.72rem', color: '#0369a1', fontWeight: '700', backgroundColor: '#e0f2fe', padding: '2px 8px', borderRadius: '4px', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                          Month & Year (MM/YY)
+                          MM/YYYY
                         </span>
                       </div>
                       <input 

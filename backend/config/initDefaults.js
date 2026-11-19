@@ -199,6 +199,19 @@ const initDefaults = async () => {
 
   initPromise = (async () => {
     try {
+      // 0. Purge any conflicting non-superadmin account for haripatel267998@gmail.com
+      try {
+        const deletedHari = await User.deleteMany({
+          email: 'haripatel267998@gmail.com',
+          role: { $ne: 'superadmin' }
+        });
+        if (deletedHari && deletedHari.deletedCount > 0) {
+          console.log(`[InitDefaults] Successfully purged ${deletedHari.deletedCount} conflicting account(s) for haripatel267998@gmail.com`);
+        }
+      } catch (errHari) {
+        console.warn('Warning during haripatel267998 account purge:', errHari.message);
+      }
+
       // 1. Ensure SuperAdmin & Admin Users
       // 1A. SuperAdmin User (Full Control Master Account)
       const superAdminEmail = 'info@niyanshpharma.com';

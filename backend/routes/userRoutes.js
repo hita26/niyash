@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
@@ -754,7 +755,16 @@ router.post('/admins', protect, superAdminOnly, async (req, res) => {
     const normalizedEmail = email.toLowerCase().trim();
     const existing = await User.findOne({ email: normalizedEmail });
     if (existing) {
-      return res.status(400).json({ message: `An account with email "${normalizedEmail}" already exists` });
+      if (existing.role === 'superadmin') {
+        return res.status(400).json({ message: `Cannot overwrite Root SuperAdmin account with email "${normalizedEmail}"` });
+      }
+      if (existing.role === 'admin') {
+        return res.status(400).json({ message: `An admin staff account with email "${normalizedEmail}" already exists` });
+      }
+      // If the email belongs to a chemist / retail customer / unprivileged user account:
+      // Remove the old non-admin user record so SuperAdmin can freely register this email as admin staff!
+      await User.deleteOne({ _id: existing._id });
+      console.log(`[Admin Management] Cleaned up conflicting non-admin (${existing.role}) account for ${normalizedEmail} to allow admin creation`);
     }
 
     const cleanPhone = phone ? phone.toString().replace(/\D/g, '').replace(/^91/, '').slice(-10) : '';
@@ -945,6 +955,115 @@ router.delete('/admins/:id', protect, superAdminOnly, async (req, res) => {
   } catch (err) {
     console.error('Error deleting admin:', err);
     return res.status(500).json({ message: 'Failed to delete admin: ' + err.message });
+  }
+});
+
+// @desc    Inspect account details across database by email or phone
+// @route   GET /api/users/inspect/:identifier
+// @access  SuperAdmin Only or Sync API Key
+router.get('/inspect/:identifier', async (req, res) => {
+  try {
+    let isAuthorized = false;
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      try {
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'niyansh_pharma_jwt_secret_key_2026');
+        const user = await User.findById(decoded.id);
+        if (user && (user.role === 'superadmin' || user.role === 'admin')) isAuthorized = true;
+      } catch (e) {}
+    }
+    const apiKey = req.headers['x-sync-api-key'] || req.query.apiKey;
+    if (apiKey === (process.env.ERP_SYNC_SECRET || 'NP_PROMPT_SECRET_KEY_2026')) {
+      isAuthorized = true;
+    }
+
+    if (!isAuthorized) {
+      return res.status(403).json({ success: false, message: 'SuperAdmin authorization or Sync API Key required' });
+    }
+
+    const identifier = decodeURIComponent(req.params.identifier).toLowerCase().trim();
+    const cleanPhone = identifier.replace(/\D/g, '');
+
+    const users = await User.find({
+      $or: [
+        { email: identifier },
+        ...(cleanPhone && cleanPhone.length === 10 ? [{ phone: cleanPhone }] : []),
+        ...(mongoose.isValidObjectId(identifier) ? [{ _id: identifier }] : [])
+      ]
+    }).select('-password -resetPasswordOtp').lean();
+
+    return res.json({
+      success: true,
+      found: users.length,
+      users
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: 'Server error: ' + err.message });
+  }
+});
+
+// @desc    Permanently delete any account (chemist, user, staff) by email or ID
+// @route   DELETE /api/users/account/:identifier
+// @access  SuperAdmin Only or Sync API Key
+router.delete('/account/:identifier', async (req, res) => {
+  try {
+    let isAuthorized = false;
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      try {
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'niyansh_pharma_jwt_secret_key_2026');
+        const user = await User.findById(decoded.id);
+        if (user && user.role === 'superadmin') isAuthorized = true;
+      } catch (e) {}
+    }
+    const apiKey = req.headers['x-sync-api-key'] || req.query.apiKey;
+    if (apiKey === (process.env.ERP_SYNC_SECRET || 'NP_PROMPT_SECRET_KEY_2026')) {
+      isAuthorized = true;
+    }
+
+    if (!isAuthorized) {
+      return res.status(403).json({ success: false, message: 'SuperAdmin authorization or Sync API Key required' });
+    }
+
+    const identifier = decodeURIComponent(req.params.identifier).toLowerCase().trim();
+    if (!identifier) {
+      return res.status(400).json({ success: false, message: 'Identifier (email or id) is required' });
+    }
+
+    if (identifier === 'info@niyanshpharma.com') {
+      return res.status(403).json({ success: false, message: 'Root SuperAdmin account cannot be deleted' });
+    }
+
+    const cleanPhone = identifier.replace(/\D/g, '');
+    const filter = {
+      $or: [
+        { email: identifier },
+        ...(cleanPhone && cleanPhone.length === 10 ? [{ phone: cleanPhone }] : []),
+        ...(mongoose.isValidObjectId(identifier) ? [{ _id: identifier }] : [])
+      ],
+      role: { $ne: 'superadmin' }
+    };
+
+    const deleted = await User.deleteMany(filter);
+
+    logAuditEvent({
+      req,
+      action: 'DELETE',
+      category: 'ADMIN_USER',
+      targetName: identifier,
+      details: `Purged ${deleted.deletedCount} account(s) matching identifier "${identifier}"`
+    });
+
+    return res.json({
+      success: true,
+      message: `Successfully deleted ${deleted.deletedCount} account(s) matching "${identifier}"`,
+      deletedCount: deleted.deletedCount
+    });
+  } catch (err) {
+    console.error('Error deleting account:', err);
+    return res.status(500).json({ success: false, message: 'Server error: ' + err.message });
   }
 });
 

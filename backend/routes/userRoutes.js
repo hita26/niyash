@@ -420,7 +420,7 @@ router.post('/forgot-password', async (req, res) => {
     await user.save();
 
     let emailSent = false;
-    const smtpHost = process.env.SMTP_HOST || 'smtp.titan.email';
+    const smtpHost = process.env.SMTP_HOST || 'smtpout.secureserver.net';
     const smtpUser = process.env.SMTP_USER || process.env.EMAIL_USER || 'info@niyanshpharma.com';
     const smtpPass = process.env.SMTP_PASS || process.env.EMAIL_PASS || process.env.EMAIL_PASSWORD || '@Neeya232026';
     const smtpPort = Number(process.env.SMTP_PORT) || 465;

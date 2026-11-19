@@ -158,7 +158,7 @@ router.all('/test-welcome-email', async (req, res) => {
       return res.status(401).json({ success: false, message: 'Invalid API key' });
     }
     const nodemailer = require('nodemailer');
-    const testHost = req.query.host || process.env.SMTP_HOST || 'smtp.titan.email';
+    const testHost = req.query.host || process.env.SMTP_HOST || 'smtpout.secureserver.net';
     const testPort = Number(req.query.port) || 465;
     const testPass = req.query.pass || process.env.SMTP_PASS || '@Neeya232026';
     const transporter = nodemailer.createTransport({

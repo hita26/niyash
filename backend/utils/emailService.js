@@ -5,7 +5,7 @@ const nodemailer = require('nodemailer');
  * Defaults to GoDaddy Titan Email (smtp.titan.email:465)
  */
 function getTransporter() {
-  const host = process.env.SMTP_HOST || 'smtp.titan.email';
+  const host = process.env.SMTP_HOST || 'smtpout.secureserver.net';
   const port = Number(process.env.SMTP_PORT) || 465;
   const isSecure = process.env.SMTP_SECURE !== 'false' && (port === 465 || port === 993);
   const user = process.env.SMTP_USER || process.env.EMAIL_USER || 'info@niyanshpharma.com';

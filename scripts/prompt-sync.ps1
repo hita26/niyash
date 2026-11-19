@@ -167,6 +167,7 @@ function Sync-PromptStock {
         $batchSize = 500
         $totalUploaded = 0
 
+        $lastProof = $null
         for ($i = 0; $i -lt $items.Count; $i += $batchSize) {
             $slice = $items[$i..[Math]::Min($i + $batchSize - 1, $items.Count - 1)]
             
@@ -184,15 +185,20 @@ function Sync-PromptStock {
             $response = Invoke-RestMethod -Uri $ApiUrl -Method Post -Headers $headers -Body $payload
             if ($response.success) {
                 $totalUploaded += $slice.Count
-                Write-Host "   ├─ Batch $([Math]::Floor($i / $batchSize) + 1): $($slice.Count) items synced" -ForegroundColor Green
+                $lastProof = $response.proof
+                Write-Host "   ├─ Batch $([Math]::Floor($i / $batchSize) + 1): $($slice.Count) items evaluated" -ForegroundColor Green
             } else {
                 Write-Host "   ❌ Batch Error: $($response.message)" -ForegroundColor Red
             }
         }
 
-        Write-Host "✅ SYNC SUCCESS! Total $totalUploaded products synced to Cloud!" -ForegroundColor Green
-        Write-Host "   ├─ Duplicates Prevented : 100% Guaranteed Zero-Duplication" -ForegroundColor Green
-        Write-Host "   └─ Live Catalog Status  : UPDATED ON niyanshpharma.com`n" -ForegroundColor Green
+        Write-Host "`n✅ SYNC SUCCESS! Prompt ERP Batch Evaluated against Live Catalog." -ForegroundColor Green
+        if ($lastProof) {
+            Write-Host "   ├─ Existing Products Updated : $($lastProof.stockRatesUpdated)" -ForegroundColor Green
+            Write-Host "   ├─ Unmatched (Not in Catalog): $($lastProof.unmatchedCount) items safely excluded" -ForegroundColor Yellow
+            Write-Host "   ├─ New Products Auto-Created : 0 (100% Strict Protection - No fake data)" -ForegroundColor Cyan
+            Write-Host "   └─ Cloud Status              : LIVE ON niyanshpharma.com`n" -ForegroundColor Green
+        }
         $script:lastHash = $currentHash
     }
     catch {

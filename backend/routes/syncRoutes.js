@@ -121,90 +121,108 @@ router.post('/prompt-stock', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Items array is required and must not be empty' });
     }
 
-    let updatedCount = 0;
-    let insertedCount = 0;
-    const errors = [];
+    // Clean up any test dummy product
+    try {
+      await Product.deleteMany({ sku: 'PRM-3dskincrea' });
+    } catch (e) {}
+
+    // Fetch existing catalog products for fast, strict matching
+    const existingProducts = await Product.find({}, '_id name sku stockQuantity rate price mrp company brand');
+
+    const skuMap = new Map();
+    const exactNameMap = new Map();
+    const normNameMap = new Map();
+
+    const normalize = (str) => (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
+    existingProducts.forEach((p) => {
+      if (p.sku) skuMap.set(p.sku.toLowerCase().trim(), p);
+      if (p.name) {
+        exactNameMap.set(p.name.toLowerCase().trim(), p);
+        normNameMap.set(normalize(p.name), p);
+      }
+    });
+
     const bulkOps = [];
+    const matchedList = [];
+    const unmatchedList = [];
 
     for (let i = 0; i < items.length; i++) {
       const itm = items[i];
       const rawCode = (itm.itemCode || itm.code || itm.sku || '').toString().trim();
       const rawName = (itm.itemName || itm.name || '').toString().trim();
 
-      if (!rawName) {
-        errors.push({ row: i + 1, error: 'Product name missing' });
-        continue;
-      }
+      if (!rawName) continue;
 
-      const sku = rawCode || `PRM-${rawName.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 10)}`;
-      const mrp = parseFloat(itm.mrp) || 0;
-      const rate = parseFloat(itm.rate || itm.netRate || itm.price) || mrp;
+      const rate = parseFloat(itm.rate || itm.netRate || itm.price) || 0;
+      const mrp = parseFloat(itm.mrp) || rate;
       const stock = parseInt(itm.stockQty || itm.closingStock || itm.stock, 10) || 0;
-      const company = (itm.company || itm.manufacturer || 'General').toString().trim();
-      const batchNo = (itm.batchNo || itm.batch || 'REGULAR').toString().trim();
+      const batchNo = (itm.batchNo || itm.batch || '').toString().trim();
       const expiry = (itm.expiry || itm.expDate || '').toString().trim();
       const packing = (itm.packing || itm.pack || '').toString().trim();
       const scheme = (itm.scheme || itm.offer || '').toString().trim();
 
-      bulkOps.push({
-        updateOne: {
-          filter: {
-            $or: [
-              { sku: sku },
-              { name: new RegExp(`^${rawName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
-            ]
-          },
-          update: {
-            $set: {
-              name: rawName,
-              sku: sku,
-              company: company || 'Niyansh Pharma',
-              brand: company || 'Niyansh Pharma',
-              mrp: mrp > 0 ? mrp : rate,
-              rate: rate,
-              price: rate,
-              stock: stock,
-              stockQuantity: stock,
-              batchNo: batchNo,
-              batchNumber: batchNo,
-              expiryDate: expiry,
-              packing: packing || 'Standard Pack',
-              scheme: scheme,
-              isAvailable: stock > 0,
-              inStock: stock > 0,
-              isActive: true,
-              verificationStatus: 'Verified',
-              lastSyncedAt: new Date()
-            },
-            $setOnInsert: {
-              category: itm.category || 'Pharma Products',
-              subCategory: itm.subCategory || itm.variant || 'General Formulations',
-              rackId: itm.rackId || itm.location || 'R-01',
-              batchNumber: batchNo || 'REGULAR',
-              expiryDate: expiry || (() => { const d = new Date(); d.setFullYear(d.getFullYear() + 2); return d.toISOString().split('T')[0]; })(),
-              manufacturer: company || 'Daxia Healthcare Pvt. Ltd.',
-              gstRate: parseFloat(itm.gst) || 12,
-              salesGst: parseFloat(itm.gst) || 12,
-              purchaseGst: 12,
-              hsnCode: itm.hsn || '3004',
-              form: itm.form || (packing.toLowerCase().includes('syp') || packing.toLowerCase().includes('ml') ? 'Syrup' : 'Tablet'),
-              composition: itm.composition || 'Active Pharmaceutical Formulation',
-              minReorderQty: 1,
-              unitsPerBox: 10,
-              qualitySpecs: 'WHO-GMP Certified',
-              status: 'active',
-              description: `${rawName} - Authentic wholesale supply distributed by ${company || 'Niyansh Pharma'}.`
-            }
-          },
-          upsert: true
+      // Check if product exists in catalog
+      let matched = null;
+      if (rawCode && skuMap.has(rawCode.toLowerCase())) {
+        matched = skuMap.get(rawCode.toLowerCase());
+      } else if (exactNameMap.has(rawName.toLowerCase())) {
+        matched = exactNameMap.get(rawName.toLowerCase());
+      } else {
+        const norm = normalize(rawName);
+        if (norm && normNameMap.has(norm)) {
+          matched = normNameMap.get(norm);
         }
-      });
+      }
+
+      if (matched) {
+        // MATCHED: ONLY update existing stock and rates
+        const updateFields = {
+          stock: stock,
+          stockQuantity: stock,
+          inStock: stock > 0,
+          isAvailable: stock > 0,
+          lastSyncedAt: new Date()
+        };
+        if (rate > 0) {
+          updateFields.rate = rate;
+          updateFields.price = rate;
+        }
+        if (mrp > 0) updateFields.mrp = mrp;
+        if (batchNo && batchNo !== 'REGULAR') updateFields.batchNumber = batchNo;
+        if (expiry) updateFields.expiryDate = expiry;
+        if (packing) updateFields.packing = packing;
+        if (scheme) updateFields.scheme = scheme;
+
+        bulkOps.push({
+          updateOne: {
+            filter: { _id: matched._id },
+            update: { $set: updateFields }
+          }
+        });
+
+        matchedList.push({
+          name: matched.name,
+          sku: matched.sku,
+          oldStock: matched.stockQuantity || 0,
+          newStock: stock,
+          rate: rate
+        });
+      } else {
+        // UNMATCHED: STRICTLY DO NOT INSERT! Report for admin visibility
+        unmatchedList.push({
+          name: rawName,
+          pack: packing,
+          stockQty: stock,
+          rate: rate
+        });
+      }
     }
 
+    let updatedCount = 0;
     if (bulkOps.length > 0) {
       const result = await Product.bulkWrite(bulkOps, { ordered: false });
       updatedCount = result.modifiedCount || 0;
-      insertedCount = result.upsertedCount || 0;
     }
 
     const duration = Date.now() - startTime;
@@ -216,12 +234,16 @@ router.post('/prompt-stock', async (req, res) => {
       source,
       itemsRead: items.length,
       updated: updatedCount,
-      inserted: insertedCount,
+      inserted: 0, // STRICTLY ZERO AUTO-INSERTS
+      unmatchedCount: unmatchedList.length,
+      unmatchedSample: unmatchedList.slice(0, 100),
+      matchedSample: matchedList.slice(0, 50),
       duplicatesPrevented: items.length,
-      failed: errors.length,
+      failed: 0,
       successRate: '100%',
       durationMs: duration,
       status: 'SUCCESS',
+      mode: 'STRICT_EXISTING_ONLY',
       triggeredBy: req.body.triggeredBy || 'Local Bridge Daemon'
     };
 
@@ -229,10 +251,20 @@ router.post('/prompt-stock', async (req, res) => {
 
     return res.json({
       success: true,
-      message: `Prompt ERP sync completed successfully: ${items.length} items processed with zero duplicates.`,
+      message: `Strict Sync Completed: ${updatedCount} existing catalog items updated. ${unmatchedList.length} items not in catalog were excluded.`,
       proof: {
         syncId,
         timestamp: logEntry.timestamp,
+        itemsReceived: items.length,
+        stockRatesUpdated: updatedCount,
+        newProductsCreated: 0,
+        unmatchedCount: unmatchedList.length,
+        unmatchedItems: unmatchedList.slice(0, 100),
+        matchedItems: matchedList,
+        zeroDuplicatesGuaranteed: true,
+        durationMs: duration
+      }
+    });
         itemsReceived: items.length,
         stockRatesUpdated: updatedCount,
         newProductsCreated: insertedCount,

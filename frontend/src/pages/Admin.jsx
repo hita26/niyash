@@ -558,6 +558,173 @@ const formatDate = (dateStr) => {
   });
 };
 
+// Smart Combobox / Searchable Autocomplete Dropdown with Custom Add Support
+function SmartCombobox({
+  id,
+  value,
+  onChange,
+  options = [],
+  placeholder = 'Type to search or select...',
+  required = false,
+  style = {}
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [filterText, setFilterText] = useState(value || '');
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    setFilterText(value || '');
+  }, [value]);
+
+  useEffect(() => {
+    const handleDocClick = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleDocClick);
+    return () => document.removeEventListener('mousedown', handleDocClick);
+  }, []);
+
+  const query = (filterText || '').trim().toLowerCase();
+  const filtered = options.filter(opt => {
+    const s = typeof opt === 'string' ? opt : (opt?.name || opt?.label || '');
+    return s.toLowerCase().includes(query);
+  });
+
+  const handleSelect = (val) => {
+    onChange(val);
+    setFilterText(val);
+    setIsOpen(false);
+  };
+
+  const handleChange = (e) => {
+    const val = e.target.value;
+    setFilterText(val);
+    onChange(val);
+    setIsOpen(true);
+  };
+
+  return (
+    <div ref={containerRef} style={{ position: 'relative', width: '100%' }}>
+      <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+        <input
+          id={id}
+          type="text"
+          required={required}
+          value={filterText}
+          placeholder={placeholder}
+          onChange={handleChange}
+          onFocus={() => setIsOpen(true)}
+          style={{
+            padding: '9px 34px 9px 13px',
+            border: '1px solid #cbd5e1',
+            borderRadius: '8px',
+            fontSize: '0.9rem',
+            width: '100%',
+            backgroundColor: '#ffffff',
+            boxSizing: 'border-box',
+            outline: 'none',
+            ...style
+          }}
+        />
+        <button
+          type="button"
+          tabIndex={-1}
+          onClick={() => setIsOpen(prev => !prev)}
+          style={{
+            position: 'absolute',
+            right: '8px',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: '4px',
+            display: 'flex',
+            alignItems: 'center',
+            color: '#64748b'
+          }}
+          title="Toggle dropdown list"
+        >
+          <ChevronDown size={16} style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+        </button>
+      </div>
+
+      {isOpen && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 'calc(100% + 4px)',
+            left: 0,
+            right: 0,
+            maxHeight: '220px',
+            overflowY: 'auto',
+            backgroundColor: '#ffffff',
+            border: '1px solid #cbd5e1',
+            borderRadius: '8px',
+            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08)',
+            zIndex: 9999,
+            padding: '4px'
+          }}
+        >
+          {filtered.length > 0 ? (
+            filtered.map((item, idx) => {
+              const label = typeof item === 'string' ? item : (item?.name || item?.label);
+              const isSelected = label.toLowerCase() === (value || '').toLowerCase();
+              return (
+                <div
+                  key={`${label}-${idx}`}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    handleSelect(label);
+                  }}
+                  style={{
+                    padding: '8px 12px',
+                    fontSize: '0.88rem',
+                    cursor: 'pointer',
+                    borderRadius: '6px',
+                    backgroundColor: isSelected ? '#eff6ff' : 'transparent',
+                    color: isSelected ? 'var(--primary-blue)' : 'var(--text-dark)',
+                    fontWeight: isSelected ? '700' : '500',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    transition: 'background-color 0.15s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isSelected ? '#e0f2fe' : '#f8fafc'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = isSelected ? '#eff6ff' : 'transparent'}
+                >
+                  <span>{label}</span>
+                  {isSelected && <Check size={14} color="var(--primary-blue)" />}
+                </div>
+              );
+            })
+          ) : (
+            <div style={{ padding: '8px 12px', fontSize: '0.84rem', color: '#64748b' }}>
+              <div>No exact match in presets.</div>
+              {filterText.trim() && (
+                <div
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    handleSelect(filterText.trim());
+                  }}
+                  style={{
+                    marginTop: '4px',
+                    color: 'var(--primary-blue)',
+                    fontWeight: '600',
+                    cursor: 'pointer'
+                  }}
+                >
+                  + Use "{filterText.trim()}"
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Admin() {
   const { t, formatCurrency, formatDate, translateStatus, translatePaymentStatus } = useLanguage();
   // Authentication & Role State
@@ -801,7 +968,105 @@ function Admin() {
   const [prodHsnCode, setProdHsnCode] = useState('3004');
   const [prodPurchaseGst, setProdPurchaseGst] = useState(12);
   const [prodSalesGst, setProdSalesGst] = useState(12);
+  const [isCustomPurchaseGst, setIsCustomPurchaseGst] = useState(false);
+  const [isCustomSalesGst, setIsCustomSalesGst] = useState(false);
   const [prodExpiryDate, setProdExpiryDate] = useState('');
+
+  // Sequential SKU Generation starting from SKU-000001
+  const getNextSequentialSku = (productList = products, offset = 0) => {
+    let maxNum = 0;
+    if (Array.isArray(productList)) {
+      productList.forEach(p => {
+        const s = String(p?.sku || '').trim();
+        const match = s.match(/^sku[-_]?(\d+)$/i);
+        if (match) {
+          const num = parseInt(match[1], 10);
+          if (!isNaN(num) && num > maxNum) {
+            maxNum = num;
+          }
+        }
+      });
+    }
+    const nextNum = maxNum + 1 + offset;
+    return `SKU-${String(nextNum).padStart(6, '0')}`;
+  };
+
+  // Normalization for HTML5 Date Picker (YYYY-MM-DD)
+  const normalizeExpiryForPicker = (dateVal) => {
+    if (!dateVal) return '';
+    const s = String(dateVal).trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+    if (/^\d{4}-\d{2}$/.test(s)) return `${s}-01`;
+    const m = s.match(/^(\d{1,2})[\/\-](\d{4})$/);
+    if (m) {
+      const month = m[1].padStart(2, '0');
+      const year = m[2];
+      return `${year}-${month}-01`;
+    }
+    return s;
+  };
+
+  // Options for Smart Comboboxes
+  const availableCategoryOptions = useMemo(() => {
+    const base = [
+      'Pharma Products',
+      'OTC Products',
+      'Injectables',
+      'Surgical & Medical Supplies',
+      'Diagnostics & Formulations',
+      'Ophthalmology & Dermatology',
+      'Cardiovascular & CNS'
+    ];
+    const dynamic = new Set(base);
+    if (Array.isArray(products)) {
+      products.forEach(p => {
+        if (p?.category && p.category !== 'Custom') dynamic.add(p.category);
+      });
+    }
+    return Array.from(dynamic);
+  }, [products]);
+
+  const availableFormOptions = useMemo(() => {
+    const base = [
+      'Tablet',
+      'Capsule',
+      'Injection',
+      'Syrup',
+      'Suspension',
+      'Drops',
+      'Cream',
+      'Ointment',
+      'Gel',
+      'Lotion',
+      'Soap',
+      'Spray',
+      'Powder',
+      'IV Fluid',
+      'Surgical & Device'
+    ];
+    const formSet = new Set(base);
+    if (Array.isArray(products)) {
+      products.forEach(p => {
+        if (p?.form) formSet.add(p.form);
+      });
+    }
+    return Array.from(formSet);
+  }, [products]);
+
+  const availableCompanyOptions = useMemo(() => {
+    const compSet = new Set(['Daxia Healthcare', 'BIOCHEM']);
+    if (Array.isArray(companies)) {
+      companies.forEach(c => {
+        if (c?.name) compSet.add(c.name);
+      });
+    }
+    if (Array.isArray(products)) {
+      products.forEach(p => {
+        if (p?.company) compSet.add(p.company);
+      });
+    }
+    return Array.from(compSet);
+  }, [companies, products]);
 
 
   // Bulk Excel & CSV Import States
@@ -2149,9 +2414,13 @@ _Helpline: +91 9316566894_`;
       setProdRackId(product.rackId || '');
       setProdBatchNumber(product.batchNumber || product.batchNo || '');
       setProdHsnCode(product.hsnCode || '3004');
-      setProdPurchaseGst(product.purchaseGst !== undefined ? product.purchaseGst : 12);
-      setProdSalesGst(product.salesGst !== undefined ? product.salesGst : (product.gstRate || 12));
-      setProdExpiryDate(product.expiryDate || '');
+      const purVal = Number(product.purchaseGst !== undefined ? product.purchaseGst : 12);
+      setProdPurchaseGst(purVal);
+      setIsCustomPurchaseGst(![0, 5, 12, 18, 28].includes(purVal));
+      const salVal = Number(product.salesGst !== undefined ? product.salesGst : (product.gstRate || 12));
+      setProdSalesGst(salVal);
+      setIsCustomSalesGst(![0, 5, 12, 18, 28].includes(salVal));
+      setProdExpiryDate(normalizeExpiryForPicker(product.expiryDate) || '');
       const customMap = {};
       if (Array.isArray(product.customFields)) {
         product.customFields.forEach(cf => {
@@ -2173,7 +2442,7 @@ _Helpline: +91 9316566894_`;
       setProdCategory('Pharma Products');
       setProdCustomCategory('');
       setProdSubCategory('');
-      setProdSku('');
+      setProdSku(getNextSequentialSku());
       setProdPrice('');
       setProdMrp('');
       setProdStockQuantity('100');
@@ -2190,6 +2459,8 @@ _Helpline: +91 9316566894_`;
       setProdHsnCode('3004');
       setProdPurchaseGst(12);
       setProdSalesGst(12);
+      setIsCustomPurchaseGst(false);
+      setIsCustomSalesGst(false);
       setProdExpiryDate('');
       setProdCustomValues({});
       setProdImageUrl('');
@@ -2394,16 +2665,16 @@ _Helpline: +91 9316566894_`;
       showToast('Manufacturer / Company is required', 'error');
       return;
     }
-    const finalCategory = prodCategory === 'Custom' ? prodCustomCategory.trim() : prodCategory;
+    const finalCategory = (prodCategory || '').trim() || (prodCustomCategory || '').trim();
     if (!finalCategory) {
       showToast('Product category is required', 'error');
       return;
     }
     if (!prodComposition.trim()) {
-      showToast('Contains is required', 'error');
+      showToast('Content is required', 'error');
       return;
     }
-    if (!prodForm) {
+    if (!prodForm || !prodForm.trim()) {
       showToast('Formulation Form is required', 'error');
       return;
     }
@@ -2443,8 +2714,15 @@ _Helpline: +91 9316566894_`;
       showToast('HSN Code is required', 'error');
       return;
     }
-    if (!prodExpiryDate.trim()) {
+    if (!prodExpiryDate || !prodExpiryDate.trim()) {
       showToast('Expiry Date is required', 'error');
+      return;
+    }
+    const expDate = new Date(prodExpiryDate);
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    if (!isNaN(expDate.getTime()) && expDate < todayStart) {
+      showToast('Expiry Date cannot be in the past. Please select a valid future date.', 'error');
       return;
     }
 
@@ -2487,7 +2765,7 @@ _Helpline: +91 9316566894_`;
   };
 
   const executeActualSaveProduct = async () => {
-    const finalCategory = prodCategory === 'Custom' ? prodCustomCategory.trim() : prodCategory;
+    const finalCategory = (prodCategory || '').trim() || (prodCustomCategory || '').trim() || 'Pharma Products';
     const finalImages = prodImages.filter(img => img && img.trim() !== '').slice(0, 5);
     const finalMainImage = prodImageUrl || (finalImages.length > 0 ? finalImages[0] : '');
 
@@ -2504,6 +2782,9 @@ _Helpline: +91 9316566894_`;
 
     const assignedCompany = prodCompany.trim() || 'Daxia Healthcare';
 
+    const purGst = !isNaN(parseFloat(prodPurchaseGst)) ? parseFloat(prodPurchaseGst) : 12;
+    const salGst = !isNaN(parseFloat(prodSalesGst)) ? parseFloat(prodSalesGst) : 12;
+
     const payload = {
       name: prodName.trim(),
       brand: prodName.trim(), // Brand name unified with Product Name
@@ -2517,14 +2798,14 @@ _Helpline: +91 9316566894_`;
       inStock: prodInStock && validStock > 0,
       packing: prodPacking.trim(),
       composition: prodComposition.trim(),
-      form: prodForm,
+      form: (prodForm || 'Tablet').trim(),
       manufacturer: prodManufacturer.trim() || assignedCompany,
       rackId: prodRackId.trim(),
       batchNumber: prodBatchNumber.trim(),
       hsnCode: prodHsnCode.trim() || '3004',
-      purchaseGst: parseFloat(prodPurchaseGst) || 12,
-      salesGst: parseFloat(prodSalesGst) || 12,
-      gstRate: parseFloat(prodSalesGst) || 12,
+      purchaseGst: purGst,
+      salesGst: salGst,
+      gstRate: salGst,
       expiryDate: prodExpiryDate.trim(),
       customFields: customFieldsArr,
       imageUrl: finalMainImage,
@@ -2723,7 +3004,7 @@ _Helpline: +91 9316566894_`;
       showToast('No products to export', 'error');
       return;
     }
-    const headers = ['Name', 'SKU', 'Brand', 'Category', 'SubCategory', 'Price (PTR)', 'MRP', 'Stock Quantity', 'In Stock', 'Featured', 'Active', 'Packing', 'Composition', 'Form', 'Image URL'];
+    const headers = ['Name', 'SKU', 'Brand', 'Category', 'SubCategory', 'Price (PTR)', 'MRP', 'Stock Quantity', 'In Stock', 'Featured', 'Active', 'Packing', 'Content', 'Form', 'Image URL'];
     const rows = products.map(p => [
       `"${(p.name || '').replace(/"/g, '""')}"`,
       `"${p.sku || ''}"`,
@@ -2784,12 +3065,12 @@ _Helpline: +91 9316566894_`;
   const handleDownloadExcelTemplate = () => {
     try {
       // 1. Column Headers for Sheet 1
-      const headers = [
+      const baseHeaders = [
         'Product Name / Brand Name *',
         'SKU / ID',
         'Manufacturer / Company *',
         'Category *',
-        'Chemical / Active Composition *',
+        'Content *',
         'Formulation Form *',
         'Wholesale Price (₹) *',
         'MRP (₹) *',
@@ -2809,6 +3090,10 @@ _Helpline: +91 9316566894_`;
         'Live on Website (YES/NO)'
       ];
 
+      // Add dynamic custom parameters to headers if defined
+      const extraCustomHeaders = (customFieldDefs || []).map(def => def.fieldName);
+      const headers = [...baseHeaders, ...extraCustomHeaders];
+
       // 2. Sample Data Rows
       const sampleCompany1 = companies[0]?.name || 'Daxia Healthcare';
       const sampleCompany2 = companies[1]?.name || companies[0]?.name || 'BIOCHEM';
@@ -2816,7 +3101,7 @@ _Helpline: +91 9316566894_`;
       const sampleRows = [
         [
           'Paracetamol Tablet IP 500mg',
-          'NP-825665',
+          'SKU-000001',
           sampleCompany1,
           'Pharma Products',
           'Paracetamol IP 500mg',
@@ -2829,18 +3114,19 @@ _Helpline: +91 9316566894_`;
           `${sampleCompany1} Pvt. Ltd., Plot 12, GIDC, Rajkot, Gujarat`,
           'R-04, Shelf-B',
           '3004',
-          '12/2027',
+          '2027-12-31',
           12,
           12,
           'Effective relief of fever, mild to moderate body pain and headache.',
           'YES',
           'NO',
           'YES',
-          'YES'
+          'YES',
+          ...(customFieldDefs || []).map(() => '')
         ],
         [
           'Pantoprazole Gastro-Resistant Tabs IP 40mg',
-          'NP-825666',
+          'SKU-000002',
           sampleCompany2,
           'Pharma Products',
           'Pantoprazole Sodium IP 40mg',
@@ -2853,14 +3139,15 @@ _Helpline: +91 9316566894_`;
           `${sampleCompany2} Pharma Labs, Ahmedabad, Gujarat`,
           'R-02, Shelf-A',
           '3004',
-          '08/2027',
+          '2027-08-31',
           12,
           12,
           'Provides fast and sustained relief from acidity, heartburn, and GERD symptoms.',
           'YES',
           'YES',
           'NO',
-          'YES'
+          'YES',
+          ...(customFieldDefs || []).map(() => '')
         ]
       ];
 
@@ -2871,7 +3158,7 @@ _Helpline: +91 9316566894_`;
         { wch: 16 }, // SKU
         { wch: 26 }, // Company
         { wch: 22 }, // Category
-        { wch: 32 }, // Composition
+        { wch: 32 }, // Content
         { wch: 16 }, // Form
         { wch: 18 }, // Wholesale Price
         { wch: 14 }, // MRP
@@ -2888,7 +3175,8 @@ _Helpline: +91 9316566894_`;
         { wch: 18 }, // In Stock
         { wch: 22 }, // Featured
         { wch: 24 }, // Our Product
-        { wch: 20 }  // Live
+        { wch: 20 }, // Live
+        ...(customFieldDefs || []).map(() => ({ wch: 20 }))
       ];
 
       // 4. Create Worksheet for Companies List
@@ -2952,10 +3240,10 @@ _Helpline: +91 9316566894_`;
 
           const name = getVal('Product Name / Brand Name *', 'Product Name', 'Name', 'Product', 'Brand Name');
           const rawSku = getVal('SKU / ID', 'SKU', 'Product ID', 'Item Code');
-          const sku = rawSku || `NP-${Date.now().toString().slice(-6)}-${idx + 1}`;
+          const sku = rawSku || getNextSequentialSku(products, idx);
           const company = getVal('Manufacturer / Company *', 'Manufacturer / Company', 'Company', 'Manufacturer') || 'Daxia Healthcare';
           const category = getVal('Category *', 'Category') || 'Pharma Products';
-          const composition = getVal('Chemical / Active Composition *', 'Chemical / Active Composition', 'Composition', 'Chemical');
+          const composition = getVal('Content *', 'Content', 'Contain', 'Chemical / Active Composition *', 'Chemical / Active Composition', 'Composition', 'Chemical');
           const form = getVal('Formulation Form *', 'Formulation Form', 'Form') || 'Tablet';
           const price = parseFloat(getVal('Wholesale Price (₹) *', 'Wholesale Price', 'Wholesale', 'Price', 'PTR')) || 0;
           const mrp = parseFloat(getVal('MRP (₹) *', 'MRP', 'Retail MRP')) || (price > 0 ? Math.round(price * 1.35) : 0);
@@ -2965,10 +3253,22 @@ _Helpline: +91 9316566894_`;
           const manufacturer = getVal('Manufacturer Details *', 'Manufacturer Details') || `${company} Pvt. Ltd.`;
           const rackId = getVal('Rack ID / Location *', 'Rack ID / Location', 'Rack ID', 'Rack', 'Location') || 'R-01';
           const hsnCode = getVal('HSN Code *', 'HSN Code', 'HSN') || '3004';
-          const expiryDate = getVal('Expiry Date *', 'Expiry Date', 'Expiry', 'Exp') || '12/2027';
-          const purchaseGst = parseFloat(getVal('Purchase GST (%) *', 'Purchase GST', 'Purchase GST Rate (%)')) || 12;
-          const salesGst = parseFloat(getVal('Sales GST (%) *', 'Sales GST', 'Sales GST Rate (%)')) || 12;
+          const expiryDate = getVal('Expiry Date *', 'Expiry Date', 'Expiry', 'Exp') || '2027-12-31';
+          const purchaseGst = parseFloat(getVal('Purchase GST (%) *', 'Purchase GST', 'Purchase GST Rate (%)', 'Purchase GST Rate')) || 12;
+          const salesGst = parseFloat(getVal('Sales GST (%) *', 'Sales GST', 'Sales GST Rate (%)', 'Sales GST Rate', 'GST Rate')) || 12;
           const description = getVal('Product Description & Indications *', 'Product Description', 'Description') || `${name} formulation by ${company}.`;
+
+          // Dynamic custom field values from Excel columns
+          const rowCustomFields = (customFieldDefs || []).map(def => {
+            const val = getVal(def.fieldName, def.fieldKey);
+            return {
+              fieldKey: def.fieldKey,
+              fieldName: def.fieldName,
+              fieldValue: val !== undefined ? val : '',
+              fieldType: def.fieldType || 'text',
+              isRequired: Boolean(def.isRequired)
+            };
+          });
 
           const inStockVal = getVal('In Stock (YES/NO)', 'In Stock', 'Publish as In Stock').toUpperCase();
           const inStock = inStockVal === 'NO' || inStockVal === 'FALSE' ? false : true;
@@ -3047,6 +3347,7 @@ _Helpline: +91 9316566894_`;
             purchaseGst,
             salesGst,
             description,
+            customFields: rowCustomFields,
             inStock,
             featured,
             isOurProduct,
@@ -3103,10 +3404,10 @@ _Helpline: +91 9316566894_`;
           if (rowObj.name || rowObj['product name']) {
             rowsToImport.push({
               name: rowObj.name || rowObj['product name'],
-              sku: rowObj.sku || `NP-${Date.now().toString().slice(-6)}-${i}`,
+              sku: rowObj.sku || getNextSequentialSku(products, i),
               company: rowObj.company || 'Daxia Healthcare',
               category: rowObj.category || 'Pharma Products',
-              composition: rowObj.composition || '',
+              composition: rowObj.content || rowObj.composition || rowObj.contain || '',
               form: rowObj.form || 'Tablet',
               price: parseFloat(rowObj.price || rowObj.ptr || 0),
               mrp: parseFloat(rowObj.mrp || 0),
@@ -3116,7 +3417,7 @@ _Helpline: +91 9316566894_`;
               manufacturer: rowObj.manufacturer || 'Daxia Healthcare Pvt. Ltd.',
               rackId: rowObj.rackid || 'R-01',
               hsnCode: rowObj.hsncode || '3004',
-              expiryDate: rowObj.expirydate || '12/2027',
+              expiryDate: rowObj.expirydate || '2027-12-31',
               purchaseGst: parseFloat(rowObj.purchasegst || 12),
               salesGst: parseFloat(rowObj.salesgst || 12),
               description: rowObj.description || '',
@@ -3776,7 +4077,7 @@ _Helpline: +91 9316566894_`;
 
               <div className="admin-b2b-licenses-row">
                 {[
-                  { key: 'dl', label: 'D.L.No.', val: '20B, 264618, 21B, 264619' },
+                  { key: 'dl', label: 'D.L.No.', val: '20B GJ-RJT-264618, 21B GJ-RJT-264619' },
                   { key: 'gstin', label: 'GSTIN', val: '24BVXPP6108F2Z7' },
                   { key: 'pan', label: 'PAN', val: 'BVXPP6108F' },
                   { key: 'food', label: 'Food Lic.', val: '20726030000567' }
@@ -8727,22 +9028,23 @@ _Helpline: +91 9316566894_`;
                         </label>
                         <button 
                           type="button"
-                          onClick={() => setProdSku(`NP-${Date.now().toString().slice(-6)}`)}
+                          onClick={() => setProdSku(getNextSequentialSku())}
                           style={{ background: 'none', border: 'none', color: 'var(--primary-blue)', fontSize: '0.78rem', cursor: 'pointer', fontWeight: '700' }}
+                          title="Generate sequential SKU"
                         >
                           Generate
                         </button>
                       </div>
                       <input 
                         id="modal-sku"
-                        type="text" required placeholder="Click Generate or enter SKU" 
+                        type="text" required placeholder="E.g., SKU-000001" 
                         value={prodSku} onChange={(e) => setProdSku(e.target.value)}
                         style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.92rem', fontFamily: 'monospace', width: '100%', boxSizing: 'border-box' }}
                       />
                     </div>
                   </div>
 
-                  {/* Row 2: Manufacturer / Company (Direct Input / Datalist) & Category */}
+                  {/* Row 2: Manufacturer / Company & Category (Smart Autocomplete / Direct Entry) */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -8751,65 +9053,42 @@ _Helpline: +91 9316566894_`;
                         </label>
                         <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: '700' }}>Type new or pick</span>
                       </div>
-                      <input 
+                      <SmartCombobox 
                         id="modal-comp"
-                        type="text"
-                        list="modal-company-suggestions"
                         required
                         placeholder="Type or select company name..."
                         value={prodCompany} 
-                        onChange={(e) => {
-                          setProdCompany(e.target.value);
-                          setProdManufacturer(e.target.value);
+                        onChange={(val) => {
+                          setProdCompany(val);
+                          setProdManufacturer(val);
                         }}
-                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box', backgroundColor: '#ffffff' }}
+                        options={availableCompanyOptions}
                       />
-                      <datalist id="modal-company-suggestions">
-                        <option value="Daxia Healthcare" />
-                        {companies.map(c => (
-                          <option key={c._id || c.name} value={c.name}>{c.name}</option>
-                        ))}
-                      </datalist>
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <label htmlFor="modal-cat" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                        Category <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
-                      </label>
-                      <select 
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <label htmlFor="modal-cat" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                          Category <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                        </label>
+                        <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: '700' }}>Type new or pick</span>
+                      </div>
+                      <SmartCombobox 
                         id="modal-cat"
                         required
+                        placeholder="Type or select category..."
                         value={prodCategory} 
-                        onChange={(e) => setProdCategory(e.target.value)}
-                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' }}
-                      >
-                        <option value="Pharma Products">Pharma Products</option>
-                        <option value="OTC Products">OTC Products</option>
-                        <option value="Injectables">Injectables</option>
-                        <option value="Surgical & Medical Supplies">Surgical & Medical Supplies</option>
-                        <option value="Diagnostics & Formulations">Diagnostics & Formulations</option>
-                        <option value="Ophthalmology & Dermatology">Ophthalmology & Dermatology</option>
-                        <option value="Cardiovascular & CNS">Cardiovascular & CNS</option>
-                        <option value="Custom">Custom Category...</option>
-                      </select>
-                      {prodCategory === 'Custom' && (
-                        <input 
-                          type="text" 
-                          required
-                          placeholder="Enter custom category name..."
-                          value={prodCustomCategory}
-                          onChange={(e) => setProdCustomCategory(e.target.value)}
-                          style={{ marginTop: '4px', padding: '7px 10px', border: '1px solid #cbd5e1', borderRadius: '7px', fontSize: '0.85rem', width: '100%', boxSizing: 'border-box' }}
-                        />
-                      )}
+                        onChange={(val) => setProdCategory(val)}
+                        options={availableCategoryOptions}
+                      />
                     </div>
                   </div>
 
-                  {/* Row 3: Chemical Composition & Formulation Form */}
+                  {/* Row 3: Content & Formulation Form */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
                       <label htmlFor="modal-composition" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                        Chemical / Active Composition <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                        Content <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
                       </label>
                       <input 
                         id="modal-composition"
@@ -8820,31 +9099,20 @@ _Helpline: +91 9316566894_`;
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <label htmlFor="modal-form" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                        Formulation Form <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
-                      </label>
-                      <select 
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <label htmlFor="modal-form" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                          Formulation Form <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                        </label>
+                        <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: '700' }}>Type new or pick</span>
+                      </div>
+                      <SmartCombobox 
                         id="modal-form"
                         required
-                        value={prodForm} onChange={(e) => setProdForm(e.target.value)}
-                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' }}
-                      >
-                        <option value="Tablet">Tablet</option>
-                        <option value="Capsule">Capsule</option>
-                        <option value="Injection">Injection</option>
-                        <option value="Syrup">Syrup</option>
-                        <option value="Suspension">Suspension</option>
-                        <option value="Drops">Drops</option>
-                        <option value="Cream">Cream</option>
-                        <option value="Ointment">Ointment</option>
-                        <option value="Gel">Gel</option>
-                        <option value="Lotion">Lotion</option>
-                        <option value="Soap">Soap</option>
-                        <option value="Spray">Spray</option>
-                        <option value="Powder">Powder</option>
-                        <option value="IV Fluid">IV Fluid</option>
-                        <option value="Surgical">Surgical & Device</option>
-                      </select>
+                        placeholder="Type or select form (e.g. Tablet, Syrup)..."
+                        value={prodForm} 
+                        onChange={(val) => setProdForm(val)}
+                        options={availableFormOptions}
+                      />
                     </div>
                   </div>
 
@@ -8927,7 +9195,7 @@ _Helpline: +91 9316566894_`;
                     />
                   </div>
 
-                  {/* Row 7: Pharma Logistics - Batch Number, Rack ID, HSN Code, Expiry Date */}
+                  {/* Row 7: Pharma Logistics - Batch Number, Rack ID, HSN Code, Expiry Date with Date Picker */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
                       <label htmlFor="modal-batch" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
@@ -8971,55 +9239,120 @@ _Helpline: +91 9316566894_`;
                       </label>
                       <input 
                         id="modal-expiry"
-                        type="text" required placeholder="E.g., 12/2027 or MM/YYYY" 
-                        value={prodExpiryDate} onChange={(e) => setProdExpiryDate(e.target.value)}
-                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' }}
+                        type="date" 
+                        required
+                        min={new Date().toISOString().split('T')[0]}
+                        value={prodExpiryDate} 
+                        onChange={(e) => setProdExpiryDate(e.target.value)}
+                        style={{ padding: '8.5px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box', backgroundColor: '#ffffff' }}
                       />
                     </div>
                   </div>
 
-                  {/* Row 8: GST Rates (Purchase & Sales) */}
+                  {/* Row 8: GST Rates (Purchase & Sales) with Custom Rate Support */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <label htmlFor="modal-purgst" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                        Purchase GST Rate (%) <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
-                      </label>
-                      <select 
-                        id="modal-purgst"
-                        required
-                        value={prodPurchaseGst} 
-                        onChange={(e) => setProdPurchaseGst(Number(e.target.value))}
-                        style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', backgroundColor: '#ffffff', width: '100%', boxSizing: 'border-box' }}
-                      >
-                        <option value={0}>0% (Exempt)</option>
-                        <option value={5}>5% GST</option>
-                        <option value={12}>12% GST (Medicines)</option>
-                        <option value={18}>18% GST</option>
-                        <option value={28}>28% GST</option>
-                      </select>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <label htmlFor="modal-purgst" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                          Purchase GST Rate (%) <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                        </label>
+                        <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '600' }}>
+                          {isCustomPurchaseGst ? 'Custom Rate' : 'Preset'}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <select 
+                          id="modal-purgst"
+                          required
+                          value={[0, 5, 12, 18, 28].includes(Number(prodPurchaseGst)) && !isCustomPurchaseGst ? Number(prodPurchaseGst) : 'custom'} 
+                          onChange={(e) => {
+                            if (e.target.value === 'custom') {
+                              setIsCustomPurchaseGst(true);
+                            } else {
+                              setIsCustomPurchaseGst(false);
+                              setProdPurchaseGst(Number(e.target.value));
+                            }
+                          }}
+                          style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', backgroundColor: '#ffffff', flex: isCustomPurchaseGst ? '1 1 50%' : '1 1 100%', boxSizing: 'border-box' }}
+                        >
+                          <option value={0}>0% (Exempt)</option>
+                          <option value={5}>5% GST</option>
+                          <option value={12}>12% GST (Medicines)</option>
+                          <option value={18}>18% GST</option>
+                          <option value={28}>28% GST</option>
+                          <option value="custom">Custom GST Rate...</option>
+                        </select>
+                        {isCustomPurchaseGst && (
+                          <div style={{ position: 'relative', flex: '1 1 50%', minWidth: 0 }}>
+                            <input 
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              max="100"
+                              required
+                              placeholder="Enter %"
+                              value={prodPurchaseGst !== undefined ? prodPurchaseGst : ''}
+                              onChange={(e) => setProdPurchaseGst(e.target.value === '' ? '' : Number(e.target.value))}
+                              style={{ padding: '9px 24px 9px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box', fontWeight: '600' }}
+                            />
+                            <span style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', color: '#64748b', fontSize: '0.85rem', fontWeight: 'bold' }}>%</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <label htmlFor="modal-salesgst" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                        Sales GST Rate (%) <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
-                      </label>
-                      <select 
-                        id="modal-salesgst"
-                        required
-                        value={prodSalesGst} 
-                        onChange={(e) => setProdSalesGst(Number(e.target.value))}
-                        style={{ padding: '9px 13px', border: '1px solid #86efac', borderRadius: '8px', fontSize: '0.9rem', backgroundColor: '#ffffff', fontWeight: '600', width: '100%', boxSizing: 'border-box' }}
-                      >
-                        <option value={0}>0% (Exempt)</option>
-                        <option value={5}>5% GST</option>
-                        <option value={12}>12% GST (Standard Medicines)</option>
-                        <option value={18}>18% GST</option>
-                        <option value={28}>28% GST</option>
-                      </select>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <label htmlFor="modal-salesgst" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                          Sales GST Rate (%) <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                        </label>
+                        <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '600' }}>
+                          {isCustomSalesGst ? 'Custom Rate' : 'Preset'}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <select 
+                          id="modal-salesgst"
+                          required
+                          value={[0, 5, 12, 18, 28].includes(Number(prodSalesGst)) && !isCustomSalesGst ? Number(prodSalesGst) : 'custom'} 
+                          onChange={(e) => {
+                            if (e.target.value === 'custom') {
+                              setIsCustomSalesGst(true);
+                            } else {
+                              setIsCustomSalesGst(false);
+                              setProdSalesGst(Number(e.target.value));
+                            }
+                          }}
+                          style={{ padding: '9px 13px', border: '1px solid #86efac', borderRadius: '8px', fontSize: '0.9rem', backgroundColor: '#ffffff', fontWeight: '600', flex: isCustomSalesGst ? '1 1 50%' : '1 1 100%', boxSizing: 'border-box' }}
+                        >
+                          <option value={0}>0% (Exempt)</option>
+                          <option value={5}>5% GST</option>
+                          <option value={12}>12% GST (Standard Medicines)</option>
+                          <option value={18}>18% GST</option>
+                          <option value={28}>28% GST</option>
+                          <option value="custom">Custom GST Rate...</option>
+                        </select>
+                        {isCustomSalesGst && (
+                          <div style={{ position: 'relative', flex: '1 1 50%', minWidth: 0 }}>
+                            <input 
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              max="100"
+                              required
+                              placeholder="Enter %"
+                              value={prodSalesGst !== undefined ? prodSalesGst : ''}
+                              onChange={(e) => setProdSalesGst(e.target.value === '' ? '' : Number(e.target.value))}
+                              style={{ padding: '9px 24px 9px 12px', border: '1px solid #86efac', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box', fontWeight: '600' }}
+                            />
+                            <span style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', color: '#64748b', fontSize: '0.85rem', fontWeight: 'bold' }}>%</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
 
-                  {/* Row 9: Dynamic Custom Fields Section */}
+                  {/* Row 9: Dynamic Custom Fields Section (Aligned in Standard Grid) */}
                   <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '12px', display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <label style={{ fontSize: '0.88rem', fontWeight: '700', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -9039,29 +9372,33 @@ _Helpline: +91 9316566894_`;
                         Need extra fields (Batch No, Schedule Drug, Storage Temp)? Click <strong>"Add Custom Field"</strong> above to create fields that will automatically save to all products.
                       </div>
                     ) : (
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px', width: '100%', boxSizing: 'border-box' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
                         {customFieldDefs.map(def => (
-                          <div key={def.fieldKey} style={{ display: 'flex', flexDirection: 'column', gap: '4px', backgroundColor: '#f8fafc', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', minWidth: 0, boxSizing: 'border-box' }}>
+                          <div key={def.fieldKey} style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0, boxSizing: 'border-box' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                                {def.fieldName} {def.isRequired && <span style={{ color: '#ef4444' }}>*</span>}
+                              <label htmlFor={`modal-cf-${def.fieldKey}`} style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
+                                {def.fieldName} {def.isRequired && <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>}
                               </label>
                               <button 
                                 type="button"
                                 onClick={() => handleDeleteCustomFieldDef(def.fieldKey)}
-                                title="Remove this field definition"
-                                style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '2px' }}
+                                title={`Remove ${def.fieldName} parameter`}
+                                style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '2px 4px', display: 'flex', alignItems: 'center', gap: '3px', fontSize: '0.74rem', borderRadius: '4px', transition: 'all 0.15s' }}
+                                onMouseEnter={(e) => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.backgroundColor = '#fee2e2'; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.backgroundColor = 'transparent'; }}
                               >
-                                <X size={12} />
+                                <X size={13} />
+                                <span>Remove</span>
                               </button>
                             </div>
                             <input 
+                              id={`modal-cf-${def.fieldKey}`}
                               type={def.fieldType === 'number' ? 'number' : def.fieldType === 'date' ? 'date' : 'text'}
                               placeholder={def.placeholder || `Enter ${def.fieldName}...`}
                               required={def.isRequired}
                               value={prodCustomValues[def.fieldKey] !== undefined ? prodCustomValues[def.fieldKey] : ''}
                               onChange={(e) => setProdCustomValues(prev => ({ ...prev, [def.fieldKey]: e.target.value }))}
-                              style={{ padding: '6px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem', width: '100%', boxSizing: 'border-box' }}
+                              style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box', backgroundColor: '#ffffff' }}
                             />
                           </div>
                         ))}
@@ -9293,7 +9630,7 @@ _Helpline: +91 9316566894_`;
                       <div>• <strong>SKU / ID</strong> (Auto-generated if blank)</div>
                       <div>• <strong>Manufacturer / Company *</strong></div>
                       <div>• <strong>Category *</strong></div>
-                      <div>• <strong>Chemical / Active Composition *</strong></div>
+                      <div>• <strong>Content *</strong> (or Chemical / Active Composition)</div>
                       <div>• <strong>Formulation Form *</strong></div>
                       <div>• <strong>Wholesale Price (₹) *</strong></div>
                       <div>• <strong>MRP (₹) *</strong></div>
@@ -9417,7 +9754,7 @@ _Helpline: +91 9316566894_`;
                             <th style={{ padding: '10px 12px', minWidth: '190px' }}>Product Name / Brand</th>
                             <th style={{ padding: '10px 12px', minWidth: '110px' }}>SKU / ID</th>
                             <th style={{ padding: '10px 12px', minWidth: '140px' }}>Company</th>
-                            <th style={{ padding: '10px 12px', minWidth: '170px' }}>Composition</th>
+                            <th style={{ padding: '10px 12px', minWidth: '170px' }}>Content</th>
                             <th style={{ padding: '10px 12px', minWidth: '130px' }}>Packing & Form</th>
                             <th style={{ padding: '10px 12px', minWidth: '95px' }}>Wholesale</th>
                             <th style={{ padding: '10px 12px', minWidth: '85px' }}>MRP</th>
@@ -9862,10 +10199,10 @@ _Helpline: +91 9316566894_`;
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
                   <span style={{ color: 'var(--text-medium)', fontWeight: '600' }}>Category:</span>
-                  <span style={{ color: 'var(--text-dark)', textAlign: 'right' }}>{prodCategory === 'Custom' ? prodCustomCategory : prodCategory}</span>
+                  <span style={{ color: 'var(--text-dark)', textAlign: 'right' }}>{prodCategory}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
-                  <span style={{ color: 'var(--text-medium)', fontWeight: '600' }}>Contains:</span>
+                  <span style={{ color: 'var(--text-medium)', fontWeight: '600' }}>Content:</span>
                   <span style={{ color: 'var(--text-dark)', textAlign: 'right' }}>{prodComposition}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>

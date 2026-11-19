@@ -157,24 +157,27 @@ router.all('/test-welcome-email', async (req, res) => {
     if (apiKey !== validApiKey) {
       return res.status(401).json({ success: false, message: 'Invalid API key' });
     }
-    const nodemailer = require('nodemailer');
-    const testHost = req.query.host || process.env.SMTP_HOST || 'smtpout.secureserver.net';
-    const testPort = Number(req.query.port) || 465;
-    const testPass = req.query.pass || process.env.SMTP_PASS || '@Neeya232026';
-    const transporter = nodemailer.createTransport({
-      host: testHost,
-      port: testPort,
-      secure: testPort === 465,
-      auth: { user: 'info@niyanshpharma.com', pass: testPass },
-      tls: { rejectUnauthorized: false }
+    const { sendAdminWelcomeEmail } = require('../utils/emailService');
+    const recipient = req.query.to || 'haripatel267998@gmail.com';
+    const recipientName = req.query.name || 'Hari Patel';
+    const pwd = req.query.password || 'admin123';
+    const mailResult = await sendAdminWelcomeEmail({
+      to: recipient,
+      name: recipientName,
+      password: pwd,
+      role: 'admin',
+      permissions: {
+        canManageProducts: true,
+        canBulkImport: true,
+        canManageOrders: true,
+        canManageCompanies: true,
+        canManageNews: true,
+        canManageEnquiries: true,
+        canManageLedgers: false
+      },
+      isUpdate: req.query.isUpdate === 'true'
     });
-    const info = await transporter.sendMail({
-      from: '"Niyansh Pharma" <info@niyanshpharma.com>',
-      to: req.query.to || 'haripatel267998@gmail.com',
-      subject: 'Welcome to Niyansh Pharma Admin Hub - Verification',
-      text: 'Hello Hari Patel, Welcome to Niyansh Pharma Admin Team! Login Portal: https://niyanshpharma.com/admin'
-    });
-    return res.json({ success: true, messageId: info.messageId });
+    return res.json(mailResult);
   } catch (err) {
     return res.json({ success: false, error: err.message });
   }

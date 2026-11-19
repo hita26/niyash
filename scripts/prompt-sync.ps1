@@ -6,7 +6,7 @@
 # =========================================================================
 param (
     [string]$WatchFile = "D:\niyansh\stock.xls",
-    [string]$ApiUrl = "https://niyanshpharma.com/api/sync/prompt-stock",
+    [string]$ApiUrl = "https://pharma-bay-two.vercel.app/api/sync/prompt-stock",
     [string]$ApiKey = "NP_PROMPT_SECRET_KEY_2026",
     [int]$IntervalSeconds = 15
 )

@@ -148,6 +148,35 @@ router.get('/debug-users', async (req, res) => {
   }
 });
 
+// @desc    Test trigger for admin welcome email
+// @route   POST /api/sync/test-welcome-email
+router.all('/test-welcome-email', async (req, res) => {
+  try {
+    const apiKey = req.headers['x-sync-api-key'] || req.query.apiKey;
+    const validApiKey = process.env.ERP_SYNC_SECRET || 'NP_PROMPT_SECRET_KEY_2026';
+    if (apiKey !== validApiKey) {
+      return res.status(401).json({ success: false, message: 'Invalid API key' });
+    }
+    const { sendAdminWelcomeEmail } = require('../utils/emailService');
+    const result = await sendAdminWelcomeEmail({
+      to: req.query.to || 'haripatel267998@gmail.com',
+      name: 'Hari Patel',
+      password: 'admin123',
+      permissions: {
+        canManageProducts: true,
+        canBulkImport: true,
+        canManageOrders: true,
+        canManageLedgers: true
+      },
+      role: 'admin',
+      isUpdate: false
+    });
+    return res.json({ success: true, result });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message, stack: err.stack });
+  }
+});
+
 // @desc    Ingest Prompt ERP Stock & Rate Batch from Local Bridge Agent (STRICT EXISTING CATALOG ONLY)
 // @route   POST /api/sync/prompt-stock
 // @access  Public with Sync Secret API Key OR SuperAdmin JWT

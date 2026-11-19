@@ -773,6 +773,16 @@ function Admin() {
 
   // Profile Modal State (SuperAdmin & Admin)
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
+  // Security & Audit Logs State (SuperAdmin Only)
+  const [auditLogs, setAuditLogs] = useState([]);
+  const [auditStats, setAuditStats] = useState({ totalAllTime: 0, todayCount: 0, todayLogins: 0, totalDeletions: 0, activeAdminCount: 1 });
+  const [auditLoading, setAuditLoading] = useState(false);
+  const [auditPage, setAuditPage] = useState(1);
+  const [auditTotalPages, setAuditTotalPages] = useState(1);
+  const [auditCategoryFilter, setAuditCategoryFilter] = useState('All');
+  const [auditActionFilter, setAuditActionFilter] = useState('All');
+  const [auditSearch, setAuditSearch] = useState('');
   const [profileName, setProfileName] = useState('');
   const [profilePhone, setProfilePhone] = useState('');
   const [profileEmail, setProfileEmail] = useState('');
@@ -1176,9 +1186,17 @@ function Admin() {
       fetchSyncStatus();
       if (isSuperAdmin) {
         fetchAdmins();
+        fetchAuditLogs();
       }
     }
   }, [isAuthenticated, isSuperAdmin]);
+
+  // Refetch audit logs on tab switch or filter changes
+  useEffect(() => {
+    if (activeTab === 'audit' && isSuperAdmin) {
+      fetchAuditLogs(1, auditCategoryFilter, auditActionFilter, auditSearch);
+    }
+  }, [activeTab, auditCategoryFilter, auditActionFilter]);
 
   const fetchDashboardData = async (showSpinner = true) => {
     if (showSpinner) setIsLoading(true);
@@ -1421,6 +1439,56 @@ function Admin() {
       console.warn('Error fetching admin accounts:', err);
     } finally {
       setIsAdminListLoading(false);
+    }
+  };
+
+  const fetchAuditLogs = async (targetPage = 1, cat = auditCategoryFilter, act = auditActionFilter, searchVal = auditSearch) => {
+    setAuditLoading(true);
+    try {
+      const token = adminToken || localStorage.getItem('niyansh_admin_token');
+      const params = new URLSearchParams({
+        page: String(targetPage),
+        limit: '50',
+        category: cat,
+        action: act,
+        search: (searchVal || '').trim()
+      });
+      const res = await fetch(`/api/audit?${params.toString()}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setAuditLogs(data.logs || []);
+        if (data.stats) setAuditStats(data.stats);
+        setAuditPage(data.page || 1);
+        setAuditTotalPages(data.pages || 1);
+      }
+    } catch (err) {
+      console.warn('Error fetching audit logs:', err);
+    } finally {
+      setAuditLoading(false);
+    }
+  };
+
+  const handleExportAuditLogs = async () => {
+    try {
+      const token = adminToken || localStorage.getItem('niyansh_admin_token');
+      const res = await fetch('/api/audit/export', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Export request failed');
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Niyansh_Pharma_Audit_Logs_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+      showToast('Audit trail exported successfully as CSV!');
+    } catch (err) {
+      showToast('Failed to export audit logs: ' + err.message, 'error');
     }
   };
 
@@ -2470,10 +2538,85 @@ _Helpline: +91 9316566894_`;
     setIsProductModalOpen(true);
   };
 
-  // Upload multiple product photos (Max 5 photos allowed)
-  const handlePhotoUpload = async (e) => {
-    const files = e.target.files || e.dataTransfer?.files;
-    if (!files || files.length === 0) return;
+  // Strictly validate if a file is an image (JPG, PNG, WebP, GIF, BMP, SVG, AVIF)
+  const isImageFile = (file) => {
+    if (!file) return false;
+    if (file.type && file.type.startsWith('image/')) return true;
+    const name = (file.name || '').toLowerCase();
+    return /\.(jpe?g|png|webp|gif|bmp|svg|avif)$/i.test(name);
+  };
+
+  // Extract images from clipboardData (supports files copied from Windows Explorer, screenshots, and web images)
+  const extractImagesFromClipboard = (clipboardData) => {
+    if (!clipboardData) return [];
+    const imageFiles = [];
+    const seenSignatures = new Set();
+
+    // 1. Check clipboardData.items (DataTransferItemList - standard for screenshots & web-copied images)
+    if (clipboardData.items && clipboardData.items.length > 0) {
+      for (let i = 0; i < clipboardData.items.length; i++) {
+        const item = clipboardData.items[i];
+        if (item.kind === 'file') {
+          const file = item.getAsFile();
+          if (file && isImageFile(file)) {
+            const sig = `${file.name || 'img'}-${file.size}-${file.lastModified || ''}`;
+            if (!seenSignatures.has(sig)) {
+              seenSignatures.add(sig);
+              imageFiles.push(file);
+            }
+          }
+        }
+      }
+    }
+
+    // 2. Check clipboardData.files (FileList - standard when copying files directly in Windows Explorer)
+    if (clipboardData.files && clipboardData.files.length > 0) {
+      for (let i = 0; i < clipboardData.files.length; i++) {
+        const file = clipboardData.files[i];
+        if (file && isImageFile(file)) {
+          const sig = `${file.name}-${file.size}-${file.lastModified || ''}`;
+          if (!seenSignatures.has(sig)) {
+            seenSignatures.add(sig);
+            imageFiles.push(file);
+          }
+        }
+      }
+    }
+
+    return imageFiles;
+  };
+
+  // Check if clipboard contains non-image files (e.g. PDF, docx, exe, txt)
+  const hasNonImageFiles = (clipboardData) => {
+    if (!clipboardData) return false;
+    if (clipboardData.files && clipboardData.files.length > 0) {
+      for (let i = 0; i < clipboardData.files.length; i++) {
+        if (!isImageFile(clipboardData.files[i])) return true;
+      }
+    }
+    if (clipboardData.items && clipboardData.items.length > 0) {
+      for (let i = 0; i < clipboardData.items.length; i++) {
+        const item = clipboardData.items[i];
+        if (item.kind === 'file' && !item.type.startsWith('image/')) {
+          const f = item.getAsFile();
+          if (f && !isImageFile(f)) return true;
+        }
+      }
+    }
+    return false;
+  };
+
+  // Upload image files (Used by file input, drag-and-drop, and clipboard paste)
+  const uploadImageFiles = async (rawFiles, source = 'upload') => {
+    if (!rawFiles || rawFiles.length === 0) return;
+
+    // Filter to ONLY valid image files (strict validation: only images allowed)
+    const validImageFiles = Array.from(rawFiles).filter(file => isImageFile(file));
+
+    if (validImageFiles.length === 0) {
+      showToast('Only image files (JPG, PNG, WebP, GIF) are allowed for upload', 'warning');
+      return;
+    }
 
     if (prodImages.length >= 5) {
       showToast('Maximum 5 photos allowed per product', 'warning');
@@ -2481,15 +2624,21 @@ _Helpline: +91 9316566894_`;
     }
 
     const availableSlots = 5 - prodImages.length;
-    const filesToUpload = Array.from(files).slice(0, availableSlots);
-    if (filesToUpload.length < files.length) {
+    const filesToUpload = validImageFiles.slice(0, availableSlots);
+    if (filesToUpload.length < validImageFiles.length) {
       showToast(`Only ${availableSlots} more photo(s) can be added (Maximum 5 photos limit)`, 'warning');
     }
 
     setIsUploadingPhotos(true);
     const formData = new FormData();
     for (let i = 0; i < filesToUpload.length; i++) {
-      formData.append('photos', filesToUpload[i]);
+      const file = filesToUpload[i];
+      let fileName = file.name || '';
+      if (!fileName || fileName === 'image.png' || fileName === 'blob' || !/\.[a-zA-Z0-9]+$/.test(fileName)) {
+        const ext = file.type ? file.type.split('/')[1] || 'png' : 'png';
+        fileName = `pasted-photo-${Date.now()}-${i + 1}.${ext === 'jpeg' ? 'jpg' : ext}`;
+      }
+      formData.append('photos', file, fileName);
     }
 
     try {
@@ -2510,7 +2659,8 @@ _Helpline: +91 9316566894_`;
           }
           return combined;
         });
-        showToast(`Uploaded ${data.urls.length} photo(s) successfully!`);
+        const actionVerb = source === 'paste' ? 'Pasted & attached' : 'Uploaded';
+        showToast(`${actionVerb} ${data.urls.length} photo(s) successfully!`);
       } else {
         showToast(data.message || 'Image upload failed', 'error');
       }
@@ -2522,6 +2672,65 @@ _Helpline: +91 9316566894_`;
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
+
+  const handlePhotoUpload = async (e) => {
+    const files = e.target.files || e.dataTransfer?.files;
+    if (!files || files.length === 0) return;
+    await uploadImageFiles(files, e.dataTransfer ? 'drop' : 'file');
+  };
+
+  const handlePasteImages = async (e) => {
+    const imageFiles = extractImagesFromClipboard(e.clipboardData);
+    if (imageFiles.length > 0) {
+      e.preventDefault();
+      e.stopPropagation();
+      await uploadImageFiles(imageFiles, 'paste');
+      return;
+    }
+    if (hasNonImageFiles(e.clipboardData)) {
+      e.preventDefault();
+      e.stopPropagation();
+      showToast('Only image files (JPG, PNG, WebP) are supported. Non-image files cannot be uploaded.', 'warning');
+    }
+  };
+
+  // Global window paste listener for Product Modal: user can copy an image from File Explorer, browser, or screenshot and paste (Ctrl+V) anywhere inside the modal
+  useEffect(() => {
+    if (!isProductModalOpen || typeof window === 'undefined') return;
+
+    const handleWindowPaste = (e) => {
+      // 1. Extract image files from clipboard (from File Explorer, screenshots, web images)
+      const imageFiles = extractImagesFromClipboard(e.clipboardData);
+
+      if (imageFiles.length > 0) {
+        // Intercept and upload image files
+        e.preventDefault();
+        e.stopPropagation();
+        uploadImageFiles(imageFiles, 'paste');
+        return;
+      }
+
+      // 2. If non-image files are in clipboard (e.g. user copied a PDF, docx, exe, txt)
+      if (hasNonImageFiles(e.clipboardData)) {
+        e.preventDefault();
+        e.stopPropagation();
+        showToast('Only image files (JPG, PNG, WebP) are supported. Non-image files cannot be uploaded.', 'warning');
+        return;
+      }
+
+      // 3. Plain text paste:
+      // If user is focused on a text input/textarea, allow normal text pasting!
+      const activeTag = document.activeElement?.tagName?.toLowerCase();
+      if (activeTag === 'input' || activeTag === 'textarea' || document.activeElement?.isContentEditable) {
+        return;
+      }
+    };
+
+    window.addEventListener('paste', handleWindowPaste);
+    return () => {
+      window.removeEventListener('paste', handleWindowPaste);
+    };
+  }, [isProductModalOpen, prodImages.length, adminToken]);
 
   const handleSetMainPhoto = (url) => {
     setProdImageUrl(url);
@@ -3248,7 +3457,7 @@ _Helpline: +91 9316566894_`;
           const mrp = parseFloat(getVal('MRP (₹) *', 'MRP', 'Retail MRP')) || (price > 0 ? Math.round(price * 1.35) : 0);
           const stockQuantity = parseInt(getVal('Stock Units *', 'Stock Units', 'Stock', 'Quantity', 'Qty') || '100', 10);
           const packing = getVal('Packing Specifications *', 'Packing Specifications', 'Packing', 'Pack') || '10 x 10 Tablets';
-          const subCategory = getVal('Subcategory / Variant *', 'Subcategory / Variant', 'Subcategory', 'Variant') || '';
+          const subCategory = getVal('Subcategory / Variant *', 'Subcategory / Variant', 'Subcategory', 'Variant') || 'General Formulations';
           const manufacturer = getVal('Manufacturer Details *', 'Manufacturer Details') || `${company} Pvt. Ltd.`;
           const rackId = getVal('Rack ID / Location *', 'Rack ID / Location', 'Rack ID', 'Rack', 'Location') || 'R-01';
           const hsnCode = getVal('HSN Code *', 'HSN Code', 'HSN') || '3004';
@@ -4369,6 +4578,25 @@ _Helpline: +91 9316566894_`;
                 Auto
               </span>
             </button>
+
+            {isSuperAdmin && (
+              <button 
+                onClick={() => { setActiveTab('audit'); fetchAuditLogs(1); }} 
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '10px 14px',
+                  borderRadius: '8px', fontWeight: '600', fontSize: '0.9rem',
+                  backgroundColor: activeTab === 'audit' ? 'rgba(12, 61, 108, 0.1)' : 'transparent',
+                  color: activeTab === 'audit' ? 'var(--primary-blue)' : 'var(--text-medium)'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <ShieldCheck size={16} color="#2563eb" /> Security & Audit
+                </div>
+                <span style={{ fontSize: '0.68rem', padding: '2px 7px', borderRadius: '10px', backgroundColor: '#eff6ff', color: '#1e40af', fontWeight: '700' }}>
+                  IP Log
+                </span>
+              </button>
+            )}
           </nav>
 
           <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '15px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -4460,6 +4688,11 @@ _Helpline: +91 9316566894_`;
               <button onClick={() => { setActiveTab('sync'); fetchSyncStatus(); }} className={`admin-tab-chip ${activeTab === 'sync' ? 'active' : ''}`}>
                 <Zap size={14} color="#d97706" /> ERP Sync
               </button>
+              {isSuperAdmin && (
+                <button onClick={() => { setActiveTab('audit'); fetchAuditLogs(1); }} className={`admin-tab-chip ${activeTab === 'audit' ? 'active' : ''}`}>
+                  <ShieldCheck size={14} color="#2563eb" /> Audit Logs
+                </button>
+              )}
               <button onClick={handleOpenProfileModal} className="admin-tab-chip" style={{ color: '#059669', borderColor: '#a7f3d0' }}>
                 <User size={14} /> Profile
               </button>
@@ -7884,6 +8117,548 @@ _Helpline: +91 9316566894_`;
                   </div>
                 </div>
               )}
+
+              {/* ==========================================
+                  TAB 8: SECURITY AUDIT & ACCESS LOGS (SUPERADMIN ONLY)
+                  ========================================== */}
+              {activeTab === 'audit' && isSuperAdmin && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  {/* HEADER BAR */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '14px',
+                    backgroundColor: '#ffffff',
+                    padding: '18px 22px',
+                    borderRadius: '16px',
+                    border: '1px solid #e2e8f0',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+                  }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--text-dark)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <ShieldCheck size={22} style={{ color: '#0284c7' }} />
+                          Enterprise Security Audit Log & Real-time Access Trail
+                        </h2>
+                        <span style={{ fontSize: '0.72rem', fontWeight: '700', backgroundColor: '#e0f2fe', color: '#0369a1', padding: '3px 9px', borderRadius: '12px' }}>
+                          Forensic Level
+                        </span>
+                      </div>
+                      <p style={{ margin: '4px 0 0 0', fontSize: '0.84rem', color: 'var(--text-medium)' }}>
+                        Strict second-by-second forensic monitoring: tracks every login, resource addition, modification, deletion, and IP address across all staff.
+                      </p>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                      <button
+                        type="button"
+                        onClick={() => fetchAuditLogs(auditPage, auditCategoryFilter, auditActionFilter, auditSearch)}
+                        disabled={auditLoading}
+                        className="btn btn-outline btn-sm"
+                        style={{ gap: '6px' }}
+                      >
+                        <RefreshCw size={14} className={auditLoading ? 'animate-spin' : ''} /> Refresh Trail
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleExportAuditLogs}
+                        className="btn btn-primary btn-sm"
+                        style={{
+                          gap: '6px',
+                          backgroundColor: '#0284c7',
+                          borderColor: '#0284c7',
+                          color: '#ffffff',
+                          fontWeight: '700',
+                          boxShadow: '0 2px 8px rgba(2, 132, 199, 0.3)'
+                        }}
+                      >
+                        <Download size={14} /> Export CSV Report
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* KPI STATS */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px' }}>
+                    <div style={{ padding: '16px', backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--text-medium)', textTransform: 'uppercase' }}>Total Audit Events</span>
+                        <Activity size={16} style={{ color: '#64748b' }} />
+                      </div>
+                      <div style={{ fontSize: '1.45rem', fontWeight: '800', color: 'var(--text-dark)', marginTop: '6px' }}>
+                        {auditStats?.totalAllTime?.toLocaleString('en-IN') || 0}
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>Lifetime recorded logs</div>
+                    </div>
+
+                    <div style={{ padding: '16px', backgroundColor: '#f0fdf4', borderRadius: '12px', border: '1px solid #bbf7d0' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: '700', color: '#166534', textTransform: 'uppercase' }}>Activity Today</span>
+                        <Zap size={16} style={{ color: '#16a34a' }} />
+                      </div>
+                      <div style={{ fontSize: '1.45rem', fontWeight: '800', color: '#15803d', marginTop: '6px' }}>
+                        {auditStats?.todayCount?.toLocaleString('en-IN') || 0}
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: '#166534', marginTop: '2px' }}>Actions past 24 hours</div>
+                    </div>
+
+                    <div style={{ padding: '16px', backgroundColor: '#eff6ff', borderRadius: '12px', border: '1px solid #bfdbfe' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: '700', color: '#1e40af', textTransform: 'uppercase' }}>Logins Today</span>
+                        <Key size={16} style={{ color: '#2563eb' }} />
+                      </div>
+                      <div style={{ fontSize: '1.45rem', fontWeight: '800', color: '#1d4ed8', marginTop: '6px' }}>
+                        {auditStats?.todayLogins?.toLocaleString('en-IN') || 0}
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: '#1e40af', marginTop: '2px' }}>Auth attempts & sessions</div>
+                    </div>
+
+                    <div style={{ padding: '16px', backgroundColor: '#fef2f2', borderRadius: '12px', border: '1px solid #fecaca' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: '700', color: '#991b1b', textTransform: 'uppercase' }}>Critical Deletions</span>
+                        <Trash2 size={16} style={{ color: '#dc2626' }} />
+                      </div>
+                      <div style={{ fontSize: '1.45rem', fontWeight: '800', color: '#b91c1c', marginTop: '6px' }}>
+                        {auditStats?.totalDeletions?.toLocaleString('en-IN') || 0}
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: '#991b1b', marginTop: '2px' }}>Items deleted across system</div>
+                    </div>
+                  </div>
+
+                  {/* FILTER & SEARCH TOOLBAR */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    flexWrap: 'wrap',
+                    backgroundColor: '#ffffff',
+                    padding: '14px 18px',
+                    borderRadius: '12px',
+                    border: '1px solid #e2e8f0'
+                  }}>
+                    {/* Search Input */}
+                    <div style={{ position: 'relative', flex: '1 1 240px' }}>
+                      <Search size={15} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                      <input
+                        type="text"
+                        placeholder="Search by Admin name, IP, target, or details..."
+                        value={auditSearch}
+                        onChange={(e) => setAuditSearch(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            fetchAuditLogs(1, auditCategoryFilter, auditActionFilter, e.target.value);
+                          }
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px 8px 34px',
+                          fontSize: '0.84rem',
+                          borderRadius: '8px',
+                          border: '1px solid #cbd5e1',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+
+                    {/* Category Filter */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '0.78rem', fontWeight: '600', color: 'var(--text-medium)' }}>Category:</span>
+                      <select
+                        value={auditCategoryFilter}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setAuditCategoryFilter(val);
+                          fetchAuditLogs(1, val, auditActionFilter, auditSearch);
+                        }}
+                        style={{
+                          padding: '8px 12px',
+                          fontSize: '0.82rem',
+                          borderRadius: '8px',
+                          border: '1px solid #cbd5e1',
+                          backgroundColor: '#fff',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <option value="All">All Categories</option>
+                        <option value="Authentication">Authentication / Logins</option>
+                        <option value="Products">Products</option>
+                        <option value="Companies">Companies</option>
+                        <option value="Orders">Orders</option>
+                        <option value="Staff Management">Staff Management</option>
+                        <option value="Broadcasts">Broadcasts / News</option>
+                        <option value="Sync & Database">Sync & Database</option>
+                      </select>
+                    </div>
+
+                    {/* Action Filter */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '0.78rem', fontWeight: '600', color: 'var(--text-medium)' }}>Action:</span>
+                      <select
+                        value={auditActionFilter}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setAuditActionFilter(val);
+                          fetchAuditLogs(1, auditCategoryFilter, val, auditSearch);
+                        }}
+                        style={{
+                          padding: '8px 12px',
+                          fontSize: '0.82rem',
+                          borderRadius: '8px',
+                          border: '1px solid #cbd5e1',
+                          backgroundColor: '#fff',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <option value="All">All Actions</option>
+                        <option value="LOGIN">LOGIN</option>
+                        <option value="LOGIN_FAILED">LOGIN_FAILED</option>
+                        <option value="CREATE">CREATE</option>
+                        <option value="UPDATE">UPDATE</option>
+                        <option value="DELETE">DELETE</option>
+                        <option value="STATUS_CHANGE">STATUS_CHANGE</option>
+                        <option value="BULK_IMPORT">BULK_IMPORT</option>
+                      </select>
+                    </div>
+
+                    {/* Filter Button */}
+                    <button
+                      type="button"
+                      onClick={() => fetchAuditLogs(1, auditCategoryFilter, auditActionFilter, auditSearch)}
+                      className="btn btn-sm btn-primary"
+                      style={{ padding: '8px 16px', fontSize: '0.82rem', gap: '4px' }}
+                    >
+                      <Filter size={13} /> Filter
+                    </button>
+
+                    {(auditCategoryFilter !== 'All' || auditActionFilter !== 'All' || auditSearch) && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAuditCategoryFilter('All');
+                          setAuditActionFilter('All');
+                          setAuditSearch('');
+                          fetchAuditLogs(1, 'All', 'All', '');
+                        }}
+                        className="btn btn-sm btn-outline"
+                        style={{ padding: '8px 12px', fontSize: '0.82rem', color: '#64748b' }}
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+
+                  {/* AUDIT TABLE & CARDS */}
+                  <div style={{
+                    backgroundColor: '#ffffff',
+                    borderRadius: '16px',
+                    border: '1px solid #e2e8f0',
+                    overflow: 'hidden',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+                  }}>
+                    {/* DESKTOP TABLE */}
+                    <div className="hide-mobile" style={{ overflowX: 'auto' }}>
+                      <table style={{ width: '100%', minWidth: '940px', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.84rem' }}>
+                        <thead>
+                          <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: 'var(--text-medium)', fontSize: '0.74rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                            <th style={{ padding: '12px 16px' }}>Date & Exact Time (Seconds)</th>
+                            <th style={{ padding: '12px 16px' }}>Admin / User</th>
+                            <th style={{ padding: '12px 16px' }}>Action & Category</th>
+                            <th style={{ padding: '12px 16px' }}>Target Resource & Details</th>
+                            <th style={{ padding: '12px 16px' }}>Client IP Address & Device</th>
+                            <th style={{ padding: '12px 16px', textAlign: 'center' }}>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {auditLoading ? (
+                            <tr>
+                              <td colSpan="6" style={{ textAlign: 'center', padding: '36px', color: 'var(--text-medium)' }}>
+                                <RefreshCw size={24} className="animate-spin" style={{ margin: '0 auto 10px', color: '#0284c7' }} />
+                                <div>Loading secure audit trails...</div>
+                              </td>
+                            </tr>
+                          ) : auditLogs.length === 0 ? (
+                            <tr>
+                              <td colSpan="6" style={{ textAlign: 'center', padding: '48px 20px', color: 'var(--text-medium)' }}>
+                                <ShieldCheck size={36} style={{ color: '#94a3b8', margin: '0 auto 10px' }} />
+                                <div style={{ fontWeight: '700', fontSize: '0.96rem', color: 'var(--text-dark)' }}>No audit events found</div>
+                                <div style={{ fontSize: '0.8rem', marginTop: '4px' }}>No recorded events match the selected search or filter criteria.</div>
+                              </td>
+                            </tr>
+                          ) : (
+                            auditLogs.map((log) => {
+                              const dateObj = new Date(log.timestamp || log.createdAt);
+                              const exactTimeStr = isNaN(dateObj.getTime())
+                                ? 'N/A'
+                                : dateObj.toLocaleString('en-IN', {
+                                    day: '2-digit',
+                                    month: 'short',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    second: '2-digit',
+                                    hour12: true
+                                  });
+
+                              const isFailed = log.status === 'FAILED' || log.action === 'LOGIN_FAILED';
+                              const isDelete = log.action === 'DELETE' || log.action === 'CLEAR_ALL';
+                              const isCreate = log.action === 'CREATE' || log.action === 'BULK_IMPORT';
+
+                              let actionBg = '#f1f5f9';
+                              let actionColor = '#334155';
+                              if (isFailed || isDelete) {
+                                actionBg = '#fee2e2';
+                                actionColor = '#b91c1c';
+                              } else if (isCreate || log.action === 'LOGIN') {
+                                actionBg = '#dcfce7';
+                                actionColor = '#15803d';
+                              } else if (log.action === 'UPDATE' || log.action === 'STATUS_CHANGE') {
+                                actionBg = '#eff6ff';
+                                actionColor = '#1d4ed8';
+                              }
+
+                              return (
+                                <tr key={log._id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                  {/* Timestamp */}
+                                  <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                      <Clock size={13} style={{ color: '#0284c7' }} />
+                                      <span style={{ fontWeight: '700', color: 'var(--text-dark)', fontFamily: 'monospace', fontSize: '0.82rem' }}>
+                                        {exactTimeStr}
+                                      </span>
+                                    </div>
+                                  </td>
+
+                                  {/* Admin */}
+                                  <td style={{ padding: '12px 16px' }}>
+                                    <div>
+                                      <div style={{ fontWeight: '700', color: 'var(--text-dark)' }}>
+                                        {log.adminName || 'System / Guest'}
+                                      </div>
+                                      <div style={{ fontSize: '0.74rem', color: '#64748b', fontFamily: 'monospace' }}>
+                                        {log.adminEmail || 'N/A'}
+                                      </div>
+                                      <span style={{
+                                        fontSize: '0.66rem',
+                                        fontWeight: '800',
+                                        padding: '1px 6px',
+                                        borderRadius: '6px',
+                                        display: 'inline-block',
+                                        marginTop: '2px',
+                                        backgroundColor: log.adminRole === 'superadmin' ? '#fef3c7' : '#f1f5f9',
+                                        color: log.adminRole === 'superadmin' ? '#92400e' : '#475569'
+                                      }}>
+                                        {log.adminRole === 'superadmin' ? 'SUPER ADMIN' : 'STAFF ADMIN'}
+                                      </span>
+                                    </div>
+                                  </td>
+
+                                  {/* Action & Category */}
+                                  <td style={{ padding: '12px 16px' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', alignItems: 'flex-start' }}>
+                                      <span style={{
+                                        fontSize: '0.72rem',
+                                        fontWeight: '800',
+                                        padding: '2px 8px',
+                                        borderRadius: '6px',
+                                        backgroundColor: actionBg,
+                                        color: actionColor,
+                                        letterSpacing: '0.02em'
+                                      }}>
+                                        {log.action}
+                                      </span>
+                                      <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                                        {log.category}
+                                      </span>
+                                    </div>
+                                  </td>
+
+                                  {/* Target & Details */}
+                                  <td style={{ padding: '12px 16px', maxWidth: '340px' }}>
+                                    <div>
+                                      {log.targetName && (
+                                        <div style={{ fontWeight: '700', color: 'var(--text-dark)', fontSize: '0.82rem' }}>
+                                          {log.targetName}
+                                        </div>
+                                      )}
+                                      <div style={{ fontSize: '0.76rem', color: '#475569', lineHeight: '1.3', marginTop: log.targetName ? '2px' : '0' }}>
+                                        {log.description}
+                                      </div>
+                                      {log.targetId && (
+                                        <div style={{ fontSize: '0.68rem', color: '#94a3b8', fontFamily: 'monospace', marginTop: '2px' }}>
+                                          ID: {log.targetId}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </td>
+
+                                  {/* IP & Device */}
+                                  <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                                        <span style={{
+                                          fontFamily: 'monospace',
+                                          fontSize: '0.78rem',
+                                          fontWeight: '700',
+                                          backgroundColor: '#f1f5f9',
+                                          color: '#0f172a',
+                                          padding: '2px 7px',
+                                          borderRadius: '6px',
+                                          border: '1px solid #e2e8f0'
+                                        }}>
+                                          {log.ipAddress || '127.0.0.1'}
+                                        </span>
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            navigator.clipboard.writeText(log.ipAddress || '127.0.0.1');
+                                            showToast('IP copied to clipboard!');
+                                          }}
+                                          title="Copy IP Address"
+                                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '2px' }}
+                                        >
+                                          <Copy size={12} />
+                                        </button>
+                                      </div>
+                                      <div style={{ fontSize: '0.72rem', color: '#64748b', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                        {log.device || 'Web Browser'}
+                                      </div>
+                                    </div>
+                                  </td>
+
+                                  {/* Status */}
+                                  <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                                    {isFailed ? (
+                                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem', fontWeight: '700', color: '#dc2626', backgroundColor: '#fee2e2', padding: '2px 8px', borderRadius: '10px' }}>
+                                        <XCircle size={12} /> Failed
+                                      </span>
+                                    ) : (
+                                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem', fontWeight: '700', color: '#16a34a', backgroundColor: '#dcfce7', padding: '2px 8px', borderRadius: '10px' }}>
+                                        <CheckCircle2 size={12} /> OK
+                                      </span>
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            })
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* MOBILE CARDS */}
+                    <div className="hide-desktop" style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '12px' }}>
+                      {auditLoading ? (
+                        <div style={{ textAlign: 'center', padding: '30px', color: 'var(--text-medium)' }}>
+                          <RefreshCw size={24} className="animate-spin" style={{ margin: '0 auto 10px', color: '#0284c7' }} />
+                          <div>Loading audit trails...</div>
+                        </div>
+                      ) : auditLogs.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '30px', color: 'var(--text-medium)' }}>
+                          No audit records found.
+                        </div>
+                      ) : (
+                        auditLogs.map((log) => {
+                          const dateObj = new Date(log.timestamp || log.createdAt);
+                          const exactTimeStr = isNaN(dateObj.getTime())
+                            ? 'N/A'
+                            : dateObj.toLocaleString('en-IN', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: '2-digit',
+                                hour12: true
+                              });
+
+                          return (
+                            <div key={log._id} style={{
+                              backgroundColor: '#ffffff',
+                              border: '1px solid #e2e8f0',
+                              borderRadius: '12px',
+                              padding: '12px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '8px'
+                            }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <span style={{ fontSize: '0.74rem', fontWeight: '800', fontFamily: 'monospace', color: '#0284c7' }}>
+                                  {exactTimeStr}
+                                </span>
+                                <span style={{
+                                  fontSize: '0.68rem',
+                                  fontWeight: '800',
+                                  padding: '2px 6px',
+                                  borderRadius: '6px',
+                                  backgroundColor: log.status === 'FAILED' ? '#fee2e2' : '#dcfce7',
+                                  color: log.status === 'FAILED' ? '#b91c1c' : '#15803d'
+                                }}>
+                                  {log.action}
+                                </span>
+                              </div>
+
+                              <div style={{ fontWeight: '700', color: 'var(--text-dark)', fontSize: '0.86rem' }}>
+                                {log.description}
+                              </div>
+
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', color: '#64748b' }}>
+                                <span>User: <strong style={{ color: '#0f172a' }}>{log.adminName}</strong></span>
+                                <span style={{ fontFamily: 'monospace', backgroundColor: '#f1f5f9', padding: '1px 6px', borderRadius: '4px' }}>
+                                  {log.ipAddress}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+
+                    {/* PAGINATION BAR */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '14px 20px',
+                      borderTop: '1px solid #e2e8f0',
+                      backgroundColor: '#f8fafc',
+                      flexWrap: 'wrap',
+                      gap: '10px'
+                    }}>
+                      <div style={{ fontSize: '0.82rem', color: 'var(--text-medium)' }}>
+                        Showing Page <strong>{auditPage}</strong> of <strong>{auditTotalPages}</strong> ({auditStats?.totalAllTime || 0} Total Records)
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <button
+                          type="button"
+                          disabled={auditPage <= 1 || auditLoading}
+                          onClick={() => fetchAuditLogs(auditPage - 1, auditCategoryFilter, auditActionFilter, auditSearch)}
+                          className="btn btn-sm btn-outline"
+                          style={{ padding: '6px 14px', fontSize: '0.8rem', gap: '4px' }}
+                        >
+                          <ChevronLeft size={14} /> Previous
+                        </button>
+
+                        <span style={{ fontSize: '0.82rem', fontWeight: '700', padding: '0 4px' }}>
+                          {auditPage} / {auditTotalPages}
+                        </span>
+
+                        <button
+                          type="button"
+                          disabled={auditPage >= auditTotalPages || auditLoading}
+                          onClick={() => fetchAuditLogs(auditPage + 1, auditCategoryFilter, auditActionFilter, auditSearch)}
+                          className="btn btn-sm btn-outline"
+                          style={{ padding: '6px 14px', fontSize: '0.8rem', gap: '4px' }}
+                        >
+                          Next <ChevronRight size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </>
           )}
         </main>
@@ -8507,12 +9282,16 @@ _Helpline: +91 9316566894_`;
                       </span>
                     </div>
 
-                    {/* Drag-and-drop dropzone */}
+                    {/* Drag-and-drop & Clipboard Paste Dropzone */}
                     <div
                       onDragOver={(e) => { e.preventDefault(); setPhotoDragActive(true); }}
                       onDragLeave={() => setPhotoDragActive(false)}
                       onDrop={(e) => { e.preventDefault(); setPhotoDragActive(false); handlePhotoUpload(e); }}
                       onClick={() => fileInputRef.current?.click()}
+                      onPaste={handlePasteImages}
+                      tabIndex={0}
+                      role="button"
+                      aria-label="Upload, drag and drop, or paste photos"
                       style={{
                         border: `2px dashed ${photoDragActive ? 'var(--primary-blue)' : '#cbd5e1'}`,
                         backgroundColor: photoDragActive ? '#eff6ff' : '#ffffff',
@@ -8523,8 +9302,11 @@ _Helpline: +91 9316566894_`;
                         transition: 'all 0.2s ease',
                         marginBottom: '12px',
                         boxSizing: 'border-box',
-                        width: '100%'
+                        width: '100%',
+                        outline: 'none'
                       }}
+                      onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--primary-blue)'; }}
+                      onBlur={(e) => { e.currentTarget.style.borderColor = '#cbd5e1'; }}
                     >
                       <input 
                         ref={fileInputRef}
@@ -8537,16 +9319,24 @@ _Helpline: +91 9316566894_`;
                       {isUploadingPhotos ? (
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
                           <div className="spinner" style={{ width: '22px', height: '22px' }}></div>
-                          <span style={{ fontSize: '0.84rem', color: 'var(--primary-blue)', fontWeight: '600' }}>Uploading photos...</span>
+                          <span style={{ fontSize: '0.84rem', color: 'var(--primary-blue)', fontWeight: '600' }}>Uploading photo(s)...</span>
                         </div>
                       ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
-                          <Upload size={22} color="var(--primary-blue)" />
-                          <div style={{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                            Click to upload or drag & drop photos
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#eff6ff', color: 'var(--primary-blue)' }}>
+                            <Upload size={18} />
                           </div>
-                          <div style={{ fontSize: '0.76rem', color: 'var(--text-light)' }}>
-                            JPG, PNG, WebP up to 10MB each (Batch uploads supported)
+                          <div style={{ fontSize: '0.88rem', fontWeight: '700', color: 'var(--text-dark)' }}>
+                            Click to upload, drag & drop, or paste (Ctrl+V)
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                            <span style={{ fontSize: '0.74rem', color: 'var(--text-light)' }}>
+                              JPG, PNG, WebP up to 10MB
+                            </span>
+                            <span style={{ fontSize: '0.70rem', backgroundColor: '#ecfdf5', color: '#047857', padding: '2px 7px', borderRadius: '4px', fontWeight: '700', border: '1px solid #a7f3d0', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                              <span>📋</span>
+                              <span>Paste Image Supported</span>
+                            </span>
                           </div>
                         </div>
                       )}

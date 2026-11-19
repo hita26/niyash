@@ -6,6 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const User = require('../models/User');
 const { protect, adminOnly, superAdminOnly } = require('../middleware/authMiddleware');
+const { logAuditEvent } = require('../utils/auditLogger');
 
 let nodemailer;
 try {
@@ -268,8 +269,28 @@ router.post('/login', async (req, res) => {
     const user = await User.findOne({ email: normalizedEmail });
     if (user && (await user.comparePassword(password))) {
       if (user.isActive === false) {
+        logAuditEvent({
+          req,
+          user,
+          action: 'LOGIN_FAILED',
+          category: 'AUTH',
+          targetId: String(user._id),
+          targetName: user.name,
+          details: `Login blocked: Account is deactivated (${normalizedEmail})`,
+          status: 'BLOCKED'
+        });
         return res.status(403).json({ message: 'Your admin/user account has been deactivated. Please contact Super Admin.' });
       }
+
+      logAuditEvent({
+        req,
+        user,
+        action: 'LOGIN',
+        category: 'AUTH',
+        targetId: String(user._id),
+        targetName: user.name,
+        details: `Successful login as ${user.role.toUpperCase()} (${user.name})`
+      });
 
       return res.json({
         _id: user._id,
@@ -293,6 +314,15 @@ router.post('/login', async (req, res) => {
         token: generateToken(user._id),
       });
     } else {
+      logAuditEvent({
+        req,
+        user: { name: normalizedEmail, email: normalizedEmail, role: 'admin' },
+        action: 'LOGIN_FAILED',
+        category: 'AUTH',
+        targetName: normalizedEmail,
+        details: `Failed login attempt with incorrect credentials for: ${normalizedEmail}`,
+        status: 'FAILED'
+      });
       return res.status(401).json({ message: 'Invalid email or password' });
     }
   } catch (error) {
@@ -758,6 +788,15 @@ router.post('/admins', protect, superAdminOnly, async (req, res) => {
       companyName: 'Niyansh Pharma Wholesale Operations'
     });
 
+    logAuditEvent({
+      req,
+      action: 'CREATE',
+      category: 'ADMIN_USER',
+      targetId: String(newAdmin._id),
+      targetName: newAdmin.name,
+      details: `Created new admin staff account for "${newAdmin.name}" (${newAdmin.email})`
+    });
+
     return res.status(201).json({
       success: true,
       message: `Admin account for ${newAdmin.name} created successfully!`,
@@ -839,6 +878,15 @@ router.put('/admins/:id', protect, superAdminOnly, async (req, res) => {
 
     await admin.save();
 
+    logAuditEvent({
+      req,
+      action: 'UPDATE',
+      category: 'ADMIN_USER',
+      targetId: String(admin._id),
+      targetName: admin.name,
+      details: `Updated admin staff profile/permissions for "${admin.name}" (${admin.email})`
+    });
+
     return res.json({
       success: true,
       message: `Admin "${admin.name}" updated successfully`,
@@ -880,6 +928,15 @@ router.delete('/admins/:id', protect, superAdminOnly, async (req, res) => {
     }
 
     await User.findByIdAndDelete(admin._id);
+
+    logAuditEvent({
+      req,
+      action: 'DELETE',
+      category: 'ADMIN_USER',
+      targetId: String(admin._id),
+      targetName: admin.name,
+      details: `Deleted admin staff account for "${admin.name}" (${admin.email})`
+    });
 
     return res.json({
       success: true,

@@ -6,6 +6,7 @@ const Product = require('../models/Product');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const { protect, adminOnly, superAdminOnly, checkPermission } = require('../middleware/authMiddleware');
+const { logAuditEvent } = require('../utils/auditLogger');
 
 // Helper to escape special regex characters to prevent crashes and ReDoS
 const escapeRegex = (str) => {
@@ -219,6 +220,15 @@ router.post('/', protect, adminOnly, checkPermission('canManageCompanies'), asyn
       specialties: Array.isArray(specialties) ? specialties : [],
     });
 
+    logAuditEvent({
+      req,
+      action: 'CREATE',
+      category: 'COMPANY',
+      targetId: String(company._id),
+      targetName: company.name,
+      details: `Created new pharma company profile "${company.name}" (Category: ${company.category})`
+    });
+
     res.status(201).json({ success: true, company });
   } catch (err) {
     console.error('Error creating company:', err);
@@ -252,6 +262,16 @@ router.put('/:id', protect, adminOnly, checkPermission('canManageCompanies'), as
     });
 
     await company.save();
+
+    logAuditEvent({
+      req,
+      action: 'UPDATE',
+      category: 'COMPANY',
+      targetId: String(company._id),
+      targetName: company.name,
+      details: `Updated company details for "${company.name}"`
+    });
+
     res.json({ success: true, company });
   } catch (err) {
     console.error('Error updating company:', err);
@@ -267,6 +287,14 @@ router.delete('/clear-all', protect, adminOnly, checkPermission('canClearDatabas
   try {
     const result = await Company.deleteMany({});
     console.log(`[ADMIN ACTION] Cleared all companies from database by ${req.user.name} (${req.user.email}). Count: ${result.deletedCount}`);
+
+    logAuditEvent({
+      req,
+      action: 'DELETE',
+      category: 'COMPANY',
+      details: `Emergency: Cleared all ${result.deletedCount} companies from database.`
+    });
+
     res.json({
       success: true,
       message: `All ${result.deletedCount} companies have been deleted successfully.`,
@@ -292,6 +320,16 @@ router.delete('/:id', protect, adminOnly, checkPermission('canManageCompanies'),
     }
 
     await Company.findByIdAndDelete(id);
+
+    logAuditEvent({
+      req,
+      action: 'DELETE',
+      category: 'COMPANY',
+      targetId: String(company._id),
+      targetName: company.name,
+      details: `Deleted company profile "${company.name}"`
+    });
+
     res.json({ success: true, message: 'Company removed successfully' });
   } catch (err) {
     console.error('Error deleting company:', err);

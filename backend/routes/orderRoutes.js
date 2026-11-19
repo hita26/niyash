@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const Order = require('../models/Order');
 const Ledger = require('../models/Ledger');
 const { protect, adminOnly, checkPermission } = require('../middleware/authMiddleware');
+const { logAuditEvent } = require('../utils/auditLogger');
 
 // Helper to escape special regex characters
 const escapeRegex = (str) => {
@@ -386,6 +387,15 @@ router.put('/:id/status', protect, adminOnly, checkPermission('canManageOrders')
     }
 
     const updatedOrder = await order.save();
+
+    logAuditEvent({
+      req,
+      action: 'STATUS_CHANGE',
+      category: 'ORDER',
+      targetId: String(updatedOrder._id),
+      targetName: updatedOrder.orderNumber,
+      details: `Updated order status for ${updatedOrder.orderNumber} (${updatedOrder.retailerShopName}) to ${updatedOrder.orderStatus}${paymentStatus ? `, Payment: ${updatedOrder.paymentStatus}` : ''}`
+    });
 
     res.json({
       success: true,

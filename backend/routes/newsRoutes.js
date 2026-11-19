@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const NewsUpdate = require('../models/NewsUpdate');
 const { protect, adminOnly, checkPermission } = require('../middleware/authMiddleware');
+const { logAuditEvent } = require('../utils/auditLogger');
 
 // Helper to escape special regex characters
 const escapeRegex = (str) => {
@@ -118,6 +119,15 @@ router.post('/', protect, adminOnly, checkPermission('canManageNews'), async (re
 
     const createdNews = await newsItem.save();
 
+    logAuditEvent({
+      req,
+      action: 'CREATE',
+      category: 'NEWS',
+      targetId: String(createdNews._id),
+      targetName: createdNews.title,
+      details: `Created news/scheme "${createdNews.title}" (Category: ${createdNews.category}, Priority: P${createdNews.priority})`
+    });
+
     res.status(201).json({
       success: true,
       message: 'News announcement created successfully',
@@ -152,6 +162,15 @@ router.put('/:id', protect, adminOnly, checkPermission('canManageNews'), async (
 
     const updatedNews = await newsItem.save();
 
+    logAuditEvent({
+      req,
+      action: 'UPDATE',
+      category: 'NEWS',
+      targetId: String(updatedNews._id),
+      targetName: updatedNews.title,
+      details: `Updated announcement "${updatedNews.title}" (Ticker: ${updatedNews.isTickerActive ? 'ON' : 'OFF'})`
+    });
+
     res.json({
       success: true,
       message: 'News update modified successfully',
@@ -174,6 +193,15 @@ router.delete('/:id', protect, adminOnly, checkPermission('canManageNews'), asyn
     }
 
     await NewsUpdate.deleteOne({ _id: req.params.id });
+
+    logAuditEvent({
+      req,
+      action: 'DELETE',
+      category: 'NEWS',
+      targetId: String(newsItem._id),
+      targetName: newsItem.title,
+      details: `Deleted news/scheme "${newsItem.title}"`
+    });
 
     res.json({
       success: true,

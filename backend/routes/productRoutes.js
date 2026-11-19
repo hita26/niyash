@@ -12,6 +12,7 @@ const CustomFieldDef = require('../models/CustomFieldDef');
 const jwt = require('jsonwebtoken');
 const cloudinary = require('../config/cloudinary');
 const { protect, adminOnly, superAdminOnly, checkPermission } = require('../middleware/authMiddleware');
+const { logAuditEvent } = require('../utils/auditLogger');
 
 // Upload directory setup
 const uploadDir = process.env.VERCEL ? path.join('/tmp', 'uploads') : path.join(__dirname, '../uploads');
@@ -29,9 +30,15 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename(req, file, cb) {
-    const ext = path.extname(file.originalname).toLowerCase();
+    let ext = path.extname(file.originalname).toLowerCase();
+    if (!ext && file.mimetype) {
+      if (file.mimetype === 'image/jpeg') ext = '.jpg';
+      else if (file.mimetype === 'image/png') ext = '.png';
+      else if (file.mimetype === 'image/webp') ext = '.webp';
+      else if (file.mimetype === 'image/gif') ext = '.gif';
+    }
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    cb(null, `prod-${uniqueSuffix}${ext}`);
+    cb(null, `prod-${uniqueSuffix}${ext || '.png'}`);
   },
 });
 
@@ -39,7 +46,10 @@ const fileFilter = (req, file, cb) => {
   const allowedExts = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
   const ext = path.extname(file.originalname).toLowerCase();
   const allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-  if (allowedExts.includes(ext) && allowedMimes.includes(file.mimetype)) {
+  if (!ext && file.mimetype && allowedMimes.includes(file.mimetype)) {
+    return cb(null, true);
+  }
+  if (allowedMimes.includes(file.mimetype) || allowedExts.includes(ext)) {
     cb(null, true);
   } else {
     cb(new Error('Invalid image file format. Supported formats: JPG, JPEG, PNG, WEBP, GIF'));
@@ -734,11 +744,54 @@ router.post('/', protect, adminOnly, checkPermission('canManageProducts'), async
       scheme,
     } = req.body;
 
+    // HARD STRICT VALIDATION FOR ALL REQUIRED FIELDS
     if (!name || name.trim() === '') {
-      return res.status(400).json({ success: false, message: 'Product name is required' });
+      return res.status(400).json({ success: false, message: 'Product Name is required' });
+    }
+    if (!sku || sku.trim() === '') {
+      return res.status(400).json({ success: false, message: 'SKU / ID is required' });
+    }
+    if (!company || company.trim() === '') {
+      return res.status(400).json({ success: false, message: 'Manufacturer / Company is required' });
     }
     if (!category || category.trim() === '') {
-      return res.status(400).json({ success: false, message: 'Product category is required' });
+      return res.status(400).json({ success: false, message: 'Product Category is required' });
+    }
+    if (!composition || composition.trim() === '') {
+      return res.status(400).json({ success: false, message: 'Contain (Chemical / Active Composition) is required' });
+    }
+    if (!form || form.trim() === '') {
+      return res.status(400).json({ success: false, message: 'Formulation Form is required' });
+    }
+    if (price === undefined || price === '' || isNaN(parseFloat(price)) || parseFloat(price) <= 0) {
+      return res.status(400).json({ success: false, message: 'Wholesale Price is required and must be greater than 0' });
+    }
+    if (mrp === undefined || mrp === '' || isNaN(parseFloat(mrp)) || parseFloat(mrp) <= 0) {
+      return res.status(400).json({ success: false, message: 'MRP is required and must be greater than 0' });
+    }
+    if (stockQuantity === undefined || stockQuantity === '' || isNaN(parseInt(stockQuantity, 10)) || parseInt(stockQuantity, 10) < 0) {
+      return res.status(400).json({ success: false, message: 'Stock Units is required and cannot be negative' });
+    }
+    if (!packing || packing.trim() === '') {
+      return res.status(400).json({ success: false, message: 'Packing Specifications is required' });
+    }
+    if (!subCategory || subCategory.trim() === '') {
+      return res.status(400).json({ success: false, message: 'Subcategory / Variant is required' });
+    }
+    if (!manufacturer || manufacturer.trim() === '') {
+      return res.status(400).json({ success: false, message: 'Manufacturer Details is required' });
+    }
+    if (!batchNumber || batchNumber.trim() === '') {
+      return res.status(400).json({ success: false, message: 'Batch Number is required' });
+    }
+    if (!rackId || rackId.trim() === '') {
+      return res.status(400).json({ success: false, message: 'Rack ID / Location is required' });
+    }
+    if (!hsnCode || hsnCode.trim() === '') {
+      return res.status(400).json({ success: false, message: 'HSN Code is required' });
+    }
+    if (!expiryDate || expiryDate.trim() === '') {
+      return res.status(400).json({ success: false, message: 'Expiry Date is required' });
     }
 
     // Check duplicate product name (case-insensitive) - DUPLICATION PREVENTION (Indexed lean query)
@@ -818,6 +871,16 @@ router.post('/', protect, adminOnly, checkPermission('canManageProducts'), async
     });
 
     const createdProduct = await product.save();
+
+    logAuditEvent({
+      req,
+      action: 'CREATE',
+      category: 'PRODUCT',
+      targetId: String(createdProduct._id),
+      targetName: createdProduct.name,
+      details: `Created new product "${createdProduct.name}" (SKU: ${createdProduct.sku}, Company: ${createdProduct.company}, Wholesale: ₹${createdProduct.price}, Stock: ${createdProduct.stockQuantity})`
+    });
+
     res.status(201).json({ success: true, product: createdProduct });
   } catch (error) {
     console.error('Create product error:', error);
@@ -836,6 +899,50 @@ router.put('/:id', protect, adminOnly, checkPermission('canManageProducts'), asy
     const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    // HARD STRICT VALIDATION FOR ALL REQUIRED FIELDS ON UPDATE
+    if (req.body.name !== undefined && (!req.body.name || req.body.name.trim() === '')) {
+      return res.status(400).json({ success: false, message: 'Product Name cannot be empty' });
+    }
+    if (req.body.company !== undefined && (!req.body.company || req.body.company.trim() === '')) {
+      return res.status(400).json({ success: false, message: 'Manufacturer / Company cannot be empty' });
+    }
+    if (req.body.category !== undefined && (!req.body.category || req.body.category.trim() === '')) {
+      return res.status(400).json({ success: false, message: 'Product Category cannot be empty' });
+    }
+    if (req.body.composition !== undefined && (!req.body.composition || req.body.composition.trim() === '')) {
+      return res.status(400).json({ success: false, message: 'Contain (Chemical / Active Composition) cannot be empty' });
+    }
+    if (req.body.form !== undefined && (!req.body.form || req.body.form.trim() === '')) {
+      return res.status(400).json({ success: false, message: 'Formulation Form cannot be empty' });
+    }
+    if (req.body.price !== undefined && (parseFloat(req.body.price) <= 0 || isNaN(parseFloat(req.body.price)))) {
+      return res.status(400).json({ success: false, message: 'Wholesale Price must be greater than 0' });
+    }
+    if (req.body.mrp !== undefined && (parseFloat(req.body.mrp) <= 0 || isNaN(parseFloat(req.body.mrp)))) {
+      return res.status(400).json({ success: false, message: 'MRP must be greater than 0' });
+    }
+    if (req.body.packing !== undefined && (!req.body.packing || req.body.packing.trim() === '')) {
+      return res.status(400).json({ success: false, message: 'Packing Specifications cannot be empty' });
+    }
+    if (req.body.subCategory !== undefined && (!req.body.subCategory || req.body.subCategory.trim() === '')) {
+      return res.status(400).json({ success: false, message: 'Subcategory / Variant cannot be empty' });
+    }
+    if (req.body.manufacturer !== undefined && (!req.body.manufacturer || req.body.manufacturer.trim() === '')) {
+      return res.status(400).json({ success: false, message: 'Manufacturer Details cannot be empty' });
+    }
+    if (req.body.batchNumber !== undefined && (!req.body.batchNumber || req.body.batchNumber.trim() === '')) {
+      return res.status(400).json({ success: false, message: 'Batch Number cannot be empty' });
+    }
+    if (req.body.rackId !== undefined && (!req.body.rackId || req.body.rackId.trim() === '')) {
+      return res.status(400).json({ success: false, message: 'Rack ID / Location cannot be empty' });
+    }
+    if (req.body.hsnCode !== undefined && (!req.body.hsnCode || req.body.hsnCode.trim() === '')) {
+      return res.status(400).json({ success: false, message: 'HSN Code cannot be empty' });
+    }
+    if (req.body.expiryDate !== undefined && (!req.body.expiryDate || req.body.expiryDate.trim() === '')) {
+      return res.status(400).json({ success: false, message: 'Expiry Date cannot be empty' });
     }
 
     // Check SKU collision if SKU changed (Indexed lean query)
@@ -896,6 +1003,16 @@ router.put('/:id', protect, adminOnly, checkPermission('canManageProducts'), asy
 
     Object.assign(product, req.body);
     const updatedProduct = await product.save();
+
+    logAuditEvent({
+      req,
+      action: 'UPDATE',
+      category: 'PRODUCT',
+      targetId: String(updatedProduct._id),
+      targetName: updatedProduct.name,
+      details: `Updated product "${updatedProduct.name}" (SKU: ${updatedProduct.sku}, Wholesale: ₹${updatedProduct.price}, MRP: ₹${updatedProduct.mrp}, Stock: ${updatedProduct.stockQuantity})`
+    });
+
     res.json({ success: true, product: updatedProduct });
   } catch (error) {
     console.error('Update product error:', error);
@@ -941,6 +1058,16 @@ router.delete('/:id', protect, adminOnly, checkPermission('canDeleteProducts'), 
     }
 
     await Product.deleteOne({ _id: req.params.id });
+
+    logAuditEvent({
+      req,
+      action: 'DELETE',
+      category: 'PRODUCT',
+      targetId: String(product._id),
+      targetName: product.name,
+      details: `Permanently deleted product "${product.name}" (SKU: ${product.sku || 'N/A'}, Company: ${product.company || 'N/A'})`
+    });
+
     res.json({ success: true, message: 'Product removed successfully' });
   } catch (error) {
     console.error('Delete product error:', error);
@@ -1074,6 +1201,13 @@ router.post('/bulk', protect, adminOnly, checkPermission('canBulkImport'), async
         errors.push({ row: i + 1, error: rowErr.message });
       }
     }
+
+    logAuditEvent({
+      req,
+      action: 'BULK_IMPORT',
+      category: 'PRODUCT',
+      details: `Bulk imported ${successCount} products via spreadsheet (${skippedCount} duplicates skipped, ${errorCount} errors)`
+    });
 
     res.json({
       success: true,

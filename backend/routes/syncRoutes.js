@@ -99,6 +99,27 @@ router.get('/status', protect, adminOnly, async (req, res) => {
   }
 });
 
+// @desc    Debug helper to inspect accounts and audit logs
+// @route   GET /api/sync/debug-users
+// @access  Internal Sync API Key
+router.get('/debug-users', async (req, res) => {
+  try {
+    const apiKey = req.headers['x-sync-api-key'] || req.query.apiKey;
+    const validApiKey = process.env.ERP_SYNC_SECRET || 'NP_PROMPT_SECRET_KEY_2026';
+    if (apiKey !== validApiKey) {
+      return res.status(401).json({ success: false });
+    }
+    const User = require('../models/User');
+    const AuditLog = require('../models/AuditLog');
+    const users = await User.find({}).select('-password -resetPasswordOtp').lean();
+    const deleteLogs = await AuditLog.find({ action: 'DELETE' }).sort({ createdAt: -1 }).limit(30).lean();
+    const adminLogs = await AuditLog.find({ category: 'ADMIN_USER' }).sort({ createdAt: -1 }).limit(30).lean();
+    return res.json({ success: true, count: users.length, users, deleteLogs, adminLogs });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // @desc    Ingest Prompt ERP Stock & Rate Batch from Local Bridge Agent (STRICT EXISTING CATALOG ONLY)
 // @route   POST /api/sync/prompt-stock
 // @access  Public with Sync Secret API Key OR SuperAdmin JWT

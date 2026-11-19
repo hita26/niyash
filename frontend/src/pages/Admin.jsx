@@ -10900,26 +10900,55 @@ _Helpline: +91 9316566894_`;
             borderRadius: '16px',
             width: '100%',
             maxWidth: '520px',
+            maxHeight: 'min(92vh, 680px)',
+            display: 'flex',
+            flexDirection: 'column',
             boxShadow: '0 25px 65px -10px rgba(0, 0, 0, 0.5)',
             border: '1px solid #cbd5e1',
             overflow: 'hidden',
             boxSizing: 'border-box'
           }} role="dialog" aria-modal="true">
-            <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: '#f8fafc' }}>
-              <div style={{ width: '42px', height: '42px', borderRadius: '50%', backgroundColor: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary-blue)', flexShrink: 0 }}>
-                <CheckCircle2 size={24} />
+            <div style={{
+              padding: '16px 20px',
+              borderBottom: '1px solid #e2e8f0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              backgroundColor: '#f8fafc',
+              flexShrink: 0
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary-blue)', flexShrink: 0 }}>
+                  <CheckCircle2 size={22} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: '700' }}>
+                    {editingProduct ? 'Confirm Product Update' : 'Confirm New Product Creation'}
+                  </h3>
+                  <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: 'var(--text-medium)' }}>
+                    Please verify the entered details before publishing.
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: '700' }}>
-                  {editingProduct ? 'Confirm Product Update' : 'Confirm New Product Creation'}
-                </h3>
-                <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: 'var(--text-medium)' }}>
-                  Please verify the entered details before publishing.
-                </p>
-              </div>
+              <button
+                type="button"
+                onClick={() => setShowSaveConfirm(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '4px' }}
+                aria-label="Close"
+              >
+                <X size={20} />
+              </button>
             </div>
 
-            <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{
+              padding: '18px 20px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+              overflowY: 'auto',
+              flex: '1 1 auto',
+              WebkitOverflowScrolling: 'touch'
+            }}>
               <div style={{ backgroundColor: '#f1f5f9', borderRadius: '10px', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '9px', fontSize: '0.88rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
                   <span style={{ color: 'var(--text-medium)', fontWeight: '600' }}>Product / Brand:</span>
@@ -10978,7 +11007,15 @@ _Helpline: +91 9316566894_`;
               </div>
             </div>
 
-            <div style={{ padding: '14px 24px', backgroundColor: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+            <div style={{
+              padding: '12px 20px',
+              backgroundColor: '#f8fafc',
+              borderTop: '1px solid #e2e8f0',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '10px',
+              flexShrink: 0
+            }}>
               <button
                 type="button"
                 onClick={() => setShowSaveConfirm(false)}

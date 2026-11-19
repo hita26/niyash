@@ -938,7 +938,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               <input
                 ref={searchInputRef}
                 type="text"
-                placeholder={t('nav.searchPlaceholder', 'Search 9,500+ medicines, companies, compositions...')}
+                placeholder={t('nav.searchPlaceholder', 'Search medicines, companies, compositions...')}
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);

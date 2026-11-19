@@ -255,7 +255,7 @@ export const en = {
     "backgroundBadge": "Our Background",
     "backgroundTitle": "A Trusted Partner for Healthcare Retailers & Institutions",
     "backgroundP1": "Headquartered at University Road in Rajkot, Niyansh Pharma was established with a singular objective: to eliminate supply-chain bottlenecks in the pharmaceutical distribution network by providing immediate access to genuine formulations at wholesale rates.",
-    "backgroundP2": "Today, our catalogue comprises over 9,500 medicinal formulations ranging from essential antibiotics, cardiovascular and diabetic medications, dermatology topicals, and critical injectables to disposable medical supplies and wellness OTC brands.",
+    "backgroundP2": "Today, our catalogue comprises extensive medicinal formulations ranging from essential antibiotics, cardiovascular and diabetic medications, dermatology topicals, and critical injectables to disposable medical supplies and wellness OTC brands.",
     "ourMission": "Our Mission",
     "missionText": "To ensure that vital, high-quality, and affordable pharmaceutical products reach every patient through an efficient, transparent, and technology-driven supply ecosystem.",
     "ourVision": "Our Vision",

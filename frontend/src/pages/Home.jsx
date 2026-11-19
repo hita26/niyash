@@ -334,7 +334,7 @@ function Home({ addToCart }) {
 
           <div className="grid-4" style={{ position: 'relative' }}>
             {[
-              { step: '01', title: t('orderingProcess.step1Title', 'Search Medicines'), desc: t('orderingProcess.step1Desc', 'Browse our 9,500+ product catalog by brand name, salt composition, or company.') },
+              { step: '01', title: t('orderingProcess.step1Title', 'Search Medicines'), desc: t('orderingProcess.step1Desc', 'Browse our product catalog by brand name, salt composition, or company.') },
               { step: '02', title: t('orderingProcess.step2Title', 'Add to Inquiry Cart'), desc: t('orderingProcess.step2Desc', 'Select required pack sizes and quantities into your inquiry cart.') },
               { step: '03', title: t('orderingProcess.step3Title', 'Confirm Store Details'), desc: t('orderingProcess.step3Desc', 'Enter your pharmacy name, mobile number, and drug license details.') },
               { step: '04', title: t('orderingProcess.step4Title', 'Instant Dispatch & Delivery'), desc: t('orderingProcess.step4Desc', 'Receive instant wholesale invoice quotation and expedited delivery.') }

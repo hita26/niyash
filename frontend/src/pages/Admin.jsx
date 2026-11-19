@@ -909,7 +909,6 @@ function Admin() {
     selectedOrder || 
     selectedLedger ||
     isCustomFieldModalOpen ||
-    deleteConfirm ||
     showSaveConfirm ||
     previewImage
   );
@@ -2671,7 +2670,7 @@ _Helpline: +91 9316566894_`;
       return;
     }
     if (!prodComposition.trim()) {
-      showToast('Containt is required', 'error');
+      showToast('Contain is required', 'error');
       return;
     }
     if (!prodForm || !prodForm.trim()) {
@@ -3004,7 +3003,7 @@ _Helpline: +91 9316566894_`;
       showToast('No products to export', 'error');
       return;
     }
-    const headers = ['Name', 'SKU', 'Brand', 'Category', 'SubCategory', 'Price (PTR)', 'MRP', 'Stock Quantity', 'In Stock', 'Featured', 'Active', 'Packing', 'Containt', 'Form', 'Image URL'];
+    const headers = ['Name', 'SKU', 'Brand', 'Category', 'SubCategory', 'Price (PTR)', 'MRP', 'Stock Quantity', 'In Stock', 'Featured', 'Active', 'Packing', 'Contain', 'Form', 'Image URL'];
     const rows = products.map(p => [
       `"${(p.name || '').replace(/"/g, '""')}"`,
       `"${p.sku || ''}"`,
@@ -3070,7 +3069,7 @@ _Helpline: +91 9316566894_`;
         'SKU / ID',
         'Manufacturer / Company *',
         'Category *',
-        'Containt *',
+        'Contain *',
         'Formulation Form *',
         'Wholesale Price (₹) *',
         'MRP (₹) *',
@@ -3158,7 +3157,7 @@ _Helpline: +91 9316566894_`;
         { wch: 16 }, // SKU
         { wch: 26 }, // Company
         { wch: 22 }, // Category
-        { wch: 32 }, // Containt
+        { wch: 32 }, // Contain
         { wch: 16 }, // Form
         { wch: 18 }, // Wholesale Price
         { wch: 14 }, // MRP
@@ -3243,7 +3242,7 @@ _Helpline: +91 9316566894_`;
           const sku = rawSku || getNextSequentialSku(products, idx);
           const company = getVal('Manufacturer / Company *', 'Manufacturer / Company', 'Company', 'Manufacturer') || 'Daxia Healthcare';
           const category = getVal('Category *', 'Category') || 'Pharma Products';
-          const composition = getVal('Containt *', 'Containt', 'Content *', 'Content', 'Contain', 'Chemical / Active Composition *', 'Chemical / Active Composition', 'Composition', 'Chemical');
+          const composition = getVal('Contain *', 'Contain', 'Containt *', 'Containt', 'Content *', 'Content', 'Chemical / Active Composition *', 'Chemical / Active Composition', 'Composition', 'Chemical');
           const form = getVal('Formulation Form *', 'Formulation Form', 'Form') || 'Tablet';
           const price = parseFloat(getVal('Wholesale Price (₹) *', 'Wholesale Price', 'Wholesale', 'Price', 'PTR')) || 0;
           const mrp = parseFloat(getVal('MRP (₹) *', 'MRP', 'Retail MRP')) || (price > 0 ? Math.round(price * 1.35) : 0);
@@ -3958,90 +3957,6 @@ _Helpline: +91 9316566894_`;
 
   return (
     <div className="section" style={{ backgroundColor: 'var(--bg-main)', minHeight: '85vh', padding: '30px 0' }}>
-      {/* In-page Top Confirmation Bar (No browser alert box, smooth top slide-in) */}
-      {deleteConfirm && (
-        <div 
-          role="alert"
-          style={{
-            position: 'fixed',
-            top: '20px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 99999,
-            width: 'min(94vw, 680px)',
-            backgroundColor: '#ffffff',
-            borderRadius: '12px',
-            boxShadow: '0 20px 45px -10px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(239, 68, 68, 0.35)',
-            padding: '14px 20px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '16px',
-            borderLeft: '5px solid #ef4444',
-            animation: 'slideDownTopBar 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1 }}>
-            <div style={{
-              width: '38px',
-              height: '38px',
-              borderRadius: '50%',
-              backgroundColor: '#fee2e2',
-              color: '#ef4444',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0
-            }}>
-              <AlertTriangle size={20} />
-            </div>
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ fontSize: '0.92rem', fontWeight: '700', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span>Delete {deleteConfirm.type === 'product' ? 'Product' : deleteConfirm.type === 'company' ? 'Company' : 'Item'}?</span>
-                <span style={{ fontSize: '0.72rem', fontWeight: '700', color: '#ef4444', backgroundColor: '#fee2e2', padding: '1px 7px', borderRadius: '10px', textTransform: 'uppercase' }}>
-                  Direct Option
-                </span>
-              </div>
-              <div style={{ fontSize: '0.84rem', color: '#475569', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                Are you sure you want to delete <strong style={{ color: '#0f172a' }}>{deleteConfirm.name}</strong>?
-              </div>
-            </div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-            <button
-              type="button"
-              onClick={() => setDeleteConfirm(null)}
-              className="btn btn-outline btn-sm"
-              style={{ padding: '6px 14px', fontSize: '0.84rem', cursor: 'pointer', height: '34px' }}
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={handleExecuteDelete}
-              className="btn btn-sm"
-              style={{
-                backgroundColor: '#ef4444',
-                borderColor: '#ef4444',
-                color: '#ffffff',
-                fontWeight: '700',
-                padding: '6px 16px',
-                fontSize: '0.84rem',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                height: '34px',
-                boxShadow: '0 2px 8px rgba(239, 68, 68, 0.35)'
-              }}
-            >
-              <Trash2 size={14} />
-              <span>Yes, Delete</span>
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Central B2B Operations Header */}
       <div className="admin-workspace-container" style={{ marginBottom: '22px' }}>
         <div className="admin-b2b-header-card">
@@ -4712,19 +4627,19 @@ _Helpline: +91 9316566894_`;
 
                       <div onClick={() => { setProductCategoryFilter('Surgical Supplies'); setActiveTab('products'); }} style={{ padding: '16px', borderRadius: '10px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
                         <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#0369a1', textTransform: 'uppercase' }}>Surgical & Devices</span>
-                        <div style={{ fontSize: '1.35rem', fontWeight: '800', color: 'var(--text-dark)', marginTop: '4px' }}>{surgicalCount || 18} SKUs</div>
+                        <div style={{ fontSize: '1.35rem', fontWeight: '800', color: 'var(--text-dark)', marginTop: '4px' }}>{surgicalCount} SKUs</div>
                         <div style={{ fontSize: '0.72rem', color: 'var(--text-medium)' }}>Disposables, Bandages, BP Monitors</div>
                       </div>
 
                       <div onClick={() => { setProductCategoryFilter('OTC & Wellness'); setActiveTab('products'); }} style={{ padding: '16px', borderRadius: '10px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
                         <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#15803d', textTransform: 'uppercase' }}>OTC & Wellness</span>
-                        <div style={{ fontSize: '1.35rem', fontWeight: '800', color: 'var(--text-dark)', marginTop: '4px' }}>{otcCount || 32} SKUs</div>
+                        <div style={{ fontSize: '1.35rem', fontWeight: '800', color: 'var(--text-dark)', marginTop: '4px' }}>{otcCount} SKUs</div>
                         <div style={{ fontSize: '0.72rem', color: 'var(--text-medium)' }}>Daily Healthcare, Balms, Nutrition</div>
                       </div>
 
                       <div onClick={() => { setProductCategoryFilter('Ayurvedic & Herbal'); setActiveTab('products'); }} style={{ padding: '16px', borderRadius: '10px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
                         <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#b45309', textTransform: 'uppercase' }}>Ayurvedic & Herbal</span>
-                        <div style={{ fontSize: '1.35rem', fontWeight: '800', color: 'var(--text-dark)', marginTop: '4px' }}>{ayurvedicCount || 24} SKUs</div>
+                        <div style={{ fontSize: '1.35rem', fontWeight: '800', color: 'var(--text-dark)', marginTop: '4px' }}>{ayurvedicCount} SKUs</div>
                         <div style={{ fontSize: '0.72rem', color: 'var(--text-medium)' }}>Herbal Tonics, Syrups & Ointments</div>
                       </div>
                     </div>
@@ -5992,20 +5907,21 @@ _Helpline: +91 9316566894_`;
                                     {/* Column 5: Actions */}
                                     <td style={{ padding: '10px 12px', verticalAlign: 'middle', textAlign: 'right' }}>
                                       {isTargetedForDelete ? (
-                                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: '#fee2e2', padding: '3px 8px', borderRadius: '7px', border: '1px solid #fca5a5' }}>
+                                          <span style={{ fontSize: '0.74rem', fontWeight: '800', color: '#991b1b', whiteSpace: 'nowrap' }}>Delete?</span>
                                           <button 
                                             type="button"
                                             onClick={handleExecuteDelete} 
-                                            style={{ color: '#ffffff', backgroundColor: '#ef4444', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '3px', padding: '4px 8px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.74rem', fontWeight: '700' }}
+                                            style={{ color: '#ffffff', backgroundColor: '#ef4444', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '3px', padding: '4px 9px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.74rem', fontWeight: '700', boxShadow: '0 1px 2px rgba(239, 68, 68, 0.4)' }}
                                             title="Confirm Delete"
                                           >
                                             <Trash2 size={11} />
-                                            <span>Delete</span>
+                                            <span>Yes</span>
                                           </button>
                                           <button 
                                             type="button"
                                             onClick={() => setDeleteConfirm(null)} 
-                                            style={{ color: '#475569', backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1', display: 'inline-flex', alignItems: 'center', padding: '4px 6px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.74rem' }}
+                                            style={{ color: '#475569', backgroundColor: '#ffffff', border: '1px solid #cbd5e1', display: 'inline-flex', alignItems: 'center', padding: '4px 6px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.74rem', fontWeight: '600' }}
                                             title="Cancel"
                                           >
                                             <X size={11} />
@@ -6201,22 +6117,26 @@ _Helpline: +91 9316566894_`;
 
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                   {isTargetedForDelete ? (
-                                    <>
+                                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: '#fee2e2', padding: '3px 8px', borderRadius: '7px', border: '1px solid #fca5a5' }}>
+                                      <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#991b1b', whiteSpace: 'nowrap' }}>Delete?</span>
                                       <button 
                                         type="button"
                                         onClick={handleExecuteDelete} 
-                                        style={{ color: '#ffffff', backgroundColor: '#ef4444', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '700' }}
+                                        style={{ color: '#ffffff', backgroundColor: '#ef4444', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '3px', padding: '4px 9px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '700', boxShadow: '0 1px 2px rgba(239, 68, 68, 0.4)' }}
+                                        title="Confirm Delete"
                                       >
-                                        <Trash2 size={13} /> Delete
+                                        <Trash2 size={12} />
+                                        <span>Yes</span>
                                       </button>
                                       <button 
                                         type="button"
                                         onClick={() => setDeleteConfirm(null)} 
-                                        style={{ color: '#475569', backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1', padding: '6px 8px', borderRadius: '6px', cursor: 'pointer' }}
+                                        style={{ color: '#475569', backgroundColor: '#ffffff', border: '1px solid #cbd5e1', padding: '4px 6px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '600', display: 'inline-flex', alignItems: 'center' }}
+                                        title="Cancel"
                                       >
-                                        <X size={13} />
+                                        <X size={12} />
                                       </button>
-                                    </>
+                                    </div>
                                   ) : (
                                     <>
                                       <button
@@ -6395,22 +6315,24 @@ _Helpline: +91 9316566894_`;
                               </button>
 
                               {deleteConfirm?.type === 'product' && deleteConfirm?.id === p._id ? (
-                                <div style={{ display: 'flex', gap: '6px' }}>
+                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: '#fee2e2', padding: '3px 8px', borderRadius: '7px', border: '1px solid #fca5a5' }}>
+                                  <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#991b1b', whiteSpace: 'nowrap' }}>Delete?</span>
                                   <button
                                     type="button"
                                     onClick={handleExecuteDelete}
-                                    style={{ padding: '4px 10px', backgroundColor: '#ef4444', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '700' }}
+                                    style={{ padding: '4px 9px', backgroundColor: '#ef4444', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '3px', boxShadow: '0 1px 2px rgba(239, 68, 68, 0.4)' }}
                                     title="Confirm Delete"
                                   >
-                                    Delete
+                                    <Trash2 size={12} />
+                                    <span>Yes</span>
                                   </button>
                                   <button
                                     type="button"
                                     onClick={() => setDeleteConfirm(null)}
-                                    style={{ padding: '4px 8px', backgroundColor: '#f1f5f9', color: '#475569', border: '1px solid #cbd5e1', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem' }}
+                                    style={{ padding: '4px 6px', backgroundColor: '#ffffff', color: '#475569', border: '1px solid #cbd5e1', borderRadius: '5px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '600', display: 'inline-flex', alignItems: 'center' }}
                                     title="Cancel"
                                   >
-                                    Cancel
+                                    <X size={12} />
                                   </button>
                                 </div>
                               ) : (
@@ -7577,7 +7499,7 @@ _Helpline: +91 9316566894_`;
                     <div style={{ padding: '14px 16px', backgroundColor: '#fffbeb', borderRadius: '12px', border: '1px solid #fde68a' }}>
                       <div style={{ fontSize: '0.72rem', fontWeight: '700', color: '#92400e', textTransform: 'uppercase' }}>Super Admins</div>
                       <div style={{ fontSize: '1.4rem', fontWeight: '800', color: '#b45309', marginTop: '4px' }}>
-                        {adminList.filter(a => a.role === 'superadmin').length || 1}
+                        {adminList.filter(a => a.role === 'superadmin').length}
                       </div>
                     </div>
 
@@ -9084,11 +9006,11 @@ _Helpline: +91 9316566894_`;
                     </div>
                   </div>
 
-                  {/* Row 3: Containt & Formulation Form */}
+                  {/* Row 3: Contain & Formulation Form */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
                       <label htmlFor="modal-composition" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                        Containt <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                        Contain <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
                       </label>
                       <input 
                         id="modal-composition"
@@ -9630,7 +9552,7 @@ _Helpline: +91 9316566894_`;
                       <div>• <strong>SKU / ID</strong> (Auto-generated if blank)</div>
                       <div>• <strong>Manufacturer / Company *</strong></div>
                       <div>• <strong>Category *</strong></div>
-                      <div>• <strong>Containt *</strong> (or Chemical / Active Composition / Content)</div>
+                      <div>• <strong>Contain *</strong> (or Chemical / Active Composition / Content)</div>
                       <div>• <strong>Formulation Form *</strong></div>
                       <div>• <strong>Wholesale Price (₹) *</strong></div>
                       <div>• <strong>MRP (₹) *</strong></div>
@@ -9754,7 +9676,7 @@ _Helpline: +91 9316566894_`;
                             <th style={{ padding: '10px 12px', minWidth: '190px' }}>Product Name / Brand</th>
                             <th style={{ padding: '10px 12px', minWidth: '110px' }}>SKU / ID</th>
                             <th style={{ padding: '10px 12px', minWidth: '140px' }}>Company</th>
-                            <th style={{ padding: '10px 12px', minWidth: '170px' }}>Containt</th>
+                            <th style={{ padding: '10px 12px', minWidth: '170px' }}>Contain</th>
                             <th style={{ padding: '10px 12px', minWidth: '130px' }}>Packing & Form</th>
                             <th style={{ padding: '10px 12px', minWidth: '95px' }}>Wholesale</th>
                             <th style={{ padding: '10px 12px', minWidth: '85px' }}>MRP</th>
@@ -10202,7 +10124,7 @@ _Helpline: +91 9316566894_`;
                   <span style={{ color: 'var(--text-dark)', textAlign: 'right' }}>{prodCategory}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
-                  <span style={{ color: 'var(--text-medium)', fontWeight: '600' }}>Containt:</span>
+                  <span style={{ color: 'var(--text-medium)', fontWeight: '600' }}>Contain:</span>
                   <span style={{ color: 'var(--text-dark)', textAlign: 'right' }}>{prodComposition}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>

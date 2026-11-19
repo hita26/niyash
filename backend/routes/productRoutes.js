@@ -203,7 +203,7 @@ router.get('/admin/all', protect, adminOnly, async (req, res) => {
       await Promise.all([
         Product.find(query).sort(sortOptions).skip(skip).limit(limitNum).lean(),
         Product.countDocuments(query),
-        Product.estimatedDocumentCount ? Product.estimatedDocumentCount() : Product.countDocuments(),
+        Product.countDocuments(),
         Product.countDocuments({ isActive: { $ne: false } }),
         Product.countDocuments({ $or: [{ inStock: false }, { stockQuantity: { $lte: 0 } }] }),
         Product.distinct('category'),

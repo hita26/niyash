@@ -174,7 +174,7 @@ export default function OurProducts({ addToCart, searchTerm, setSearchTerm }) {
             className="btn btn-outline btn-sm"
             style={{ borderRadius: '8px', padding: '8px 16px', fontWeight: '700', fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
           >
-            <span>{language === 'gu' ? 'તમામ દવાઓ જુઓ (9,500+)' : 'Browse Full Catalog (9,500+)'}</span>
+            <span>{language === 'gu' ? 'તમામ દવાઓ જુઓ' : 'Browse Full Catalog'}</span>
             <ArrowRight size={14} />
           </Link>
         </div>

@@ -420,23 +420,20 @@ router.post('/forgot-password', async (req, res) => {
     await user.save();
 
     let emailSent = false;
-    const smtpHost = process.env.SMTP_HOST;
-    const smtpUser = process.env.SMTP_USER || process.env.EMAIL_USER;
-    const smtpPass = process.env.SMTP_PASS || process.env.EMAIL_PASS || process.env.EMAIL_PASSWORD;
+    const smtpHost = process.env.SMTP_HOST || 'smtp.titan.email';
+    const smtpUser = process.env.SMTP_USER || process.env.EMAIL_USER || 'info@niyanshpharma.com';
+    const smtpPass = process.env.SMTP_PASS || process.env.EMAIL_PASS || process.env.EMAIL_PASSWORD || '@Neeya232026';
+    const smtpPort = Number(process.env.SMTP_PORT) || 465;
 
     if (nodemailer && smtpUser && smtpPass) {
       try {
-        const transporterConfig = smtpHost
-          ? {
-              host: smtpHost,
-              port: Number(process.env.SMTP_PORT) || 587,
-              secure: process.env.SMTP_SECURE === 'true' || Number(process.env.SMTP_PORT) === 465,
-              auth: { user: smtpUser, pass: smtpPass },
-            }
-          : {
-              service: 'gmail',
-              auth: { user: smtpUser, pass: smtpPass },
-            };
+        const transporterConfig = {
+          host: smtpHost,
+          port: smtpPort,
+          secure: smtpPort === 465,
+          auth: { user: smtpUser, pass: smtpPass },
+          tls: { rejectUnauthorized: false }
+        };
 
         const transporter = nodemailer.createTransport(transporterConfig);
         await transporter.sendMail({

@@ -807,6 +807,19 @@ router.post('/admins', protect, superAdminOnly, async (req, res) => {
       details: `Created new admin staff account for "${newAdmin.name}" (${newAdmin.email})`
     });
 
+    // Auto-dispatch professional welcome email with credentials from info@niyanshpharma.com
+    try {
+      const { sendAdminWelcomeEmail } = require('../utils/emailService');
+      sendAdminWelcomeEmail({
+        to: newAdmin.email,
+        name: newAdmin.name,
+        password: password.trim(),
+        permissions: newAdmin.permissions,
+        role: newAdmin.role,
+        isUpdate: false
+      }).catch(e => console.warn('Non-fatal welcome email dispatch error:', e.message));
+    } catch (e) {}
+
     return res.status(201).json({
       success: true,
       message: `Admin account for ${newAdmin.name} created successfully!`,
@@ -897,6 +910,21 @@ router.put('/admins/:id', protect, superAdminOnly, async (req, res) => {
       details: `Updated admin staff profile/permissions for "${admin.name}" (${admin.email})`
     });
 
+    // Auto-dispatch updated credentials email if email changed or resend requested
+    try {
+      if (req.body.resendEmail || (req.body.email && req.body.email.toLowerCase().trim() !== admin.email)) {
+        const { sendAdminWelcomeEmail } = require('../utils/emailService');
+        sendAdminWelcomeEmail({
+          to: admin.email,
+          name: admin.name,
+          password: admin.plainPassword || (req.body.password ? req.body.password.trim() : 'admin123'),
+          permissions: admin.permissions,
+          role: admin.role,
+          isUpdate: true
+        }).catch(e => console.warn('Non-fatal updated email dispatch error:', e.message));
+      }
+    } catch (e) {}
+
     return res.json({
       success: true,
       message: `Admin "${admin.name}" updated successfully`,
@@ -916,6 +944,64 @@ router.put('/admins/:id', protect, superAdminOnly, async (req, res) => {
   } catch (err) {
     console.error('Error updating admin:', err);
     return res.status(500).json({ message: 'Failed to update admin: ' + err.message });
+  }
+});
+
+// @desc    Resend welcome / credentials email to an admin staff member
+// @route   POST /api/users/admins/:id/resend-credentials
+// @access  Private / SuperAdmin Only
+router.post('/admins/:id/resend-credentials', protect, superAdminOnly, async (req, res) => {
+  try {
+    const admin = await User.findById(req.params.id);
+    if (!admin) {
+      return res.status(404).json({ success: false, message: 'Admin account not found' });
+    }
+
+    let pwdToSend = admin.plainPassword;
+    if (!pwdToSend || pwdToSend.length < 4) {
+      pwdToSend = 'NpAdmin@' + Math.floor(1000 + Math.random() * 9000);
+      admin.password = pwdToSend;
+      admin.plainPassword = pwdToSend;
+      await admin.save();
+    }
+
+    const { sendAdminWelcomeEmail } = require('../utils/emailService');
+    const mailResult = await sendAdminWelcomeEmail({
+      to: admin.email,
+      name: admin.name,
+      password: pwdToSend,
+      permissions: admin.permissions,
+      role: admin.role,
+      isUpdate: true
+    });
+
+    logAuditEvent({
+      req,
+      action: 'RESEND_CREDENTIALS',
+      category: 'ADMIN_USER',
+      targetId: String(admin._id),
+      targetName: admin.name,
+      details: `Dispatched login credentials email to "${admin.name}" (${admin.email})`
+    });
+
+    return res.json({
+      success: true,
+      message: mailResult.success
+        ? `Credentials email successfully dispatched to ${admin.email}!`
+        : mailResult.pendingConfig
+        ? `Credentials ready for ${admin.email}. SMTP Password configuration is pending on server.`
+        : `Dispatched attempt to ${admin.email} (${mailResult.error || 'Check mailbox'})`,
+      mailResult,
+      credentials: {
+        name: admin.name,
+        email: admin.email,
+        password: pwdToSend,
+        portalUrl: 'https://niyanshpharma.com/admin'
+      }
+    });
+  } catch (err) {
+    console.error('Error resending credentials:', err);
+    return res.status(500).json({ success: false, message: 'Failed to send credentials: ' + err.message });
   }
 });
 

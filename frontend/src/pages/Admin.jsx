@@ -770,6 +770,8 @@ function Admin() {
   });
   const [showPasswordMap, setShowPasswordMap] = useState({});
   const [isSavingAdmin, setIsSavingAdmin] = useState(false);
+  const [adminFormSendEmail, setAdminFormSendEmail] = useState(true);
+  const [resendingAdminId, setResendingAdminId] = useState(null);
 
   // Profile Modal State (SuperAdmin & Admin)
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -1570,6 +1572,7 @@ function Admin() {
   };
 
   const handleOpenAdminModal = (admin = null) => {
+    setAdminFormSendEmail(true);
     if (admin) {
       setEditingAdmin(admin);
       setAdminFormName(admin.name || '');
@@ -1630,7 +1633,8 @@ function Admin() {
         name: adminFormName.trim(),
         email: adminFormEmail.trim().toLowerCase(),
         phone: adminFormPhone.replace(/\D/g, ''),
-        permissions: adminFormPermissions
+        permissions: adminFormPermissions,
+        resendEmail: adminFormSendEmail
       };
       if (adminFormPassword) {
         payload.password = adminFormPassword.trim();
@@ -1657,6 +1661,37 @@ function Admin() {
     } finally {
       setIsSavingAdmin(false);
     }
+  };
+
+  const handleResendCredentials = async (admin) => {
+    if (!admin || !admin._id) return;
+    setResendingAdminId(admin._id);
+    try {
+      const res = await fetch(`/api/users/admins/${admin._id}/resend-credentials`, {
+        method: 'POST',
+        headers: getAuthHeaders()
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast(data.message || 'Credentials email dispatched!', 'success');
+      } else {
+        showToast(data.message || 'Failed to dispatch email', 'error');
+      }
+    } catch (err) {
+      showToast('Error sending credentials: ' + err.message, 'error');
+    } finally {
+      setResendingAdminId(null);
+    }
+  };
+
+  const handleShareCredentialsWhatsApp = (admin) => {
+    if (!admin) return;
+    const pwd = admin.plainPassword && admin.plainPassword !== '••••••••' ? admin.plainPassword : 'Saved Password';
+    const text = `*NIYANSH PHARMA - Admin Portal Access*\nPortal: https://niyanshpharma.com/admin\nUsername: ${admin.email}\nPassword: ${pwd}\n\nPlease keep your credentials confidential.`;
+    const cleanPhone = (admin.phone || '').replace(/\D/g, '');
+    const phoneParam = cleanPhone.length === 10 ? `91${cleanPhone}` : '';
+    const waUrl = phoneParam ? `https://wa.me/${phoneParam}?text=${encodeURIComponent(text)}` : `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(waUrl, '_blank');
   };
 
   const handleToggleAdminStatus = async (admin) => {
@@ -8277,6 +8312,25 @@ _Helpline: +91 9316566894_`;
                                         <Edit2 size={14} />
                                       </button>
 
+                                      <button
+                                        type="button"
+                                        onClick={() => handleResendCredentials(adm)}
+                                        disabled={resendingAdminId === adm._id}
+                                        title={`Resend Welcome & Credentials Email from info@niyanshpharma.com to ${adm.email}`}
+                                        style={{ padding: '5px 8px', borderRadius: '6px', border: '1px solid #bfdbfe', backgroundColor: '#eff6ff', cursor: 'pointer', color: '#1d4ed8' }}
+                                      >
+                                        {resendingAdminId === adm._id ? <RefreshCw size={14} className="spin" /> : <Mail size={14} />}
+                                      </button>
+
+                                      <button
+                                        type="button"
+                                        onClick={() => handleShareCredentialsWhatsApp(adm)}
+                                        title={`Share Credentials via WhatsApp (${adm.phone || 'Admin'})`}
+                                        style={{ padding: '5px 8px', borderRadius: '6px', border: '1px solid #bbf7d0', backgroundColor: '#f0fdf4', cursor: 'pointer', color: '#15803d' }}
+                                      >
+                                        <MessageSquare size={14} />
+                                      </button>
+
                                       {!isRootSuper && (
                                         <>
                                           <button
@@ -8447,7 +8501,26 @@ _Helpline: +91 9316566894_`;
                                   className="btn btn-outline btn-sm"
                                   style={{ flex: 1, justifyContent: 'center', fontSize: '0.78rem', gap: '6px' }}
                                 >
-                                  <Edit2 size={13} /> Edit Account
+                                  <Edit2 size={13} /> Edit
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleResendCredentials(adm)}
+                                  disabled={resendingAdminId === adm._id}
+                                  className="btn btn-outline btn-sm"
+                                  style={{ padding: '6px 10px', color: '#1d4ed8', backgroundColor: '#eff6ff' }}
+                                  title="Resend Credentials Email"
+                                >
+                                  {resendingAdminId === adm._id ? <RefreshCw size={13} className="spin" /> : <Mail size={13} />}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleShareCredentialsWhatsApp(adm)}
+                                  className="btn btn-outline btn-sm"
+                                  style={{ padding: '6px 10px', color: '#15803d', backgroundColor: '#f0fdf4' }}
+                                  title="Share on WhatsApp"
+                                >
+                                  <MessageSquare size={13} />
                                 </button>
                                 {!isRootSuper && (
                                   <>
@@ -11701,6 +11774,21 @@ _Helpline: +91 9316566894_`;
                       SuperAdmin can always view or change this password later.
                     </span>
                   </div>
+                </div>
+
+                {/* Email Welcome & Credentials Option */}
+                <div style={{ backgroundColor: '#f0fdf4', border: '1.5px solid #86efac', borderRadius: '10px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <input
+                    type="checkbox"
+                    id="adminFormSendEmailCheckbox"
+                    checked={adminFormSendEmail}
+                    onChange={(e) => setAdminFormSendEmail(e.target.checked)}
+                    style={{ width: '18px', height: '18px', accentColor: '#16a34a', cursor: 'pointer' }}
+                  />
+                  <label htmlFor="adminFormSendEmailCheckbox" style={{ fontSize: '0.85rem', color: '#14532d', fontWeight: '700', cursor: 'pointer', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Mail size={16} color="#16a34a" />
+                    <span>Send welcome & login credentials email from <strong>info@niyanshpharma.com</strong></span>
+                  </label>
                 </div>
 
                 {/* Permissions Section */}

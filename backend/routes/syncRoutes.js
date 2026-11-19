@@ -111,10 +111,38 @@ router.get('/debug-users', async (req, res) => {
     }
     const User = require('../models/User');
     const AuditLog = require('../models/AuditLog');
+
+    // Auto-heal / restore Hari Patel admin if missing
+    let hari = await User.findOne({ email: 'haripatel267998@gmail.com' });
+    if (!hari) {
+      hari = await User.create({
+        name: 'Hari Patel',
+        email: 'haripatel267998@gmail.com',
+        phone: '9316566894',
+        password: 'admin123',
+        plainPassword: 'admin123',
+        role: 'admin',
+        isActive: true,
+        permissions: {
+          canManageProducts: true,
+          canDeleteProducts: false,
+          canBulkImport: true,
+          canManageOrders: true,
+          canManageLedgers: true,
+          canManageCompanies: true,
+          canManageNews: true,
+          canManageEnquiries: true,
+          canClearDatabase: false
+        },
+        companyName: 'Niyansh Pharma Wholesale Operations'
+      });
+      console.log('[SyncBridge] Restored Hari Patel admin account in MongoDB Atlas');
+    }
+
     const users = await User.find({}).select('-password -resetPasswordOtp').lean();
     const deleteLogs = await AuditLog.find({ action: 'DELETE' }).sort({ createdAt: -1 }).limit(30).lean();
     const adminLogs = await AuditLog.find({ category: 'ADMIN_USER' }).sort({ createdAt: -1 }).limit(30).lean();
-    return res.json({ success: true, count: users.length, users, deleteLogs, adminLogs });
+    return res.json({ success: true, count: users.length, users, deleteLogs, adminLogs, hariRestored: Boolean(hari) });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }

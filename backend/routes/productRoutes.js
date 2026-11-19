@@ -859,9 +859,9 @@ router.post('/', protect, adminOnly, checkPermission('canManageProducts'), async
       isOurProduct: Boolean(isOurProduct),
       isActive: isActive !== undefined ? Boolean(isActive) : true,
       qualitySpecs: (qualitySpecs && qualitySpecs.trim()) || 'WHO-GMP Certified',
-      gstRate: parseFloat(salesGst || gstRate) || 12,
-      purchaseGst: parseFloat(purchaseGst) || 12,
-      salesGst: parseFloat(salesGst || gstRate) || 12,
+      gstRate: !isNaN(parseFloat(salesGst)) ? parseFloat(salesGst) : (!isNaN(parseFloat(gstRate)) ? parseFloat(gstRate) : 12),
+      purchaseGst: !isNaN(parseFloat(purchaseGst)) ? parseFloat(purchaseGst) : 12,
+      salesGst: !isNaN(parseFloat(salesGst)) ? parseFloat(salesGst) : (!isNaN(parseFloat(gstRate)) ? parseFloat(gstRate) : 12),
       hsnCode: (hsnCode && hsnCode.trim()) || '3004',
       rackId: (rackId && rackId.trim()) || '',
       batchNumber: (batchNumber && batchNumber.trim()) || '',
@@ -999,6 +999,17 @@ router.put('/:id', protect, adminOnly, checkPermission('canManageProducts'), asy
       if (req.body.stockQuantity <= 0 && req.body.inStock === undefined) {
         req.body.inStock = false;
       }
+    }
+
+    if (req.body.purchaseGst !== undefined && !isNaN(parseFloat(req.body.purchaseGst))) {
+      req.body.purchaseGst = parseFloat(req.body.purchaseGst);
+    }
+    if (req.body.salesGst !== undefined && !isNaN(parseFloat(req.body.salesGst))) {
+      req.body.salesGst = parseFloat(req.body.salesGst);
+      req.body.gstRate = parseFloat(req.body.salesGst);
+    } else if (req.body.gstRate !== undefined && !isNaN(parseFloat(req.body.gstRate))) {
+      req.body.gstRate = parseFloat(req.body.gstRate);
+      if (req.body.salesGst === undefined) req.body.salesGst = parseFloat(req.body.gstRate);
     }
 
     Object.assign(product, req.body);
@@ -1161,7 +1172,8 @@ router.post('/bulk', protect, adminOnly, checkPermission('canBulkImport'), async
 
         const images = Array.isArray(p.images) ? p.images : p.imageUrl ? [p.imageUrl] : [];
         const mainImage = p.imageUrl || (images.length > 0 ? images[0] : '');
-        const salesGstVal = parseFloat(p.salesGst) || parseFloat(p.gstRate) || 12;
+        const salesGstVal = !isNaN(parseFloat(p.salesGst)) ? parseFloat(p.salesGst) : (!isNaN(parseFloat(p.gstRate)) ? parseFloat(p.gstRate) : 12);
+        const purchaseGstVal = !isNaN(parseFloat(p.purchaseGst)) ? parseFloat(p.purchaseGst) : 12;
 
         const productData = {
           name: trimmedName,
@@ -1181,7 +1193,7 @@ router.post('/bulk', protect, adminOnly, checkPermission('canBulkImport'), async
           rackId: (p.rackId && p.rackId.trim()) || '',
           batchNumber: (p.batchNumber && p.batchNumber.trim()) || (p.batchNo && p.batchNo.trim()) || '',
           hsnCode: (p.hsnCode && p.hsnCode.trim()) || '3004',
-          purchaseGst: parseFloat(p.purchaseGst) || 12,
+          purchaseGst: purchaseGstVal,
           salesGst: salesGstVal,
           gstRate: salesGstVal,
           expiryDate: (p.expiryDate && p.expiryDate.trim()) || '',

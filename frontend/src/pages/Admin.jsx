@@ -2501,10 +2501,10 @@ _Helpline: +91 9316566894_`;
       setProdRackId(product.rackId || '');
       setProdBatchNumber(product.batchNumber || product.batchNo || '');
       setProdHsnCode(product.hsnCode || '3004');
-      const purVal = Number(product.purchaseGst !== undefined ? product.purchaseGst : 12);
+      const purVal = Number(product.purchaseGst !== undefined && product.purchaseGst !== null && product.purchaseGst !== '' ? product.purchaseGst : (product.gstRate !== undefined && product.gstRate !== null && product.gstRate !== '' ? product.gstRate : 12));
       setProdPurchaseGst(purVal);
       setIsCustomPurchaseGst(![0, 5, 12, 18, 28].includes(purVal));
-      const salVal = Number(product.salesGst !== undefined ? product.salesGst : (product.gstRate || 12));
+      const salVal = Number(product.salesGst !== undefined && product.salesGst !== null && product.salesGst !== '' ? product.salesGst : (product.gstRate !== undefined && product.gstRate !== null && product.gstRate !== '' ? product.gstRate : 12));
       setProdSalesGst(salVal);
       setIsCustomSalesGst(![0, 5, 12, 18, 28].includes(salVal));
       setProdExpiryDate(normalizeExpiryForPicker(product.expiryDate) || '');
@@ -10992,6 +10992,18 @@ _Helpline: +91 9316566894_`;
                     <strong style={{ color: 'var(--text-dark)' }}>₹{parseFloat(prodMrp).toFixed(2)}</strong>
                   </div>
                 )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
+                  <span style={{ color: 'var(--text-medium)', fontWeight: '600' }}>Purchase GST / Sales GST:</span>
+                  <span style={{ color: 'var(--text-dark)', fontWeight: '700', textAlign: 'right' }}>
+                    {prodPurchaseGst}% / {prodSalesGst}%
+                  </span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
+                  <span style={{ color: 'var(--text-medium)', fontWeight: '600' }}>Expiry Date:</span>
+                  <span style={{ color: '#0369a1', fontWeight: '700', textAlign: 'right' }}>
+                    {formatPharmaExpiry(prodExpiryDate) || 'N/A'}
+                  </span>
+                </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
                   <span style={{ color: 'var(--text-medium)', fontWeight: '600' }}>Stock Units:</span>
                   <span style={{ color: 'var(--text-dark)' }}>{prodStockQuantity || 100} ({prodInStock ? '✓ In Stock' : '✕ Out of Stock'})</span>

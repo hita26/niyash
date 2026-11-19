@@ -265,13 +265,6 @@ router.post('/prompt-stock', async (req, res) => {
         durationMs: duration
       }
     });
-        itemsReceived: items.length,
-        stockRatesUpdated: updatedCount,
-        newProductsCreated: insertedCount,
-        zeroDuplicatesGuaranteed: true,
-        durationMs: duration
-      }
-    });
   } catch (err) {
     console.error('Prompt stock sync error:', err);
     return res.status(500).json({ success: false, message: 'Prompt stock sync failed: ' + err.message });

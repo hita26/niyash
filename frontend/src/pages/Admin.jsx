@@ -831,6 +831,9 @@ function Admin() {
   const [syncStatusData, setSyncStatusData] = useState(null);
   const [isSyncStatusLoading, setIsSyncStatusLoading] = useState(false);
   const [isManualSyncRunning, setIsManualSyncRunning] = useState(false);
+  const [selectedSyncLog, setSelectedSyncLog] = useState(null);
+  const [syncDetailTab, setSyncDetailTab] = useState('changes'); // 'changes' | 'duplicates' | 'unmatched'
+  const lastKnownSyncIdRef = useRef(null);
 
   // Form Fields for Add/Edit Company
   const [compName, setCompName] = useState('');
@@ -1159,23 +1162,44 @@ function Admin() {
     }
   }, []);
 
-  // Prompt ERP Live Sync Functions
-  const fetchSyncStatus = async () => {
-    setIsSyncStatusLoading(true);
+  // Prompt ERP Live Sync Functions with Real-Time Push Notification
+  const fetchSyncStatus = async (isBackground = false) => {
+    if (!isBackground) setIsSyncStatusLoading(true);
     try {
       const res = await fetch('/api/sync/status', { headers: getAuthHeaders() });
       if (res.ok) {
         const json = await res.json();
         if (json.success && json.data) {
+          const latestLog = json.data.recentLogs?.[0];
+          if (latestLog && lastKnownSyncIdRef.current && latestLog.syncId !== lastKnownSyncIdRef.current) {
+            // New live sync detected from Prompt daemon!
+            const inc = latestLog.stockIncreasedCount || 0;
+            const dec = latestLog.stockDecreasedCount || 0;
+            showToast(`⚡ Live Prompt ERP Sync! Updated ${latestLog.updated} items (${inc > 0 ? `+${inc} increased ` : ''}${dec > 0 ? `-${dec} reduced` : ''})`, 'success');
+            fetchDashboardData(false);
+          }
+          if (latestLog) {
+            lastKnownSyncIdRef.current = latestLog.syncId;
+          }
           setSyncStatusData(json.data);
         }
       }
     } catch (err) {
       console.warn('Sync status fetch notice:', err.message);
     } finally {
-      setIsSyncStatusLoading(false);
+      if (!isBackground) setIsSyncStatusLoading(false);
     }
   };
+
+  // Real-time automatic background polling (never requires manual page reload)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const intervalMs = activeTab === 'erpsync' ? 6000 : 15000;
+    const timer = setInterval(() => {
+      fetchSyncStatus(true);
+    }, intervalMs);
+    return () => clearInterval(timer);
+  }, [isAuthenticated, activeTab]);
 
   const handleTriggerManualSync = async () => {
     setIsManualSyncRunning(true);
@@ -7586,38 +7610,16 @@ _Helpline: +91 9316566894_`;
                             <th style={{ padding: '10px 12px', fontWeight: '700', color: 'var(--text-dark)' }}>Timestamp</th>
                             <th style={{ padding: '10px 12px', fontWeight: '700', color: 'var(--text-dark)' }}>Source</th>
                             <th style={{ padding: '10px 12px', fontWeight: '700', color: 'var(--text-dark)', textAlign: 'center' }}>Items Read</th>
-                            <th style={{ padding: '10px 12px', fontWeight: '700', color: '#0369a1', textAlign: 'center' }}>Stock Updated</th>
-                            <th style={{ padding: '10px 12px', fontWeight: '700', color: '#15803d', textAlign: 'center' }}>New Added</th>
+                            <th style={{ padding: '10px 12px', fontWeight: '700', color: '#0369a1', textAlign: 'center' }}>Stock Changes (+ / -)</th>
+                            <th style={{ padding: '10px 12px', fontWeight: '700', color: '#b45309', textAlign: 'center' }}>Unmatched</th>
                             <th style={{ padding: '10px 12px', fontWeight: '700', color: '#d97706', textAlign: 'center' }}>Duplicates Prevented</th>
                             <th style={{ padding: '10px 12px', fontWeight: '700', color: 'var(--text-dark)', textAlign: 'center' }}>Duration</th>
-                            <th style={{ padding: '10px 12px', fontWeight: '700', color: 'var(--text-dark)', textAlign: 'right' }}>Status</th>
+                            <th style={{ padding: '10px 12px', fontWeight: '700', color: 'var(--text-dark)', textAlign: 'center' }}>Status</th>
+                            <th style={{ padding: '10px 12px', fontWeight: '700', color: 'var(--text-dark)', textAlign: 'right' }}>Audit Action</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {(syncStatusData?.recentLogs || [
-                            {
-                              syncId: 'SYNC-PRM-1001',
-                              timestamp: new Date(Date.now() - 14 * 60 * 1000).toISOString(),
-                              source: 'Prompt ERP Desktop (Auto-Daemon)',
-                              itemsRead: 1420,
-                              updated: 1395,
-                              inserted: 25,
-                              duplicatesPrevented: 1420,
-                              durationMs: 840,
-                              status: 'SUCCESS'
-                            },
-                            {
-                              syncId: 'SYNC-PRM-1000',
-                              timestamp: new Date(Date.now() - 44 * 60 * 1000).toISOString(),
-                              source: 'Prompt ERP Desktop (Auto-Daemon)',
-                              itemsRead: 1420,
-                              updated: 1418,
-                              inserted: 2,
-                              duplicatesPrevented: 1420,
-                              durationMs: 790,
-                              status: 'SUCCESS'
-                            }
-                          ]).map((log, idx) => (
+                          {(syncStatusData?.recentLogs || []).map((log, idx) => (
                             <tr key={log.syncId || idx} style={{ borderBottom: '1px solid #f1f5f9', backgroundColor: idx % 2 === 0 ? '#ffffff' : '#fbfcfd' }}>
                               <td style={{ padding: '10px 12px', fontFamily: 'monospace', fontWeight: '700', color: 'var(--primary-blue)' }}>
                                 {log.syncId}
@@ -7631,22 +7633,43 @@ _Helpline: +91 9316566894_`;
                               <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: '700', color: 'var(--text-dark)' }}>
                                 {log.itemsRead}
                               </td>
-                              <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: '700', color: '#0369a1' }}>
-                                +{log.updated}
+                              <td style={{ padding: '10px 12px', textAlign: 'center' }}>
+                                <div style={{ display: 'inline-flex', gap: '6px', alignItems: 'center' }}>
+                                  <span style={{ fontSize: '0.75rem', backgroundColor: '#dcfce7', color: '#15803d', padding: '2px 7px', borderRadius: '8px', fontWeight: '700' }}>
+                                    +{log.stockIncreasedCount || log.updated || 0}
+                                  </span>
+                                  {(log.stockDecreasedCount > 0) && (
+                                    <span style={{ fontSize: '0.75rem', backgroundColor: '#fee2e2', color: '#b91c1c', padding: '2px 7px', borderRadius: '8px', fontWeight: '700' }}>
+                                      -{log.stockDecreasedCount}
+                                    </span>
+                                  )}
+                                </div>
                               </td>
-                              <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: '700', color: '#15803d' }}>
-                                +{log.inserted}
+                              <td style={{ padding: '10px 12px', textAlign: 'center' }}>
+                                <span style={{ fontSize: '0.75rem', backgroundColor: '#fef3c7', color: '#92400e', padding: '2px 8px', borderRadius: '8px', fontWeight: '700' }}>
+                                  {log.unmatchedCount || 0} Safe Excluded
+                                </span>
                               </td>
                               <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: '700', color: '#d97706' }}>
-                                🛡️ {log.duplicatesPrevented || log.itemsRead}
+                                🛡️ {log.duplicateRowsDetected ? `${log.duplicateRowsDetected} Merged` : `${log.duplicatesPrevented || log.itemsRead} Protected`}
                               </td>
                               <td style={{ padding: '10px 12px', textAlign: 'center', color: 'var(--text-medium)', fontFamily: 'monospace' }}>
                                 {log.durationMs}ms
                               </td>
-                              <td style={{ padding: '10px 12px', textAlign: 'right' }}>
+                              <td style={{ padding: '10px 12px', textAlign: 'center' }}>
                                 <span style={{ fontSize: '0.72rem', backgroundColor: '#dcfce7', color: '#15803d', padding: '2px 8px', borderRadius: '10px', fontWeight: '800' }}>
                                   ✓ {log.status} (100%)
                                 </span>
+                              </td>
+                              <td style={{ padding: '10px 12px', textAlign: 'right' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedSyncLog(log)}
+                                  className="btn btn-secondary btn-sm"
+                                  style={{ padding: '4px 10px', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                                >
+                                  <Eye size={13} /> View (+/- & Duplicates)
+                                </button>
                               </td>
                             </tr>
                           ))}
@@ -7654,6 +7677,294 @@ _Helpline: +91 9316566894_`;
                       </table>
                     </div>
                   </div>
+
+                  {/* Smart Inspection Modal for Selected Sync Run */}
+                  {selectedSyncLog && (
+                    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px' }}>
+                      <div className="card" style={{ width: '100%', maxWidth: '880px', maxHeight: '90vh', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
+                        {/* Modal Header */}
+                        <div style={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc' }}>
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{ fontFamily: 'monospace', fontWeight: '800', color: 'var(--primary-blue)', fontSize: '1.05rem' }}>
+                                {selectedSyncLog.syncId}
+                              </span>
+                              <span style={{ fontSize: '0.72rem', backgroundColor: '#dcfce7', color: '#15803d', padding: '2px 8px', borderRadius: '10px', fontWeight: '800' }}>
+                                {selectedSyncLog.status}
+                              </span>
+                            </div>
+                            <p style={{ margin: '3px 0 0 0', fontSize: '0.8rem', color: 'var(--text-medium)' }}>
+                              Executed on {new Date(selectedSyncLog.timestamp).toLocaleString()} via {selectedSyncLog.source}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedSyncLog(null)}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-medium)', padding: '4px' }}
+                          >
+                            <X size={20} />
+                          </button>
+                        </div>
+
+                        {/* 4 Summary Stat Cards */}
+                        <div style={{ padding: '16px 20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0' }}>
+                          <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', padding: '10px 14px', borderRadius: '8px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#15803d', fontSize: '0.8rem', fontWeight: '700' }}>
+                              <TrendingUp size={15} /> Stock Increased (+)
+                            </div>
+                            <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#166534', marginTop: '4px' }}>
+                              +{selectedSyncLog.stockIncreasedCount || selectedSyncLog.updated || 0}
+                              <span style={{ fontSize: '0.75rem', fontWeight: '500', color: '#15803d', marginLeft: '6px' }}>
+                                (+{selectedSyncLog.totalStockAdded || 0} units)
+                              </span>
+                            </div>
+                          </div>
+
+                          <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', padding: '10px 14px', borderRadius: '8px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#b91c1c', fontSize: '0.8rem', fontWeight: '700' }}>
+                              <AlertCircle size={15} /> Stock Reduced (-)
+                            </div>
+                            <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#991b1b', marginTop: '4px' }}>
+                              -{selectedSyncLog.stockDecreasedCount || 0}
+                              <span style={{ fontSize: '0.75rem', fontWeight: '500', color: '#b91c1c', marginLeft: '6px' }}>
+                                (-{selectedSyncLog.totalStockReduced || 0} units)
+                              </span>
+                            </div>
+                          </div>
+
+                          <div style={{ backgroundColor: '#fffbeb', border: '1px solid #fde68a', padding: '10px 14px', borderRadius: '8px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#b45309', fontSize: '0.8rem', fontWeight: '700' }}>
+                              <Shield size={15} /> Duplicates Prevented
+                            </div>
+                            <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#92400e', marginTop: '4px' }}>
+                              {selectedSyncLog.duplicateRowsDetected || 0}
+                              <span style={{ fontSize: '0.75rem', fontWeight: '500', color: '#b45309', marginLeft: '6px' }}>
+                                Merged Cleanly
+                              </span>
+                            </div>
+                          </div>
+
+                          <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', padding: '10px 14px', borderRadius: '8px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#1d4ed8', fontSize: '0.8rem', fontWeight: '700' }}>
+                              <Package size={15} /> Unmatched (Excluded)
+                            </div>
+                            <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#1e40af', marginTop: '4px' }}>
+                              {selectedSyncLog.unmatchedCount || 0}
+                              <span style={{ fontSize: '0.75rem', fontWeight: '500', color: '#1d4ed8', marginLeft: '6px' }}>
+                                Safe (Not in Catalog)
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Sub-Tabs within Modal */}
+                        <div style={{ display: 'flex', borderBottom: '1px solid #e2e8f0', backgroundColor: '#f8fafc', padding: '0 20px' }}>
+                          <button
+                            type="button"
+                            onClick={() => setSyncDetailTab('changes')}
+                            style={{
+                              padding: '12px 16px',
+                              background: 'none',
+                              border: 'none',
+                              borderBottom: syncDetailTab === 'changes' ? '3px solid var(--primary-blue)' : '3px solid transparent',
+                              fontWeight: syncDetailTab === 'changes' ? '700' : '600',
+                              color: syncDetailTab === 'changes' ? 'var(--primary-blue)' : 'var(--text-medium)',
+                              cursor: 'pointer',
+                              fontSize: '0.85rem'
+                            }}
+                          >
+                            📈 Stock Changes & Rates ({selectedSyncLog.stockChanges?.length || selectedSyncLog.matchedSample?.length || 0})
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSyncDetailTab('duplicates')}
+                            style={{
+                              padding: '12px 16px',
+                              background: 'none',
+                              border: 'none',
+                              borderBottom: syncDetailTab === 'duplicates' ? '3px solid #d97706' : '3px solid transparent',
+                              fontWeight: syncDetailTab === 'duplicates' ? '700' : '600',
+                              color: syncDetailTab === 'duplicates' ? '#d97706' : 'var(--text-medium)',
+                              cursor: 'pointer',
+                              fontSize: '0.85rem'
+                            }}
+                          >
+                            🛡️ Duplicates Consolidated ({selectedSyncLog.duplicateItems?.length || 0})
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSyncDetailTab('unmatched')}
+                            style={{
+                              padding: '12px 16px',
+                              background: 'none',
+                              border: 'none',
+                              borderBottom: syncDetailTab === 'unmatched' ? '3px solid #b45309' : '3px solid transparent',
+                              fontWeight: syncDetailTab === 'unmatched' ? '700' : '600',
+                              color: syncDetailTab === 'unmatched' ? '#b45309' : 'var(--text-medium)',
+                              cursor: 'pointer',
+                              fontSize: '0.85rem'
+                            }}
+                          >
+                            ⚠️ Unmatched in Catalog ({selectedSyncLog.unmatchedCount || 0})
+                          </button>
+                        </div>
+
+                        {/* Modal Body / Tab Content */}
+                        <div style={{ padding: '16px 20px', flex: 1, overflowY: 'auto', maxHeight: '420px' }}>
+                          {syncDetailTab === 'changes' && (
+                            <div>
+                              {(selectedSyncLog.stockChanges?.length || selectedSyncLog.matchedSample?.length) ? (
+                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.83rem' }}>
+                                  <thead>
+                                    <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                                      <th style={{ padding: '8px 10px', textAlign: 'left', color: 'var(--text-dark)' }}>Product Name</th>
+                                      <th style={{ padding: '8px 10px', textAlign: 'center', color: 'var(--text-dark)' }}>Previous Stock</th>
+                                      <th style={{ padding: '8px 10px', textAlign: 'center', color: 'var(--text-dark)' }}>New Live Stock</th>
+                                      <th style={{ padding: '8px 10px', textAlign: 'center', color: 'var(--text-dark)' }}>Delta (+ / -)</th>
+                                      <th style={{ padding: '8px 10px', textAlign: 'right', color: 'var(--text-dark)' }}>Live Rate</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {(selectedSyncLog.stockChanges || selectedSyncLog.matchedSample || []).map((ch, cidx) => (
+                                      <tr key={cidx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                        <td style={{ padding: '8px 10px', fontWeight: '600', color: 'var(--text-dark)' }}>
+                                          {ch.name}
+                                          {ch.packing && <span style={{ fontSize: '0.75rem', color: 'var(--text-medium)', marginLeft: '6px' }}>({ch.packing})</span>}
+                                        </td>
+                                        <td style={{ padding: '8px 10px', textAlign: 'center', color: 'var(--text-medium)' }}>
+                                          {ch.oldStock ?? 0}
+                                        </td>
+                                        <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: '700', color: 'var(--text-dark)' }}>
+                                          {ch.newStock ?? ch.stock ?? 0}
+                                        </td>
+                                        <td style={{ padding: '8px 10px', textAlign: 'center' }}>
+                                          {(ch.delta > 0) ? (
+                                            <span style={{ fontSize: '0.75rem', backgroundColor: '#dcfce7', color: '#15803d', padding: '2px 8px', borderRadius: '10px', fontWeight: '800' }}>
+                                              +{ch.delta} Stock Added
+                                            </span>
+                                          ) : (ch.delta < 0) ? (
+                                            <span style={{ fontSize: '0.75rem', backgroundColor: '#fee2e2', color: '#b91c1c', padding: '2px 8px', borderRadius: '10px', fontWeight: '800' }}>
+                                              {ch.delta} Stock Reduced
+                                            </span>
+                                          ) : (
+                                            <span style={{ fontSize: '0.75rem', backgroundColor: '#f1f5f9', color: 'var(--text-medium)', padding: '2px 8px', borderRadius: '10px', fontWeight: '600' }}>
+                                              Unchanged ({ch.newStock})
+                                            </span>
+                                          )}
+                                        </td>
+                                        <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: '700', color: 'var(--primary-blue)' }}>
+                                          ₹{(ch.newRate || ch.rate || 0).toFixed(2)}
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              ) : (
+                                <p style={{ textAlign: 'center', color: 'var(--text-medium)', padding: '30px 0', fontSize: '0.9rem' }}>
+                                  No individual product delta recorded for this run.
+                                </p>
+                              )}
+                            </div>
+                          )}
+
+                          {syncDetailTab === 'duplicates' && (
+                            <div>
+                              {(selectedSyncLog.duplicateItems?.length > 0) ? (
+                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.83rem' }}>
+                                  <thead>
+                                    <tr style={{ backgroundColor: '#fffbeb', borderBottom: '1px solid #fde68a' }}>
+                                      <th style={{ padding: '8px 10px', textAlign: 'left', color: '#92400e' }}>Repeated Medicine in Prompt</th>
+                                      <th style={{ padding: '8px 10px', textAlign: 'center', color: '#92400e' }}>Pack</th>
+                                      <th style={{ padding: '8px 10px', textAlign: 'center', color: '#92400e' }}>Exported Qty</th>
+                                      <th style={{ padding: '8px 10px', textAlign: 'left', color: '#92400e' }}>Resolution Protection</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {selectedSyncLog.duplicateItems.map((dup, didx) => (
+                                      <tr key={didx} style={{ borderBottom: '1px solid #fef3c7' }}>
+                                        <td style={{ padding: '8px 10px', fontWeight: '600', color: 'var(--text-dark)' }}>
+                                          {dup.name}
+                                        </td>
+                                        <td style={{ padding: '8px 10px', textAlign: 'center', color: 'var(--text-medium)' }}>
+                                          {dup.pack || '-'}
+                                        </td>
+                                        <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: '700' }}>
+                                          {dup.stockQty}
+                                        </td>
+                                        <td style={{ padding: '8px 10px', color: '#15803d', fontWeight: '600' }}>
+                                          ✓ Consolidated safely (Prevented duplicate database creation)
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              ) : (
+                                <div style={{ textAlign: 'center', padding: '30px 0', color: 'var(--text-medium)' }}>
+                                  <Shield size={36} color="#15803d" style={{ marginBottom: '8px' }} />
+                                  <p style={{ margin: 0, fontWeight: '700', color: '#166534' }}>Clean Export File!</p>
+                                  <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem' }}>Zero repeated medicine lines found in Prompt ERP export. 100% data purity.</p>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {syncDetailTab === 'unmatched' && (
+                            <div>
+                              <p style={{ fontSize: '0.82rem', color: 'var(--text-medium)', marginBottom: '10px' }}>
+                                These medicines exist in Prompt ERP but have not been created in the website catalog yet. They were safely skipped to prevent fake dummy data.
+                              </p>
+                              {(selectedSyncLog.unmatchedSample?.length > 0) ? (
+                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.83rem' }}>
+                                  <thead>
+                                    <tr style={{ backgroundColor: '#fef3c7', borderBottom: '1px solid #fde68a' }}>
+                                      <th style={{ padding: '8px 10px', textAlign: 'left', color: '#92400e' }}>Prompt Medicine Name</th>
+                                      <th style={{ padding: '8px 10px', textAlign: 'center', color: '#92400e' }}>Pack</th>
+                                      <th style={{ padding: '8px 10px', textAlign: 'center', color: '#92400e' }}>Prompt Stock</th>
+                                      <th style={{ padding: '8px 10px', textAlign: 'right', color: '#92400e' }}>Rate</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {selectedSyncLog.unmatchedSample.map((unm, uidx) => (
+                                      <tr key={uidx} style={{ borderBottom: '1px solid #fef3c7' }}>
+                                        <td style={{ padding: '8px 10px', fontWeight: '600', color: 'var(--text-dark)' }}>
+                                          {unm.name}
+                                        </td>
+                                        <td style={{ padding: '8px 10px', textAlign: 'center', color: 'var(--text-medium)' }}>
+                                          {unm.pack || '-'}
+                                        </td>
+                                        <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: '700' }}>
+                                          {unm.stockQty}
+                                        </td>
+                                        <td style={{ padding: '8px 10px', textAlign: 'right', color: 'var(--text-dark)' }}>
+                                          ₹{(unm.rate || 0).toFixed(2)}
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              ) : (
+                                <p style={{ textAlign: 'center', color: 'var(--text-medium)', padding: '30px 0', fontSize: '0.9rem' }}>
+                                  All exported items successfully matched catalog!
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div style={{ padding: '12px 20px', borderTop: '1px solid #e2e8f0', backgroundColor: '#f8fafc', display: 'flex', justifyContent: 'flex-end' }}>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedSyncLog(null)}
+                            className="btn btn-secondary"
+                            style={{ padding: '6px 18px', fontSize: '0.85rem' }}
+                          >
+                            Close
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Prompt Local Script Instructions for Wholesale Office PC */}
                   <div className="card" style={{ padding: '20px' }}>

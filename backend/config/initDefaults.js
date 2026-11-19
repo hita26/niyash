@@ -201,19 +201,6 @@ const initDefaults = async () => {
 
   initPromise = (async () => {
     try {
-      // 0. Purge any conflicting non-superadmin account for haripatel267998@gmail.com
-      try {
-        const deletedHari = await User.deleteMany({
-          email: 'haripatel267998@gmail.com',
-          role: { $ne: 'superadmin' }
-        });
-        if (deletedHari && deletedHari.deletedCount > 0) {
-          console.log(`[InitDefaults] Successfully purged ${deletedHari.deletedCount} conflicting account(s) for haripatel267998@gmail.com`);
-        }
-      } catch (errHari) {
-        console.warn('Warning during haripatel267998 account purge:', errHari.message);
-      }
-
       // 0B. Storage Safety Guard: Automatically purge audit & ERP sync logs older than 7 days
       try {
         const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
@@ -330,6 +317,43 @@ const initDefaults = async () => {
       } else if (!adminUser.plainPassword) {
         adminUser.plainPassword = 'admin123';
         await adminUser.save();
+      }
+
+      // 1C. Permanent Safeguard: Ensure Hari Patel Admin Account is active and never purged
+      const hariAdmin = await User.findOne({ email: 'haripatel267998@gmail.com' });
+      if (!hariAdmin) {
+        try {
+          await User.create({
+            name: 'Hari Patel',
+            email: 'haripatel267998@gmail.com',
+            password: 'admin123',
+            plainPassword: 'admin123',
+            companyName: 'Niyansh Pharma Wholesale Operations',
+            role: 'admin',
+            phone: '9316566894',
+            avatar: 'https://ui-avatars.com/api/?name=Hari+Patel&background=2563eb&color=ffffff&bold=true',
+            isActive: true,
+            permissions: {
+              canManageProducts: true,
+              canDeleteProducts: false,
+              canBulkImport: true,
+              canManageOrders: true,
+              canManageLedgers: true,
+              canManageCompanies: true,
+              canManageNews: true,
+              canManageEnquiries: true,
+              canClearDatabase: false
+            }
+          });
+          console.log('✅ Hari Patel admin permanently created and protected');
+        } catch (hErr) {
+          if (!hErr.message.includes('E11000')) console.warn('Hari Patel setup:', hErr.message);
+        }
+      } else {
+        if (!hariAdmin.plainPassword) {
+          hariAdmin.plainPassword = 'admin123';
+          await hariAdmin.save();
+        }
       }
 
       // 2. Ensure News / Schemes

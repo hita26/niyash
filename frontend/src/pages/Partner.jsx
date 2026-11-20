@@ -50,10 +50,8 @@ function Partner() {
           name: ownerName.trim().toUpperCase(),
           phone: cleanPhone,
           email: email.trim().toLowerCase(),
-          phone: cleanPhone,
-          email: email.trim(),
-          address: address.trim(),
-          designation: designation.trim(),
+          address: address.trim().toUpperCase(),
+          designation: designation.trim().toUpperCase(),
           message: fullMessage,
         }),
       });

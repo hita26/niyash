@@ -117,7 +117,7 @@ function Supplier() {
     setIsSubmitting(true);
 
     try {
-      const fullMessage = `Company: ${companyName.trim()}\nContact Person: ${contactName.trim()}\nDesignation: ${designation.trim()}\nGSTIN: ${gstNumber.trim()}\nPortfolio File: ${portfolioFile?.name || 'Uploaded'}\nPortfolio Link: ${portfolioUrl || 'Attached'}\n\nPortfolio details: ${message.trim()}`;
+      const fullMessage = `COMPANY: ${companyName.trim().toUpperCase()}\nCONTACT PERSON: ${contactName.trim().toUpperCase()}\nDESIGNATION: ${designation.trim().toUpperCase()}\nGSTIN: ${gstNumber.trim().toUpperCase()}\nPORTFOLIO FILE: ${(portfolioFile?.name || 'UPLOADED').toUpperCase()}\nPORTFOLIO LINK: ${portfolioUrl || 'ATTACHED'}\n\nPORTFOLIO DETAILS: ${message.trim().toUpperCase()}`;
 
       const response = await fetch('/api/enquiries', {
         method: 'POST',
@@ -126,11 +126,11 @@ function Supplier() {
         },
         body: JSON.stringify({
           type: 'Supplier',
-          name: contactName.trim(),
+          name: contactName.trim().toUpperCase(),
           phone: cleanPhone,
-          email: email.trim(),
-          address: address.trim(),
-          designation: designation.trim(),
+          email: email.trim().toLowerCase(),
+          address: address.trim().toUpperCase(),
+          designation: designation.trim().toUpperCase(),
           attachment: portfolioUrl || '',
           message: fullMessage,
         }),

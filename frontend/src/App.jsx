@@ -32,6 +32,7 @@ import InstallAppBanner from './components/InstallAppBanner';
 import BioNanoProgressBar from './components/BioNanoProgressBar';
 import SecurityVerification from './components/SecurityVerification';
 import SecurityCheck from './pages/SecurityCheck';
+import GlobalBrandWatermark from './components/GlobalBrandWatermark';
 
 // Security Auth Guard: blocks unauthenticated access and forces login if user presses Back after logout
 function ProtectedRoute({ children }) {
@@ -268,7 +269,8 @@ function AppContent() {
       )}
       <BioNanoProgressBar />
       <ScrollToTop />
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <GlobalBrandWatermark />
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', position: 'relative' }}>
         <Header 
           cartCount={enquiryCart.reduce((total, item) => total + item.quantity, 0)} 
           onOpenCart={() => setIsCartOpen(true)}

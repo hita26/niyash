@@ -17,6 +17,7 @@ import {
   Package
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import PharmaMoleculesCanvas from '../components/PharmaMoleculesCanvas';
 import AnimatedCounter from '../components/AnimatedCounter';
 import useScrollReveal from '../hooks/useScrollReveal';
 
@@ -171,9 +172,13 @@ function About() {
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         color: '#ffffff',
-        padding: '75px 0 85px 0'
+        padding: '75px 0 85px 0',
+        position: 'relative',
+        overflow: 'hidden'
       }}>
-        <div className="container" style={{ textAlign: 'center', maxWidth: '850px' }}>
+        {/* Floating Molecule Particle Mesh with Niyansh Pharma Watermark */}
+        <PharmaMoleculesCanvas particleCount={30} speed={0.40} />
+        <div className="container" style={{ textAlign: 'center', maxWidth: '850px', position: 'relative', zIndex: 2 }}>
           <span style={{
             backgroundColor: 'var(--secondary-green)',
             padding: '6px 16px',

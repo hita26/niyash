@@ -5533,3 +5533,25 @@ a:active,
     padding: 10px 18px !important;
   }
 }
+
+/* =========================================================================
+   GLOBAL BRAND WATERMARK (Site-Wide Holographic Bio-Nucleus Emblem)
+   ========================================================================= */
+.global-brand-watermark-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 2;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow: hidden;
+}
+
+@media print {
+  .global-brand-watermark-wrapper {
+    display: none !important;
+  }
+}

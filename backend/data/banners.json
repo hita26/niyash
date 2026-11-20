@@ -1,0 +1,86 @@
+[
+  {
+    "_id": "seed-b1",
+    "title": "Authorized Wholesale & B2B Distribution",
+    "subtitle": "Genuine Healthcare Formulations, Generics & Hospital Consumables Delivered Across Saurashtra",
+    "badge": "PAN GUJARAT DISTRIBUTION",
+    "image": "/banners/b1.jpeg",
+    "link": "/companies",
+    "ctaText": "Browse Pharma Companies",
+    "order": 1,
+    "active": true,
+    "aspectRatio": "landscape"
+  },
+  {
+    "_id": "seed-b2",
+    "title": "WHO-GMP Verified Pharmaceutical Formulations",
+    "subtitle": "100% Certified Batch Compliance & Direct Sourcing from Top Indian Manufacturers",
+    "badge": "WHO-GMP CERTIFIED",
+    "image": "/banners/b2.jpeg",
+    "link": "/products?category=Pharma Products",
+    "ctaText": "View Pharma Products",
+    "order": 2,
+    "active": true,
+    "aspectRatio": "square"
+  },
+  {
+    "_id": "seed-b3",
+    "title": "Exclusive Chemist Schemes & Volume Discounts",
+    "subtitle": "Special Bonus Margins, 10+1 Free Offers & Wholesale Savings for Registered Pharmacies",
+    "badge": "CHEMIST SCHEMES & OFFERS",
+    "image": "/banners/b3.jpeg",
+    "link": "/quick-order",
+    "ctaText": "Fast Quick Order ⚡",
+    "order": 3,
+    "active": true,
+    "aspectRatio": "square"
+  },
+  {
+    "_id": "seed-b4",
+    "title": "Critical Care Emergency Injectables",
+    "subtitle": "Dedicated Cold-Chain Storage & Sterile Ampoules for Nursing Homes & Hospitals",
+    "badge": "COLD-CHAIN COMPLIANT",
+    "image": "/banners/b4.jpeg",
+    "link": "/products?category=Injectables",
+    "ctaText": "Critical Care Range",
+    "order": 4,
+    "active": true,
+    "aspectRatio": "square"
+  },
+  {
+    "_id": "seed-b5",
+    "title": "Hospital Disposables & Surgical Supplies",
+    "subtitle": "Clinical Surgical Gloves, I.V. Cannulas, Syringes, Sutures & Diagnostic Consumables",
+    "badge": "HOSPITAL SURGICAL SUPPLY",
+    "image": "/banners/b5.jpeg",
+    "link": "/products?category=Surgical %26 Medical Supplies",
+    "ctaText": "Explore Surgical Supplies",
+    "order": 5,
+    "active": true,
+    "aspectRatio": "square"
+  },
+  {
+    "_id": "seed-b6",
+    "title": "Guaranteed 24-Hour Dispatch from Rajkot Depot",
+    "subtitle": "Rapid Logistics & Direct Wholesale Desk Connectivity Across Saurashtra",
+    "badge": "SAME-DAY DISPATCH",
+    "image": "/banners/b6.jpeg",
+    "link": "https://wa.me/919909923130?text=Hello%20Niyansh%20Pharma%2C%20I%20would%20like%20to%20place%20a%20wholesale%20order.",
+    "ctaText": "WhatsApp Direct Order",
+    "order": 6,
+    "active": true,
+    "aspectRatio": "portrait"
+  },
+  {
+    "_id": "seed-b7",
+    "title": "Authorized Distribution for 15+ Top Brands",
+    "subtitle": "Direct Network for Sun Pharma, Cipla, Zydus, Alkem, Mankind, Abbott & Torrent",
+    "badge": "OFFICIAL STOCKIST NETWORK",
+    "image": "/banners/b7.jpeg",
+    "link": "/companies",
+    "ctaText": "Explore Manufacturers",
+    "order": 7,
+    "active": true,
+    "aspectRatio": "portrait"
+  }
+]

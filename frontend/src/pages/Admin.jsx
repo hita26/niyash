@@ -15,6 +15,7 @@ import {
 import { broadcastLiveEvent, SYNC_EVENTS } from '../utils/liveSync';
 import { useLanguage } from '../context/LanguageContext';
 import SkeletonLoader from '../components/SkeletonLoader';
+import AdminBannerManager from '../components/AdminBannerManager';
 
 // ==========================================
 // FALLBACK DATASETS FOR OFFLINE / ROBUST DEMO
@@ -4929,6 +4930,25 @@ _Helpline: +91 9316566894_`;
               </span>
             </button>
 
+            {/* HERO BANNERS & SLIDER MANAGER */}
+            <button 
+              onClick={() => setActiveTab('banners')} 
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '10px 14px',
+                borderRadius: '8px', fontWeight: '700', fontSize: '0.9rem',
+                backgroundColor: activeTab === 'banners' ? '#ecfdf5' : 'transparent',
+                color: activeTab === 'banners' ? '#059669' : 'var(--text-medium)',
+                border: activeTab === 'banners' ? '1px solid #a7f3d0' : 'none'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <ImageIcon size={16} color={activeTab === 'banners' ? '#059669' : '#0c3d6c'} /> Hero Banners
+              </div>
+              <span style={{ fontSize: '0.68rem', padding: '2px 7px', borderRadius: '10px', backgroundColor: activeTab === 'banners' ? '#059669' : '#e0f2fe', color: activeTab === 'banners' ? '#ffffff' : '#0369a1', fontWeight: '800' }}>
+                Slider
+              </span>
+            </button>
+
             <button 
               onClick={() => setActiveTab('products')} 
               style={{
@@ -5136,6 +5156,9 @@ _Helpline: +91 9316566894_`;
               )}
               <button onClick={() => setActiveTab('news')} className={`admin-tab-chip ${activeTab === 'news' ? 'active' : ''}`}>
                 <Flame size={14} /> {t('admin.tabBulletins', 'Schemes')} ({news.length})
+              </button>
+              <button onClick={() => setActiveTab('banners')} className={`admin-tab-chip ${activeTab === 'banners' ? 'active' : ''}`} style={activeTab === 'banners' ? { backgroundColor: '#059669', color: '#ffffff', fontWeight: '800' } : {}}>
+                <ImageIcon size={14} /> Banners
               </button>
               <button onClick={() => setActiveTab('products')} className={`admin-tab-chip ${activeTab === 'products' ? 'active' : ''}`}>
                 <ShoppingBag size={14} /> {t('admin.tabProducts', 'Products')} ({productStats.totalProducts || products.length})
@@ -6422,6 +6445,17 @@ _Helpline: +91 9316566894_`;
                     )}
                   </div>
                 </div>
+              )}
+
+              {/* ==========================================
+                  HERO BANNERS & SLIDER MANAGER (SUPERADMIN)
+                  ========================================== */}
+              {activeTab === 'banners' && (
+                <AdminBannerManager 
+                  token={token} 
+                  showNotification={showNotification} 
+                  isSuperAdmin={isSuperAdmin} 
+                />
               )}
 
               {/* ==========================================

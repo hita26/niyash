@@ -34,6 +34,21 @@ const DEFAULT_BANNER_SETTINGS = {
   quickOrderBannerImage: ''
 };
 
+const DEFAULT_NEW_LAUNCH_SETTINGS = {
+  enabled: true,
+  badgeText: 'NEW LAUNCH SPOTLIGHT • RAJKOT DEPOT',
+  heading: 'Advanced Cardiovascular Formulation',
+  productName: 'NAP STAR A75',
+  formula: 'Aspirin Gastro-resistant & Atorvastatin Capsules I.P.',
+  description: 'Dual-action cardiovascular protection combining anti-platelet therapy with potent lipid regulation for cardiac defense and secondary stroke prevention.',
+  image: '/banners/hero-banner-2.jpg',
+  mrp: 60,
+  scheme: '10 + 1 FREE',
+  depotText: 'LIVE IN RAJKOT',
+  dispatchText: 'Same-Day Dispatch',
+  phone: '+919909923130'
+};
+
 const DEFAULT_BRANDS = [
   'Abbott', 'Alkem', 'Biochem', 'Cipla', 'Dr. Morepen', 'Daxia',
   'Glenmark', 'Intas', 'Mankind', 'Sun Pharma', 'Torrent', 'Zydus Cadila',
@@ -320,6 +335,57 @@ router.put('/home-content', protect, adminOnly, async (req, res) => {
   } catch (err) {
     console.error('Error updating home content:', err);
     return res.status(500).json({ success: false, message: 'Failed to update home content' });
+  }
+});
+
+// ==========================================
+// 5. NEW LAUNCH SPOTLIGHT SETTINGS
+// ==========================================
+router.get('/new-launch', async (req, res) => {
+  try {
+    const setting = await SiteSetting.findOne({ key: 'new_launch' });
+    if (setting && setting.value) {
+      return res.json({ success: true, data: { ...DEFAULT_NEW_LAUNCH_SETTINGS, ...setting.value } });
+    }
+    const local = readLocalSettings();
+    return res.json({ success: true, data: { ...DEFAULT_NEW_LAUNCH_SETTINGS, ...(local?.newLaunch || {}) } });
+  } catch (err) {
+    console.warn('DB error fetching new launch settings, using fallback:', err.message);
+    const local = readLocalSettings();
+    return res.json({ success: true, data: { ...DEFAULT_NEW_LAUNCH_SETTINGS, ...(local?.newLaunch || {}) } });
+  }
+});
+
+router.put('/new-launch', protect, adminOnly, async (req, res) => {
+  try {
+    const payload = req.body;
+    if (!payload || typeof payload !== 'object') {
+      return res.status(400).json({ success: false, message: 'Invalid payload' });
+    }
+
+    const updated = {
+      ...DEFAULT_NEW_LAUNCH_SETTINGS,
+      ...payload
+    };
+
+    try {
+      await SiteSetting.findOneAndUpdate(
+        { key: 'new_launch' },
+        { value: updated },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      );
+    } catch (dbErr) {
+      console.warn('Could not save new launch settings to MongoDB, saving locally:', dbErr.message);
+    }
+
+    const currentLocal = readLocalSettings();
+    currentLocal.newLaunch = updated;
+    writeLocalSettings(currentLocal);
+
+    return res.json({ success: true, message: 'New Launch settings updated successfully', data: updated });
+  } catch (err) {
+    console.error('Error updating new launch settings:', err);
+    return res.status(500).json({ success: false, message: 'Failed to update new launch settings' });
   }
 });
 

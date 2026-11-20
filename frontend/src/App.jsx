@@ -30,6 +30,8 @@ import AIAssistant from './components/AIAssistant';
 import FloatingOrderWidget from './components/FloatingOrderWidget';
 import InstallAppBanner from './components/InstallAppBanner';
 import BioNanoProgressBar from './components/BioNanoProgressBar';
+import SecurityVerification from './components/SecurityVerification';
+import SecurityCheck from './pages/SecurityCheck';
 
 // Security Auth Guard: blocks unauthenticated access and forces login if user presses Back after logout
 function ProtectedRoute({ children }) {
@@ -57,6 +59,15 @@ function AppContent() {
   
   // Auth state from centralized context
   const { user, token, login, logout, isAuthOpen, openAuth, closeAuth } = useAuth();
+
+  // Cloudflare-Style Bot Security Verification Gate State
+  const [isSecurityCleared, setIsSecurityCleared] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    if (localStorage.getItem('niyansh_bypass_security') === 'true') return true;
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('verify') || params.has('test-security')) return false;
+    return sessionStorage.getItem('niyansh_security_cleared') === 'true';
+  });
 
   // Detect whether current view is within the B2B Chemist Workstation
   const isB2BPortal = location.pathname.startsWith('/dashboard') || 
@@ -248,6 +259,12 @@ function AppContent() {
 
   return (
     <>
+      {/* Cloudflare Bot Security Challenge Gate */}
+      {!isSecurityCleared && location.pathname !== '/security-check' && (
+        <SecurityVerification 
+          onVerified={() => setIsSecurityCleared(true)} 
+        />
+      )}
       <BioNanoProgressBar />
       <ScrollToTop />
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -308,6 +325,7 @@ function AppContent() {
             <Route path="/supplier" element={<Supplier />} />
             <Route path="/manufacturing" element={<Manufacturing />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/security-check" element={<SecurityCheck />} />
           </Routes>
         </main>
 

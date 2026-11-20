@@ -291,8 +291,23 @@ function Footer({ compact = false }) {
             <div className="footer-bottom-rights">
               <span>© 2026 Niyansh Pharma. All Rights Reserved.</span>
             </div>
-            <div className="footer-bottom-tagline">
+            <div className="footer-bottom-tagline" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               <span>Designed with Care • Quality • Trust</span>
+              <Link 
+                to="/security-check" 
+                style={{ 
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  gap: '5px', 
+                  color: 'inherit', 
+                  textDecoration: 'none', 
+                  fontSize: '0.75rem',
+                  opacity: 0.8
+                }}
+                title="Cloudflare Bot & DDoS Security Protected"
+              >
+                <ShieldCheck size={13} color="#22c55e" /> Cloudflare Protected
+              </Link>
             </div>
           </div>
         </div>

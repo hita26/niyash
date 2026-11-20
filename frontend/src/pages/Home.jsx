@@ -9,6 +9,8 @@ import PharmaMoleculesCanvas from '../components/PharmaMoleculesCanvas';
 import AnimatedCounter from '../components/AnimatedCounter';
 import useScrollReveal from '../hooks/useScrollReveal';
 import { useLiveSync, SYNC_EVENTS } from '../utils/liveSync';
+import HeroBannerSlider from '../components/HeroBannerSlider';
+import NewLaunchSpotlight from '../components/NewLaunchSpotlight';
 
 function Home({ addToCart }) {
   const { t, language } = useLanguage();
@@ -236,6 +238,12 @@ function Home({ addToCart }) {
 
   return (
     <div style={{ width: '100%' }} className="animate-fade-in">
+      
+      {/* Premium Full-Width Ultra-Wide Hero Banner Slider (1024x373 2.74:1) */}
+      <HeroBannerSlider />
+
+      {/* Interactive New Launch 3D Spotlight Section (NAP STAR A75) */}
+      <NewLaunchSpotlight />
       
       {/* Hero Banner Section with Floating Molecular Particles */}
       <section className="home-hero-section" style={{

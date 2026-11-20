@@ -9492,6 +9492,29 @@ _Helpline: +91 9316566894_`;
                       >
                         <Download size={14} /> Export CSV Report
                       </button>
+
+                      <a
+                        href="/security-check"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-sm"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          backgroundColor: '#0f172a',
+                          color: '#ffffff',
+                          border: '1px solid #334155',
+                          borderRadius: '8px',
+                          padding: '6px 12px',
+                          fontSize: '0.82rem',
+                          fontWeight: '600',
+                          textDecoration: 'none'
+                        }}
+                        title="Preview and test the Cloudflare bot security challenge gate"
+                      >
+                        <ShieldCheck size={14} color="#10b981" /> Bot Challenge Preview
+                      </a>
                     </div>
                   </div>
 

@@ -5991,9 +5991,9 @@ _Helpline: +91 9316566894_`;
                     </div>
                   </div>
 
-                  {/* Ledgers Table */}
+                  {/* Ledgers Table & Mobile Pocket Cards */}
                   <div className="card" style={{ padding: '20px' }}>
-                    <div className="admin-table-container">
+                    <div className="admin-table-container admin-ledgers-desktop-table">
                       <table className="admin-table" style={{ width: '100%', minWidth: '1050px' }}>
                         <thead>
                           <tr>
@@ -6103,6 +6103,131 @@ _Helpline: +91 9316566894_`;
                           )}
                         </tbody>
                       </table>
+                    </div>
+
+                    {/* Pocket Mobile Cards View for Ledgers */}
+                    <div className="admin-ledgers-mobile-cards">
+                      {filteredLedgers.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '30px', color: 'var(--text-light)' }}>
+                          No retailer ledgers match your search.
+                        </div>
+                      ) : (
+                        filteredLedgers.map((ledger) => {
+                          const hasOverdue = (ledger.invoices || []).some(inv => inv.balance > 0 && inv.status === 'Overdue');
+                          const hasDues = (ledger.outstandingBalance || 0) > 0;
+                          const creditLimit = ledger.creditLimit || 100000;
+                          const creditUsedPercent = Math.min(100, Math.round(((ledger.outstandingBalance || 0) / creditLimit) * 100));
+
+                          return (
+                            <div key={ledger._id || ledger.retailerMobile} className="card" style={{
+                              padding: '16px',
+                              borderRadius: '14px',
+                              border: `1.5px solid ${hasOverdue ? '#fca5a5' : 'var(--border-light)'}`,
+                              boxShadow: hasOverdue ? '0 4px 14px rgba(239, 68, 68, 0.08)' : '0 3px 12px rgba(0,0,0,0.04)',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '12px',
+                              marginBottom: '12px',
+                              backgroundColor: hasOverdue ? 'rgba(239, 68, 68, 0.02)' : 'var(--bg-card)'
+                            }}>
+                              {/* Header: Store Name & Status Badge */}
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
+                                <div>
+                                  <div style={{ fontWeight: '800', color: 'var(--text-dark)', fontSize: '0.98rem' }}>
+                                    {ledger.shopName}
+                                  </div>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '3px', fontSize: '0.8rem', color: 'var(--text-medium)' }}>
+                                    <span>Ph: <a href={`tel:${ledger.retailerMobile}`} style={{ fontWeight: '600', color: 'var(--primary-blue)' }}>{ledger.retailerMobile}</a></span>
+                                    {ledger.gstin && <span style={{ fontSize: '0.72rem', color: 'var(--text-light)', fontFamily: 'monospace' }}>GST: {ledger.gstin}</span>}
+                                  </div>
+                                </div>
+                                {hasOverdue ? (
+                                  <span style={{ fontSize: '0.7rem', fontWeight: '800', backgroundColor: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca', padding: '2px 8px', borderRadius: '12px', whiteSpace: 'nowrap' }}>
+                                    ⚠️ OVERDUE
+                                  </span>
+                                ) : hasDues ? (
+                                  <span style={{ fontSize: '0.7rem', fontWeight: '700', backgroundColor: '#fef3c7', color: '#b45309', border: '1px solid #fde68a', padding: '2px 8px', borderRadius: '12px', whiteSpace: 'nowrap' }}>
+                                    PENDING DUES
+                                  </span>
+                                ) : (
+                                  <span style={{ fontSize: '0.7rem', fontWeight: '700', backgroundColor: '#dcfce7', color: '#15803d', border: '1px solid #bbf7d0', padding: '2px 8px', borderRadius: '12px', whiteSpace: 'nowrap' }}>
+                                    ✓ SETTLED
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Financial Summary */}
+                              <div style={{ background: hasOverdue ? '#fff5f5' : 'rgba(12, 61, 108, 0.04)', padding: '12px', borderRadius: '10px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                  <div>
+                                    <div style={{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--text-light)', textTransform: 'uppercase' }}>
+                                      Outstanding Balance
+                                    </div>
+                                    <div style={{ fontSize: '1.35rem', fontWeight: '900', color: hasOverdue ? '#dc2626' : hasDues ? '#d97706' : '#16a34a', marginTop: '2px' }}>
+                                      {formatCurrency(ledger.outstandingBalance)}
+                                    </div>
+                                  </div>
+                                  <div style={{ textAlign: 'right' }}>
+                                    <div style={{ fontSize: '0.72rem', color: 'var(--text-light)' }}>
+                                      Total Billed: <strong>{formatCurrency(ledger.totalBilled)}</strong>
+                                    </div>
+                                    <div style={{ fontSize: '0.72rem', color: '#16a34a', marginTop: '2px' }}>
+                                      Total Paid: <strong>{formatCurrency(ledger.totalPaid)}</strong>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Credit Limit Progress */}
+                                <div style={{ marginTop: '8px' }}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-medium)', marginBottom: '3px' }}>
+                                    <span>Credit Limit: {formatCurrency(creditLimit)}</span>
+                                    <span style={{ fontWeight: '700', color: creditUsedPercent > 80 ? '#dc2626' : 'var(--text-dark)' }}>{creditUsedPercent}% Used</span>
+                                  </div>
+                                  <div style={{ height: '5px', backgroundColor: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
+                                    <div style={{
+                                      height: '100%',
+                                      width: `${creditUsedPercent}%`,
+                                      backgroundColor: creditUsedPercent > 90 ? '#dc2626' : creditUsedPercent > 70 ? '#f59e0b' : '#0c3d6c',
+                                      transition: 'width 0.3s ease'
+                                    }} />
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* 3 Touch-Friendly Action Buttons */}
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1.2fr', gap: '8px', paddingTop: '8px', borderTop: '1px solid var(--border-light)' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedLedger(ledger)}
+                                  className="btn btn-outline btn-sm"
+                                  style={{ padding: '7px 6px', fontSize: '0.76rem', gap: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                  title="View Full Ledger Statement"
+                                >
+                                  <FileText size={13} /> Statement
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenPaymentModal(ledger)}
+                                  className="btn btn-secondary btn-sm"
+                                  style={{ padding: '7px 6px', fontSize: '0.76rem', gap: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                  title="Record Manual Payment"
+                                >
+                                  <Plus size={13} /> Pay
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleSendStatementWhatsApp(ledger)}
+                                  className="btn btn-sm"
+                                  style={{ padding: '7px 6px', fontSize: '0.76rem', gap: '4px', backgroundColor: '#25D366', color: '#ffffff', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700' }}
+                                  title="Send WhatsApp Dues Reminder"
+                                >
+                                  <Phone size={13} /> WhatsApp
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
                     </div>
                   </div>
                 </div>

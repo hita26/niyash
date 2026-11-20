@@ -861,9 +861,27 @@ function Admin() {
   // Active Tab
   const [activeTab, setActiveTab] = useState('products');
 
-  // Database / Live States
-  const [products, setProducts] = useState([]);
-  const [orders, setOrders] = useState([]);
+  // Database / Live States (Cached for Instant 0ms Load)
+  const [products, setProducts] = useState(() => {
+    try {
+      const cached = localStorage.getItem('cached_admin_products');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (_) {}
+    return [];
+  });
+  const [orders, setOrders] = useState(() => {
+    try {
+      const cached = localStorage.getItem('cached_admin_orders');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (_) {}
+    return [];
+  });
   const [ledgers, setLedgers] = useState([]);
   const [news, setNews] = useState([]);
   const [enquiries, setEnquiries] = useState([]);
@@ -1503,151 +1521,113 @@ function Admin() {
   }, [activeTab, products.length, isAuthenticated]);
 
   const fetchDashboardData = async (showSpinner = true) => {
-    if (showSpinner) setIsLoading(true);
+    // Only show full-screen skeleton if we have zero products in memory/cache
+    if (showSpinner && products.length === 0) {
+      setIsLoading(true);
+    }
+
+    // Safety timeout: Never let isLoading lock the screen for more than 2.5s
+    const safetyTimer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2500);
+
     try {
       const headers = getAuthHeaders();
 
-      // Parallel high-speed fetch for all dashboard metrics and collections (Bullet train speed)
-      const [
-        prodResult,
-        ordResult,
-        ledResult,
-        newsResult,
-        enqResult,
-        carResult,
-        compResult,
-        cfResult,
-        contactResult
-      ] = await Promise.allSettled([
-        fetch('/api/products/admin/all?limit=15000', { headers })
-          .then(async (res) => {
-            if (res.ok) {
-              const ct = res.headers.get('content-type') || '';
-              if (ct.includes('application/json')) {
-                const data = await res.json();
-                if (Array.isArray(data.products) && data.products.length > 0) {
-                  return data;
-                }
-              }
-            }
-            // Fallback 1: Standard public products endpoint
-            const fallback = await fetch('/api/products?limit=15000');
-            if (fallback.ok) {
-              const fbCt = fallback.headers.get('content-type') || '';
-              if (fbCt.includes('application/json')) {
-                const fbData = await fallback.json();
-                if (Array.isArray(fbData.products) && fbData.products.length > 0) {
-                  return fbData;
-                }
-              }
-            }
-            // Fallback 2: Direct Vercel backend URL
-            const direct = await fetch('https://pharma-bay-two.vercel.app/api/products?limit=15000');
-            if (direct.ok) {
-              const directData = await direct.json();
-              if (Array.isArray(directData.products) && directData.products.length > 0) {
-                return directData;
-              }
-            }
-            return { products: [] };
-          })
-          .catch(async () => {
-            try {
-              const direct = await fetch('https://pharma-bay-two.vercel.app/api/products?limit=15000');
-              if (direct.ok) return await direct.json();
-            } catch (_) {}
-            return { products: [] };
-          }),
-        fetch('/api/orders?limit=100', { headers })
-          .then(r => r.ok ? r.json() : { orders: FALLBACK_ORDERS })
-          .catch(() => ({ orders: FALLBACK_ORDERS })),
-        fetch('/api/ledger?limit=100', { headers })
-          .then(r => r.ok ? r.json() : { ledgers: FALLBACK_LEDGERS })
-          .catch(() => ({ ledgers: FALLBACK_LEDGERS })),
-        fetch('/api/news?limit=100', { headers })
-          .then(r => r.ok ? r.json() : { news: FALLBACK_NEWS })
-          .catch(() => ({ news: FALLBACK_NEWS })),
-        fetch('/api/enquiries', { headers })
-          .then(r => r.ok ? r.json() : [])
-          .catch(() => []),
-        fetch('/api/careers', { headers })
-          .then(r => r.ok ? r.json() : [])
-          .catch(() => []),
-        fetch('/api/companies?limit=1000&admin=true', { headers })
-          .then(r => r.ok ? r.json() : { companies: [] })
-          .catch(() => ({ companies: [] })),
-        fetch('/api/products/custom-fields', { headers })
-          .then(r => r.ok ? r.json() : { fields: [] })
-          .catch(() => ({ fields: [] })),
-        fetch('/api/settings/contact')
-          .then(r => r.ok ? r.json() : null)
-          .catch(() => null)
-      ]);
+      // 1. Fetch Products immediately with timeout (highest priority - unblocks UI at once)
+      const fetchProducts = async () => {
+        try {
+          const ctrl = new AbortController();
+          const tid = setTimeout(() => ctrl.abort(), 5000);
 
-      // 1. Products
-      if (prodResult.status === 'fulfilled' && prodResult.value) {
-        const pData = prodResult.value;
-        if (Array.isArray(pData.products) && pData.products.length > 0) {
-          setProducts(pData.products);
-        } else {
-          try {
-            const fallbackDirect = await fetch('https://pharma-bay-two.vercel.app/api/products?limit=15000').then(r => r.json());
-            if (fallbackDirect && Array.isArray(fallbackDirect.products) && fallbackDirect.products.length > 0) {
-              setProducts(fallbackDirect.products);
+          let res = await fetch('/api/products/admin/all?limit=2500', { headers, signal: ctrl.signal }).catch(() => null);
+          if (!res || !res.ok) {
+            res = await fetch('/api/products?limit=2500', { signal: ctrl.signal }).catch(() => null);
+          }
+          clearTimeout(tid);
+
+          if (res && res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data.products) && data.products.length > 0) {
+              setProducts(data.products);
+              try { localStorage.setItem('cached_admin_products', JSON.stringify(data.products)); } catch (_) {}
             }
-          } catch (_) {}
+            if (data.stats) setProductAdminStats(data.stats);
+          }
+        } catch (err) {
+          console.warn('Products fast fetch notice:', err.message);
+        } finally {
+          setIsLoading(false);
+          clearTimeout(safetyTimer);
         }
-        if (pData.stats) setProductAdminStats(pData.stats);
-      }
+      };
 
-      // 2. Orders
-      if (ordResult.status === 'fulfilled' && ordResult.value) {
-        const oData = ordResult.value;
-        setOrders(oData.orders && oData.orders.length > 0 ? oData.orders : FALLBACK_ORDERS);
-      }
+      // Trigger products fetch immediately
+      fetchProducts();
 
-      // 3. Ledgers
-      if (ledResult.status === 'fulfilled' && ledResult.value) {
-        const lData = ledResult.value;
-        setLedgers(lData.ledgers && lData.ledgers.length > 0 ? lData.ledgers : FALLBACK_LEDGERS);
-      }
+      // 2. Fetch all other dashboard metrics asynchronously in background (never blocks table)
+      fetch('/api/orders?limit=100', { headers })
+        .then(r => r.ok ? r.json() : { orders: FALLBACK_ORDERS })
+        .then(oData => {
+          if (oData?.orders) {
+            setOrders(oData.orders.length > 0 ? oData.orders : FALLBACK_ORDERS);
+            try { localStorage.setItem('cached_admin_orders', JSON.stringify(oData.orders)); } catch (_) {}
+          }
+        })
+        .catch(() => setOrders(FALLBACK_ORDERS));
 
-      // 4. News
-      if (newsResult.status === 'fulfilled' && newsResult.value) {
-        const nData = newsResult.value;
-        setNews(nData.news && nData.news.length > 0 ? nData.news : FALLBACK_NEWS);
-      }
+      fetch('/api/ledger?limit=100', { headers })
+        .then(r => r.ok ? r.json() : { ledgers: FALLBACK_LEDGERS })
+        .then(lData => {
+          if (lData?.ledgers) setLedgers(lData.ledgers.length > 0 ? lData.ledgers : FALLBACK_LEDGERS);
+        })
+        .catch(() => setLedgers(FALLBACK_LEDGERS));
 
-      // 5. Enquiries
-      if (enqResult.status === 'fulfilled' && enqResult.value) {
-        setEnquiries(Array.isArray(enqResult.value) ? enqResult.value : []);
-      }
+      fetch('/api/news?limit=100', { headers })
+        .then(r => r.ok ? r.json() : { news: FALLBACK_NEWS })
+        .then(nData => {
+          if (nData?.news) setNews(nData.news.length > 0 ? nData.news : FALLBACK_NEWS);
+        })
+        .catch(() => setNews(FALLBACK_NEWS));
 
-      // 6. Careers
-      if (carResult.status === 'fulfilled' && carResult.value) {
-        setCareers(Array.isArray(carResult.value) ? carResult.value : []);
-      }
+      fetch('/api/enquiries', { headers })
+        .then(r => r.ok ? r.json() : [])
+        .then(enq => setEnquiries(Array.isArray(enq) ? enq : []))
+        .catch(() => setEnquiries([]));
 
-      // 7. Companies
-      if (compResult.status === 'fulfilled' && compResult.value) {
-        const cData = compResult.value;
-        setCompanies(cData.companies || []);
-        if (cData.total) setTotalCompaniesCount(cData.total);
-      }
+      fetch('/api/careers', { headers })
+        .then(r => r.ok ? r.json() : [])
+        .then(car => setCareers(Array.isArray(car) ? car : []))
+        .catch(() => setCareers([]));
 
-      // 8. Custom fields
-      if (cfResult.status === 'fulfilled' && cfResult.value) {
-        setCustomFieldDefs(cfResult.value.fields || []);
-      }
+      fetch('/api/companies?limit=1000&admin=true', { headers })
+        .then(r => r.ok ? r.json() : { companies: [] })
+        .then(cData => {
+          if (cData?.companies) {
+            setCompanies(cData.companies);
+            if (cData.total) setTotalCompaniesCount(cData.total);
+          }
+        })
+        .catch(() => setCompanies([]));
 
-      // 9. Contact settings
-      if (contactResult.status === 'fulfilled' && contactResult.value && contactResult.value.contact) {
-        setContactSettings(prev => ({ ...prev, ...contactResult.value.contact }));
-      }
+      fetch('/api/products/custom-fields', { headers })
+        .then(r => r.ok ? r.json() : { fields: [] })
+        .then(cf => {
+          if (cf?.fields) setCustomFieldDefs(cf.fields);
+        })
+        .catch(() => {});
+
+      fetch('/api/settings/contact')
+        .then(r => r.ok ? r.json() : null)
+        .then(cSet => {
+          if (cSet?.contact) setContactSettings(prev => ({ ...prev, ...cSet.contact }));
+        })
+        .catch(() => {});
+
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-    } finally {
-      if (showSpinner) setIsLoading(false);
+      console.error('Error in fetchDashboardData:', error);
+      setIsLoading(false);
+      clearTimeout(safetyTimer);
     }
   };
 
@@ -5208,7 +5188,7 @@ _Helpline: +91 9316566894_`;
             </div>
           </div>
 
-          {isLoading && (activeTab === 'products' || activeTab === 'orders') ? (
+          {isLoading && (activeTab === 'products' ? products.length === 0 : activeTab === 'orders' ? orders.length === 0 : false) ? (
             <SkeletonLoader variant="admin-table" rows={6} />
           ) : (
             <>

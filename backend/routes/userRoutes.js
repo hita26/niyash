@@ -1257,17 +1257,27 @@ router.post('/chemists/:id/approve', protect, adminOnly, async (req, res) => {
     chemist.status = 'approved';
     chemist.isActive = true;
     chemist.rejectionReason = '';
+
+    const cleanDigits = (chemist.phone || '').replace(/\D/g, '').slice(-4) || '2026';
+    const pwdToSend = req.body.plainPassword || req.body.password || chemist.plainPassword || `Niyansh@${cleanDigits}`;
+    if (!chemist.plainPassword || req.body.plainPassword) {
+      chemist.plainPassword = pwdToSend;
+    }
     await chemist.save();
 
-    // Send Activation Email with username and registered password
-    sendChemistApprovalEmail({
-      to: chemist.email,
-      name: chemist.name,
-      companyName: chemist.companyName,
-      email: chemist.email,
-      plainPassword: chemist.plainPassword || '',
-      drugLicense: chemist.drugLicense1 || chemist.drugLicense || ''
-    }).catch(e => console.warn('[Chemist Approval] Email notification notice:', e.message));
+    // Send Activation Email with username and registered password (properly awaited)
+    try {
+      await sendChemistApprovalEmail({
+        to: chemist.email,
+        name: chemist.name,
+        companyName: chemist.companyName,
+        email: chemist.email,
+        plainPassword: pwdToSend,
+        drugLicense: chemist.drugLicense1 || chemist.drugLicense || ''
+      });
+    } catch (mailErr) {
+      console.warn('[Chemist Approval] Email notification notice:', mailErr.message);
+    }
 
     logAuditEvent({
       req,

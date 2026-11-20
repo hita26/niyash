@@ -778,61 +778,22 @@ router.post('/', protect, adminOnly, checkPermission('canManageProducts'), async
       scheme,
     } = req.body;
 
-    // HARD STRICT VALIDATION FOR ALL REQUIRED FIELDS
-    if (!name || name.trim() === '') {
-      return res.status(400).json({ success: false, message: 'Product Name is required' });
-    }
-    if (!sku || sku.trim() === '') {
-      return res.status(400).json({ success: false, message: 'SKU / ID is required' });
-    }
-    if (!company || company.trim() === '') {
-      return res.status(400).json({ success: false, message: 'Manufacturer / Company is required' });
-    }
-    if (!category || category.trim() === '') {
-      return res.status(400).json({ success: false, message: 'Product Category is required' });
-    }
-    if (!composition || composition.trim() === '') {
-      return res.status(400).json({ success: false, message: 'Contain (Chemical / Active Composition) is required' });
-    }
-    if (!form || form.trim() === '') {
-      return res.status(400).json({ success: false, message: 'Formulation Form is required' });
-    }
-    if (price === undefined || price === '' || isNaN(parseFloat(price)) || parseFloat(price) <= 0) {
-      return res.status(400).json({ success: false, message: 'Wholesale Price is required and must be greater than 0' });
-    }
-    if (mrp === undefined || mrp === '' || isNaN(parseFloat(mrp)) || parseFloat(mrp) <= 0) {
-      return res.status(400).json({ success: false, message: 'MRP is required and must be greater than 0' });
-    }
-    if (stockQuantity === undefined || stockQuantity === '' || isNaN(parseInt(stockQuantity, 10)) || parseInt(stockQuantity, 10) < 0) {
-      return res.status(400).json({ success: false, message: 'Stock Units is required and cannot be negative' });
-    }
-    if (!packing || packing.trim() === '') {
-      return res.status(400).json({ success: false, message: 'Packing Specifications is required' });
-    }
-    if (!subCategory || subCategory.trim() === '') {
-      return res.status(400).json({ success: false, message: 'Subcategory / Variant is required' });
-    }
-    if (!manufacturer || manufacturer.trim() === '') {
-      return res.status(400).json({ success: false, message: 'Manufacturer Details is required' });
-    }
-    if (!batchNumber || batchNumber.trim() === '') {
-      return res.status(400).json({ success: false, message: 'Batch Number is required' });
-    }
-    if (!rackId || rackId.trim() === '') {
-      return res.status(400).json({ success: false, message: 'Rack ID / Location is required' });
-    }
-    if (!hsnCode || hsnCode.trim() === '') {
-      return res.status(400).json({ success: false, message: 'HSN Code is required' });
-    }
-    if (!expiryDate || expiryDate.trim() === '') {
-      return res.status(400).json({ success: false, message: 'Expiry Date is required' });
-    }
+    // Product creation - fields are flexible and optional as configured by Admin
+    const finalName = (name && name.trim()) || 'UNTITLED PRODUCT';
+    const finalCompany = (company && company.trim()) || 'DAXIA HEALTHCARE';
+    const finalCategory = (category && category.trim()) || 'Pharma Products';
+    const finalSku = (sku && sku.trim()) || ('SKU-' + Date.now().toString().slice(-6));
+    const finalPrice = !isNaN(parseFloat(price)) ? parseFloat(price) : 0;
+    const finalMrp = !isNaN(parseFloat(mrp)) ? parseFloat(mrp) : finalPrice;
+    const finalStock = !isNaN(parseInt(stockQuantity, 10)) ? parseInt(stockQuantity, 10) : 0;
 
     // Check duplicate product name (case-insensitive) - DUPLICATION PREVENTION (Indexed lean query)
-    const escapedName = name.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const existingName = await Product.findOne({ name: { $regex: new RegExp(`^${escapedName}$`, 'i') } }).select('_id').lean();
-    if (existingName) {
-      return res.status(400).json({ success: false, message: `Product "${name.trim()}" already exists in catalog. Duplicates are not allowed.` });
+    if (name && name.trim() !== '') {
+      const escapedName = name.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const existingName = await Product.findOne({ name: { $regex: new RegExp(`^${escapedName}$`, 'i') } }).select('_id').lean();
+      if (existingName) {
+        return res.status(400).json({ success: false, message: `Product "${name.trim()}" already exists in catalog. Duplicates are not allowed.` });
+      }
     }
 
     // Check unique SKU if provided (Indexed lean query)
@@ -844,14 +805,14 @@ router.post('/', protect, adminOnly, checkPermission('canManageProducts'), async
     }
 
     // Auto-ensure Company exists in Company collection so it shows up in public website directory
-    const targetComp = (company && company.trim()) || 'DAXIA';
+    const targetComp = finalCompany;
     try {
       const escapedComp = targetComp.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const compExists = await Company.findOne({ name: { $regex: new RegExp(`^${escapedComp}$`, 'i') } }).select('_id').lean();
       if (!compExists) {
         await Company.create({
           name: targetComp,
-          category: (category && category.trim()) || 'Pharmaceutical Formulations',
+          category: finalCategory,
           status: 'Published',
           isVerified: true
         });
@@ -867,19 +828,18 @@ router.post('/', protect, adminOnly, checkPermission('canManageProducts'), async
       imagesArr.unshift(mainImage);
     }
 
-    const qty = parseInt(stockQuantity, 10);
-    const computedStock = !isNaN(qty) ? qty : 100;
+    const computedStock = finalStock;
     const computedInStock = inStock !== undefined ? Boolean(inStock) : computedStock > 0;
 
     const product = new Product({
-      name: name.trim(),
-      brand: (brand && brand.trim()) || 'Daxia Healthcare',
-      company: (company && company.trim()) || 'DAXIA',
-      category: category.trim(),
+      name: finalName,
+      brand: (brand && brand.trim()) || finalName || 'Daxia Healthcare',
+      company: finalCompany,
+      category: finalCategory,
       subCategory: (subCategory && subCategory.trim()) || '',
-      sku: (sku && sku.trim()) || '',
-      price: parseFloat(price) || 0,
-      mrp: parseFloat(mrp) || parseFloat(price) || 0,
+      sku: finalSku,
+      price: finalPrice,
+      mrp: finalMrp,
       stockQuantity: computedStock,
       inStock: computedInStock,
       packing: (packing && packing.trim()) || '',
@@ -935,48 +895,16 @@ router.put('/:id', protect, adminOnly, checkPermission('canManageProducts'), asy
       return res.status(404).json({ success: false, message: 'Product not found' });
     }
 
-    // HARD STRICT VALIDATION FOR ALL REQUIRED FIELDS ON UPDATE
-    if (req.body.name !== undefined && (!req.body.name || req.body.name.trim() === '')) {
-      return res.status(400).json({ success: false, message: 'Product Name cannot be empty' });
+    // Flexible field update - allow optional fields as configured by Admin
+    // Only check price/mrp/stock if valid numbers are passed, otherwise sanitize
+    if (req.body.price !== undefined && req.body.price !== '') {
+      req.body.price = parseFloat(req.body.price) || 0;
     }
-    if (req.body.company !== undefined && (!req.body.company || req.body.company.trim() === '')) {
-      return res.status(400).json({ success: false, message: 'Manufacturer / Company cannot be empty' });
+    if (req.body.mrp !== undefined && req.body.mrp !== '') {
+      req.body.mrp = parseFloat(req.body.mrp) || parseFloat(req.body.price) || 0;
     }
-    if (req.body.category !== undefined && (!req.body.category || req.body.category.trim() === '')) {
-      return res.status(400).json({ success: false, message: 'Product Category cannot be empty' });
-    }
-    if (req.body.composition !== undefined && (!req.body.composition || req.body.composition.trim() === '')) {
-      return res.status(400).json({ success: false, message: 'Contain (Chemical / Active Composition) cannot be empty' });
-    }
-    if (req.body.form !== undefined && (!req.body.form || req.body.form.trim() === '')) {
-      return res.status(400).json({ success: false, message: 'Formulation Form cannot be empty' });
-    }
-    if (req.body.price !== undefined && (parseFloat(req.body.price) <= 0 || isNaN(parseFloat(req.body.price)))) {
-      return res.status(400).json({ success: false, message: 'Wholesale Price must be greater than 0' });
-    }
-    if (req.body.mrp !== undefined && (parseFloat(req.body.mrp) <= 0 || isNaN(parseFloat(req.body.mrp)))) {
-      return res.status(400).json({ success: false, message: 'MRP must be greater than 0' });
-    }
-    if (req.body.packing !== undefined && (!req.body.packing || req.body.packing.trim() === '')) {
-      return res.status(400).json({ success: false, message: 'Packing Specifications cannot be empty' });
-    }
-    if (req.body.subCategory !== undefined && (!req.body.subCategory || req.body.subCategory.trim() === '')) {
-      return res.status(400).json({ success: false, message: 'Subcategory / Variant cannot be empty' });
-    }
-    if (req.body.manufacturer !== undefined && (!req.body.manufacturer || req.body.manufacturer.trim() === '')) {
-      return res.status(400).json({ success: false, message: 'Manufacturer Details cannot be empty' });
-    }
-    if (req.body.batchNumber !== undefined && (!req.body.batchNumber || req.body.batchNumber.trim() === '')) {
-      return res.status(400).json({ success: false, message: 'Batch Number cannot be empty' });
-    }
-    if (req.body.rackId !== undefined && (!req.body.rackId || req.body.rackId.trim() === '')) {
-      return res.status(400).json({ success: false, message: 'Rack ID / Location cannot be empty' });
-    }
-    if (req.body.hsnCode !== undefined && (!req.body.hsnCode || req.body.hsnCode.trim() === '')) {
-      return res.status(400).json({ success: false, message: 'HSN Code cannot be empty' });
-    }
-    if (req.body.expiryDate !== undefined && (!req.body.expiryDate || req.body.expiryDate.trim() === '')) {
-      return res.status(400).json({ success: false, message: 'Expiry Date cannot be empty' });
+    if (req.body.stockQuantity !== undefined && req.body.stockQuantity !== '') {
+      req.body.stockQuantity = parseInt(req.body.stockQuantity, 10) || 0;
     }
 
     // Check SKU collision if SKU changed (Indexed lean query)

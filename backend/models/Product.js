@@ -4,17 +4,16 @@ const productSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
       trim: true,
+      default: 'UNTITLED PRODUCT',
     },
     brand: {
       type: String,
-      required: true,
       trim: true,
+      default: 'DAXIA',
     },
     company: {
       type: String,
-      required: true,
       trim: true,
       default: 'DAXIA',
     },
@@ -24,8 +23,8 @@ const productSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      required: true,
       trim: true,
+      default: 'Pharma Products',
       // e.g., 'Pharma Products', 'OTC Products', 'Surgical & Medical Supplies', 'Injectables', 'Ayurvedic Products', 'Dermatology & Topicals'
     },
     sku: {
@@ -34,7 +33,6 @@ const productSchema = new mongoose.Schema(
     },
     price: {
       type: Number,
-      required: true,
       default: 0.0,
     },
     mrp: {
@@ -102,7 +100,6 @@ const productSchema = new mongoose.Schema(
     },
     inStock: {
       type: Boolean,
-      required: true,
       default: true,
     },
     packing: {

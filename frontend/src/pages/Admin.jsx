@@ -1097,6 +1097,110 @@ function Admin() {
   const [isCustomSalesGst, setIsCustomSalesGst] = useState(false);
   const [prodExpiryDate, setProdExpiryDate] = useState('');
 
+  // Dynamic Product Form Field Requirement Configuration (User can toggle Required/Optional for each field)
+  const DEFAULT_PRODUCT_FIELD_REQUIREMENTS = {
+    name: false,
+    sku: false,
+    company: false,
+    category: false,
+    composition: false,
+    form: false,
+    price: false,
+    mrp: false,
+    stockQuantity: false,
+    packing: false,
+    subCategory: false,
+    manufacturer: false,
+    batchNumber: false,
+    rackId: false,
+    hsnCode: false,
+    expiryDate: false,
+    purchaseGst: false,
+    salesGst: false,
+  };
+
+  const [productFieldRequirements, setProductFieldRequirements] = useState(() => {
+    try {
+      const saved = localStorage.getItem('pharma_product_field_requirements');
+      if (saved) {
+        return { ...DEFAULT_PRODUCT_FIELD_REQUIREMENTS, ...JSON.parse(saved) };
+      }
+    } catch (err) {
+      console.warn('Failed to parse saved product field requirements:', err);
+    }
+    return DEFAULT_PRODUCT_FIELD_REQUIREMENTS;
+  });
+
+  const toggleFieldRequirement = (fieldKey, fieldLabel = '') => {
+    setProductFieldRequirements(prev => {
+      const nextVal = !prev[fieldKey];
+      const updated = { ...prev, [fieldKey]: nextVal };
+      try {
+        localStorage.setItem('pharma_product_field_requirements', JSON.stringify(updated));
+      } catch (e) {}
+      showToast(`${fieldLabel || fieldKey}: ${nextVal ? 'Required (જરૂરી)' : 'Optional (વૈકલ્પિક)'}`);
+      return updated;
+    });
+  };
+
+  const setAllFieldsOptional = () => {
+    const updated = {};
+    Object.keys(DEFAULT_PRODUCT_FIELD_REQUIREMENTS).forEach(k => { updated[k] = false; });
+    setProductFieldRequirements(updated);
+    try {
+      localStorage.setItem('pharma_product_field_requirements', JSON.stringify(updated));
+    } catch (e) {}
+    showToast('બધા ફિલ્ડ Optional (વૈકલ્પિક) કર્યા છે');
+  };
+
+  const setAllFieldsRequired = () => {
+    const updated = {};
+    Object.keys(DEFAULT_PRODUCT_FIELD_REQUIREMENTS).forEach(k => { updated[k] = true; });
+    setProductFieldRequirements(updated);
+    try {
+      localStorage.setItem('pharma_product_field_requirements', JSON.stringify(updated));
+    } catch (e) {}
+    showToast('બધા ફિલ્ડ Required (જરૂરી) કર્યા છે');
+  };
+
+  const renderReqBadge = (fieldKey, labelName = '', isCompact = false) => {
+    const isReq = Boolean(productFieldRequirements[fieldKey]);
+    return (
+      <button
+        type="button"
+        onClick={() => toggleFieldRequirement(fieldKey, labelName)}
+        title={`Click to switch between Required and Optional for ${labelName || fieldKey}`}
+        style={{
+          border: isReq ? '1px solid #fca5a5' : '1px solid #cbd5e1',
+          borderRadius: '12px',
+          padding: isCompact ? '1px 6px' : '2px 8px',
+          fontSize: isCompact ? '0.68rem' : '0.72rem',
+          fontWeight: '700',
+          cursor: 'pointer',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '4px',
+          lineHeight: 1.2,
+          transition: 'all 0.15s ease',
+          backgroundColor: isReq ? '#fef2f2' : '#f8fafc',
+          color: isReq ? '#dc2626' : '#64748b',
+          boxShadow: isReq ? '0 1px 2px rgba(220, 38, 38, 0.1)' : 'none',
+          userSelect: 'none',
+          flexShrink: 0
+        }}
+      >
+        <span style={{
+          display: 'inline-block',
+          width: '6px',
+          height: '6px',
+          borderRadius: '50%',
+          backgroundColor: isReq ? '#dc2626' : '#94a3b8'
+        }}></span>
+        <span>{isReq ? (isCompact ? 'Req' : 'Required') : (isCompact ? 'Opt' : 'Optional')}</span>
+      </button>
+    );
+  };
+
   // Sequential SKU Generation starting from SKU-000001
   const getNextSequentialSku = (productList = products, offset = 0) => {
     let maxNum = 0;
@@ -3270,92 +3374,98 @@ _Helpline: +91 9316566894_`;
 
   const handleSaveProduct = async (e) => {
     e.preventDefault();
-    if (!prodName.trim()) {
+
+    // Check each field ONLY if it is set as Required by the Admin toggle:
+    if (productFieldRequirements.name && !prodName.trim()) {
       showToast('Product Name / Brand Name is required', 'error');
       return;
     }
     const currentSku = prodSku.trim();
-    if (!currentSku) {
+    if (productFieldRequirements.sku && !currentSku) {
       showToast('SKU / ID is required (Click Generate to create one)', 'error');
       return;
     }
     const assignedCompany = prodCompany.trim();
-    if (!assignedCompany) {
+    if (productFieldRequirements.company && !assignedCompany) {
       showToast('Manufacturer / Company is required', 'error');
       return;
     }
     const finalCategory = (prodCategory || '').trim() || (prodCustomCategory || '').trim();
-    if (!finalCategory) {
+    if (productFieldRequirements.category && !finalCategory) {
       showToast('Product category is required', 'error');
       return;
     }
-    if (!prodComposition.trim()) {
+    if (productFieldRequirements.composition && !prodComposition.trim()) {
       showToast('Contain is required', 'error');
       return;
     }
-    if (!prodForm || !prodForm.trim()) {
+    if (productFieldRequirements.form && (!prodForm || !prodForm.trim())) {
       showToast('Formulation Form is required', 'error');
       return;
     }
-    if (!prodPrice || parseFloat(prodPrice) <= 0) {
+    if (productFieldRequirements.price && (!prodPrice || parseFloat(prodPrice) <= 0)) {
       showToast('Wholesale price is required and must be greater than 0', 'error');
       return;
     }
-    if (!prodMrp || parseFloat(prodMrp) <= 0) {
+    if (productFieldRequirements.mrp && (!prodMrp || parseFloat(prodMrp) <= 0)) {
       showToast('MRP is required and must be greater than 0', 'error');
       return;
     }
-    if (prodStockQuantity === '' || isNaN(parseInt(prodStockQuantity, 10)) || parseInt(prodStockQuantity, 10) < 0) {
+    if (productFieldRequirements.stockQuantity && (prodStockQuantity === '' || isNaN(parseInt(prodStockQuantity, 10)) || parseInt(prodStockQuantity, 10) < 0)) {
       showToast('Stock Units is required', 'error');
       return;
     }
-    if (!prodPacking.trim()) {
+    if (productFieldRequirements.packing && !prodPacking.trim()) {
       showToast('Packing Specifications is required', 'error');
       return;
     }
-    if (!prodSubCategory.trim()) {
+    if (productFieldRequirements.subCategory && !prodSubCategory.trim()) {
       showToast('Subcategory / Variant is required', 'error');
       return;
     }
-    if (!prodManufacturer.trim()) {
+    if (productFieldRequirements.manufacturer && !prodManufacturer.trim()) {
       showToast('Manufacturer Details is required', 'error');
       return;
     }
-    if (!prodBatchNumber.trim()) {
+    if (productFieldRequirements.batchNumber && !prodBatchNumber.trim()) {
       showToast('Batch Number is required', 'error');
       return;
     }
-    if (!prodRackId.trim()) {
+    if (productFieldRequirements.rackId && !prodRackId.trim()) {
       showToast('Rack ID / Location is required', 'error');
       return;
     }
-    if (!prodHsnCode.trim()) {
+    if (productFieldRequirements.hsnCode && !prodHsnCode.trim()) {
       showToast('HSN Code is required', 'error');
       return;
     }
-    if (!prodExpiryDate || !prodExpiryDate.trim()) {
+    if (productFieldRequirements.expiryDate && (!prodExpiryDate || !prodExpiryDate.trim())) {
       showToast('Expiry Date (Month & Year) is required', 'error');
       return;
     }
-    const currentYm = new Date().toISOString().slice(0, 7);
-    const expYm = prodExpiryDate.trim().slice(0, 7);
-    if (expYm < currentYm) {
-      showToast('Expiry cannot be in the past. Please select a valid current or future Month & Year.', 'error');
-      return;
+    if (prodExpiryDate && prodExpiryDate.trim()) {
+      const currentYm = new Date().toISOString().slice(0, 7);
+      const expYm = prodExpiryDate.trim().slice(0, 7);
+      if (expYm < currentYm) {
+        showToast('Expiry cannot be in the past. Please select a valid current or future Month & Year.', 'error');
+        return;
+      }
     }
 
-    // DUPLICATION PREVENTION 1: Check duplicate product name (case-insensitive)
+    // DUPLICATION PREVENTION 1: Check duplicate product name (case-insensitive) only if entered
     const trimmedName = prodName.trim();
-    const isDuplicateName = products.some(p => 
-      p.name?.trim().toLowerCase() === trimmedName.toLowerCase() && 
-      (!editingProduct || p._id !== editingProduct._id)
-    );
-    if (isDuplicateName) {
-      showToast(`Product "${trimmedName}" already exists! Duplicates cannot be added.`, 'error');
-      return;
+    if (trimmedName) {
+      const isDuplicateName = products.some(p => 
+        p.name?.trim().toLowerCase() === trimmedName.toLowerCase() && 
+        (!editingProduct || p._id !== editingProduct._id)
+      );
+      if (isDuplicateName) {
+        showToast(`Product "${trimmedName}" already exists! Duplicates cannot be added.`, 'error');
+        return;
+      }
     }
 
-    // DUPLICATION PREVENTION 2: Check duplicate SKU
+    // DUPLICATION PREVENTION 2: Check duplicate SKU only if entered
     if (currentSku) {
       const isDuplicateSku = products.some(p => 
         p.sku?.trim().toLowerCase() === currentSku.toLowerCase() && 
@@ -3403,32 +3513,35 @@ _Helpline: +91 9316566894_`;
     const purGst = !isNaN(parseFloat(prodPurchaseGst)) ? parseFloat(prodPurchaseGst) : 12;
     const salGst = !isNaN(parseFloat(prodSalesGst)) ? parseFloat(prodSalesGst) : 12;
 
+    const actualName = prodName.trim() || 'UNTITLED PRODUCT';
+    const fallbackSku = prodSku.trim() || ('SKU-' + Date.now().toString().slice(-6));
+
     const payload = {
-      name: prodName.trim().toUpperCase(),
-      brand: prodName.trim().toUpperCase(), // Brand name unified with Product Name
+      name: actualName.toUpperCase(),
+      brand: (prodBrand.trim() || actualName).toUpperCase(), // Brand name unified with Product Name
       company: assignedCompany.toUpperCase(),
       category: finalCategory.toUpperCase(),
-      subCategory: prodSubCategory.trim().toUpperCase(),
-      sku: prodSku.trim().toUpperCase(),
+      subCategory: (prodSubCategory.trim() || '').toUpperCase(),
+      sku: fallbackSku.toUpperCase(),
       price: parseFloat(prodPrice) || 0,
       mrp: parseFloat(prodMrp) || parseFloat(prodPrice) || 0,
       stockQuantity: validStock,
       inStock: prodInStock && validStock > 0,
-      packing: prodPacking.trim().toUpperCase(),
-      composition: prodComposition.trim().toUpperCase(),
+      packing: (prodPacking.trim() || '').toUpperCase(),
+      composition: (prodComposition.trim() || '').toUpperCase(),
       form: (prodForm || 'TABLET').trim().toUpperCase(),
       manufacturer: (prodManufacturer.trim() || assignedCompany).toUpperCase(),
-      rackId: prodRackId.trim().toUpperCase(),
-      batchNumber: prodBatchNumber.trim().toUpperCase(),
+      rackId: (prodRackId.trim() || '').toUpperCase(),
+      batchNumber: (prodBatchNumber.trim() || '').toUpperCase(),
       hsnCode: (prodHsnCode.trim() || '3004').toUpperCase(),
       purchaseGst: purGst,
       salesGst: salGst,
       gstRate: salGst,
-      expiryDate: prodExpiryDate.trim(),
+      expiryDate: (prodExpiryDate || '').trim(),
       customFields: customFieldsArr,
       imageUrl: finalMainImage,
       images: finalImages,
-      description: (prodDescription.trim() || `${prodName.trim()} FORMULATION BY ${assignedCompany}.`).toUpperCase(),
+      description: (prodDescription.trim() || `${actualName} FORMULATION BY ${assignedCompany}.`).toUpperCase(),
       featured: prodFeatured,
       isOurProduct: prodIsOurProduct,
       isActive: prodIsActive,
@@ -11433,38 +11546,106 @@ _Helpline: +91 9316566894_`;
                 {/* ================= RIGHT COLUMN: PRODUCT FORM DETAILS (SCROLLABLE) ================= */}
                 <div className="admin-workspace-right" style={{ display: 'flex', flexDirection: 'column', gap: '14px', minWidth: 0, width: '100%', boxSizing: 'border-box' }}>
                   
+                  {/* Master Bar: Field Requirement Validation Controls */}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '8px 12px',
+                    backgroundColor: '#f1f5f9',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    flexWrap: 'wrap',
+                    gap: '8px'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.80rem' }}>
+                      <span style={{ fontWeight: '700', color: '#1e293b' }}>Field Validation Mode:</span>
+                      <span style={{ color: '#64748b' }}>Click any field&apos;s badge to toggle Required / Optional</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                      <button
+                        type="button"
+                        onClick={setAllFieldsOptional}
+                        title="Turn OFF required for all fields (Make all optional)"
+                        style={{
+                          padding: '4px 9px',
+                          fontSize: '0.74rem',
+                          fontWeight: '700',
+                          borderRadius: '6px',
+                          border: '1px solid #cbd5e1',
+                          backgroundColor: '#ffffff',
+                          color: '#475569',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        ○ Make All Optional
+                      </button>
+                      <button
+                        type="button"
+                        onClick={setAllFieldsRequired}
+                        title="Turn ON required for all fields (Make all required)"
+                        style={{
+                          padding: '4px 9px',
+                          fontSize: '0.74rem',
+                          fontWeight: '700',
+                          borderRadius: '6px',
+                          border: '1px solid #fecaca',
+                          backgroundColor: '#fef2f2',
+                          color: '#dc2626',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        ● Make All Required
+                      </button>
+                    </div>
+                  </div>
+
                   {/* Row 1: Product Name / Brand Name & SKU */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <label htmlFor="modal-name" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                        Product Name / Brand Name <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
-                      </label>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
+                        <label htmlFor="modal-name" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span>Product Name / Brand Name</span>
+                          {productFieldRequirements.name && <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>}
+                        </label>
+                        {renderReqBadge('name', 'Product Name')}
+                      </div>
                       <input 
                         id="modal-name"
-                        type="text" required placeholder="E.g., Paracetamol Tablet IP 500mg, Dolo 650, etc." 
-                        value={prodName} onChange={(e) => setProdName(e.target.value)}
+                        type="text"
+                        required={productFieldRequirements.name}
+                        placeholder="E.g., Paracetamol Tablet IP 500mg, Dolo 650, etc." 
+                        value={prodName}
+                        onChange={(e) => setProdName(e.target.value)}
                         style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.92rem', width: '100%', boxSizing: 'border-box' }}
                       />
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <label htmlFor="modal-sku" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                          SKU / ID <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
+                        <label htmlFor="modal-sku" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span>SKU / ID</span>
+                          {productFieldRequirements.sku && <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>}
                         </label>
-                        <button 
-                          type="button"
-                          onClick={() => setProdSku(getNextSequentialSku())}
-                          style={{ background: 'none', border: 'none', color: 'var(--primary-blue)', fontSize: '0.78rem', cursor: 'pointer', fontWeight: '700' }}
-                          title="Generate sequential SKU"
-                        >
-                          Generate
-                        </button>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          {renderReqBadge('sku', 'SKU / ID')}
+                          <button 
+                            type="button"
+                            onClick={() => setProdSku(getNextSequentialSku())}
+                            style={{ background: 'none', border: 'none', color: 'var(--primary-blue)', fontSize: '0.78rem', cursor: 'pointer', fontWeight: '700' }}
+                            title="Generate sequential SKU"
+                          >
+                            Generate
+                          </button>
+                        </div>
                       </div>
                       <input 
                         id="modal-sku"
-                        type="text" required placeholder="E.g., SKU-000001" 
-                        value={prodSku} onChange={(e) => setProdSku(e.target.value)}
+                        type="text"
+                        required={productFieldRequirements.sku}
+                        placeholder="E.g., SKU-000001" 
+                        value={prodSku}
+                        onChange={(e) => setProdSku(e.target.value)}
                         style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.92rem', fontFamily: 'monospace', width: '100%', boxSizing: 'border-box' }}
                       />
                     </div>
@@ -11473,15 +11654,19 @@ _Helpline: +91 9316566894_`;
                   {/* Row 2: Manufacturer / Company & Category (Smart Autocomplete / Direct Entry) */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <label htmlFor="modal-comp" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                          Manufacturer / Company <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
+                        <label htmlFor="modal-comp" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span>Manufacturer / Company</span>
+                          {productFieldRequirements.company && <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>}
                         </label>
-                        <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: '700' }}>Type new or pick</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          {renderReqBadge('company', 'Company')}
+                          <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: '700' }}>Type new or pick</span>
+                        </div>
                       </div>
                       <SmartCombobox 
                         id="modal-comp"
-                        required
+                        required={productFieldRequirements.company}
                         placeholder="Type or select company name..."
                         value={prodCompany} 
                         onChange={(val) => {
@@ -11493,15 +11678,19 @@ _Helpline: +91 9316566894_`;
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <label htmlFor="modal-cat" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                          Category <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
+                        <label htmlFor="modal-cat" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span>Category</span>
+                          {productFieldRequirements.category && <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>}
                         </label>
-                        <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: '700' }}>Type new or pick</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          {renderReqBadge('category', 'Category')}
+                          <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: '700' }}>Type new or pick</span>
+                        </div>
                       </div>
                       <SmartCombobox 
                         id="modal-cat"
-                        required
+                        required={productFieldRequirements.category}
                         placeholder="Type or select category..."
                         value={prodCategory} 
                         onChange={(val) => setProdCategory(val)}
@@ -11513,27 +11702,38 @@ _Helpline: +91 9316566894_`;
                   {/* Row 3: Contain & Formulation Form */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <label htmlFor="modal-composition" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                        Contain <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
-                      </label>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
+                        <label htmlFor="modal-composition" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span>Contain</span>
+                          {productFieldRequirements.composition && <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>}
+                        </label>
+                        {renderReqBadge('composition', 'Contain')}
+                      </div>
                       <input 
                         id="modal-composition"
-                        type="text" required placeholder="E.g., Paracetamol IP 500mg, Amoxicillin 250mg" 
-                        value={prodComposition} onChange={(e) => setProdComposition(e.target.value)}
+                        type="text"
+                        required={productFieldRequirements.composition}
+                        placeholder="E.g., Paracetamol IP 500mg, Amoxicillin 250mg" 
+                        value={prodComposition}
+                        onChange={(e) => setProdComposition(e.target.value)}
                         style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' }}
                       />
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <label htmlFor="modal-form" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                          Formulation Form <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
+                        <label htmlFor="modal-form" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span>Formulation Form</span>
+                          {productFieldRequirements.form && <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>}
                         </label>
-                        <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: '700' }}>Type new or pick</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          {renderReqBadge('form', 'Form')}
+                          <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: '700' }}>Type new or pick</span>
+                        </div>
                       </div>
                       <SmartCombobox 
                         id="modal-form"
-                        required
+                        required={productFieldRequirements.form}
                         placeholder="Type or select form (e.g. Tablet, Syrup)..."
                         value={prodForm} 
                         onChange={(val) => setProdForm(val)}
@@ -11545,36 +11745,54 @@ _Helpline: +91 9316566894_`;
                   {/* Row 4: Commercial Matrix (Wholesale, MRP, Stock Units) */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px', padding: '12px 14px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0', width: '100%', boxSizing: 'border-box' }} className="admin-workspace-panel">
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
-                      <label htmlFor="modal-price" style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>
-                        Wholesale (₹) <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
-                      </label>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '4px' }}>
+                        <label htmlFor="modal-price" style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                          <span>Wholesale (₹)</span>
+                          {productFieldRequirements.price && <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>}
+                        </label>
+                        {renderReqBadge('price', 'Wholesale', true)}
+                      </div>
                       <input 
                         id="modal-price"
-                        type="number" step="0.01" required placeholder="E.g., 28.50" 
+                        type="number" step="0.01"
+                        required={productFieldRequirements.price}
+                        placeholder="E.g., 28.50" 
                         value={prodPrice} onChange={(e) => setProdPrice(e.target.value)}
                         style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '7px', fontSize: '0.95rem', fontWeight: '700', width: '100%', boxSizing: 'border-box' }}
                       />
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
-                      <label htmlFor="modal-mrp" style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>
-                        MRP (₹) <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
-                      </label>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '4px' }}>
+                        <label htmlFor="modal-mrp" style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                          <span>MRP (₹)</span>
+                          {productFieldRequirements.mrp && <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>}
+                        </label>
+                        {renderReqBadge('mrp', 'MRP', true)}
+                      </div>
                       <input 
                         id="modal-mrp"
-                        type="number" step="0.01" required placeholder="E.g., 45.00" 
+                        type="number" step="0.01"
+                        required={productFieldRequirements.mrp}
+                        placeholder="E.g., 45.00" 
                         value={prodMrp} onChange={(e) => setProdMrp(e.target.value)}
                         style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '7px', fontSize: '0.95rem', width: '100%', boxSizing: 'border-box' }}
                       />
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
-                      <label htmlFor="modal-stockqty" style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>
-                        Stock Units <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
-                      </label>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '4px' }}>
+                        <label htmlFor="modal-stockqty" style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                          <span>Stock Units</span>
+                          {productFieldRequirements.stockQuantity && <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>}
+                        </label>
+                        {renderReqBadge('stockQuantity', 'Stock Units', true)}
+                      </div>
                       <input 
                         id="modal-stockqty"
-                        type="number" required placeholder="E.g., 100" 
+                        type="number"
+                        required={productFieldRequirements.stockQuantity}
+                        placeholder="E.g., 100" 
                         value={prodStockQuantity} onChange={(e) => setProdStockQuantity(e.target.value)}
                         style={{ padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '7px', fontSize: '0.95rem', width: '100%', boxSizing: 'border-box' }}
                       />
@@ -11584,24 +11802,36 @@ _Helpline: +91 9316566894_`;
                   {/* Row 5: Packing Specifications & Subcategory / Variant */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <label htmlFor="modal-packing" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                        Packing Specifications <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
-                      </label>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
+                        <label htmlFor="modal-packing" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span>Packing Specifications</span>
+                          {productFieldRequirements.packing && <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>}
+                        </label>
+                        {renderReqBadge('packing', 'Packing')}
+                      </div>
                       <input 
                         id="modal-packing"
-                        type="text" required placeholder="E.g., 10 × 10 Tablets" 
+                        type="text"
+                        required={productFieldRequirements.packing}
+                        placeholder="E.g., 10 × 10 Tablets" 
                         value={prodPacking} onChange={(e) => setProdPacking(e.target.value)}
                         style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' }}
                       />
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <label htmlFor="modal-subcat" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                        Subcategory / Variant <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
-                      </label>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
+                        <label htmlFor="modal-subcat" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span>Subcategory / Variant</span>
+                          {productFieldRequirements.subCategory && <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>}
+                        </label>
+                        {renderReqBadge('subCategory', 'Subcategory')}
+                      </div>
                       <input 
                         id="modal-subcat"
-                        type="text" required placeholder="E.g., Effervescent, Pain Relief, Pediatric" 
+                        type="text"
+                        required={productFieldRequirements.subCategory}
+                        placeholder="E.g., Effervescent, Pain Relief, Pediatric" 
                         value={prodSubCategory} onChange={(e) => setProdSubCategory(e.target.value)}
                         style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' }}
                       />
@@ -11610,12 +11840,18 @@ _Helpline: +91 9316566894_`;
 
                   {/* Row 6: Manufacturer Details */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', width: '100%', boxSizing: 'border-box' }}>
-                    <label htmlFor="modal-mfg" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                      Manufacturer Details <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
-                    </label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
+                      <label htmlFor="modal-mfg" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span>Manufacturer Details</span>
+                        {productFieldRequirements.manufacturer && <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>}
+                      </label>
+                      {renderReqBadge('manufacturer', 'Manufacturer Details')}
+                    </div>
                     <input 
                       id="modal-mfg"
-                      type="text" required placeholder="E.g., Daxia Healthcare Pvt. Ltd." 
+                      type="text"
+                      required={productFieldRequirements.manufacturer}
+                      placeholder="E.g., Daxia Healthcare Pvt. Ltd." 
                       value={prodManufacturer} onChange={(e) => setProdManufacturer(e.target.value)}
                       style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' }}
                     />
@@ -11624,54 +11860,76 @@ _Helpline: +91 9316566894_`;
                   {/* Row 7: Pharma Logistics - Batch Number, Rack ID, HSN Code, Expiry Date (Responsive 2x2 or 4-col Grid) */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <label htmlFor="modal-batch" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)', whiteSpace: 'nowrap' }}>
-                        Batch Number <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
-                      </label>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '4px' }}>
+                        <label htmlFor="modal-batch" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '3px', whiteSpace: 'nowrap' }}>
+                          <span>Batch Number</span>
+                          {productFieldRequirements.batchNumber && <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>}
+                        </label>
+                        {renderReqBadge('batchNumber', 'Batch No', true)}
+                      </div>
                       <input 
                         id="modal-batch"
-                        type="text" required placeholder="E.g., B-9482, NB-102" 
+                        type="text"
+                        required={productFieldRequirements.batchNumber}
+                        placeholder="E.g., B-9482, NB-102" 
                         value={prodBatchNumber} onChange={(e) => setProdBatchNumber(e.target.value)}
                         style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', height: '42px', boxSizing: 'border-box' }}
                       />
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <label htmlFor="modal-rackid" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)', whiteSpace: 'nowrap' }}>
-                        Rack ID / Location <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
-                      </label>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '4px' }}>
+                        <label htmlFor="modal-rackid" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '3px', whiteSpace: 'nowrap' }}>
+                          <span>Rack ID / Location</span>
+                          {productFieldRequirements.rackId && <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>}
+                        </label>
+                        {renderReqBadge('rackId', 'Rack ID', true)}
+                      </div>
                       <input 
                         id="modal-rackid"
-                        type="text" required placeholder="E.g., R-04, Shelf-B" 
+                        type="text"
+                        required={productFieldRequirements.rackId}
+                        placeholder="E.g., R-04, Shelf-B" 
                         value={prodRackId} onChange={(e) => setProdRackId(e.target.value)}
                         style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', height: '42px', boxSizing: 'border-box' }}
                       />
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <label htmlFor="modal-hsn" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)', whiteSpace: 'nowrap' }}>
-                        HSN Code <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
-                      </label>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '4px' }}>
+                        <label htmlFor="modal-hsn" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '3px', whiteSpace: 'nowrap' }}>
+                          <span>HSN Code</span>
+                          {productFieldRequirements.hsnCode && <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>}
+                        </label>
+                        {renderReqBadge('hsnCode', 'HSN Code', true)}
+                      </div>
                       <input 
                         id="modal-hsn"
-                        type="text" required placeholder="E.g., 3004" 
+                        type="text"
+                        required={productFieldRequirements.hsnCode}
+                        placeholder="E.g., 3004" 
                         value={prodHsnCode} onChange={(e) => setProdHsnCode(e.target.value)}
                         style={{ padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.9rem', width: '100%', height: '42px', boxSizing: 'border-box' }}
                       />
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-                        <label htmlFor="modal-expiry" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)', whiteSpace: 'nowrap' }}>
-                          Expiry Date <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '4px', minWidth: 0 }}>
+                        <label htmlFor="modal-expiry" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '3px', whiteSpace: 'nowrap' }}>
+                          <span>Expiry Date</span>
+                          {productFieldRequirements.expiryDate && <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>}
                         </label>
-                        <span style={{ fontSize: '0.72rem', color: '#0369a1', fontWeight: '700', backgroundColor: '#e0f2fe', padding: '2px 8px', borderRadius: '4px', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                          MM/YYYY
-                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          {renderReqBadge('expiryDate', 'Expiry Date', true)}
+                          <span style={{ fontSize: '0.70rem', color: '#0369a1', fontWeight: '700', backgroundColor: '#e0f2fe', padding: '2px 6px', borderRadius: '4px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                            MM/YYYY
+                          </span>
+                        </div>
                       </div>
                       <input 
                         id="modal-expiry"
                         type="month" 
-                        required
+                        required={productFieldRequirements.expiryDate}
                         min={new Date().toISOString().slice(0, 7)}
                         value={prodExpiryDate} 
                         onChange={(e) => setProdExpiryDate(e.target.value)}
@@ -11683,18 +11941,22 @@ _Helpline: +91 9316566894_`;
                   {/* Row 8: GST Rates (Purchase & Sales) with Custom Rate Support (Responsive Grid) */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <label htmlFor="modal-purgst" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                          Purchase GST Rate (%) <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
+                        <label htmlFor="modal-purgst" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span>Purchase GST Rate (%)</span>
+                          {productFieldRequirements.purchaseGst && <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>}
                         </label>
-                        <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '600' }}>
-                          {isCustomPurchaseGst ? 'Custom Rate' : 'Preset'}
-                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          {renderReqBadge('purchaseGst', 'Purchase GST')}
+                          <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '600' }}>
+                            {isCustomPurchaseGst ? 'Custom Rate' : 'Preset'}
+                          </span>
+                        </div>
                       </div>
                       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                         <select 
                           id="modal-purgst"
-                          required
+                          required={productFieldRequirements.purchaseGst}
                           value={[0, 5, 12, 18, 28].includes(Number(prodPurchaseGst)) && !isCustomPurchaseGst ? Number(prodPurchaseGst) : 'custom'} 
                           onChange={(e) => {
                             if (e.target.value === 'custom') {
@@ -11720,7 +11982,7 @@ _Helpline: +91 9316566894_`;
                               step="0.01"
                               min="0"
                               max="100"
-                              required
+                              required={productFieldRequirements.purchaseGst}
                               placeholder="Enter %"
                               value={prodPurchaseGst !== undefined ? prodPurchaseGst : ''}
                               onChange={(e) => setProdPurchaseGst(e.target.value === '' ? '' : Number(e.target.value))}
@@ -11733,18 +11995,22 @@ _Helpline: +91 9316566894_`;
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <label htmlFor="modal-salesgst" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)' }}>
-                          Sales GST Rate (%) <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
+                        <label htmlFor="modal-salesgst" style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span>Sales GST Rate (%)</span>
+                          {productFieldRequirements.salesGst && <span style={{ color: '#ef4444', fontWeight: 'bold' }}>*</span>}
                         </label>
-                        <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '600' }}>
-                          {isCustomSalesGst ? 'Custom Rate' : 'Preset'}
-                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          {renderReqBadge('salesGst', 'Sales GST')}
+                          <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '600' }}>
+                            {isCustomSalesGst ? 'Custom Rate' : 'Preset'}
+                          </span>
+                        </div>
                       </div>
                       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                         <select 
                           id="modal-salesgst"
-                          required
+                          required={productFieldRequirements.salesGst}
                           value={[0, 5, 12, 18, 28].includes(Number(prodSalesGst)) && !isCustomSalesGst ? Number(prodSalesGst) : 'custom'} 
                           onChange={(e) => {
                             if (e.target.value === 'custom') {
@@ -11770,7 +12036,7 @@ _Helpline: +91 9316566894_`;
                               step="0.01"
                               min="0"
                               max="100"
-                              required
+                              required={productFieldRequirements.salesGst}
                               placeholder="Enter %"
                               value={prodSalesGst !== undefined ? prodSalesGst : ''}
                               onChange={(e) => setProdSalesGst(e.target.value === '' ? '' : Number(e.target.value))}

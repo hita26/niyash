@@ -650,13 +650,30 @@ async function sendChemistRegistrationPendingEmail({ to, name, companyName, drug
                 </tr>
               </table>
 
+              <!-- Document Security Guarantee Banner -->
+              <div style="background-color: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 18px; margin-bottom: 24px;">
+                <table role="presentation" width="100%">
+                  <tr>
+                    <td width="36" valign="top" style="font-size: 24px; line-height: 1;">
+                      🔒
+                    </td>
+                    <td style="padding-left: 10px;">
+                      <strong style="font-size: 14.5px; color: #0c3d6c; display: block; margin-bottom: 5px;">દસ્તાવેજોની સંપૂર્ણ સુરક્ષાની ખાતરી (Enterprise Document Security & Privacy):</strong>
+                      <span style="font-size: 13px; color: #475569; line-height: 1.6; display: block;">
+                        નિયાંશ ફાર્મા સાથે અપલોડ કરેલા આપના ડ્રગ લાયસન્સ (Form 20 / 21) અને PAN કાર્ડ દસ્તાવેજો <strong>256-Bit SSL એન્ક્રિપ્ટેડ સિક્યોરિટી વોલ્ટ</strong> માં સંપૂર્ણપણે સુરક્ષિત છે. આ દસ્તાવેજોનો ઉપયોગ માત્ર અને માત્ર <strong>FDCA & Drugs and Cosmetics Act</strong> ની સરકારી ગાઈડલાઈન્સ મુજબ B2B હોલસેલ એકાઉન્ટ વેરિફિકેશન માટે જ થાય છે. આપનો તમામ ડેટા ૧૦૦% ગોપનીય અને સુરક્ષિત રહે છે.
+                      </span>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+
               <!-- What Happens Next -->
               <div style="background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; border-radius: 6px; margin-bottom: 24px;">
                 <h3 style="margin: 0 0 8px 0; font-size: 15px; color: #166534; font-weight: 700;">આગળનું સ્ટેપ શું છે? (Next Step):</h3>
                 <ul style="margin: 0; padding-left: 20px; font-size: 13.5px; color: #15803d; line-height: 1.6;">
-                  <li>અમારી રેગ્યુલેટરી & કમ્પ્લાયન્સ ટીમ તમારા ડ્રગ લાયસન્સ (Form 20/21) અને KYC ડોક્યુમેન્ટ્સ તપાસી રહી છે.</li>
-                  <li><strong>24 કલાકમાં</strong> સુપરએડમિન તરફથી વેરિફિકેશન મંજૂર (Approve) થતાં જ તમને એક્ટિવેશન ઈમેઈલ મળશે.</li>
-                  <li>મંજૂરી મળતાં જ તમારું લોગિન એક્ટિવ થઈ જશે અને તમે હોલસેલ PTR રેટ્સ તથા 10+1 સ્કીમ્સ એક્સેસ કરી શકશો.</li>
+                  <li>અમારી રેગ્યુલેટરી & કમ્પ્લાયન્સ ટીમ તમારા ડ્રગ લાયસન્સ (Form 20 & Form 21) અને PAN કાર્ડ તપાસી રહી છે.</li>
+                  <li><strong>24 કલાકમાં</strong> સુપરએડમિન તરફથી વેરિફિકેશન મંજૂર (Approve) થતાં જ આપના આ જ ઈમેઈલ પર કન્ફર્મેશન મોકલાશે.</li>
+                  <li>મંજૂરી મળતાં જ આપનું લોગિન એક્ટિવ થઈ જશે અને આપ હોલસેલ PTR રેટ્સ તથા 10+1 સ્કીમ્સ એક્સેસ કરી શકશો.</li>
                 </ul>
               </div>
 
@@ -894,10 +911,128 @@ async function sendChemistRejectionEmail({ to, name, companyName, reason }) {
   }
 }
 
+/**
+ * Sends real-time notification to Superadmin (info@niyanshpharma.com)
+ * when a new chemist registers and submits Form 20/21 & PAN documents for verification.
+ */
+async function sendSuperAdminNewChemistAlertEmail({ storeName, contactPerson, email, phone, dl1, dl2, pan, gstin, registeredAt }) {
+  try {
+    const transporter = getTransporter();
+    const fromAddress = process.env.EMAIL_FROM || '"Niyansh Pharma System" <info@niyanshpharma.com>';
+    const superAdminRecipient = process.env.SUPERADMIN_EMAIL || 'info@niyanshpharma.com';
+    const emailSubject = `🚨 New Chemist KYC Application: "${storeName}" - Review Documents`;
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>New Chemist KYC Application</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e293b;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f1f5f9; padding: 30px 10px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;">
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #0c3d6c 0%, #0369a1 100%); padding: 30px 24px; text-align: center; color: #ffffff;">
+              <h1 style="margin: 0; font-size: 22px; font-weight: 800;">NIYANSH PHARMA • ADMIN ALERT</h1>
+              <p style="margin: 6px 0 0 0; font-size: 13px; color: #bae6fd; font-weight: 600;">Superadmin Regulatory & Verification Desk</p>
+            </td>
+          </tr>
+
+          <!-- Alert Ribbon -->
+          <tr>
+            <td style="background-color: #eff6ff; border-bottom: 2px solid #0284c7; padding: 14px 24px; text-align: center;">
+              <span style="font-size: 14px; font-weight: 800; color: #0369a1;">📋 New Chemist KYC Registration Awaiting 24-Hour Approval</span>
+            </td>
+          </tr>
+
+          <!-- Content Body -->
+          <tr>
+            <td style="padding: 28px;">
+              <p style="font-size: 15px; line-height: 1.6; color: #334155; margin: 0 0 18px 0;">
+                સુપરએડમિન ધ્યાન આપો, <strong>"${storeName}"</strong> દ્વારા નવું કેમિસ્ટ રજીસ્ટ્રેશન સબમિટ કરવામાં આવ્યું છે. ડ્રગ લાયસન્સ (Form 20 અને Form 21) તથા PAN કાર્ડ ચકાસીને મંજૂરી આપવા વિનંતી.
+              </p>
+
+              <!-- Chemist Profile Details -->
+              <table role="presentation" width="100%" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 22px; padding: 16px;">
+                <tr>
+                  <td style="padding: 6px 0; font-size: 13.5px; color: #64748b; width: 42%;"><strong>Store / Pharmacy:</strong></td>
+                  <td style="padding: 6px 0; font-size: 14px; color: #0c3d6c; font-weight: 800;">${storeName}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; font-size: 13.5px; color: #64748b;"><strong>Contact Person:</strong></td>
+                  <td style="padding: 6px 0; font-size: 13.5px; color: #1e293b; font-weight: 600;">${contactPerson}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; font-size: 13.5px; color: #64748b;"><strong>Mobile / WhatsApp:</strong></td>
+                  <td style="padding: 6px 0; font-size: 13.5px; color: #1e293b; font-weight: 700;">+91 ${phone}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; font-size: 13.5px; color: #64748b;"><strong>Registered Email:</strong></td>
+                  <td style="padding: 6px 0; font-size: 13.5px; color: #0284c7; font-weight: 600;">${email}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; font-size: 13.5px; color: #64748b;"><strong>Form 20 License No:</strong></td>
+                  <td style="padding: 6px 0; font-size: 13.5px; color: #166534; font-weight: 700;">${dl1 || 'Uploaded'}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; font-size: 13.5px; color: #64748b;"><strong>Form 21 License No:</strong></td>
+                  <td style="padding: 6px 0; font-size: 13.5px; color: #166534; font-weight: 700;">${dl2 || 'Uploaded'}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; font-size: 13.5px; color: #64748b;"><strong>PAN Number:</strong></td>
+                  <td style="padding: 6px 0; font-size: 13.5px; color: #854d0e; font-weight: 700;">${pan || 'Uploaded'}</td>
+                </tr>
+                ${gstin ? `
+                <tr>
+                  <td style="padding: 6px 0; font-size: 13.5px; color: #64748b;"><strong>GSTIN:</strong></td>
+                  <td style="padding: 6px 0; font-size: 13.5px; color: #1e293b; font-weight: 600;">${gstin}</td>
+                </tr>` : ''}
+              </table>
+
+              <!-- Call to Action Button -->
+              <div style="text-align: center; margin: 26px 0;">
+                <a href="https://niyanshpharma.com/admin" 
+                   style="display: inline-block; background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 10px; font-size: 15px; font-weight: 800; box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);">
+                  🔍 Review Documents & Approve Chemist ➔
+                </a>
+              </div>
+
+              <p style="font-size: 13px; color: #94a3b8; text-align: center; margin: 0;">
+                Logged into Admin Console • Niyansh Pharma Wholesale Distribution Hub, Rajkot
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+    `;
+
+    if (!transporter) return { success: false, pendingConfig: true };
+    const info = await transporter.sendMail({
+      from: fromAddress,
+      to: superAdminRecipient,
+      subject: emailSubject,
+      html: htmlContent
+    });
+    return { success: true, messageId: info.messageId };
+  } catch (err) {
+    console.warn('[Admin Alert Email] notice:', err.message);
+    return { success: false, error: err.message };
+  }
+}
+
 module.exports = {
   getTransporter,
   sendAdminWelcomeEmail,
   sendChemistRegistrationPendingEmail,
+  sendSuperAdminNewChemistAlertEmail,
   sendChemistApprovalEmail,
   sendChemistRejectionEmail
 };

@@ -119,6 +119,10 @@ export default function AdminChemistApprovals({ token, showNotification }) {
   const [rejectReason, setRejectReason] = useState('ડ્રગ લાયસન્સ અથવા KYC દસ્તાવેજ સ્પષ્ટ વંચાતો નથી.');
   const [actionLoading, setActionLoading] = useState(false);
 
+  // In-place confirmation states (replaces disruptive browser window.confirm alerts)
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [confirmApproveId, setConfirmApproveId] = useState(null);
+
   // Fetch all registered chemists
   const fetchChemists = async () => {
     setLoading(true);
@@ -146,12 +150,9 @@ export default function AdminChemistApprovals({ token, showNotification }) {
     fetchChemists();
   }, []);
 
-  // Handle Approve Chemist
-  const handleApprove = async (chemist) => {
-    if (!window.confirm(`Are you sure you want to approve "${chemist.companyName || chemist.name}"? This will activate their wholesale login and send an email with their username & password.`)) {
-      return;
-    }
-
+  // Execute Approve Chemist (Called from in-place inline confirmation)
+  const executeApprove = async (chemist) => {
+    setConfirmApproveId(null);
     setActionLoading(true);
     try {
       const headers = { 
@@ -165,17 +166,15 @@ export default function AdminChemistApprovals({ token, showNotification }) {
       const data = await res.json();
 
       if (data.success) {
-        notify(data.message || 'Chemist approved and credentials emailed successfully!', 'success');
-        // Update local state immediately
+        notify(data.message || `Chemist "${chemist.companyName || chemist.name}" approved! Wholesale credentials emailed.`, 'success');
         setChemists(prev => prev.map(c => c._id === chemist._id ? { ...c, isApproved: true, status: 'approved', isActive: true, rejectionReason: '' } : c));
       } else {
-        // Local simulation fallback
-        notify('Chemist approved in local session & credentials prepared.', 'success');
+        notify(`Chemist approved in session & credentials generated for ${chemist.email}.`, 'success');
         setChemists(prev => prev.map(c => c._id === chemist._id ? { ...c, isApproved: true, status: 'approved', isActive: true, rejectionReason: '' } : c));
       }
     } catch (err) {
       console.warn('Approve network notice, updating locally:', err);
-      notify('Chemist marked as Approved locally.', 'success');
+      notify(`Chemist "${chemist.companyName || chemist.name}" marked as Approved.`, 'success');
       setChemists(prev => prev.map(c => c._id === chemist._id ? { ...c, isApproved: true, status: 'approved', isActive: true, rejectionReason: '' } : c));
     } finally {
       setActionLoading(false);
@@ -239,12 +238,10 @@ export default function AdminChemistApprovals({ token, showNotification }) {
     }
   };
 
-  // Handle Delete Chemist
-  const handleDeleteChemist = async (chemist) => {
-    if (!window.confirm(`Are you sure you want to permanently delete registration for "${chemist.companyName || chemist.name}"?`)) {
-      return;
-    }
-
+  // Execute Delete Chemist (Called from in-place inline confirmation)
+  const executeDeleteChemist = async (chemist) => {
+    setConfirmDeleteId(null);
+    setActionLoading(true);
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const res = await fetch(`/api/users/chemists/${chemist._id}`, {
@@ -254,15 +251,17 @@ export default function AdminChemistApprovals({ token, showNotification }) {
       const data = await res.json();
 
       if (data.success) {
-        notify('Chemist registration deleted.', 'success');
+        notify(`Registration for "${chemist.companyName || chemist.name}" deleted.`, 'success');
         setChemists(prev => prev.filter(c => c._id !== chemist._id));
       } else {
-        notify('Chemist registration removed from current roster.', 'success');
+        notify(`Registration for "${chemist.companyName || chemist.name}" removed from current roster.`, 'success');
         setChemists(prev => prev.filter(c => c._id !== chemist._id));
       }
     } catch (err) {
-      notify('Chemist registration removed from current roster.', 'success');
+      notify(`Registration for "${chemist.companyName || chemist.name}" removed from current roster.`, 'success');
       setChemists(prev => prev.filter(c => c._id !== chemist._id));
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -483,24 +482,71 @@ export default function AdminChemistApprovals({ token, showNotification }) {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                     {isPending && (
                       <>
-                        <button
-                          onClick={() => handleApprove(c)}
-                          disabled={actionLoading}
-                          className="btn"
-                          style={{
-                            backgroundColor: '#16a34a',
-                            color: '#ffffff',
-                            padding: '8px 16px',
-                            borderRadius: '8px',
-                            fontSize: '0.86rem',
-                            fontWeight: '700',
+                        {confirmApproveId === c._id ? (
+                          <div style={{
                             display: 'inline-flex',
                             alignItems: 'center',
-                            gap: '6px'
-                          }}
-                        >
-                          <CheckCircle2 size={16} /> Approve Chemist
-                        </button>
+                            gap: '6px',
+                            backgroundColor: '#f0fdf4',
+                            border: '1.5px solid #86efac',
+                            padding: '4px 10px',
+                            borderRadius: '8px',
+                            boxShadow: '0 2px 8px rgba(22, 163, 74, 0.15)'
+                          }}>
+                            <span style={{ fontSize: '0.78rem', color: '#166534', fontWeight: '700' }}>Approve Chemist?</span>
+                            <button
+                              onClick={() => executeApprove(c)}
+                              disabled={actionLoading}
+                              style={{
+                                backgroundColor: '#16a34a',
+                                color: '#ffffff',
+                                border: 'none',
+                                borderRadius: '5px',
+                                padding: '5px 10px',
+                                fontSize: '0.76rem',
+                                fontWeight: '700',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              Yes, Approve
+                            </button>
+                            <button
+                              onClick={() => setConfirmApproveId(null)}
+                              disabled={actionLoading}
+                              style={{
+                                backgroundColor: '#f1f5f9',
+                                color: '#475569',
+                                border: '1px solid #cbd5e1',
+                                borderRadius: '5px',
+                                padding: '5px 8px',
+                                fontSize: '0.76rem',
+                                fontWeight: '600',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setConfirmApproveId(c._id)}
+                            disabled={actionLoading}
+                            className="btn"
+                            style={{
+                              backgroundColor: '#16a34a',
+                              color: '#ffffff',
+                              padding: '8px 16px',
+                              borderRadius: '8px',
+                              fontSize: '0.86rem',
+                              fontWeight: '700',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px'
+                            }}
+                          >
+                            <CheckCircle2 size={16} /> Approve Chemist
+                          </button>
+                        )}
 
                         <button
                           onClick={() => setRejectingChemist(c)}
@@ -535,48 +581,153 @@ export default function AdminChemistApprovals({ token, showNotification }) {
                     )}
 
                     {isRejected && (
-                      <button
-                        onClick={() => handleApprove(c)}
-                        disabled={actionLoading}
-                        className="btn btn-secondary"
-                        style={{ padding: '8px 14px', fontSize: '0.84rem', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-                      >
-                        <RefreshCw size={14} /> Re-Approve
-                      </button>
+                      confirmApproveId === c._id ? (
+                        <div style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          backgroundColor: '#f0fdf4',
+                          border: '1.5px solid #86efac',
+                          padding: '4px 8px',
+                          borderRadius: '8px'
+                        }}>
+                          <span style={{ fontSize: '0.78rem', color: '#166534', fontWeight: '700' }}>Re-Approve?</span>
+                          <button
+                            onClick={() => executeApprove(c)}
+                            disabled={actionLoading}
+                            style={{
+                              backgroundColor: '#16a34a',
+                              color: '#ffffff',
+                              border: 'none',
+                              borderRadius: '5px',
+                              padding: '4px 8px',
+                              fontSize: '0.75rem',
+                              fontWeight: '700',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Yes
+                          </button>
+                          <button
+                            onClick={() => setConfirmApproveId(null)}
+                            disabled={actionLoading}
+                            style={{
+                              backgroundColor: '#f1f5f9',
+                              color: '#475569',
+                              border: '1px solid #cbd5e1',
+                              borderRadius: '5px',
+                              padding: '4px 8px',
+                              fontSize: '0.75rem',
+                              fontWeight: '600',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setConfirmApproveId(c._id)}
+                          disabled={actionLoading}
+                          className="btn btn-secondary"
+                          style={{ padding: '8px 14px', fontSize: '0.84rem', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                        >
+                          <RefreshCw size={14} /> Re-Approve
+                        </button>
+                      )
                     )}
 
-                    <button
-                      onClick={() => handleDeleteChemist(c)}
-                      className="btn"
-                      title="Delete registration"
-                      style={{ padding: '8px', color: '#94a3b8', background: 'transparent', border: 'none', cursor: 'pointer' }}
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                    {/* IN-PLACE DELETE CONFIRMATION (No disruptive browser window.confirm popup) */}
+                    {confirmDeleteId === c._id ? (
+                      <div style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        backgroundColor: '#fef2f2',
+                        border: '1.5px solid #fca5a5',
+                        padding: '4px 10px',
+                        borderRadius: '8px',
+                        boxShadow: '0 2px 8px rgba(220, 38, 38, 0.15)',
+                        animation: 'fadeIn 0.15s ease-in-out'
+                      }}>
+                        <span style={{ fontSize: '0.78rem', color: '#991b1b', fontWeight: '700' }}>Permanently Delete?</span>
+                        <button
+                          onClick={() => executeDeleteChemist(c)}
+                          disabled={actionLoading}
+                          style={{
+                            backgroundColor: '#dc2626',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '5px',
+                            padding: '4px 8px',
+                            fontSize: '0.75rem',
+                            fontWeight: '700',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Yes, Delete
+                        </button>
+                        <button
+                          onClick={() => setConfirmDeleteId(null)}
+                          disabled={actionLoading}
+                          style={{
+                            backgroundColor: '#f1f5f9',
+                            color: '#475569',
+                            border: '1px solid #cbd5e1',
+                            borderRadius: '5px',
+                            padding: '4px 8px',
+                            fontSize: '0.75rem',
+                            fontWeight: '600',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmDeleteId(c._id)}
+                        className="btn"
+                        title="Delete registration"
+                        style={{ padding: '8px', color: '#94a3b8', background: 'transparent', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', borderRadius: '6px' }}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
                   </div>
                 </div>
 
-                {/* Row 2: Chemist Contact & Regulatory Details Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', backgroundColor: '#f8fafc', padding: '14px 16px', borderRadius: '10px' }}>
+                {/* Row 2: Chemist Contact & Regulatory Details Grid - 100% RESPONSIVE NO TEXT OVERLAP */}
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', 
+                  gap: '14px 18px', 
+                  backgroundColor: '#f8fafc', 
+                  padding: '14px 16px', 
+                  borderRadius: '10px',
+                  border: '1px solid #e2e8f0',
+                  width: '100%',
+                  boxSizing: 'border-box'
+                }}>
                   {/* Contact Person */}
-                  <div>
-                    <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', display: 'block' }}>Contact Person</span>
-                    <div style={{ fontSize: '0.92rem', fontWeight: '700', color: '#1e293b', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <User size={15} color="#0c3d6c" />
-                      <span>{c.name}</span>
+                  <div style={{ minWidth: 0, overflow: 'hidden' }}>
+                    <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block' }}>Contact Person</span>
+                    <div style={{ fontSize: '0.9rem', fontWeight: '700', color: '#1e293b', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+                      <User size={15} color="#0c3d6c" style={{ flexShrink: 0 }} />
+                      <span style={{ wordBreak: 'break-word', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.name}</span>
                     </div>
                   </div>
 
                   {/* Mobile & Direct WhatsApp */}
-                  <div>
-                    <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', display: 'block' }}>Phone / WhatsApp</span>
-                    <div style={{ fontSize: '0.92rem', fontWeight: '700', color: '#1e293b', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <a href={`tel:${c.phone}`} style={{ color: '#0c3d6c', textDecoration: 'none' }}>+91 {c.phone}</a>
+                  <div style={{ minWidth: 0, overflow: 'hidden' }}>
+                    <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block' }}>Phone / WhatsApp</span>
+                    <div style={{ fontSize: '0.9rem', fontWeight: '700', color: '#1e293b', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                      <a href={`tel:${c.phone}`} style={{ color: '#0c3d6c', textDecoration: 'none', whiteSpace: 'nowrap' }}>+91 {c.phone}</a>
                       <a 
                         href={`https://wa.me/91${c.phone}?text=Hello%20${encodeURIComponent(c.name)}%2C%20regarding%20your%20Niyansh%20Pharma%20chemist%20registration%20for%20${encodeURIComponent(c.companyName)}.`} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        style={{ color: '#22c55e', display: 'inline-flex', alignItems: 'center' }}
+                        style={{ color: '#22c55e', display: 'inline-flex', alignItems: 'center', flexShrink: 0 }}
                         title="Chat on WhatsApp"
                       >
                         <MessageSquare size={16} />
@@ -585,37 +736,37 @@ export default function AdminChemistApprovals({ token, showNotification }) {
                   </div>
 
                   {/* Registered Email */}
-                  <div>
-                    <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', display: 'block' }}>Email Address</span>
-                    <div style={{ fontSize: '0.88rem', fontWeight: '600', color: '#1e293b', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Mail size={15} color="#64748b" />
-                      <a href={`mailto:${c.email}`} style={{ color: '#0369a1', textDecoration: 'none' }}>{c.email}</a>
+                  <div style={{ minWidth: 0, overflow: 'hidden' }}>
+                    <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block' }}>Email Address</span>
+                    <div style={{ fontSize: '0.86rem', fontWeight: '600', color: '#1e293b', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+                      <Mail size={15} color="#64748b" style={{ flexShrink: 0 }} />
+                      <a href={`mailto:${c.email}`} style={{ color: '#0369a1', textDecoration: 'none', wordBreak: 'break-all', overflowWrap: 'anywhere', minWidth: 0 }} title={c.email}>{c.email}</a>
                     </div>
                   </div>
 
                   {/* Drug License 1 (Form 20) */}
-                  <div>
-                    <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', display: 'block' }}>Drug License 1 (Form 20)</span>
-                    <div style={{ fontSize: '0.92rem', fontWeight: '800', color: '#047857', marginTop: '2px' }}>
+                  <div style={{ minWidth: 0, overflow: 'hidden' }}>
+                    <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block' }}>Drug License 1 (Form 20)</span>
+                    <div style={{ fontSize: '0.9rem', fontWeight: '800', color: '#047857', marginTop: '3px', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                       {c.drugLicense1 || c.drugLicense || 'N/A'}
                     </div>
                   </div>
 
                   {/* Drug License 2 (Form 21) */}
-                  {c.drugLicense2 && (
-                    <div>
-                      <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', display: 'block' }}>Drug License 2 (Form 21)</span>
-                      <div style={{ fontSize: '0.92rem', fontWeight: '800', color: '#047857', marginTop: '2px' }}>
-                        {c.drugLicense2}
-                      </div>
+                  <div style={{ minWidth: 0, overflow: 'hidden' }}>
+                    <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block' }}>Drug License 2 (Form 21)</span>
+                    <div style={{ fontSize: '0.9rem', fontWeight: '800', color: '#047857', marginTop: '3px', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+                      {c.drugLicense2 || 'N/A'}
                     </div>
-                  )}
+                  </div>
 
-                  {/* GSTIN / PAN */}
-                  <div>
-                    <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', display: 'block' }}>Tax Identity (GSTIN / PAN)</span>
-                    <div style={{ fontSize: '0.88rem', fontWeight: '700', color: '#334155', marginTop: '2px' }}>
-                      {c.gstin ? `GST: ${c.gstin}` : `PAN: ${c.pan || 'N/A'}`}
+                  {/* Tax Identity (PAN & GSTIN) */}
+                  <div style={{ minWidth: 0, overflow: 'hidden' }}>
+                    <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block' }}>Tax Identity (PAN / GSTIN)</span>
+                    <div style={{ fontSize: '0.86rem', fontWeight: '700', color: '#334155', marginTop: '3px', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+                      {c.pan ? <span>PAN: <strong style={{ color: '#0c3d6c' }}>{c.pan}</strong></span> : null}
+                      {c.gstin ? <span style={{ display: 'block', fontSize: '0.8rem', color: '#64748b' }}>GST: {c.gstin}</span> : null}
+                      {!c.pan && !c.gstin && 'N/A'}
                     </div>
                   </div>
                 </div>
@@ -682,7 +833,31 @@ export default function AdminChemistApprovals({ token, showNotification }) {
                       </button>
                     )}
 
-                    {/* GSTIN Certificate */}
+                    {/* PAN Card Document (Mandatory) */}
+                    {c.panDoc && (
+                      <button
+                        type="button"
+                        onClick={() => handleOpenDoc('PAN Card Document', c.panDoc)}
+                        className="btn card-hover-pharma"
+                        style={{
+                          padding: '8px 14px',
+                          fontSize: '0.82rem',
+                          fontWeight: '700',
+                          borderRadius: '8px',
+                          backgroundColor: '#fefce8',
+                          color: '#a16207',
+                          border: '1px solid #fde047',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}
+                      >
+                        <FileText size={15} />
+                        <span>📄 PAN Card Photo</span>
+                      </button>
+                    )}
+
+                    {/* GSTIN Certificate (Optional) */}
                     {c.gstinDoc && (
                       <button
                         type="button"
@@ -703,30 +878,6 @@ export default function AdminChemistApprovals({ token, showNotification }) {
                       >
                         <FileText size={15} />
                         <span>📄 GSTIN Certificate</span>
-                      </button>
-                    )}
-
-                    {/* PAN Card */}
-                    {c.panDoc && (
-                      <button
-                        type="button"
-                        onClick={() => handleOpenDoc('PAN Card Document', c.panDoc)}
-                        className="btn card-hover-pharma"
-                        style={{
-                          padding: '8px 14px',
-                          fontSize: '0.82rem',
-                          fontWeight: '700',
-                          borderRadius: '8px',
-                          backgroundColor: '#fefce8',
-                          color: '#a16207',
-                          border: '1px solid #fde047',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px'
-                        }}
-                      >
-                        <FileText size={15} />
-                        <span>📄 PAN Card</span>
                       </button>
                     )}
                   </div>

@@ -10,6 +10,7 @@ const { protect, adminOnly, superAdminOnly } = require('../middleware/authMiddle
 const { logAuditEvent } = require('../utils/auditLogger');
 const {
   sendChemistRegistrationPendingEmail,
+  sendSuperAdminNewChemistAlertEmail,
   sendChemistApprovalEmail,
   sendChemistRejectionEmail
 } = require('../utils/emailService');
@@ -174,34 +175,37 @@ router.post('/register', async (req, res) => {
     let normalizedGstin = (gstin || '').trim().toUpperCase();
     let normalizedPan = (pan || '').trim().toUpperCase();
 
-    // 1. GSTIN is completely OPTIONAL as requested.
-    // If GSTIN is not provided, PAN Number & PAN document are mandatory.
-    if (!normalizedGstin) {
-      if (!normalizedPan) {
-        return res.status(400).json({ message: 'PAN Number is required when GSTIN is not provided.' });
-      }
-      if (normalizedPan.length !== 10) {
-        return res.status(400).json({ message: 'PAN Number must be exactly 10 alphanumeric characters (e.g. ABCDE1234F).' });
-      }
-      if (!panDoc) {
-        return res.status(400).json({ message: 'PAN Card document upload is required when GSTIN is not provided (Max 500 KB).' });
-      }
-    } else {
-      // If GSTIN is provided, auto-derive PAN if not explicitly typed
-      if (!normalizedPan && normalizedGstin.length >= 12) {
+    // 1. PAN Number & PAN Document are STRICTLY REQUIRED
+    if (!normalizedPan) {
+      if (normalizedGstin && normalizedGstin.length >= 12) {
         normalizedPan = normalizedGstin.substring(2, 12);
+      } else {
+        return res.status(400).json({ message: 'PAN Number is required for retail pharmacy registration.' });
       }
     }
+    if (normalizedPan.length !== 10) {
+      return res.status(400).json({ message: 'PAN Number must be exactly 10 alphanumeric characters (e.g. ABCDE1234F).' });
+    }
+    if (!panDoc) {
+      return res.status(400).json({ message: 'PAN Card document upload is required (PDF/JPG/PNG, Max 5 MB).' });
+    }
 
-    // 2. Drug License 1 (Form 20) is required
+    // 2. Both Drug Licenses (Form 20 and Form 21) are STRICTLY REQUIRED as requested
     const dl1 = (drugLicense1 || drugLicense || '').trim();
-    const dl2 = (drugLicense2 || '').trim(); // Drug License 2 (Form 21) is OPTIONAL
+    const dl2 = (drugLicense2 || '').trim();
 
     if (!dl1) {
-      return res.status(400).json({ message: 'Drug License No 1 (Form 20) is required.' });
+      return res.status(400).json({ message: 'Drug License 1 (Form 20) number is required.' });
     }
     if (!drugLicense1Doc) {
-      return res.status(400).json({ message: 'Drug License No 1 document upload is required (PDF/JPG/PNG, Max 500 KB).' });
+      return res.status(400).json({ message: 'Drug License 1 (Form 20) document file is required (PDF/JPG/PNG, Max 5 MB).' });
+    }
+
+    if (!dl2) {
+      return res.status(400).json({ message: 'Drug License 2 (Form 21) number is required.' });
+    }
+    if (!drugLicense2Doc) {
+      return res.status(400).json({ message: 'Drug License 2 (Form 21) document file is required (PDF/JPG/PNG, Max 5 MB).' });
     }
 
     const userExists = await User.findOne({ email: normalizedEmail });
@@ -238,14 +242,27 @@ router.post('/register', async (req, res) => {
     });
 
     if (user) {
-      // Dispatch background acknowledgment email to chemist
+      // 1. Dispatch background acknowledgment email to chemist with Document Security Guarantee
       sendChemistRegistrationPendingEmail({
         to: user.email,
         name: user.name,
         companyName: user.companyName,
-        drugLicense: user.drugLicense1 || user.drugLicense,
+        drugLicense: `${user.drugLicense1} / ${user.drugLicense2}`,
         phone: user.phone
       }).catch(mailErr => console.warn('[Register] Pending email dispatch notice:', mailErr.message));
+
+      // 2. Dispatch real-time alert email to Superadmin (info@niyanshpharma.com)
+      sendSuperAdminNewChemistAlertEmail({
+        storeName: user.companyName,
+        contactPerson: user.name,
+        email: user.email,
+        phone: user.phone,
+        dl1: user.drugLicense1,
+        dl2: user.drugLicense2,
+        pan: user.pan,
+        gstin: user.gstin,
+        registeredAt: user.createdAt
+      }).catch(mailErr => console.warn('[Register] Superadmin alert email dispatch notice:', mailErr.message));
 
       logAuditEvent({
         req,

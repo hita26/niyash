@@ -7,7 +7,8 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
-const MAX_DOC_SIZE_KB = 500; // Required maximum document size in KB
+const MAX_DOC_SIZE_MB = 5; // Maximum document upload size in MB
+const MAX_DOC_SIZE_BYTES = MAX_DOC_SIZE_MB * 1024 * 1024;
 
 function AuthModal({ isOpen, onClose, onSuccess }) {
   const { t } = useLanguage();
@@ -154,20 +155,22 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
     if (!file) return;
 
     const sizeInKB = Math.round(file.size / 1024);
+    const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+    const formattedSize = file.size > 1024 * 1024 ? `${sizeInMB} MB` : `${sizeInKB} KB`;
     const fileName = file.name || '';
     const fileExt = fileName.slice((fileName.lastIndexOf('.') - 1 >>> 0) + 2).toLowerCase();
     const allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png', 'webp'];
 
     // 1. Validate file extension / MIME type
     if (!allowedExtensions.includes(fileExt) && !file.type.match(/^(image\/(jpeg|png|webp)|application\/pdf)$/)) {
-      setError(`File "${fileName}" is not supported. Only PDF, JPG, JPEG, PNG, and WEBP documents are allowed.`);
+      setError(`File "${fileName}" is not supported. Please upload PDF, JPG, JPEG, PNG, or WEBP documents.`);
       e.target.value = '';
       return;
     }
 
-    // 2. Enforce strict 500 KB limit
-    if (file.size > MAX_DOC_SIZE_KB * 1024) {
-      setError(`File "${fileName}" is ${sizeInKB} KB. Maximum allowed size is ${MAX_DOC_SIZE_KB} KB. Please compress it using the free compressor link at the bottom.`);
+    // 2. Enforce 5 MB limit
+    if (file.size > MAX_DOC_SIZE_BYTES) {
+      setError(`File "${fileName}" is ${formattedSize}. Maximum allowed size is ${MAX_DOC_SIZE_MB} MB. Please upload a file smaller than 5 MB.`);
       e.target.value = '';
       return;
     }
@@ -180,7 +183,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
       const dataUrl = loadEvt.target.result;
       setDocFiles(prev => ({
         ...prev,
-        [field]: { name: file.name, sizeKB: sizeInKB, url: dataUrl, uploading: true }
+        [field]: { name: file.name, sizeStr: formattedSize, sizeKB: sizeInKB, url: dataUrl, uploading: true }
       }));
       // Default to Data URL so it is stored directly in MongoDB Atlas Cloud
       setFormData(prev => ({ ...prev, [`${field}Doc`]: dataUrl }));
@@ -319,44 +322,52 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
       const cleanGstin = (formData.gstin || '').trim().toUpperCase();
       let cleanPan = (formData.pan || '').trim().toUpperCase();
 
-      // GSTIN is OPTIONAL. If no GSTIN, PAN Number & PAN document are mandatory.
-      if (!cleanGstin) {
-        if (!cleanPan) {
-          setError('PAN Number is required when GSTIN is not provided.');
-          setLoading(false);
-          return;
-        }
-        if (cleanPan.length !== 10) {
-          setError('PAN Number must contain exactly 10 alphanumeric characters (e.g. ABCDE1234F).');
-          setLoading(false);
-          return;
-        }
-        if (!formData.panDoc) {
-          setError('Please upload your PAN Card document (PDF/JPG/PNG, Max 500 KB).');
-          setLoading(false);
-          return;
-        }
-      } else {
-        // If GSTIN is entered, auto-derive PAN if PAN field was left empty
-        if (!cleanPan && cleanGstin.length >= 12) {
+      // 1. PAN Number & PAN Document are STRICTLY REQUIRED
+      if (!cleanPan) {
+        if (cleanGstin && cleanGstin.length >= 12) {
           cleanPan = cleanGstin.substring(2, 12);
+        } else {
+          setError('PAN Number is required for chemist retail registration.');
+          setLoading(false);
+          return;
         }
       }
+      if (cleanPan.length !== 10) {
+        setError('PAN Number must contain exactly 10 alphanumeric characters (e.g. ABCDE1234F).');
+        setLoading(false);
+        return;
+      }
+      if (!formData.panDoc) {
+        setError('Please upload your PAN Card document (PDF, JPG, or PNG, Max 5 MB).');
+        setLoading(false);
+        return;
+      }
 
-      // Drug License 1 (Form 20) is required
+      // 2. Both Drug Licenses (Form 20 and Form 21) are STRICTLY REQUIRED
       const dl1 = (formData.drugLicense1 || formData.drugLicense || '').trim();
+      const dl2 = (formData.drugLicense2 || '').trim();
+
       if (!dl1) {
-        setError('Drug License No 1 (Form 20) is required.');
+        setError('Drug License 1 (Form 20) number is required.');
         setLoading(false);
         return;
       }
       if (!formData.drugLicense1Doc) {
-        setError('Please upload your Drug License No 1 document (PDF/JPG/PNG, Max 500 KB).');
+        setError('Please upload your Drug License 1 (Form 20) document (PDF, JPG, or PNG, Max 5 MB).');
         setLoading(false);
         return;
       }
 
-      // Drug License 2 (Form 21) is OPTIONAL - no mandatory check
+      if (!dl2) {
+        setError('Drug License 2 (Form 21) number is required.');
+        setLoading(false);
+        return;
+      }
+      if (!formData.drugLicense2Doc) {
+        setError('Please upload your Drug License 2 (Form 21) document (PDF, JPG, or PNG, Max 5 MB).');
+        setLoading(false);
+        return;
+      }
     }
 
     const url = isLogin ? '/api/users/login' : '/api/users/register';
@@ -389,6 +400,10 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
           name: formData.name,
           email: cleanEmail,
           phone: formData.phone,
+          drugLicense1: formData.drugLicense1 || formData.drugLicense,
+          drugLicense2: formData.drugLicense2,
+          pan: formData.pan,
+          gstin: formData.gstin,
           message: data.message
         });
         return;
@@ -608,7 +623,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
               borderRadius: '12px',
               padding: '16px',
               textAlign: 'left',
-              marginBottom: '20px',
+              marginBottom: '16px',
               fontSize: '0.88rem',
               lineHeight: '1.6'
             }}>
@@ -621,9 +636,40 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
               <div style={{ marginBottom: '6px' }}>
                 <strong style={{ color: 'var(--text-dark, #0f172a)' }}>રજીસ્ટર્ડ ઈમેઈલ:</strong> {registrationSuccessData.email}
               </div>
-              <div>
-                <strong style={{ color: 'var(--text-dark, #0f172a)' }}>મોબાઈલ:</strong> +91 {registrationSuccessData.phone}
+              <div style={{ marginBottom: '6px' }}>
+                <strong style={{ color: 'var(--text-dark, #0f172a)' }}>મોબાઈલ નંબર:</strong> +91 {registrationSuccessData.phone}
               </div>
+              <div style={{ marginBottom: '6px' }}>
+                <strong style={{ color: 'var(--text-dark, #0f172a)' }}>ડ્રગ લાયસન્સ 1 (Form 20):</strong> <span style={{ color: '#047857', fontWeight: '700' }}>{registrationSuccessData.drugLicense1 || 'સબમિટ થયેલ'}</span>
+              </div>
+              <div style={{ marginBottom: '6px' }}>
+                <strong style={{ color: 'var(--text-dark, #0f172a)' }}>ડ્રગ લાયસન્સ 2 (Form 21):</strong> <span style={{ color: '#047857', fontWeight: '700' }}>{registrationSuccessData.drugLicense2 || 'સબમિટ થયેલ'}</span>
+              </div>
+              <div>
+                <strong style={{ color: 'var(--text-dark, #0f172a)' }}>PAN નંબર:</strong> <span style={{ color: '#0c3d6c', fontWeight: '700' }}>{registrationSuccessData.pan || 'સબમિટ થયેલ'}</span>
+                {registrationSuccessData.gstin && (
+                  <span style={{ marginLeft: '12px', color: '#64748b' }}>• GSTIN: {registrationSuccessData.gstin}</span>
+                )}
+              </div>
+            </div>
+
+            {/* Document Security Guarantee */}
+            <div style={{
+              backgroundColor: '#f0fdf4',
+              border: '1px solid #86efac',
+              borderRadius: '8px',
+              padding: '10px 14px',
+              textAlign: 'left',
+              fontSize: '0.8rem',
+              color: '#166534',
+              lineHeight: '1.5',
+              marginBottom: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              <span style={{ fontSize: '1.1rem' }}>🔒</span>
+              <span><strong>સિક્યુરિટી ગેરંટી:</strong> તમારા અપલોડ કરેલા Form 20, Form 21 અને PAN દસ્તાવેજ 256-Bit SSL એન્ક્રિપ્ટેડ સુરક્ષિત વોલ્ટમાં સંગ્રહિત છે, જે માત્ર FDCA રેગ્યુલેટરી વેરિફિકેશન માટે જ ઉપયોગમાં લેવાશે.</span>
             </div>
 
             <div style={{
@@ -635,9 +681,9 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
               fontSize: '0.84rem',
               color: '#1e40af',
               lineHeight: '1.55',
-              marginBottom: '24px'
+              marginBottom: '22px'
             }}>
-              <strong>આગળનું સ્ટેપ:</strong> અમારી કમ્પ્લાયન્સ ટીમ તમારા ડ્રગ લાયસન્સ (Form 20/21) અને KYC ડોક્યુમેન્ટ્સ ચકાસી રહી છે. <strong>24 કલાકમાં</strong> સુપરએડમિન દ્વારા મંજૂરી અપાતાં જ તમારા રજીસ્ટર્ડ ઈમેઈલ પર <strong>યુઝરનેમ અને પાસવર્ડનું કન્ફર્મેશન</strong> મોકલી દેવાશે, જેથી તમારું હોલસેલ લોગિન એક્ટિવ થઈ જશે.
+              <strong>આગળનું સ્ટેપ:</strong> અમારી કમ્પ્લાયન્સ ટીમ તમારા ડ્રગ લાયસન્સ (Form 20/21) અને KYC ડોક્યુમેન્ટ્સ ચકાસી રહી છે. <strong>24 કલાકમાં</strong> સુપરએડમિન દ્વારા મંજૂરી અપાતાં જ તમારા રજીસ્ટર્ડ ઈમેઈલ પર <strong>હોલસેલ લોગિન યુઝરનેમ અને પાસવર્ડ</strong> મોકલી દેવાશે, જેથી તમારું એકાઉન્ટ એક્ટિવ થઈ જશે.
             </div>
 
             <button
@@ -1120,7 +1166,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                   </span>
                 </div>
 
-                {/* Section 1: Tax Credentials (GSTIN / PAN) */}
+                {/* Section 1: Tax Credentials (PAN Required, GSTIN Optional) */}
                 <div style={{
                   backgroundColor: 'var(--bg-main, #f8fafc)',
                   padding: '12px 14px',
@@ -1132,15 +1178,49 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px' }}>
                     <span style={{ fontSize: '0.84rem', fontWeight: '800', color: 'var(--primary-blue, #2563eb)' }}>
-                      1. Tax Credentials (GSTIN or PAN)
+                      1. Tax Identity (PAN & GSTIN)
                     </span>
-                    <span style={{ fontSize: '0.72rem', color: '#0369a1', backgroundColor: '#e0f2fe', padding: '2px 8px', borderRadius: '10px', fontWeight: '700' }}>
-                      GSTIN Optional • PAN Required if no GST
+                    <span style={{ fontSize: '0.72rem', color: '#047857', backgroundColor: '#dcfce7', padding: '2px 8px', borderRadius: '10px', fontWeight: '700' }}>
+                      PAN Required • GSTIN Optional
                     </span>
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: '12px' }}>
-                    {/* GSTIN Card */}
+                    {/* PAN Card - FIRST (Required) */}
+                    <div style={{ backgroundColor: '#ffffff', border: '1.5px solid #93c5fd', borderRadius: '8px', padding: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: '800', color: '#0c3d6c' }}>
+                          PAN Number <span style={{ color: '#ef4444' }}>*</span>
+                        </span>
+                        <span style={{ fontSize: '0.7rem', color: '#ef4444', fontWeight: '700' }}>(Required)</span>
+                      </div>
+                      <input 
+                        type="text" 
+                        name="pan" 
+                        required
+                        maxLength={10}
+                        value={formData.pan} 
+                        onChange={handleChange}
+                        placeholder="e.g. ABCDE1234F"
+                        style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.82rem', fontWeight: '600' }}
+                      />
+                      {docFiles.pan ? (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', backgroundColor: '#ecfdf5', color: '#065f46', padding: '4px 8px', borderRadius: '5px', border: '1px solid #a7f3d0' }}>
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '170px', fontWeight: '600' }}>
+                            ✓ {docFiles.pan.name} ({docFiles.pan.sizeStr || `${docFiles.pan.sizeKB} KB`})
+                          </span>
+                          <button type="button" onClick={() => handleRemoveFile('pan')} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontWeight: '800' }}>✕</button>
+                        </div>
+                      ) : (
+                        <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', fontSize: '0.74rem', fontWeight: '700', color: '#ffffff', backgroundColor: '#0284c7', padding: '6px 8px', borderRadius: '5px', cursor: 'pointer' }}>
+                          <Upload size={12} />
+                          <span>Attach PAN Card Photo * (Required)</span>
+                          <input type="file" accept=".pdf, .jpg, .jpeg, .png, .webp" style={{ display: 'none' }} onChange={(e) => handleFileUpload(e, 'pan')} />
+                        </label>
+                      )}
+                    </div>
+
+                    {/* GSTIN Card - SECOND (Optional) */}
                     <div style={{ backgroundColor: '#ffffff', border: '1px solid var(--border-light, #cbd5e1)', borderRadius: '8px', padding: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-dark)' }}>GSTIN Number</span>
@@ -1157,55 +1237,23 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                       />
                       {docFiles.gstin ? (
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', backgroundColor: '#ecfdf5', color: '#065f46', padding: '4px 8px', borderRadius: '5px', border: '1px solid #a7f3d0' }}>
-                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '170px', fontWeight: '600' }}>✓ {docFiles.gstin.name}</span>
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '170px', fontWeight: '600' }}>
+                            ✓ {docFiles.gstin.name} ({docFiles.gstin.sizeStr || `${docFiles.gstin.sizeKB} KB`})
+                          </span>
                           <button type="button" onClick={() => handleRemoveFile('gstin')} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontWeight: '800' }}>✕</button>
                         </div>
                       ) : (
-                        <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', fontSize: '0.74rem', fontWeight: '700', color: '#0284c7', backgroundColor: '#e0f2fe', padding: '5px 8px', borderRadius: '5px', cursor: 'pointer' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', fontSize: '0.74rem', fontWeight: '700', color: '#0284c7', backgroundColor: '#e0f2fe', padding: '6px 8px', borderRadius: '5px', cursor: 'pointer' }}>
                           <Upload size={12} />
-                          <span>Attach GST Certificate</span>
+                          <span>Attach GST Certificate (Optional)</span>
                           <input type="file" accept=".pdf, .jpg, .jpeg, .png, .webp" style={{ display: 'none' }} onChange={(e) => handleFileUpload(e, 'gstin')} />
-                        </label>
-                      )}
-                    </div>
-
-                    {/* PAN Card */}
-                    <div style={{ backgroundColor: '#ffffff', border: '1px solid var(--border-light, #cbd5e1)', borderRadius: '8px', padding: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-dark)' }}>
-                          PAN Number {!formData.gstin && <span style={{ color: '#ef4444' }}>*</span>}
-                        </span>
-                        <span style={{ fontSize: '0.7rem', color: formData.gstin ? '#64748b' : '#ef4444', fontWeight: '600' }}>
-                          {formData.gstin ? '(Optional)' : '(Required)'}
-                        </span>
-                      </div>
-                      <input 
-                        type="text" 
-                        name="pan" 
-                        required={!formData.gstin}
-                        maxLength={10}
-                        value={formData.pan} 
-                        onChange={handleChange}
-                        placeholder="e.g. ABCDE1234F"
-                        style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }}
-                      />
-                      {docFiles.pan ? (
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', backgroundColor: '#ecfdf5', color: '#065f46', padding: '4px 8px', borderRadius: '5px', border: '1px solid #a7f3d0' }}>
-                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '170px', fontWeight: '600' }}>✓ {docFiles.pan.name}</span>
-                          <button type="button" onClick={() => handleRemoveFile('pan')} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontWeight: '800' }}>✕</button>
-                        </div>
-                      ) : (
-                        <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', fontSize: '0.74rem', fontWeight: '700', color: '#ffffff', backgroundColor: !formData.gstin ? '#0284c7' : '#64748b', padding: '5px 8px', borderRadius: '5px', cursor: 'pointer' }}>
-                          <Upload size={12} />
-                          <span>Attach PAN Card Photo</span>
-                          <input type="file" accept=".pdf, .jpg, .jpeg, .png, .webp" style={{ display: 'none' }} onChange={(e) => handleFileUpload(e, 'pan')} />
                         </label>
                       )}
                     </div>
                   </div>
                 </div>
 
-                {/* Section 2: Drug Licenses (Form 20 & 21) */}
+                {/* Section 2: Drug Licenses (Form 20 & 21 BOTH REQUIRED) */}
                 <div style={{
                   backgroundColor: 'var(--bg-main, #f8fafc)',
                   padding: '12px 14px',
@@ -1219,19 +1267,19 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                     <span style={{ fontSize: '0.84rem', fontWeight: '800', color: 'var(--primary-blue, #2563eb)' }}>
                       2. Drug Licenses (Form 20 & 21)
                     </span>
-                    <span style={{ fontSize: '0.72rem', color: '#059669', backgroundColor: '#ecfdf5', padding: '2px 8px', borderRadius: '10px', fontWeight: '700' }}>
-                      Form 20 Required • Form 21 Optional
+                    <span style={{ fontSize: '0.72rem', color: '#b91c1c', backgroundColor: '#fee2e2', padding: '2px 8px', borderRadius: '10px', fontWeight: '800' }}>
+                      Both Form 20 & Form 21 Required
                     </span>
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: '12px' }}>
-                    {/* Drug License 1 (Form 20) */}
-                    <div style={{ backgroundColor: '#ffffff', border: '1px solid var(--border-light, #cbd5e1)', borderRadius: '8px', padding: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    {/* Drug License 1 (Form 20) - REQUIRED */}
+                    <div style={{ backgroundColor: '#ffffff', border: '1.5px solid #93c5fd', borderRadius: '8px', padding: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-dark)' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: '800', color: '#0c3d6c' }}>
                           Drug License 1 (Form 20) <span style={{ color: '#ef4444' }}>*</span>
                         </span>
-                        <span style={{ fontSize: '0.7rem', color: '#ef4444', fontWeight: '700' }}>(Required)</span>
+                        <span style={{ fontSize: '0.7rem', color: '#ef4444', fontWeight: '800' }}>(Required)</span>
                       </div>
                       <input 
                         type="text" 
@@ -1240,45 +1288,52 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                         value={formData.drugLicense1} 
                         onChange={handleChange}
                         placeholder="e.g. 20B/1234 or G/20/1234"
-                        style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }}
+                        style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.82rem', fontWeight: '600' }}
                       />
                       {docFiles.drugLicense1 ? (
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', backgroundColor: '#ecfdf5', color: '#065f46', padding: '4px 8px', borderRadius: '5px', border: '1px solid #a7f3d0' }}>
-                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '170px', fontWeight: '600' }}>✓ {docFiles.drugLicense1.name}</span>
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '170px', fontWeight: '600' }}>
+                            ✓ {docFiles.drugLicense1.name} ({docFiles.drugLicense1.sizeStr || `${docFiles.drugLicense1.sizeKB} KB`})
+                          </span>
                           <button type="button" onClick={() => handleRemoveFile('drugLicense1')} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontWeight: '800' }}>✕</button>
                         </div>
                       ) : (
-                        <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', fontSize: '0.74rem', fontWeight: '700', color: '#ffffff', backgroundColor: '#0284c7', padding: '5px 8px', borderRadius: '5px', cursor: 'pointer' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', fontSize: '0.74rem', fontWeight: '700', color: '#ffffff', backgroundColor: '#0284c7', padding: '6px 8px', borderRadius: '5px', cursor: 'pointer' }}>
                           <Upload size={12} />
-                          <span>Attach Form 20 License</span>
+                          <span>Attach Form 20 License * (Required)</span>
                           <input type="file" accept=".pdf, .jpg, .jpeg, .png, .webp" style={{ display: 'none' }} onChange={(e) => handleFileUpload(e, 'drugLicense1')} />
                         </label>
                       )}
                     </div>
 
-                    {/* Drug License 2 (Form 21) */}
-                    <div style={{ backgroundColor: '#ffffff', border: '1px solid var(--border-light, #cbd5e1)', borderRadius: '8px', padding: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    {/* Drug License 2 (Form 21) - REQUIRED */}
+                    <div style={{ backgroundColor: '#ffffff', border: '1.5px solid #93c5fd', borderRadius: '8px', padding: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-dark)' }}>Drug License 2 (Form 21)</span>
-                        <span style={{ fontSize: '0.7rem', color: '#64748b' }}>(Optional)</span>
+                        <span style={{ fontSize: '0.8rem', fontWeight: '800', color: '#0c3d6c' }}>
+                          Drug License 2 (Form 21) <span style={{ color: '#ef4444' }}>*</span>
+                        </span>
+                        <span style={{ fontSize: '0.7rem', color: '#ef4444', fontWeight: '800' }}>(Required)</span>
                       </div>
                       <input 
                         type="text" 
                         name="drugLicense2" 
+                        required
                         value={formData.drugLicense2} 
                         onChange={handleChange}
                         placeholder="e.g. 21B/5678 or G/21/5678"
-                        style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }}
+                        style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.82rem', fontWeight: '600' }}
                       />
                       {docFiles.drugLicense2 ? (
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', backgroundColor: '#ecfdf5', color: '#065f46', padding: '4px 8px', borderRadius: '5px', border: '1px solid #a7f3d0' }}>
-                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '170px', fontWeight: '600' }}>✓ {docFiles.drugLicense2.name}</span>
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '170px', fontWeight: '600' }}>
+                            ✓ {docFiles.drugLicense2.name} ({docFiles.drugLicense2.sizeStr || `${docFiles.drugLicense2.sizeKB} KB`})
+                          </span>
                           <button type="button" onClick={() => handleRemoveFile('drugLicense2')} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontWeight: '800' }}>✕</button>
                         </div>
                       ) : (
-                        <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', fontSize: '0.74rem', fontWeight: '700', color: '#0284c7', backgroundColor: '#e0f2fe', padding: '5px 8px', borderRadius: '5px', cursor: 'pointer' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', fontSize: '0.74rem', fontWeight: '700', color: '#ffffff', backgroundColor: '#0284c7', padding: '6px 8px', borderRadius: '5px', cursor: 'pointer' }}>
                           <Upload size={12} />
-                          <span>Attach Form 21 (Optional)</span>
+                          <span>Attach Form 21 License * (Required)</span>
                           <input type="file" accept=".pdf, .jpg, .jpeg, .png, .webp" style={{ display: 'none' }} onChange={(e) => handleFileUpload(e, 'drugLicense2')} />
                         </label>
                       )}
@@ -1286,25 +1341,25 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                   </div>
                 </div>
 
-                {/* Free Online Image Compressor Info Strip */}
+                {/* Document Format & Max Size Info Strip */}
                 <div style={{
-                  padding: '10px 12px',
+                  padding: '10px 14px',
                   borderRadius: '8px',
-                  backgroundColor: 'var(--bg-main, #f8fafc)',
-                  border: '1px dashed var(--border-light, #cbd5e1)',
+                  backgroundColor: '#f0fdf4',
+                  border: '1px solid #bbf7d0',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   flexWrap: 'wrap',
                   gap: '8px'
                 }}>
-                  <div style={{ fontSize: '0.76rem', color: 'var(--text-medium, #64748b)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <FileText size={14} style={{ color: '#2563eb', flexShrink: 0 }} />
-                    <span>Max 500 KB per file. Need compression?</span>
+                  <div style={{ fontSize: '0.78rem', color: '#166534', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '600' }}>
+                    <ShieldAlert size={15} style={{ color: '#16a34a', flexShrink: 0 }} />
+                    <span>Max 5 MB per file • Supported: PDF, JPG, JPEG, PNG, WEBP • 256-Bit SSL Encrypted</span>
                   </div>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <a href="https://www.iloveimg.com/compress-image" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.74rem', color: '#0284c7', fontWeight: '700', textDecoration: 'underline' }}>iLoveIMG ↗</a>
-                    <a href="https://tinypng.com/" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.74rem', color: '#0284c7', fontWeight: '700', textDecoration: 'underline' }}>TinyPNG ↗</a>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <a href="https://www.iloveimg.com/compress-image" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.74rem', color: '#0284c7', fontWeight: '700', textDecoration: 'underline' }}>Compress Image ↗</a>
+                    <a href="https://www.ilovepdf.com/compress_pdf" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.74rem', color: '#0284c7', fontWeight: '700', textDecoration: 'underline' }}>Compress PDF ↗</a>
                   </div>
                 </div>
 

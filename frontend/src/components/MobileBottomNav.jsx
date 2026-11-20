@@ -28,6 +28,12 @@ function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
     return false;
   };
 
+  const triggerHaptic = () => {
+    if (typeof window !== 'undefined' && window.navigator?.vibrate) {
+      try { window.navigator.vibrate([15]); } catch (_) {}
+    }
+  };
+
   return (
     <nav 
       className="mobile-bottom-nav" 
@@ -57,6 +63,7 @@ function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
           {/* Dashboard */}
           <Link 
             to="/dashboard" 
+            onClick={triggerHaptic}
             style={{
               display: 'flex',
               flexDirection: 'column',
@@ -78,6 +85,7 @@ function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
           {/* Quick Order Pad */}
           <Link 
             to="/quick-order" 
+            onClick={triggerHaptic}
             style={{
               display: 'flex',
               flexDirection: 'column',
@@ -99,6 +107,7 @@ function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
           {/* Ledger & GST Invoices */}
           <Link 
             to="/outstanding" 
+            onClick={triggerHaptic}
             style={{
               display: 'flex',
               flexDirection: 'column',
@@ -120,6 +129,7 @@ function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
           {/* Wholesale Products */}
           <Link 
             to="/products" 
+            onClick={triggerHaptic}
             style={{
               display: 'flex',
               flexDirection: 'column',
@@ -140,7 +150,7 @@ function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
 
           {/* Wholesale Cart */}
           <button 
-            onClick={onOpenCart} 
+            onClick={() => { triggerHaptic(); onOpenCart(); }} 
             style={{
               display: 'flex',
               flexDirection: 'column',
@@ -191,6 +201,7 @@ function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
           {/* Public Home */}
           <Link 
             to="/" 
+            onClick={triggerHaptic}
             style={{
               display: 'flex',
               flexDirection: 'column',
@@ -212,6 +223,7 @@ function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
           {/* Medicines */}
           <Link 
             to="/products" 
+            onClick={triggerHaptic}
             style={{
               display: 'flex',
               flexDirection: 'column',
@@ -233,6 +245,7 @@ function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
           {/* Chemist Portal Access */}
           <Link 
             to="/dashboard" 
+            onClick={triggerHaptic}
             style={{
               display: 'flex',
               flexDirection: 'column',
@@ -254,6 +267,7 @@ function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
           {/* Quick Order */}
           <Link 
             to="/quick-order" 
+            onClick={triggerHaptic}
             style={{
               display: 'flex',
               flexDirection: 'column',
@@ -274,7 +288,7 @@ function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
 
           {/* Cart */}
           <button 
-            onClick={onOpenCart} 
+            onClick={() => { triggerHaptic(); onOpenCart(); }} 
             style={{
               display: 'flex',
               flexDirection: 'column',

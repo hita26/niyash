@@ -1,0 +1,55 @@
+{
+  "name": "Niyansh Pharma - Wholesale B2B Portal",
+  "short_name": "Niyansh Pharma",
+  "description": "Leading wholesale pharmaceutical distributor and B2B medicine supply portal across Gujarat.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0c3d6c",
+  "theme_color": "#0c3d6c",
+  "categories": ["medical", "business", "shopping"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo-dark.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Quick Order",
+      "short_name": "Order",
+      "description": "Fast medicine ordering pad for chemists",
+      "url": "/quick-order",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Medicines Catalog",
+      "short_name": "Catalog",
+      "description": "Browse WHO-GMP pharma products & schemes",
+      "url": "/products",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Outstanding Ledger",
+      "short_name": "Ledger",
+      "description": "Check bills, statements & GST invoices",
+      "url": "/outstanding",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
+    }
+  ]
+}

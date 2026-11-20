@@ -5,6 +5,12 @@
     <link rel="icon" type="image/jpeg" href="/logo.jpg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
     <meta name="theme-color" content="#0c3d6c" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Niyansh Pharma" />
+    <link rel="apple-touch-icon" href="/logo.jpg" />
     
     <!-- Primary Meta Tags -->
     <title>Niyansh Pharma - Wholesale Pharmaceutical Distributor | Gujarat</title>
@@ -110,12 +116,24 @@
         } catch (e) {}
       })();
     </script>
-    <script type="module" crossorigin src="/assets/index-CuZpr9e2.js"></script>
+    <script type="module" crossorigin src="/assets/index-CADavL3R.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/vendor-core-H--6RVv2.js">
-    <link rel="modulepreload" crossorigin href="/assets/vendor-icons-CbyLWHDq.js">
-    <link rel="stylesheet" crossorigin href="/assets/index-BMV-gtSY.css">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-icons-YIvPl4ab.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-DIUvOIqw.css">
   </head>
   <body>
     <div id="root"></div>
+    <!-- PWA Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js').then(function(reg) {
+            console.log('Niyansh Pharma PWA Service Worker active:', reg.scope);
+          }).catch(function(err) {
+            console.warn('PWA registration failed:', err);
+          });
+        });
+      }
+    </script>
   </body>
 </html>

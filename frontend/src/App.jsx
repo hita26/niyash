@@ -28,6 +28,8 @@ import ScrollToTop from './components/ScrollToTop';
 import MobileBottomNav from './components/MobileBottomNav';
 import AIAssistant from './components/AIAssistant';
 import FloatingOrderWidget from './components/FloatingOrderWidget';
+import InstallAppBanner from './components/InstallAppBanner';
+import BioNanoProgressBar from './components/BioNanoProgressBar';
 
 // Security Auth Guard: blocks unauthenticated access and forces login if user presses Back after logout
 function ProtectedRoute({ children }) {
@@ -246,6 +248,7 @@ function AppContent() {
 
   return (
     <>
+      <BioNanoProgressBar />
       <ScrollToTop />
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <Header 
@@ -315,6 +318,8 @@ function AppContent() {
           onOpenCart={() => setIsCartOpen(true)} 
           isB2BPortal={isB2BPortal}
         />
+
+        <InstallAppBanner />
 
         <EnquiryCartModal 
           isOpen={isCartOpen} 

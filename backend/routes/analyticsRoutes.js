@@ -255,4 +255,57 @@ router.get('/export', protect, adminOnly, async (req, res) => {
   }
 });
 
+// @desc    Clear / Purge visitor traffic analytics logs
+// @route   DELETE /api/analytics/clear
+// @route   DELETE /api/analytics/traffic
+// @access  Private / Admin
+router.delete('/clear', protect, adminOnly, async (req, res) => {
+  try {
+    const range = req.query.range || req.body?.range || 'all';
+    let query = {};
+
+    if (range === '7d') {
+      const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      query = {
+        $or: [
+          { timestamp: { $lt: cutoff } },
+          { createdAt: { $lt: cutoff } }
+        ]
+      };
+    } else if (range === '30d') {
+      const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      query = {
+        $or: [
+          { timestamp: { $lt: cutoff } },
+          { createdAt: { $lt: cutoff } }
+        ]
+      };
+    } else if (range === 'all') {
+      query = {};
+    } else {
+      return res.status(400).json({ success: false, message: 'Invalid range option. Supported ranges: 7d, 30d, all.' });
+    }
+
+    const result = await VisitorLog.deleteMany(query);
+
+    res.json({
+      success: true,
+      message: range === 'all'
+        ? `Successfully cleared all ${result.deletedCount} visitor traffic records from database.`
+        : `Successfully purged ${result.deletedCount} visitor records older than ${range === '7d' ? '7 days' : '30 days'}.`,
+      deletedCount: result.deletedCount,
+      range
+    });
+  } catch (err) {
+    console.error('Error clearing visitor logs:', err);
+    res.status(500).json({ success: false, message: 'Failed to clear visitor logs', error: err.message });
+  }
+});
+
+// Alias DELETE /traffic to /clear
+router.delete('/traffic', protect, adminOnly, async (req, res) => {
+  req.url = '/clear';
+  return router.handle(req, res);
+});
+
 module.exports = router;

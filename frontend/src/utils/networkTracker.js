@@ -55,13 +55,20 @@ if (typeof window !== 'undefined' && window.fetch && !window.__NIYANSH_NETWORK_T
     const [resource, config] = args;
     const url = typeof resource === 'string' ? resource : (resource?.url || '');
 
-    // Ignore background telemetry and keep-alive pings to avoid visual distraction
+    // Ignore background telemetry, auto-polling pings, and silent requests to avoid visual distraction
     const isSilent =
       url.includes('/api/analytics/track') ||
+      url.includes('/api/analytics/live') ||
+      url.includes('/api/sync/status') ||
       config?.silent === true ||
+      config?.background === true ||
       (config?.headers && (
         config.headers['x-silent-request'] === 'true' ||
-        (config.headers instanceof Headers && config.headers.get('x-silent-request') === 'true')
+        config.headers['x-background-request'] === 'true' ||
+        (config.headers instanceof Headers && (
+          config.headers.get('x-silent-request') === 'true' ||
+          config.headers.get('x-background-request') === 'true'
+        ))
       ));
 
     if (isSilent) {

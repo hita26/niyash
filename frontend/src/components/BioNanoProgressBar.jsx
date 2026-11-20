@@ -69,6 +69,14 @@ export default function BioNanoProgressBar() {
 
   // Check overall activity state
   const evaluateActivity = () => {
+    if (location.pathname.startsWith('/admin')) {
+      clearTimers();
+      if (visible || progress > 0) {
+        setVisible(false);
+        setProgress(0);
+      }
+      return;
+    }
     const isBusy = isNetworkActiveRef.current || isRouteTransitionRef.current;
     if (isBusy) {
       startProgress();
@@ -107,6 +115,11 @@ export default function BioNanoProgressBar() {
       return () => clearTimeout(routeDoneTimer);
     }
   }, [location.pathname, location.search]);
+
+  // Disable top progress bar completely on the admin panel to eliminate visual flickering
+  if (location.pathname.startsWith('/admin')) {
+    return null;
+  }
 
   if (!visible && progress === 0) {
     return null;

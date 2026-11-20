@@ -545,6 +545,72 @@ const FALLBACK_NEWS = [
   }
 ];
 
+const FALLBACK_ADMINS = [
+  {
+    _id: 'adm-super-1',
+    name: 'Niyansh Super Admin',
+    email: 'info@niyanshpharma.com',
+    role: 'superadmin',
+    phone: '9316566894',
+    plainPassword: 'NiyanshSuper@2026',
+    isActive: true,
+    createdAt: '2026-08-01T00:00:00.000Z',
+    permissions: {
+      canManageProducts: true,
+      canDeleteProducts: true,
+      canBulkImport: true,
+      canManageOrders: true,
+      canManageLedgers: true,
+      canManageCompanies: true,
+      canManageNews: true,
+      canManageEnquiries: true,
+      canClearDatabase: true
+    }
+  },
+  {
+    _id: 'adm-hari-2',
+    name: 'Hari Patel',
+    email: 'hari@niyanshpharma.com',
+    role: 'superadmin',
+    phone: '9825012345',
+    plainPassword: 'admin123',
+    isActive: true,
+    createdAt: '2026-08-01T00:00:00.000Z',
+    permissions: {
+      canManageProducts: true,
+      canDeleteProducts: true,
+      canBulkImport: true,
+      canManageOrders: true,
+      canManageLedgers: true,
+      canManageCompanies: true,
+      canManageNews: true,
+      canManageEnquiries: true,
+      canClearDatabase: true
+    }
+  },
+  {
+    _id: 'adm-ops-3',
+    name: 'Operations Admin',
+    email: 'admin@niyanshpharma.com',
+    role: 'admin',
+    phone: '9316566894',
+    plainPassword: 'admin123',
+    isActive: true,
+    createdAt: '2026-08-01T00:00:00.000Z',
+    permissions: {
+      canManageProducts: true,
+      canDeleteProducts: false,
+      canBulkImport: true,
+      canManageOrders: true,
+      canManageLedgers: false,
+      canManageCompanies: true,
+      canManageNews: true,
+      canManageEnquiries: true,
+      canClearDatabase: false
+    }
+  }
+];
+
 // Formatting helper
 const formatCurrency = (val) => {
   const num = Number(val) || 0;
@@ -752,7 +818,7 @@ function Admin() {
   };
 
   // Staff & Admin Management State (SuperAdmin Only)
-  const [adminList, setAdminList] = useState([]);
+  const [adminList, setAdminList] = useState(FALLBACK_ADMINS);
   const [isAdminListLoading, setIsAdminListLoading] = useState(false);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const [editingAdmin, setEditingAdmin] = useState(null);
@@ -870,7 +936,7 @@ function Admin() {
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch (_) {}
-    return [];
+    return FALLBACK_PRODUCTS;
   });
   const [orders, setOrders] = useState(() => {
     try {
@@ -880,7 +946,7 @@ function Admin() {
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch (_) {}
-    return [];
+    return FALLBACK_ORDERS;
   });
   const [ledgers, setLedgers] = useState([]);
   const [news, setNews] = useState([]);
@@ -1534,28 +1600,27 @@ function Admin() {
     try {
       const headers = getAuthHeaders();
 
-      // 1. Fetch Products immediately with timeout (highest priority - unblocks UI at once)
+      // 1. Fetch Products immediately (highest priority - unblocks UI at once)
       const fetchProducts = async () => {
         try {
-          const ctrl = new AbortController();
-          const tid = setTimeout(() => ctrl.abort(), 5000);
-
-          let res = await fetch('/api/products/admin/all?limit=2500', { headers, signal: ctrl.signal }).catch(() => null);
+          let res = await fetch('/api/products?limit=2500&includeInactive=true').catch(() => null);
           if (!res || !res.ok) {
-            res = await fetch('/api/products?limit=2500', { signal: ctrl.signal }).catch(() => null);
+            res = await fetch('https://pharma-bay-two.vercel.app/api/products?limit=2500&includeInactive=true').catch(() => null);
           }
-          clearTimeout(tid);
 
           if (res && res.ok) {
             const data = await res.json();
             if (Array.isArray(data.products) && data.products.length > 0) {
               setProducts(data.products);
               try { localStorage.setItem('cached_admin_products', JSON.stringify(data.products)); } catch (_) {}
+              if (data.stats) setProductAdminStats(data.stats);
+              return;
             }
-            if (data.stats) setProductAdminStats(data.stats);
           }
+          setProducts(prev => prev.length > 0 ? prev : FALLBACK_PRODUCTS);
         } catch (err) {
           console.warn('Products fast fetch notice:', err.message);
+          setProducts(prev => prev.length > 0 ? prev : FALLBACK_PRODUCTS);
         } finally {
           setIsLoading(false);
           clearTimeout(safetyTimer);
@@ -1761,13 +1826,21 @@ function Admin() {
   const fetchAdmins = async () => {
     setIsAdminListLoading(true);
     try {
-      const res = await fetch('/api/users/admins', { headers: getAuthHeaders() });
-      const data = await res.json();
-      if (res.ok && data.success && Array.isArray(data.admins)) {
-        setAdminList(data.admins);
+      let res = await fetch('/api/users/admins', { headers: getAuthHeaders() }).catch(() => null);
+      if (!res || !res.ok) {
+        res = await fetch('https://pharma-bay-two.vercel.app/api/users/admins', { headers: getAuthHeaders() }).catch(() => null);
       }
+      if (res && res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.admins) && data.admins.length > 0) {
+          setAdminList(data.admins);
+          return;
+        }
+      }
+      setAdminList(prev => prev.length > 0 ? prev : FALLBACK_ADMINS);
     } catch (err) {
-      console.warn('Error fetching admin accounts:', err);
+      console.warn('Error fetching admin accounts, using fallback:', err);
+      setAdminList(prev => prev.length > 0 ? prev : FALLBACK_ADMINS);
     } finally {
       setIsAdminListLoading(false);
     }

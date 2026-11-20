@@ -79,14 +79,17 @@ function Home({ addToCart }) {
         if (!name || typeof name !== 'string') return;
         const clean = name.trim();
         // Skip empty, numbers, or non-brand entries like long product descriptions
-        if (clean.length < 2 || clean.length > 28) return;
-        if (/sanitary|pad|diaper|condom|ml|gm|mg|tablet|capsule/i.test(clean)) return;
+        if (clean.length < 2 || clean.length > 30) return;
+        if (/sanitary|pad|diaper|condom|\b\d+\s*(ml|gm|mg|tab|cap|vial|amp)\b/i.test(clean)) return;
         const lower = clean.toLowerCase();
         if (!brandMap.has(lower)) {
           // Normalize all-caps names like "BIOCHEM" -> "Biochem"
-          const formatted = clean === clean.toUpperCase() && clean.length > 3
+          let formatted = clean === clean.toUpperCase() && clean.length > 3
             ? clean.charAt(0).toUpperCase() + clean.slice(1).toLowerCase()
             : clean;
+          
+          if (lower === 'daxia') formatted = 'Daxia Healthcare';
+          if (lower === 'zydus') formatted = 'Zydus Cadila';
           brandMap.set(lower, formatted);
         }
       };

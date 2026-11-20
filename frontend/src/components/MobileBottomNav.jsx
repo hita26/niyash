@@ -1,15 +1,15 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Package, Building2, Zap, ShoppingBag, ShieldCheck, FileText } from 'lucide-react';
+import { Home, Package, Building2, ShieldCheck, FileText, Menu, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 
-function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
-  const { t } = useLanguage();
+function MobileBottomNav({ cartCount = 0, onOpenCart, isB2BPortal, isMenuOpen = false, onOpenMenu }) {
+  const { t, language } = useLanguage();
   const location = useLocation();
   const { isLoggedIn, user } = useAuth();
 
-  // Maximize workspace on Admin panel
+  // Hide navigation on Admin panel
   if (location.pathname.startsWith('/admin')) {
     return null;
   }
@@ -28,11 +28,14 @@ function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
     return false;
   };
 
-  const triggerHaptic = () => {
-    if (typeof window !== 'undefined' && window.navigator?.vibrate) {
-      try { window.navigator.vibrate([15]); } catch (_) {}
+  const handleTabClick = () => {
+    if (typeof window !== 'undefined' && window.triggerHaptic) {
+      window.triggerHaptic('selection');
     }
   };
+
+  const companiesLabel = language === 'gu' ? 'કંપનીઓ' : language === 'hi' ? 'कंपनियां' : 'Companies';
+  const menuLabel = language === 'gu' ? 'મેનુ' : language === 'hi' ? 'मेनू' : 'Menu';
 
   return (
     <nav 
@@ -43,8 +46,8 @@ function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
         bottom: 0,
         left: 0,
         right: 0,
-        height: 'calc(60px + env(safe-area-inset-bottom, 0px))',
-        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        height: 'calc(58px + env(safe-area-inset-bottom, 8px))',
+        paddingBottom: 'env(safe-area-inset-bottom, 8px)',
         backgroundColor: 'var(--bg-card, #ffffff)',
         borderTop: '1px solid var(--border-light, #e2e8f0)',
         display: 'flex',
@@ -52,286 +55,327 @@ function MobileBottomNav({ cartCount, onOpenCart, isB2BPortal }) {
         justifyContent: 'space-around',
         zIndex: 9990,
         boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.08)',
-        paddingLeft: 'max(8px, env(safe-area-inset-left, 0px))',
-        paddingRight: 'max(8px, env(safe-area-inset-right, 0px))',
+        paddingLeft: 'max(4px, env(safe-area-inset-left, 0px))',
+        paddingRight: 'max(4px, env(safe-area-inset-right, 0px))',
         boxSizing: 'border-box'
       }}
     >
-      {/* If in B2B Chemist Workstation mode, display specialized B2B quick tabs */}
+      {/* B2B Mode Navigation Tabs */}
       {isB2B ? (
         <>
-          {/* Dashboard */}
+          {/* 1. Dashboard */}
           <Link 
             to="/dashboard" 
-            onClick={triggerHaptic}
+            onClick={handleTabClick}
             style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '3px',
+              gap: '2px',
               flex: 1,
-              color: isActive('/dashboard') || isActive('/portal') ? 'var(--primary-blue)' : '#64748b',
+              minWidth: 0,
+              color: isActive('/dashboard') || isActive('/portal') ? 'var(--primary-blue, #0c3d6c)' : 'var(--text-medium, #64748b)',
               fontWeight: isActive('/dashboard') ? '800' : '600',
-              fontSize: '0.72rem',
+              fontSize: 'clamp(0.68rem, 2.2vw, 0.74rem)',
               textDecoration: 'none',
-              padding: '4px 0',
+              padding: '4px 2px',
+              transition: 'color 0.15s ease'
             }}
           >
-            <ShieldCheck size={20} strokeWidth={isActive('/dashboard') ? 2.5 : 2} color={isActive('/dashboard') ? 'var(--primary-blue)' : '#64748b'} />
-            <span>{t('nav.dashboard', 'Dashboard')}</span>
+            <LayoutDashboard size={20} strokeWidth={isActive('/dashboard') ? 2.5 : 2} />
+            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>
+              {t('nav.dashboard', 'Dashboard')}
+            </span>
           </Link>
 
-          {/* Quick Order Pad */}
-          <Link 
-            to="/quick-order" 
-            onClick={triggerHaptic}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '3px',
-              flex: 1,
-              color: isActive('/quick-order') ? '#ea580c' : '#64748b',
-              fontWeight: isActive('/quick-order') ? '800' : '600',
-              fontSize: '0.72rem',
-              textDecoration: 'none',
-              padding: '4px 0',
-            }}
-          >
-            <Zap size={20} color={isActive('/quick-order') ? '#ea580c' : '#64748b'} strokeWidth={2.5} />
-            <span>{t('nav.quickOrder', 'Quick Order')}</span>
-          </Link>
-
-          {/* Ledger & GST Invoices */}
-          <Link 
-            to="/outstanding" 
-            onClick={triggerHaptic}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '3px',
-              flex: 1,
-              color: isActive('/outstanding') || isActive('/ledger') ? '#2563eb' : '#64748b',
-              fontWeight: isActive('/outstanding') ? '800' : '600',
-              fontSize: '0.72rem',
-              textDecoration: 'none',
-              padding: '4px 0',
-            }}
-          >
-            <FileText size={20} strokeWidth={isActive('/outstanding') ? 2.5 : 2} color={isActive('/outstanding') ? '#2563eb' : '#64748b'} />
-            <span>{t('nav.ledger', 'Ledger')}</span>
-          </Link>
-
-          {/* Wholesale Products */}
+          {/* 2. Medicines Catalog */}
           <Link 
             to="/products" 
-            onClick={triggerHaptic}
+            onClick={handleTabClick}
             style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '3px',
+              gap: '2px',
               flex: 1,
-              color: isActive('/products') ? 'var(--primary-blue)' : '#64748b',
-              fontWeight: isActive('/products') ? '700' : '500',
-              fontSize: '0.72rem',
+              minWidth: 0,
+              color: isActive('/products') ? 'var(--primary-blue, #0c3d6c)' : 'var(--text-medium, #64748b)',
+              fontWeight: isActive('/products') ? '800' : '600',
+              fontSize: 'clamp(0.68rem, 2.2vw, 0.74rem)',
               textDecoration: 'none',
-              padding: '4px 0',
+              padding: '4px 2px',
+              transition: 'color 0.15s ease'
             }}
           >
             <Package size={20} strokeWidth={isActive('/products') ? 2.5 : 2} />
-            <span>{t('nav.products', 'Medicines')}</span>
+            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>
+              {t('nav.products', 'Medicines')}
+            </span>
           </Link>
 
-          {/* Wholesale Cart */}
-          <button 
-            onClick={() => { triggerHaptic(); onOpenCart(); }} 
+          {/* 3. Companies Directory */}
+          <Link 
+            to="/companies" 
+            onClick={handleTabClick}
             style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '3px',
+              gap: '2px',
               flex: 1,
-              color: cartCount > 0 ? '#ea580c' : '#64748b',
-              fontWeight: cartCount > 0 ? '800' : '500',
-              fontSize: '0.72rem',
+              minWidth: 0,
+              color: isActive('/companies') ? 'var(--primary-blue, #0c3d6c)' : 'var(--text-medium, #64748b)',
+              fontWeight: isActive('/companies') ? '800' : '600',
+              fontSize: 'clamp(0.68rem, 2.2vw, 0.74rem)',
+              textDecoration: 'none',
+              padding: '4px 2px',
+              transition: 'color 0.15s ease'
+            }}
+          >
+            <Building2 size={20} strokeWidth={isActive('/companies') ? 2.5 : 2} />
+            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>
+              {companiesLabel}
+            </span>
+          </Link>
+
+          {/* 4. Ledger */}
+          <Link 
+            to="/outstanding" 
+            onClick={handleTabClick}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '2px',
+              flex: 1,
+              minWidth: 0,
+              color: isActive('/outstanding') || isActive('/ledger') ? '#2563eb' : 'var(--text-medium, #64748b)',
+              fontWeight: isActive('/outstanding') ? '800' : '600',
+              fontSize: 'clamp(0.68rem, 2.2vw, 0.74rem)',
+              textDecoration: 'none',
+              padding: '4px 2px',
+              transition: 'color 0.15s ease'
+            }}
+          >
+            <FileText size={20} strokeWidth={isActive('/outstanding') ? 2.5 : 2} />
+            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>
+              {t('nav.ledger', 'Ledger')}
+            </span>
+          </Link>
+
+          {/* 5. Menu Drawer */}
+          <button 
+            type="button"
+            onClick={() => { handleTabClick(); onOpenMenu?.(); }}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '2px',
+              flex: 1,
+              minWidth: 0,
+              color: isMenuOpen ? 'var(--primary-blue, #0c3d6c)' : 'var(--text-medium, #64748b)',
+              fontWeight: isMenuOpen ? '800' : '600',
+              fontSize: 'clamp(0.68rem, 2.2vw, 0.74rem)',
               background: 'none',
               border: 'none',
               cursor: 'pointer',
-              padding: '4px 0',
-              position: 'relative',
+              padding: '4px 2px',
+              position: 'relative'
             }}
-            aria-label={`Open Cart with ${cartCount} items`}
+            aria-label="Open App Navigation Menu"
           >
             <div style={{ position: 'relative' }}>
-              <ShoppingBag size={20} strokeWidth={2} />
+              <Menu size={20} strokeWidth={isMenuOpen ? 2.5 : 2} />
               {cartCount > 0 && (
                 <span 
                   style={{
                     position: 'absolute',
-                    top: '-5px',
-                    right: '-8px',
+                    top: '-4px',
+                    right: '-7px',
                     backgroundColor: '#ea580c',
                     color: '#ffffff',
                     borderRadius: '50%',
-                    width: '16px',
-                    height: '16px',
-                    fontSize: '0.65rem',
+                    width: '15px',
+                    height: '15px',
+                    fontSize: '0.62rem',
                     fontWeight: '800',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
+                    justifyContent: 'center'
                   }}
                 >
                   {cartCount}
                 </span>
               )}
             </div>
-            <span>{t('nav.cart', 'Cart')}</span>
+            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>
+              {menuLabel}
+            </span>
           </button>
         </>
       ) : (
         <>
-          {/* Public Home */}
+          {/* Public Mode Navigation Tabs */}
+          {/* 1. Home */}
           <Link 
             to="/" 
-            onClick={triggerHaptic}
+            onClick={handleTabClick}
             style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '3px',
+              gap: '2px',
               flex: 1,
-              color: isActive('/') ? 'var(--primary-blue)' : '#64748b',
-              fontWeight: isActive('/') ? '700' : '500',
-              fontSize: '0.72rem',
+              minWidth: 0,
+              color: isActive('/') ? 'var(--primary-blue, #0c3d6c)' : 'var(--text-medium, #64748b)',
+              fontWeight: isActive('/') ? '800' : '600',
+              fontSize: 'clamp(0.68rem, 2.2vw, 0.74rem)',
               textDecoration: 'none',
-              padding: '4px 0',
+              padding: '4px 2px',
+              transition: 'color 0.15s ease'
             }}
           >
             <Home size={20} strokeWidth={isActive('/') ? 2.5 : 2} />
-            <span>{t('nav.home', 'Home')}</span>
+            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>
+              {t('nav.home', 'Home')}
+            </span>
           </Link>
 
-          {/* Medicines */}
+          {/* 2. Medicines Catalog */}
           <Link 
             to="/products" 
-            onClick={triggerHaptic}
+            onClick={handleTabClick}
             style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '3px',
+              gap: '2px',
               flex: 1,
-              color: isActive('/products') ? 'var(--primary-blue)' : '#64748b',
-              fontWeight: isActive('/products') ? '700' : '500',
-              fontSize: '0.72rem',
+              minWidth: 0,
+              color: isActive('/products') ? 'var(--primary-blue, #0c3d6c)' : 'var(--text-medium, #64748b)',
+              fontWeight: isActive('/products') ? '800' : '600',
+              fontSize: 'clamp(0.68rem, 2.2vw, 0.74rem)',
               textDecoration: 'none',
-              padding: '4px 0',
+              padding: '4px 2px',
+              transition: 'color 0.15s ease'
             }}
           >
             <Package size={20} strokeWidth={isActive('/products') ? 2.5 : 2} />
-            <span>{t('nav.products', 'Medicines')}</span>
+            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>
+              {t('nav.products', 'Medicines')}
+            </span>
           </Link>
 
-          {/* Chemist Portal Access */}
+          {/* 3. Chemist B2B Portal Access */}
           <Link 
             to="/dashboard" 
-            onClick={triggerHaptic}
+            onClick={handleTabClick}
             style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '3px',
+              gap: '2px',
               flex: 1,
+              minWidth: 0,
               color: '#059669',
               fontWeight: '800',
-              fontSize: '0.72rem',
+              fontSize: 'clamp(0.68rem, 2.2vw, 0.74rem)',
               textDecoration: 'none',
-              padding: '4px 0',
+              padding: '4px 2px',
+              transition: 'color 0.15s ease'
             }}
           >
             <ShieldCheck size={20} strokeWidth={2.5} color="#059669" />
-            <span>{t('nav.dashboard', 'Chemist Portal')}</span>
+            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>
+              {t('nav.dashboard', 'B2B Portal')}
+            </span>
           </Link>
 
-          {/* Quick Order */}
+          {/* 4. Companies Directory (replaces Quick Order) */}
           <Link 
-            to="/quick-order" 
-            onClick={triggerHaptic}
+            to="/companies" 
+            onClick={handleTabClick}
             style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '3px',
+              gap: '2px',
               flex: 1,
-              color: isActive('/quick-order') ? '#ea580c' : '#64748b',
-              fontWeight: isActive('/quick-order') ? '800' : '500',
-              fontSize: '0.72rem',
+              minWidth: 0,
+              color: isActive('/companies') ? 'var(--primary-blue, #0c3d6c)' : 'var(--text-medium, #64748b)',
+              fontWeight: isActive('/companies') ? '800' : '600',
+              fontSize: 'clamp(0.68rem, 2.2vw, 0.74rem)',
               textDecoration: 'none',
-              padding: '4px 0',
+              padding: '4px 2px',
+              transition: 'color 0.15s ease'
             }}
           >
-            <Zap size={20} color={isActive('/quick-order') ? '#ea580c' : '#64748b'} strokeWidth={2.5} />
-            <span>{t('nav.quickOrder', 'Order')}</span>
+            <Building2 size={20} strokeWidth={isActive('/companies') ? 2.5 : 2} />
+            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>
+              {companiesLabel}
+            </span>
           </Link>
 
-          {/* Cart */}
+          {/* 5. Menu Drawer (replaces Cart) */}
           <button 
-            onClick={() => { triggerHaptic(); onOpenCart(); }} 
+            type="button"
+            onClick={() => { handleTabClick(); onOpenMenu?.(); }}
             style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '3px',
+              gap: '2px',
               flex: 1,
-              color: cartCount > 0 ? 'var(--primary-blue)' : '#64748b',
-              fontWeight: cartCount > 0 ? '700' : '500',
-              fontSize: '0.72rem',
+              minWidth: 0,
+              color: isMenuOpen ? 'var(--primary-blue, #0c3d6c)' : 'var(--text-medium, #64748b)',
+              fontWeight: isMenuOpen ? '800' : '600',
+              fontSize: 'clamp(0.68rem, 2.2vw, 0.74rem)',
               background: 'none',
               border: 'none',
               cursor: 'pointer',
-              padding: '4px 0',
-              position: 'relative',
+              padding: '4px 2px',
+              position: 'relative'
             }}
-            aria-label={`Open Cart with ${cartCount} items`}
+            aria-label="Open App Navigation Menu"
           >
             <div style={{ position: 'relative' }}>
-              <ShoppingBag size={20} strokeWidth={2} />
+              <Menu size={20} strokeWidth={isMenuOpen ? 2.5 : 2} />
               {cartCount > 0 && (
                 <span 
                   style={{
                     position: 'absolute',
-                    top: '-5px',
-                    right: '-8px',
-                    backgroundColor: 'var(--primary-blue)',
+                    top: '-4px',
+                    right: '-7px',
+                    backgroundColor: 'var(--primary-blue, #0c3d6c)',
                     color: '#ffffff',
                     borderRadius: '50%',
-                    width: '16px',
-                    height: '16px',
-                    fontSize: '0.65rem',
-                    fontWeight: '700',
+                    width: '15px',
+                    height: '15px',
+                    fontSize: '0.62rem',
+                    fontWeight: '800',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
+                    justifyContent: 'center'
                   }}
                 >
                   {cartCount}
                 </span>
               )}
             </div>
-            <span>{t('nav.cart', 'Cart')}</span>
+            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>
+              {menuLabel}
+            </span>
           </button>
         </>
       )}

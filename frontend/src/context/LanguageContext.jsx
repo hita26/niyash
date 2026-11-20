@@ -218,27 +218,86 @@ export function LanguageSelector({ variant = 'default' }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  if (variant === 'segmented-full') {
+    return (
+      <div 
+        style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(3, 1fr)', 
+          backgroundColor: 'var(--bg-surface-alt, #f1f5f9)', 
+          padding: '4px', 
+          borderRadius: '12px', 
+          border: '1px solid var(--border-light, #e2e8f0)', 
+          gap: '4px',
+          width: '100%',
+          boxSizing: 'border-box'
+        }}
+      >
+        {supportedLanguages.map((lang) => {
+          const isSelected = language === lang.code;
+          return (
+            <button
+              key={lang.code}
+              type="button"
+              onClick={() => {
+                setLanguage(lang.code);
+                if (typeof window !== 'undefined' && window.triggerHaptic) {
+                  window.triggerHaptic('selection');
+                }
+              }}
+              style={{
+                padding: '8px 4px',
+                borderRadius: '8px',
+                border: 'none',
+                backgroundColor: isSelected ? 'var(--primary-blue, #0c3d6c)' : 'transparent',
+                color: isSelected ? '#ffffff' : 'var(--text-dark, #0f172a)',
+                fontSize: '0.82rem',
+                fontWeight: isSelected ? '800' : '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                textAlign: 'center',
+                whiteSpace: 'nowrap',
+                boxShadow: isSelected ? '0 2px 8px rgba(12, 61, 108, 0.25)' : 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <span>{lang.native}</span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
   if (variant === 'pill-buttons') {
     return (
-      <div style={{ display: 'inline-flex', alignItems: 'center', flexWrap: 'wrap', backgroundColor: 'var(--bg-main, #f1f5f9)', padding: '3px', borderRadius: '24px', border: '1px solid var(--border-light, #e2e8f0)', gap: '3px' }}>
+      <div style={{ display: 'inline-flex', alignItems: 'center', flexWrap: 'nowrap', backgroundColor: 'var(--bg-main, #f1f5f9)', padding: '3px', borderRadius: '24px', border: '1px solid var(--border-light, #e2e8f0)', gap: '3px' }}>
         {supportedLanguages.map((lang) => (
           <button
             key={lang.code}
             type="button"
-            onClick={() => setLanguage(lang.code)}
+            onClick={() => {
+              setLanguage(lang.code);
+              if (typeof window !== 'undefined' && window.triggerHaptic) {
+                window.triggerHaptic('selection');
+              }
+            }}
             style={{
-              padding: '6px 12px',
+              padding: '5px 10px',
               borderRadius: '20px',
               border: 'none',
               backgroundColor: language === lang.code ? 'var(--primary-blue, #0c3d6c)' : 'transparent',
               color: language === lang.code ? '#ffffff' : 'var(--text-medium, #475569)',
-              fontSize: '0.82rem',
+              fontSize: '0.78rem',
               fontWeight: language === lang.code ? '800' : '600',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '4px'
+              gap: '4px',
+              whiteSpace: 'nowrap'
             }}
           >
             <span>{lang.native}</span>

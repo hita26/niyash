@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   ShoppingBag, Search, Phone, Mail, ChevronDown, Menu, X, User, LogOut, LogIn, ShieldCheck, FileText, Zap,
@@ -9,13 +10,26 @@ import ThemeToggle from './ThemeToggle';
 import { useLanguage, LanguageSelector } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 
-function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogout, onOpenAuth, isB2BPortal }) {
+function Header({ 
+  cartCount, 
+  onOpenCart, 
+  searchTerm, 
+  setSearchTerm, 
+  user, 
+  onLogout, 
+  onOpenAuth, 
+  isB2BPortal,
+  isMobileMenuOpen: externalIsMobileMenuOpen,
+  setIsMobileMenuOpen: externalSetIsMobileMenuOpen 
+}) {
   const { t, language } = useLanguage();
   const { isDark } = useTheme();
   const brandLogo = isDark ? '/logo-dark.png' : '/logo.jpg';
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [localIsMobileMenuOpen, setLocalIsMobileMenuOpen] = useState(false);
+  const isMobileMenuOpen = typeof externalIsMobileMenuOpen === 'boolean' ? externalIsMobileMenuOpen : localIsMobileMenuOpen;
+  const setIsMobileMenuOpen = externalSetIsMobileMenuOpen || setLocalIsMobileMenuOpen;
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef(null);
   const navigate = useNavigate();
@@ -233,12 +247,13 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 </div>
               </div>
 
-              {/* Mobile Action Controls: Cart, Theme, Hamburger */}
+              {/* Mobile Action Controls: Theme & Admin Access */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <button 
                   onClick={onOpenCart}
+                  className="cart-icon-btn hide-mobile"
                   style={{
-                    display: 'inline-flex',
+                    display: 'none',
                     alignItems: 'center',
                     gap: '4px',
                     backgroundColor: cartCount > 0 ? '#ea580c' : '#f1f5f9',
@@ -259,17 +274,17 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 <ThemeToggle />
 
                 <button 
-                  className="mobile-menu-btn" 
+                  className="mobile-menu-btn hide-mobile" 
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                   aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
                   aria-expanded={isMobileMenuOpen}
                   style={{ 
+                    display: 'none',
                     padding: '6px', 
                     border: '1px solid var(--border-light)', 
                     borderRadius: '8px', 
                     background: 'var(--bg-surface-alt)', 
                     color: 'var(--text-dark)',
-                    display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     cursor: 'pointer'
@@ -659,11 +674,11 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
 
               {/* Mobile Drawer Hamburger */}
               <button 
-                className="mobile-menu-btn" 
+                className="mobile-menu-btn hide-mobile" 
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
                 aria-expanded={isMobileMenuOpen}
-                style={{ marginLeft: '4px' }}
+                style={{ display: 'none', marginLeft: '4px' }}
               >
                 {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
@@ -847,26 +862,27 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
         </nav>
 
         {/* Chemist Mobile Drawer */}
-        {isMobileMenuOpen && (
-          <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex' }}>
+        {isMobileMenuOpen && createPortal(
+          <div style={{ position: 'fixed', inset: 0, zIndex: 999999, display: 'flex' }}>
             <div 
-              style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(3px)' }}
+              style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)' }}
               onClick={() => setIsMobileMenuOpen(false)}
             />
             <div className="mobile-nav-drawer" style={{
               position: 'relative',
               marginLeft: 'auto',
-              width: 'min(88vw, 350px)',
+              width: 'min(88vw, 360px)',
               backgroundColor: 'var(--bg-card, #ffffff)',
               color: 'var(--text-dark)',
               height: '100dvh',
               maxHeight: '100dvh',
-              boxShadow: '-4px 0 20px rgba(0,0,0,0.2)',
+              boxShadow: '-8px 0 35px rgba(0,0,0,0.3)',
               display: 'flex',
               flexDirection: 'column',
-              padding: 'max(20px, env(safe-area-inset-top, 20px)) 16px max(32px, calc(24px + env(safe-area-inset-bottom, 0px))) 16px',
+              padding: 'max(20px, env(safe-area-inset-top, 20px)) 16px calc(140px + env(safe-area-inset-bottom, 24px)) 16px',
               overflowY: 'auto',
-              WebkitOverflowScrolling: 'touch'
+              WebkitOverflowScrolling: 'touch',
+              gap: '12px'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '14px', borderBottom: '1px solid var(--border-light)' }}>
                 <span style={{ fontWeight: '800', color: 'var(--primary-blue)', fontSize: '1rem' }}>{t('nav.b2bWorkstation', 'B2B Workstation')}</span>
@@ -874,10 +890,21 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               </div>
 
               {/* Chemist Profile Card in mobile */}
-              <div style={{ backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '10px', padding: '12px', margin: '14px 0' }}>
+              <div style={{ backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '10px', padding: '12px' }}>
                 <div style={{ fontSize: '0.72rem', color: '#059669', fontWeight: '800', textTransform: 'uppercase' }}>● {t('retailerDashboard.verifiedPartner', 'Verified Retailer')}</div>
                 <div style={{ fontSize: '0.95rem', fontWeight: '800', color: '#064e3b', marginTop: '2px' }}>{chemistName}</div>
                 <div style={{ fontSize: '0.78rem', color: '#065f46', marginTop: '2px' }}>👤 {user?.name || 'Hari Patel'}</div>
+              </div>
+
+              {/* App Preferences: Language & Theme */}
+              <div style={{ padding: '10px 12px', borderRadius: '10px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span style={{ fontSize: '0.78rem', fontWeight: '800', color: 'var(--text-dark)', textTransform: 'uppercase' }}>{t('nav.language', 'Language')}</span>
+                <LanguageSelector variant="segmented-full" />
+              </div>
+
+              <div style={{ padding: '10px 12px', borderRadius: '10px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '0.78rem', fontWeight: '800', color: 'var(--text-dark)', textTransform: 'uppercase' }}>{t('nav.themeMode', 'Theme Mode')}</span>
+                <ThemeToggle variant="segmented" />
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -892,6 +919,9 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 </Link>
                 <Link to="/products" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px', borderRadius: '8px', fontWeight: '600', color: '#475569', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Package size={18} /> {t('nav.products', 'Wholesale Products')}
+                </Link>
+                <Link to="/companies" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px', borderRadius: '8px', fontWeight: '600', color: '#475569', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Building2 size={18} /> {t('nav.companies', 'Companies & Brands')}
                 </Link>
                 <Link to="/news" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '10px', borderRadius: '8px', fontWeight: '600', color: '#475569', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Sparkles size={18} color="#ea580c" /> {t('nav.marginSchemes', 'Margin Schemes')}
@@ -910,7 +940,8 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
                 </button>
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
 
       </header>
@@ -1215,7 +1246,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             )}
 
             <button 
-              className="cart-icon-btn" 
+              className="cart-icon-btn hide-mobile" 
               onClick={onOpenCart} 
               aria-label={`Open Cart containing ${cartCount} items`}
             >
@@ -1224,7 +1255,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             </button>
 
             <button 
-              className="mobile-menu-btn" 
+              className="mobile-menu-btn hide-mobile" 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
               aria-expanded={isMobileMenuOpen}
@@ -1322,20 +1353,17 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
         </div>
       </nav>
 
-      {/* Mobile Drawer Menu */}
-      {isMobileMenuOpen && (
-        <>
+      {/* Mobile Drawer Menu via Portal */}
+      {isMobileMenuOpen && createPortal(
+        <div style={{ position: 'fixed', inset: 0, zIndex: 999999, display: 'flex' }}>
           <div 
             onClick={() => setIsMobileMenuOpen(false)}
             style={{
               position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
+              inset: 0,
               backgroundColor: 'rgba(15, 23, 42, 0.65)',
               backdropFilter: 'blur(4px)',
-              zIndex: 9998
+              zIndex: 999998
             }}
             aria-hidden="true"
           />
@@ -1343,27 +1371,25 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
           <div 
             className="mobile-nav-drawer"
             style={{
-              position: 'fixed', 
-              top: 0, 
-              right: 0, 
-              bottom: 0, 
+              position: 'relative', 
+              marginLeft: 'auto',
               width: 'min(88vw, 380px)', 
               height: '100dvh',
               maxHeight: '100dvh',
               backgroundColor: 'var(--bg-card)', 
               color: 'var(--text-dark)',
-              zIndex: 9999, 
+              zIndex: 999999, 
               overflowY: 'auto', 
               WebkitOverflowScrolling: 'touch',
               paddingTop: 'max(20px, env(safe-area-inset-top, 20px))', 
-              paddingBottom: 'max(40px, calc(30px + env(safe-area-inset-bottom, 0px)))', 
+              paddingBottom: 'calc(140px + env(safe-area-inset-bottom, 24px))', 
               paddingLeft: 'max(18px, env(safe-area-inset-left, 18px))',
               paddingRight: 'max(18px, env(safe-area-inset-right, 18px))',
               display: 'flex', 
               flexDirection: 'column', 
               gap: '12px',
               borderLeft: '1px solid var(--border-light)',
-              boxShadow: '-8px 0 35px rgba(0,0,0,0.22)'
+              boxShadow: '-8px 0 35px rgba(0,0,0,0.25)'
             }}
             role="dialog"
             aria-modal="true"
@@ -1371,7 +1397,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '14px', borderBottom: '1px solid var(--border-light)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <img src={brandLogo} alt="Niyansh Pharma" style={{ height: '36px', width: 'auto', borderRadius: '4px', objectFit: 'contain' }} />
+                <img src={brandLogo} alt="Niyansh Pharma" style={{ height: '38px', width: 'auto', borderRadius: '4px', objectFit: 'contain' }} />
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   <span style={{ fontWeight: '800', color: 'var(--text-dark)', fontSize: '1.02rem', lineHeight: '1.2' }}>Niyansh Pharma</span>
                   <span style={{ fontSize: '0.74rem', color: 'var(--secondary-green)', fontWeight: '700' }}>Care • Quality • Trust</span>
@@ -1386,8 +1412,70 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               </button>
             </div>
 
+            {/* Wholesale Cart Quick Access Card */}
+            <div 
+              onClick={() => { setIsMobileMenuOpen(false); onOpenCart(); }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px 14px',
+                borderRadius: '12px',
+                backgroundColor: cartCount > 0 ? 'rgba(37, 99, 235, 0.08)' : 'var(--bg-main)',
+                border: cartCount > 0 ? '1.5px solid var(--primary-blue)' : '1px solid var(--border-light)',
+                cursor: 'pointer'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '10px', backgroundColor: 'var(--primary-blue)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <ShoppingBag size={20} />
+                </div>
+                <div>
+                  <div style={{ fontWeight: '800', fontSize: '0.92rem', color: 'var(--text-dark)' }}>{t('nav.cart', 'Wholesale Inquiry Cart')}</div>
+                  <div style={{ fontSize: '0.76rem', color: 'var(--text-medium)' }}>
+                    {cartCount > 0 ? `${cartCount} items selected for quotation` : 'Cart is currently empty'}
+                  </div>
+                </div>
+              </div>
+              {cartCount > 0 ? (
+                <span style={{ backgroundColor: '#ea580c', color: '#ffffff', fontSize: '0.75rem', fontWeight: '800', padding: '3px 9px', borderRadius: '12px' }}>
+                  {cartCount}
+                </span>
+              ) : (
+                <ChevronRight size={18} color="var(--text-medium)" />
+              )}
+            </div>
+
+            {/* Quick Order Workstation Link */}
+            <Link 
+              to="/quick-order"
+              onClick={() => setIsMobileMenuOpen(false)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px 14px',
+                borderRadius: '12px',
+                backgroundColor: '#fff7ed',
+                border: '1px solid #fed7aa',
+                textDecoration: 'none',
+                color: '#9a3412'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '10px', backgroundColor: '#ea580c', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Zap size={20} />
+                </div>
+                <div>
+                  <div style={{ fontWeight: '800', fontSize: '0.92rem', color: '#9a3412' }}>Fast Quick Order ⚡</div>
+                  <div style={{ fontSize: '0.76rem', color: '#c2410c' }}>Bulk order grid for registered pharmacies</div>
+                </div>
+              </div>
+              <ChevronRight size={18} color="#ea580c" />
+            </Link>
+
             {user && (
-              <div style={{ backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '10px', padding: '12px', marginBottom: '10px' }}>
+              <div style={{ backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '10px', padding: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', fontWeight: '800', color: '#047857', textTransform: 'uppercase' }}>
                   <ShieldCheck size={14} /> Verified B2B Partner
                 </div>
@@ -1413,15 +1501,16 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               </div>
             )}
 
-            {/* Mobile Language Switcher */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', borderRadius: '8px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)' }}>
-              <span style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>{t('nav.language', 'Language')}</span>
-              <LanguageSelector variant="pill-buttons" />
+            {/* App Settings: 3-Tab Language Selector (No Line Wrap) */}
+            <div style={{ padding: '10px 12px', borderRadius: '12px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <span style={{ fontSize: '0.80rem', fontWeight: '800', color: 'var(--text-dark)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{t('nav.language', 'Language')}</span>
+              <LanguageSelector variant="segmented-full" />
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', borderRadius: '8px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)' }}>
-              <span style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>{t('nav.themeMode', 'Theme Mode')}</span>
-              <ThemeToggle />
+            {/* Theme Mode Segmented Toggle */}
+            <div style={{ padding: '10px 12px', borderRadius: '12px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.80rem', fontWeight: '800', color: 'var(--text-dark)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{t('nav.themeMode', 'Theme Mode')}</span>
+              <ThemeToggle variant="segmented" />
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
@@ -1506,14 +1595,15 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               ) : (
                 <button 
                   onClick={() => { onOpenAuth(); setIsMobileMenuOpen(false); }}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px 15px', backgroundColor: 'var(--primary-blue)', color: '#ffffff', borderRadius: '8px', fontWeight: '700', cursor: 'pointer', border: 'none', width: '100%' }}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px 15px', backgroundColor: 'var(--primary-blue)', color: '#ffffff', borderRadius: '8px', fontWeight: '700', cursor: 'pointer', border: 'none', width: '100%', boxShadow: '0 4px 15px rgba(12, 61, 108, 0.3)' }}
                 >
                   <LogIn size={16} /> {t('nav.login', 'Chemist Login / Register')}
                 </button>
               )}
             </div>
           </div>
-        </>
+        </div>,
+        document.body
       )}
     </header>
   );

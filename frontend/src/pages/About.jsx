@@ -55,10 +55,26 @@ function About() {
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          const brandSet = new Set(brandsList);
-          if (Array.isArray(data.brands)) data.brands.forEach(b => b && brandSet.add(b.trim()));
-          if (Array.isArray(data.companies)) data.companies.forEach(c => c && brandSet.add(c.trim()));
-          const combined = Array.from(brandSet).filter(Boolean).sort((a, b) => a.localeCompare(b));
+          const brandMap = new Map();
+          const sanitizeAndAdd = (name) => {
+            if (!name || typeof name !== 'string') return;
+            const clean = name.trim();
+            if (clean.length < 2 || clean.length > 30) return;
+            if (/sanitary|pad|diaper|condom|\b\d+\s*(ml|gm|mg|tab|cap|vial|amp)\b/i.test(clean)) return;
+            const lower = clean.toLowerCase();
+            if (!brandMap.has(lower)) {
+              const formatted = clean === clean.toUpperCase() && clean.length > 3
+                ? clean.charAt(0).toUpperCase() + clean.slice(1).toLowerCase()
+                : clean;
+              brandMap.set(lower, formatted);
+            }
+          };
+
+          brandsList.forEach(sanitizeAndAdd);
+          if (Array.isArray(data.brands)) data.brands.forEach(sanitizeAndAdd);
+          if (Array.isArray(data.companies)) data.companies.forEach(sanitizeAndAdd);
+
+          const combined = Array.from(brandMap.values()).filter(Boolean).sort((a, b) => a.localeCompare(b));
           if (combined.length > 0) setBrandsList(combined);
           if (Array.isArray(data.companies) && data.companies.length > 0) {
             setLiveCompaniesCount(data.companies.length);

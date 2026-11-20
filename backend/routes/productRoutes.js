@@ -87,8 +87,28 @@ router.get('/meta/filters', async (req, res) => {
           .map((item) => item.toString().trim())
       )].sort((a, b) => a.localeCompare(b));
 
-    const companies = cleanList(companiesRaw);
-    const brands = cleanList(brandsRaw);
+    const cleanPharmaBrands = (arr) => {
+      const map = new Map();
+      arr.forEach((item) => {
+        if (!item || typeof item !== 'string') return;
+        const clean = item.trim();
+        if (clean.length < 2 || clean.length > 30) return;
+        // Exclude products, medical sundries, dosage pack descriptors
+        if (/sanitary|pad|diaper|condom|\b\d+\s*(ml|gm|mg|tab|cap|vial|amp|pack|strip)\b/i.test(clean)) return;
+        
+        const lower = clean.toLowerCase();
+        if (!map.has(lower)) {
+          const formatted = clean === clean.toUpperCase() && clean.length > 3
+            ? clean.charAt(0).toUpperCase() + clean.slice(1).toLowerCase()
+            : clean;
+          map.set(lower, formatted);
+        }
+      });
+      return Array.from(map.values()).sort((a, b) => a.localeCompare(b));
+    };
+
+    const companies = cleanPharmaBrands(companiesRaw);
+    const brands = cleanPharmaBrands(brandsRaw);
     const forms = cleanList(formsRaw);
     const categories = cleanList(categoriesRaw);
 

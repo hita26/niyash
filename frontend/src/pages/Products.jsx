@@ -70,13 +70,38 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
         if (res.ok) {
           const data = await res.json();
           if (!isCancelled) {
-            if (data.brands && data.brands.length > 0) {
-              const merged = [...new Set([...defaultBrands, ...data.brands])]
-                .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
-              setAvailableBrands(merged);
-            }
+            const brandMap = new Map();
+            const sanitizeBrand = (name) => {
+              if (!name || typeof name !== 'string') return;
+              const clean = name.trim();
+              if (clean.length < 2 || clean.length > 30) return;
+              if (/sanitary|pad|diaper|condom|\b\d+\s*(ml|gm|mg|tab|cap|vial|amp)\b/i.test(clean)) return;
+              const lower = clean.toLowerCase();
+              if (!brandMap.has(lower)) {
+                const formatted = clean === clean.toUpperCase() && clean.length > 3
+                  ? clean.charAt(0).toUpperCase() + clean.slice(1).toLowerCase()
+                  : clean;
+                brandMap.set(lower, formatted);
+              }
+            };
+
+            defaultBrands.forEach(sanitizeBrand);
+            if (Array.isArray(data.brands)) data.brands.forEach(sanitizeBrand);
+
+            const merged = Array.from(brandMap.values()).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+            setAvailableBrands(merged);
+
             if (data.companies && data.companies.length > 0) {
-              setAvailableCompanies(data.companies.sort((a, b) => a.localeCompare(b)));
+              const compMap = new Map();
+              data.companies.forEach(c => {
+                if (c && typeof c === 'string' && c.trim().length >= 2) {
+                  const clean = c.trim();
+                  if (!/sanitary|pad|diaper|condom/i.test(clean)) {
+                    compMap.set(clean.toLowerCase(), clean);
+                  }
+                }
+              });
+              setAvailableCompanies(Array.from(compMap.values()).sort((a, b) => a.localeCompare(b)));
             }
           }
         }

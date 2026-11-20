@@ -55,6 +55,7 @@ function AppContent() {
   const [enquiryCart, setEnquiryCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   
   // Auth state from centralized context
@@ -277,6 +278,8 @@ function AppContent() {
           onLogout={logout}
           onOpenAuth={openAuth}
           isB2BPortal={isB2BPortal}
+          isMobileMenuOpen={isMobileMenuOpen}
+          setIsMobileMenuOpen={setIsMobileMenuOpen}
         />
 
         <main style={{ flex: 1 }}>
@@ -335,6 +338,8 @@ function AppContent() {
           cartCount={enquiryCart.reduce((total, item) => total + item.quantity, 0)} 
           onOpenCart={() => setIsCartOpen(true)} 
           isB2BPortal={isB2BPortal}
+          isMenuOpen={isMobileMenuOpen}
+          onOpenMenu={() => setIsMobileMenuOpen(prev => !prev)}
         />
 
         <InstallAppBanner />
@@ -356,9 +361,12 @@ function AppContent() {
           onClose={closeAuth}
           onSuccess={login}
         />
-        <FloatingOrderWidget />
-        <AIAssistant addToCart={addToCart}
-        />
+        {!isMobileMenuOpen && (
+          <>
+            <FloatingOrderWidget />
+            <AIAssistant addToCart={addToCart} />
+          </>
+        )}
       </div>
     </>
   );

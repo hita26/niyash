@@ -1646,8 +1646,9 @@ input[type="submit"]:disabled {
   }
 
   .logo-container img {
-    height: 40px;
-    max-width: 128px;
+    height: 48px;
+    max-width: 165px;
+    object-fit: contain;
   }
   
   .header-actions {
@@ -1655,9 +1656,27 @@ input[type="submit"]:disabled {
     width: auto;
     display: flex;
     align-items: center;
-    gap: 7px;
+    gap: 8px;
     justify-content: flex-end;
     min-width: 0;
+  }
+
+  /* Hide Cart and Hamburger icons in Top Header on Mobile (Native App Design) */
+  .cart-icon-btn,
+  .mobile-menu-btn {
+    display: none !important;
+  }
+
+  .header-actions .theme-toggle-btn {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
 
   .header-user-controls {
@@ -1678,7 +1697,16 @@ input[type="submit"]:disabled {
   }
 
   .search-bar input {
-    padding: 10px 46px 10px 14px;
+    padding: 10px 56px 10px 16px !important;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .search-bar input::placeholder {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
   }
 
   .detail-layout {
@@ -4352,31 +4380,24 @@ html[lang="gu"] .nav-link, html[lang="hi"] .nav-link {
 /* 320px–375px Ultra-Compact Mobile Precision Rules (iPhone SE, Small Phones) */
 @media (max-width: 375px) {
   .logo-container img {
-    height: 34px;
-    max-width: 112px;
+    height: 44px !important;
+    max-width: 145px !important;
   }
 
   .header-actions {
-    gap: 5px !important;
+    gap: 6px !important;
   }
 
-  .theme-toggle-btn {
-    width: 38px !important;
-    height: 38px !important;
-    min-width: 38px !important;
-    min-height: 38px !important;
+  .header-actions .theme-toggle-btn {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
   }
 
-  .cart-icon-btn {
-    width: 38px !important;
-    height: 38px !important;
-    min-height: 38px !important;
-  }
-
+  .cart-icon-btn,
   .mobile-menu-btn {
-    width: 38px !important;
-    height: 38px !important;
-    min-height: 38px !important;
+    display: none !important;
   }
 }
 
@@ -4981,7 +5002,8 @@ html[lang="gu"] .nav-link, html[lang="hi"] .nav-link {
    ========================================================================== */
 .pharma-steps-grid {
   position: relative;
-  margin-top: 15px;
+  margin-top: 28px;
+  row-gap: 36px !important;
 }
 
 .pharma-step-card {

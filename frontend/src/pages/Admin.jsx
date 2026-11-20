@@ -3861,12 +3861,19 @@ _Helpline: +91 9316566894_`;
         'Stock Units *',
         'Packing Specifications *',
         'Subcategory / Variant *',
-        'Manufacturer Details *',
+        'Batch Number',
         'Rack ID / Location *',
         'HSN Code *',
         'Expiry Date *',
         'Purchase GST (%) *',
         'Sales GST (%) *',
+        'Trade Scheme (e.g. 10+1)',
+        'Quality Specs / Certifications',
+        'Units Per Box / Shipper',
+        'Min Reorder Quantity',
+        'Product Image URL',
+        'Additional Image URLs (Comma-separated)',
+        'Manufacturer Details *',
         'Product Description & Indications *',
         'In Stock (YES/NO)',
         'Featured Showcase (YES/NO)',
@@ -3895,12 +3902,19 @@ _Helpline: +91 9316566894_`;
           100,
           '10 x 10 Tablets',
           'Pain Relief & Antipyretic',
-          `${sampleCompany1} Pvt. Ltd., Plot 12, GIDC, Rajkot, Gujarat`,
+          'BATCH-2026-A1',
           'R-04, Shelf-B',
           '3004',
           '2027-12-31',
           12,
           12,
+          '10+1 Free',
+          'WHO-GMP Certified',
+          10,
+          5,
+          'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500',
+          'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=500',
+          `${sampleCompany1} Pvt. Ltd., Plot 12, GIDC, Rajkot, Gujarat`,
           'Effective relief of fever, mild to moderate body pain and headache.',
           'YES',
           'NO',
@@ -3920,12 +3934,19 @@ _Helpline: +91 9316566894_`;
           150,
           '10 x 10 Strips',
           'Gastro Care',
-          `${sampleCompany2} Pharma Labs, Ahmedabad, Gujarat`,
+          'BATCH-2026-B4',
           'R-02, Shelf-A',
           '3004',
           '2027-08-31',
           12,
           12,
+          '20+2 Free',
+          'WHO-GMP Certified, ISO 9001',
+          20,
+          10,
+          'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=500',
+          '',
+          `${sampleCompany2} Pharma Labs, Ahmedabad, Gujarat`,
           'Provides fast and sustained relief from acidity, heartburn, and GERD symptoms.',
           'YES',
           'YES',
@@ -3949,12 +3970,19 @@ _Helpline: +91 9316566894_`;
         { wch: 14 }, // Stock
         { wch: 22 }, // Packing
         { wch: 26 }, // Subcategory
-        { wch: 38 }, // Manufacturer Details
+        { wch: 18 }, // Batch Number
         { wch: 18 }, // Rack ID
         { wch: 14 }, // HSN Code
         { wch: 16 }, // Expiry Date
         { wch: 18 }, // Purchase GST
         { wch: 18 }, // Sales GST
+        { wch: 20 }, // Scheme
+        { wch: 24 }, // Quality Specs
+        { wch: 20 }, // Units Per Box
+        { wch: 18 }, // Min Reorder Qty
+        { wch: 34 }, // Product Image URL
+        { wch: 38 }, // Additional Images
+        { wch: 38 }, // Manufacturer Details
         { wch: 42 }, // Description
         { wch: 18 }, // In Stock
         { wch: 22 }, // Featured
@@ -4034,12 +4062,23 @@ _Helpline: +91 9316566894_`;
           const stockQuantity = parseInt(getVal('Stock Units *', 'Stock Units', 'Stock', 'Quantity', 'Qty') || '100', 10);
           const packing = getVal('Packing Specifications *', 'Packing Specifications', 'Packing', 'Pack') || '10 x 10 Tablets';
           const subCategory = getVal('Subcategory / Variant *', 'Subcategory / Variant', 'Subcategory', 'Variant') || 'General Formulations';
-          const manufacturer = getVal('Manufacturer Details *', 'Manufacturer Details') || `${company} Pvt. Ltd.`;
+          const batchNumber = getVal('Batch Number', 'Batch No', 'Batch', 'Batch Number *', 'Batch #') || '';
           const rackId = getVal('Rack ID / Location *', 'Rack ID / Location', 'Rack ID', 'Rack', 'Location') || 'R-01';
           const hsnCode = getVal('HSN Code *', 'HSN Code', 'HSN') || '3004';
-          const expiryDate = getVal('Expiry Date *', 'Expiry Date', 'Expiry', 'Exp') || '2027-12-31';
+          const expiryDate = getVal('Expiry Date *', 'Expiry Date', 'Expiry', 'Exp', 'Exp Date') || '2027-12-31';
           const purchaseGst = parseFloat(getVal('Purchase GST (%) *', 'Purchase GST', 'Purchase GST Rate (%)', 'Purchase GST Rate')) || 12;
           const salesGst = parseFloat(getVal('Sales GST (%) *', 'Sales GST', 'Sales GST Rate (%)', 'Sales GST Rate', 'GST Rate')) || 12;
+          const scheme = getVal('Trade Scheme (e.g. 10+1)', 'Trade Scheme', 'Scheme', 'Bonus Scheme') || '';
+          const qualitySpecs = getVal('Quality Specs / Certifications', 'Quality Specs', 'Quality Certifications', 'Quality') || 'WHO-GMP Certified';
+          const unitsPerBox = parseInt(getVal('Units Per Box / Shipper', 'Units Per Box', 'Units/Box') || '10', 10);
+          const minReorderQty = parseInt(getVal('Min Reorder Quantity', 'Min Reorder Qty', 'Min Reorder', 'Min Qty') || '1', 10);
+          const imageUrl = getVal('Product Image URL', 'Product Image', 'Image URL', 'Image', 'Photo URL', 'Photo') || '';
+          const additionalImagesRaw = getVal('Additional Image URLs (Comma-separated)', 'Additional Image URLs', 'Additional Images', 'Gallery Images', 'Images') || '';
+          const parsedImages = additionalImagesRaw ? additionalImagesRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+          if (imageUrl && !parsedImages.includes(imageUrl)) {
+            parsedImages.unshift(imageUrl);
+          }
+          const manufacturer = getVal('Manufacturer Details *', 'Manufacturer Details') || `${company} Pvt. Ltd.`;
           const description = getVal('Product Description & Indications *', 'Product Description', 'Description') || `${name} formulation by ${company}.`;
 
           // Dynamic custom field values from Excel columns
@@ -4124,12 +4163,19 @@ _Helpline: +91 9316566894_`;
             stockQuantity,
             packing,
             subCategory,
-            manufacturer,
+            batchNumber,
             rackId,
             hsnCode,
             expiryDate,
             purchaseGst,
             salesGst,
+            scheme,
+            qualitySpecs,
+            unitsPerBox,
+            minReorderQty,
+            imageUrl: imageUrl || (parsedImages.length > 0 ? parsedImages[0] : ''),
+            images: parsedImages,
+            manufacturer,
             description,
             customFields: rowCustomFields,
             inStock,
@@ -4198,12 +4244,19 @@ _Helpline: +91 9316566894_`;
               stockQuantity: parseInt(rowObj.stockquantity || 100, 10),
               packing: rowObj.packing || '10 x 10 Tablets',
               subCategory: rowObj.subcategory || '',
+              batchNumber: rowObj.batchnumber || rowObj.batch || '',
               manufacturer: rowObj.manufacturer || 'Daxia Healthcare Pvt. Ltd.',
               rackId: rowObj.rackid || 'R-01',
               hsnCode: rowObj.hsncode || '3004',
               expiryDate: rowObj.expirydate || '2027-12-31',
               purchaseGst: parseFloat(rowObj.purchasegst || 12),
               salesGst: parseFloat(rowObj.salesgst || 12),
+              scheme: rowObj.scheme || '',
+              qualitySpecs: rowObj.qualityspecs || 'WHO-GMP Certified',
+              unitsPerBox: parseInt(rowObj.unitsperbox || 10, 10),
+              minReorderQty: parseInt(rowObj.minreorderqty || 1, 10),
+              imageUrl: rowObj.imageurl || rowObj.image || '',
+              images: (rowObj.images || '').split(',').map(s => s.trim()).filter(Boolean),
               description: rowObj.description || '',
               inStock: true,
               featured: false,
@@ -12380,18 +12433,22 @@ _Helpline: +91 9316566894_`;
                       <div>• <strong>SKU / ID</strong> (Auto-generated if blank)</div>
                       <div>• <strong>Manufacturer / Company *</strong></div>
                       <div>• <strong>Category *</strong></div>
-                      <div>• <strong>Contain *</strong> (or Chemical / Active Composition / Content)</div>
+                      <div>• <strong>Contain *</strong> (Active Composition)</div>
                       <div>• <strong>Formulation Form *</strong></div>
                       <div>• <strong>Wholesale Price (₹) *</strong></div>
                       <div>• <strong>MRP (₹) *</strong></div>
                       <div>• <strong>Stock Units *</strong></div>
                       <div>• <strong>Packing Specifications *</strong></div>
                       <div>• <strong>Subcategory / Variant *</strong></div>
-                      <div>• <strong>Manufacturer Details *</strong></div>
+                      <div>• <strong>Batch Number</strong></div>
                       <div>• <strong>Rack ID / Location *</strong></div>
                       <div>• <strong>HSN Code *</strong></div>
                       <div>• <strong>Expiry Date *</strong></div>
                       <div>• <strong>Purchase & Sales GST (%) *</strong></div>
+                      <div>• <strong>Trade Scheme (e.g. 10+1)</strong></div>
+                      <div>• <strong>Quality Specs / Certifications</strong></div>
+                      <div>• <strong>Units Per Box & Min Reorder Qty</strong></div>
+                      <div>• <strong>Product Image URL & Gallery</strong></div>
                     </div>
                   </div>
                 </div>

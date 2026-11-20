@@ -3835,16 +3835,11 @@ body.dark-theme {
   }
 }
 
-/* 5-Item Stat Cards (Products Tab) */
+/* Stat Cards (Products Tab - Clean 3-Grid) */
 .admin-stat-5-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 14px;
-}
-@media (max-width: 1200px) {
-  .admin-stat-5-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
 }
 @media (max-width: 768px) {
   .admin-stat-5-grid {
@@ -3854,6 +3849,12 @@ body.dark-theme {
 @media (max-width: 440px) {
   .admin-stat-5-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .admin-header-licenses {
+    display: none !important;
   }
 }
 

@@ -225,14 +225,27 @@ function Header({
         borderBottom: '1px solid var(--border-light, #e2e8f0)' 
       }}>
         <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', gap: '16px' }}>
-          {/* Brand Logo */}
-          <Link to="/admin" aria-label="Niyansh Pharma Admin Console" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-            <img 
-              src={brandLogo} 
-              alt="Niyansh Pharma" 
-              style={{ height: '42px', width: 'auto', display: 'block', objectFit: 'contain' }} 
-            />
-          </Link>
+          {/* Brand Logo & Compliance Badges */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <Link to="/admin" aria-label="Niyansh Pharma Admin Console" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+              <img 
+                src={brandLogo} 
+                alt="Niyansh Pharma" 
+                style={{ height: '42px', width: 'auto', display: 'block', objectFit: 'contain' }} 
+              />
+            </Link>
+            <div className="admin-header-licenses" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', color: 'var(--text-medium)' }}>
+              <span style={{ backgroundColor: 'rgba(12, 61, 108, 0.05)', border: '1px solid var(--border-light)', padding: '3px 8px', borderRadius: '6px', fontWeight: '600' }} title="Drug License: 20B GJ-RJT-264618, 21B GJ-RJT-264619">
+                D.L.: 20B / 21B
+              </span>
+              <span style={{ backgroundColor: 'rgba(12, 61, 108, 0.05)', border: '1px solid var(--border-light)', padding: '3px 8px', borderRadius: '6px', fontWeight: '600' }} title="GSTIN: 24BVXPP6108F2Z7">
+                GSTIN: 24BVXPP6108F2Z7
+              </span>
+              <span style={{ backgroundColor: 'rgba(12, 61, 108, 0.05)', border: '1px solid var(--border-light)', padding: '3px 8px', borderRadius: '6px', fontWeight: '600' }} title="Food Safety License: 20726030000567">
+                FSSAI: 20726030000567
+              </span>
+            </div>
+          </div>
 
           {/* Right Action Controls: Language & Theme Toggle */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>

@@ -859,7 +859,7 @@ function Admin() {
   const [isPurgingTraffic, setIsPurgingTraffic] = useState(false);
 
   // Active Tab
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('products');
 
   // Database / Live States
   const [products, setProducts] = useState([]);
@@ -4608,173 +4608,7 @@ _Helpline: +91 9316566894_`;
   // ==========================================
 
   return (
-    <div className="section" style={{ backgroundColor: 'var(--bg-main)', minHeight: '85vh', padding: '30px 0' }}>
-      {/* Central B2B Operations Header */}
-      <div className="admin-workspace-container" style={{ marginBottom: '22px' }}>
-        <div className="admin-b2b-header-card">
-          {/* Identity & Compliance Details */}
-          <div className="admin-b2b-identity-wrap">
-            <div className="admin-b2b-emblem">
-              <ShieldCheck size={28} color="#ffffff" />
-              <div className="admin-b2b-emblem-badge" />
-            </div>
-
-            <div className="admin-b2b-title-area">
-              <div className="admin-b2b-badges-row">
-                {isSuperAdmin ? (
-                  <span className="admin-role-badge superadmin">
-                    <Crown size={12} /> Super Admin Console
-                  </span>
-                ) : (
-                  <span className="admin-role-badge admin">
-                    <Shield size={12} /> Operations Admin
-                  </span>
-                )}
-                <span className="admin-live-badge">
-                  <span className="admin-live-dot" /> Live System Online
-                </span>
-                <span className="admin-hub-badge">
-                  <MapPin size={11} color="#0284c7" /> Rajkot Wholesale Hub (Gujarat)
-                </span>
-              </div>
-
-              <h1 className="admin-b2b-title">
-                Niyansh Pharma • Central B2B Operations Console
-              </h1>
-
-              <div className="admin-b2b-licenses-row">
-                {[
-                  { key: 'dl', label: 'D.L.No.', val: '20B GJ-RJT-264618, 21B GJ-RJT-264619' },
-                  { key: 'gstin', label: 'GSTIN', val: '24BVXPP6108F2Z7' },
-                  { key: 'pan', label: 'PAN', val: 'BVXPP6108F' },
-                  { key: 'food', label: 'Food Lic.', val: '20726030000567' }
-                ].map(lic => (
-                  <button
-                    key={lic.key}
-                    type="button"
-                    onClick={() => {
-                      if (navigator.clipboard) {
-                        navigator.clipboard.writeText(lic.val);
-                        setCopiedLicenseKey(lic.key);
-                        showToast(`${lic.label} copied to clipboard!`, 'info');
-                        setTimeout(() => setCopiedLicenseKey(null), 1800);
-                      }
-                    }}
-                    className="admin-license-pill-interactive"
-                    title={`Click to copy ${lic.label}`}
-                  >
-                    <span>{lic.label}:</span>
-                    <strong>{lic.val}</strong>
-                    {copiedLicenseKey === lic.key ? (
-                      <Check size={11} color="#16a34a" />
-                    ) : (
-                      <Copy size={10} style={{ opacity: 0.5, marginLeft: '2px' }} />
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Metrics & Actions Bar */}
-          <div className="admin-b2b-controls-wrap">
-            <div className="admin-b2b-kpis-grid">
-              {/* Orders KPI */}
-              <div 
-                className="admin-b2b-kpi-chip" 
-                onClick={() => setActiveTab('orders')}
-                title="View Active Orders"
-              >
-                <div className="admin-b2b-kpi-icon" style={{ backgroundColor: '#e0f2fe' }}>
-                  <ShoppingBag size={16} color="#0284c7" />
-                </div>
-                <div>
-                  <div className="admin-b2b-kpi-val">
-                    {(orders || []).filter(o => o.orderStatus === 'Pending' || o.orderStatus === 'Processing' || o.orderStatus === 'Booked').length}
-                  </div>
-                  <div className="admin-b2b-kpi-lbl">Active Orders</div>
-                </div>
-              </div>
-
-              {/* Products KPI */}
-              <div 
-                className="admin-b2b-kpi-chip" 
-                onClick={() => setActiveTab('products')}
-                title="View All Catalog Products"
-              >
-                <div className="admin-b2b-kpi-icon" style={{ backgroundColor: '#dcfce7' }}>
-                  <Package size={16} color="#16a34a" />
-                </div>
-                <div>
-                  <div className="admin-b2b-kpi-val">{(products || []).length}</div>
-                  <div className="admin-b2b-kpi-lbl">Live Products</div>
-                </div>
-              </div>
-
-              {/* Low Stock Alert KPI */}
-              {(() => {
-                const lowCount = (products || []).filter(p => (Number(p.stock) || 0) <= (Number(p.minOrderQty) || 5)).length;
-                return (
-                  <div 
-                    className="admin-b2b-kpi-chip" 
-                    onClick={() => { setActiveTab('products'); setProductStockFilter('low'); }}
-                    title={lowCount > 0 ? `${lowCount} products low in stock` : 'All products well stocked'}
-                    style={{ borderColor: lowCount > 0 ? '#fde68a' : undefined }}
-                  >
-                    <div className="admin-b2b-kpi-icon" style={{ backgroundColor: lowCount > 0 ? '#fef3c7' : '#f1f5f9' }}>
-                      <AlertTriangle size={16} color={lowCount > 0 ? '#d97706' : '#94a3b8'} />
-                    </div>
-                    <div>
-                      <div className="admin-b2b-kpi-val" style={{ color: lowCount > 0 ? '#b45309' : undefined }}>
-                        {lowCount}
-                      </div>
-                      <div className="admin-b2b-kpi-lbl">Low Stock</div>
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
-
-            {/* Quick Actions */}
-            <div className="admin-b2b-actions-group">
-              <button 
-                type="button" 
-                onClick={() => handleOpenProductModal()} 
-                className="admin-b2b-btn admin-b2b-btn-primary"
-                title="Quick Add New Product to Catalog"
-              >
-                <Plus size={14} />
-                <span>Add Product</span>
-              </button>
-
-              <button 
-                type="button" 
-                onClick={() => { 
-                  fetchDashboardData(true); 
-                  showToast('Live dashboard data synced!', 'info'); 
-                }} 
-                className="admin-b2b-btn admin-b2b-btn-secondary"
-                title="Sync Live Orders & Catalog"
-              >
-                <RefreshCw size={13} className={isLoading ? 'spin-anim' : ''} />
-                <span>Sync</span>
-              </button>
-
-              <a 
-                href="/" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="admin-b2b-btn admin-b2b-btn-outline"
-                title="Open Retailer B2B Storefront in New Tab"
-              >
-                <ExternalLink size={13} />
-                <span>Storefront</span>
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <div className="section" style={{ backgroundColor: 'var(--bg-main)', minHeight: '85vh', padding: '24px 0' }}>
       <div className="admin-workspace-container admin-layout-container">
         
         {/* Sidebar Nav */}
@@ -4846,19 +4680,6 @@ _Helpline: +91 9316566894_`;
           </div>
 
           <nav style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <button 
-              onClick={() => setActiveTab('overview')} 
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '10px 14px',
-                borderRadius: '8px', fontWeight: '600', fontSize: '0.9rem',
-                backgroundColor: activeTab === 'overview' ? 'rgba(12, 61, 108, 0.1)' : 'transparent',
-                color: activeTab === 'overview' ? 'var(--primary-blue)' : 'var(--text-medium)'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <LayoutDashboard size={16} /> Overview
-              </div>
-            </button>
 
             {/* SUPERADMIN ONLY: MANAGE ADMINS TAB */}
             {isSuperAdmin && (
@@ -5093,6 +4914,69 @@ _Helpline: +91 9316566894_`;
             </button>
           </nav>
 
+          {/* Statutory Compliance & Regulatory Licenses Box */}
+          <div style={{
+            padding: '12px',
+            backgroundColor: 'var(--bg-main)',
+            border: '1px solid var(--border-light)',
+            borderRadius: '12px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-light)', paddingBottom: '6px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', fontWeight: '800', color: 'var(--primary-blue)', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+                <ShieldCheck size={14} color="#16a34a" /> Statutory Licenses
+              </div>
+              <span style={{ fontSize: '0.62rem', backgroundColor: '#dcfce7', color: '#15803d', fontWeight: '800', padding: '1px 6px', borderRadius: '6px' }}>FDCA GUJ</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+              {[
+                { key: 'dl', label: 'D.L.No.', val: '20B GJ-RJT-264618, 21B GJ-RJT-264619' },
+                { key: 'gstin', label: 'GSTIN', val: '24BVXPP6108F2Z7' },
+                { key: 'pan', label: 'PAN', val: 'BVXPP6108F' },
+                { key: 'food', label: 'Food Lic.', val: '20726030000567' }
+              ].map(lic => (
+                <button
+                  key={lic.key}
+                  type="button"
+                  onClick={() => {
+                    if (navigator.clipboard) {
+                      navigator.clipboard.writeText(lic.val);
+                      setCopiedLicenseKey(lic.key);
+                      showToast(`${lic.label} copied to clipboard!`, 'info');
+                      setTimeout(() => setCopiedLicenseKey(null), 1800);
+                    }
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '5px 8px',
+                    backgroundColor: 'var(--bg-surface)',
+                    border: '1px solid var(--border-light)',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '0.7rem',
+                    textAlign: 'left',
+                    width: '100%',
+                    gap: '6px',
+                    transition: 'all 0.15s ease'
+                  }}
+                  title={`Click to copy ${lic.label}`}
+                >
+                  <span style={{ color: 'var(--text-medium)', fontWeight: '600', whiteSpace: 'nowrap' }}>{lic.label}:</span>
+                  <strong style={{ color: 'var(--text-dark)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, textAlign: 'right', fontSize: '0.69rem' }}>{lic.val}</strong>
+                  {copiedLicenseKey === lic.key ? (
+                    <Check size={11} color="#16a34a" style={{ flexShrink: 0 }} />
+                  ) : (
+                    <Copy size={10} style={{ opacity: 0.45, flexShrink: 0 }} />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '15px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <button 
               onClick={fetchDashboardData}
@@ -5144,9 +5028,6 @@ _Helpline: +91 9316566894_`;
             </div>
 
             <div className="admin-mobile-tabs-scroll">
-              <button onClick={() => setActiveTab('overview')} className={`admin-tab-chip ${activeTab === 'overview' ? 'active' : ''}`}>
-                <LayoutDashboard size={14} /> {t('admin.tabOverview', 'Overview')}
-              </button>
               {isSuperAdmin && (
                 <button 
                   onClick={() => { setActiveTab('manage-admins'); fetchAdmins(); }} 
@@ -5214,339 +5095,10 @@ _Helpline: +91 9316566894_`;
             </div>
           </div>
 
-          {isLoading && (activeTab === 'overview' || activeTab === 'products' || activeTab === 'orders') ? (
-            activeTab === 'overview' ? (
-              <SkeletonLoader variant="admin-overview" />
-            ) : (
-              <SkeletonLoader variant="admin-table" rows={6} />
-            )
+          {isLoading && (activeTab === 'products' || activeTab === 'orders') ? (
+            <SkeletonLoader variant="admin-table" rows={6} />
           ) : (
             <>
-              {/* ==========================================
-                  TAB 1: OVERVIEW DASHBOARD
-                  ========================================== */}
-              {activeTab === 'overview' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-                    <div>
-                      <h2 style={{ fontSize: '1.6rem', color: 'var(--primary-blue)', margin: 0 }}>Overview & B2B Summary</h2>
-                      <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem', marginTop: '4px' }}>Real-time wholesale operations, retailer ledger dues, orders & active schemes</p>
-                    </div>
-                    <button onClick={fetchDashboardData} className="btn btn-outline btn-sm" style={{ gap: '6px' }}>
-                      <RefreshCw size={14} /> Refresh Metrics
-                    </button>
-                  </div>
-
-                  {/* Prompt ERP Live Sync Quick Access Banner */}
-                  <div 
-                    onClick={() => { setActiveTab('sync'); fetchSyncStatus(); }}
-                    style={{
-                      padding: '16px 20px',
-                      backgroundColor: '#fffbeb',
-                      border: '1.5px solid #fde68a',
-                      borderRadius: '12px',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      flexWrap: 'wrap',
-                      gap: '12px',
-                      cursor: 'pointer',
-                      boxShadow: '0 2px 8px rgba(217, 119, 6, 0.08)'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                      <div style={{ width: '42px', height: '42px', borderRadius: '10px', backgroundColor: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0 }}>
-                        <Zap size={22} />
-                      </div>
-                      <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                          <strong style={{ fontSize: '0.98rem', color: '#92400e' }}>⚡ Prompt ERP ↔ Cloud Live Sync Hub</strong>
-                          <span style={{ fontSize: '0.7rem', backgroundColor: '#dcfce7', color: '#15803d', padding: '2px 8px', borderRadius: '10px', fontWeight: '800' }}>
-                            🟢 100% Active & Operational
-                          </span>
-                        </div>
-                        <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: '#b45309' }}>
-                          Desktop billing inventory bridge is live. Click to view real-time audit logs, run instant test sync, or view connection proof.
-                        </p>
-                      </div>
-                    </div>
-                    <button 
-                      type="button" 
-                      className="btn btn-sm btn-primary"
-                      style={{ padding: '6px 14px', fontSize: '0.82rem', backgroundColor: '#d97706', borderColor: '#b45309', fontWeight: '700' }}
-                    >
-                      Open ERP Sync Hub →
-                    </button>
-                  </div>
-                  
-                  {/* 4-Stage B2B Fulfillment Pipeline Funnel */}
-                  <div className="card" style={{ padding: '20px 24px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-                      <div>
-                        <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-dark)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <TrendingUp size={18} color="var(--primary-blue)" /> Order Fulfillment Pipeline
-                        </h3>
-                        <p style={{ fontSize: '0.8rem', color: 'var(--text-medium)', margin: '3px 0 0 0' }}>
-                          Track wholesale consignments from chemist booking to verified delivery & invoice clearance
-                        </p>
-                      </div>
-                      <span style={{ fontSize: '0.75rem', fontWeight: '700', backgroundColor: '#eff6ff', color: '#1e40af', padding: '4px 10px', borderRadius: '15px' }}>
-                        {orders.length} Total Consignments
-                      </span>
-                    </div>
-
-                    <div className="admin-funnel-grid">
-                      {/* Stage 1: Booked */}
-                      <div
-                        onClick={() => { setOrderStatusFilter('Booked'); setActiveTab('orders'); }}
-                        style={{ padding: '16px', borderRadius: '10px', backgroundColor: '#fffbeb', border: '1.5px solid #fde68a', cursor: 'pointer', transition: 'var(--transition-smooth)' }}
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                          <span style={{ fontSize: '0.74rem', fontWeight: '800', color: '#b45309', textTransform: 'uppercase' }}>1. Booked (New)</span>
-                          <Clock size={16} color="#d97706" />
-                        </div>
-                        <div style={{ fontSize: '1.75rem', fontWeight: '900', color: '#b45309' }}>{bookedOrdersCount}</div>
-                        <div style={{ fontSize: '0.74rem', color: '#92400e', marginTop: '2px' }}>Awaiting stock dispatch</div>
-                      </div>
-
-                      {/* Stage 2: Confirmed */}
-                      <div
-                        onClick={() => { setOrderStatusFilter('Confirmed'); setActiveTab('orders'); }}
-                        style={{ padding: '16px', borderRadius: '10px', backgroundColor: '#f0f9ff', border: '1.5px solid #bae6fd', cursor: 'pointer', transition: 'var(--transition-smooth)' }}
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                          <span style={{ fontSize: '0.74rem', fontWeight: '800', color: '#0369a1', textTransform: 'uppercase' }}>2. Confirmed</span>
-                          <CheckCircle2 size={16} color="#0284c7" />
-                        </div>
-                        <div style={{ fontSize: '1.75rem', fontWeight: '900', color: '#0369a1' }}>{confirmedOrdersCount}</div>
-                        <div style={{ fontSize: '0.74rem', color: '#075985', marginTop: '2px' }}>Stock & credit validated</div>
-                      </div>
-
-                      {/* Stage 3: Dispatched */}
-                      <div
-                        onClick={() => { setOrderStatusFilter('Dispatched'); setActiveTab('orders'); }}
-                        style={{ padding: '16px', borderRadius: '10px', backgroundColor: '#f5f3ff', border: '1.5px solid #ddd6fe', cursor: 'pointer', transition: 'var(--transition-smooth)' }}
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                          <span style={{ fontSize: '0.74rem', fontWeight: '800', color: '#6d28d9', textTransform: 'uppercase' }}>3. Dispatched</span>
-                          <Package size={16} color="#7c3aed" />
-                        </div>
-                        <div style={{ fontSize: '1.75rem', fontWeight: '900', color: '#6d28d9' }}>{dispatchedOrdersCount}</div>
-                        <div style={{ fontSize: '0.74rem', color: '#5b21b6', marginTop: '2px' }}>In logistics with Tax Invoice</div>
-                      </div>
-
-                      {/* Stage 4: Delivered */}
-                      <div
-                        onClick={() => { setOrderStatusFilter('Delivered'); setActiveTab('orders'); }}
-                        style={{ padding: '16px', borderRadius: '10px', backgroundColor: '#f0fdf4', border: '1.5px solid #bbf7d0', cursor: 'pointer', transition: 'var(--transition-smooth)' }}
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                          <span style={{ fontSize: '0.74rem', fontWeight: '800', color: '#15803d', textTransform: 'uppercase' }}>4. Delivered</span>
-                          <Check size={16} color="#16a34a" />
-                        </div>
-                        <div style={{ fontSize: '1.75rem', fontWeight: '900', color: '#15803d' }}>{deliveredOrdersCount}</div>
-                        <div style={{ fontSize: '0.74rem', color: '#166534', marginTop: '2px' }}>Received & settled in ledger</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 4 Healthcare Category Pillars */}
-                  <div className="card" style={{ padding: '20px 24px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-                      <div>
-                        <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-dark)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <Layers size={18} color="var(--primary-blue)" /> Healthcare Category Ecosystem
-                        </h3>
-                        <p style={{ fontSize: '0.8rem', color: 'var(--text-medium)', margin: '3px 0 0 0' }}>
-                          Therapeutic formulations, surgical supplies, OTC personal wellness & Ayurvedic remedies
-                        </p>
-                      </div>
-                      <button onClick={() => setActiveTab('products')} className="btn btn-outline btn-sm" style={{ fontSize: '0.78rem' }}>
-                        Explore Catalog ({productStats.totalProducts || products.length}) →
-                      </button>
-                    </div>
-
-                    <div className="admin-category-grid">
-                      <div onClick={() => { setProductCategoryFilter('Generic Medicines'); setActiveTab('products'); }} style={{ padding: '16px', borderRadius: '10px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
-                        <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--primary-blue)', textTransform: 'uppercase' }}>Generic Medicines</span>
-                        <div style={{ fontSize: '1.35rem', fontWeight: '800', color: 'var(--text-dark)', marginTop: '4px' }}>{genericMedicinesCount} SKUs</div>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--text-medium)' }}>Cardiac, Antibiotics, Pain, Neuro</div>
-                      </div>
-
-                      <div onClick={() => { setProductCategoryFilter('Surgical Supplies'); setActiveTab('products'); }} style={{ padding: '16px', borderRadius: '10px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
-                        <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#0369a1', textTransform: 'uppercase' }}>Surgical & Devices</span>
-                        <div style={{ fontSize: '1.35rem', fontWeight: '800', color: 'var(--text-dark)', marginTop: '4px' }}>{surgicalCount} SKUs</div>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--text-medium)' }}>Disposables, Bandages, BP Monitors</div>
-                      </div>
-
-                      <div onClick={() => { setProductCategoryFilter('OTC & Wellness'); setActiveTab('products'); }} style={{ padding: '16px', borderRadius: '10px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
-                        <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#15803d', textTransform: 'uppercase' }}>OTC & Wellness</span>
-                        <div style={{ fontSize: '1.35rem', fontWeight: '800', color: 'var(--text-dark)', marginTop: '4px' }}>{otcCount} SKUs</div>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--text-medium)' }}>Daily Healthcare, Balms, Nutrition</div>
-                      </div>
-
-                      <div onClick={() => { setProductCategoryFilter('Ayurvedic & Herbal'); setActiveTab('products'); }} style={{ padding: '16px', borderRadius: '10px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
-                        <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#b45309', textTransform: 'uppercase' }}>Ayurvedic & Herbal</span>
-                        <div style={{ fontSize: '1.35rem', fontWeight: '800', color: 'var(--text-dark)', marginTop: '4px' }}>{ayurvedicCount} SKUs</div>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--text-medium)' }}>Herbal Tonics, Syrups & Ointments</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* High-Impact Wholesale B2B Summary Tiles */}
-                  <div className="admin-stat-tiles-grid">
-                    {/* Tile 1: Total B2B Orders */}
-                    <div 
-                      className="card" 
-                      onClick={() => setActiveTab('orders')}
-                      style={{ padding: '22px', borderLeft: '5px solid var(--primary-blue)', cursor: 'pointer', transition: 'var(--transition-smooth)' }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase' }}>Total B2B Orders</span>
-                        <Package size={20} color="var(--primary-blue)" />
-                      </div>
-                      <div style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--primary-blue)' }}>{totalWholesaleOrdersCount}</div>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-medium)', fontWeight: '600' }}>
-                        Volume: {formatCurrency(totalWholesaleRevenue)}
-                      </span>
-                    </div>
-
-                    {/* Tile 2: Outstanding Dues */}
-                    <div 
-                      className="card" 
-                      onClick={() => setActiveTab('ledgers')}
-                      style={{ padding: '22px', borderLeft: '5px solid #ef4444', cursor: 'pointer', transition: 'var(--transition-smooth)' }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase' }}>Total Outstanding Dues</span>
-                        <CreditCard size={20} color="#ef4444" />
-                      </div>
-                      <div style={{ fontSize: '2rem', fontWeight: '800', color: '#ef4444' }}>{formatCurrency(totalOutstandingDues)}</div>
-                      <span style={{ fontSize: '0.8rem', color: overdueLedgersCount > 0 ? '#ef4444' : 'var(--secondary-green)', fontWeight: '600' }}>
-                        {overdueLedgersCount > 0 ? `${overdueLedgersCount} Overdue Accounts` : 'All accounts within credit limit'}
-                      </span>
-                    </div>
-
-                    {/* Tile 3: Active Schemes */}
-                    <div 
-                      className="card" 
-                      onClick={() => setActiveTab('news')}
-                      style={{ padding: '22px', borderLeft: '5px solid #f59e0b', cursor: 'pointer', transition: 'var(--transition-smooth)' }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase' }}>Active Schemes</span>
-                        <Flame size={20} color="#f59e0b" />
-                      </div>
-                      <div style={{ fontSize: '2rem', fontWeight: '800', color: '#f59e0b' }}>{activeSchemesCount}</div>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-medium)', fontWeight: '600' }}>
-                        {activeTickerCount} Live on Ticker
-                      </span>
-                    </div>
-
-                    {/* Tile 4: Total Products */}
-                    <div 
-                      className="card" 
-                      onClick={() => setActiveTab('products')}
-                      style={{ padding: '22px', borderLeft: '5px solid var(--secondary-green)', cursor: 'pointer', transition: 'var(--transition-smooth)' }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase' }}>Total Products</span>
-                        <ShoppingBag size={20} color="var(--secondary-green)" />
-                      </div>
-                      <div style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--secondary-green)' }}>{productStats.totalProducts || products.length}</div>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-medium)', fontWeight: '600' }}>
-                        {productStats.activeProducts ?? products.filter(p => p.inStock).length} In Stock
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Quick Sub-Stats Row */}
-                  <div className="grid-2" style={{ gap: '20px' }}>
-                    <div className="card" style={{ padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase' }}>B2B & Public Enquiries</span>
-                        <div style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--primary-blue)' }}>{enquiries.length}</div>
-                      </div>
-                      <button onClick={() => setActiveTab('enquiries')} className="btn btn-outline btn-sm">Manage Enquiries →</button>
-                    </div>
-
-                    <div className="card" style={{ padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase' }}>Job Applications</span>
-                        <div style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--accent-blue)' }}>{careers.length}</div>
-                      </div>
-                      <button onClick={() => setActiveTab('careers')} className="btn btn-outline btn-sm">Review Applicants →</button>
-                    </div>
-                  </div>
-
-                  {/* Recent Orders Preview */}
-                  <div className="card" style={{ padding: '25px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid var(--border-light)', paddingBottom: '12px' }}>
-                      <h3 style={{ fontSize: '1.15rem', color: 'var(--text-dark)', margin: 0 }}>Recent B2B Orders</h3>
-                      <button onClick={() => setActiveTab('orders')} className="btn btn-outline btn-sm" style={{ fontSize: '0.8rem' }}>
-                        View All Orders ({orders.length}) →
-                      </button>
-                    </div>
-
-                    <div className="admin-table-container">
-                      <table className="admin-table" style={{ width: '100%', minWidth: '780px' }}>
-                        <thead>
-                          <tr>
-                            <th style={{ minWidth: '140px', whiteSpace: 'nowrap' }}>Order #</th>
-                            <th style={{ minWidth: '180px' }}>Store Name</th>
-                            <th style={{ minWidth: '110px', whiteSpace: 'nowrap' }}>Date</th>
-                            <th style={{ minWidth: '110px', whiteSpace: 'nowrap' }}>Grand Total</th>
-                            <th style={{ minWidth: '110px' }}>Order Status</th>
-                            <th style={{ minWidth: '110px' }}>Payment</th>
-                            <th style={{ minWidth: '90px', textAlign: 'center' }}>Action</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {orders.slice(0, 4).map((ord) => (
-                            <tr key={ord._id} style={{ borderBottom: '1px solid var(--border-light)' }}>
-                              <td style={{ padding: '10px 12px', fontWeight: '700', color: 'var(--primary-blue)', verticalAlign: 'middle' }}>{ord.orderNumber}</td>
-                              <td style={{ padding: '10px 12px', verticalAlign: 'middle' }}>
-                                <div style={{ fontWeight: '600' }}>{ord.shopName}</div>
-                                <div style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>{ord.retailerMobile}</div>
-                              </td>
-                              <td style={{ padding: '10px 12px', color: 'var(--text-medium)', verticalAlign: 'middle' }}>{formatDate(ord.createdAt)}</td>
-                              <td style={{ padding: '10px 12px', fontWeight: '700', verticalAlign: 'middle' }}>{formatCurrency(ord.grandTotal)}</td>
-                              <td style={{ padding: '10px 12px', verticalAlign: 'middle' }}>
-                                <span style={{
-                                  padding: '3px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '700',
-                                  backgroundColor: ord.orderStatus === 'Delivered' ? 'rgba(34, 197, 94, 0.1)' : ord.orderStatus === 'Dispatched' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-                                  color: ord.orderStatus === 'Delivered' ? '#16a34a' : ord.orderStatus === 'Dispatched' ? '#2563eb' : '#d97706'
-                                }}>
-                                  {ord.orderStatus || 'Booked'}
-                                </span>
-                              </td>
-                              <td style={{ padding: '10px 12px', verticalAlign: 'middle' }}>
-                                <span style={{
-                                  padding: '3px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '700',
-                                  backgroundColor: ord.paymentStatus === 'Paid' ? 'rgba(34, 197, 94, 0.1)' : ord.paymentStatus === 'Partially Paid' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                                  color: ord.paymentStatus === 'Paid' ? '#16a34a' : ord.paymentStatus === 'Partially Paid' ? '#d97706' : '#ef4444'
-                                }}>
-                                  {ord.paymentStatus || 'Pending'}
-                                </span>
-                              </td>
-                              <td style={{ padding: '10px 12px', textAlign: 'center', verticalAlign: 'middle' }}>
-                                <button 
-                                  onClick={() => setSelectedOrder(ord)} 
-                                  className="btn btn-outline btn-sm"
-                                  style={{ padding: '4px 10px', fontSize: '0.75rem', gap: '4px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                                >
-                                  <Eye size={12} /> Details
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {/* ==========================================
                   TAB 2: B2B ORDERS MANAGER
                   ========================================== */}
@@ -6568,26 +6120,6 @@ _Helpline: +91 9316566894_`;
                       <div>
                         <div style={{ fontSize: '0.8rem', color: 'var(--text-medium)', textTransform: 'uppercase', fontWeight: '600', letterSpacing: '0.5px' }}>Out of Stock</div>
                         <div style={{ fontSize: '1.6rem', fontWeight: '800', color: '#ef4444', lineHeight: 1.2 }}>{productStats.outOfStock}</div>
-                      </div>
-                    </div>
-
-                    <div className="card" style={{ padding: '18px 20px', display: 'flex', alignItems: 'center', gap: '15px', borderLeft: '4px solid #8b5cf6' }}>
-                      <div style={{ width: '44px', height: '44px', borderRadius: '10px', backgroundColor: 'rgba(139, 92, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8b5cf6' }}>
-                        <Layers size={22} />
-                      </div>
-                      <div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-medium)', textTransform: 'uppercase', fontWeight: '600', letterSpacing: '0.5px' }}>Categories</div>
-                        <div style={{ fontSize: '1.6rem', fontWeight: '800', color: '#8b5cf6', lineHeight: 1.2 }}>{productStats.totalCategories}</div>
-                      </div>
-                    </div>
-
-                    <div className="card" style={{ padding: '18px 20px', display: 'flex', alignItems: 'center', gap: '15px', borderLeft: '4px solid #f59e0b' }}>
-                      <div style={{ width: '44px', height: '44px', borderRadius: '10px', backgroundColor: 'rgba(245, 158, 11, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f59e0b' }}>
-                        <Star size={22} />
-                      </div>
-                      <div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-medium)', textTransform: 'uppercase', fontWeight: '600', letterSpacing: '0.5px' }}>Featured</div>
-                        <div style={{ fontSize: '1.6rem', fontWeight: '800', color: '#f59e0b', lineHeight: 1.2 }}>{productStats.featuredProducts}</div>
                       </div>
                     </div>
                   </div>

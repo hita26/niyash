@@ -461,7 +461,7 @@ router.post('/forgot-password', async (req, res) => {
                 </p>
                 <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #94a3b8; text-align: center;">
                   Need urgent help? Wholesale Support Desk:<br />
-                  <strong>Call / WhatsApp:</strong> +91 9316566894 | <strong>Email:</strong> accounts@niyanshpharma.com
+                  <strong>Call / WhatsApp:</strong> +91 99099 23130 | <strong>Email:</strong> info@niyanshpharma.com
                 </div>
               </div>
             </div>

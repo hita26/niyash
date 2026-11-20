@@ -10,7 +10,7 @@ import {
   TrendingUp, Percent, Upload, Image as ImageIcon, Star, Grid, List,
   FileSpreadsheet, ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Layers,
   Copy, CheckCheck, MapPin, Mail, Save, EyeOff, Shield, Users, Key, Crown, UserCheck, UserX, Camera, UserPlus,
-  Zap, Activity, Cpu, Server, Terminal, Play, Globe
+  Zap, Activity, Cpu, Server, Terminal, Play, Globe, Volume2, VolumeX, Bell
 } from 'lucide-react';
 import { broadcastLiveEvent, SYNC_EVENTS } from '../utils/liveSync';
 import { useLanguage } from '../context/LanguageContext';
@@ -921,10 +921,56 @@ function Admin() {
   const [productPerPage, setProductPerPage] = useState(25);
   const [productAdminStats, setProductAdminStats] = useState(null);
   
-  // Orders Filter States
+  // Orders Filter States & App-Grade Real-Time Engine
   const [orderSearch, setOrderSearch] = useState('');
   const [orderStatusFilter, setOrderStatusFilter] = useState('All');
   const [paymentStatusFilter, setPaymentStatusFilter] = useState('All');
+  const [orderViewMode, setOrderViewMode] = useState('table'); // 'table' | 'cards'
+  const [isSoundEnabled, setIsSoundEnabled] = useState(() => {
+    try {
+      return localStorage.getItem('niyansh_admin_sound') !== 'disabled';
+    } catch {
+      return true;
+    }
+  });
+  const [newOrderAlert, setNewOrderAlert] = useState(null);
+
+  const playOrderChime = () => {
+    try {
+      if (localStorage.getItem('niyansh_admin_sound') === 'disabled') return;
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      
+      const playTone = (freq, start, duration) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
+        gain.gain.setValueAtTime(0.25, ctx.currentTime + start);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + start);
+        osc.stop(ctx.currentTime + start + duration);
+      };
+
+      // Two-tone pleasant notification chime (880Hz -> 1320Hz)
+      playTone(880, 0, 0.22);
+      playTone(1320, 0.16, 0.40);
+    } catch (err) {
+      console.warn('Audio chime notice:', err);
+    }
+  };
+
+  const toggleSound = () => {
+    const next = !isSoundEnabled;
+    setIsSoundEnabled(next);
+    localStorage.setItem('niyansh_admin_sound', next ? 'enabled' : 'disabled');
+    if (next) {
+      playOrderChime();
+    }
+  };
 
   // Ledger Filter States
   const [ledgerSearch, setLedgerSearch] = useState('');
@@ -1262,6 +1308,32 @@ function Admin() {
     }, intervalMs);
     return () => clearInterval(timer);
   }, [isAuthenticated, activeTab]);
+
+  // Real-time Order Polling & Audio Chime Listener
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const orderTimer = setInterval(async () => {
+      try {
+        const res = await fetch('/api/orders');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.orders)) {
+            setOrders(prev => {
+              if (prev.length > 0 && data.orders.length > prev.length) {
+                const diff = data.orders.length - prev.length;
+                playOrderChime();
+                setNewOrderAlert(`🔔 ${diff} New Wholesale Order${diff > 1 ? 's' : ''} Received!`);
+                setTimeout(() => setNewOrderAlert(null), 6000);
+              }
+              return data.orders.length > 0 ? data.orders : prev;
+            });
+          }
+        }
+      } catch (_) {}
+    }, 15000);
+
+    return () => clearInterval(orderTimer);
+  }, [isAuthenticated, isSoundEnabled]);
 
   const handleTriggerManualSync = async () => {
     setIsManualSyncRunning(true);
@@ -5337,6 +5409,33 @@ _Helpline: +91 9316566894_`;
                   ========================================== */}
               {activeTab === 'orders' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+                  {newOrderAlert && (
+                    <div style={{
+                      background: 'linear-gradient(135deg, #10b981, #059669)',
+                      color: '#ffffff',
+                      padding: '12px 18px',
+                      borderRadius: '12px',
+                      fontWeight: '700',
+                      fontSize: '0.92rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      boxShadow: '0 6px 20px rgba(16, 185, 129, 0.35)',
+                      animation: 'pwaSlideUp 0.3s ease'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <Bell size={20} className="animate-bounce" />
+                        <span>{newOrderAlert}</span>
+                      </div>
+                      <button 
+                        onClick={() => setNewOrderAlert(null)}
+                        style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', padding: '4px' }}
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  )}
+
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
                     <div>
                       <h2 style={{ fontSize: '1.6rem', color: 'var(--primary-blue)', margin: 0 }}>Wholesale B2B Orders</h2>
@@ -5345,7 +5444,69 @@ _Helpline: +91 9316566894_`;
                       </p>
                     </div>
                     
-                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                      {/* Live Audio Chime Toggle */}
+                      <button
+                        type="button"
+                        onClick={toggleSound}
+                        className="btn btn-outline btn-sm"
+                        style={{
+                          gap: '6px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: isSoundEnabled ? 'rgba(34, 197, 94, 0.1)' : 'transparent',
+                          color: isSoundEnabled ? '#16a34a' : 'var(--text-medium)',
+                          borderColor: isSoundEnabled ? '#86efac' : undefined
+                        }}
+                        title={isSoundEnabled ? "Sound Alerts Active (Click to mute)" : "Sound Muted (Click to enable)"}
+                      >
+                        {isSoundEnabled ? <Volume2 size={15} /> : <VolumeX size={15} />}
+                        <span>{isSoundEnabled ? 'Chime ON' : 'Chime Muted'}</span>
+                      </button>
+
+                      {/* View Mode Toggle */}
+                      <div style={{ display: 'inline-flex', borderRadius: '8px', border: '1px solid #cbd5e1', padding: '2px', backgroundColor: 'var(--bg-light, #f1f5f9)' }}>
+                        <button
+                          type="button"
+                          onClick={() => setOrderViewMode('table')}
+                          style={{
+                            padding: '4px 10px',
+                            borderRadius: '6px',
+                            border: 'none',
+                            backgroundColor: orderViewMode === 'table' ? '#0c3d6c' : 'transparent',
+                            color: orderViewMode === 'table' ? '#ffffff' : 'var(--text-medium, #64748b)',
+                            fontSize: '0.78rem',
+                            fontWeight: '700',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          <List size={13} /> Table
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setOrderViewMode('cards')}
+                          style={{
+                            padding: '4px 10px',
+                            borderRadius: '6px',
+                            border: 'none',
+                            backgroundColor: orderViewMode === 'cards' ? '#0c3d6c' : 'transparent',
+                            color: orderViewMode === 'cards' ? '#ffffff' : 'var(--text-medium, #64748b)',
+                            fontSize: '0.78rem',
+                            fontWeight: '700',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          <Grid size={13} /> Cards
+                        </button>
+                      </div>
+
                       <button 
                         onClick={handleDownloadOrdersCSV} 
                         className="btn btn-outline btn-sm" 
@@ -5429,9 +5590,9 @@ _Helpline: +91 9316566894_`;
                     </div>
                   </div>
 
-                  {/* Orders Table */}
+                  {/* Orders Table & Pocket Mobile Cards */}
                   <div className="card" style={{ padding: '20px' }}>
-                    <div className="admin-table-container">
+                    <div className={`admin-table-container admin-orders-desktop-table ${orderViewMode === 'cards' ? 'mode-hidden-cards' : ''}`}>
                       <table className="admin-table" style={{ width: '100%', minWidth: '1050px' }}>
                         <thead>
                           <tr>
@@ -5542,6 +5703,106 @@ _Helpline: +91 9316566894_`;
                           )}
                         </tbody>
                       </table>
+                    </div>
+
+                    {/* Pocket Mobile Cards View */}
+                    <div className={`admin-orders-mobile-cards ${orderViewMode === 'table' ? 'mode-mobile-only' : 'mode-always-visible'}`}>
+                      {filteredOrders.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '30px', color: 'var(--text-light)' }}>
+                          No B2B orders match your current filters.
+                        </div>
+                      ) : (
+                        filteredOrders.map((ord) => (
+                          <div key={ord._id} className="card" style={{
+                            padding: '16px',
+                            borderRadius: '14px',
+                            border: '1px solid var(--border-light)',
+                            boxShadow: '0 3px 12px rgba(0,0,0,0.04)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '12px',
+                            marginBottom: '12px'
+                          }}>
+                            {/* Card Header: Order #, Date, Status */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                              <div>
+                                <div style={{ fontWeight: '800', color: 'var(--primary-blue)', fontSize: '0.98rem' }}>
+                                  {ord.orderNumber}
+                                </div>
+                                <div style={{ fontSize: '0.74rem', color: 'var(--text-light)', marginTop: '2px' }}>
+                                  {formatDate(ord.createdAt)}
+                                </div>
+                              </div>
+                              <div style={{ display: 'flex', gap: '6px' }}>
+                                <select 
+                                  value={ord.orderStatus || 'Booked'}
+                                  onChange={(e) => handleUpdateOrderStatus(ord._id, e.target.value, null)}
+                                  style={{
+                                    padding: '4px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: '700',
+                                    backgroundColor: ord.orderStatus === 'Delivered' ? 'rgba(34, 197, 94, 0.1)' : ord.orderStatus === 'Dispatched' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                                    color: ord.orderStatus === 'Delivered' ? '#16a34a' : ord.orderStatus === 'Dispatched' ? '#2563eb' : '#d97706',
+                                    border: '1px solid #cbd5e1'
+                                  }}
+                                >
+                                  <option value="Booked">Booked</option>
+                                  <option value="Confirmed">Confirmed</option>
+                                  <option value="Dispatched">Dispatched</option>
+                                  <option value="Delivered">Delivered</option>
+                                </select>
+                              </div>
+                            </div>
+
+                            {/* Chemist / Store Info */}
+                            <div style={{ background: 'rgba(12, 61, 108, 0.04)', padding: '10px 12px', borderRadius: '10px' }}>
+                              <div style={{ fontWeight: '700', fontSize: '0.92rem', color: 'var(--text-dark)' }}>
+                                {ord.shopName}
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px', fontSize: '0.8rem', color: 'var(--text-medium)' }}>
+                                <span>Ph: {ord.retailerMobile}</span>
+                                {ord.gstin && <span style={{ fontSize: '0.72rem', color: 'var(--text-light)' }}>GST: {ord.gstin}</span>}
+                              </div>
+                            </div>
+
+                            {/* Items Summary & Total */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <div style={{ fontSize: '0.78rem', color: 'var(--text-medium)', maxWidth: '60%' }}>
+                                <strong>{(ord.items || []).length} items:</strong> {(ord.items || []).slice(0, 2).map(i => i.productName).join(', ')}{(ord.items || []).length > 2 ? '...' : ''}
+                              </div>
+                              <div style={{ fontSize: '1.15rem', fontWeight: '800', color: 'var(--primary-blue)' }}>
+                                {formatCurrency(ord.grandTotal)}
+                              </div>
+                            </div>
+
+                            {/* 1-Tap Quick Action Buttons */}
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', paddingTop: '8px', borderTop: '1px solid var(--border-light)' }}>
+                              <a
+                                href={`tel:${ord.retailerMobile}`}
+                                className="btn btn-outline btn-sm"
+                                style={{ padding: '6px 8px', fontSize: '0.75rem', gap: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                title="Call Chemist"
+                              >
+                                <Phone size={13} color="var(--primary-blue)" /> Call
+                              </a>
+                              <button 
+                                onClick={() => setSelectedOrder(ord)} 
+                                className="btn btn-outline btn-sm"
+                                style={{ padding: '6px 8px', fontSize: '0.75rem', gap: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                              >
+                                <Eye size={13} /> View
+                              </button>
+                              <a 
+                                href={getWhatsAppDispatchUrl(ord)} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="btn btn-sm"
+                                style={{ padding: '6px 8px', fontSize: '0.75rem', gap: '4px', backgroundColor: '#25D366', color: '#ffffff', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                              >
+                                <Send size={13} /> WhatsApp
+                              </a>
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </div>
                 </div>

@@ -5226,3 +5226,27 @@ button, a, input, select, textarea {
     bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
+
+/* =========================================================================
+   POCKET ADMIN RESPONSIVE CARDS & REAL-TIME ALERTS
+   ========================================================================= */
+.admin-orders-mobile-cards {
+  display: none;
+}
+
+.admin-orders-mobile-cards.mode-always-visible {
+  display: flex !important;
+}
+
+.admin-orders-desktop-table.mode-hidden-cards {
+  display: none !important;
+}
+
+@media (max-width: 980px) {
+  .admin-orders-desktop-table {
+    display: none !important;
+  }
+  .admin-orders-mobile-cards {
+    display: flex !important;
+  }
+}

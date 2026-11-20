@@ -294,10 +294,66 @@ function Home({ addToCart }) {
             </div>
           </div>
 
-          {/* Wholesale Trust & Real-time Live Statistics Card */}
-          <div className="hero-trust-card pharma-glass-card float-gentle" style={{
-            borderRadius: '20px', padding: 'clamp(16px, 3vw, 28px)', minWidth: 0
-          }}>
+          {/* Right Column: Floating Brand Air Capsule + Wholesale Trust Card */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', minWidth: 0 }}>
+            {/* Holographic 3D Brand Capsule Levitating Weightlessly in Air */}
+            <div className="hero-floating-air-badge">
+              {/* Glowing Emblem Orb */}
+              <div style={{
+                position: 'relative',
+                width: '46px',
+                height: '46px',
+                borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(52, 211, 153, 0.3) 0%, rgba(10, 48, 86, 0.9) 100%)',
+                border: '1.5px solid #34d399',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                boxShadow: '0 0 18px rgba(52, 211, 153, 0.55)'
+              }}>
+                <img
+                  src="/logo-dark.png"
+                  alt="Niyansh Pharma"
+                  style={{
+                    width: '84%',
+                    height: '84%',
+                    objectFit: 'contain',
+                    filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.5))'
+                  }}
+                />
+              </div>
+
+              {/* Brand Text & Live Verification Chip */}
+              <div style={{ minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '1rem', fontWeight: '800', color: '#ffffff', letterSpacing: '0.4px', fontFamily: 'Outfit' }}>
+                    NIYANSH PHARMA
+                  </span>
+                  <span style={{
+                    fontSize: '0.68rem',
+                    fontWeight: '800',
+                    padding: '2px 8px',
+                    borderRadius: '12px',
+                    backgroundColor: '#10b981',
+                    color: '#ffffff',
+                    letterSpacing: '0.4px',
+                    textTransform: 'uppercase',
+                    boxShadow: '0 2px 8px rgba(16, 185, 129, 0.4)'
+                  }}>
+                    WHO-GMP Hub
+                  </span>
+                </div>
+                <span style={{ fontSize: '0.76rem', color: '#86efac', fontWeight: '500', display: 'block', marginTop: '1px' }}>
+                  Care • Quality • Trust • PAN Gujarat Distribution
+                </span>
+              </div>
+            </div>
+
+            {/* Wholesale Trust & Real-time Live Statistics Card */}
+            <div className="hero-trust-card pharma-glass-card float-gentle" style={{
+              borderRadius: '20px', padding: 'clamp(16px, 3vw, 28px)', minWidth: 0
+            }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '18px', borderBottom: '1px solid rgba(255, 255, 255, 0.15)', paddingBottom: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Sparkles size={18} color="#86efac" />
@@ -355,6 +411,7 @@ function Home({ addToCart }) {
               </a>
             </div>
           </div>
+        </div>
         </div>
       </section>
 

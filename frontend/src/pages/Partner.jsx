@@ -38,7 +38,7 @@ function Partner() {
     setIsSubmitting(true);
 
     try {
-      const fullMessage = `Distributor Name: ${distributorName.trim()}\nStore/Hospital Name: ${storeName.trim()}\nOwner/Contact Person: ${ownerName.trim()}\nDesignation: ${designation.trim()}\nDrug License: ${drugLicense.trim()}\nGSTIN: ${gstNumber.trim()}\n\nMessage: ${message.trim()}`;
+      const fullMessage = `DISTRIBUTOR NAME: ${distributorName.trim().toUpperCase()}\nSTORE/HOSPITAL NAME: ${storeName.trim().toUpperCase()}\nOWNER/CONTACT PERSON: ${ownerName.trim().toUpperCase()}\nDESIGNATION: ${designation.trim().toUpperCase()}\nDRUG LICENSE: ${drugLicense.trim().toUpperCase()}\nGSTIN: ${gstNumber.trim().toUpperCase()}\n\nMESSAGE: ${message.trim().toUpperCase()}`;
 
       const response = await fetch('/api/enquiries', {
         method: 'POST',
@@ -47,7 +47,9 @@ function Partner() {
         },
         body: JSON.stringify({
           type: 'Partner',
-          name: ownerName.trim(),
+          name: ownerName.trim().toUpperCase(),
+          phone: cleanPhone,
+          email: email.trim().toLowerCase(),
           phone: cleanPhone,
           email: email.trim(),
           address: address.trim(),

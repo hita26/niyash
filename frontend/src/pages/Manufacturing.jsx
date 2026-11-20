@@ -36,7 +36,7 @@ function Manufacturing() {
     setIsSubmitting(true);
 
     try {
-      const fullMessage = `Company: ${company.trim()}\nDesignation: ${designation.trim()}\nRequested Formulations: ${formulations.trim()}\nEstimated Batch Size: ${batchSize.trim()}\n\nNotes: ${message.trim()}`;
+      const fullMessage = `COMPANY: ${company.trim().toUpperCase()}\nDESIGNATION: ${designation.trim().toUpperCase()}\nREQUESTED FORMULATIONS: ${formulations.trim().toUpperCase()}\nESTIMATED BATCH SIZE: ${batchSize.trim().toUpperCase()}\n\nNOTES: ${message.trim().toUpperCase()}`;
 
       const response = await fetch('/api/enquiries', {
         method: 'POST',
@@ -45,9 +45,9 @@ function Manufacturing() {
         },
         body: JSON.stringify({
           type: 'Manufacturing',
-          name: name.trim(),
+          name: name.trim().toUpperCase(),
           phone: cleanPhone,
-          email: email.trim(),
+          email: email.trim().toLowerCase(),
           address: company.trim(),
           designation: designation.trim(),
           message: fullMessage,

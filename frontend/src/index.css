@@ -2046,8 +2046,22 @@ body.dark-theme {
   --secondary-green: #34d399;
 }
 
-/* Smooth Theme Switching Transitions Across Entire Website */
+/* Smooth Enterprise Theme Switching Across Entire Website */
+html.theme-switching,
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              fill 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              stroke 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition-delay: 0s !important;
+}
+
 body, header, nav, main, footer, section, aside, article,
+h1, h2, h3, h4, h5, h6, p, a, span, strong, b,
 .main-header, .nav-bar, .top-strip, .top-bar, .mobile-bottom-nav, .mobile-nav-drawer,
 .card, .product-card, .feature-card, .category-card, .testimonial-card,
 .stat-card, .info-card, .matrix-table-container, .filter-section,
@@ -4696,7 +4710,8 @@ html[lang="gu"] .nav-link, html[lang="hi"] .nav-link {
 @media (max-width: 768px) {
   .floating-b2b-widget {
     bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
-    right: 16px !important;
+    left: 16px !important;
+    right: auto !important;
   }
 }
 
@@ -4805,9 +4820,152 @@ html[lang="gu"] .nav-link, html[lang="hi"] .nav-link {
   border-color: rgba(255, 255, 255, 0.12) !important;
 }
 
+/* ==========================================================================
+   7. SCROLL-TRIGGERED STAGGERED REVEAL (AOS / Scrollytelling - Pfizer & Moderna)
+   ========================================================================== */
+.pharma-reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.pharma-reveal.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.stagger-1 { transition-delay: 0.05s; }
+.stagger-2 { transition-delay: 0.14s; }
+.stagger-3 { transition-delay: 0.23s; }
+.stagger-4 { transition-delay: 0.32s; }
+
+/* ==========================================================================
+   8. PROFESSIONAL PHARMA ORDERING PROCESS CARDS (Unclipped, Responsive & Dark-Mode Native)
+   ========================================================================== */
+.pharma-steps-grid {
+  position: relative;
+  margin-top: 15px;
+}
+
+.pharma-step-card {
+  position: relative;
+  padding: 34px 22px 24px 22px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  text-align: center;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.28s ease;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+  overflow: visible !important;
+}
+
+.pharma-step-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 36px -8px rgba(12, 61, 108, 0.14), 0 4px 14px rgba(0, 0, 0, 0.04);
+  border-color: rgba(37, 99, 235, 0.45);
+}
+
+[data-theme="dark"] .pharma-step-card {
+  background-color: var(--bg-card);
+  border-color: var(--border-light);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .pharma-step-card:hover {
+  box-shadow: 0 18px 40px -8px rgba(0, 0, 0, 0.7), 0 0 24px rgba(56, 189, 248, 0.16);
+  border-color: rgba(56, 189, 248, 0.45);
+}
+
+.pharma-step-badge {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0c3d6c 0%, #1e40af 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.92rem;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 14px rgba(12, 61, 108, 0.35);
+  border: 2.5px solid var(--bg-surface);
+  z-index: 2;
+  transition: transform 0.25s ease, background 0.25s ease, border-color 0.3s ease;
+}
+
+.pharma-step-card:hover .pharma-step-badge {
+  transform: translateX(-50%) scale(1.12);
+  background: linear-gradient(135deg, #1b75bc 0%, #2563eb 100%);
+}
+
+[data-theme="dark"] .pharma-step-badge {
+  background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+  border-color: var(--bg-surface);
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.45);
+}
+
+.pharma-step-title {
+  font-size: 1.12rem;
+  font-weight: 700;
+  margin: 14px 0 10px 0;
+  color: var(--text-dark);
+  min-height: 2.4rem;
+  line-height: 1.35;
+}
+
+.pharma-step-desc {
+  font-size: 0.88rem;
+  color: var(--text-medium);
+  line-height: 1.55;
+  margin: 0;
+  flex-grow: 1;
+}
+
+/* Dark Mode Brands Marquee Card Polish */
+[data-theme="dark"] .brand-pill-card {
+  background-color: var(--bg-card);
+  border-color: var(--border-light);
+  color: var(--text-dark);
+}
+
+[data-theme="dark"] .brand-pill-card:hover {
+  background-color: var(--bg-card-hover);
+  border-color: var(--primary-blue);
+  color: var(--primary-blue);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
 /* 7. Animated Counter Glow */
 .animated-stat-glow {
   text-shadow: 0 0 20px rgba(134, 239, 172, 0.35);
   font-family: 'Outfit', sans-serif;
   letter-spacing: -0.5px;
+}
+
+/* =========================================================================
+   GLOBAL UPPERCASE FORM DATA-ENTRY (ALL FORMS EXCEPT LOGIN & PASSWORDS)
+   ========================================================================= */
+input:not([type="password"]):not([type="email"]):not([type="file"]):not([type="checkbox"]):not([type="radio"]):not([type="number"]):not([type="date"]):not([type="time"]):not([type="month"]):not(.no-uppercase):not(.login-input):not([data-no-uppercase="true"]),
+textarea:not(.no-uppercase):not([data-no-uppercase="true"]) {
+  text-transform: uppercase;
+}
+
+/* Strict Exclusion for Login inputs */
+form.login-form input,
+form[data-auth-mode="login"] input,
+.login-input,
+input.login-input,
+[data-no-uppercase="true"],
+input[type="password"],
+input[type="email"] {
+  text-transform: none !important;
 }

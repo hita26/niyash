@@ -1677,7 +1677,7 @@ function Admin() {
     setIsSavingAdmin(true);
     try {
       const payload = {
-        name: adminFormName.trim(),
+        name: adminFormName.trim().toUpperCase(),
         email: adminFormEmail.trim().toLowerCase(),
         phone: adminFormPhone.replace(/\D/g, ''),
         permissions: adminFormPermissions,
@@ -2403,10 +2403,10 @@ _Helpline: +91 9316566894_`;
   const handleSaveNews = async (e) => {
     e.preventDefault();
     const payload = {
-      title: newsTitle,
-      content: newsContent,
-      category: newsCategory,
-      company: newsCompany,
+      title: (newsTitle || '').trim().toUpperCase(),
+      content: (newsContent || '').trim().toUpperCase(),
+      category: (newsCategory || '').trim().toUpperCase(),
+      company: (newsCompany || '').trim().toUpperCase(),
       priority: parseInt(newsPriority, 10) || 1,
       expiryDate: newsExpiryDate ? new Date(newsExpiryDate).toISOString() : null,
       isTickerActive: newsIsTickerActive
@@ -3152,23 +3152,23 @@ _Helpline: +91 9316566894_`;
     const salGst = !isNaN(parseFloat(prodSalesGst)) ? parseFloat(prodSalesGst) : 12;
 
     const payload = {
-      name: prodName.trim(),
-      brand: prodName.trim(), // Brand name unified with Product Name
-      company: assignedCompany,
-      category: finalCategory,
-      subCategory: prodSubCategory.trim(),
-      sku: prodSku.trim(),
+      name: prodName.trim().toUpperCase(),
+      brand: prodName.trim().toUpperCase(), // Brand name unified with Product Name
+      company: assignedCompany.toUpperCase(),
+      category: finalCategory.toUpperCase(),
+      subCategory: prodSubCategory.trim().toUpperCase(),
+      sku: prodSku.trim().toUpperCase(),
       price: parseFloat(prodPrice) || 0,
       mrp: parseFloat(prodMrp) || parseFloat(prodPrice) || 0,
       stockQuantity: validStock,
       inStock: prodInStock && validStock > 0,
-      packing: prodPacking.trim(),
-      composition: prodComposition.trim(),
-      form: (prodForm || 'Tablet').trim(),
-      manufacturer: prodManufacturer.trim() || assignedCompany,
-      rackId: prodRackId.trim(),
-      batchNumber: prodBatchNumber.trim(),
-      hsnCode: prodHsnCode.trim() || '3004',
+      packing: prodPacking.trim().toUpperCase(),
+      composition: prodComposition.trim().toUpperCase(),
+      form: (prodForm || 'TABLET').trim().toUpperCase(),
+      manufacturer: (prodManufacturer.trim() || assignedCompany).toUpperCase(),
+      rackId: prodRackId.trim().toUpperCase(),
+      batchNumber: prodBatchNumber.trim().toUpperCase(),
+      hsnCode: (prodHsnCode.trim() || '3004').toUpperCase(),
       purchaseGst: purGst,
       salesGst: salGst,
       gstRate: salGst,
@@ -3176,7 +3176,7 @@ _Helpline: +91 9316566894_`;
       customFields: customFieldsArr,
       imageUrl: finalMainImage,
       images: finalImages,
-      description: prodDescription.trim() || `${prodName.trim()} formulation by ${assignedCompany}.`,
+      description: (prodDescription.trim() || `${prodName.trim()} FORMULATION BY ${assignedCompany}.`).toUpperCase(),
       featured: prodFeatured,
       isOurProduct: prodIsOurProduct,
       isActive: prodIsActive,
@@ -3873,13 +3873,13 @@ _Helpline: +91 9316566894_`;
     }
 
     const payload = {
-      name: compName.trim(),
-      category: compCategory.trim(),
-      location: compLocation.trim(),
+      name: compName.trim().toUpperCase(),
+      category: compCategory.trim().toUpperCase(),
+      location: compLocation.trim().toUpperCase(),
       websiteUrl: compWebsiteUrl.trim(),
       logoUrl: compLogoUrl.trim(),
-      description: compDescription.trim(),
-      specialties: compSpecialties.split(',').map(s => s.trim()).filter(Boolean),
+      description: compDescription.trim().toUpperCase(),
+      specialties: compSpecialties.split(',').map(s => s.trim().toUpperCase()).filter(Boolean),
       isPublished: compIsPublished,
       isVerified: compIsVerified,
     };
@@ -4270,13 +4270,15 @@ _Helpline: +91 9316566894_`;
             </div>
           )}
 
-          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <form onSubmit={handleLogin} className="login-form" data-auth-mode="login" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label htmlFor="admin-email" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-medium)' }}>Admin Email</label>
               <input 
                 id="admin-email"
                 type="email" 
                 required
+                className="login-input"
+                data-no-uppercase="true"
                 placeholder="admin@niyanshpharma.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -4291,6 +4293,8 @@ _Helpline: +91 9316566894_`;
                   id="admin-pwd"
                   type={showAdminLoginPassword ? 'text' : 'password'} 
                   required
+                  className="login-input"
+                  data-no-uppercase="true"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

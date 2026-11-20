@@ -82,11 +82,11 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
         headers,
         body: JSON.stringify({
           type: 'Cart Quote',
-          name: name.trim(),
+          name: name.trim().toUpperCase(),
           phone: cleanPhone,
-          email: email.trim(),
-          address: address.trim(),
-          message: message.trim(),
+          email: email.trim().toLowerCase(),
+          address: address.trim().toUpperCase(),
+          message: message.trim().toUpperCase(),
           items: itemsPayload,
         }),
       });

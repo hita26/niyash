@@ -5,7 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 /**
  * FloatingOrderWidget
  * Interactive B2B Quick Order / WhatsApp Floating Action Button with a subtle pulse ripple effect.
- * Responsive: sits above MobileBottomNav on small screens and at bottom-right on desktop.
+ * Responsive: sits above MobileBottomNav on small screens and at bottom-left on desktop (opposite of AI Assistant).
  */
 export default function FloatingOrderWidget() {
   const { t, language } = useLanguage();
@@ -21,7 +21,7 @@ export default function FloatingOrderWidget() {
   };
 
   return (
-    <div className="floating-b2b-widget" style={{ position: 'fixed', zIndex: 990, right: '20px', bottom: '24px' }}>
+    <div className="floating-b2b-widget" style={{ position: 'fixed', zIndex: 9980, left: '24px', bottom: '24px' }}>
       {/* Popover Menu */}
       {isOpen && (
         <div 
@@ -29,37 +29,42 @@ export default function FloatingOrderWidget() {
           style={{
             position: 'absolute',
             bottom: '70px',
-            right: 0,
-            width: '280px',
-            backgroundColor: '#ffffff',
+            left: 0,
+            width: '290px',
+            backgroundColor: 'var(--bg-card)',
+            color: 'var(--text-dark)',
             borderRadius: '16px',
-            padding: '16px',
-            boxShadow: '0 12px 36px rgba(12, 61, 108, 0.22), 0 2px 8px rgba(0,0,0,0.08)',
-            border: '1px solid #e2e8f0',
+            padding: '18px',
+            boxShadow: '0 16px 40px rgba(0, 0, 0, 0.28), 0 2px 10px rgba(0,0,0,0.1)',
+            border: '1px solid var(--border-light)',
             display: 'flex',
             flexDirection: 'column',
-            gap: '10px'
+            gap: '12px'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Sparkles size={16} color="#16a34a" />
-              <span style={{ fontWeight: '800', fontSize: '0.9rem', color: '#0f172a' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-light)', paddingBottom: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#22c55e', display: 'inline-block' }} />
+              <span style={{ fontWeight: '800', fontSize: '0.92rem', color: 'var(--text-dark)' }}>
                 B2B Wholesale Desk
               </span>
             </div>
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '2px' }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-light)', padding: '4px' }}
               aria-label="Close wholesale menu"
             >
-              <X size={16} />
+              <X size={17} />
             </button>
           </div>
 
-          <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b', lineHeight: 1.4 }}>
-            Direct wholesale ordering for Retail Chemists, Clinics & Hospitals across Gujarat.
+          <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-medium)', lineHeight: 1.45 }}>
+            {language === 'gu'
+              ? 'મેડિકલ સ્ટોર, ક્લિનિક અને હોસ્પિટલો માટે ડાયરેક્ટ હોલસેલ સપ્લાય અને ઇન્સ્ટન્ટ રેટ કાર્ડ.'
+              : language === 'hi'
+              ? 'मेडिकल स्टोर, क्लिनिक और अस्पतालों के लिए सीधा थोक ऑर्डर और त्वरित रेट कार्ड।'
+              : 'Direct wholesale ordering for Retail Chemists, Clinics & Hospitals across Gujarat.'}
           </p>
 
           <button
@@ -71,17 +76,18 @@ export default function FloatingOrderWidget() {
               color: '#ffffff',
               border: 'none',
               borderRadius: '10px',
-              padding: '10px 14px',
+              padding: '11px 16px',
               fontWeight: '700',
-              fontSize: '0.84rem',
+              fontSize: '0.86rem',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '8px',
-              boxShadow: '0 4px 12px rgba(34, 197, 94, 0.3)'
+              boxShadow: '0 4px 14px rgba(34, 197, 94, 0.35)',
+              cursor: 'pointer'
             }}
           >
-            <MessageSquare size={16} /> Order on WhatsApp
+            <MessageSquare size={17} /> {language === 'gu' ? 'WhatsApp પર ઓર્ડર આપો' : language === 'hi' ? 'WhatsApp पर ऑर्डर करें' : 'Order on WhatsApp'}
           </button>
 
           <a
@@ -89,18 +95,19 @@ export default function FloatingOrderWidget() {
             className="btn btn-outline btn-sm"
             style={{
               borderRadius: '10px',
-              padding: '9px 14px',
+              padding: '10px 14px',
               fontWeight: '600',
-              fontSize: '0.82rem',
+              fontSize: '0.84rem',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '8px',
-              color: '#0c3d6c',
-              borderColor: '#cbd5e1'
+              color: 'var(--text-dark)',
+              borderColor: 'var(--border-light)',
+              textDecoration: 'none'
             }}
           >
-            <PhoneCall size={15} /> Call Wholesale Desk
+            <PhoneCall size={15} /> +91 99099 23130
           </a>
         </div>
       )}

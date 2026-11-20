@@ -18,9 +18,11 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import AnimatedCounter from '../components/AnimatedCounter';
+import useScrollReveal from '../hooks/useScrollReveal';
 
 function About() {
   const { t, language } = useLanguage();
+  useScrollReveal();
   const [heroImage, setHeroImage] = useState('https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=1600&q=80');
   const [liveProductsCount, setLiveProductsCount] = useState(500);
   const [liveCompaniesCount, setLiveCompaniesCount] = useState(15);
@@ -180,11 +182,11 @@ function About() {
       </section>
 
       {/* Metrics Counter Strip */}
-      <section style={{ backgroundColor: '#ffffff', borderBottom: '1px solid var(--border-light)', padding: 'clamp(28px, 5vw, 40px) 0' }}>
+      <section style={{ backgroundColor: 'var(--bg-surface)', borderBottom: '1px solid var(--border-light)', padding: 'clamp(28px, 5vw, 40px) 0' }}>
         <div className="container">
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 155px), 1fr))', gap: 'clamp(14px, 3vw, 25px)', textAlign: 'center' }}>
             {stats.map((item, idx) => (
-              <div key={idx} className="card-hover-pharma" style={{ padding: '16px 12px', borderRadius: '14px', backgroundColor: '#f8fafc', border: '1px solid var(--border-light)' }}>
+              <div key={idx} className="card-hover-pharma pharma-reveal" style={{ padding: '16px 12px', borderRadius: '14px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-light)' }}>
                 <div style={{ fontSize: '2.4rem', fontWeight: '800', color: 'var(--primary-blue)', lineHeight: '1', fontFamily: 'Outfit' }}>
                   <AnimatedCounter end={item.numeric} suffix={item.suffix} />
                 </div>
@@ -250,7 +252,7 @@ function About() {
 
           {/* Quick Facility Spotlight Card */}
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div className="card" style={{ padding: '30px', backgroundColor: '#ffffff', borderRadius: '16px' }}>
+            <div className="card pharma-reveal" style={{ padding: '30px', backgroundColor: 'var(--bg-card)', borderRadius: '16px' }}>
               <div style={{ height: '220px', borderRadius: '12px', overflow: 'hidden', marginBottom: '20px' }}>
                 <img 
                   src="/pharma-products.jpg" 
@@ -288,9 +290,9 @@ function About() {
       </section>
 
       {/* Core Values Section */}
-      <section className="section" style={{ backgroundColor: '#ffffff' }}>
+      <section className="section" style={{ backgroundColor: 'var(--bg-surface)' }}>
         <div className="container">
-          <div style={{ textAlign: 'center', maxWidth: '700px', margin: '0 auto 40px auto' }}>
+          <div className="pharma-reveal" style={{ textAlign: 'center', maxWidth: '700px', margin: '0 auto 40px auto' }}>
             <h2 className="section-title">{t('about.whyChooseTitle', 'Why Healthcare Providers Choose Us')}</h2>
             <p className="section-subtitle">
               {t('about.whyChooseSubtitle', 'We uphold the highest benchmarks in pharmaceutical distribution, trade terms, and client care.')}
@@ -299,7 +301,7 @@ function About() {
 
           <div className="grid-2">
             {values.map((v, i) => (
-              <div key={i} className="card card-hover-pharma" style={{ padding: '28px', display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
+              <div key={i} className="card card-hover-pharma pharma-reveal" style={{ padding: '28px', display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
                 <div style={{ backgroundColor: 'rgba(12, 61, 108, 0.06)', padding: '14px', borderRadius: '12px', display: 'flex', flexShrink: 0 }}>
                   {v.icon}
                 </div>
@@ -316,7 +318,7 @@ function About() {
       {/* Infrastructure & Capabilities */}
       <section className="section" style={{ backgroundColor: 'var(--bg-main)' }}>
         <div className="container">
-          <div style={{ textAlign: 'center', maxWidth: '700px', margin: '0 auto 40px auto' }}>
+          <div className="pharma-reveal" style={{ textAlign: 'center', maxWidth: '700px', margin: '0 auto 40px auto' }}>
             <h2 className="section-title">{t('about.infraTitle', 'Infrastructure & Trade Capabilities')}</h2>
             <p className="section-subtitle">
               {t('about.infraSubtitle', 'End-to-end supply solutions designed to support modern healthcare logistics.')}
@@ -325,7 +327,7 @@ function About() {
 
           <div className="grid-4">
             {infrastructureHighlights.map((inf, idx) => (
-              <div key={idx} className="card" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
+              <div key={idx} className="card pharma-reveal" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ backgroundColor: 'rgba(56, 142, 60, 0.08)', width: '42px', height: '42px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', color: 'var(--secondary-green)', fontWeight: '800' }}>
                   {idx + 1}
                 </div>
@@ -337,10 +339,8 @@ function About() {
         </div>
       </section>
 
-
-
       {/* Brands Collaboration Banner */}
-      <section className="section" style={{ backgroundColor: '#ffffff' }}>
+      <section className="section" style={{ backgroundColor: 'var(--bg-surface)' }}>
         <div className="container" style={{ textAlign: 'center' }}>
           <h2 className="section-title">{t('about.brandNetworkTitle', 'Our Brand Network')}</h2>
           <p className="section-subtitle">

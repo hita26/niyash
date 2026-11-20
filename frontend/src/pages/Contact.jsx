@@ -79,10 +79,10 @@ function Contact() {
         },
         body: JSON.stringify({
           type: 'General Enquiry',
-          name: name.trim(),
+          name: name.trim().toUpperCase(),
           phone: cleanPhone,
-          email: email.trim(),
-          message: `Subject: ${subject.trim()}\n\n${message.trim()}`,
+          email: email.trim().toLowerCase(),
+          message: `SUBJECT: ${subject.trim().toUpperCase()}\n\n${message.trim().toUpperCase()}`,
         }),
       });
 

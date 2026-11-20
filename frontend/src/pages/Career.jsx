@@ -114,12 +114,12 @@ function Career() {
 
     try {
       const formData = new FormData();
-      formData.append('name', name);
-      formData.append('email', email);
+      formData.append('name', (name || '').trim().toUpperCase());
+      formData.append('email', (email || '').trim().toLowerCase());
       formData.append('phone', cleanPhone);
-      formData.append('position', position);
-      formData.append('experience', experience);
-      formData.append('coverLetter', coverLetter);
+      formData.append('position', (position || '').trim().toUpperCase());
+      formData.append('experience', (experience || '').trim().toUpperCase());
+      formData.append('coverLetter', (coverLetter || '').trim().toUpperCase());
       formData.append('resume', resumeFile);
 
       const response = await fetch('/api/careers', {

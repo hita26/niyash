@@ -40,11 +40,11 @@ export default function PharmaMoleculesCanvas({
       if (!canvas) return;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const rect = canvas.getBoundingClientRect();
-      width = rect.width;
-      height = rect.height;
+      width = rect.width || canvas.parentElement?.clientWidth || (typeof window !== 'undefined' ? window.innerWidth : 1200);
+      height = rect.height || canvas.parentElement?.clientHeight || 500;
       canvas.width = width * dpr;
       canvas.height = height * dpr;
-      ctx.scale(dpr, dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
     class Particle {
@@ -53,23 +53,23 @@ export default function PharmaMoleculesCanvas({
       }
 
       reset(init = false) {
-        this.x = init ? Math.random() * width : Math.random() < 0.5 ? 0 : width;
-        this.y = init ? Math.random() * height : Math.random() * height;
+        this.x = init ? Math.random() * (width || 1200) : Math.random() < 0.5 ? 0 : (width || 1200);
+        this.y = init ? Math.random() * (height || 500) : Math.random() * (height || 500);
         this.vx = (Math.random() - 0.5) * speed;
         this.vy = (Math.random() - 0.5) * speed;
         // Molecular node sizes (simulating atoms / compounds)
-        this.radius = Math.random() * 2.2 + 1.2;
-        // Soft pharma glowing palette: cyan, emerald green, luminous light blue
+        this.radius = Math.random() * 2.8 + 1.6;
+        // Soft pharma glowing palette: cyan, emerald green, luminous light blue, pure white
         const hues = [
           { r: 56, g: 189, b: 248 },  // Sky cyan
-          { r: 74, g: 222, b: 128 },  // Emerald green
-          { r: 147, g: 197, b: 253 }, // Soft pharma blue
+          { r: 52, g: 211, b: 153 },  // Radiant emerald green
+          { r: 96, g: 165, b: 250 },  // Pharma electric blue
           { r: 255, g: 255, b: 255 }  // Clean pure white
         ];
         this.color = hues[Math.floor(Math.random() * hues.length)];
-        this.alpha = Math.random() * 0.45 + 0.25;
+        this.alpha = Math.random() * 0.4 + 0.45;
         this.pulse = Math.random() * Math.PI * 2;
-        this.pulseSpeed = 0.02 + Math.random() * 0.02;
+        this.pulseSpeed = 0.025 + Math.random() * 0.025;
       }
 
       update() {
@@ -128,12 +128,12 @@ export default function PharmaMoleculesCanvas({
 
           if (distSq < maxDistSq) {
             const dist = Math.sqrt(distSq);
-            const alpha = (1 - dist / activeDistance) * 0.22;
+            const alpha = (1 - dist / activeDistance) * 0.38;
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(147, 197, 253, ${alpha})`;
-            ctx.lineWidth = 0.9;
+            ctx.strokeStyle = `rgba(56, 189, 248, ${alpha})`;
+            ctx.lineWidth = 1.1;
             ctx.stroke();
           }
         }
@@ -179,6 +179,12 @@ export default function PharmaMoleculesCanvas({
     initParticles();
     animationFrameId = requestAnimationFrame(animate);
 
+    // Re-verify bounds after layout settle
+    const settleTimer = setTimeout(() => {
+      resize();
+      initParticles();
+    }, 80);
+
     const handleResize = () => {
       resize();
       initParticles();
@@ -209,6 +215,7 @@ export default function PharmaMoleculesCanvas({
     window.addEventListener('touchmove', handleTouchMove, { passive: true });
 
     return () => {
+      clearTimeout(settleTimer);
       observer.disconnect();
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', handleResize);

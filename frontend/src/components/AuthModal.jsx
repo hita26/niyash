@@ -136,7 +136,12 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
     } else if (name === 'drugLicense2') {
       val = val.toUpperCase();
       setFormData(prev => ({ ...prev, [name]: val }));
+    } else if (name === 'password') {
+      setFormData(prev => ({ ...prev, [name]: val }));
     } else {
+      if (typeof val === 'string' && isRegister) {
+        val = val.toUpperCase();
+      }
       setFormData(prev => ({ ...prev, [name]: val }));
     }
   };
@@ -653,7 +658,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
         {/* VIEW 1: CHEMIST SIGN IN                                  */}
         {/* ======================================================== */}
         {isLogin && (
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          <form onSubmit={handleSubmit} className="login-form" data-auth-mode="login" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
               <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-dark)' }}>
                 {t('auth.emailLabel', 'Email Address or Mobile')} <span style={{ color: '#ef4444' }}>*</span>
@@ -664,6 +669,8 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                   type="email" 
                   name="email" 
                   required 
+                  className="login-input"
+                  data-no-uppercase="true"
                   value={formData.email} 
                   onChange={handleChange}
                   placeholder={t('auth.emailPlaceholder', 'example@mail.com')}
@@ -682,6 +689,8 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                   type={showLoginPassword ? 'text' : 'password'} 
                   name="password" 
                   required 
+                  className="login-input"
+                  data-no-uppercase="true"
                   value={formData.password} 
                   onChange={handleChange}
                   placeholder="••••••••"

@@ -7,10 +7,12 @@ import {
 import { useLanguage } from '../context/LanguageContext';
 import PharmaMoleculesCanvas from '../components/PharmaMoleculesCanvas';
 import AnimatedCounter from '../components/AnimatedCounter';
+import useScrollReveal from '../hooks/useScrollReveal';
 
 function Home({ addToCart }) {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
+  useScrollReveal();
   const [heroSearch, setHeroSearch] = useState('');
   const [liveProductsCount, setLiveProductsCount] = useState(500);
   const [liveCompaniesCount, setLiveCompaniesCount] = useState(15);
@@ -285,19 +287,21 @@ function Home({ addToCart }) {
       </section>
 
       {/* Shop By Category Section */}
-      <section className="section" style={{ backgroundColor: '#ffffff' }}>
+      <section className="section" style={{ backgroundColor: 'var(--bg-surface)' }}>
         <div className="container">
-          <h2 className="section-title">{t('categories.title', 'Shop By Category')}</h2>
-          <p className="section-subtitle">{t('categories.subtitle', 'We distribute a comprehensive portfolio of pharmaceutical and clinical supplies.')}</p>
+          <div className="pharma-reveal">
+            <h2 className="section-title">{t('categories.title', 'Shop By Category')}</h2>
+            <p className="section-subtitle">{t('categories.subtitle', 'We distribute a comprehensive portfolio of pharmaceutical and clinical supplies.')}</p>
+          </div>
           
           <div className="grid-4">
             {categories.map((cat, i) => (
               <div 
                 key={i} 
-                className="card category-card-hover card-hover-pharma" 
+                className={`card category-card-hover card-hover-pharma pharma-reveal stagger-${(i % 4) + 1}`} 
                 style={{
                   padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column',
-                  border: '1px solid #f1f5f9'
+                  border: '1px solid var(--border-light)'
                 }}
               >
                 <div style={{ height: '160px', overflow: 'hidden' }}>
@@ -332,14 +336,16 @@ function Home({ addToCart }) {
       {/* Why Choose Us Section */}
       <section className="section" style={{ backgroundColor: 'var(--bg-main)' }}>
         <div className="container">
-          <h2 className="section-title">{t('features.title', 'Why Choose Niyansh Pharma?')}</h2>
-          <p className="section-subtitle">{t('features.subtitle', 'We prioritize quality, affordability, and professional distribution logistics.')}</p>
+          <div className="pharma-reveal">
+            <h2 className="section-title">{t('features.title', 'Why Choose Niyansh Pharma?')}</h2>
+            <p className="section-subtitle">{t('features.subtitle', 'We prioritize quality, affordability, and professional distribution logistics.')}</p>
+          </div>
 
           <div className="grid-3">
             {features.map((feat, i) => (
               <div 
                 key={i} 
-                className="card card-hover-pharma" 
+                className={`card card-hover-pharma pharma-reveal stagger-${(i % 3) + 1}`} 
                 style={{
                   display: 'flex', gap: '20px', alignItems: 'flex-start', padding: '25px'
                 }}
@@ -361,13 +367,15 @@ function Home({ addToCart }) {
         </div>
       </section>
 
-      {/* Easy Ordering Process */}
-      <section className="section" style={{ backgroundColor: '#ffffff' }}>
+      {/* Easy Ordering Process - Unclipped & Dark-Mode Native (Image Fix) */}
+      <section className="section" style={{ backgroundColor: 'var(--bg-surface)' }}>
         <div className="container">
-          <h2 className="section-title">{t('orderingProcess.title', 'Easy Ordering Process')}</h2>
-          <p className="section-subtitle">{t('orderingProcess.subtitle', 'How medical stores and healthcare institutions order from us in 4 simple steps.')}</p>
+          <div className="pharma-reveal">
+            <h2 className="section-title">{t('orderingProcess.title', 'Easy Ordering Process')}</h2>
+            <p className="section-subtitle">{t('orderingProcess.subtitle', 'How medical stores and healthcare institutions order from us in 4 simple steps.')}</p>
+          </div>
 
-          <div className="grid-4" style={{ position: 'relative' }}>
+          <div className="grid-4 pharma-steps-grid">
             {[
               { step: '01', title: t('orderingProcess.step1Title', 'Search Medicines'), desc: t('orderingProcess.step1Desc', 'Browse our product catalog by brand name, salt composition, or company.') },
               { step: '02', title: t('orderingProcess.step2Title', 'Add to Inquiry Cart'), desc: t('orderingProcess.step2Desc', 'Select required pack sizes and quantities into your inquiry cart.') },
@@ -376,23 +384,13 @@ function Home({ addToCart }) {
             ].map((step, i) => (
               <div 
                 key={i} 
-                className="card-hover-pharma"
-                style={{
-                  padding: '30px 20px', border: '1px solid var(--border-light)',
-                  borderRadius: '12px', backgroundColor: '#f8fafc', position: 'relative',
-                  textAlign: 'center', height: '100%', display: 'flex', flexDirection: 'column'
-                }}
+                className={`pharma-step-card pharma-reveal stagger-${i + 1}`}
               >
-                <span style={{
-                  position: 'absolute', top: '-15px', left: '50%', transform: 'translateX(-50%)',
-                  backgroundColor: 'var(--primary-blue)', color: '#ffffff', width: '35px', height: '35px',
-                  borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontWeight: '700', fontSize: '0.9rem'
-                }}>
+                <div className="pharma-step-badge">
                   {step.step}
-                </span>
-                <h3 style={{ fontSize: '1.1rem', margin: '15px 0 10px 0', minHeight: '2.4rem', lineHeight: '1.3' }}>{step.title}</h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-medium)', minHeight: '3.6rem', lineHeight: '1.5', margin: 0 }}>{step.desc}</p>
+                </div>
+                <h3 className="pharma-step-title">{step.title}</h3>
+                <p className="pharma-step-desc">{step.desc}</p>
               </div>
             ))}
           </div>
@@ -430,9 +428,9 @@ function Home({ addToCart }) {
       </section>
 
       {/* Brands We Deal In Section - Animated Marquee + Grid */}
-      <section className="section" style={{ backgroundColor: '#ffffff', overflow: 'hidden' }}>
+      <section className="section" style={{ backgroundColor: 'var(--bg-surface)', overflow: 'hidden' }}>
         <div className="container">
-          <div style={{ textAlign: 'center', maxWidth: '750px', margin: '0 auto 20px auto' }}>
+          <div className="pharma-reveal" style={{ textAlign: 'center', maxWidth: '750px', margin: '0 auto 20px auto' }}>
             <h2 className="section-title">{t('about.brandNetworkTitle', 'Brands We Deal In')}</h2>
             <p className="section-subtitle">{t('about.brandNetworkSubtitle', 'We distribute high-quality medical supplies from reputed pharmaceutical corporations.')}</p>
           </div>

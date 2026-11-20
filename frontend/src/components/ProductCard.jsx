@@ -96,7 +96,7 @@ function ProductCard({ product, addToCart }) {
         position: 'relative',
         transition: 'all 0.22s ease',
         minWidth: 0,
-        backgroundColor: '#ffffff'
+        backgroundColor: 'var(--bg-card)'
       }}
     >
       {/* Product Image Container - Fixed 1:1 Aspect Ratio (Amazon / Flipkart Standard) */}
@@ -111,12 +111,12 @@ function ProductCard({ product, addToCart }) {
           overflow: 'hidden', 
           borderRadius: '10px', 
           marginBottom: '10px', 
-          backgroundColor: '#ffffff',
+          backgroundColor: 'var(--bg-surface)',
           width: '100%',
           aspectRatio: '1 / 1',
           padding: '10px',
           boxSizing: 'border-box',
-          border: '1px solid #f1f5f9'
+          border: '1px solid var(--border-light)'
         }}
         title={`View details for ${product.name}`}
       >
@@ -147,9 +147,9 @@ function ProductCard({ product, addToCart }) {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: '#f8fafc',
+              backgroundColor: 'var(--bg-surface)',
               borderRadius: '8px',
-              border: '1px dashed #cbd5e1',
+              border: '1px dashed var(--border-medium)',
               padding: '10px',
               boxSizing: 'border-box',
               textAlign: 'center',

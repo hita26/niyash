@@ -27,6 +27,7 @@ import CompanyDetail from './pages/CompanyDetail';
 import ScrollToTop from './components/ScrollToTop';
 import MobileBottomNav from './components/MobileBottomNav';
 import AIAssistant from './components/AIAssistant';
+import FloatingOrderWidget from './components/FloatingOrderWidget';
 
 // Security Auth Guard: blocks unauthenticated access and forces login if user presses Back after logout
 function ProtectedRoute({ children }) {
@@ -106,6 +107,76 @@ function AppContent() {
   useEffect(() => {
     localStorage.setItem('niyansh_enquiry_cart', JSON.stringify(enquiryCart));
   }, [enquiryCart]);
+
+  // Global Uppercase Form Input Enforcer (All forms except Login credentials & passwords)
+  useEffect(() => {
+    const handleGlobalInput = (e) => {
+      const target = e.target;
+      if (!target) return;
+
+      const isInput = target.tagName === 'INPUT';
+      const isTextarea = target.tagName === 'TEXTAREA';
+      if (!isInput && !isTextarea) return;
+
+      // EXCLUSIONS:
+      // 1. Never uppercase passwords or hidden inputs
+      if (target.type === 'password' || target.type === 'hidden') return;
+      // 2. Email inputs (emails remain natural lowercase)
+      if (target.type === 'email') return;
+      // 3. Technical and selection input types
+      if (['file', 'checkbox', 'radio', 'number', 'date', 'time', 'datetime-local', 'month', 'range', 'color'].includes(target.type)) return;
+      // 4. Inputs explicitly marked to skip uppercase
+      if (target.dataset.noUppercase === 'true' || target.classList.contains('no-uppercase') || target.classList.contains('login-input')) return;
+
+      // 5. Exclude Login Forms (Chemist Login, Admin Login, Forgot Password)
+      const form = target.closest('form');
+      if (form) {
+        if (
+          form.classList.contains('login-form') ||
+          form.dataset.authMode === 'login' ||
+          form.id?.toLowerCase().includes('login') ||
+          form.getAttribute('name')?.toLowerCase().includes('login')
+        ) {
+          return;
+        }
+      }
+      if (target.closest('.login-modal') || target.closest('[data-auth-mode="login"]')) {
+        return;
+      }
+
+      // 6. Perform Uppercase Transformation for data entry
+      const original = target.value;
+      if (typeof original !== 'string') return;
+      const upper = original.toUpperCase();
+
+      if (original !== upper) {
+        const start = target.selectionStart;
+        const end = target.selectionEnd;
+
+        // Use prototype setter to notify React's internal value tracker
+        const prototype = isTextarea ? window.HTMLTextAreaElement.prototype : window.HTMLInputElement.prototype;
+        const nativeSetter = Object.getOwnPropertyDescriptor(prototype, 'value')?.set;
+
+        if (nativeSetter) {
+          nativeSetter.call(target, upper);
+        } else {
+          target.value = upper;
+        }
+
+        if (typeof start === 'number' && typeof end === 'number') {
+          try {
+            target.setSelectionRange(start, end);
+          } catch (_) {}
+        }
+
+        // Notify React of the synthetic input event
+        target.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    };
+
+    window.addEventListener('input', handleGlobalInput, true);
+    return () => window.removeEventListener('input', handleGlobalInput, true);
+  }, []);
 
   const addToCart = (product, quantity = 1) => {
     setEnquiryCart((prevCart) => {
@@ -231,6 +302,7 @@ function AppContent() {
           onClose={closeAuth}
           onSuccess={login}
         />
+        <FloatingOrderWidget />
         <AIAssistant addToCart={addToCart}
         />
       </div>

@@ -80,7 +80,20 @@ export function ThemeProvider({ children }) {
   }, []);
 
   const toggleTheme = () => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+    try {
+      const root = document.documentElement;
+      root.classList.add('theme-switching');
+      if (document.body) document.body.classList.add('theme-switching');
+      
+      setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+
+      setTimeout(() => {
+        root.classList.remove('theme-switching');
+        if (document.body) document.body.classList.remove('theme-switching');
+      }, 450);
+    } catch {
+      setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+    }
   };
 
   const isDark = theme === 'dark';

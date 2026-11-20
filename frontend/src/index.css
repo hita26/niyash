@@ -4942,6 +4942,12 @@ html[lang="gu"] .nav-link, html[lang="hi"] .nav-link {
   }
 }
 
+/* Hide floating B2B WhatsApp order widget in Admin Console */
+body:has(.admin-header-shell) .floating-b2b-widget,
+body:has(.admin-container) .floating-b2b-widget {
+  display: none !important;
+}
+
 /* 3. High-End Pharma Product & Category Card 3D Lift & Glow */
 .card-hover-pharma {
   transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.28s ease !important;

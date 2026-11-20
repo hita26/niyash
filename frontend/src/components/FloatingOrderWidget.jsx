@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { MessageSquare, PhoneCall, Package, X, Sparkles, Send } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -9,7 +10,13 @@ import { useLanguage } from '../context/LanguageContext';
  */
 export default function FloatingOrderWidget() {
   const { t, language } = useLanguage();
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+
+  // Strictly do not render in Admin portal (/admin)
+  if (location.pathname.startsWith('/admin')) {
+    return null;
+  }
 
   const handleWhatsApp = () => {
     const msg = language === 'gu'

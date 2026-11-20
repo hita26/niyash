@@ -34,6 +34,7 @@ import InstallAppBanner from './components/InstallAppBanner';
 import BioNanoProgressBar from './components/BioNanoProgressBar';
 import SecurityVerification from './components/SecurityVerification';
 import SecurityCheck from './pages/SecurityCheck';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Security Auth Guard: blocks unauthenticated access and forces login if user presses Back after logout
 function ProtectedRoute({ children }) {
@@ -428,7 +429,7 @@ function AppContent() {
         />
         {!isMobileMenuOpen && (
           <>
-            <FloatingOrderWidget />
+            {!location.pathname.startsWith('/admin') && <FloatingOrderWidget />}
             <AIAssistant addToCart={addToCart} />
           </>
         )}
@@ -443,7 +444,9 @@ function App() {
       <LanguageProvider>
         <ThemeProvider>
           <AuthProvider>
-            <AppContent />
+            <ErrorBoundary>
+              <AppContent />
+            </ErrorBoundary>
           </AuthProvider>
         </ThemeProvider>
       </LanguageProvider>

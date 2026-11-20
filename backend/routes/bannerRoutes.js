@@ -7,18 +7,106 @@ const { protect, adminOnly } = require('../middleware/authMiddleware');
 
 const BANNERS_FILE = path.join(__dirname, '../data/banners.json');
 
-// Read local fallback banners
+// Master Default Banners representing b1-b7 product catalog posters
+const DEFAULT_BANNERS = [
+  {
+    _id: "seed-b1",
+    title: "NAP STAR A75 Capsules",
+    subtitle: "Aspirin Gastro-resistant & Atorvastatin Capsules I.P. • MRP ₹60 • Niyansh Pharma Rajkot",
+    badge: "NEWLY LAUNCHED",
+    image: "/banners/b1.jpeg",
+    link: "/products?search=NAP%20STAR",
+    ctaText: "Order NAP STAR A75 ⚡",
+    order: 1,
+    active: true,
+    aspectRatio: "landscape"
+  },
+  {
+    _id: "seed-b2",
+    title: "NIYACOF-DX Cough Syrup",
+    subtitle: "Dextromethorphan HBr, Chlorpheniramine & Phenylephrine • Triple Relief from Cough, Cold & Congestion",
+    badge: "NEW LAUNCH",
+    image: "/banners/b2.jpeg",
+    link: "/products?search=NIYACOF",
+    ctaText: "Order NIYACOF-DX ⚡",
+    order: 2,
+    active: true,
+    aspectRatio: "square"
+  },
+  {
+    _id: "seed-b3",
+    title: "Niyamet-G1 SR Tablets",
+    subtitle: "Metformin Hydrochloride PR & Glimepiride Tablets I.P. • MRP ₹135/- • For Better Control of Diabetes",
+    badge: "DIABETES CARE",
+    image: "/banners/b3.jpeg",
+    link: "/products?search=Niyamet",
+    ctaText: "Order Niyamet-G1 ⚡",
+    order: 3,
+    active: true,
+    aspectRatio: "square"
+  },
+  {
+    _id: "seed-b4",
+    title: "Niyamet-G2 SR Tablets",
+    subtitle: "Metformin Hydrochloride PR & Glimepiride Tablets I.P. • MRP ₹176/- • Better Control for Healthier Tomorrow",
+    badge: "DIABETES CARE",
+    image: "/banners/b4.jpeg",
+    link: "/products?search=Niyamet",
+    ctaText: "Order Niyamet-G2 ⚡",
+    order: 4,
+    active: true,
+    aspectRatio: "square"
+  },
+  {
+    _id: "seed-b5",
+    title: "Niyarose 10 Tablets",
+    subtitle: "Rosuvastatin Calcium Tablets I.P. • MRP ₹185/- • Effective Control of Cholesterol & Heart Health",
+    badge: "CARDIAC CARE",
+    image: "/banners/b5.jpeg",
+    link: "/products?search=Niyarose",
+    ctaText: "Order Niyarose 10 ⚡",
+    order: 5,
+    active: true,
+    aspectRatio: "square"
+  },
+  {
+    _id: "seed-b6",
+    title: "Niyastat-Gold 10 Capsules",
+    subtitle: "Atorvastatin, Aspirin & Clopidogrel Capsules • MRP ₹107/Strip • Triple Action for Healthier Heart",
+    badge: "TRIPLE ACTION CARDIAC",
+    image: "/banners/b6.jpeg",
+    link: "/products?search=Niyastat",
+    ctaText: "Order Niyastat-Gold 10 ⚡",
+    order: 6,
+    active: true,
+    aspectRatio: "portrait"
+  },
+  {
+    _id: "seed-b7",
+    title: "Niyastat-Gold 20 Capsules",
+    subtitle: "Atorvastatin, Aspirin & Clopidogrel Capsules • MRP ₹139/Strip • Advanced Triple Action Heart Care",
+    badge: "TRIPLE ACTION CARDIAC",
+    image: "/banners/b7.jpeg",
+    link: "/products?search=Niyastat",
+    ctaText: "Order Niyastat-Gold 20 ⚡",
+    order: 7,
+    active: true,
+    aspectRatio: "portrait"
+  }
+];
+
+// Read local fallback banners with hard fallback to DEFAULT_BANNERS
 const readLocalBanners = () => {
   try {
     if (fs.existsSync(BANNERS_FILE)) {
       const raw = fs.readFileSync(BANNERS_FILE, 'utf8');
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) return parsed;
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
     }
   } catch (err) {
     console.warn('Error reading local banners.json:', err.message);
   }
-  return [];
+  return DEFAULT_BANNERS;
 };
 
 // Write local fallback banners
@@ -38,10 +126,9 @@ const seedDatabaseIfEmpty = async () => {
     const count = await Banner.countDocuments();
     if (count === 0) {
       const local = readLocalBanners();
-      if (local.length > 0) {
-        const toInsert = local.map(({ _id, ...rest }) => rest);
-        await Banner.insertMany(toInsert);
-      }
+      const toInsert = (local.length > 0 ? local : DEFAULT_BANNERS).map(({ _id, ...rest }) => rest);
+      await Banner.insertMany(toInsert);
+      console.log('Successfully seeded MongoDB with 7 initial Niyansh hero banners');
     }
   } catch (err) {
     console.warn('Seed banners notice:', err.message);
@@ -62,11 +149,11 @@ router.get('/', async (req, res) => {
 
     // Fallback to local
     const local = readLocalBanners().filter(b => b.active !== false);
-    return res.json({ success: true, banners: local });
+    return res.json({ success: true, banners: local.length > 0 ? local : DEFAULT_BANNERS });
   } catch (err) {
-    console.warn('DB error fetching banners, using local fallback:', err.message);
+    console.warn('DB error fetching banners, using fallback:', err.message);
     const local = readLocalBanners().filter(b => b.active !== false);
-    return res.json({ success: true, banners: local });
+    return res.json({ success: true, banners: local.length > 0 ? local : DEFAULT_BANNERS });
   }
 });
 
@@ -83,11 +170,11 @@ router.get('/all', protect, adminOnly, async (req, res) => {
     }
 
     const local = readLocalBanners();
-    return res.json({ success: true, banners: local });
+    return res.json({ success: true, banners: local.length > 0 ? local : DEFAULT_BANNERS });
   } catch (err) {
-    console.warn('DB error in /api/banners/all, using local fallback:', err.message);
+    console.warn('DB error in /api/banners/all, using fallback:', err.message);
     const local = readLocalBanners();
-    return res.json({ success: true, banners: local });
+    return res.json({ success: true, banners: local.length > 0 ? local : DEFAULT_BANNERS });
   }
 });
 
@@ -104,9 +191,9 @@ router.post('/', protect, adminOnly, async (req, res) => {
     }
 
     const newBannerData = {
-      title: title?.trim() || 'Niyansh Pharma B2B Wholesale',
+      title: title?.trim() || 'Niyansh Pharma Formulation',
       subtitle: subtitle?.trim() || 'Genuine Formulations & Supplies Across Gujarat',
-      badge: badge?.trim() || 'WHO-GMP CERTIFIED',
+      badge: badge?.trim() || 'NEW LAUNCH',
       image: image.trim(),
       link: link?.trim() || '/quick-order',
       ctaText: ctaText?.trim() || 'Fast Quick Order ⚡',

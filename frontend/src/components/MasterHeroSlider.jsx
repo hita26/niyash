@@ -11,101 +11,109 @@ import {
   ShieldCheck,
   Truck,
   CheckCircle2,
-  Layers
+  Layers,
+  ArrowRight
 } from 'lucide-react';
 import PharmaMoleculesCanvas from './PharmaMoleculesCanvas';
 import AnimatedCounter from './AnimatedCounter';
 import { useLanguage } from '../context/LanguageContext';
 
-// Seed fallback banners if backend is offline
+// 7 Master Hero Banners for Niyansh Pharma's Exclusive Product Line (b1 - b7)
 const FALLBACK_BANNERS = [
   {
     _id: 'seed-b1',
-    title: 'Authorized Wholesale & B2B Distribution',
-    subtitle: 'Genuine Healthcare Formulations, Generics & Hospital Consumables Delivered Across Saurashtra',
-    badge: 'PAN GUJARAT DISTRIBUTION',
+    tabLabel: 'NAP STAR A75',
+    title: 'NAP STAR A75 Capsules',
+    subtitle: 'Aspirin Gastro-resistant & Atorvastatin Capsules I.P. • For a Healthy Heart & Better Life • MRP ₹60',
+    badge: 'NEWLY LAUNCHED • RAJKOT',
     image: '/banners/b1.jpeg',
-    link: '/companies',
-    ctaText: 'Browse Pharma Companies',
+    link: '/products?search=NAP%20STAR',
+    ctaText: 'Order NAP STAR A75 ⚡',
     order: 1,
     active: true,
     aspectRatio: 'landscape'
   },
   {
     _id: 'seed-b2',
-    title: 'WHO-GMP Verified Pharmaceutical Formulations',
-    subtitle: '100% Certified Batch Compliance & Direct Sourcing from Top Indian Manufacturers',
-    badge: 'WHO-GMP CERTIFIED',
+    tabLabel: 'NIYACOF-DX',
+    title: 'NIYACOF-DX Cough Syrup',
+    subtitle: 'Dextromethorphan HBr, Chlorpheniramine & Phenylephrine • Triple Relief from Cough, Cold & Congestion',
+    badge: 'NEW LAUNCH • COUGH & COLD',
     image: '/banners/b2.jpeg',
-    link: '/products?category=Pharma Products',
-    ctaText: 'View Pharma Products',
+    link: '/products?search=NIYACOF',
+    ctaText: 'Order NIYACOF-DX ⚡',
     order: 2,
     active: true,
     aspectRatio: 'square'
   },
   {
     _id: 'seed-b3',
-    title: 'Exclusive Chemist Schemes & Volume Discounts',
-    subtitle: 'Special Bonus Margins, 10+1 Free Offers & Wholesale Savings for Registered Pharmacies',
-    badge: 'CHEMIST SCHEMES & OFFERS',
+    tabLabel: 'Niyamet-G1',
+    title: 'Niyamet-G1 SR Tablets',
+    subtitle: 'Metformin Hydrochloride PR & Glimepiride Tablets I.P. • For Better Control of Diabetes • MRP ₹135/-',
+    badge: 'DIABETES CARE • WHO-GMP',
     image: '/banners/b3.jpeg',
-    link: '/quick-order',
-    ctaText: 'Fast Quick Order ⚡',
+    link: '/products?search=Niyamet',
+    ctaText: 'Order Niyamet-G1 ⚡',
     order: 3,
     active: true,
     aspectRatio: 'square'
   },
   {
     _id: 'seed-b4',
-    title: 'Critical Care Emergency Injectables',
-    subtitle: 'Dedicated Cold-Chain Storage & Sterile Ampoules for Nursing Homes & Hospitals',
-    badge: 'COLD-CHAIN COMPLIANT',
+    tabLabel: 'Niyamet-G2',
+    title: 'Niyamet-G2 SR Tablets',
+    subtitle: 'Metformin Hydrochloride PR & Glimepiride Tablets I.P. • Better Control for Healthier Tomorrow • MRP ₹176/-',
+    badge: 'DIABETES CARE • PROLONGED RELEASE',
     image: '/banners/b4.jpeg',
-    link: '/products?category=Injectables',
-    ctaText: 'Critical Care Range',
+    link: '/products?search=Niyamet',
+    ctaText: 'Order Niyamet-G2 ⚡',
     order: 4,
     active: true,
     aspectRatio: 'square'
   },
   {
     _id: 'seed-b5',
-    title: 'Hospital Disposables & Surgical Supplies',
-    subtitle: 'Clinical Surgical Gloves, I.V. Cannulas, Syringes, Sutures & Diagnostic Consumables',
-    badge: 'HOSPITAL SURGICAL SUPPLY',
+    tabLabel: 'Niyarose 10',
+    title: 'Niyarose 10 Tablets',
+    subtitle: 'Rosuvastatin Calcium Tablets I.P. • Effective Control of Cholesterol & Heart Health • MRP ₹185/-',
+    badge: 'CARDIAC CARE • CHOLESTEROL CONTROL',
     image: '/banners/b5.jpeg',
-    link: '/products?category=Surgical %26 Medical Supplies',
-    ctaText: 'Explore Surgical Supplies',
+    link: '/products?search=Niyarose',
+    ctaText: 'Order Niyarose 10 ⚡',
     order: 5,
     active: true,
     aspectRatio: 'square'
   },
   {
     _id: 'seed-b6',
-    title: 'Guaranteed 24-Hour Dispatch from Rajkot Depot',
-    subtitle: 'Rapid Logistics & Direct Wholesale Desk Connectivity Across Saurashtra',
-    badge: 'SAME-DAY DISPATCH',
+    tabLabel: 'Niyastat 10',
+    title: 'Niyastat-Gold 10 Capsules',
+    subtitle: 'Atorvastatin, Aspirin & Clopidogrel Capsules • Triple Action for Healthier Heart • MRP ₹107/Strip',
+    badge: 'TRIPLE ACTION CARDIAC',
     image: '/banners/b6.jpeg',
-    link: 'https://wa.me/919909923130?text=Hello%20Niyansh%20Pharma%2C%20I%20would%20like%20to%20place%20a%20wholesale%20order.',
-    ctaText: 'WhatsApp Direct Order',
+    link: '/products?search=Niyastat',
+    ctaText: 'Order Niyastat-Gold 10 ⚡',
     order: 6,
     active: true,
     aspectRatio: 'portrait'
   },
   {
     _id: 'seed-b7',
-    title: 'Authorized Distribution for 15+ Top Brands',
-    subtitle: 'Direct Network for Sun Pharma, Cipla, Zydus, Alkem, Mankind, Abbott & Torrent',
-    badge: 'OFFICIAL STOCKIST NETWORK',
+    tabLabel: 'Niyastat 20',
+    title: 'Niyastat-Gold 20 Capsules',
+    subtitle: 'Atorvastatin, Aspirin & Clopidogrel Capsules • Advanced Cardiovascular Protection • MRP ₹139/Strip',
+    badge: 'TRIPLE ACTION ADVANCED',
     image: '/banners/b7.jpeg',
-    link: '/companies',
-    ctaText: 'Explore Manufacturers',
+    link: '/products?search=Niyastat',
+    ctaText: 'Order Niyastat-Gold 20 ⚡',
     order: 7,
     active: true,
     aspectRatio: 'portrait'
   }
 ];
 
-const AUTOPLAY_MS = 5500; // 5.5 seconds per slide
+const AUTOPLAY_MS = 5000; // 5 seconds per slide for a brisk, dynamic rotation
 
 export default function MasterHeroSlider({
   liveProductsCount = 500,
@@ -124,23 +132,26 @@ export default function MasterHeroSlider({
   const touchEndX = useRef(0);
   const touchStartY = useRef(0);
 
-  // Fetch active banners from backend
+  // Fetch active banners from backend with fallback guarantee
   useEffect(() => {
     let isMounted = true;
     fetch('/api/banners')
       .then(res => res.json())
       .then(data => {
-        if (isMounted && data.success && Array.isArray(data.banners) && data.banners.length > 0) {
-          setBanners(data.banners.filter(b => b.active !== false));
+        if (isMounted && data && data.success && Array.isArray(data.banners) && data.banners.length > 0) {
+          const activeList = data.banners.filter(b => b.active !== false);
+          if (activeList.length > 0) {
+            setBanners(activeList);
+          }
         }
       })
       .catch(err => {
-        console.warn('Could not fetch banners, using seeded list:', err);
+        console.warn('Could not fetch banners from API, keeping seeded roster:', err);
       });
     return () => { isMounted = false; };
   }, []);
 
-  // Total slides: Slide 0 is the Master Interactive Brand Hub, followed by banners
+  // Total slides: Slide 0 is the Master Interactive Brand Hub, followed by product banners
   const totalSlides = 1 + banners.length;
 
   const nextSlide = useCallback(() => {
@@ -191,7 +202,7 @@ export default function MasterHeroSlider({
 
   const handleTouchEnd = () => {
     const diffX = touchStartX.current - touchEndX.current;
-    if (Math.abs(diffX) > 45) {
+    if (Math.abs(diffX) > 40) {
       if (diffX > 0) nextSlide();
       else prevSlide();
     }
@@ -199,6 +210,11 @@ export default function MasterHeroSlider({
 
   // Active banner data for dynamic slides (index 1..N)
   const currentBanner = currentIdx > 0 ? banners[currentIdx - 1] : null;
+
+  // Active slide label for the floating pill
+  const activeLabel = currentIdx === 0 
+    ? 'Brand Hub' 
+    : (currentBanner?.tabLabel || currentBanner?.title?.split(' ')[0] || `Banner ${currentIdx}`);
 
   return (
     <section 
@@ -210,7 +226,7 @@ export default function MasterHeroSlider({
       onTouchEnd={handleTouchEnd}
       style={{
         position: 'relative',
-        minHeight: 'clamp(520px, 68vh, 660px)',
+        minHeight: 'clamp(520px, 70vh, 660px)',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
@@ -219,9 +235,57 @@ export default function MasterHeroSlider({
         background: `linear-gradient(135deg, rgba(8, 38, 70, 0.97), rgba(15, 68, 115, 0.93)), url("${heroBgImage}")`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        padding: 'clamp(32px, 5vw, 65px) 0 clamp(44px, 6vw, 75px) 0'
+        padding: 'clamp(32px, 5vw, 65px) 0 clamp(54px, 7vw, 85px) 0'
       }}
     >
+      {/* Top Slide Autoplay Progress Line */}
+      <div 
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '3px',
+          backgroundColor: 'rgba(255, 255, 255, 0.12)',
+          zIndex: 15
+        }}
+      >
+        <div 
+          style={{
+            height: '100%',
+            width: `${progress}%`,
+            backgroundColor: '#34d399',
+            boxShadow: '0 0 10px #34d399',
+            transition: 'width 50ms linear'
+          }}
+        />
+      </div>
+
+      {/* Floating Rotating Status Beacon (Top Right) */}
+      <div 
+        style={{
+          position: 'absolute',
+          top: '16px',
+          right: 'clamp(14px, 3vw, 36px)',
+          zIndex: 15,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '8px',
+          backgroundColor: 'rgba(10, 35, 65, 0.75)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(52, 211, 153, 0.45)',
+          padding: '4px 12px',
+          borderRadius: '20px',
+          fontSize: '0.74rem',
+          fontWeight: '700',
+          color: '#86efac',
+          letterSpacing: '0.5px'
+        }}
+      >
+        <span className="live-pulse-dot" style={{ width: 7, height: 7 }} />
+        <span>Slide {currentIdx + 1} / {totalSlides} • {activeLabel}</span>
+      </div>
+
       {/* ============================================================== */}
       {/* SLIDE 0: MASTER INTERACTIVE BIOTECH BRAND HUB (Default on load) */}
       {/* ============================================================== */}
@@ -356,7 +420,7 @@ export default function MasterHeroSlider({
       </div>
 
       {/* ============================================================== */}
-      {/* SLIDES 1..N: DYNAMIC HERO BANNERS (b1..b7 & Admin Created)       */}
+      {/* SLIDES 1..N: DYNAMIC HERO PRODUCT BANNERS (b1..b7)              */}
       {/* ============================================================== */}
       {currentBanner && (
         <div 
@@ -372,150 +436,48 @@ export default function MasterHeroSlider({
           <div 
             style={{
               position: 'absolute',
-              top: '-20%',
-              left: '-10%',
-              width: '120%',
-              height: '140%',
+              top: '-30%',
+              left: '-15%',
+              width: '130%',
+              height: '160%',
               backgroundImage: `url("${currentBanner.image}")`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
-              filter: 'blur(36px) brightness(0.40)',
-              opacity: 0.55,
+              filter: 'blur(45px) brightness(0.35)',
+              opacity: 0.65,
               zIndex: 0,
               pointerEvents: 'none'
             }}
           />
 
           <div className="container" style={{ position: 'relative', zIndex: 2 }}>
-            <div 
-              className="banner-content-wrapper"
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                gap: 'clamp(20px, 4vw, 44px)',
-                alignItems: 'center'
-              }}
-            >
-              {/* Left Column: Heading, Subtitle & Action Buttons */}
-              <div style={{ maxWidth: '640px' }}>
-                {/* Badge Tag */}
-                <div 
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '7px',
-                    backgroundColor: 'rgba(52, 211, 153, 0.18)',
-                    border: '1.5px solid rgba(74, 222, 128, 0.55)',
-                    padding: '6px 14px',
-                    borderRadius: '24px',
-                    fontSize: 'clamp(0.72rem, 2vw, 0.82rem)',
-                    fontWeight: '800',
-                    color: '#86efac',
-                    letterSpacing: '0.8px',
-                    textTransform: 'uppercase',
-                    marginBottom: '16px'
-                  }}
-                >
-                  <Sparkles size={14} color="#86efac" />
-                  <span>{currentBanner.badge || 'WHO-GMP DISTRIBUTOR'}</span>
-                </div>
-
-                {/* Banner Title */}
-                <h2 
-                  style={{
-                    fontSize: 'clamp(1.65rem, 4.2vw, 2.9rem)',
-                    fontWeight: '900',
-                    lineHeight: '1.2',
-                    color: '#ffffff',
-                    marginBottom: '14px',
-                    fontFamily: 'Outfit',
-                    textShadow: '0 2px 14px rgba(0,0,0,0.5)'
-                  }}
-                >
-                  {currentBanner.title}
-                </h2>
-
-                {/* Banner Subtitle */}
-                <p 
-                  style={{
-                    fontSize: 'clamp(0.92rem, 2.2vw, 1.05rem)',
-                    color: '#e2e8f0',
-                    lineHeight: '1.6',
-                    marginBottom: '24px',
-                    maxWidth: '560px'
-                  }}
-                >
-                  {currentBanner.subtitle}
-                </p>
-
-                {/* Trust Badges */}
-                <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', marginBottom: '24px' }}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', color: '#cbd5e1' }}>
-                    <ShieldCheck size={16} color="#86efac" /> WHO-GMP Batch Verified
-                  </span>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', color: '#cbd5e1' }}>
-                    <Truck size={16} color="#38bdf8" /> Same-Day Dispatch in Saurashtra
-                  </span>
-                </div>
-
-                {/* Action CTAs */}
-                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                  {currentBanner.link?.startsWith('http') || currentBanner.link?.startsWith('wa.me') ? (
-                    <a 
-                      href={currentBanner.link} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="btn btn-secondary card-hover-pharma"
-                      style={{ padding: '12px 24px', fontSize: '0.94rem', fontWeight: '700', borderRadius: '30px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
-                    >
-                      <MessageSquare size={17} /> {currentBanner.ctaText || 'WhatsApp Order'}
-                    </a>
-                  ) : (
-                    <Link 
-                      to={currentBanner.link || '/quick-order'} 
-                      className="btn btn-primary card-hover-pharma"
-                      style={{ padding: '12px 24px', fontSize: '0.94rem', fontWeight: '700', borderRadius: '30px', display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#ffffff', color: 'var(--primary-blue)' }}
-                    >
-                      <Package size={17} /> {currentBanner.ctaText || 'Fast Quick Order ⚡'}
-                    </Link>
-                  )}
-
-                  <button 
-                    onClick={handleQuickWhatsApp} 
-                    className="btn btn-outline card-hover-pharma"
-                    style={{ borderColor: 'rgba(255,255,255,0.7)', color: '#ffffff', padding: '12px 20px', fontSize: '0.94rem', fontWeight: '600', borderRadius: '30px' }}
-                  >
-                    <MessageSquare size={17} /> Direct Inquiry
-                  </button>
-                </div>
-              </div>
-
-              {/* Right Column: Crisp Illuminated Artwork Display */}
+            {/* If it's the wide landscape banner (b1): show full widescreen panorama card */}
+            {currentBanner.aspectRatio === 'landscape' ? (
               <div 
-                style={{ 
-                  display: 'flex', 
-                  justifyContent: 'center',
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
-                  position: 'relative'
+                  justifyContent: 'center',
+                  maxWidth: '1160px',
+                  margin: '0 auto'
                 }}
               >
-                <div 
-                  className="banner-image-card float-gentle"
+                {/* Clickable Large Panoramic Poster */}
+                <Link 
+                  to={currentBanner.link || '/products'}
                   style={{
-                    position: 'relative',
-                    borderRadius: '20px',
-                    overflow: 'hidden',
-                    boxShadow: '0 20px 50px rgba(0, 0, 0, 0.45), 0 0 30px rgba(52, 211, 153, 0.25)',
-                    border: '1.5px solid rgba(255, 255, 255, 0.18)',
-                    backgroundColor: 'rgba(11, 35, 65, 0.65)',
-                    backdropFilter: 'blur(12px)',
-                    maxWidth: currentBanner.aspectRatio === 'landscape' ? '560px' : '420px',
+                    display: 'block',
                     width: '100%',
-                    maxHeight: '440px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
+                    borderRadius: '22px',
+                    overflow: 'hidden',
+                    boxShadow: '0 25px 60px rgba(0, 0, 0, 0.55), 0 0 35px rgba(52, 211, 153, 0.3)',
+                    border: '1.5px solid rgba(255, 255, 255, 0.22)',
+                    backgroundColor: 'rgba(11, 35, 65, 0.7)',
+                    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                    textDecoration: 'none'
                   }}
+                  className="banner-panoramic-card card-hover-pharma"
                 >
                   <img 
                     src={currentBanner.image} 
@@ -524,32 +486,226 @@ export default function MasterHeroSlider({
                       width: '100%',
                       height: 'auto',
                       maxHeight: '440px',
-                      objectFit: currentBanner.aspectRatio === 'landscape' ? 'cover' : 'contain',
+                      objectFit: 'cover',
                       display: 'block'
                     }}
-                    loading="lazy"
                   />
-                  {/* Subtle Glass Sheen Overlay */}
-                  <div 
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      height: '35%',
-                      background: 'linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 100%)',
-                      pointerEvents: 'none'
-                    }}
-                  />
+                </Link>
+
+                {/* Sub-Banner Fast Action Bar */}
+                <div 
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '14px',
+                    width: '100%',
+                    marginTop: '16px',
+                    padding: '12px 20px',
+                    borderRadius: '16px',
+                    backgroundColor: 'rgba(10, 35, 65, 0.75)',
+                    backdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontSize: '0.74rem', backgroundColor: '#22c55e', color: '#ffffff', fontWeight: '800', padding: '3px 10px', borderRadius: '12px' }}>
+                      {currentBanner.badge || 'NEW LAUNCH'}
+                    </span>
+                    <span style={{ fontSize: '1rem', fontWeight: '800', color: '#ffffff' }}>
+                      {currentBanner.title}
+                    </span>
+                    <span style={{ fontSize: '0.82rem', color: '#94a3b8', display: 'none', mdDisplay: 'inline' }} className="d-none d-md-inline">
+                      • {currentBanner.subtitle}
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <Link 
+                      to={currentBanner.link || '/quick-order'} 
+                      className="btn btn-primary"
+                      style={{ padding: '8px 18px', fontSize: '0.88rem', fontWeight: '700', borderRadius: '25px', backgroundColor: '#ffffff', color: 'var(--primary-blue)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <Package size={15} /> {currentBanner.ctaText || 'Fast Quick Order ⚡'}
+                    </Link>
+                    <a 
+                      href={`https://wa.me/919909923130?text=Hello%20Niyansh%20Pharma%2C%20I%20would%20like%20to%20order%20${encodeURIComponent(currentBanner.title)}.`}
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="btn btn-secondary"
+                      style={{ padding: '8px 18px', fontSize: '0.88rem', fontWeight: '700', borderRadius: '25px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <MessageSquare size={15} /> WhatsApp Order
+                    </a>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              /* For Square & Portrait Posters (b2 - b7): Rich Split Showcase Layout */
+              <div 
+                className="banner-content-wrapper"
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                  gap: 'clamp(24px, 5vw, 50px)',
+                  alignItems: 'center'
+                }}
+              >
+                {/* Left Column: Product Details & CTAs */}
+                <div style={{ maxWidth: '600px' }}>
+                  {/* Badge Tag */}
+                  <div 
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '7px',
+                      backgroundColor: 'rgba(52, 211, 153, 0.2)',
+                      border: '1.5px solid rgba(74, 222, 128, 0.6)',
+                      padding: '6px 14px',
+                      borderRadius: '24px',
+                      fontSize: 'clamp(0.72rem, 2vw, 0.82rem)',
+                      fontWeight: '800',
+                      color: '#86efac',
+                      letterSpacing: '0.8px',
+                      textTransform: 'uppercase',
+                      marginBottom: '16px'
+                    }}
+                  >
+                    <Sparkles size={14} color="#86efac" />
+                    <span>{currentBanner.badge || 'EXCLUSIVE NIYANSH FORMULATION'}</span>
+                  </div>
+
+                  {/* Banner Title */}
+                  <h2 
+                    style={{
+                      fontSize: 'clamp(1.75rem, 4.2vw, 2.85rem)',
+                      fontWeight: '900',
+                      lineHeight: '1.2',
+                      color: '#ffffff',
+                      marginBottom: '14px',
+                      fontFamily: 'Outfit',
+                      textShadow: '0 2px 14px rgba(0,0,0,0.5)'
+                    }}
+                  >
+                    {currentBanner.title}
+                  </h2>
+
+                  {/* Banner Subtitle */}
+                  <p 
+                    style={{
+                      fontSize: 'clamp(0.92rem, 2.2vw, 1.08rem)',
+                      color: '#e2e8f0',
+                      lineHeight: '1.65',
+                      marginBottom: '22px',
+                      maxWidth: '540px'
+                    }}
+                  >
+                    {currentBanner.subtitle}
+                  </p>
+
+                  {/* Trust Badges */}
+                  <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', marginBottom: '24px' }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', color: '#cbd5e1' }}>
+                      <ShieldCheck size={16} color="#86efac" /> WHO-GMP Certified Formulation
+                    </span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', color: '#cbd5e1' }}>
+                      <Truck size={16} color="#38bdf8" /> Prompt Saurashtra & Gujarat Dispatch
+                    </span>
+                  </div>
+
+                  {/* Action CTAs */}
+                  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                    <Link 
+                      to={currentBanner.link || '/products'} 
+                      className="btn btn-primary card-hover-pharma"
+                      style={{ padding: '12px 24px', fontSize: '0.94rem', fontWeight: '700', borderRadius: '30px', display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#ffffff', color: 'var(--primary-blue)' }}
+                    >
+                      <Package size={17} /> {currentBanner.ctaText || 'Fast Quick Order ⚡'}
+                    </Link>
+
+                    <a 
+                      href={`https://wa.me/919909923130?text=Hello%20Niyansh%20Pharma%2C%20I%20would%20like%20to%20place%20a%20wholesale%20order%20for%20${encodeURIComponent(currentBanner.title)}.`}
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="btn btn-secondary card-hover-pharma"
+                      style={{ padding: '12px 24px', fontSize: '0.94rem', fontWeight: '700', borderRadius: '30px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                    >
+                      <MessageSquare size={17} /> WhatsApp Order
+                    </a>
+
+                    <button 
+                      onClick={handleQuickWhatsApp} 
+                      className="btn btn-outline card-hover-pharma"
+                      style={{ borderColor: 'rgba(255,255,255,0.7)', color: '#ffffff', padding: '12px 20px', fontSize: '0.94rem', fontWeight: '600', borderRadius: '30px' }}
+                    >
+                      Direct Inquiry
+                    </button>
+                  </div>
+                </div>
+
+                {/* Right Column: Crisp Illuminated Artwork Display */}
+                <div 
+                  style={{ 
+                    display: 'flex', 
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    position: 'relative'
+                  }}
+                >
+                  <Link
+                    to={currentBanner.link || '/products'}
+                    className="banner-image-card float-gentle"
+                    style={{
+                      position: 'relative',
+                      borderRadius: '20px',
+                      overflow: 'hidden',
+                      boxShadow: '0 25px 60px rgba(0, 0, 0, 0.55), 0 0 35px rgba(52, 211, 153, 0.28)',
+                      border: '1.5px solid rgba(255, 255, 255, 0.22)',
+                      backgroundColor: 'rgba(11, 35, 65, 0.7)',
+                      backdropFilter: 'blur(12px)',
+                      maxWidth: currentBanner.aspectRatio === 'portrait' ? '360px' : '440px',
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      textDecoration: 'none'
+                    }}
+                  >
+                    <img 
+                      src={currentBanner.image} 
+                      alt={currentBanner.title}
+                      style={{
+                        width: '100%',
+                        height: 'auto',
+                        maxHeight: '440px',
+                        objectFit: 'contain',
+                        display: 'block'
+                      }}
+                      loading="lazy"
+                    />
+                    {/* Subtle Glass Sheen Overlay */}
+                    <div 
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: '35%',
+                        background: 'linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 100%)',
+                        pointerEvents: 'none'
+                      }}
+                    />
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
 
       {/* ============================================================== */}
-      {/* NAVIGATION CONTROLS: Glass Chevrons & Progress Indicators       */}
+      {/* NAVIGATION CONTROLS: Prominent Glass Chevrons & Pill Indicators */}
       {/* ============================================================== */}
       {totalSlides > 1 && (
         <>
@@ -561,25 +717,26 @@ export default function MasterHeroSlider({
             className="hero-nav-arrow hero-nav-prev"
             style={{
               position: 'absolute',
-              left: 'clamp(8px, 2vw, 24px)',
+              left: 'clamp(8px, 2.5vw, 28px)',
               top: '50%',
               transform: 'translateY(-50%)',
-              zIndex: 10,
-              width: '42px',
-              height: '42px',
+              zIndex: 20,
+              width: '46px',
+              height: '46px',
               borderRadius: '50%',
-              backgroundColor: 'rgba(10, 35, 65, 0.65)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.25)',
+              backgroundColor: 'rgba(8, 28, 52, 0.82)',
+              backdropFilter: 'blur(12px)',
+              border: '1.5px solid rgba(255, 255, 255, 0.35)',
               color: '#ffffff',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)',
               transition: 'all 0.2s ease'
             }}
           >
-            <ChevronLeft size={22} />
+            <ChevronLeft size={24} />
           </button>
 
           {/* Next Arrow */}
@@ -590,44 +747,51 @@ export default function MasterHeroSlider({
             className="hero-nav-arrow hero-nav-next"
             style={{
               position: 'absolute',
-              right: 'clamp(8px, 2vw, 24px)',
+              right: 'clamp(8px, 2.5vw, 28px)',
               top: '50%',
               transform: 'translateY(-50%)',
-              zIndex: 10,
-              width: '42px',
-              height: '42px',
+              zIndex: 20,
+              width: '46px',
+              height: '46px',
               borderRadius: '50%',
-              backgroundColor: 'rgba(10, 35, 65, 0.65)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.25)',
+              backgroundColor: 'rgba(8, 28, 52, 0.82)',
+              backdropFilter: 'blur(12px)',
+              border: '1.5px solid rgba(255, 255, 255, 0.35)',
               color: '#ffffff',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)',
               transition: 'all 0.2s ease'
             }}
           >
-            <ChevronRight size={22} />
+            <ChevronRight size={24} />
           </button>
 
-          {/* Bottom Indicator Dots with Slide Titles & Progress */}
+          {/* Bottom Interactive Slide Indicator Pills Bar */}
           <div 
             className="hero-slider-pagination"
             style={{
               position: 'absolute',
-              bottom: '12px',
+              bottom: '14px',
               left: 0,
               right: 0,
-              zIndex: 10,
+              zIndex: 20,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '8px'
+              gap: '6px',
+              flexWrap: 'wrap',
+              padding: '0 16px'
             }}
           >
             {Array.from({ length: totalSlides }).map((_, idx) => {
               const isActive = idx === currentIdx;
+              const pillLabel = idx === 0 
+                ? '✦ Brand Hub' 
+                : (banners[idx - 1]?.tabLabel || banners[idx - 1]?.title?.split(' ')[0] || `Slide ${idx}`);
+
               return (
                 <button
                   key={idx}
@@ -636,31 +800,34 @@ export default function MasterHeroSlider({
                   aria-label={`Go to slide ${idx + 1}`}
                   style={{
                     position: 'relative',
-                    height: '8px',
-                    width: isActive ? '36px' : '10px',
-                    borderRadius: '4px',
-                    backgroundColor: isActive ? 'rgba(52, 211, 153, 0.4)' : 'rgba(255, 255, 255, 0.25)',
-                    border: 'none',
-                    padding: 0,
+                    height: '24px',
+                    padding: isActive ? '0 12px' : '0 8px',
+                    borderRadius: '12px',
+                    backgroundColor: isActive ? 'rgba(34, 197, 94, 0.35)' : 'rgba(255, 255, 255, 0.18)',
+                    border: isActive ? '1px solid #34d399' : '1px solid rgba(255, 255, 255, 0.22)',
+                    color: isActive ? '#86efac' : '#cbd5e1',
+                    fontSize: '0.72rem',
+                    fontWeight: isActive ? '800' : '600',
                     cursor: 'pointer',
-                    overflow: 'hidden',
-                    transition: 'all 0.3s ease'
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    transition: 'all 0.25s ease',
+                    backdropFilter: 'blur(8px)',
+                    boxShadow: isActive ? '0 0 12px rgba(52, 211, 153, 0.5)' : 'none'
                   }}
                 >
-                  {isActive && (
-                    <span 
-                      style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        height: '100%',
-                        width: `${progress}%`,
-                        backgroundColor: '#34d399',
-                        borderRadius: '4px',
-                        transition: 'width 50ms linear'
-                      }}
-                    />
-                  )}
+                  <span 
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: '50%',
+                      backgroundColor: isActive ? '#34d399' : 'rgba(255, 255, 255, 0.5)'
+                    }} 
+                  />
+                  <span className={isActive ? '' : 'd-none d-sm-inline'}>
+                    {pillLabel}
+                  </span>
                 </button>
               );
             })}

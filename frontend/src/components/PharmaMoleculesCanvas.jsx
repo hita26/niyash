@@ -1,12 +1,17 @@
 import React, { useEffect, useRef } from 'react';
 
 /**
- * PharmaMoleculesCanvas - 3D Luminous DNA Helix & Molecular Nebula
- * An ultra-modern, cinematic biotech background animation:
- * - 3D Rotating Luminous DNA Double-Helix suspended on the far right (never in the center!)
- * - Floating chemical benzene rings, bio-atom nodes, and zero-gravity tumbling micro-capsules
- * - Zero middle clutter: The hero headline text remains 100% crisp, unobstructed, and pristine
- * - 60 FPS hardware-accelerated Canvas with zero-CPU offscreen pausing via IntersectionObserver
+ * PharmaMoleculesCanvas - Luminous Brand Nebula & 3D DNA Helix Edition
+ * High-performance HTML5 Canvas rendering:
+ * 1. Ambient Kinetic Typography: Majestic glowing "NIYANSH PHARMA" architectural watermark spanning the background
+ * 2. Floating Luminous NP Bio-Emblem: Weightless capsule & leaf emblem in the open upper horizon
+ * 3. 3D Rotating DNA Double-Helix: Suspended on the far right with perspective depth
+ * 4. Zero-Gravity Molecular Network: Floating benzene rings, bio-atoms, and tumbling micro-capsules
+ *
+ * - Calibrated transparency: Foreground hero headline text remains 100% crisp & readable
+ * - Zero double-text collision, zero rectangular artifacts
+ * - Auto-pauses offscreen via IntersectionObserver (0% CPU / battery waste)
+ * - 60 FPS hardware-accelerated Canvas with fluid mouse interaction
  */
 export default function PharmaMoleculesCanvas({
   particleCount = 38,
@@ -111,7 +116,6 @@ export default function PharmaMoleculesCanvas({
           }
         }
 
-        // Screen boundary smooth wrap
         if (this.x < -30) this.x = width + 30;
         else if (this.x > width + 30) this.x = -30;
         if (this.y < -30) this.y = height + 30;
@@ -201,7 +205,6 @@ export default function PharmaMoleculesCanvas({
           ctx.shadowBlur = 6;
           ctx.fill();
 
-          // Inner clinical highlight
           ctx.beginPath();
           ctx.arc(-this.radius * 0.3, -this.radius * 0.3, this.radius * 0.35, 0, Math.PI * 2);
           ctx.fillStyle = `rgba(255, 255, 255, ${currentAlpha * 0.8})`;
@@ -234,7 +237,7 @@ export default function PharmaMoleculesCanvas({
 
           if (distSq < maxDistSq) {
             const dist = Math.sqrt(distSq);
-            const alpha = (1 - dist / activeDistance) * 0.28;
+            const alpha = (1 - dist / activeDistance) * 0.26;
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
@@ -247,98 +250,203 @@ export default function PharmaMoleculesCanvas({
     };
 
     /**
-     * 3D Luminous DNA Double-Helix (Positioned on the FAR RIGHT, NEVER in the middle!)
-     * Pure international biotechnology animation with 3D perspective depth
+     * 1. Majestic Ambient Kinetic Watermark: "NIYANSH PHARMA"
+     * Spans gracefully across the background canvas in elegant, glowing outline typography.
+     * Architectural, non-intrusive, and 100% visible across the whole hero section.
+     */
+    const drawKineticBrandWatermark = () => {
+      ctx.save();
+      const breathing = Math.sin(globalTime * 1.2) * 0.04;
+      const waveY = Math.sin(globalTime * 0.6) * 8;
+
+      const fontSize = isMobile ? Math.max(26, width * 0.075) : Math.min(84, width * 0.058);
+      ctx.font = `900 ${fontSize}px Outfit, -apple-system, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      const posX = width * 0.50;
+      const posY = (height * 0.52) + waveY;
+
+      // Soft glow aura behind watermark
+      ctx.shadowColor = 'rgba(52, 211, 153, 0.45)';
+      ctx.shadowBlur = 18;
+
+      // Luminous cyan outline stroke
+      const alphaStroke = 0.12 + breathing;
+      ctx.strokeStyle = `rgba(56, 189, 248, ${alphaStroke})`;
+      ctx.lineWidth = isMobile ? 1.4 : 2.0;
+      ctx.strokeText('NIYANSH  PHARMA', posX, posY);
+
+      // Faint emerald inner luminescence
+      ctx.fillStyle = `rgba(52, 211, 153, ${alphaStroke * 0.35})`;
+      ctx.fillText('NIYANSH  PHARMA', posX, posY);
+
+      ctx.restore();
+    };
+
+    /**
+     * 2. Floating Luminous NP Bio-Emblem (In Open Upper Horizon, AWAY from text!)
+     * Positioned in the open space where it never collides with headline text.
+     */
+    const drawFloatingBioEmblem = () => {
+      // Placed in the open space above the cards / between columns (x = 65%, y = 65px)
+      const emblemX = isMobile ? width * 0.72 : width * 0.66;
+      const emblemY = isMobile ? 48 : 68;
+
+      const floatY = Math.sin(globalTime * 0.8) * 8;
+      const floatRot = Math.sin(globalTime * 0.5) * 0.03;
+      const breathing = Math.sin(globalTime * 1.5) * 0.06;
+      const scale = (isMobile ? 0.72 : 1.0) * (1 + breathing * 0.04);
+      const alpha = 0.38 + breathing * 0.08;
+
+      ctx.save();
+      ctx.translate(emblemX, emblemY + floatY);
+      ctx.rotate(floatRot);
+      ctx.scale(scale, scale);
+
+      // Ambient radial glow
+      const aura = ctx.createRadialGradient(0, 0, 5, 0, 0, 50);
+      aura.addColorStop(0, `rgba(52, 211, 153, ${alpha * 0.5})`);
+      aura.addColorStop(0.6, `rgba(56, 189, 248, ${alpha * 0.25})`);
+      aura.addColorStop(1, 'rgba(10, 48, 86, 0)');
+      ctx.beginPath();
+      ctx.arc(0, 0, 50, 0, Math.PI * 2);
+      ctx.fillStyle = aura;
+      ctx.fill();
+
+      // Rotating fine orbital ring
+      ctx.save();
+      ctx.rotate(globalTime * 0.4);
+      ctx.beginPath();
+      ctx.arc(0, 0, 32, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(56, 189, 248, ${alpha * 0.45})`;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([6, 8]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Small orbital satellite node
+      ctx.beginPath();
+      ctx.arc(32, 0, 2.2, 0, Math.PI * 2);
+      ctx.fillStyle = '#38bdf8';
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 6;
+      ctx.fill();
+      ctx.restore();
+
+      // Stylized glowing 'N'
+      ctx.shadowColor = 'rgba(56, 189, 248, 0.8)';
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.moveTo(-18, 10);
+      ctx.lineTo(-18, -14);
+      ctx.quadraticCurveTo(-18, -20, -11, -20);
+      ctx.lineTo(-5, -11);
+      ctx.lineWidth = 3.8;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = `rgba(56, 189, 248, ${alpha * 1.2})`;
+      ctx.stroke();
+
+      // Stylized glowing 'P'
+      ctx.shadowColor = 'rgba(52, 211, 153, 0.8)';
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.moveTo(5, 10);
+      ctx.lineTo(5, -16);
+      ctx.bezierCurveTo(18, -16, 20, -7, 13, 0);
+      ctx.quadraticCurveTo(8, 4, 5, 3);
+      ctx.lineWidth = 3.8;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = `rgba(52, 211, 153, ${alpha * 1.25})`;
+      ctx.stroke();
+
+      // Center capsule pill
+      ctx.save();
+      ctx.translate(-2, -4);
+      ctx.rotate(-Math.PI / 4);
+      ctx.beginPath();
+      ctx.arc(0, -5, 4.5, Math.PI, 0);
+      ctx.lineTo(4.5, 0);
+      ctx.lineTo(-4.5, 0);
+      ctx.closePath();
+      ctx.fillStyle = `rgba(56, 189, 248, ${alpha * 1.3})`;
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(0, 5, 4.5, 0, Math.PI);
+      ctx.lineTo(-4.5, 0);
+      ctx.lineTo(4.5, 0);
+      ctx.closePath();
+      ctx.fillStyle = `rgba(52, 211, 153, ${alpha * 1.3})`;
+      ctx.fill();
+      ctx.restore();
+
+      // Sprouting Green Leaf
+      ctx.beginPath();
+      ctx.moveTo(5, -16);
+      ctx.bezierCurveTo(2, -26, 15, -28, 17, -21);
+      ctx.closePath();
+      ctx.fillStyle = `rgba(74, 222, 128, ${alpha * 1.4})`;
+      ctx.shadowColor = 'rgba(74, 222, 128, 0.9)';
+      ctx.shadowBlur = 8;
+      ctx.fill();
+
+      // Subtle brand label underneath emblem
+      ctx.font = '700 8px Outfit, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = `rgba(186, 230, 253, ${alpha * 0.9})`;
+      ctx.shadowBlur = 4;
+      ctx.fillText('NIYANSH PHARMA', 0, 24);
+
+      ctx.restore();
+    };
+
+    /**
+     * 3. 3D Luminous DNA Double-Helix (Positioned on Far Right)
      */
     const draw3DDNAHelix = () => {
-      // Positioned on the FAR RIGHT in the open space, far away from left headline text
-      const helixX = isMobile ? width * 0.90 : width * 0.84;
-      const helixY = height * 0.10;
-      const helixHeight = height * 0.80;
-      const helixWidth = isMobile ? 32 : 55;
-      const nodeCount = isMobile ? 14 : 22;
+      const helixX = isMobile ? width * 0.91 : width * 0.85;
+      const helixY = height * 0.12;
+      const helixHeight = height * 0.76;
+      const helixWidth = isMobile ? 28 : 50;
+      const nodeCount = isMobile ? 14 : 20;
       const stepY = helixHeight / nodeCount;
       const rotationSpeed = globalTime * 0.75;
 
       ctx.save();
       ctx.translate(helixX, helixY);
 
-      // Ambient soft glow column behind the helix
-      const colAura = ctx.createRadialGradient(0, helixHeight * 0.5, 10, 0, helixHeight * 0.5, helixWidth * 2.2);
-      colAura.addColorStop(0, 'rgba(52, 211, 153, 0.12)');
-      colAura.addColorStop(0.5, 'rgba(56, 189, 248, 0.08)');
+      // Soft ambient column
+      const colAura = ctx.createRadialGradient(0, helixHeight * 0.5, 10, 0, helixHeight * 0.5, helixWidth * 2.0);
+      colAura.addColorStop(0, 'rgba(52, 211, 153, 0.10)');
+      colAura.addColorStop(0.5, 'rgba(56, 189, 248, 0.06)');
       colAura.addColorStop(1, 'rgba(10, 48, 86, 0)');
       ctx.beginPath();
-      ctx.ellipse(0, helixHeight * 0.5, helixWidth * 2, helixHeight * 0.52, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, helixHeight * 0.5, helixWidth * 1.8, helixHeight * 0.50, 0, 0, Math.PI * 2);
       ctx.fillStyle = colAura;
       ctx.fill();
-
-      // Subtle Floating NP Biotechnology Insignia hovering gracefully above the helix (FAR RIGHT, NO CLASH)
-      ctx.save();
-      const badgeY = -28;
-      const breathing = Math.sin(globalTime * 1.5) * 0.06;
-      ctx.translate(0, badgeY);
-      ctx.scale(1 + breathing, 1 + breathing);
-
-      // Stylized glowing 'NP' Monogram Mark (Pure Vector, No Text)
-      ctx.shadowColor = 'rgba(52, 211, 153, 0.8)';
-      ctx.shadowBlur = 10;
-
-      // Small cyan 'N' loop
-      ctx.beginPath();
-      ctx.moveTo(-16, 8);
-      ctx.lineTo(-16, -10);
-      ctx.quadraticCurveTo(-16, -16, -10, -16);
-      ctx.lineTo(-5, -8);
-      ctx.lineWidth = 3;
-      ctx.lineCap = 'round';
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.45)';
-      ctx.stroke();
-
-      // Small emerald 'P' loop with leaf
-      ctx.beginPath();
-      ctx.moveTo(4, 8);
-      ctx.lineTo(4, -12);
-      ctx.bezierCurveTo(14, -12, 16, -4, 10, 2);
-      ctx.quadraticCurveTo(6, 5, 4, 4);
-      ctx.lineWidth = 3;
-      ctx.lineCap = 'round';
-      ctx.strokeStyle = 'rgba(52, 211, 153, 0.50)';
-      ctx.stroke();
-
-      // Tiny green leaf
-      ctx.beginPath();
-      ctx.moveTo(4, -12);
-      ctx.bezierCurveTo(2, -20, 12, -22, 14, -16);
-      ctx.closePath();
-      ctx.fillStyle = 'rgba(74, 222, 128, 0.65)';
-      ctx.fill();
-
-      ctx.restore();
 
       // Render 3D DNA Base Pairs and Strands
       for (let i = 0; i < nodeCount; i++) {
         const curY = i * stepY;
         const angle = i * 0.38 + rotationSpeed;
 
-        // 3D perspective projection
         const cosA = Math.cos(angle);
         const sinA = Math.sin(angle);
 
         const x1 = cosA * helixWidth;
-        const z1 = sinA; // -1 (back) to +1 (front)
+        const z1 = sinA;
 
         const x2 = -x1;
         const z2 = -z1;
 
-        // Depth perspective alpha & sizing
-        const alpha1 = Math.max(0.15, (z1 + 1) * 0.35 + 0.15);
-        const alpha2 = Math.max(0.15, (z2 + 1) * 0.35 + 0.15);
-        const radius1 = Math.max(2.0, (z1 + 1) * 1.5 + 2.2);
-        const radius2 = Math.max(2.0, (z2 + 1) * 1.5 + 2.2);
+        const alpha1 = Math.max(0.14, (z1 + 1) * 0.32 + 0.14);
+        const alpha2 = Math.max(0.14, (z2 + 1) * 0.32 + 0.14);
+        const radius1 = Math.max(1.8, (z1 + 1) * 1.4 + 2.0);
+        const radius2 = Math.max(1.8, (z2 + 1) * 1.4 + 2.0);
 
-        // 1. Horizontal Base-Pair Rung connecting the two strands
-        const bondAlpha = Math.max(0.1, (Math.min(alpha1, alpha2)) * 0.65);
+        // Base-Pair Rung
+        const bondAlpha = Math.max(0.08, Math.min(alpha1, alpha2) * 0.60);
         const grad = ctx.createLinearGradient(x1, curY, x2, curY);
         grad.addColorStop(0, `rgba(56, 189, 248, ${bondAlpha})`);
         grad.addColorStop(0.5, `rgba(255, 255, 255, ${bondAlpha * 1.2})`);
@@ -348,35 +456,29 @@ export default function PharmaMoleculesCanvas({
         ctx.moveTo(x1, curY);
         ctx.lineTo(x2, curY);
         ctx.strokeStyle = grad;
-        ctx.lineWidth = 1.2;
+        ctx.lineWidth = 1.1;
         ctx.stroke();
 
-        // 2. Center nucleotide hydrogen bond dot
-        ctx.beginPath();
-        ctx.arc(0, curY, 1.2, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${bondAlpha * 1.4})`;
-        ctx.fill();
-
-        // 3. Strand 1 Node (Cyan Sky Base)
+        // Strand 1 (Cyan)
         ctx.save();
         ctx.beginPath();
         ctx.arc(x1, curY, radius1, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(56, 189, 248, ${alpha1})`;
         if (z1 > 0) {
-          ctx.shadowColor = 'rgba(56, 189, 248, 0.8)';
-          ctx.shadowBlur = 8;
+          ctx.shadowColor = 'rgba(56, 189, 248, 0.75)';
+          ctx.shadowBlur = 7;
         }
         ctx.fill();
         ctx.restore();
 
-        // 4. Strand 2 Node (Emerald Green Base)
+        // Strand 2 (Emerald)
         ctx.save();
         ctx.beginPath();
         ctx.arc(x2, curY, radius2, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(52, 211, 153, ${alpha2})`;
         if (z2 > 0) {
-          ctx.shadowColor = 'rgba(52, 211, 153, 0.8)';
-          ctx.shadowBlur = 8;
+          ctx.shadowColor = 'rgba(52, 211, 153, 0.75)';
+          ctx.shadowBlur = 7;
         }
         ctx.fill();
         ctx.restore();
@@ -397,10 +499,16 @@ export default function PharmaMoleculesCanvas({
       // 1. Draw connecting chemical bonds between floating particles
       drawInterParticleConnections();
 
-      // 2. Draw 3D Rotating Luminous DNA Double-Helix on the FAR RIGHT
+      // 2. Draw 3D Rotating DNA Double-Helix on Far Right
       draw3DDNAHelix();
 
-      // 3. Update & draw all floating molecules (Zero-gravity physics across the background)
+      // 3. Draw Majestic Kinetic Brand Watermark across the Background
+      drawKineticBrandWatermark();
+
+      // 4. Draw Floating Luminous NP Bio-Emblem in Open Upper Space (NEVER behind text!)
+      drawFloatingBioEmblem();
+
+      // 5. Update & draw all floating molecules
       for (let i = 0; i < particles.length; i++) {
         particles[i].update();
         particles[i].draw();

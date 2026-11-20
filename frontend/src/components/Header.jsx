@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
-  ShoppingBag, Search, Phone, Mail, ChevronDown, Menu, X, User, LogOut, LogIn, ShieldCheck, FileText, Zap,
+  ShoppingBag, Search, Phone, Mail, ChevronDown, ChevronRight, Menu, X, User, LogOut, LogIn, ShieldCheck, FileText, Zap,
   Package, Flame, CreditCard, Factory, Handshake, Users, PhoneCall, Shield,
   ArrowRight, MessageCircle, ExternalLink, Lock, Info, Building2, Store, Sparkles, RefreshCw
 } from 'lucide-react';
@@ -274,17 +274,17 @@ function Header({
                 <ThemeToggle />
 
                 <button 
-                  className="mobile-menu-btn hide-mobile" 
+                  className="mobile-menu-btn" 
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                   aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
                   aria-expanded={isMobileMenuOpen}
                   style={{ 
-                    display: 'none',
                     padding: '6px', 
                     border: '1px solid var(--border-light)', 
                     borderRadius: '8px', 
                     background: 'var(--bg-surface-alt)', 
                     color: 'var(--text-dark)',
+                    display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     cursor: 'pointer'
@@ -674,11 +674,11 @@ function Header({
 
               {/* Mobile Drawer Hamburger */}
               <button 
-                className="mobile-menu-btn hide-mobile" 
+                className="mobile-menu-btn" 
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
                 aria-expanded={isMobileMenuOpen}
-                style={{ display: 'none', marginLeft: '4px' }}
+                style={{ marginLeft: '4px' }}
               >
                 {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
@@ -1255,7 +1255,7 @@ function Header({
             </button>
 
             <button 
-              className="mobile-menu-btn hide-mobile" 
+              className="mobile-menu-btn" 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
               aria-expanded={isMobileMenuOpen}

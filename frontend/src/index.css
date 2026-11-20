@@ -1661,10 +1661,30 @@ input[type="submit"]:disabled {
     min-width: 0;
   }
 
-  /* Hide Cart and Hamburger icons in Top Header on Mobile (Native App Design) */
-  .cart-icon-btn,
-  .mobile-menu-btn {
+  /* Hide Cart on Top Mobile Header (accessible from Drawer and Bottom Nav) */
+  .cart-icon-btn {
     display: none !important;
+  }
+
+  /* Responsive Mobile Hamburger Menu Button */
+  .mobile-menu-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    padding: 0 !important;
+    border-radius: 8px;
+    border: 1.5px solid var(--border-light);
+    background-color: var(--bg-surface-alt);
+    color: var(--text-dark);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .mobile-menu-btn:active {
+    transform: scale(0.92);
   }
 
   .header-actions .theme-toggle-btn {
@@ -4395,9 +4415,15 @@ html[lang="gu"] .nav-link, html[lang="hi"] .nav-link {
     min-height: 32px !important;
   }
 
-  .cart-icon-btn,
-  .mobile-menu-btn {
+  .cart-icon-btn {
     display: none !important;
+  }
+
+  .mobile-menu-btn {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
   }
 }
 

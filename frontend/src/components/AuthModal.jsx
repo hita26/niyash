@@ -600,7 +600,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
             </div>
 
             <h3 style={{ fontSize: '1.35rem', fontWeight: '800', color: 'var(--text-dark, #0f172a)', margin: '0 0 8px 0' }}>
-              નોંધણી સફળતાપૂર્વક સબમિટ થઈ ગઈ છે!
+              Registration Submitted Successfully!
             </h3>
 
             <div style={{
@@ -614,7 +614,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
               fontWeight: '700',
               marginBottom: '18px'
             }}>
-              ⏳ KYC & ડ્રગ લાયસન્સ ચકાસણી હેઠળ છે (24 કલાકમાં)
+              ⏳ Status: KYC & Drug Licenses Under Review (Within 24 Hours)
             </div>
 
             <div style={{
@@ -628,25 +628,25 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
               lineHeight: '1.6'
             }}>
               <div style={{ marginBottom: '6px' }}>
-                <strong style={{ color: 'var(--primary-blue, #0c3d6c)' }}>ફાર્મસી / સ્ટોર:</strong> {registrationSuccessData.companyName}
+                <strong style={{ color: 'var(--primary-blue, #0c3d6c)' }}>Pharmacy / Store:</strong> {registrationSuccessData.companyName}
               </div>
               <div style={{ marginBottom: '6px' }}>
-                <strong style={{ color: 'var(--text-dark, #0f172a)' }}>સંપર્ક વ્યક્તિ:</strong> {registrationSuccessData.name}
+                <strong style={{ color: 'var(--text-dark, #0f172a)' }}>Contact Person:</strong> {registrationSuccessData.name}
               </div>
               <div style={{ marginBottom: '6px' }}>
-                <strong style={{ color: 'var(--text-dark, #0f172a)' }}>રજીસ્ટર્ડ ઈમેઈલ:</strong> {registrationSuccessData.email}
+                <strong style={{ color: 'var(--text-dark, #0f172a)' }}>Registered Email:</strong> {registrationSuccessData.email}
               </div>
               <div style={{ marginBottom: '6px' }}>
-                <strong style={{ color: 'var(--text-dark, #0f172a)' }}>મોબાઈલ નંબર:</strong> +91 {registrationSuccessData.phone}
+                <strong style={{ color: 'var(--text-dark, #0f172a)' }}>Mobile Number:</strong> +91 {registrationSuccessData.phone}
               </div>
               <div style={{ marginBottom: '6px' }}>
-                <strong style={{ color: 'var(--text-dark, #0f172a)' }}>ડ્રગ લાયસન્સ 1 (Form 20):</strong> <span style={{ color: '#047857', fontWeight: '700' }}>{registrationSuccessData.drugLicense1 || 'સબમિટ થયેલ'}</span>
+                <strong style={{ color: 'var(--text-dark, #0f172a)' }}>Drug License 1 (Form 20):</strong> <span style={{ color: '#047857', fontWeight: '700' }}>{registrationSuccessData.drugLicense1 || 'Submitted'}</span>
               </div>
               <div style={{ marginBottom: '6px' }}>
-                <strong style={{ color: 'var(--text-dark, #0f172a)' }}>ડ્રગ લાયસન્સ 2 (Form 21):</strong> <span style={{ color: '#047857', fontWeight: '700' }}>{registrationSuccessData.drugLicense2 || 'સબમિટ થયેલ'}</span>
+                <strong style={{ color: 'var(--text-dark, #0f172a)' }}>Drug License 2 (Form 21):</strong> <span style={{ color: '#047857', fontWeight: '700' }}>{registrationSuccessData.drugLicense2 || 'Submitted'}</span>
               </div>
               <div>
-                <strong style={{ color: 'var(--text-dark, #0f172a)' }}>PAN નંબર:</strong> <span style={{ color: '#0c3d6c', fontWeight: '700' }}>{registrationSuccessData.pan || 'સબમિટ થયેલ'}</span>
+                <strong style={{ color: 'var(--text-dark, #0f172a)' }}>PAN Number:</strong> <span style={{ color: '#0c3d6c', fontWeight: '700' }}>{registrationSuccessData.pan || 'Submitted'}</span>
                 {registrationSuccessData.gstin && (
                   <span style={{ marginLeft: '12px', color: '#64748b' }}>• GSTIN: {registrationSuccessData.gstin}</span>
                 )}
@@ -669,7 +669,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
               gap: '8px'
             }}>
               <span style={{ fontSize: '1.1rem' }}>🔒</span>
-              <span><strong>સિક્યુરિટી ગેરંટી:</strong> તમારા અપલોડ કરેલા Form 20, Form 21 અને PAN દસ્તાવેજ 256-Bit SSL એન્ક્રિપ્ટેડ સુરક્ષિત વોલ્ટમાં સંગ્રહિત છે, જે માત્ર FDCA રેગ્યુલેટરી વેરિફિકેશન માટે જ ઉપયોગમાં લેવાશે.</span>
+              <span><strong>Document Security Guarantee:</strong> Your uploaded Form 20, Form 21, and PAN documents are 256-Bit SSL encrypted and stored in our secure compliance vault. Documents are strictly used for FDCA wholesale authorization and never shared with external parties.</span>
             </div>
 
             <div style={{
@@ -683,7 +683,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
               lineHeight: '1.55',
               marginBottom: '22px'
             }}>
-              <strong>આગળનું સ્ટેપ:</strong> અમારી કમ્પ્લાયન્સ ટીમ તમારા ડ્રગ લાયસન્સ (Form 20/21) અને KYC ડોક્યુમેન્ટ્સ ચકાસી રહી છે. <strong>24 કલાકમાં</strong> સુપરએડમિન દ્વારા મંજૂરી અપાતાં જ તમારા રજીસ્ટર્ડ ઈમેઈલ પર <strong>હોલસેલ લોગિન યુઝરનેમ અને પાસવર્ડ</strong> મોકલી દેવાશે, જેથી તમારું એકાઉન્ટ એક્ટિવ થઈ જશે.
+              <strong>Next Steps:</strong> Our regulatory compliance team is verifying your Form 20, Form 21, and PAN credentials. Upon SuperAdmin approval within <strong>24 hours</strong>, an official activation email containing your <strong>Wholesale B2B Username & Password</strong> will be dispatched to your registered email address.
             </div>
 
             <button
@@ -704,7 +704,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                 boxShadow: '0 4px 14px rgba(12, 61, 108, 0.25)'
               }}
             >
-              સમજાઈ ગયું (બંધ કરો)
+              Understood (Close)
             </button>
           </div>
         ) : (

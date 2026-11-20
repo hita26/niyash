@@ -584,112 +584,170 @@ async function sendAdminWelcomeEmail({
 /**
  * Sends confirmation email to Chemist right after registration
  * informing them that documents are under verification within 24 hours.
+ * 100% English, fully mobile-responsive with official animated logo GIF.
  */
-async function sendChemistRegistrationPendingEmail({ to, name, companyName, drugLicense, phone }) {
+async function sendChemistRegistrationPendingEmail({ to, name, companyName, drugLicense, dl1, dl2, pan, gstin, phone }) {
   try {
     const transporter = getTransporter();
     const fromAddress = process.env.EMAIL_FROM || '"Niyansh Pharma Wholesale" <info@niyanshpharma.com>';
-    const emailSubject = `📋 Niyansh Pharma - Chemist Registration Received & Under Verification`;
+    const gifUrl = 'https://niyanshpharma.com/niyansh.gif';
+    const emailSubject = `📋 Niyansh Pharma — Chemist Registration Received & Under Verification (${companyName || 'Retail Pharmacy'})`;
+    const form20 = dl1 || (drugLicense ? drugLicense.split('/')[0]?.trim() : '') || 'Submitted';
+    const form21 = dl2 || (drugLicense ? drugLicense.split('/')[1]?.trim() : '') || 'Submitted';
 
     const htmlContent = `
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8">
-  <title>Chemist Registration Received</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
+  <title>${emailSubject}</title>
+  <style type="text/css">
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+    body { margin: 0; padding: 0; width: 100% !important; min-width: 100%; background-color: #f1f5f9; }
+
+    @media only screen and (max-width: 600px) {
+      .email-container { width: 100% !important; max-width: 100% !important; border-radius: 0 !important; }
+      .mobile-padding { padding: 22px 16px !important; }
+      .mobile-header-padding { padding: 24px 16px 20px !important; }
+      .mobile-logo-gif { max-width: 150px !important; }
+      .mobile-h1 { font-size: 20px !important; }
+      .mobile-h2 { font-size: 17px !important; }
+      .mobile-text { font-size: 13.5px !important; line-height: 1.55 !important; }
+      .stack-col { display: block !important; width: 100% !important; box-sizing: border-box !important; }
+      .stack-col-label { padding-bottom: 2px !important; }
+      .stack-col-value { padding-bottom: 10px !important; }
+      .cta-btn { display: block !important; width: 100% !important; box-sizing: border-box !important; padding: 14px 16px !important; text-align: center !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e293b;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f1f5f9; padding: 30px 10px;">
+<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #f1f5f9; padding: 24px 8px;">
     <tr>
       <td align="center">
-        <table role="presentation" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;">
-          <!-- Header -->
+        <table role="presentation" width="100%" class="email-container" style="max-width: 600px; background-color: #ffffff; border-radius: 14px; overflow: hidden; box-shadow: 0 6px 24px rgba(15,23,42,0.08); border: 1px solid #e2e8f0;" cellspacing="0" cellpadding="0" border="0">
+          
+          <!-- Top Header with Animated Logo GIF -->
           <tr>
-            <td style="background: linear-gradient(135deg, #0c3d6c 0%, #1e40af 100%); padding: 32px 24px; text-align: center; color: #ffffff;">
-              <h1 style="margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">NIYANSH PHARMA</h1>
-              <p style="margin: 6px 0 0 0; font-size: 13px; color: #86efac; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Care • Quality • Trust • PAN Gujarat Distribution</p>
+            <td class="email-hero-header mobile-header-padding" style="background: linear-gradient(135deg, #071e3d 0%, #0c3d6c 60%, #1e40af 100%); padding: 28px 24px 22px; text-align: center;">
+              <div style="display: block; margin: 0 auto 10px; text-align: center;">
+                <img 
+                  src="${gifUrl}" 
+                  alt="Niyansh Pharma" 
+                  width="180" 
+                  class="mobile-logo-gif"
+                  style="display: block; margin: 0 auto; max-width: 180px; width: 100%; height: auto; border: 0; outline: none; border-radius: 8px;" 
+                />
+              </div>
+              <div style="color: #93c5fd; font-size: 11px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; margin-top: 6px; line-height: 1.4;">
+                Wholesale Pharmaceutical Distribution &bull; PAN Gujarat
+              </div>
+              <div style="margin-top: 10px; display: inline-block; background: rgba(255,255,255,0.12); padding: 4px 14px; border-radius: 20px; color: #e0f2fe; font-size: 10px; font-weight: 600; letter-spacing: 0.5px; border: 1px solid rgba(255,255,255,0.2);">
+                WHO-GMP COMPLIANT &bull; REGULATORY B2B NETWORK
+              </div>
             </td>
           </tr>
 
           <!-- Notice Banner -->
           <tr>
-            <td style="background-color: #fef3c7; border-bottom: 2px solid #f59e0b; padding: 14px 24px; text-align: center;">
-              <span style="font-size: 14px; font-weight: 700; color: #b45309;">⏳ Status: KYC & Drug License Under Verification (Within 24 Hours)</span>
+            <td style="background-color: #fef3c7; border-bottom: 2px solid #f59e0b; padding: 12px 20px; text-align: center;">
+              <span style="font-size: 13px; font-weight: 800; color: #b45309;">⏳ STATUS: REGULATORY KYC & DRUG LICENSES UNDER VERIFICATION (24 HOURS SLA)</span>
             </td>
           </tr>
 
           <!-- Content Body -->
           <tr>
-            <td style="padding: 32px 28px;">
-              <h2 style="margin: 0 0 14px 0; font-size: 20px; color: #0c3d6c;">નમસ્તે ${name || 'Chemist Partner'},</h2>
-              <p style="font-size: 15px; line-height: 1.65; color: #475569; margin: 0 0 20px 0;">
-                તમારી ફાર્મસી <strong>"${companyName || 'Retail Pharmacy'}"</strong> ની નિયાંશ ફાર્મા B2B હોલસેલ પોર્ટલ પર નોંધણી સફળતાપૂર્વક મળી ગઈ છે.
+            <td class="mobile-padding" style="padding: 30px 28px 26px;">
+              <h2 class="mobile-h2" style="margin: 0 0 12px 0; font-size: 19px; color: #0c3d6c; font-weight: 800;">
+                Dear ${name || 'Valued Pharmacy Partner'},
+              </h2>
+              <p class="mobile-text" style="font-size: 14px; line-height: 1.65; color: #334155; margin: 0 0 20px 0;">
+                Thank you for applying for a Chemist Wholesale Account with <strong>Niyansh Pharma</strong>. We have successfully received your retail registration details for <strong>"${companyName || 'Retail Pharmacy'}"</strong> along with your Form 20, Form 21, and PAN credentials.
               </p>
 
               <!-- Application Summary Box -->
-              <table role="presentation" width="100%" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 24px; padding: 16px;">
+              <table role="presentation" width="100%" style="background-color: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; margin-bottom: 22px; padding: 16px;" cellspacing="0" cellpadding="0" border="0">
                 <tr>
-                  <td style="padding: 6px 0; font-size: 14px; color: #64748b; width: 40%;"><strong>Pharmacy / Store:</strong></td>
-                  <td style="padding: 6px 0; font-size: 14px; color: #0c3d6c; font-weight: 700;">${companyName}</td>
+                  <td style="padding: 7px 0; font-size: 13px; color: #64748b; width: 42%;" class="stack-col stack-col-label"><strong>Pharmacy / Store:</strong></td>
+                  <td style="padding: 7px 0; font-size: 13.5px; color: #0c3d6c; font-weight: 800;" class="stack-col stack-col-value">${companyName}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 6px 0; font-size: 14px; color: #64748b;"><strong>Contact Person:</strong></td>
-                  <td style="padding: 6px 0; font-size: 14px; color: #1e293b;">${name}</td>
+                  <td style="padding: 7px 0; font-size: 13px; color: #64748b;" class="stack-col stack-col-label"><strong>Contact Person:</strong></td>
+                  <td style="padding: 7px 0; font-size: 13px; color: #1e293b; font-weight: 600;" class="stack-col stack-col-value">${name}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 6px 0; font-size: 14px; color: #64748b;"><strong>Registered Email:</strong></td>
-                  <td style="padding: 6px 0; font-size: 14px; color: #1e293b;">${to}</td>
+                  <td style="padding: 7px 0; font-size: 13px; color: #64748b;" class="stack-col stack-col-label"><strong>Registered Email:</strong></td>
+                  <td style="padding: 7px 0; font-size: 13px; color: #0284c7; font-weight: 600; word-break: break-all;" class="stack-col stack-col-value">${to}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 6px 0; font-size: 14px; color: #64748b;"><strong>Drug License No:</strong></td>
-                  <td style="padding: 6px 0; font-size: 14px; color: #1e293b; font-weight: 600;">${drugLicense || 'Submitted'}</td>
+                  <td style="padding: 7px 0; font-size: 13px; color: #64748b;" class="stack-col stack-col-label"><strong>Mobile Number:</strong></td>
+                  <td style="padding: 7px 0; font-size: 13px; color: #1e293b; font-weight: 700;" class="stack-col stack-col-value">+91 ${phone}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 6px 0; font-size: 14px; color: #64748b;"><strong>Phone:</strong></td>
-                  <td style="padding: 6px 0; font-size: 14px; color: #1e293b;">+91 ${phone}</td>
+                  <td style="padding: 7px 0; font-size: 13px; color: #64748b;" class="stack-col stack-col-label"><strong>Drug License 1 (Form 20):</strong></td>
+                  <td style="padding: 7px 0; font-size: 13px; color: #15803d; font-weight: 700;" class="stack-col stack-col-value">${form20}</td>
                 </tr>
+                <tr>
+                  <td style="padding: 7px 0; font-size: 13px; color: #64748b;" class="stack-col stack-col-label"><strong>Drug License 2 (Form 21):</strong></td>
+                  <td style="padding: 7px 0; font-size: 13px; color: #15803d; font-weight: 700;" class="stack-col stack-col-value">${form21}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 7px 0; font-size: 13px; color: #64748b;" class="stack-col stack-col-label"><strong>PAN Number:</strong></td>
+                  <td style="padding: 7px 0; font-size: 13px; color: #0c3d6c; font-weight: 700;" class="stack-col stack-col-value">${pan || 'Submitted'}</td>
+                </tr>
+                ${gstin ? `
+                <tr>
+                  <td style="padding: 7px 0; font-size: 13px; color: #64748b;" class="stack-col stack-col-label"><strong>GSTIN:</strong></td>
+                  <td style="padding: 7px 0; font-size: 13px; color: #1e293b; font-weight: 600;" class="stack-col stack-col-value">${gstin}</td>
+                </tr>` : ''}
               </table>
 
-              <!-- Document Security Guarantee Banner -->
-              <div style="background-color: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 18px; margin-bottom: 24px;">
-                <table role="presentation" width="100%">
+              <!-- Enterprise Document Security Guarantee Banner -->
+              <div style="background-color: #f0fdf4; border: 1.5px solid #86efac; border-radius: 10px; padding: 16px; margin-bottom: 22px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                   <tr>
-                    <td width="36" valign="top" style="font-size: 24px; line-height: 1;">
+                    <td width="32" valign="top" style="font-size: 22px; line-height: 1;">
                       🔒
                     </td>
                     <td style="padding-left: 10px;">
-                      <strong style="font-size: 14.5px; color: #0c3d6c; display: block; margin-bottom: 5px;">દસ્તાવેજોની સંપૂર્ણ સુરક્ષાની ખાતરી (Enterprise Document Security & Privacy):</strong>
-                      <span style="font-size: 13px; color: #475569; line-height: 1.6; display: block;">
-                        નિયાંશ ફાર્મા સાથે અપલોડ કરેલા આપના ડ્રગ લાયસન્સ (Form 20 / 21) અને PAN કાર્ડ દસ્તાવેજો <strong>256-Bit SSL એન્ક્રિપ્ટેડ સિક્યોરિટી વોલ્ટ</strong> માં સંપૂર્ણપણે સુરક્ષિત છે. આ દસ્તાવેજોનો ઉપયોગ માત્ર અને માત્ર <strong>FDCA & Drugs and Cosmetics Act</strong> ની સરકારી ગાઈડલાઈન્સ મુજબ B2B હોલસેલ એકાઉન્ટ વેરિફિકેશન માટે જ થાય છે. આપનો તમામ ડેટા ૧૦૦% ગોપનીય અને સુરક્ષિત રહે છે.
+                      <strong style="font-size: 13.5px; color: #166534; display: block; margin-bottom: 4px;">
+                        Enterprise Document Security &amp; Privacy Guarantee:
+                      </strong>
+                      <span style="font-size: 12.5px; color: #15803d; line-height: 1.55; display: block;">
+                        Your submitted Form 20, Form 21, and PAN documents are protected with <strong>256-Bit SSL encryption</strong> and stored in a secure compliance vault. Under the Drugs &amp; Cosmetics Act 1940 and Gujarat FDCA regulatory guidelines, your regulatory documents are strictly utilized for wholesale authorization and are never shared with external third parties.
                       </span>
                     </td>
                   </tr>
                 </table>
               </div>
 
-              <!-- What Happens Next -->
-              <div style="background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; border-radius: 6px; margin-bottom: 24px;">
-                <h3 style="margin: 0 0 8px 0; font-size: 15px; color: #166534; font-weight: 700;">આગળનું સ્ટેપ શું છે? (Next Step):</h3>
-                <ul style="margin: 0; padding-left: 20px; font-size: 13.5px; color: #15803d; line-height: 1.6;">
-                  <li>અમારી રેગ્યુલેટરી & કમ્પ્લાયન્સ ટીમ તમારા ડ્રગ લાયસન્સ (Form 20 & Form 21) અને PAN કાર્ડ તપાસી રહી છે.</li>
-                  <li><strong>24 કલાકમાં</strong> સુપરએડમિન તરફથી વેરિફિકેશન મંજૂર (Approve) થતાં જ આપના આ જ ઈમેઈલ પર કન્ફર્મેશન મોકલાશે.</li>
-                  <li>મંજૂરી મળતાં જ આપનું લોગિન એક્ટિવ થઈ જશે અને આપ હોલસેલ PTR રેટ્સ તથા 10+1 સ્કીમ્સ એક્સેસ કરી શકશો.</li>
+              <!-- Next Steps -->
+              <div style="background-color: #eff6ff; border-left: 4px solid #2563eb; padding: 14px 18px; border-radius: 6px; margin-bottom: 22px;">
+                <h3 style="margin: 0 0 8px 0; font-size: 14px; color: #1e40af; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Next Steps:</h3>
+                <ul style="margin: 0; padding-left: 18px; font-size: 13px; color: #1e3a8a; line-height: 1.6;">
+                  <li>Our regulatory compliance desk is currently validating your Form 20, Form 21, and PAN records.</li>
+                  <li>Within <strong>24 hours</strong>, upon SuperAdmin approval, you will receive an official activation email containing your <strong>Wholesale B2B Username &amp; Password</strong>.</li>
+                  <li>Once activated, you can immediately log in to access confidential PTR trade rates, manufacturer 10+1 schemes, and same-day dispatch.</li>
                 </ul>
               </div>
 
               <!-- Support Contact -->
-              <p style="font-size: 14px; color: #64748b; line-height: 1.6; margin: 0;">
-                જો તાત્કાલિક વેરિફિકેશનની જરૂર હોય તો અમારા હોલસેલ ડેસ્ક પર સંપર્ક કરી શકો છો:<br>
-                📞 <strong>+91 99099 23130</strong> | ✉️ <strong>info@niyanshpharma.com</strong>
+              <p style="font-size: 13px; color: #64748b; line-height: 1.6; margin: 0; text-align: center;">
+                For urgent verification requests or inquiries:<br>
+                📞 Wholesale Desk: <strong>+91 99099 23130</strong> &bull; ✉️ <strong>info@niyanshpharma.com</strong>
               </p>
             </td>
           </tr>
 
           <!-- Footer -->
           <tr>
-            <td style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 20px; text-align: center; font-size: 12px; color: #94a3b8;">
-              © 2026 Niyansh Pharma. Wholesale Pharma Distributor, Rajkot, Gujarat.<br>
-              This is an automated regulatory acknowledgment. Please do not reply directly to this email.
+            <td style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 18px; text-align: center; font-size: 11.5px; color: #94a3b8; line-height: 1.5;">
+              &copy; 2026 Niyansh Pharma. Wholesale Pharmaceutical Distributor, Rajkot, Gujarat.<br>
+              Authorized B2B Channel for WHO-GMP Certified Formulations.
             </td>
           </tr>
         </table>
@@ -722,101 +780,146 @@ async function sendChemistRegistrationPendingEmail({ to, name, companyName, drug
 
 /**
  * Sends approval email to Chemist with username and password once approved by Superadmin.
+ * 100% English, fully mobile-responsive with official animated logo GIF.
  */
 async function sendChemistApprovalEmail({ to, name, companyName, email, plainPassword, drugLicense }) {
   try {
     const transporter = getTransporter();
     const fromAddress = process.env.EMAIL_FROM || '"Niyansh Pharma Wholesale" <info@niyanshpharma.com>';
-    const emailSubject = `🎉 Congratulations! Your Niyansh Pharma Chemist Wholesale Account is Approved & Active`;
-
+    const gifUrl = 'https://niyanshpharma.com/niyansh.gif';
+    const emailSubject = `🎉 Congratulations! Your Niyansh Pharma Wholesale Account is Approved & Active (${companyName || 'Retail Pharmacy'})`;
     const passwordDisplay = plainPassword ? plainPassword : 'Your chosen password at registration';
 
     const htmlContent = `
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8">
-  <title>Account Approved</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
+  <title>${emailSubject}</title>
+  <style type="text/css">
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+    body { margin: 0; padding: 0; width: 100% !important; min-width: 100%; background-color: #f1f5f9; }
+
+    @media only screen and (max-width: 600px) {
+      .email-container { width: 100% !important; max-width: 100% !important; border-radius: 0 !important; }
+      .mobile-padding { padding: 22px 16px !important; }
+      .mobile-header-padding { padding: 24px 16px 20px !important; }
+      .mobile-logo-gif { max-width: 150px !important; }
+      .mobile-h1 { font-size: 20px !important; }
+      .mobile-h2 { font-size: 17px !important; }
+      .mobile-text { font-size: 13.5px !important; line-height: 1.55 !important; }
+      .stack-col { display: block !important; width: 100% !important; box-sizing: border-box !important; }
+      .stack-col-label { padding-bottom: 2px !important; }
+      .stack-col-value { padding-bottom: 10px !important; }
+      .cta-btn { display: block !important; width: 100% !important; box-sizing: border-box !important; padding: 14px 16px !important; text-align: center !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e293b;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f1f5f9; padding: 30px 10px;">
+<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #f1f5f9; padding: 24px 8px;">
     <tr>
       <td align="center">
-        <table role="presentation" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;">
-          <!-- Header -->
+        <table role="presentation" width="100%" class="email-container" style="max-width: 600px; background-color: #ffffff; border-radius: 14px; overflow: hidden; box-shadow: 0 6px 24px rgba(15,23,42,0.08); border: 1px solid #e2e8f0;" cellspacing="0" cellpadding="0" border="0">
+          
+          <!-- Header with Animated Logo GIF -->
           <tr>
-            <td style="background: linear-gradient(135deg, #065f46 0%, #0c3d6c 100%); padding: 32px 24px; text-align: center; color: #ffffff;">
-              <h1 style="margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">NIYANSH PHARMA</h1>
-              <p style="margin: 6px 0 0 0; font-size: 13px; color: #86efac; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Authorized B2B Wholesale Pharmacy Network</p>
+            <td class="email-hero-header mobile-header-padding" style="background: linear-gradient(135deg, #071e3d 0%, #0c3d6c 60%, #1e40af 100%); padding: 28px 24px 22px; text-align: center;">
+              <div style="display: block; margin: 0 auto 10px; text-align: center;">
+                <img 
+                  src="${gifUrl}" 
+                  alt="Niyansh Pharma" 
+                  width="180" 
+                  class="mobile-logo-gif"
+                  style="display: block; margin: 0 auto; max-width: 180px; width: 100%; height: auto; border: 0; outline: none; border-radius: 8px;" 
+                />
+              </div>
+              <div style="color: #93c5fd; font-size: 11px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; margin-top: 6px; line-height: 1.4;">
+                Wholesale Pharmaceutical Distribution &bull; PAN Gujarat
+              </div>
             </td>
           </tr>
 
           <!-- Success Banner -->
           <tr>
-            <td style="background-color: #dcfce7; border-bottom: 2px solid #22c55e; padding: 14px 24px; text-align: center;">
-              <span style="font-size: 15px; font-weight: 800; color: #15803d;">✅ ACCOUNT APPROVED & ACTIVATED!</span>
+            <td style="background-color: #dcfce7; border-bottom: 2px solid #22c55e; padding: 12px 20px; text-align: center;">
+              <span style="font-size: 14px; font-weight: 800; color: #15803d;">✅ ACCOUNT APPROVED &amp; ACTIVATED!</span>
             </td>
           </tr>
 
           <!-- Content Body -->
           <tr>
-            <td style="padding: 32px 28px;">
-              <h2 style="margin: 0 0 14px 0; font-size: 20px; color: #0c3d6c;">અભિનંદન ${name || 'Chemist Partner'},</h2>
-              <p style="font-size: 15px; line-height: 1.65; color: #475569; margin: 0 0 20px 0;">
-                તમારી ફાર્મસી <strong>"${companyName || 'Retail Pharmacy'}"</strong> ના તમામ ડ્રગ લાયસન્સ અને KYC ડોક્યુમેન્ટ્સ નિયાંશ ફાર્મા સુપરએડમિન દ્વારા <strong>મંજૂર (Approve)</strong> કરવામાં આવ્યા છે. તમારું હોલસેલ એકાઉન્ટ હવે સંપૂર્ણ સક્રિય (Active) છે!
+            <td class="mobile-padding" style="padding: 30px 28px 26px;">
+              <h2 class="mobile-h2" style="margin: 0 0 12px 0; font-size: 19px; color: #0c3d6c; font-weight: 800;">
+                Congratulations ${name || 'Valued Pharmacy Partner'},
+              </h2>
+              <p class="mobile-text" style="font-size: 14px; line-height: 1.65; color: #334155; margin: 0 0 20px 0;">
+                We are pleased to inform you that your retail chemist registration for <strong>"${companyName || 'Retail Pharmacy'}"</strong> has been audited and officially approved by Niyansh Pharma SuperAdmin. Your B2B wholesale account is now fully active.
               </p>
 
               <!-- Credentials Box -->
-              <div style="background-color: #f8fafc; border: 2px solid #38bdf8; border-radius: 14px; padding: 20px; margin-bottom: 24px;">
-                <h3 style="margin: 0 0 12px 0; font-size: 15px; color: #0369a1; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">🔑 તમારા લોગિન ક્રેડેન્શિયલ્સ (Login Details):</h3>
-                <table role="presentation" width="100%">
+              <div style="background-color: #f8fafc; border: 2px solid #38bdf8; border-radius: 12px; padding: 18px; margin-bottom: 22px;">
+                <h3 style="margin: 0 0 12px 0; font-size: 13.5px; color: #0369a1; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px;">
+                  🔑 Official Wholesale Login Credentials:
+                </h3>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                   <tr>
-                    <td style="padding: 6px 0; font-size: 14px; color: #64748b; width: 35%;"><strong>Website URL:</strong></td>
-                    <td style="padding: 6px 0; font-size: 14px; color: #0c3d6c; font-weight: 700;">
-                      <a href="https://niyanshpharma.com" target="_blank" style="color: #0284c7; text-decoration: none;">https://niyanshpharma.com</a>
+                    <td style="padding: 6px 0; font-size: 13px; color: #64748b; width: 40%;" class="stack-col stack-col-label"><strong>Portal URL:</strong></td>
+                    <td style="padding: 6px 0; font-size: 13px; color: #0c3d6c; font-weight: 700;" class="stack-col stack-col-value">
+                      <a href="https://niyanshpharma.com" target="_blank" style="color: #0284c7; text-decoration: underline;">https://niyanshpharma.com</a>
                     </td>
                   </tr>
                   <tr>
-                    <td style="padding: 6px 0; font-size: 14px; color: #64748b;"><strong>Username / Email:</strong></td>
-                    <td style="padding: 6px 0; font-size: 14px; color: #0c3d6c; font-weight: 700;">${email || to}</td>
+                    <td style="padding: 6px 0; font-size: 13px; color: #64748b;" class="stack-col stack-col-label"><strong>Username / Email:</strong></td>
+                    <td style="padding: 6px 0; font-size: 13.5px; color: #0c3d6c; font-weight: 800; word-break: break-all;" class="stack-col stack-col-value">${email || to}</td>
                   </tr>
                   <tr>
-                    <td style="padding: 6px 0; font-size: 14px; color: #64748b;"><strong>Password:</strong></td>
-                    <td style="padding: 6px 0; font-size: 14px; color: #0f172a; font-weight: 800; background-color: #e0f2fe; padding: 4px 8px; border-radius: 4px; display: inline-block;">${passwordDisplay}</td>
+                    <td style="padding: 6px 0; font-size: 13px; color: #64748b;" class="stack-col stack-col-label"><strong>Account Password:</strong></td>
+                    <td style="padding: 6px 0; font-size: 13.5px; color: #0f172a; font-weight: 800;" class="stack-col stack-col-value">
+                      <span style="background-color: #fef3c7; color: #b45309; padding: 4px 10px; border-radius: 5px; font-family: monospace; border: 1px solid #fde68a;">${passwordDisplay}</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 0; font-size: 13px; color: #64748b;" class="stack-col stack-col-label"><strong>Account Status:</strong></td>
+                    <td style="padding: 6px 0; font-size: 13px; color: #15803d; font-weight: 700;" class="stack-col stack-col-value">✓ Active &amp; Wholesale Verified</td>
                   </tr>
                 </table>
               </div>
 
-              <!-- Unlocked Perks -->
-              <div style="background-color: #f0fdf4; border-radius: 12px; padding: 18px; margin-bottom: 26px;">
-                <h3 style="margin: 0 0 10px 0; font-size: 15px; color: #166534; font-weight: 700;">હવે તમે પોર્ટલ પર શું કરી શકશો?</h3>
-                <ul style="margin: 0; padding-left: 20px; font-size: 13.5px; color: #15803d; line-height: 1.7;">
-                  <li><strong>ગોપનીય હોલસેલ PTR રેટ્સ:</strong> તમામ ટેબ્લેટ્સ, સિરપ અને ઇન્જેક્ટેબલ્સના વાસ્તવિક ટ્રેડ રેટ્સ અને તમારો પ્રોફિટ માર્જિન (%) જોઈ શકશો.</li>
-                  <li><strong>10+1 & વોલ્યુમ સ્કીમ્સ:</strong> હોલસેલ ડીસ્કાઉન્ટ સ્કીમ્સ અને બોનસ ઓફર્સનો સીધો લાભ.</li>
-                  <li><strong>ફાસ્ટ B2B ક્વિક ઓર્ડર:</strong> 1-ક્લિકમાં જથ્થાબંધ ઓર્ડર બુક કરો અને સેમ-ડે ડિસ્પેચ મેળવો.</li>
-                  <li><strong>લાઈવ લેજર & બાકી રકમ:</strong> તમારું સ્ટેટમેન્ટ, ક્રેડિટ લિમિટ (₹1,00,000) અને GST ઇન્વૉઇસેસ ડાઉનલોડ કરો.</li>
+              <!-- Unlocked Wholesale Privileges -->
+              <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 16px 18px; margin-bottom: 24px;">
+                <h3 style="margin: 0 0 10px 0; font-size: 14px; color: #166534; font-weight: 800;">Unlocked Chemist Privileges:</h3>
+                <ul style="margin: 0; padding-left: 18px; font-size: 13px; color: #15803d; line-height: 1.65;">
+                  <li><strong>Confidential PTR Rates:</strong> View true wholesale PTR pricing and calculate profit margins across 500+ formulations.</li>
+                  <li><strong>Trade Schemes:</strong> Access manufacturer 10+1, 10+2, and special volume discount offers.</li>
+                  <li><strong>Fast Quick Orders:</strong> 1-click B2B order booking with expedited dispatch across Saurashtra &amp; Gujarat.</li>
+                  <li><strong>Live Ledger &amp; Credit Dues:</strong> Review transaction statements, credit limits, and download GST tax invoices.</li>
                 </ul>
               </div>
 
               <!-- CTA Button -->
-              <div style="text-align: center; margin-bottom: 24px;">
-                <a href="https://niyanshpharma.com" target="_blank" style="background: linear-gradient(135deg, #0c3d6c 0%, #1e40af 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 30px; font-weight: 800; font-size: 15px; display: inline-block; box-shadow: 0 4px 14px rgba(12, 61, 108, 0.35);">
-                  🚀 એકાઉન્ટમાં લોગિન કરો (Login to Chemist Portal)
+              <div style="text-align: center; margin-bottom: 22px;">
+                <a href="https://niyanshpharma.com" target="_blank" class="cta-btn" style="background: linear-gradient(135deg, #0c3d6c 0%, #1e40af 100%); color: #ffffff; text-decoration: none; padding: 14px 34px; border-radius: 30px; font-weight: 800; font-size: 14.5px; display: inline-block; box-shadow: 0 4px 14px rgba(12, 61, 108, 0.35);">
+                  🚀 Log In to Wholesale Portal ➔
                 </a>
               </div>
 
               <!-- Support Contact -->
-              <p style="font-size: 13.5px; color: #64748b; line-height: 1.6; margin: 0; text-align: center;">
-                ઓર્ડર અથવા પ્રોડક્ટ ઈન્ક્વાયરી માટે:<br>
-                📞 હોલસેલ ડેસ્ક: <strong>+91 99099 23130</strong> | ✉️ <strong>info@niyanshpharma.com</strong>
+              <p style="font-size: 13px; color: #64748b; line-height: 1.6; margin: 0; text-align: center;">
+                For orders, inquiries, or billing support:<br>
+                📞 Wholesale Desk: <strong>+91 99099 23130</strong> &bull; ✉️ <strong>info@niyanshpharma.com</strong>
               </p>
             </td>
           </tr>
 
           <!-- Footer -->
           <tr>
-            <td style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 20px; text-align: center; font-size: 12px; color: #94a3b8;">
-              © 2026 Niyansh Pharma. Wholesale Pharma Distributor, Rajkot, Gujarat.<br>
+            <td style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 18px; text-align: center; font-size: 11.5px; color: #94a3b8; line-height: 1.5;">
+              &copy; 2026 Niyansh Pharma. Wholesale Pharma Distributor, Rajkot, Gujarat.<br>
               Authorized B2B Channel for WHO-GMP Pharmaceutical Formulations.
             </td>
           </tr>
@@ -850,44 +953,112 @@ async function sendChemistApprovalEmail({ to, name, companyName, email, plainPas
 
 /**
  * Sends rejection / document re-upload notice to Chemist.
+ * 100% English, fully mobile-responsive with official animated logo GIF.
  */
 async function sendChemistRejectionEmail({ to, name, companyName, reason }) {
   try {
     const transporter = getTransporter();
     const fromAddress = process.env.EMAIL_FROM || '"Niyansh Pharma Wholesale" <info@niyanshpharma.com>';
-    const emailSubject = `⚠️ Niyansh Pharma - Chemist Account Verification Notice`;
+    const gifUrl = 'https://niyanshpharma.com/niyansh.gif';
+    const emailSubject = `⚠️ Niyansh Pharma — Chemist Account Verification Notice (${companyName || 'Retail Pharmacy'})`;
 
     const htmlContent = `
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8">
-  <title>Verification Notice</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
+  <title>${emailSubject}</title>
+  <style type="text/css">
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+    body { margin: 0; padding: 0; width: 100% !important; min-width: 100%; background-color: #f1f5f9; }
+
+    @media only screen and (max-width: 600px) {
+      .email-container { width: 100% !important; max-width: 100% !important; border-radius: 0 !important; }
+      .mobile-padding { padding: 22px 16px !important; }
+      .mobile-header-padding { padding: 24px 16px 20px !important; }
+      .mobile-logo-gif { max-width: 150px !important; }
+      .mobile-h1 { font-size: 20px !important; }
+      .mobile-h2 { font-size: 17px !important; }
+      .mobile-text { font-size: 13.5px !important; line-height: 1.55 !important; }
+      .cta-btn { display: block !important; width: 100% !important; box-sizing: border-box !important; padding: 14px 16px !important; text-align: center !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e293b;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f1f5f9; padding: 30px 10px;">
+<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #f1f5f9; padding: 24px 8px;">
     <tr>
       <td align="center">
-        <table role="presentation" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;">
+        <table role="presentation" width="100%" class="email-container" style="max-width: 600px; background-color: #ffffff; border-radius: 14px; overflow: hidden; box-shadow: 0 6px 24px rgba(15,23,42,0.08); border: 1px solid #e2e8f0;" cellspacing="0" cellpadding="0" border="0">
+          
+          <!-- Header with Animated Logo GIF -->
           <tr>
-            <td style="background-color: #b91c1c; padding: 26px 24px; text-align: center; color: #ffffff;">
-              <h1 style="margin: 0; font-size: 22px; font-weight: 800;">NIYANSH PHARMA</h1>
-              <p style="margin: 4px 0 0 0; font-size: 13px; color: #fecaca;">KYC Compliance & Regulatory Verification</p>
+            <td class="email-hero-header mobile-header-padding" style="background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%); padding: 28px 24px 22px; text-align: center;">
+              <div style="display: block; margin: 0 auto 10px; text-align: center;">
+                <img 
+                  src="${gifUrl}" 
+                  alt="Niyansh Pharma" 
+                  width="180" 
+                  class="mobile-logo-gif"
+                  style="display: block; margin: 0 auto; max-width: 180px; width: 100%; height: auto; border: 0; outline: none; border-radius: 8px;" 
+                />
+              </div>
+              <div style="color: #fecaca; font-size: 11px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; margin-top: 6px; line-height: 1.4;">
+                Regulatory KYC Compliance &bull; Drug License Verification Desk
+              </div>
             </td>
           </tr>
+
+          <!-- Banner -->
           <tr>
-            <td style="padding: 30px 24px;">
-              <h2 style="margin: 0 0 12px 0; font-size: 18px; color: #991b1b;">ડ્રગ લાયસન્સ / KYC દસ્તાવેજ ચકાસણી નોટિસ</h2>
-              <p style="font-size: 14.5px; line-height: 1.6; color: #475569;">
-                નમસ્તે ${name || 'Chemist Partner'}, તમારી ફાર્મસી <strong>"${companyName}"</strong> ના રજીસ્ટ્રેશન દસ્તાવેજોમાં નીચે મુજબની ક્ષતિ જણાયેલ છે:
+            <td style="background-color: #fee2e2; border-bottom: 2px solid #ef4444; padding: 12px 20px; text-align: center;">
+              <span style="font-size: 13.5px; font-weight: 800; color: #991b1b;">⚠️ DOCUMENT CLARIFICATION OR RE-UPLOAD REQUIRED</span>
+            </td>
+          </tr>
+
+          <!-- Content Body -->
+          <tr>
+            <td class="mobile-padding" style="padding: 30px 28px 26px;">
+              <h2 class="mobile-h2" style="margin: 0 0 12px 0; font-size: 19px; color: #991b1b; font-weight: 800;">
+                Dear ${name || 'Chemist Partner'},
+              </h2>
+              <p class="mobile-text" style="font-size: 14px; line-height: 1.65; color: #334155; margin: 0 0 18px 0;">
+                Thank you for your registration application for <strong>"${companyName || 'Retail Pharmacy'}"</strong>. During our regulatory review of your submitted documents, our compliance team noted the following issue:
               </p>
-              <div style="background-color: #fef2f2; border: 1px solid #f87171; border-radius: 8px; padding: 14px; margin: 18px 0; color: #991b1b; font-size: 14px; font-weight: 600;">
-                કારણ: ${reason || 'ડ્રગ લાયસન્સ અથવા જીએસટી દસ્તાવેજ અસ્પષ્ટ છે અથવા માન્ય નથી.'}
+
+              <!-- Reason Box -->
+              <div style="background-color: #fef2f2; border: 1.5px solid #f87171; border-radius: 10px; padding: 16px; margin-bottom: 22px; color: #991b1b; font-size: 13.5px; font-weight: 600; line-height: 1.55;">
+                <strong>Reason:</strong> ${reason || 'Drug License (Form 20/21) or PAN document image is blurred, unreadable, or missing required regulatory details.'}
               </div>
-              <p style="font-size: 14px; line-height: 1.6; color: #64748b;">
-                કૃપા કરીને સાચા દસ્તાવેજ સાથે ફરીથી રજીસ્ટ્રેશન કરો અથવા સીધો અમારા હોલસેલ ડેસ્ક પર સંપર્ક કરો:<br>
-                📞 <strong>+91 99099 23130</strong> | ✉️ <strong>info@niyanshpharma.com</strong>
+
+              <!-- Action Instructions -->
+              <p class="mobile-text" style="font-size: 13.5px; line-height: 1.65; color: #475569; margin: 0 0 22px 0;">
+                Please re-submit your registration with clear, unblurred scans or high-resolution photos of your <strong>Form 20, Form 21, and PAN Card</strong>, or contact our wholesale desk directly for assistance.
               </p>
+
+              <!-- CTA Button -->
+              <div style="text-align: center; margin-bottom: 22px;">
+                <a href="https://niyanshpharma.com" target="_blank" class="cta-btn" style="background: linear-gradient(135deg, #0c3d6c 0%, #0284c7 100%); color: #ffffff; text-decoration: none; padding: 13px 30px; border-radius: 30px; font-weight: 800; font-size: 14px; display: inline-block;">
+                  🔄 Re-Submit KYC Registration ➔
+                </a>
+              </div>
+
+              <!-- Support Contact -->
+              <p style="font-size: 13px; color: #64748b; line-height: 1.6; margin: 0; text-align: center;">
+                Need help? Contact our Wholesale Verification Desk:<br>
+                📞 <strong>+91 99099 23130</strong> &bull; ✉️ <strong>info@niyanshpharma.com</strong>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 18px; text-align: center; font-size: 11.5px; color: #94a3b8; line-height: 1.5;">
+              &copy; 2026 Niyansh Pharma. Wholesale Pharma Distributor, Rajkot, Gujarat.
             </td>
           </tr>
         </table>
@@ -914,96 +1085,139 @@ async function sendChemistRejectionEmail({ to, name, companyName, reason }) {
 /**
  * Sends real-time notification to Superadmin (info@niyanshpharma.com)
  * when a new chemist registers and submits Form 20/21 & PAN documents for verification.
+ * 100% English, fully mobile-responsive with official animated logo GIF.
  */
 async function sendSuperAdminNewChemistAlertEmail({ storeName, contactPerson, email, phone, dl1, dl2, pan, gstin, registeredAt }) {
   try {
     const transporter = getTransporter();
     const fromAddress = process.env.EMAIL_FROM || '"Niyansh Pharma System" <info@niyanshpharma.com>';
     const superAdminRecipient = process.env.SUPERADMIN_EMAIL || 'info@niyanshpharma.com';
-    const emailSubject = `🚨 New Chemist KYC Application: "${storeName}" - Review Documents`;
+    const gifUrl = 'https://niyanshpharma.com/niyansh.gif';
+    const emailSubject = `🚨 [Action Required] New Chemist KYC Application: "${storeName}" — Review Documents`;
 
     const htmlContent = `
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8">
-  <title>New Chemist KYC Application</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
+  <title>${emailSubject}</title>
+  <style type="text/css">
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+    body { margin: 0; padding: 0; width: 100% !important; min-width: 100%; background-color: #f1f5f9; }
+
+    @media only screen and (max-width: 600px) {
+      .email-container { width: 100% !important; max-width: 100% !important; border-radius: 0 !important; }
+      .mobile-padding { padding: 22px 16px !important; }
+      .mobile-header-padding { padding: 24px 16px 20px !important; }
+      .mobile-logo-gif { max-width: 150px !important; }
+      .mobile-h1 { font-size: 20px !important; }
+      .mobile-h2 { font-size: 17px !important; }
+      .mobile-text { font-size: 13.5px !important; line-height: 1.55 !important; }
+      .stack-col { display: block !important; width: 100% !important; box-sizing: border-box !important; }
+      .stack-col-label { padding-bottom: 2px !important; }
+      .stack-col-value { padding-bottom: 10px !important; }
+      .cta-btn { display: block !important; width: 100% !important; box-sizing: border-box !important; padding: 14px 16px !important; text-align: center !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e293b;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f1f5f9; padding: 30px 10px;">
+<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #f1f5f9; padding: 24px 8px;">
     <tr>
       <td align="center">
-        <table role="presentation" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;">
-          <!-- Header -->
+        <table role="presentation" width="100%" class="email-container" style="max-width: 600px; background-color: #ffffff; border-radius: 14px; overflow: hidden; box-shadow: 0 6px 24px rgba(15,23,42,0.08); border: 1px solid #e2e8f0;" cellspacing="0" cellpadding="0" border="0">
+          
+          <!-- Header with Animated Logo GIF -->
           <tr>
-            <td style="background: linear-gradient(135deg, #0c3d6c 0%, #0369a1 100%); padding: 30px 24px; text-align: center; color: #ffffff;">
-              <h1 style="margin: 0; font-size: 22px; font-weight: 800;">NIYANSH PHARMA • ADMIN ALERT</h1>
-              <p style="margin: 6px 0 0 0; font-size: 13px; color: #bae6fd; font-weight: 600;">Superadmin Regulatory & Verification Desk</p>
+            <td class="email-hero-header mobile-header-padding" style="background: linear-gradient(135deg, #071e3d 0%, #0c3d6c 60%, #1e40af 100%); padding: 28px 24px 22px; text-align: center;">
+              <div style="display: block; margin: 0 auto 10px; text-align: center;">
+                <img 
+                  src="${gifUrl}" 
+                  alt="Niyansh Pharma" 
+                  width="180" 
+                  class="mobile-logo-gif"
+                  style="display: block; margin: 0 auto; max-width: 180px; width: 100%; height: auto; border: 0; outline: none; border-radius: 8px;" 
+                />
+              </div>
+              <div style="color: #93c5fd; font-size: 11px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; margin-top: 6px; line-height: 1.4;">
+                SuperAdmin Regulatory &bull; KYC Verification Desk
+              </div>
             </td>
           </tr>
 
           <!-- Alert Ribbon -->
           <tr>
-            <td style="background-color: #eff6ff; border-bottom: 2px solid #0284c7; padding: 14px 24px; text-align: center;">
-              <span style="font-size: 14px; font-weight: 800; color: #0369a1;">📋 New Chemist KYC Registration Awaiting 24-Hour Approval</span>
+            <td style="background-color: #eff6ff; border-bottom: 2px solid #0284c7; padding: 12px 20px; text-align: center;">
+              <span style="font-size: 13.5px; font-weight: 800; color: #0369a1;">📋 NEW CHEMIST KYC APPLICATION AWAITING 24-HOUR REVIEW</span>
             </td>
           </tr>
 
           <!-- Content Body -->
           <tr>
-            <td style="padding: 28px;">
-              <p style="font-size: 15px; line-height: 1.6; color: #334155; margin: 0 0 18px 0;">
-                સુપરએડમિન ધ્યાન આપો, <strong>"${storeName}"</strong> દ્વારા નવું કેમિસ્ટ રજીસ્ટ્રેશન સબમિટ કરવામાં આવ્યું છે. ડ્રગ લાયસન્સ (Form 20 અને Form 21) તથા PAN કાર્ડ ચકાસીને મંજૂરી આપવા વિનંતી.
+            <td class="mobile-padding" style="padding: 30px 28px 26px;">
+              <p class="mobile-text" style="font-size: 14.5px; line-height: 1.6; color: #334155; margin: 0 0 18px 0;">
+                Attention SuperAdmin, a new retail chemist application has been submitted by <strong>"${storeName}"</strong>. Please inspect the regulatory credentials (Form 20, Form 21, and PAN Card) in the Admin Console and grant wholesale authorization.
               </p>
 
               <!-- Chemist Profile Details -->
-              <table role="presentation" width="100%" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 22px; padding: 16px;">
+              <table role="presentation" width="100%" style="background-color: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; margin-bottom: 22px; padding: 16px;" cellspacing="0" cellpadding="0" border="0">
                 <tr>
-                  <td style="padding: 6px 0; font-size: 13.5px; color: #64748b; width: 42%;"><strong>Store / Pharmacy:</strong></td>
-                  <td style="padding: 6px 0; font-size: 14px; color: #0c3d6c; font-weight: 800;">${storeName}</td>
+                  <td style="padding: 7px 0; font-size: 13px; color: #64748b; width: 42%;" class="stack-col stack-col-label"><strong>Store / Pharmacy:</strong></td>
+                  <td style="padding: 7px 0; font-size: 14px; color: #0c3d6c; font-weight: 800;" class="stack-col stack-col-value">${storeName}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 6px 0; font-size: 13.5px; color: #64748b;"><strong>Contact Person:</strong></td>
-                  <td style="padding: 6px 0; font-size: 13.5px; color: #1e293b; font-weight: 600;">${contactPerson}</td>
+                  <td style="padding: 7px 0; font-size: 13px; color: #64748b;" class="stack-col stack-col-label"><strong>Contact Person:</strong></td>
+                  <td style="padding: 7px 0; font-size: 13px; color: #1e293b; font-weight: 600;" class="stack-col stack-col-value">${contactPerson}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 6px 0; font-size: 13.5px; color: #64748b;"><strong>Mobile / WhatsApp:</strong></td>
-                  <td style="padding: 6px 0; font-size: 13.5px; color: #1e293b; font-weight: 700;">+91 ${phone}</td>
+                  <td style="padding: 7px 0; font-size: 13px; color: #64748b;" class="stack-col stack-col-label"><strong>Mobile / WhatsApp:</strong></td>
+                  <td style="padding: 7px 0; font-size: 13px; color: #1e293b; font-weight: 700;" class="stack-col stack-col-value">+91 ${phone}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 6px 0; font-size: 13.5px; color: #64748b;"><strong>Registered Email:</strong></td>
-                  <td style="padding: 6px 0; font-size: 13.5px; color: #0284c7; font-weight: 600;">${email}</td>
+                  <td style="padding: 7px 0; font-size: 13px; color: #64748b;" class="stack-col stack-col-label"><strong>Registered Email:</strong></td>
+                  <td style="padding: 7px 0; font-size: 13px; color: #0284c7; font-weight: 600; word-break: break-all;" class="stack-col stack-col-value">${email}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 6px 0; font-size: 13.5px; color: #64748b;"><strong>Form 20 License No:</strong></td>
-                  <td style="padding: 6px 0; font-size: 13.5px; color: #166534; font-weight: 700;">${dl1 || 'Uploaded'}</td>
+                  <td style="padding: 7px 0; font-size: 13px; color: #64748b;" class="stack-col stack-col-label"><strong>Drug License 1 (Form 20):</strong></td>
+                  <td style="padding: 7px 0; font-size: 13px; color: #166534; font-weight: 700;" class="stack-col stack-col-value">${dl1 || 'Uploaded'}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 6px 0; font-size: 13.5px; color: #64748b;"><strong>Form 21 License No:</strong></td>
-                  <td style="padding: 6px 0; font-size: 13.5px; color: #166534; font-weight: 700;">${dl2 || 'Uploaded'}</td>
+                  <td style="padding: 7px 0; font-size: 13px; color: #64748b;" class="stack-col stack-col-label"><strong>Drug License 2 (Form 21):</strong></td>
+                  <td style="padding: 7px 0; font-size: 13px; color: #166534; font-weight: 700;" class="stack-col stack-col-value">${dl2 || 'Uploaded'}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 6px 0; font-size: 13.5px; color: #64748b;"><strong>PAN Number:</strong></td>
-                  <td style="padding: 6px 0; font-size: 13.5px; color: #854d0e; font-weight: 700;">${pan || 'Uploaded'}</td>
+                  <td style="padding: 7px 0; font-size: 13px; color: #64748b;" class="stack-col stack-col-label"><strong>PAN Number:</strong></td>
+                  <td style="padding: 7px 0; font-size: 13px; color: #854d0e; font-weight: 700;" class="stack-col stack-col-value">${pan || 'Uploaded'}</td>
                 </tr>
                 ${gstin ? `
                 <tr>
-                  <td style="padding: 6px 0; font-size: 13.5px; color: #64748b;"><strong>GSTIN:</strong></td>
-                  <td style="padding: 6px 0; font-size: 13.5px; color: #1e293b; font-weight: 600;">${gstin}</td>
+                  <td style="padding: 7px 0; font-size: 13px; color: #64748b;" class="stack-col stack-col-label"><strong>GSTIN:</strong></td>
+                  <td style="padding: 7px 0; font-size: 13px; color: #1e293b; font-weight: 600;" class="stack-col stack-col-value">${gstin}</td>
                 </tr>` : ''}
               </table>
 
               <!-- Call to Action Button -->
-              <div style="text-align: center; margin: 26px 0;">
-                <a href="https://niyanshpharma.com/admin" 
-                   style="display: inline-block; background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 10px; font-size: 15px; font-weight: 800; box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);">
-                  🔍 Review Documents & Approve Chemist ➔
+              <div style="text-align: center; margin: 24px 0 10px;">
+                <a href="https://niyanshpharma.com/admin" class="cta-btn" 
+                   style="display: inline-block; background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: #ffffff; text-decoration: none; padding: 14px 30px; border-radius: 10px; font-size: 14.5px; font-weight: 800; box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);">
+                  🔍 Review Documents &amp; Approve Chemist ➔
                 </a>
               </div>
 
-              <p style="font-size: 13px; color: #94a3b8; text-align: center; margin: 0;">
-                Logged into Admin Console • Niyansh Pharma Wholesale Distribution Hub, Rajkot
+              <p style="font-size: 12px; color: #94a3b8; text-align: center; margin-top: 14px;">
+                Secure SuperAdmin Direct Link &bull; Niyansh Pharma Wholesale Hub
               </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px; text-align: center; font-size: 11.5px; color: #94a3b8;">
+              &copy; 2026 Niyansh Pharma. Wholesale Pharma Distributor, Rajkot, Gujarat.
             </td>
           </tr>
         </table>

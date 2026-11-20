@@ -248,6 +248,10 @@ router.post('/register', async (req, res) => {
         name: user.name,
         companyName: user.companyName,
         drugLicense: `${user.drugLicense1} / ${user.drugLicense2}`,
+        dl1: user.drugLicense1,
+        dl2: user.drugLicense2,
+        pan: user.pan,
+        gstin: user.gstin,
         phone: user.phone
       }).catch(mailErr => console.warn('[Register] Pending email dispatch notice:', mailErr.message));
 
@@ -278,7 +282,7 @@ router.post('/register', async (req, res) => {
         success: true,
         isApproved: false,
         status: 'pending',
-        message: 'નોંધણી સફળ થઈ ગઈ છે! તમારા Drug License અને KYC દસ્તાવેજો ચકાસણી હેઠળ છે. 24 કલાકમાં એડમિન દ્વારા મંજૂરી મળશે અને તમારા ઈમેઈલ પર કન્ફર્મેશન મોકલાશે.',
+        message: 'Registration submitted successfully! Your Drug Licenses (Form 20 & 21) and KYC documents are under review. Approval will be granted within 24 hours and credentials sent to your registered email.',
         _id: user._id,
         name: user.name,
         email: user.email,
@@ -316,7 +320,7 @@ router.post('/login', async (req, res) => {
             success: false,
             isApproved: false,
             status: 'pending',
-            message: 'તમારા ડ્રગ લાયસન્સ અને KYC દસ્તાવેજો હાલ ચકાસણી હેઠળ છે. 24 કલાકમાં સુપરએડમિન દ્વારા મંજૂરી મળશે અને તમારા ઈમેઈલ પર કન્ફર્મેશન મોકલવામાં આવશે.'
+            message: 'Your Drug Licenses (Form 20 & 21) and KYC credentials are currently under verification. Approval will be granted by SuperAdmin within 24 hours, and your Wholesale login details will be sent to your email.'
           });
         }
         if (user.status === 'rejected') {
@@ -325,8 +329,8 @@ router.post('/login', async (req, res) => {
             isApproved: false,
             status: 'rejected',
             message: user.rejectionReason 
-              ? `તમારી કેમિસ્ટ નોંધણી મંજૂર કરવામાં આવી નથી: ${user.rejectionReason}. કૃપા કરીને હોલસેલ ડેસ્ક +91 99099 23130 પર સંપર્ક કરો.`
-              : 'તમારી કેમિસ્ટ નોંધણી મંજૂર કરવામાં આવી નથી. કૃપા કરીને હોલસેલ ડેસ્ક +91 99099 23130 પર સંપર્ક કરો.'
+              ? `Your chemist registration could not be approved: ${user.rejectionReason}. Please contact Wholesale Desk at +91 99099 23130 for support.`
+              : 'Your chemist registration could not be approved. Please contact Wholesale Desk at +91 99099 23130 for support.'
           });
         }
       }

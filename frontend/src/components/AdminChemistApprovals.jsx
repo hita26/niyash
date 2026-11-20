@@ -116,7 +116,7 @@ export default function AdminChemistApprovals({ token, showNotification }) {
 
   // Reject Modal State
   const [rejectingChemist, setRejectingChemist] = useState(null);
-  const [rejectReason, setRejectReason] = useState('ડ્રગ લાયસન્સ અથવા KYC દસ્તાવેજ સ્પષ્ટ વંચાતો નથી.');
+  const [rejectReason, setRejectReason] = useState('Drug License (Form 20/21) or PAN document scan is blurred or unreadable. Please re-upload a clear copy.');
   const [actionLoading, setActionLoading] = useState(false);
 
   // In-place confirmation states (replaces disruptive browser window.confirm alerts)

@@ -45,6 +45,9 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
     drugLicense2: null,
   });
 
+  // Chemist Registration Pending Approval State
+  const [registrationSuccessData, setRegistrationSuccessData] = useState(null);
+
   // Forgot Password & Reset State
   const [forgotEmail, setForgotEmail] = useState('');
   const [resetData, setResetData] = useState({
@@ -379,6 +382,18 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
         throw new Error(data.message || 'Authentication failed');
       }
 
+      // If registered chemist is pending verification, do NOT auto-login; display confirmation view
+      if (!isLogin && (data.isApproved === false || data.status === 'pending')) {
+        setRegistrationSuccessData({
+          companyName: formData.companyName || 'Retail Pharmacy',
+          name: formData.name,
+          email: cleanEmail,
+          phone: formData.phone,
+          message: data.message
+        });
+        return;
+      }
+
       onSuccess(data);
       onClose();
 
@@ -533,7 +548,10 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
       >
         {/* Close Button */}
         <button 
-          onClick={onClose}
+          onClick={() => {
+            setRegistrationSuccessData(null);
+            onClose();
+          }}
           style={{ 
             position: 'absolute', top: '16px', right: '16px', 
             color: 'var(--text-light)', background: 'var(--bg-main, #f8fafc)', 
@@ -547,6 +565,104 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
         >
           <X size={18} />
         </button>
+
+        {/* CHEMIST REGISTRATION PENDING CONFIRMATION VIEW */}
+        {registrationSuccessData ? (
+          <div style={{ textAlign: 'center', padding: '20px 10px' }} className="animate-fade-in">
+            <div style={{
+              width: '68px',
+              height: '68px',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(34, 197, 94, 0.14)',
+              color: '#16a34a',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '16px',
+              border: '2px solid rgba(34, 197, 94, 0.3)'
+            }}>
+              <CheckCircle2 size={38} />
+            </div>
+
+            <h3 style={{ fontSize: '1.35rem', fontWeight: '800', color: 'var(--text-dark, #0f172a)', margin: '0 0 8px 0' }}>
+              નોંધણી સફળતાપૂર્વક સબમિટ થઈ ગઈ છે!
+            </h3>
+
+            <div style={{
+              display: 'inline-block',
+              backgroundColor: '#fef3c7',
+              border: '1px solid #f59e0b',
+              color: '#b45309',
+              padding: '6px 14px',
+              borderRadius: '20px',
+              fontSize: '0.82rem',
+              fontWeight: '700',
+              marginBottom: '18px'
+            }}>
+              ⏳ KYC & ડ્રગ લાયસન્સ ચકાસણી હેઠળ છે (24 કલાકમાં)
+            </div>
+
+            <div style={{
+              backgroundColor: 'var(--bg-main, #f8fafc)',
+              border: '1px solid var(--border-light, #e2e8f0)',
+              borderRadius: '12px',
+              padding: '16px',
+              textAlign: 'left',
+              marginBottom: '20px',
+              fontSize: '0.88rem',
+              lineHeight: '1.6'
+            }}>
+              <div style={{ marginBottom: '6px' }}>
+                <strong style={{ color: 'var(--primary-blue, #0c3d6c)' }}>ફાર્મસી / સ્ટોર:</strong> {registrationSuccessData.companyName}
+              </div>
+              <div style={{ marginBottom: '6px' }}>
+                <strong style={{ color: 'var(--text-dark, #0f172a)' }}>સંપર્ક વ્યક્તિ:</strong> {registrationSuccessData.name}
+              </div>
+              <div style={{ marginBottom: '6px' }}>
+                <strong style={{ color: 'var(--text-dark, #0f172a)' }}>રજીસ્ટર્ડ ઈમેઈલ:</strong> {registrationSuccessData.email}
+              </div>
+              <div>
+                <strong style={{ color: 'var(--text-dark, #0f172a)' }}>મોબાઈલ:</strong> +91 {registrationSuccessData.phone}
+              </div>
+            </div>
+
+            <div style={{
+              backgroundColor: 'rgba(37, 99, 235, 0.08)',
+              borderLeft: '4px solid #2563eb',
+              borderRadius: '6px',
+              padding: '14px',
+              textAlign: 'left',
+              fontSize: '0.84rem',
+              color: '#1e40af',
+              lineHeight: '1.55',
+              marginBottom: '24px'
+            }}>
+              <strong>આગળનું સ્ટેપ:</strong> અમારી કમ્પ્લાયન્સ ટીમ તમારા ડ્રગ લાયસન્સ (Form 20/21) અને KYC ડોક્યુમેન્ટ્સ ચકાસી રહી છે. <strong>24 કલાકમાં</strong> સુપરએડમિન દ્વારા મંજૂરી અપાતાં જ તમારા રજીસ્ટર્ડ ઈમેઈલ પર <strong>યુઝરનેમ અને પાસવર્ડનું કન્ફર્મેશન</strong> મોકલી દેવાશે, જેથી તમારું હોલસેલ લોગિન એક્ટિવ થઈ જશે.
+            </div>
+
+            <button
+              onClick={() => {
+                setRegistrationSuccessData(null);
+                onClose();
+              }}
+              style={{
+                width: '100%',
+                padding: '13px',
+                borderRadius: '10px',
+                backgroundColor: 'var(--primary-blue, #0c3d6c)',
+                color: '#ffffff',
+                border: 'none',
+                fontWeight: '700',
+                fontSize: '0.95rem',
+                cursor: 'pointer',
+                boxShadow: '0 4px 14px rgba(12, 61, 108, 0.25)'
+              }}
+            >
+              સમજાઈ ગયું (બંધ કરો)
+            </button>
+          </div>
+        ) : (
+        <>
 
         {/* Top Header: Clean Header in Sign In mode, Back Link in Register mode */}
         {isLogin && (
@@ -1495,6 +1611,8 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
               Redirecting to wholesale portal...
             </div>
           </div>
+        )}
+        </>
         )}
 
       </div>

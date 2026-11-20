@@ -15,6 +15,7 @@ import {
 import { broadcastLiveEvent, SYNC_EVENTS } from '../utils/liveSync';
 import { useLanguage } from '../context/LanguageContext';
 import SkeletonLoader from '../components/SkeletonLoader';
+import AdminChemistApprovals from '../components/AdminChemistApprovals';
 
 // ==========================================
 // FALLBACK DATASETS FOR OFFLINE / ROBUST DEMO
@@ -4874,6 +4875,28 @@ _Helpline: +91 9316566894_`;
               </button>
             )}
 
+            {/* SUPERADMIN & ADMIN: CHEMIST REGISTRATIONS & KYC APPROVALS */}
+            {(isSuperAdmin || hasPermission('canManageEnquiries') || hasPermission('canManageOrders')) && (
+              <button 
+                onClick={() => setActiveTab('chemists')} 
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '10px 14px',
+                  borderRadius: '8px', fontWeight: '700', fontSize: '0.9rem',
+                  backgroundColor: activeTab === 'chemists' ? '#e0f2fe' : '#f0fdf4',
+                  color: activeTab === 'chemists' ? '#0369a1' : '#15803d',
+                  border: `1.5px solid ${activeTab === 'chemists' ? '#0284c7' : '#86efac'}`,
+                  boxShadow: '0 1px 3px rgba(34, 197, 94, 0.1)'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <Building2 size={16} color="#15803d" /> Chemist Approvals
+                </div>
+                <span style={{ fontSize: '0.7rem', padding: '2px 7px', borderRadius: '10px', backgroundColor: '#10b981', color: '#ffffff', fontWeight: '800' }}>
+                  KYC
+                </span>
+              </button>
+            )}
+
             <button 
               onClick={() => setActiveTab('orders')} 
               style={{
@@ -5124,6 +5147,15 @@ _Helpline: +91 9316566894_`;
                   style={{ backgroundColor: activeTab === 'manage-admins' ? '#f59e0b' : '#fffbeb', color: activeTab === 'manage-admins' ? '#fff' : '#b45309', border: '1.5px solid #fde68a', fontWeight: '700' }}
                 >
                   <Users size={14} /> Admins ({adminList.length})
+                </button>
+              )}
+              {(isSuperAdmin || hasPermission('canManageEnquiries') || hasPermission('canManageOrders')) && (
+                <button 
+                  onClick={() => setActiveTab('chemists')} 
+                  className={`admin-tab-chip ${activeTab === 'chemists' ? 'active' : ''}`}
+                  style={{ backgroundColor: activeTab === 'chemists' ? '#10b981' : '#f0fdf4', color: activeTab === 'chemists' ? '#fff' : '#15803d', border: '1.5px solid #86efac', fontWeight: '700' }}
+                >
+                  <Building2 size={14} /> Chemists KYC
                 </button>
               )}
               <button onClick={() => setActiveTab('orders')} className={`admin-tab-chip ${activeTab === 'orders' ? 'active' : ''}`}>
@@ -9664,6 +9696,13 @@ _Helpline: +91 9316566894_`;
                     )}
                   </div>
                 </div>
+              )}
+
+              {/* ==========================================
+                  TAB: CHEMIST REGISTRATIONS & KYC APPROVALS
+                  ========================================== */}
+              {activeTab === 'chemists' && (
+                <AdminChemistApprovals token={adminToken} showNotification={showNotification} />
               )}
 
               {/* ==========================================

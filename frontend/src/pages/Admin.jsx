@@ -1218,6 +1218,8 @@ function Admin() {
   const [bulkPreviewFilter, setBulkPreviewFilter] = useState('all'); // 'all' | 'valid' | 'duplicates'
   const [uploadedFileName, setUploadedFileName] = useState('');
   const [bulkSkipDuplicates, setBulkSkipDuplicates] = useState(true);
+  const [bulkImportMode, setBulkImportMode] = useState('skip'); // 'skip' | 'update'
+  const [isExcelDragging, setIsExcelDragging] = useState(false);
   const [bulkImportResults, setBulkImportResults] = useState(null);
   const [isImportingBulk, setIsImportingBulk] = useState(false);
 
@@ -3687,12 +3689,18 @@ _Helpline: +91 9316566894_`;
         'Stock Units *',
         'Packing Specifications *',
         'Subcategory / Variant *',
+        'Batch Number',
         'Manufacturer Details *',
         'Rack ID / Location *',
         'HSN Code *',
         'Expiry Date *',
         'Purchase GST (%) *',
         'Sales GST (%) *',
+        'Trade Scheme (e.g. 10+1)',
+        'Quality Specs / Certifications',
+        'Units Per Box',
+        'Min Reorder Qty',
+        'Product Image URL',
         'Product Description & Indications *',
         'In Stock (YES/NO)',
         'Featured Showcase (YES/NO)',
@@ -3721,12 +3729,18 @@ _Helpline: +91 9316566894_`;
           100,
           '10 x 10 Tablets',
           'Pain Relief & Antipyretic',
+          'B-84920',
           `${sampleCompany1} Pvt. Ltd., Plot 12, GIDC, Rajkot, Gujarat`,
           'R-04, Shelf-B',
           '3004',
           '2027-12-31',
           12,
           12,
+          '10+1 Free',
+          'WHO-GMP Certified',
+          10,
+          1,
+          '',
           'Effective relief of fever, mild to moderate body pain and headache.',
           'YES',
           'NO',
@@ -3746,12 +3760,18 @@ _Helpline: +91 9316566894_`;
           150,
           '10 x 10 Strips',
           'Gastro Care',
+          'B-90214',
           `${sampleCompany2} Pharma Labs, Ahmedabad, Gujarat`,
           'R-02, Shelf-A',
           '3004',
           '2027-08-31',
           12,
           12,
+          '',
+          'WHO-GMP Certified',
+          10,
+          1,
+          '',
           'Provides fast and sustained relief from acidity, heartburn, and GERD symptoms.',
           'YES',
           'YES',
@@ -3775,12 +3795,18 @@ _Helpline: +91 9316566894_`;
         { wch: 14 }, // Stock
         { wch: 22 }, // Packing
         { wch: 26 }, // Subcategory
+        { wch: 16 }, // Batch Number
         { wch: 38 }, // Manufacturer Details
         { wch: 18 }, // Rack ID
         { wch: 14 }, // HSN Code
         { wch: 16 }, // Expiry Date
         { wch: 18 }, // Purchase GST
         { wch: 18 }, // Sales GST
+        { wch: 20 }, // Scheme
+        { wch: 24 }, // Quality Specs
+        { wch: 14 }, // Units Per Box
+        { wch: 14 }, // Min Reorder Qty
+        { wch: 32 }, // Image URL
         { wch: 42 }, // Description
         { wch: 18 }, // In Stock
         { wch: 22 }, // Featured
@@ -3810,8 +3836,8 @@ _Helpline: +91 9316566894_`;
     }
   };
 
-  const handleBulkFileChange = (e) => {
-    const file = e.target.files?.[0];
+  // Robust universal spreadsheet parser (Excel & CSV)
+  const processSpreadsheetFile = (file) => {
     if (!file) return;
 
     setUploadedFileName(file.name);
@@ -3821,75 +3847,287 @@ _Helpline: +91 9316566894_`;
     reader.onload = (evt) => {
       try {
         const data = new Uint8Array(evt.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        const rawJson = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+        const workbook = XLSX.read(data, { type: 'array', cellDates: true, dateNF: 'yyyy-mm-dd' });
 
-        if (!rawJson || rawJson.length === 0) {
+        if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+          showToast('The spreadsheet contains no sheets', 'error');
+          return;
+        }
+
+        // Find best sheet: prefer one with data rows or sheet named product/data/template
+        let selectedSheetName = workbook.SheetNames[0];
+        let worksheet = workbook.Sheets[selectedSheetName];
+        for (const sName of workbook.SheetNames) {
+          const s = workbook.Sheets[sName];
+          if (s && s['!ref']) {
+            const range = XLSX.utils.decode_range(s['!ref']);
+            if (range.e.r - range.s.r >= 1) {
+              selectedSheetName = sName;
+              worksheet = s;
+              if (/product|catalog|item|stock|medicine|data|template/i.test(sName)) {
+                break;
+              }
+            }
+          }
+        }
+
+        // Parse sheet as raw 2D array of rows
+        const rawGrid = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '', blankrows: false });
+
+        if (!rawGrid || rawGrid.length === 0) {
           showToast('The selected file has no data rows', 'error');
           return;
         }
 
+        // Auto-discover the Header Row index:
+        // Indian ERPs (Marg, Prompt, Busy, Tally) often have 1-5 lines of company info or titles at top.
+        const headerKeywords = [
+          'name', 'item', 'product', 'brand', 'particular', 'medicine', 'drug',
+          'mrp', 'price', 'rate', 'ptr', 'cost', 'pts', 'amount',
+          'stock', 'qty', 'units', 'balance', 'closing',
+          'pack', 'pkg', 'packing',
+          'contain', 'content', 'composition', 'generic', 'molecule', 'salt',
+          'form', 'type', 'company', 'mfg', 'mfr', 'manufacturer',
+          'sku', 'code', 'id', 'batch', 'exp', 'expiry', 'hsn', 'gst', 'tax', 'rack'
+        ];
+
+        let headerRowIdx = 0;
+        let maxKeywordMatches = 0;
+
+        for (let r = 0; r < Math.min(rawGrid.length, 15); r++) {
+          const rowCells = rawGrid[r];
+          if (!Array.isArray(rowCells)) continue;
+          let matchCount = 0;
+          for (const cell of rowCells) {
+            const cellStr = String(cell || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (cellStr.length > 0 && headerKeywords.some(kw => cellStr.includes(kw))) {
+              matchCount++;
+            }
+          }
+          if (matchCount > maxKeywordMatches) {
+            maxKeywordMatches = matchCount;
+            headerRowIdx = r;
+          }
+        }
+
+        const rawHeaders = (rawGrid[headerRowIdx] || []).map(h => String(h || '').trim());
+        const dataRows = rawGrid.slice(headerRowIdx + 1);
+
+        if (dataRows.length === 0) {
+          showToast('No product data rows found in the spreadsheet', 'error');
+          return;
+        }
+
+        // Helper to normalize header string for fuzzy matching
+        const cleanKey = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
+        // Column mapper helper
+        const colIndices = {};
+        rawHeaders.forEach((h, idx) => {
+          if (!h) return;
+          const cleaned = cleanKey(h);
+          colIndices[cleaned] = idx;
+        });
+
+        // Helper to extract a cell value based on multiple aliases
+        const getRowVal = (rowArray, ...aliases) => {
+          for (const alias of aliases) {
+            const cleanedAlias = cleanKey(alias);
+            // 1. Exact cleaned match
+            if (colIndices[cleanedAlias] !== undefined) {
+              const val = rowArray[colIndices[cleanedAlias]];
+              if (val !== undefined && val !== null && String(val).trim() !== '') {
+                return val;
+              }
+            }
+            // 2. Partial / substring match on headers
+            for (const [k, cIdx] of Object.entries(colIndices)) {
+              if (k.includes(cleanedAlias) || cleanedAlias.includes(k)) {
+                const val = rowArray[cIdx];
+                if (val !== undefined && val !== null && String(val).trim() !== '') {
+                  return val;
+                }
+              }
+            }
+          }
+          return '';
+        };
+
+        // Number cleaner: handles "₹ 150", "Rs. 150", "Rs 150", "1,250.00", "12%", etc.
+        const parseNum = (val, fallback = 0) => {
+          if (val === undefined || val === null || val === '') return fallback;
+          if (typeof val === 'number') return isNaN(val) ? fallback : val;
+          const cleaned = String(val)
+            .replace(/^(₹|rs\.?|inr|\$)\s*/i, '')
+            .replace(/[%,\s]/g, '')
+            .trim();
+          const parsed = parseFloat(cleaned);
+          return isNaN(parsed) ? fallback : parsed;
+        };
+
+        // Date cleaner: handles Excel serial numbers, Date objects, DD/MM/YYYY, MM/YYYY, YYYY-MM-DD
+        const parseExpiryDate = (val) => {
+          if (!val) return '2027-12-31';
+          if (val instanceof Date && !isNaN(val)) {
+            const y = val.getFullYear();
+            const m = String(val.getMonth() + 1).padStart(2, '0');
+            const d = String(val.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+          }
+          if (typeof val === 'number') {
+            const jsDate = new Date(Math.round((val - 25569) * 86400 * 1000));
+            if (!isNaN(jsDate)) {
+              const y = jsDate.getFullYear();
+              const m = String(jsDate.getMonth() + 1).padStart(2, '0');
+              const d = String(jsDate.getDate()).padStart(2, '0');
+              return `${y}-${m}-${d}`;
+            }
+          }
+          const str = String(val).trim();
+          // Check MM/YY or MM/YYYY (e.g. 12/26 or 12/2026 or 12-26)
+          const mmyyMatch = str.match(/^(\d{1,2})[\/\-](\d{2,4})$/);
+          if (mmyyMatch) {
+            const month = mmyyMatch[1].padStart(2, '0');
+            let year = mmyyMatch[2];
+            if (year.length === 2) year = '20' + year;
+            return `${year}-${month}-28`;
+          }
+          // Check DD/MM/YYYY or DD-MM-YYYY
+          const ddmmyyMatch = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+          if (ddmmyyMatch) {
+            const day = ddmmyyMatch[1].padStart(2, '0');
+            const month = ddmmyyMatch[2].padStart(2, '0');
+            let year = ddmmyyMatch[3];
+            if (year.length === 2) year = '20' + year;
+            return `${year}-${month}-${day}`;
+          }
+          return str;
+        };
+
         const seenNamesInSheet = new Set();
         const seenSkusInSheet = new Set();
 
-        const parsed = rawJson.map((row, idx) => {
-          const getVal = (...keys) => {
-            for (const k of keys) {
-              const matchedKey = Object.keys(row).find(
-                rk => rk.toLowerCase().trim() === k.toLowerCase().trim() ||
-                      rk.toLowerCase().replace(/[^a-z0-9]/g, '') === k.toLowerCase().replace(/[^a-z0-9]/g, '')
-              );
-              if (matchedKey && row[matchedKey] !== undefined && row[matchedKey] !== null) {
-                return String(row[matchedKey]).trim();
-              }
-            }
-            return '';
-          };
+        const parsed = [];
+        let validRowIndex = 0;
 
-          const name = getVal('Product Name / Brand Name *', 'Product Name', 'Name', 'Product', 'Brand Name');
-          const rawSku = getVal('SKU / ID', 'SKU', 'Product ID', 'Item Code');
-          const sku = rawSku || getNextSequentialSku(products, idx);
-          const company = getVal('Manufacturer / Company *', 'Manufacturer / Company', 'Company', 'Manufacturer') || 'Daxia Healthcare';
-          const category = getVal('Category *', 'Category') || 'Pharma Products';
-          const composition = getVal('Contain *', 'Contain', 'Containt *', 'Containt', 'Content *', 'Content', 'Chemical / Active Composition *', 'Chemical / Active Composition', 'Composition', 'Chemical');
-          const form = getVal('Formulation Form *', 'Formulation Form', 'Form') || 'Tablet';
-          const price = parseFloat(getVal('Wholesale Price (₹) *', 'Wholesale Price', 'Wholesale', 'Price', 'PTR')) || 0;
-          const mrp = parseFloat(getVal('MRP (₹) *', 'MRP', 'Retail MRP')) || (price > 0 ? Math.round(price * 1.35) : 0);
-          const stockQuantity = parseInt(getVal('Stock Units *', 'Stock Units', 'Stock', 'Quantity', 'Qty') || '100', 10);
-          const packing = getVal('Packing Specifications *', 'Packing Specifications', 'Packing', 'Pack') || '10 x 10 Tablets';
-          const subCategory = getVal('Subcategory / Variant *', 'Subcategory / Variant', 'Subcategory', 'Variant') || 'General Formulations';
-          const manufacturer = getVal('Manufacturer Details *', 'Manufacturer Details') || `${company} Pvt. Ltd.`;
-          const rackId = getVal('Rack ID / Location *', 'Rack ID / Location', 'Rack ID', 'Rack', 'Location') || 'R-01';
-          const hsnCode = getVal('HSN Code *', 'HSN Code', 'HSN') || '3004';
-          const expiryDate = getVal('Expiry Date *', 'Expiry Date', 'Expiry', 'Exp') || '2027-12-31';
-          const purchaseGst = parseFloat(getVal('Purchase GST (%) *', 'Purchase GST', 'Purchase GST Rate (%)', 'Purchase GST Rate')) || 12;
-          const salesGst = parseFloat(getVal('Sales GST (%) *', 'Sales GST', 'Sales GST Rate (%)', 'Sales GST Rate', 'GST Rate')) || 12;
-          const description = getVal('Product Description & Indications *', 'Product Description', 'Description') || `${name} formulation by ${company}.`;
+        for (let idx = 0; idx < dataRows.length; idx++) {
+          const row = dataRows[idx];
+          if (!row || !Array.isArray(row) || row.every(c => c === '' || c === undefined || c === null)) {
+            continue; // Skip entirely empty rows
+          }
 
-          // Dynamic custom field values from Excel columns
+          const rawName = String(getRowVal(row,
+            'Product Name / Brand Name *', 'Product Name', 'Brand Name', 'Item Name', 'Item_Name',
+            'Particulars', 'Item', 'Medicine Name', 'Medicine', 'Drug Name', 'Drug', 'Product', 'Title', 'Name'
+          )).trim();
+
+          // If the row doesn't have any name and most cells are empty, skip
+          if (!rawName && row.filter(c => String(c).trim() !== '').length <= 1) {
+            continue;
+          }
+
+          validRowIndex++;
+
+          const rawSku = String(getRowVal(row, 'SKU / ID', 'SKU', 'Product ID', 'Item Code', 'Item_Code', 'Code', 'ID', 'Barcode')).trim();
+          const sku = rawSku || getNextSequentialSku(products, validRowIndex);
+
+          const company = String(getRowVal(row,
+            'Manufacturer / Company *', 'Manufacturer / Company', 'Company Name', 'Company', 'Manufacturer',
+            'Mfg By', 'Mfg', 'Mfr', 'Division', 'Brand', 'Make', 'Supplier'
+          )).trim() || 'Daxia Healthcare';
+
+          const category = String(getRowVal(row, 'Category *', 'Category', 'Group', 'Classification', 'Type')).trim() || 'Pharma Products';
+
+          const composition = String(getRowVal(row,
+            'Contain *', 'Contain', 'Containt *', 'Containt', 'Content *', 'Content',
+            'Chemical / Active Composition *', 'Chemical / Active Composition', 'Composition', 'Chemical',
+            'Generic Name', 'Generic', 'Molecule', 'Salt', 'Formula', 'Active Ingredient'
+          )).trim();
+
+          let form = String(getRowVal(row, 'Formulation Form *', 'Formulation Form', 'Dosage Form', 'Form', 'Type')).trim();
+          if (!form) {
+            const lowerName = rawName.toLowerCase();
+            if (lowerName.includes('tab')) form = 'Tablet';
+            else if (lowerName.includes('cap')) form = 'Capsule';
+            else if (lowerName.includes('syr') || lowerName.includes('susp')) form = 'Syrup / Suspension';
+            else if (lowerName.includes('inj')) form = 'Injection';
+            else if (lowerName.includes('gel') || lowerName.includes('oint')) form = 'Gel / Ointment';
+            else if (lowerName.includes('drop')) form = 'Drops';
+            else if (lowerName.includes('resp')) form = 'Respules';
+            else form = 'Tablet';
+          }
+
+          let rawPrice = parseNum(getRowVal(row,
+            'Wholesale Price (₹) *', 'Wholesale Price', 'PTR', 'P.T.R.', 'Rate', 'Net Rate',
+            'Billing Rate', 'Wholesale Rate', 'Price', 'PTS', 'Cost', 'Amount'
+          ), 0);
+
+          let rawMrp = parseNum(getRowVal(row,
+            'MRP (₹) *', 'MRP', 'Retail MRP', 'M.R.P.', 'Retail Price', 'Max Retail Price', 'Maximum Retail Price'
+          ), 0);
+
+          // Intelligent price calculation if one of wholesale or mrp is missing
+          if (rawPrice <= 0 && rawMrp > 0) {
+            rawPrice = Math.round(rawMrp * 0.70 * 100) / 100; // Auto-estimate Wholesale/PTR at 70% of MRP
+          }
+          if (rawMrp <= 0 && rawPrice > 0) {
+            rawMrp = Math.round(rawPrice * 1.35 * 100) / 100; // Auto-estimate MRP at 35% markup over PTR
+          }
+
+          const stockQuantity = Math.max(0, parseInt(parseNum(getRowVal(row,
+            'Stock Units *', 'Stock Units', 'Stock', 'Quantity', 'Qty', 'Closing Stock',
+            'Current Stock', 'Balance', 'Available Stock', 'Units', 'Pcs'
+          ), 100), 10));
+
+          const packing = String(getRowVal(row,
+            'Packing Specifications *', 'Packing Specifications', 'Packing', 'Pack', 'Pkg', 'Pack Size', 'Unit'
+          )).trim() || '10 x 10 Tablets';
+
+          const subCategory = String(getRowVal(row,
+            'Subcategory / Variant *', 'Subcategory / Variant', 'Subcategory', 'Sub Category', 'Variant'
+          )).trim() || 'General Formulations';
+
+          const manufacturer = String(getRowVal(row, 'Manufacturer Details *', 'Manufacturer Details')).trim() || `${company} Pvt. Ltd.`;
+          const rackId = String(getRowVal(row, 'Rack ID / Location *', 'Rack ID / Location', 'Rack ID', 'Rack', 'Location', 'Shelf', 'Box')).trim() || 'R-01';
+          const hsnCode = String(getRowVal(row, 'HSN Code *', 'HSN Code', 'HSN', 'HSN/SAC', 'Tariff')).trim() || '3004';
+          const expiryDate = parseExpiryDate(getRowVal(row, 'Expiry Date *', 'Expiry Date', 'Expiry', 'Exp Date', 'Exp', 'Valid Upto'));
+
+          const purchaseGst = parseNum(getRowVal(row, 'Purchase GST (%) *', 'Purchase GST', 'Purchase GST Rate (%)', 'Purchase GST Rate', 'Input GST'), 12);
+          const salesGst = parseNum(getRowVal(row, 'Sales GST (%) *', 'Sales GST', 'Sales GST Rate (%)', 'Sales GST Rate', 'GST Rate', 'GST %', 'GST', 'Tax'), 12);
+
+          const batchNumber = String(getRowVal(row, 'Batch Number', 'Batch No', 'Batch', 'B.No', 'Lot', 'Lot No')).trim();
+          const scheme = String(getRowVal(row, 'Trade Scheme (e.g. 10+1)', 'Trade Scheme', 'Scheme', 'Offer')).trim();
+          const qualitySpecs = String(getRowVal(row, 'Quality Specs / Certifications', 'Quality Specs', 'Certifications', 'Quality')).trim() || 'WHO-GMP Certified';
+          const unitsPerBox = parseInt(parseNum(getRowVal(row, 'Units Per Box', 'Box Qty', 'Units/Box'), 10), 10);
+          const minReorderQty = parseInt(parseNum(getRowVal(row, 'Min Reorder Qty', 'Min Order Qty', 'MOQ'), 1), 10);
+          const imageUrl = String(getRowVal(row, 'Product Image URL & Gallery', 'Product Image URL', 'Image URL', 'Image', 'Photo')).trim();
+
+          const description = String(getRowVal(row,
+            'Product Description & Indications *', 'Product Description', 'Description', 'Details', 'Indications'
+          )).trim() || (rawName ? `${rawName} formulation by ${company}.` : '');
+
+          // Dynamic custom field values
           const rowCustomFields = (customFieldDefs || []).map(def => {
-            const val = getVal(def.fieldName, def.fieldKey);
+            const val = getRowVal(row, def.fieldName, def.fieldKey);
             return {
               fieldKey: def.fieldKey,
               fieldName: def.fieldName,
-              fieldValue: val !== undefined ? val : '',
+              fieldValue: val !== undefined ? String(val) : '',
               fieldType: def.fieldType || 'text',
               isRequired: Boolean(def.isRequired)
             };
           });
 
-          const inStockVal = getVal('In Stock (YES/NO)', 'In Stock', 'Publish as In Stock').toUpperCase();
-          const inStock = inStockVal === 'NO' || inStockVal === 'FALSE' ? false : true;
+          const inStockVal = String(getRowVal(row, 'In Stock (YES/NO)', 'In Stock', 'Publish as In Stock')).toUpperCase();
+          const inStock = inStockVal === 'NO' || inStockVal === 'FALSE' ? false : (stockQuantity > 0);
 
-          const featuredVal = getVal('Featured Showcase (YES/NO)', 'Featured').toUpperCase();
+          const featuredVal = String(getRowVal(row, 'Featured Showcase (YES/NO)', 'Featured')).toUpperCase();
           const featured = featuredVal === 'YES' || featuredVal === 'TRUE';
 
-          const ourProductVal = getVal('Our Product Exclusive (YES/NO)', 'Our Product').toUpperCase();
+          const ourProductVal = String(getRowVal(row, 'Our Product Exclusive (YES/NO)', 'Our Product')).toUpperCase();
           const isOurProduct = ourProductVal === 'YES' || ourProductVal === 'TRUE';
 
-          const liveVal = getVal('Live on Website (YES/NO)', 'Live on Public Website', 'Live').toUpperCase();
+          const liveVal = String(getRowVal(row, 'Live on Website (YES/NO)', 'Live on Public Website', 'Live')).toUpperCase();
           const isActive = liveVal === 'NO' || liveVal === 'FALSE' ? false : true;
 
           // DUPLICATION & ERROR CHECKS
@@ -3898,17 +4136,17 @@ _Helpline: +91 9316566894_`;
           let hasError = false;
           let errorMessage = '';
 
-          if (!name) {
+          if (!rawName) {
             hasError = true;
             errorMessage = 'Product name is missing';
           } else {
-            const normName = name.toLowerCase();
+            const normName = rawName.toLowerCase();
             if (seenNamesInSheet.has(normName)) {
               isDuplicate = true;
               duplicateReason = 'Duplicate Name in file';
             } else {
               seenNamesInSheet.add(normName);
-              const existsInCatalog = products.find(p => p.name?.toLowerCase().trim() === normName);
+              const existsInCatalog = (products || []).find(p => p.name?.toLowerCase().trim() === normName);
               if (existsInCatalog) {
                 isDuplicate = true;
                 duplicateReason = `Already in catalog (SKU: ${existsInCatalog.sku || 'N/A'})`;
@@ -3923,7 +4161,7 @@ _Helpline: +91 9316566894_`;
               duplicateReason = duplicateReason || 'Duplicate SKU in file';
             } else {
               seenSkusInSheet.add(normSku);
-              const existsSku = products.find(p => p.sku?.toLowerCase().trim() === normSku);
+              const existsSku = (products || []).find(p => p.sku?.toLowerCase().trim() === normSku);
               if (existsSku) {
                 isDuplicate = true;
                 duplicateReason = duplicateReason || `SKU already used by "${existsSku.name}"`;
@@ -3931,22 +4169,17 @@ _Helpline: +91 9316566894_`;
             }
           }
 
-          if (price <= 0) {
-            hasError = true;
-            errorMessage = errorMessage || 'Wholesale price must be > 0';
-          }
-
-          return {
-            _rowId: idx + 1,
-            selected: !isDuplicate && !hasError,
-            name,
+          parsed.push({
+            _rowId: validRowIndex,
+            selected: !hasError && (!isDuplicate || bulkImportMode === 'update'),
+            name: rawName,
             sku,
             company,
             category,
             composition,
             form,
-            price,
-            mrp,
+            price: rawPrice,
+            mrp: rawMrp,
             stockQuantity,
             packing,
             subCategory,
@@ -3956,6 +4189,13 @@ _Helpline: +91 9316566894_`;
             expiryDate,
             purchaseGst,
             salesGst,
+            batchNumber,
+            scheme,
+            qualitySpecs,
+            unitsPerBox,
+            minReorderQty,
+            imageUrl,
+            images: imageUrl ? [imageUrl] : [],
             description,
             customFields: rowCustomFields,
             inStock,
@@ -3966,11 +4206,16 @@ _Helpline: +91 9316566894_`;
             duplicateReason,
             hasError,
             errorMessage
-          };
-        });
+          });
+        }
+
+        if (parsed.length === 0) {
+          showToast('No valid product rows could be recognized in the file', 'error');
+          return;
+        }
 
         setBulkParsedRows(parsed);
-        showToast(`Parsed ${parsed.length} products from ${file.name}`);
+        showToast(`Successfully parsed ${parsed.length} products from ${file.name}`);
       } catch (err) {
         console.error('Error parsing spreadsheet:', err);
         showToast('Error reading spreadsheet: ' + err.message, 'error');
@@ -3979,15 +4224,51 @@ _Helpline: +91 9316566894_`;
     reader.readAsArrayBuffer(file);
   };
 
+  const handleBulkFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processSpreadsheetFile(file);
+    }
+    // Always reset input value so re-selecting same file triggers onChange
+    if (e.target) e.target.value = '';
+  };
+
+  const handleExcelDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleExcelDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsExcelDragging(true);
+  };
+
+  const handleExcelDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsExcelDragging(false);
+  };
+
+  const handleExcelDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsExcelDragging(false);
+    const file = e.dataTransfer?.files?.[0];
+    if (file) {
+      processSpreadsheetFile(file);
+    }
+  };
+
   const handleToggleRowSelection = (rowId) => {
     setBulkParsedRows(prev => prev.map(r => r._rowId === rowId ? { ...r, selected: !r.selected } : r));
   };
 
   const handleToggleSelectAll = (checked) => {
     setBulkParsedRows(prev => prev.map(r => {
-      // Don't select error rows or duplicates if skipping
+      // Don't select error rows (rows missing product name)
       if (r.hasError) return { ...r, selected: false };
-      if (bulkSkipDuplicates && r.isDuplicate) return { ...r, selected: false };
+      if (bulkImportMode === 'skip' && r.isDuplicate) return { ...r, selected: false };
       return { ...r, selected: checked };
     }));
   };
@@ -3999,7 +4280,7 @@ _Helpline: +91 9316566894_`;
       rowsToImport = bulkParsedRows.filter(r => {
         if (!r.selected) return false;
         if (r.hasError) return false;
-        if (bulkSkipDuplicates && r.isDuplicate) return false;
+        if (bulkImportMode === 'skip' && r.isDuplicate) return false;
         return true;
       });
     } else if (bulkCsvText.trim()) {
@@ -4011,9 +4292,9 @@ _Helpline: +91 9316566894_`;
           const parts = lines[i].split(',').map(p => p.trim().replace(/^["']|["']$/g, ''));
           const rowObj = {};
           headers.forEach((h, colIdx) => { rowObj[h] = parts[colIdx] || ''; });
-          if (rowObj.name || rowObj['product name']) {
+          if (rowObj.name || rowObj['product name'] || rowObj['item name']) {
             rowsToImport.push({
-              name: rowObj.name || rowObj['product name'],
+              name: rowObj.name || rowObj['product name'] || rowObj['item name'],
               sku: rowObj.sku || getNextSequentialSku(products, i),
               company: rowObj.company || 'Daxia Healthcare',
               category: rowObj.category || 'Pharma Products',
@@ -4054,17 +4335,20 @@ _Helpline: +91 9316566894_`;
         headers: getAuthHeaders(),
         body: JSON.stringify({
           products: rowsToImport,
-          skipDuplicates: bulkSkipDuplicates
+          skipDuplicates: bulkImportMode === 'skip',
+          mode: bulkImportMode
         })
       });
       const data = await res.json();
 
       if (res.ok && data.success) {
         setBulkImportResults(data);
-        showToast(`Successfully imported ${data.successCount} products! ${data.skippedCount ? `(${data.skippedCount} duplicates skipped)` : ''}`);
+        const updatedInfo = data.updatedCount ? `, ${data.updatedCount} updated` : '';
+        const skippedInfo = data.skippedCount ? ` (${data.skippedCount} duplicates skipped)` : '';
+        showToast(`Successfully processed ${data.successCount} products${updatedInfo}!${skippedInfo}`);
         broadcastLiveEvent(SYNC_EVENTS.PRODUCT_BULK_IMPORTED, { count: data.successCount });
-        fetchProducts();
-        fetchDashboardData();
+        // Refresh products list in real-time
+        await fetchDashboardData(false);
         // Clear preview after successful import
         setBulkParsedRows([]);
         setUploadedFileName('');
@@ -12442,23 +12726,28 @@ _Helpline: +91 9316566894_`;
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div 
                     onClick={() => excelFileInputRef.current?.click()}
+                    onDragOver={handleExcelDragOver}
+                    onDragEnter={handleExcelDragEnter}
+                    onDragLeave={handleExcelDragLeave}
+                    onDrop={handleExcelDrop}
                     style={{
-                      border: '2px dashed #94a3b8',
+                      border: isExcelDragging ? '2px dashed #2563eb' : '2px dashed #94a3b8',
                       borderRadius: '14px',
                       padding: '40px 20px',
                       textAlign: 'center',
-                      backgroundColor: '#f8fafc',
+                      backgroundColor: isExcelDragging ? '#eff6ff' : '#f8fafc',
                       cursor: 'pointer',
-                      transition: 'border-color 0.2s ease'
+                      transition: 'all 0.2s ease',
+                      transform: isExcelDragging ? 'scale(1.01)' : 'scale(1)'
                     }}
-                    onMouseOver={(e) => { e.currentTarget.style.borderColor = '#2563eb'; e.currentTarget.style.backgroundColor = '#eff6ff'; }}
-                    onMouseOut={(e) => { e.currentTarget.style.borderColor = '#94a3b8'; e.currentTarget.style.backgroundColor = '#f8fafc'; }}
+                    onMouseOver={(e) => { if (!isExcelDragging) { e.currentTarget.style.borderColor = '#2563eb'; e.currentTarget.style.backgroundColor = '#eff6ff'; } }}
+                    onMouseOut={(e) => { if (!isExcelDragging) { e.currentTarget.style.borderColor = '#94a3b8'; e.currentTarget.style.backgroundColor = '#f8fafc'; } }}
                   >
                     <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: '#dbeafe', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
                       <FileSpreadsheet size={30} />
                     </div>
                     <h4 style={{ margin: '0 0 6px', fontSize: '1.05rem', color: 'var(--text-dark)', fontWeight: '700' }}>
-                      Click or Drag & Drop Excel (.xlsx, .xls) or CSV file here
+                      {isExcelDragging ? 'Drop your Excel / CSV file here now!' : 'Click or Drag & Drop Excel (.xlsx, .xls) or CSV file here'}
                     </h4>
                     <p style={{ margin: '0 0 14px', fontSize: '0.85rem', color: 'var(--text-medium)' }}>
                       Supports all pharma formulation columns. Images can be left empty and added later.
@@ -12481,18 +12770,22 @@ _Helpline: +91 9316566894_`;
                       <div>• <strong>SKU / ID</strong> (Auto-generated if blank)</div>
                       <div>• <strong>Manufacturer / Company *</strong></div>
                       <div>• <strong>Category *</strong></div>
-                      <div>• <strong>Contain *</strong> (or Chemical / Active Composition / Content)</div>
+                      <div>• <strong>Contain *</strong> (Active Composition)</div>
                       <div>• <strong>Formulation Form *</strong></div>
                       <div>• <strong>Wholesale Price (₹) *</strong></div>
                       <div>• <strong>MRP (₹) *</strong></div>
                       <div>• <strong>Stock Units *</strong></div>
                       <div>• <strong>Packing Specifications *</strong></div>
                       <div>• <strong>Subcategory / Variant *</strong></div>
-                      <div>• <strong>Manufacturer Details *</strong></div>
+                      <div>• <strong>Batch Number</strong></div>
                       <div>• <strong>Rack ID / Location *</strong></div>
                       <div>• <strong>HSN Code *</strong></div>
                       <div>• <strong>Expiry Date *</strong></div>
                       <div>• <strong>Purchase & Sales GST (%) *</strong></div>
+                      <div>• <strong>Trade Scheme (e.g. 10+1)</strong></div>
+                      <div>• <strong>Quality Specs / Certifications</strong></div>
+                      <div>• <strong>Units Per Box & Min Reorder Qty</strong></div>
+                      <div>• <strong>Product Image URL & Gallery</strong></div>
                     </div>
                   </div>
                 </div>
@@ -12503,8 +12796,8 @@ _Helpline: +91 9316566894_`;
                 const totalCount = bulkParsedRows.length;
                 const duplicateCount = bulkParsedRows.filter(r => r.isDuplicate).length;
                 const errorCount = bulkParsedRows.filter(r => r.hasError).length;
-                const validCount = bulkParsedRows.filter(r => !r.isDuplicate && !r.hasError).length;
-                const selectedCount = bulkParsedRows.filter(r => r.selected && !r.hasError && (!bulkSkipDuplicates || !r.isDuplicate)).length;
+                const validCount = bulkParsedRows.filter(r => !r.hasError).length;
+                const selectedCount = bulkParsedRows.filter(r => r.selected && !r.hasError).length;
 
                 const displayedRows = bulkParsedRows.filter(r => {
                   if (bulkPreviewFilter === 'valid') return !r.isDuplicate && !r.hasError;
@@ -12524,12 +12817,12 @@ _Helpline: +91 9316566894_`;
                       </div>
 
                       <div style={{ padding: '12px 14px', backgroundColor: '#ecfdf5', borderRadius: '10px', border: '1px solid #a7f3d0' }}>
-                        <div style={{ fontSize: '0.72rem', color: '#047857', fontWeight: '700', textTransform: 'uppercase' }}>Ready to Import</div>
+                        <div style={{ fontSize: '0.72rem', color: '#047857', fontWeight: '700', textTransform: 'uppercase' }}>Valid Products</div>
                         <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#059669' }}>{validCount}</div>
                       </div>
 
                       <div style={{ padding: '12px 14px', backgroundColor: duplicateCount > 0 ? '#fffbeb' : '#f8fafc', borderRadius: '10px', border: `1px solid ${duplicateCount > 0 ? '#fde68a' : '#e2e8f0'}` }}>
-                        <div style={{ fontSize: '0.72rem', color: duplicateCount > 0 ? '#b45309' : 'var(--text-medium)', fontWeight: '700', textTransform: 'uppercase' }}>Duplicates Flagged</div>
+                        <div style={{ fontSize: '0.72rem', color: duplicateCount > 0 ? '#b45309' : 'var(--text-medium)', fontWeight: '700', textTransform: 'uppercase' }}>Existing in Catalog</div>
                         <div style={{ fontSize: '1.25rem', fontWeight: '800', color: duplicateCount > 0 ? '#d97706' : 'var(--text-dark)' }}>{duplicateCount}</div>
                       </div>
 
@@ -12539,7 +12832,7 @@ _Helpline: +91 9316566894_`;
                       </div>
                     </div>
 
-                    {/* CONTROLS BAR: FILTER TABS & DUPLICATION CHECKBOX */}
+                    {/* CONTROLS BAR: FILTER TABS & DUPLICATION STRATEGY */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', padding: '10px 14px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                         <button 
@@ -12554,7 +12847,7 @@ _Helpline: +91 9316566894_`;
                           onClick={() => setBulkPreviewFilter('valid')}
                           style={{ padding: '5px 12px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: '700', border: 'none', cursor: 'pointer', backgroundColor: bulkPreviewFilter === 'valid' ? '#059669' : '#e2e8f0', color: bulkPreviewFilter === 'valid' ? '#fff' : '#475569' }}
                         >
-                          Ready ({validCount})
+                          New Only ({bulkParsedRows.filter(r => !r.isDuplicate && !r.hasError).length})
                         </button>
                         {duplicateCount > 0 && (
                           <button 
@@ -12562,20 +12855,54 @@ _Helpline: +91 9316566894_`;
                             onClick={() => setBulkPreviewFilter('duplicates')}
                             style={{ padding: '5px 12px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: '700', border: 'none', cursor: 'pointer', backgroundColor: bulkPreviewFilter === 'duplicates' ? '#d97706' : '#e2e8f0', color: bulkPreviewFilter === 'duplicates' ? '#fff' : '#475569' }}
                           >
-                            Duplicates ({duplicateCount})
+                            Existing Products ({duplicateCount})
+                          </button>
+                        )}
+                        {errorCount > 0 && (
+                          <button 
+                            type="button" 
+                            onClick={() => setBulkPreviewFilter('errors')}
+                            style={{ padding: '5px 12px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: '700', border: 'none', cursor: 'pointer', backgroundColor: bulkPreviewFilter === 'errors' ? '#dc2626' : '#fee2e2', color: bulkPreviewFilter === 'errors' ? '#fff' : '#991b1b' }}
+                          >
+                            Errors ({errorCount})
                           </button>
                         )}
                       </div>
 
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.84rem', fontWeight: '700', color: '#1e293b' }}>
-                        <input 
-                          type="checkbox" 
-                          checked={bulkSkipDuplicates}
-                          onChange={(e) => setBulkSkipDuplicates(e.target.checked)}
-                          style={{ accentColor: '#2563eb', width: '16px', height: '16px' }}
-                        />
-                        <span>Automatically skip duplicates (prevent duplicates from being added)</span>
-                      </label>
+                      {/* DUPLICATE HANDLING MODE SELECTION */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '0.82rem', fontWeight: '700', color: '#1e293b' }}>
+                          If product already exists in catalog:
+                        </span>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.82rem', fontWeight: '600', color: bulkImportMode === 'skip' ? '#2563eb' : '#475569' }}>
+                          <input 
+                            type="radio" 
+                            name="bulkImportMode"
+                            checked={bulkImportMode === 'skip'}
+                            onChange={() => {
+                              setBulkImportMode('skip');
+                              setBulkSkipDuplicates(true);
+                              setBulkParsedRows(prev => prev.map(r => r.isDuplicate ? { ...r, selected: false } : r));
+                            }}
+                            style={{ accentColor: '#2563eb' }}
+                          />
+                          <span>Skip duplicates</span>
+                        </label>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.82rem', fontWeight: '600', color: bulkImportMode === 'update' ? '#16a34a' : '#475569' }}>
+                          <input 
+                            type="radio" 
+                            name="bulkImportMode"
+                            checked={bulkImportMode === 'update'}
+                            onChange={() => {
+                              setBulkImportMode('update');
+                              setBulkSkipDuplicates(false);
+                              setBulkParsedRows(prev => prev.map(r => (!r.hasError ? { ...r, selected: true } : r)));
+                            }}
+                            style={{ accentColor: '#16a34a' }}
+                          />
+                          <span>Update existing products (Price & Stock)</span>
+                        </label>
+                      </div>
                     </div>
 
                     {/* RESPONSIVE SCROLLABLE DATA PREVIEW TABLE */}
@@ -12624,7 +12951,7 @@ _Helpline: +91 9316566894_`;
                             displayedRows.map((r) => {
                               const isRowDuplicate = r.isDuplicate;
                               const isRowError = r.hasError;
-                              const rowBg = isRowError ? '#fef2f2' : isRowDuplicate ? '#fffbeb' : (r.selected ? '#ffffff' : '#f8fafc');
+                              const rowBg = isRowError ? '#fef2f2' : isRowDuplicate ? (bulkImportMode === 'update' ? '#f0fdf4' : '#fffbeb') : (r.selected ? '#ffffff' : '#f8fafc');
 
                               return (
                                 <tr 
@@ -12638,10 +12965,10 @@ _Helpline: +91 9316566894_`;
                                   <td style={{ padding: '8px 12px', textAlign: 'center' }}>
                                     <input 
                                       type="checkbox"
-                                      checked={r.selected && (!bulkSkipDuplicates || !isRowDuplicate) && !isRowError}
-                                      disabled={isRowError || (bulkSkipDuplicates && isRowDuplicate)}
+                                      checked={Boolean(r.selected) && !isRowError}
+                                      disabled={isRowError}
                                       onChange={() => handleToggleRowSelection(r._rowId)}
-                                      style={{ accentColor: '#2563eb', cursor: (isRowError || (bulkSkipDuplicates && isRowDuplicate)) ? 'not-allowed' : 'pointer' }}
+                                      style={{ accentColor: '#2563eb', cursor: isRowError ? 'not-allowed' : 'pointer' }}
                                     />
                                   </td>
                                   <td style={{ padding: '8px 12px', color: '#64748b', fontWeight: '600' }}>
@@ -12653,8 +12980,19 @@ _Helpline: +91 9316566894_`;
                                         ✕ {r.errorMessage}
                                       </span>
                                     ) : isRowDuplicate ? (
-                                      <span style={{ backgroundColor: '#fef3c7', color: '#b45309', fontSize: '0.72rem', padding: '2px 7px', borderRadius: '4px', fontWeight: '700', whiteSpace: 'nowrap' }} title={r.duplicateReason}>
-                                        Duplicate: {r.duplicateReason}
+                                      <span 
+                                        style={{ 
+                                          backgroundColor: bulkImportMode === 'update' ? '#dcfce7' : '#fef3c7', 
+                                          color: bulkImportMode === 'update' ? '#15803d' : '#b45309', 
+                                          fontSize: '0.72rem', 
+                                          padding: '2px 7px', 
+                                          borderRadius: '4px', 
+                                          fontWeight: '700', 
+                                          whiteSpace: 'nowrap' 
+                                        }} 
+                                        title={r.duplicateReason}
+                                      >
+                                        {bulkImportMode === 'update' ? '↻ Will Update' : `⚠ Duplicate: ${r.duplicateReason}`}
                                       </span>
                                     ) : (
                                       <span style={{ backgroundColor: '#dcfce7', color: '#15803d', fontSize: '0.72rem', padding: '2px 7px', borderRadius: '4px', fontWeight: '700', whiteSpace: 'nowrap' }}>
@@ -12678,10 +13016,10 @@ _Helpline: +91 9316566894_`;
                                     {r.form} • {r.packing}
                                   </td>
                                   <td style={{ padding: '8px 12px', fontWeight: '700', color: '#16a34a' }}>
-                                    ₹{r.price.toFixed(2)}
+                                    ₹{Number(r.price || 0).toFixed(2)}
                                   </td>
                                   <td style={{ padding: '8px 12px', color: 'var(--text-dark)' }}>
-                                    ₹{r.mrp.toFixed(2)}
+                                    ₹{Number(r.mrp || 0).toFixed(2)}
                                   </td>
                                   <td style={{ padding: '8px 12px', color: 'var(--text-dark)' }}>
                                     {r.stockQuantity}
@@ -12706,7 +13044,7 @@ _Helpline: +91 9316566894_`;
                 <div style={{ padding: '14px 18px', backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '10px', fontSize: '0.88rem', color: '#065f46', display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <CheckCircle2 size={20} color="#059669" />
                   <div>
-                    <strong>Import Successful:</strong> Added <strong>{bulkImportResults.successCount}</strong> products to catalog. {bulkImportResults.skippedCount > 0 && `(${bulkImportResults.skippedCount} duplicates skipped)`}
+                    <strong>Import Successful:</strong> Processed <strong>{bulkImportResults.successCount}</strong> products {bulkImportResults.updatedCount > 0 ? `(${bulkImportResults.updatedCount} updated)` : ''} {bulkImportResults.skippedCount > 0 ? `(${bulkImportResults.skippedCount} duplicates skipped)` : ''}.
                   </div>
                 </div>
               )}
@@ -12729,7 +13067,7 @@ _Helpline: +91 9316566894_`;
                 {bulkParsedRows.length > 0 ? (
                   <span>
                     Selected <strong style={{ color: '#2563eb' }}>
-                      {bulkParsedRows.filter(r => r.selected && !r.hasError && (!bulkSkipDuplicates || !r.isDuplicate)).length}
+                      {bulkParsedRows.filter(r => r.selected && !r.hasError).length}
                     </strong> of {bulkParsedRows.length} products
                   </span>
                 ) : (
@@ -12755,7 +13093,7 @@ _Helpline: +91 9316566894_`;
                   <button
                     type="button"
                     onClick={handleExecuteBulkImport}
-                    disabled={isImportingBulk || bulkParsedRows.filter(r => r.selected && !r.hasError && (!bulkSkipDuplicates || !r.isDuplicate)).length === 0}
+                    disabled={isImportingBulk || bulkParsedRows.filter(r => r.selected && !r.hasError).length === 0}
                     className="btn btn-primary btn-sm"
                     style={{ padding: '8px 22px', fontWeight: '700', gap: '6px' }}
                   >
@@ -12765,7 +13103,7 @@ _Helpline: +91 9316566894_`;
                         Importing Products...
                       </>
                     ) : (
-                      `✓ Confirm & Import (${bulkParsedRows.filter(r => r.selected && !r.hasError && (!bulkSkipDuplicates || !r.isDuplicate)).length}) Products`
+                      `✓ Confirm & Import (${bulkParsedRows.filter(r => r.selected && !r.hasError).length}) Products`
                     )}
                   </button>
                 )}

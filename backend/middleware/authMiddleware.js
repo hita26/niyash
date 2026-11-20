@@ -67,6 +67,10 @@ const checkPermission = (permissionKey) => {
       if (req.user.permissions && req.user.permissions[permissionKey] === true) {
         return next();
       }
+      // If permissions object or this key hasn't been explicitly configured, allow default admin access
+      if (!req.user.permissions || req.user.permissions[permissionKey] === undefined) {
+        return next();
+      }
       return res.status(403).json({
         success: false,
         message: `Action denied. Your admin account lacks the "${permissionKey}" permission. Please contact Super Admin.`

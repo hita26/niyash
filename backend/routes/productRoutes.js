@@ -1125,12 +1125,13 @@ router.delete('/:id', protect, adminOnly, checkPermission('canDeleteProducts'), 
 // @access  Private/Admin
 router.post('/bulk', protect, adminOnly, checkPermission('canBulkImport'), async (req, res) => {
   try {
-    const { products, skipDuplicates = true } = req.body;
+    const { products, skipDuplicates = true, mode = 'skip' } = req.body;
     if (!Array.isArray(products) || products.length === 0) {
       return res.status(400).json({ success: false, message: 'Please provide an array of products to import' });
     }
 
     let successCount = 0;
+    let updatedCount = 0;
     let skippedCount = 0;
     let errorCount = 0;
     const errors = [];
@@ -1140,48 +1141,33 @@ router.post('/bulk', protect, adminOnly, checkPermission('canBulkImport'), async
     for (let i = 0; i < products.length; i++) {
       const p = products[i];
       try {
-        if (!p.name || p.name.trim() === '') {
+        if (!p.name || String(p.name).trim() === '') {
           throw new Error(`Row ${i + 1}: Product name is required`);
         }
 
-        const trimmedName = p.name.trim();
+        const trimmedName = String(p.name).trim();
         const normalizedName = trimmedName.toLowerCase();
-        const sku = p.sku && p.sku.trim() ? p.sku.trim() : `NP-${Date.now().toString().slice(-6)}-${i + 1}`;
+        const sku = p.sku && String(p.sku).trim() ? String(p.sku).trim() : `NP-${Date.now().toString().slice(-6)}-${i + 1}`;
         const normalizedSku = sku.toLowerCase();
 
         // Duplication prevention: Check against batch itself
         if (seenNamesInBatch.has(normalizedName)) {
-          if (skipDuplicates) {
+          if (skipDuplicates && mode === 'skip') {
             skippedCount++;
             continue;
           }
         }
         if (seenSkusInBatch.has(normalizedSku)) {
-          if (skipDuplicates) {
+          if (skipDuplicates && mode === 'skip') {
             skippedCount++;
             continue;
-          }
-        }
-
-        // Duplication prevention: Check against existing MongoDB collection
-        if (skipDuplicates) {
-          const escapedName = trimmedName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          const existingProduct = await Product.findOne({
-            $or: [
-              { name: { $regex: new RegExp(`^${escapedName}$`, 'i') } },
-              { sku: { $regex: new RegExp(`^${sku.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') } }
-            ]
-          });
-          if (existingProduct) {
-            skippedCount++;
-            continue; // Skip duplicate without throwing an error
           }
         }
 
         seenNamesInBatch.add(normalizedName);
         seenSkusInBatch.add(normalizedSku);
 
-        const assignedCompany = (p.company && p.company.trim()) || 'Daxia Healthcare';
+        const assignedCompany = (p.company && String(p.company).trim()) || 'Daxia Healthcare';
 
         // Auto-ensure Company exists in Company collection so it shows up on public website
         try {
@@ -1211,36 +1197,63 @@ router.post('/bulk', protect, adminOnly, checkPermission('canBulkImport'), async
 
         const productData = {
           name: trimmedName,
-          brand: (p.brand && p.brand.trim()) || trimmedName,
+          brand: (p.brand && String(p.brand).trim()) || trimmedName,
           company: assignedCompany,
-          category: (p.category && p.category.trim()) || 'Pharma Products',
-          subCategory: (p.subCategory && p.subCategory.trim()) || '',
+          category: (p.category && String(p.category).trim()) || 'Pharma Products',
+          subCategory: (p.subCategory && String(p.subCategory).trim()) || '',
           sku,
           price: parseFloat(p.price) || 0,
           mrp: parseFloat(p.mrp) || parseFloat(p.price) || 0,
           stockQuantity: parseInt(p.stockQuantity, 10) || 100,
           inStock: p.inStock !== undefined ? Boolean(p.inStock) : true,
-          packing: (p.packing && p.packing.trim()) || '10 x 10 Tablets',
-          composition: (p.composition && p.composition.trim()) || '',
-          form: (p.form && p.form.trim()) || 'Tablet',
-          manufacturer: (p.manufacturer && p.manufacturer.trim()) || assignedCompany,
-          rackId: (p.rackId && p.rackId.trim()) || '',
-          batchNumber: (p.batchNumber && p.batchNumber.trim()) || (p.batchNo && p.batchNo.trim()) || '',
-          hsnCode: (p.hsnCode && p.hsnCode.trim()) || '3004',
+          packing: (p.packing && String(p.packing).trim()) || '10 x 10 Tablets',
+          composition: (p.composition && String(p.composition).trim()) || '',
+          form: (p.form && String(p.form).trim()) || 'Tablet',
+          manufacturer: (p.manufacturer && String(p.manufacturer).trim()) || assignedCompany,
+          rackId: (p.rackId && String(p.rackId).trim()) || '',
+          batchNumber: (p.batchNumber && String(p.batchNumber).trim()) || (p.batchNo && String(p.batchNo).trim()) || '',
+          hsnCode: (p.hsnCode && String(p.hsnCode).trim()) || '3004',
           purchaseGst: purchaseGstVal,
           salesGst: salesGstVal,
           gstRate: salesGstVal,
-          expiryDate: (p.expiryDate && p.expiryDate.trim()) || '',
+          expiryDate: (p.expiryDate && String(p.expiryDate).trim()) || '',
+          scheme: (p.scheme && String(p.scheme).trim()) || '',
+          qualitySpecs: (p.qualitySpecs && String(p.qualitySpecs).trim()) || 'WHO-GMP Certified',
+          unitsPerBox: parseInt(p.unitsPerBox, 10) || 10,
+          minReorderQty: parseInt(p.minReorderQty, 10) || 1,
+          customFields: Array.isArray(p.customFields) ? p.customFields : [],
           imageUrl: mainImage,
           images,
-          description: (p.description && p.description.trim()) || '',
+          description: (p.description && String(p.description).trim()) || '',
           featured: Boolean(p.featured),
           isOurProduct: Boolean(p.isOurProduct),
           isActive: p.isActive !== undefined ? Boolean(p.isActive) : true,
         };
 
-        // If product with matching SKU exists and not skipping, update; otherwise insert
-        await Product.findOneAndUpdate({ sku }, { $set: productData }, { upsert: true, new: true });
+        // Check if product already exists in MongoDB
+        const escapedName = trimmedName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const existingProduct = await Product.findOne({
+          $or: [
+            { sku: { $regex: new RegExp(`^${sku.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') } },
+            { name: { $regex: new RegExp(`^${escapedName}$`, 'i') } }
+          ]
+        });
+
+        if (existingProduct) {
+          if (skipDuplicates && mode === 'skip') {
+            skippedCount++;
+            continue; // Skip duplicate without throwing error
+          } else {
+            // Update existing product
+            await Product.findByIdAndUpdate(existingProduct._id, { $set: productData });
+            updatedCount++;
+            successCount++;
+            continue;
+          }
+        }
+
+        // Create new product
+        await Product.create(productData);
         successCount++;
       } catch (rowErr) {
         errorCount++;
@@ -1252,13 +1265,14 @@ router.post('/bulk', protect, adminOnly, checkPermission('canBulkImport'), async
       req,
       action: 'BULK_IMPORT',
       category: 'PRODUCT',
-      details: `Bulk imported ${successCount} products via spreadsheet (${skippedCount} duplicates skipped, ${errorCount} errors)`
+      details: `Bulk imported ${successCount} products via spreadsheet (${updatedCount} updated, ${skippedCount} duplicates skipped, ${errorCount} errors)`
     });
 
     res.json({
       success: true,
-      message: `Bulk import completed: ${successCount} products imported, ${skippedCount} duplicates skipped.`,
+      message: `Bulk import completed: ${successCount} products processed (${updatedCount} updated), ${skippedCount} duplicates skipped.`,
       successCount,
+      updatedCount,
       skippedCount,
       errorCount,
       errors: errors.slice(0, 10),

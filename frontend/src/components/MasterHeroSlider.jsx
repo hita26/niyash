@@ -226,16 +226,19 @@ export default function MasterHeroSlider({
       onTouchEnd={handleTouchEnd}
       style={{
         position: 'relative',
-        minHeight: 'clamp(520px, 70vh, 660px)',
+        minHeight: currentIdx === 0 ? 'clamp(520px, 70vh, 660px)' : 'auto',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         overflow: 'hidden',
         color: '#ffffff',
-        background: `linear-gradient(135deg, rgba(8, 38, 70, 0.97), rgba(15, 68, 115, 0.93)), url("${heroBgImage}")`,
+        background: currentIdx === 0 
+          ? `linear-gradient(135deg, rgba(8, 38, 70, 0.97), rgba(15, 68, 115, 0.93)), url("${heroBgImage}")`
+          : '#0a192f',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        padding: 'clamp(32px, 5vw, 65px) 0 clamp(54px, 7vw, 85px) 0'
+        padding: currentIdx === 0 ? 'clamp(32px, 5vw, 65px) 0 clamp(54px, 7vw, 85px) 0' : '0',
+        transition: 'min-height 0.3s ease'
       }}
     >
       {/* Top Slide Autoplay Progress Line */}
@@ -420,287 +423,46 @@ export default function MasterHeroSlider({
       </div>
 
       {/* ============================================================== */}
-      {/* SLIDES 1..N: DYNAMIC HERO PRODUCT BANNERS (b1..b7)              */}
+      {/* SLIDES 1..N: DYNAMIC HERO PRODUCT BANNERS (Full Width, Proper Fit) */}
       {/* ============================================================== */}
       {currentBanner && (
         <div 
-          className="dynamic-banner-slide"
+          className="dynamic-banner-slide-full"
           style={{
             position: 'relative',
             width: '100%',
-            zIndex: 2,
-            animation: 'fadeInSlide 0.45s ease-out forwards'
+            height: 'auto',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'hidden',
+            backgroundColor: '#0a192f'
           }}
         >
-          {/* Ambient Blurred Backdrop for wide panoramic immersion */}
-          <div 
-            style={{
-              position: 'absolute',
-              top: '-30%',
-              left: '-15%',
-              width: '130%',
-              height: '160%',
-              backgroundImage: `url("${currentBanner.image}")`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              filter: 'blur(45px) brightness(0.35)',
-              opacity: 0.65,
-              zIndex: 0,
-              pointerEvents: 'none'
+          <Link 
+            to={currentBanner.link || '/quick-order'}
+            title={currentBanner.title || 'Niyansh Pharma Wholesale Offer'}
+            style={{ 
+              display: 'block', 
+              width: '100%', 
+              height: 'auto',
+              textDecoration: 'none'
             }}
-          />
-
-          <div className="container" style={{ position: 'relative', zIndex: 2 }}>
-            {/* If it's the wide landscape banner (b1): show full widescreen panorama card */}
-            {currentBanner.aspectRatio === 'landscape' ? (
-              <div 
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  maxWidth: '1160px',
-                  margin: '0 auto'
-                }}
-              >
-                {/* Clickable Large Panoramic Poster */}
-                <Link 
-                  to={currentBanner.link || '/products'}
-                  style={{
-                    display: 'block',
-                    width: '100%',
-                    borderRadius: '22px',
-                    overflow: 'hidden',
-                    boxShadow: '0 25px 60px rgba(0, 0, 0, 0.55), 0 0 35px rgba(52, 211, 153, 0.3)',
-                    border: '1.5px solid rgba(255, 255, 255, 0.22)',
-                    backgroundColor: 'rgba(11, 35, 65, 0.7)',
-                    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                    textDecoration: 'none'
-                  }}
-                  className="banner-panoramic-card card-hover-pharma"
-                >
-                  <img 
-                    src={currentBanner.image} 
-                    alt={currentBanner.title}
-                    style={{
-                      width: '100%',
-                      height: 'auto',
-                      maxHeight: '440px',
-                      objectFit: 'cover',
-                      display: 'block'
-                    }}
-                  />
-                </Link>
-
-                {/* Sub-Banner Fast Action Bar */}
-                <div 
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    flexWrap: 'wrap',
-                    gap: '14px',
-                    width: '100%',
-                    marginTop: '16px',
-                    padding: '12px 20px',
-                    borderRadius: '16px',
-                    backgroundColor: 'rgba(10, 35, 65, 0.75)',
-                    backdropFilter: 'blur(12px)',
-                    border: '1px solid rgba(255, 255, 255, 0.15)'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span style={{ fontSize: '0.74rem', backgroundColor: '#22c55e', color: '#ffffff', fontWeight: '800', padding: '3px 10px', borderRadius: '12px' }}>
-                      {currentBanner.badge || 'NEW LAUNCH'}
-                    </span>
-                    <span style={{ fontSize: '1rem', fontWeight: '800', color: '#ffffff' }}>
-                      {currentBanner.title}
-                    </span>
-                    <span style={{ fontSize: '0.82rem', color: '#94a3b8', display: 'none', mdDisplay: 'inline' }} className="d-none d-md-inline">
-                      • {currentBanner.subtitle}
-                    </span>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    <Link 
-                      to={currentBanner.link || '/quick-order'} 
-                      className="btn btn-primary"
-                      style={{ padding: '8px 18px', fontSize: '0.88rem', fontWeight: '700', borderRadius: '25px', backgroundColor: '#ffffff', color: 'var(--primary-blue)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-                    >
-                      <Package size={15} /> {currentBanner.ctaText || 'Fast Quick Order ⚡'}
-                    </Link>
-                    <a 
-                      href={`https://wa.me/919909923130?text=Hello%20Niyansh%20Pharma%2C%20I%20would%20like%20to%20order%20${encodeURIComponent(currentBanner.title)}.`}
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="btn btn-secondary"
-                      style={{ padding: '8px 18px', fontSize: '0.88rem', fontWeight: '700', borderRadius: '25px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-                    >
-                      <MessageSquare size={15} /> WhatsApp Order
-                    </a>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              /* For Square & Portrait Posters (b2 - b7): Rich Split Showcase Layout */
-              <div 
-                className="banner-content-wrapper"
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                  gap: 'clamp(24px, 5vw, 50px)',
-                  alignItems: 'center'
-                }}
-              >
-                {/* Left Column: Product Details & CTAs */}
-                <div style={{ maxWidth: '600px' }}>
-                  {/* Badge Tag */}
-                  <div 
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '7px',
-                      backgroundColor: 'rgba(52, 211, 153, 0.2)',
-                      border: '1.5px solid rgba(74, 222, 128, 0.6)',
-                      padding: '6px 14px',
-                      borderRadius: '24px',
-                      fontSize: 'clamp(0.72rem, 2vw, 0.82rem)',
-                      fontWeight: '800',
-                      color: '#86efac',
-                      letterSpacing: '0.8px',
-                      textTransform: 'uppercase',
-                      marginBottom: '16px'
-                    }}
-                  >
-                    <Sparkles size={14} color="#86efac" />
-                    <span>{currentBanner.badge || 'EXCLUSIVE NIYANSH FORMULATION'}</span>
-                  </div>
-
-                  {/* Banner Title */}
-                  <h2 
-                    style={{
-                      fontSize: 'clamp(1.75rem, 4.2vw, 2.85rem)',
-                      fontWeight: '900',
-                      lineHeight: '1.2',
-                      color: '#ffffff',
-                      marginBottom: '14px',
-                      fontFamily: 'Outfit',
-                      textShadow: '0 2px 14px rgba(0,0,0,0.5)'
-                    }}
-                  >
-                    {currentBanner.title}
-                  </h2>
-
-                  {/* Banner Subtitle */}
-                  <p 
-                    style={{
-                      fontSize: 'clamp(0.92rem, 2.2vw, 1.08rem)',
-                      color: '#e2e8f0',
-                      lineHeight: '1.65',
-                      marginBottom: '22px',
-                      maxWidth: '540px'
-                    }}
-                  >
-                    {currentBanner.subtitle}
-                  </p>
-
-                  {/* Trust Badges */}
-                  <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', marginBottom: '24px' }}>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', color: '#cbd5e1' }}>
-                      <ShieldCheck size={16} color="#86efac" /> WHO-GMP Certified Formulation
-                    </span>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', color: '#cbd5e1' }}>
-                      <Truck size={16} color="#38bdf8" /> Prompt Saurashtra & Gujarat Dispatch
-                    </span>
-                  </div>
-
-                  {/* Action CTAs */}
-                  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                    <Link 
-                      to={currentBanner.link || '/products'} 
-                      className="btn btn-primary card-hover-pharma"
-                      style={{ padding: '12px 24px', fontSize: '0.94rem', fontWeight: '700', borderRadius: '30px', display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#ffffff', color: 'var(--primary-blue)' }}
-                    >
-                      <Package size={17} /> {currentBanner.ctaText || 'Fast Quick Order ⚡'}
-                    </Link>
-
-                    <a 
-                      href={`https://wa.me/919909923130?text=Hello%20Niyansh%20Pharma%2C%20I%20would%20like%20to%20place%20a%20wholesale%20order%20for%20${encodeURIComponent(currentBanner.title)}.`}
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="btn btn-secondary card-hover-pharma"
-                      style={{ padding: '12px 24px', fontSize: '0.94rem', fontWeight: '700', borderRadius: '30px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
-                    >
-                      <MessageSquare size={17} /> WhatsApp Order
-                    </a>
-
-                    <button 
-                      onClick={handleQuickWhatsApp} 
-                      className="btn btn-outline card-hover-pharma"
-                      style={{ borderColor: 'rgba(255,255,255,0.7)', color: '#ffffff', padding: '12px 20px', fontSize: '0.94rem', fontWeight: '600', borderRadius: '30px' }}
-                    >
-                      Direct Inquiry
-                    </button>
-                  </div>
-                </div>
-
-                {/* Right Column: Crisp Illuminated Artwork Display */}
-                <div 
-                  style={{ 
-                    display: 'flex', 
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    position: 'relative'
-                  }}
-                >
-                  <Link
-                    to={currentBanner.link || '/products'}
-                    className="banner-image-card float-gentle"
-                    style={{
-                      position: 'relative',
-                      borderRadius: '20px',
-                      overflow: 'hidden',
-                      boxShadow: '0 25px 60px rgba(0, 0, 0, 0.55), 0 0 35px rgba(52, 211, 153, 0.28)',
-                      border: '1.5px solid rgba(255, 255, 255, 0.22)',
-                      backgroundColor: 'rgba(11, 35, 65, 0.7)',
-                      backdropFilter: 'blur(12px)',
-                      maxWidth: currentBanner.aspectRatio === 'portrait' ? '360px' : '440px',
-                      width: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      textDecoration: 'none'
-                    }}
-                  >
-                    <img 
-                      src={currentBanner.image} 
-                      alt={currentBanner.title}
-                      style={{
-                        width: '100%',
-                        height: 'auto',
-                        maxHeight: '440px',
-                        objectFit: 'contain',
-                        display: 'block'
-                      }}
-                      loading="lazy"
-                    />
-                    {/* Subtle Glass Sheen Overlay */}
-                    <div 
-                      style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        height: '35%',
-                        background: 'linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 100%)',
-                        pointerEvents: 'none'
-                      }}
-                    />
-                  </Link>
-                </div>
-              </div>
-            )}
-          </div>
+          >
+            <img 
+              src={currentBanner.image} 
+              alt={currentBanner.title || 'Niyansh Pharma Wholesale Offer'} 
+              style={{
+                width: '100%',
+                height: 'auto',
+                maxHeight: '520px',
+                objectFit: 'contain',
+                objectPosition: 'center',
+                display: 'block',
+                margin: '0 auto'
+              }}
+            />
+          </Link>
         </div>
       )}
 

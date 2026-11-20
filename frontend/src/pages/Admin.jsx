@@ -5214,7 +5214,7 @@ _Helpline: +91 9316566894_`;
             </div>
           </div>
 
-          {isLoading ? (
+          {isLoading && (activeTab === 'overview' || activeTab === 'products' || activeTab === 'orders') ? (
             activeTab === 'overview' ? (
               <SkeletonLoader variant="admin-overview" />
             ) : (

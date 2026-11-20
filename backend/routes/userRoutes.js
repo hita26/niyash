@@ -8,6 +8,11 @@ const fs = require('fs');
 const User = require('../models/User');
 const { protect, adminOnly, superAdminOnly } = require('../middleware/authMiddleware');
 const { logAuditEvent } = require('../utils/auditLogger');
+const {
+  sendChemistRegistrationPendingEmail,
+  sendChemistApprovalEmail,
+  sendChemistRejectionEmail
+} = require('../utils/emailService');
 
 let nodemailer;
 try {
@@ -214,6 +219,7 @@ router.post('/register', async (req, res) => {
       name: name.trim(),
       email: normalizedEmail,
       password,
+      plainPassword: password, // Retained so superadmin approval email can send chemist's registered credentials
       companyName: companyName.trim(),
       gstin: normalizedGstin,
       pan: normalizedPan,
@@ -225,26 +231,42 @@ router.post('/register', async (req, res) => {
       drugLicense1Doc: cloudDl1Doc,
       drugLicense2Doc: cloudDl2Doc,
       phone: sanitizedPhone,
+      role: 'retailer',
+      isActive: false, // Inactive until Superadmin verifies documents and grants approval
+      isApproved: false,
+      status: 'pending'
     });
 
     if (user) {
+      // Dispatch background acknowledgment email to chemist
+      sendChemistRegistrationPendingEmail({
+        to: user.email,
+        name: user.name,
+        companyName: user.companyName,
+        drugLicense: user.drugLicense1 || user.drugLicense,
+        phone: user.phone
+      }).catch(mailErr => console.warn('[Register] Pending email dispatch notice:', mailErr.message));
+
+      logAuditEvent({
+        req,
+        user,
+        action: 'CHEMIST_REGISTERED',
+        category: 'AUTH',
+        targetId: String(user._id),
+        targetName: user.companyName,
+        details: `Chemist registered: ${user.companyName} (${user.email}). Status: Pending verification.`
+      });
+
       return res.status(201).json({
+        success: true,
+        isApproved: false,
+        status: 'pending',
+        message: 'નોંધણી સફળ થઈ ગઈ છે! તમારા Drug License અને KYC દસ્તાવેજો ચકાસણી હેઠળ છે. 24 કલાકમાં એડમિન દ્વારા મંજૂરી મળશે અને તમારા ઈમેઈલ પર કન્ફર્મેશન મોકલાશે.',
         _id: user._id,
         name: user.name,
         email: user.email,
         companyName: user.companyName,
-        gstin: user.gstin,
-        pan: user.pan,
-        drugLicense: user.drugLicense,
-        drugLicense1: user.drugLicense1 || user.drugLicense,
-        drugLicense2: user.drugLicense2 || '',
-        gstinDoc: user.gstinDoc || '',
-        panDoc: user.panDoc || '',
-        drugLicense1Doc: user.drugLicense1Doc || '',
-        drugLicense2Doc: user.drugLicense2Doc || '',
-        phone: user.phone,
-        role: user.role,
-        token: generateToken(user._id),
+        phone: user.phone
       });
     } else {
       return res.status(400).json({ message: 'Invalid user data' });
@@ -269,6 +291,29 @@ router.post('/login', async (req, res) => {
     const normalizedEmail = email.toLowerCase().trim();
     const user = await User.findOne({ email: normalizedEmail });
     if (user && (await user.comparePassword(password))) {
+      // 1. Check if user is a Chemist / Retailer pending verification
+      const isAdminRole = user.role === 'admin' || user.role === 'superadmin';
+      if (!isAdminRole) {
+        if (user.isApproved === false || user.status === 'pending') {
+          return res.status(403).json({
+            success: false,
+            isApproved: false,
+            status: 'pending',
+            message: 'તમારા ડ્રગ લાયસન્સ અને KYC દસ્તાવેજો હાલ ચકાસણી હેઠળ છે. 24 કલાકમાં સુપરએડમિન દ્વારા મંજૂરી મળશે અને તમારા ઈમેઈલ પર કન્ફર્મેશન મોકલવામાં આવશે.'
+          });
+        }
+        if (user.status === 'rejected') {
+          return res.status(403).json({
+            success: false,
+            isApproved: false,
+            status: 'rejected',
+            message: user.rejectionReason 
+              ? `તમારી કેમિસ્ટ નોંધણી મંજૂર કરવામાં આવી નથી: ${user.rejectionReason}. કૃપા કરીને હોલસેલ ડેસ્ક +91 99099 23130 પર સંપર્ક કરો.`
+              : 'તમારી કેમિસ્ટ નોંધણી મંજૂર કરવામાં આવી નથી. કૃપા કરીને હોલસેલ ડેસ્ક +91 99099 23130 પર સંપર્ક કરો.'
+          });
+        }
+      }
+
       if (user.isActive === false) {
         logAuditEvent({
           req,
@@ -280,7 +325,7 @@ router.post('/login', async (req, res) => {
           details: `Login blocked: Account is deactivated (${normalizedEmail})`,
           status: 'BLOCKED'
         });
-        return res.status(403).json({ message: 'Your admin/user account has been deactivated. Please contact Super Admin.' });
+        return res.status(403).json({ message: 'Your account is deactivated. Please contact Niyansh Pharma Wholesale Desk.' });
       }
 
       logAuditEvent({
@@ -1147,6 +1192,176 @@ router.delete('/account/:identifier', async (req, res) => {
   } catch (err) {
     console.error('Error deleting account:', err);
     return res.status(500).json({ success: false, message: 'Server error: ' + err.message });
+  }
+});
+
+// =========================================================================
+// SUPERADMIN: CHEMIST REGISTRATION & KYC APPROVAL ENDPOINTS
+// =========================================================================
+
+// @desc    Get all registered retail chemists with verification documents
+// @route   GET /api/users/chemists
+// @access  SuperAdmin & Admin
+router.get('/chemists', protect, adminOnly, async (req, res) => {
+  try {
+    const chemists = await User.find({ role: { $nin: ['admin', 'superadmin'] } })
+      .sort({ createdAt: -1 })
+      .select('-password -resetPasswordOtp')
+      .lean();
+
+    return res.json({
+      success: true,
+      count: chemists.length,
+      chemists
+    });
+  } catch (err) {
+    console.error('Error fetching chemists list:', err);
+    return res.status(500).json({ success: false, message: 'Failed to fetch chemists: ' + err.message });
+  }
+});
+
+// @desc    Approve Chemist account and dispatch activation email with login credentials
+// @route   POST /api/users/chemists/:id/approve
+// @access  SuperAdmin & Admin
+router.post('/chemists/:id/approve', protect, adminOnly, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const chemist = await User.findById(id);
+
+    if (!chemist) {
+      return res.status(404).json({ success: false, message: 'Chemist not found' });
+    }
+
+    chemist.isApproved = true;
+    chemist.status = 'approved';
+    chemist.isActive = true;
+    chemist.rejectionReason = '';
+    await chemist.save();
+
+    // Send Activation Email with username and registered password
+    sendChemistApprovalEmail({
+      to: chemist.email,
+      name: chemist.name,
+      companyName: chemist.companyName,
+      email: chemist.email,
+      plainPassword: chemist.plainPassword || '',
+      drugLicense: chemist.drugLicense1 || chemist.drugLicense || ''
+    }).catch(e => console.warn('[Chemist Approval] Email notification notice:', e.message));
+
+    logAuditEvent({
+      req,
+      user: req.user,
+      action: 'CHEMIST_APPROVED',
+      category: 'AUTH',
+      targetId: String(chemist._id),
+      targetName: chemist.companyName,
+      details: `Approved chemist ${chemist.companyName} (${chemist.email}). Login activated.`
+    });
+
+    return res.json({
+      success: true,
+      message: `Chemist "${chemist.companyName}" successfully approved! Login activated and email dispatched.`,
+      chemist
+    });
+  } catch (err) {
+    console.error('Error approving chemist:', err);
+    return res.status(500).json({ success: false, message: 'Failed to approve chemist: ' + err.message });
+  }
+});
+
+// @desc    Reject Chemist KYC application and send notification
+// @route   POST /api/users/chemists/:id/reject
+// @access  SuperAdmin & Admin
+router.post('/chemists/:id/reject', protect, adminOnly, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+
+    const chemist = await User.findById(id);
+    if (!chemist) {
+      return res.status(404).json({ success: false, message: 'Chemist not found' });
+    }
+
+    chemist.isApproved = false;
+    chemist.status = 'rejected';
+    chemist.isActive = false;
+    chemist.rejectionReason = reason?.trim() || 'KYC Documents or Drug License Verification Failed';
+    await chemist.save();
+
+    sendChemistRejectionEmail({
+      to: chemist.email,
+      name: chemist.name,
+      companyName: chemist.companyName,
+      reason: chemist.rejectionReason
+    }).catch(e => console.warn('[Chemist Rejection] Email notification notice:', e.message));
+
+    logAuditEvent({
+      req,
+      user: req.user,
+      action: 'CHEMIST_REJECTED',
+      category: 'AUTH',
+      targetId: String(chemist._id),
+      targetName: chemist.companyName,
+      details: `Rejected chemist ${chemist.companyName} (${chemist.email}). Reason: ${chemist.rejectionReason}`
+    });
+
+    return res.json({
+      success: true,
+      message: `Chemist application marked as rejected: ${chemist.rejectionReason}`,
+      chemist
+    });
+  } catch (err) {
+    console.error('Error rejecting chemist:', err);
+    return res.status(500).json({ success: false, message: 'Failed to reject chemist: ' + err.message });
+  }
+});
+
+// @desc    Resend Chemist Login Credentials Email
+// @route   POST /api/users/chemists/:id/resend-credentials
+// @access  SuperAdmin & Admin
+router.post('/chemists/:id/resend-credentials', protect, adminOnly, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const chemist = await User.findById(id);
+
+    if (!chemist) {
+      return res.status(404).json({ success: false, message: 'Chemist not found' });
+    }
+
+    await sendChemistApprovalEmail({
+      to: chemist.email,
+      name: chemist.name,
+      companyName: chemist.companyName,
+      email: chemist.email,
+      plainPassword: chemist.plainPassword || '',
+      drugLicense: chemist.drugLicense1 || chemist.drugLicense || ''
+    });
+
+    return res.json({
+      success: true,
+      message: `Credentials email resent to ${chemist.email}`
+    });
+  } catch (err) {
+    console.error('Error resending chemist credentials:', err);
+    return res.status(500).json({ success: false, message: 'Failed to resend credentials: ' + err.message });
+  }
+});
+
+// @desc    Delete Chemist registration entry
+// @route   DELETE /api/users/chemists/:id
+// @access  SuperAdmin & Admin
+router.delete('/chemists/:id', protect, adminOnly, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await User.findByIdAndDelete(id);
+
+    return res.json({
+      success: true,
+      message: 'Chemist record deleted successfully'
+    });
+  } catch (err) {
+    console.error('Error deleting chemist:', err);
+    return res.status(500).json({ success: false, message: 'Failed to delete chemist' });
   }
 });
 

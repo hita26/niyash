@@ -581,7 +581,323 @@ async function sendAdminWelcomeEmail({
   }
 }
 
+/**
+ * Sends confirmation email to Chemist right after registration
+ * informing them that documents are under verification within 24 hours.
+ */
+async function sendChemistRegistrationPendingEmail({ to, name, companyName, drugLicense, phone }) {
+  try {
+    const transporter = getTransporter();
+    const fromAddress = process.env.EMAIL_FROM || '"Niyansh Pharma Wholesale" <info@niyanshpharma.com>';
+    const emailSubject = `📋 Niyansh Pharma - Chemist Registration Received & Under Verification`;
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Chemist Registration Received</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e293b;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f1f5f9; padding: 30px 10px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;">
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #0c3d6c 0%, #1e40af 100%); padding: 32px 24px; text-align: center; color: #ffffff;">
+              <h1 style="margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">NIYANSH PHARMA</h1>
+              <p style="margin: 6px 0 0 0; font-size: 13px; color: #86efac; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Care • Quality • Trust • PAN Gujarat Distribution</p>
+            </td>
+          </tr>
+
+          <!-- Notice Banner -->
+          <tr>
+            <td style="background-color: #fef3c7; border-bottom: 2px solid #f59e0b; padding: 14px 24px; text-align: center;">
+              <span style="font-size: 14px; font-weight: 700; color: #b45309;">⏳ Status: KYC & Drug License Under Verification (Within 24 Hours)</span>
+            </td>
+          </tr>
+
+          <!-- Content Body -->
+          <tr>
+            <td style="padding: 32px 28px;">
+              <h2 style="margin: 0 0 14px 0; font-size: 20px; color: #0c3d6c;">નમસ્તે ${name || 'Chemist Partner'},</h2>
+              <p style="font-size: 15px; line-height: 1.65; color: #475569; margin: 0 0 20px 0;">
+                તમારી ફાર્મસી <strong>"${companyName || 'Retail Pharmacy'}"</strong> ની નિયાંશ ફાર્મા B2B હોલસેલ પોર્ટલ પર નોંધણી સફળતાપૂર્વક મળી ગઈ છે.
+              </p>
+
+              <!-- Application Summary Box -->
+              <table role="presentation" width="100%" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 24px; padding: 16px;">
+                <tr>
+                  <td style="padding: 6px 0; font-size: 14px; color: #64748b; width: 40%;"><strong>Pharmacy / Store:</strong></td>
+                  <td style="padding: 6px 0; font-size: 14px; color: #0c3d6c; font-weight: 700;">${companyName}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; font-size: 14px; color: #64748b;"><strong>Contact Person:</strong></td>
+                  <td style="padding: 6px 0; font-size: 14px; color: #1e293b;">${name}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; font-size: 14px; color: #64748b;"><strong>Registered Email:</strong></td>
+                  <td style="padding: 6px 0; font-size: 14px; color: #1e293b;">${to}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; font-size: 14px; color: #64748b;"><strong>Drug License No:</strong></td>
+                  <td style="padding: 6px 0; font-size: 14px; color: #1e293b; font-weight: 600;">${drugLicense || 'Submitted'}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; font-size: 14px; color: #64748b;"><strong>Phone:</strong></td>
+                  <td style="padding: 6px 0; font-size: 14px; color: #1e293b;">+91 ${phone}</td>
+                </tr>
+              </table>
+
+              <!-- What Happens Next -->
+              <div style="background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; border-radius: 6px; margin-bottom: 24px;">
+                <h3 style="margin: 0 0 8px 0; font-size: 15px; color: #166534; font-weight: 700;">આગળનું સ્ટેપ શું છે? (Next Step):</h3>
+                <ul style="margin: 0; padding-left: 20px; font-size: 13.5px; color: #15803d; line-height: 1.6;">
+                  <li>અમારી રેગ્યુલેટરી & કમ્પ્લાયન્સ ટીમ તમારા ડ્રગ લાયસન્સ (Form 20/21) અને KYC ડોક્યુમેન્ટ્સ તપાસી રહી છે.</li>
+                  <li><strong>24 કલાકમાં</strong> સુપરએડમિન તરફથી વેરિફિકેશન મંજૂર (Approve) થતાં જ તમને એક્ટિવેશન ઈમેઈલ મળશે.</li>
+                  <li>મંજૂરી મળતાં જ તમારું લોગિન એક્ટિવ થઈ જશે અને તમે હોલસેલ PTR રેટ્સ તથા 10+1 સ્કીમ્સ એક્સેસ કરી શકશો.</li>
+                </ul>
+              </div>
+
+              <!-- Support Contact -->
+              <p style="font-size: 14px; color: #64748b; line-height: 1.6; margin: 0;">
+                જો તાત્કાલિક વેરિફિકેશનની જરૂર હોય તો અમારા હોલસેલ ડેસ્ક પર સંપર્ક કરી શકો છો:<br>
+                📞 <strong>+91 99099 23130</strong> | ✉️ <strong>info@niyanshpharma.com</strong>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 20px; text-align: center; font-size: 12px; color: #94a3b8;">
+              © 2026 Niyansh Pharma. Wholesale Pharma Distributor, Rajkot, Gujarat.<br>
+              This is an automated regulatory acknowledgment. Please do not reply directly to this email.
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+    `;
+
+    if (!transporter) {
+      console.log(`[EmailService - PENDING] Chemist registration pending email prepared for ${to}`);
+      return { success: false, pendingConfig: true };
+    }
+
+    const info = await transporter.sendMail({
+      from: fromAddress,
+      to,
+      subject: emailSubject,
+      html: htmlContent
+    });
+
+    console.log(`[EmailService] Chemist pending email sent to ${to}. MessageId: ${info.messageId}`);
+    return { success: true, messageId: info.messageId };
+  } catch (err) {
+    console.error(`[EmailService] Error sending chemist pending email to ${to}:`, err.message);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Sends approval email to Chemist with username and password once approved by Superadmin.
+ */
+async function sendChemistApprovalEmail({ to, name, companyName, email, plainPassword, drugLicense }) {
+  try {
+    const transporter = getTransporter();
+    const fromAddress = process.env.EMAIL_FROM || '"Niyansh Pharma Wholesale" <info@niyanshpharma.com>';
+    const emailSubject = `🎉 Congratulations! Your Niyansh Pharma Chemist Wholesale Account is Approved & Active`;
+
+    const passwordDisplay = plainPassword ? plainPassword : 'Your chosen password at registration';
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Account Approved</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e293b;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f1f5f9; padding: 30px 10px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;">
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #065f46 0%, #0c3d6c 100%); padding: 32px 24px; text-align: center; color: #ffffff;">
+              <h1 style="margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">NIYANSH PHARMA</h1>
+              <p style="margin: 6px 0 0 0; font-size: 13px; color: #86efac; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Authorized B2B Wholesale Pharmacy Network</p>
+            </td>
+          </tr>
+
+          <!-- Success Banner -->
+          <tr>
+            <td style="background-color: #dcfce7; border-bottom: 2px solid #22c55e; padding: 14px 24px; text-align: center;">
+              <span style="font-size: 15px; font-weight: 800; color: #15803d;">✅ ACCOUNT APPROVED & ACTIVATED!</span>
+            </td>
+          </tr>
+
+          <!-- Content Body -->
+          <tr>
+            <td style="padding: 32px 28px;">
+              <h2 style="margin: 0 0 14px 0; font-size: 20px; color: #0c3d6c;">અભિનંદન ${name || 'Chemist Partner'},</h2>
+              <p style="font-size: 15px; line-height: 1.65; color: #475569; margin: 0 0 20px 0;">
+                તમારી ફાર્મસી <strong>"${companyName || 'Retail Pharmacy'}"</strong> ના તમામ ડ્રગ લાયસન્સ અને KYC ડોક્યુમેન્ટ્સ નિયાંશ ફાર્મા સુપરએડમિન દ્વારા <strong>મંજૂર (Approve)</strong> કરવામાં આવ્યા છે. તમારું હોલસેલ એકાઉન્ટ હવે સંપૂર્ણ સક્રિય (Active) છે!
+              </p>
+
+              <!-- Credentials Box -->
+              <div style="background-color: #f8fafc; border: 2px solid #38bdf8; border-radius: 14px; padding: 20px; margin-bottom: 24px;">
+                <h3 style="margin: 0 0 12px 0; font-size: 15px; color: #0369a1; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">🔑 તમારા લોગિન ક્રેડેન્શિયલ્સ (Login Details):</h3>
+                <table role="presentation" width="100%">
+                  <tr>
+                    <td style="padding: 6px 0; font-size: 14px; color: #64748b; width: 35%;"><strong>Website URL:</strong></td>
+                    <td style="padding: 6px 0; font-size: 14px; color: #0c3d6c; font-weight: 700;">
+                      <a href="https://niyanshpharma.com" target="_blank" style="color: #0284c7; text-decoration: none;">https://niyanshpharma.com</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 0; font-size: 14px; color: #64748b;"><strong>Username / Email:</strong></td>
+                    <td style="padding: 6px 0; font-size: 14px; color: #0c3d6c; font-weight: 700;">${email || to}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 0; font-size: 14px; color: #64748b;"><strong>Password:</strong></td>
+                    <td style="padding: 6px 0; font-size: 14px; color: #0f172a; font-weight: 800; background-color: #e0f2fe; padding: 4px 8px; border-radius: 4px; display: inline-block;">${passwordDisplay}</td>
+                  </tr>
+                </table>
+              </div>
+
+              <!-- Unlocked Perks -->
+              <div style="background-color: #f0fdf4; border-radius: 12px; padding: 18px; margin-bottom: 26px;">
+                <h3 style="margin: 0 0 10px 0; font-size: 15px; color: #166534; font-weight: 700;">હવે તમે પોર્ટલ પર શું કરી શકશો?</h3>
+                <ul style="margin: 0; padding-left: 20px; font-size: 13.5px; color: #15803d; line-height: 1.7;">
+                  <li><strong>ગોપનીય હોલસેલ PTR રેટ્સ:</strong> તમામ ટેબ્લેટ્સ, સિરપ અને ઇન્જેક્ટેબલ્સના વાસ્તવિક ટ્રેડ રેટ્સ અને તમારો પ્રોફિટ માર્જિન (%) જોઈ શકશો.</li>
+                  <li><strong>10+1 & વોલ્યુમ સ્કીમ્સ:</strong> હોલસેલ ડીસ્કાઉન્ટ સ્કીમ્સ અને બોનસ ઓફર્સનો સીધો લાભ.</li>
+                  <li><strong>ફાસ્ટ B2B ક્વિક ઓર્ડર:</strong> 1-ક્લિકમાં જથ્થાબંધ ઓર્ડર બુક કરો અને સેમ-ડે ડિસ્પેચ મેળવો.</li>
+                  <li><strong>લાઈવ લેજર & બાકી રકમ:</strong> તમારું સ્ટેટમેન્ટ, ક્રેડિટ લિમિટ (₹1,00,000) અને GST ઇન્વૉઇસેસ ડાઉનલોડ કરો.</li>
+                </ul>
+              </div>
+
+              <!-- CTA Button -->
+              <div style="text-align: center; margin-bottom: 24px;">
+                <a href="https://niyanshpharma.com" target="_blank" style="background: linear-gradient(135deg, #0c3d6c 0%, #1e40af 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 30px; font-weight: 800; font-size: 15px; display: inline-block; box-shadow: 0 4px 14px rgba(12, 61, 108, 0.35);">
+                  🚀 એકાઉન્ટમાં લોગિન કરો (Login to Chemist Portal)
+                </a>
+              </div>
+
+              <!-- Support Contact -->
+              <p style="font-size: 13.5px; color: #64748b; line-height: 1.6; margin: 0; text-align: center;">
+                ઓર્ડર અથવા પ્રોડક્ટ ઈન્ક્વાયરી માટે:<br>
+                📞 હોલસેલ ડેસ્ક: <strong>+91 99099 23130</strong> | ✉️ <strong>info@niyanshpharma.com</strong>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 20px; text-align: center; font-size: 12px; color: #94a3b8;">
+              © 2026 Niyansh Pharma. Wholesale Pharma Distributor, Rajkot, Gujarat.<br>
+              Authorized B2B Channel for WHO-GMP Pharmaceutical Formulations.
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+    `;
+
+    if (!transporter) {
+      console.log(`[EmailService - PENDING] Chemist approval email prepared for ${to}. Password: ${passwordDisplay}`);
+      return { success: false, pendingConfig: true };
+    }
+
+    const info = await transporter.sendMail({
+      from: fromAddress,
+      to,
+      subject: emailSubject,
+      html: htmlContent
+    });
+
+    console.log(`[EmailService] Chemist approval email successfully sent to ${to}. MessageId: ${info.messageId}`);
+    return { success: true, messageId: info.messageId };
+  } catch (err) {
+    console.error(`[EmailService] Error sending chemist approval email to ${to}:`, err.message);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Sends rejection / document re-upload notice to Chemist.
+ */
+async function sendChemistRejectionEmail({ to, name, companyName, reason }) {
+  try {
+    const transporter = getTransporter();
+    const fromAddress = process.env.EMAIL_FROM || '"Niyansh Pharma Wholesale" <info@niyanshpharma.com>';
+    const emailSubject = `⚠️ Niyansh Pharma - Chemist Account Verification Notice`;
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Verification Notice</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e293b;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f1f5f9; padding: 30px 10px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;">
+          <tr>
+            <td style="background-color: #b91c1c; padding: 26px 24px; text-align: center; color: #ffffff;">
+              <h1 style="margin: 0; font-size: 22px; font-weight: 800;">NIYANSH PHARMA</h1>
+              <p style="margin: 4px 0 0 0; font-size: 13px; color: #fecaca;">KYC Compliance & Regulatory Verification</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 30px 24px;">
+              <h2 style="margin: 0 0 12px 0; font-size: 18px; color: #991b1b;">ડ્રગ લાયસન્સ / KYC દસ્તાવેજ ચકાસણી નોટિસ</h2>
+              <p style="font-size: 14.5px; line-height: 1.6; color: #475569;">
+                નમસ્તે ${name || 'Chemist Partner'}, તમારી ફાર્મસી <strong>"${companyName}"</strong> ના રજીસ્ટ્રેશન દસ્તાવેજોમાં નીચે મુજબની ક્ષતિ જણાયેલ છે:
+              </p>
+              <div style="background-color: #fef2f2; border: 1px solid #f87171; border-radius: 8px; padding: 14px; margin: 18px 0; color: #991b1b; font-size: 14px; font-weight: 600;">
+                કારણ: ${reason || 'ડ્રગ લાયસન્સ અથવા જીએસટી દસ્તાવેજ અસ્પષ્ટ છે અથવા માન્ય નથી.'}
+              </div>
+              <p style="font-size: 14px; line-height: 1.6; color: #64748b;">
+                કૃપા કરીને સાચા દસ્તાવેજ સાથે ફરીથી રજીસ્ટ્રેશન કરો અથવા સીધો અમારા હોલસેલ ડેસ્ક પર સંપર્ક કરો:<br>
+                📞 <strong>+91 99099 23130</strong> | ✉️ <strong>info@niyanshpharma.com</strong>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+    `;
+
+    if (!transporter) return { success: false, pendingConfig: true };
+    const info = await transporter.sendMail({
+      from: fromAddress,
+      to,
+      subject: emailSubject,
+      html: htmlContent
+    });
+    return { success: true, messageId: info.messageId };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
 module.exports = {
   getTransporter,
-  sendAdminWelcomeEmail
+  sendAdminWelcomeEmail,
+  sendChemistRegistrationPendingEmail,
+  sendChemistApprovalEmail,
+  sendChemistRejectionEmail
 };

@@ -48,16 +48,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Network First for all API requests (Never serve stale order or stock data)
-  if (url.pathname.startsWith('/api')) {
-    event.respondWith(
-      fetch(request).catch(() => {
-        return new Response(JSON.stringify({ error: 'Offline', message: 'You are currently offline. Please check your internet connection.' }), {
-          headers: { 'Content-Type': 'application/json' },
-          status: 503
-        });
-      })
-    );
+  // Never intercept API requests; let them bypass the service worker directly to Vercel API backend
+  if (url.pathname.startsWith('/api') || url.hostname.includes('vercel.app')) {
     return;
   }
 

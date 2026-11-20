@@ -7,11 +7,15 @@ import './index.css';
 const originalFetch = window.fetch;
 window.fetch = async (...args) => {
   let [resource, config] = args;
-  if (typeof resource === 'string' && resource.startsWith('/api')) {
-    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const isVercel = window.location.hostname.includes('vercel.app');
-    if (!isLocal && !isVercel) {
+  const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+  const isVercel = typeof window !== 'undefined' && window.location.hostname.includes('vercel.app');
+
+  if (!isLocal && !isVercel) {
+    if (typeof resource === 'string' && resource.startsWith('/api')) {
       resource = `https://pharma-bay-two.vercel.app${resource}`;
+    } else if (typeof Request !== 'undefined' && resource instanceof Request && resource.url.startsWith(window.location.origin + '/api')) {
+      const path = resource.url.replace(window.location.origin, '');
+      resource = new Request(`https://pharma-bay-two.vercel.app${path}`, resource);
     }
   }
   return originalFetch(resource, config);

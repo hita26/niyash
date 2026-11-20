@@ -359,36 +359,18 @@ function About() {
             {t('about.brandNetworkSubtitle', 'Authorised distribution partner for India’s most trusted pharmaceutical manufacturers.')}
           </p>
 
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '12px', marginTop: '20px' }}>
-            {[
-              'Abbott', 'Alkem', 'Biochem', 'Cipla', 'Daxia Healthcare', 'Dr. Morepen',
-              'Elder Pharmaceuticals', 'Healing Pharma', 'Intas', 'Leeford Healthcare',
-              'Lucid Pharma', 'Namcare Pharma', 'Steris Pharma', 'Sun Pharma', 'Troikaa Pharmaceuticals', 'Zydus'
-            ].map((b, i) => (
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '12px', marginTop: '24px' }}>
+            {brandsList.map((b, i) => (
               <Link 
                 key={i} 
                 to={`/products?brand=${encodeURIComponent(b)}`}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#f8fafc',
-                  border: '1px solid var(--border-light)',
-                  borderRadius: '24px',
-                  color: 'var(--primary-blue)',
-                  fontWeight: '600',
-                  fontSize: '0.88rem',
-                  textDecoration: 'none',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--primary-blue)';
-                  e.currentTarget.style.color = '#ffffff';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f8fafc';
-                  e.currentTarget.style.color = 'var(--primary-blue)';
-                }}
+                title={`Browse medicines manufactured by ${b}`}
+                className="brand-pill-card"
               >
-                {b}
+                <span className="brand-pill-emblem">
+                  <Building2 size={13} />
+                </span>
+                <span>{b}</span>
               </Link>
             ))}
           </div>

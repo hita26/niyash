@@ -1,20 +1,19 @@
 import React, { useEffect, useRef } from 'react';
 
 /**
- * PharmaMoleculesCanvas - Holographic Brand Bio-Nucleus Edition
- * Ultra-high-performance HTML5 Canvas rendering living pharmaceutical molecules,
- * hexagonal benzene compounds, micro-capsules, and an interactive Holographic
- * Niyansh Pharma Bio-Nucleus with bioluminescent synapse connectivity.
+ * PharmaMoleculesCanvas - Zero-Gravity Floating Air Edition
+ * Pure, weightless biological molecules, rotating chemical benzene compounds,
+ * and dual-tone micro-capsules floating smoothly in air with zero-gravity physics.
  *
- * - Inspired by Moderna, Pfizer, Polpharma Biologics, and Roche digital experiences
- * - 0 external libraries, pure hardware-accelerated 60fps Canvas
- * - Auto-pauses offscreen via IntersectionObserver (0% CPU / battery drain)
- * - Calibrated transparency so foreground hero headlines remain 100% crisp & readable
+ * - Clean, non-intrusive design: Zero clashing text, zero rigid target lines
+ * - Guarantees 100% crystal-clear readability for foreground headline text
+ * - Auto-pauses offscreen via IntersectionObserver (0% CPU/battery waste)
+ * - 60 FPS hardware-accelerated Canvas with fluid mouse interaction
  */
 export default function PharmaMoleculesCanvas({
-  particleCount = 42,
-  connectionDistance = 125,
-  speed = 0.42,
+  particleCount = 38,
+  connectionDistance = 120,
+  speed = 0.38,
   interactive = true,
   className = '',
   style = {}
@@ -32,25 +31,12 @@ export default function PharmaMoleculesCanvas({
     let width = 0;
     let height = 0;
     let particles = [];
-    let synapsePackets = [];
-    let globalTime = 0;
-    let rippleRadius = 0;
-    let rippleAlpha = 0;
+    const mouse = { x: -1000, y: -1000, radius: 140 };
 
-    const mouse = { x: -1000, y: -1000, radius: 150 };
-
-    // Detect mobile viewport to scale computational density
+    // Detect mobile viewport to optimize particle count
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-    const activeCount = isMobile ? Math.min(particleCount, 22) : particleCount;
+    const activeCount = isMobile ? Math.min(particleCount, 20) : particleCount;
     const activeDistance = isMobile ? connectionDistance * 0.8 : connectionDistance;
-
-    // Load authentic Niyansh Pharma dark logo for layered holographic projection
-    const logoImg = new Image();
-    let isLogoLoaded = false;
-    logoImg.onload = () => {
-      isLogoLoaded = true;
-    };
-    logoImg.src = '/logo-dark.png';
 
     const resize = () => {
       if (!canvas) return;
@@ -63,47 +49,37 @@ export default function PharmaMoleculesCanvas({
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
-    // Calculate dynamic optical center for the brand nucleus
-    const getNucleus = () => {
-      return {
-        x: isMobile ? width * 0.5 : width * 0.48,
-        y: isMobile ? height * 0.38 : height * 0.46,
-        radius: isMobile ? 75 : 120,
-        connectionDistance: isMobile ? 180 : 270
-      };
-    };
-
     /**
-     * Pharmaceutical Particle Entity
+     * Floating Pharmaceutical Particle Entity
      * Types:
      *  0 = Bio-Atom Sphere (60%)
      *  1 = Benzene Hexagonal Aromatic Ring (25%)
      *  2 = Micro Dual-Tone Bio-Capsule Pill (15%)
      */
-    class Particle {
+    class FloatingParticle {
       constructor() {
         this.reset(true);
       }
 
       reset(init = false) {
-        this.x = init ? Math.random() * (width || 1200) : Math.random() < 0.5 ? 0 : (width || 1200);
+        this.x = init ? Math.random() * (width || 1200) : Math.random() < 0.5 ? -20 : (width || 1200) + 20;
         this.y = init ? Math.random() * (height || 560) : Math.random() * (height || 560);
         this.vx = (Math.random() - 0.5) * speed;
         this.vy = (Math.random() - 0.5) * speed;
 
         const typeRand = Math.random();
         if (typeRand < 0.25) {
-          this.type = 1; // Benzene Hexagon
+          this.type = 1; // Benzene Hexagon Ring
           this.radius = Math.random() * 2.5 + 7;
         } else if (typeRand < 0.40) {
-          this.type = 2; // Bio-Capsule
+          this.type = 2; // Micro Bio-Capsule Pill
           this.radius = Math.random() * 2 + 6;
         } else {
           this.type = 0; // Bio-Atom sphere
           this.radius = Math.random() * 2.2 + 1.8;
         }
 
-        // Palette: Sky Cyan, Radiant Emerald, Medical Cobalt, Pure White
+        // Palette: Soft Sky Cyan, Luminous Emerald, Medical Blue, Pure White
         const hues = [
           { r: 56, g: 189, b: 248 },  // Cyan
           { r: 52, g: 211, b: 153 },  // Emerald
@@ -111,13 +87,11 @@ export default function PharmaMoleculesCanvas({
           { r: 255, g: 255, b: 255 }  // Clean White
         ];
         this.color = hues[Math.floor(Math.random() * hues.length)];
-        this.alpha = Math.random() * 0.35 + 0.4;
+        this.alpha = Math.random() * 0.35 + 0.35;
         this.pulse = Math.random() * Math.PI * 2;
-        this.pulseSpeed = 0.02 + Math.random() * 0.025;
+        this.pulseSpeed = 0.018 + Math.random() * 0.02;
         this.rot = Math.random() * Math.PI * 2;
-        this.rotSpeed = (Math.random() - 0.5) * 0.02;
-        this.isTetheredToNucleus = false;
-        this.highlight = 0;
+        this.rotSpeed = (Math.random() - 0.5) * 0.015;
       }
 
       update() {
@@ -126,23 +100,19 @@ export default function PharmaMoleculesCanvas({
         this.pulse += this.pulseSpeed;
         this.rot += this.rotSpeed;
 
-        if (this.highlight > 0) {
-          this.highlight = Math.max(0, this.highlight - 0.03);
-        }
-
-        // Fluid mouse avoidance
+        // Fluid zero-gravity mouse repulsion
         if (interactive && mouse.x > 0) {
           const dx = mouse.x - this.x;
           const dy = mouse.y - this.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < mouse.radius) {
             const force = (mouse.radius - dist) / mouse.radius;
-            this.x -= (dx / dist) * force * 1.8;
-            this.y -= (dy / dist) * force * 1.8;
+            this.x -= (dx / dist) * force * 2.0;
+            this.y -= (dy / dist) * force * 2.0;
           }
         }
 
-        // Screen boundary wrapping
+        // Screen boundary smooth wrap
         if (this.x < -30) this.x = width + 30;
         else if (this.x > width + 30) this.x = -30;
         if (this.y < -30) this.y = height + 30;
@@ -150,14 +120,14 @@ export default function PharmaMoleculesCanvas({
       }
 
       draw() {
-        const currentAlpha = Math.min(1, Math.max(0.12, this.alpha + Math.sin(this.pulse) * 0.15 + this.highlight));
+        const currentAlpha = Math.max(0.12, this.alpha + Math.sin(this.pulse) * 0.14);
 
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.rotate(this.rot);
 
         if (this.type === 1) {
-          // Benzene Ring (Organic Chemistry Hexagon)
+          // Floating Benzene Ring (Organic Chemistry Hexagon)
           ctx.beginPath();
           const angleStep = (Math.PI * 2) / 6;
           for (let k = 0; k < 6; k++) {
@@ -167,17 +137,17 @@ export default function PharmaMoleculesCanvas({
             else ctx.lineTo(hx, hy);
           }
           ctx.closePath();
-          ctx.strokeStyle = `rgba(52, 211, 153, ${currentAlpha * 0.85})`;
-          ctx.lineWidth = 1.2;
-          ctx.shadowColor = `rgba(52, 211, 153, ${currentAlpha * 0.7})`;
-          ctx.shadowBlur = 6;
+          ctx.strokeStyle = `rgba(52, 211, 153, ${currentAlpha * 0.8})`;
+          ctx.lineWidth = 1.1;
+          ctx.shadowColor = `rgba(52, 211, 153, ${currentAlpha * 0.6})`;
+          ctx.shadowBlur = 5;
           ctx.stroke();
 
           // Inner chemical resonance circle
           ctx.beginPath();
           ctx.arc(0, 0, this.radius * 0.45, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(56, 189, 248, ${currentAlpha * 0.6})`;
-          ctx.lineWidth = 0.9;
+          ctx.strokeStyle = `rgba(56, 189, 248, ${currentAlpha * 0.55})`;
+          ctx.lineWidth = 0.8;
           ctx.stroke();
 
           // Vertex atoms
@@ -185,17 +155,17 @@ export default function PharmaMoleculesCanvas({
             const hx = Math.cos(angleStep * k) * this.radius;
             const hy = Math.sin(angleStep * k) * this.radius;
             ctx.beginPath();
-            ctx.arc(hx, hy, 1.4, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255, 255, 255, ${currentAlpha})`;
+            ctx.arc(hx, hy, 1.3, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 255, 255, ${currentAlpha * 0.9})`;
             ctx.fill();
           }
         } else if (this.type === 2) {
-          // Micro Bio-Capsule (Cyan / Emerald Dual Tone)
-          const capW = this.radius * 2.2;
-          const capH = this.radius * 0.95;
+          // Floating Bio-Capsule Pill (Cyan / Emerald Dual Tone)
+          const capW = this.radius * 2.1;
+          const capH = this.radius * 0.9;
           const r = capH / 2;
 
-          ctx.shadowColor = 'rgba(56, 189, 248, 0.6)';
+          ctx.shadowColor = 'rgba(56, 189, 248, 0.55)';
           ctx.shadowBlur = 5;
 
           // Left Half (Cyan)
@@ -204,7 +174,7 @@ export default function PharmaMoleculesCanvas({
           ctx.lineTo(0, -r);
           ctx.lineTo(0, r);
           ctx.closePath();
-          ctx.fillStyle = `rgba(56, 189, 248, ${currentAlpha * 0.85})`;
+          ctx.fillStyle = `rgba(56, 189, 248, ${currentAlpha * 0.8})`;
           ctx.fill();
 
           // Right Half (Emerald)
@@ -213,88 +183,45 @@ export default function PharmaMoleculesCanvas({
           ctx.lineTo(0, r);
           ctx.lineTo(0, -r);
           ctx.closePath();
-          ctx.fillStyle = `rgba(52, 211, 153, ${currentAlpha * 0.85})`;
+          ctx.fillStyle = `rgba(52, 211, 153, ${currentAlpha * 0.8})`;
           ctx.fill();
 
-          // Center Seam Line
+          // Center Seam
           ctx.beginPath();
           ctx.moveTo(0, -r);
           ctx.lineTo(0, r);
-          ctx.strokeStyle = `rgba(255, 255, 255, ${currentAlpha * 0.9})`;
-          ctx.lineWidth = 1;
+          ctx.strokeStyle = `rgba(255, 255, 255, ${currentAlpha * 0.85})`;
+          ctx.lineWidth = 0.9;
           ctx.stroke();
         } else {
-          // Bio-Atom Sphere with Soft Glow
+          // Floating Bio-Atom Sphere
           ctx.beginPath();
           ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
           ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${currentAlpha})`;
-          ctx.shadowColor = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, 0.7)`;
-          ctx.shadowBlur = 7;
+          ctx.shadowColor = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, 0.65)`;
+          ctx.shadowBlur = 6;
           ctx.fill();
 
-          // Inner clinical nucleus highlight
+          // Inner clinical highlight
           ctx.beginPath();
           ctx.arc(-this.radius * 0.3, -this.radius * 0.3, this.radius * 0.35, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(255, 255, 255, ${currentAlpha * 0.85})`;
+          ctx.fillStyle = `rgba(255, 255, 255, ${currentAlpha * 0.8})`;
           ctx.fill();
         }
 
-        ctx.restore();
-      }
-    }
-
-    /**
-     * Synapse Energy Packet: Luminous quantum/photonic beads traveling
-     * along tethers between the Niyansh Pharma nucleus and floating particles.
-     */
-    class SynapsePacket {
-      constructor(particle, startX, startY) {
-        this.particle = particle;
-        this.startX = startX;
-        this.startY = startY;
-        this.progress = 0;
-        this.speed = 0.016 + Math.random() * 0.018;
-        this.color = Math.random() > 0.4 ? '#38bdf8' : '#34d399';
-        this.alive = true;
-      }
-
-      update() {
-        this.progress += this.speed;
-        if (this.progress >= 1) {
-          this.alive = false;
-          // Trigger energy flash at destination particle
-          if (this.particle) {
-            this.particle.highlight = 0.5;
-          }
-        }
-      }
-
-      draw() {
-        if (!this.particle) return;
-        const curX = this.startX + (this.particle.x - this.startX) * this.progress;
-        const curY = this.startY + (this.particle.y - this.startY) * this.progress;
-
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(curX, curY, 2.2, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
-        ctx.shadowColor = this.color;
-        ctx.shadowBlur = 8;
-        ctx.fill();
         ctx.restore();
       }
     }
 
     const initParticles = () => {
       particles = [];
-      synapsePackets = [];
       for (let i = 0; i < activeCount; i++) {
-        particles.push(new Particle());
+        particles.push(new FloatingParticle());
       }
     };
 
     /**
-     * Draw inter-molecular chemical bonds between nearby particles
+     * Draw inter-molecular chemical bonds between nearby floating particles
      */
     const drawInterParticleConnections = () => {
       const maxDistSq = activeDistance * activeDistance;
@@ -308,7 +235,7 @@ export default function PharmaMoleculesCanvas({
 
           if (distSq < maxDistSq) {
             const dist = Math.sqrt(distSq);
-            const alpha = (1 - dist / activeDistance) * 0.32;
+            const alpha = (1 - dist / activeDistance) * 0.30;
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
@@ -321,275 +248,16 @@ export default function PharmaMoleculesCanvas({
     };
 
     /**
-     * Draw living bioluminescent synapse connections between the
-     * Holographic Niyansh Pharma Nucleus and surrounding particles
-     */
-    const drawNucleusSynapses = (nucleus) => {
-      const maxDistSq = nucleus.connectionDistance * nucleus.connectionDistance;
-      const innerRadius = nucleus.radius * 0.85;
-
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i];
-        const dx = p.x - nucleus.x;
-        const dy = p.y - nucleus.y;
-        const distSq = dx * dx + dy * dy;
-
-        if (distSq < maxDistSq) {
-          const dist = Math.sqrt(distSq);
-          if (dist > innerRadius * 0.7) {
-            const angle = Math.atan2(dy, dx);
-            const anchorX = nucleus.x + Math.cos(angle) * innerRadius;
-            const anchorY = nucleus.y + Math.sin(angle) * innerRadius;
-
-            const alpha = (1 - dist / nucleus.connectionDistance) * 0.42;
-
-            // Bioluminescent synapse tether with dual-tone gradient
-            const grad = ctx.createLinearGradient(anchorX, anchorY, p.x, p.y);
-            grad.addColorStop(0, `rgba(52, 211, 153, ${alpha * 1.2})`);
-            grad.addColorStop(1, `rgba(56, 189, 248, ${alpha * 0.7})`);
-
-            ctx.beginPath();
-            ctx.moveTo(anchorX, anchorY);
-            ctx.lineTo(p.x, p.y);
-            ctx.strokeStyle = grad;
-            ctx.lineWidth = 1.2;
-            ctx.stroke();
-
-            // Anchor node glow
-            ctx.beginPath();
-            ctx.arc(anchorX, anchorY, 1.8, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(52, 211, 153, ${alpha * 1.5})`;
-            ctx.fill();
-
-            // Spawn occasional energy pulses from nucleus outward
-            if (Math.random() < 0.007 && synapsePackets.length < 14) {
-              synapsePackets.push(new SynapsePacket(p, anchorX, anchorY));
-            }
-          }
-        }
-      }
-
-      // Update and render all active synapse energy pulses
-      for (let i = synapsePackets.length - 1; i >= 0; i--) {
-        const packet = synapsePackets[i];
-        packet.update();
-        if (!packet.alive) {
-          synapsePackets.splice(i, 1);
-        } else {
-          packet.draw();
-        }
-      }
-    };
-
-    /**
-     * Render the Centerpiece: Holographic Niyansh Pharma Bio-Nucleus
-     */
-    const drawBioNucleus = (nucleus) => {
-      const breathing = Math.sin(globalTime * 1.6) * 0.08;
-      const baseR = nucleus.radius * (1 + breathing * 0.05);
-
-      ctx.save();
-      ctx.translate(nucleus.x, nucleus.y);
-
-      // 1. Ambient Bioluminescent Core Aura (Multi-layer Radial Gradient)
-      const auraGrad = ctx.createRadialGradient(0, 0, 10, 0, 0, baseR * 1.9);
-      auraGrad.addColorStop(0, `rgba(52, 211, 153, ${0.14 + breathing * 0.04})`);
-      auraGrad.addColorStop(0.4, `rgba(56, 189, 248, ${0.08 + breathing * 0.03})`);
-      auraGrad.addColorStop(0.75, `rgba(14, 165, 233, ${0.03})`);
-      auraGrad.addColorStop(1, 'rgba(10, 48, 86, 0)');
-
-      ctx.beginPath();
-      ctx.arc(0, 0, baseR * 1.9, 0, Math.PI * 2);
-      ctx.fillStyle = auraGrad;
-      ctx.fill();
-
-      // 2. Interactive Shockwave Ripple (emanates on mouse movement)
-      if (rippleAlpha > 0.01) {
-        ctx.beginPath();
-        ctx.arc(0, 0, rippleRadius, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(56, 189, 248, ${rippleAlpha * 0.4})`;
-        ctx.lineWidth = 1.8;
-        ctx.stroke();
-      }
-
-      // 3. Outer Bio-Radar Orbital Ring with 24 Radial Sensor Ticks
-      const outerR = baseR * 1.32;
-      const outerAngle = -globalTime * 0.18;
-      ctx.save();
-      ctx.rotate(outerAngle);
-
-      ctx.beginPath();
-      ctx.arc(0, 0, outerR, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.16)';
-      ctx.lineWidth = 1.1;
-      ctx.stroke();
-
-      // Radial sensor ticks around circumference
-      const tickCount = 24;
-      const tickStep = (Math.PI * 2) / tickCount;
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.32)';
-      ctx.lineWidth = 1;
-      for (let t = 0; t < tickCount; t++) {
-        const a = t * tickStep;
-        const tickLen = t % 4 === 0 ? 7 : 3.5;
-        const x1 = Math.cos(a) * (outerR - tickLen);
-        const y1 = Math.sin(a) * (outerR - tickLen);
-        const x2 = Math.cos(a) * outerR;
-        const y2 = Math.sin(a) * outerR;
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-      }
-
-      // Orbiting satellite nano-capsule node on outer ring
-      const satX = Math.cos(globalTime * 0.6) * outerR;
-      const satY = Math.sin(globalTime * 0.6) * outerR;
-      ctx.beginPath();
-      ctx.arc(satX, satY, 3.2, 0, Math.PI * 2);
-      ctx.fillStyle = '#38bdf8';
-      ctx.shadowColor = '#38bdf8';
-      ctx.shadowBlur = 10;
-      ctx.fill();
-
-      ctx.restore();
-
-      // 4. Middle Scanning Ring with Dashed Luminous Arc Segments
-      const midR = baseR * 0.95;
-      const midAngle = globalTime * 0.35;
-      ctx.save();
-      ctx.rotate(midAngle);
-
-      ctx.beginPath();
-      ctx.arc(0, 0, midR, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(52, 211, 153, 0.28)';
-      ctx.lineWidth = 1.4;
-      ctx.setLineDash([14, 18]);
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      // 4 Cardinal Anchor Points
-      for (let k = 0; k < 4; k++) {
-        const ca = (Math.PI / 2) * k;
-        const cx = Math.cos(ca) * midR;
-        const cy = Math.sin(ca) * midR;
-        ctx.beginPath();
-        ctx.arc(cx, cy, 2.5, 0, Math.PI * 2);
-        ctx.fillStyle = '#34d399';
-        ctx.shadowColor = '#34d399';
-        ctx.shadowBlur = 8;
-        ctx.fill();
-      }
-
-      ctx.restore();
-
-      // 5. Innermost Circular Chamber
-      ctx.beginPath();
-      ctx.arc(0, 0, baseR * 0.72, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.22)';
-      ctx.lineWidth = 1.0;
-      ctx.stroke();
-
-      // 6. Layered Brand Projection: Logo Image & Crisp Procedural Vector Insignia
-      if (isLogoLoaded && logoImg.width > 0) {
-        ctx.save();
-        const logoTargetW = baseR * (isMobile ? 1.55 : 1.75);
-        const aspect = logoImg.height / logoImg.width;
-        const logoTargetH = logoTargetW * aspect;
-
-        ctx.globalAlpha = 0.17 + breathing * 0.05;
-        ctx.shadowColor = 'rgba(56, 189, 248, 0.85)';
-        ctx.shadowBlur = 22;
-        ctx.drawImage(
-          logoImg,
-          -logoTargetW / 2,
-          -logoTargetH / 2 - (isMobile ? 8 : 12),
-          logoTargetW,
-          logoTargetH
-        );
-        ctx.restore();
-      }
-
-      // 7. Vector Holographic Monogram & Typography (Guarantees instant crisp display)
-      ctx.save();
-      const alphaBrand = 0.32 + breathing * 0.08;
-
-      // Stylized Center NP Capsule Monogram
-      ctx.shadowColor = 'rgba(52, 211, 153, 0.9)';
-      ctx.shadowBlur = 12;
-
-      // Center glowing capsule icon
-      const pillW = isMobile ? 24 : 34;
-      const pillH = isMobile ? 12 : 16;
-      const pillR = pillH / 2;
-      const pillY = isMobile ? -14 : -18;
-
-      // Capsule outline
-      ctx.beginPath();
-      ctx.arc(-pillW / 4, pillY, pillR, Math.PI / 2, Math.PI * 1.5);
-      ctx.lineTo(pillW / 4, pillY - pillR);
-      ctx.arc(pillW / 4, pillY, pillR, Math.PI * 1.5, Math.PI / 2);
-      ctx.closePath();
-      ctx.strokeStyle = `rgba(52, 211, 153, ${alphaBrand * 1.2})`;
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-
-      // Center divider
-      ctx.beginPath();
-      ctx.moveTo(0, pillY - pillR);
-      ctx.lineTo(0, pillY + pillR);
-      ctx.strokeStyle = `rgba(56, 189, 248, ${alphaBrand * 1.4})`;
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-
-      // Brand Typography: NIYANSH PHARMA
-      ctx.font = `800 ${isMobile ? '11px' : '14px'} Outfit, -apple-system, BlinkMacSystemFont, sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = `rgba(134, 239, 172, ${alphaBrand * 1.1})`;
-      ctx.shadowColor = 'rgba(134, 239, 172, 0.7)';
-      ctx.shadowBlur = 10;
-      ctx.fillText('NIYANSH PHARMA', 0, isMobile ? 8 : 12);
-
-      // Clinical Standard Subtitle: CARE • QUALITY • TRUST
-      ctx.font = `600 ${isMobile ? '7px' : '8.5px'} Outfit, sans-serif`;
-      ctx.fillStyle = `rgba(186, 230, 253, ${alphaBrand * 0.85})`;
-      ctx.shadowColor = 'rgba(56, 189, 248, 0.6)';
-      ctx.shadowBlur = 6;
-      ctx.fillText('CARE • QUALITY • TRUST', 0, isMobile ? 22 : 28);
-
-      ctx.restore();
-
-      ctx.restore();
-    };
-
-    /**
-     * Main Render Loop (60 FPS)
+     * Main 60 FPS Animation Loop
      */
     const animate = () => {
       if (!isVisible) return;
-      globalTime += 0.016;
-
       ctx.clearRect(0, 0, width, height);
 
-      const nucleus = getNucleus();
-
-      // 1. Expand and fade interactive ripple if active
-      if (rippleAlpha > 0) {
-        rippleRadius += 4.5;
-        rippleAlpha -= 0.015;
-      }
-
-      // 2. Draw background inter-molecular covalent bonds
+      // 1. Draw connecting chemical bonds
       drawInterParticleConnections();
 
-      // 3. Draw living synapse connections to the brand nucleus
-      drawNucleusSynapses(nucleus);
-
-      // 4. Draw Centerpiece: Holographic Niyansh Pharma Bio-Nucleus
-      drawBioNucleus(nucleus);
-
-      // 5. Update and render all pharmaceutical particle entities
+      // 2. Update and render all floating entities
       for (let i = 0; i < particles.length; i++) {
         particles[i].update();
         particles[i].draw();
@@ -626,7 +294,7 @@ export default function PharmaMoleculesCanvas({
     const settleTimer = setTimeout(() => {
       resize();
       initParticles();
-    }, 90);
+    }, 80);
 
     const handleResize = () => {
       resize();
@@ -638,15 +306,6 @@ export default function PharmaMoleculesCanvas({
       const rect = canvas.getBoundingClientRect();
       mouse.x = e.clientX - rect.left;
       mouse.y = e.clientY - rect.top;
-
-      // Trigger ripple if mouse approaches nucleus
-      const nucleus = getNucleus();
-      const dx = mouse.x - nucleus.x;
-      const dy = mouse.y - nucleus.y;
-      if (Math.sqrt(dx * dx + dy * dy) < nucleus.radius * 1.5 && rippleAlpha <= 0.05) {
-        rippleRadius = nucleus.radius * 0.7;
-        rippleAlpha = 0.8;
-      }
     };
 
     const handleMouseLeave = () => {

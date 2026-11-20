@@ -1603,8 +1603,9 @@ input[type="submit"]:disabled {
 }
 
 @media (max-width: 768px) {
-  body {
-    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)); /* Space for MobileBottomNav */
+  /* Space for MobileBottomNav strictly when app is installed in PWA standalone mode */
+  body.standalone-pwa {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
   }
 
   body:has(.admin-workspace-container),
@@ -1646,8 +1647,8 @@ input[type="submit"]:disabled {
   }
 
   .logo-container img {
-    height: 48px;
-    max-width: 165px;
+    height: 52px !important;
+    max-width: 175px !important;
     object-fit: contain;
   }
   
@@ -1659,6 +1660,11 @@ input[type="submit"]:disabled {
     gap: 8px;
     justify-content: flex-end;
     min-width: 0;
+  }
+
+  /* Admin pill hidden on mobile top header to leave ample space for prominent logo; accessible from side drawer */
+  .admin-nav-pill {
+    display: none !important;
   }
 
   /* Hide Cart on Top Mobile Header (accessible from Drawer and Bottom Nav) */
@@ -4574,8 +4580,8 @@ html[lang="gu"] .nav-link, html[lang="hi"] .nav-link {
 /* 320px–375px Ultra-Compact Mobile Precision Rules (iPhone SE, Small Phones) */
 @media (max-width: 375px) {
   .logo-container img {
-    height: 44px !important;
-    max-width: 145px !important;
+    height: 48px !important;
+    max-width: 160px !important;
   }
 
   .header-actions {
@@ -5202,8 +5208,10 @@ html[lang="gu"] .nav-link, html[lang="hi"] .nav-link {
    ========================================================================== */
 .pharma-steps-grid {
   position: relative;
-  margin-top: 28px;
+  margin-top: 16px;
+  padding-top: 26px !important;
   row-gap: 36px !important;
+  overflow: visible !important;
 }
 
 .pharma-step-card {
@@ -5707,3 +5715,4 @@ a:active,
     padding: 10px 18px !important;
   }
 }
+

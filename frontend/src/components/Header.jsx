@@ -108,18 +108,45 @@ function Header({
   const chemistName = user?.companyName || user?.company || user?.name || 'Haritas Pharma';
   const chemistInitial = chemistName.split(' ')[0];
 
-  // Lock body scroll when mobile menu is open
+  // Bulletproof Body Scroll Lock when Mobile Drawer is Open (prevents underlying webpage scroll on iOS & Android)
   useEffect(() => {
     if (isMobileMenuOpen) {
+      const scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.width = '100%';
       document.body.style.overflow = 'hidden';
-      document.body.style.touchAction = 'none';
+      document.documentElement.style.overflow = 'hidden';
+      document.body.setAttribute('data-scroll-locked', scrollY.toString());
     } else {
+      const savedScroll = document.body.getAttribute('data-scroll-locked');
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.width = '';
       document.body.style.overflow = '';
-      document.body.style.touchAction = '';
+      document.documentElement.style.overflow = '';
+      if (savedScroll !== null) {
+        window.scrollTo(0, parseInt(savedScroll, 10));
+        document.body.removeAttribute('data-scroll-locked');
+      }
     }
     return () => {
+      const savedScroll = document.body.getAttribute('data-scroll-locked');
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.width = '';
       document.body.style.overflow = '';
-      document.body.style.touchAction = '';
+      document.documentElement.style.overflow = '';
+      if (savedScroll !== null) {
+        window.scrollTo(0, parseInt(savedScroll, 10));
+        document.body.removeAttribute('data-scroll-locked');
+      }
     };
   }, [isMobileMenuOpen]);
 
@@ -863,10 +890,11 @@ function Header({
 
         {/* Chemist Mobile Drawer */}
         {isMobileMenuOpen && createPortal(
-          <div style={{ position: 'fixed', inset: 0, zIndex: 999999, display: 'flex' }}>
+          <div style={{ position: 'fixed', inset: 0, zIndex: 999999, display: 'flex', overflow: 'hidden' }}>
             <div 
               style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)' }}
               onClick={() => setIsMobileMenuOpen(false)}
+              onTouchMove={(e) => e.preventDefault()}
             />
             <div className="mobile-nav-drawer" style={{
               position: 'relative',
@@ -894,17 +922,6 @@ function Header({
                 <div style={{ fontSize: '0.72rem', color: '#059669', fontWeight: '800', textTransform: 'uppercase' }}>● {t('retailerDashboard.verifiedPartner', 'Verified Retailer')}</div>
                 <div style={{ fontSize: '0.95rem', fontWeight: '800', color: '#064e3b', marginTop: '2px' }}>{chemistName}</div>
                 <div style={{ fontSize: '0.78rem', color: '#065f46', marginTop: '2px' }}>👤 {user?.name || 'Hari Patel'}</div>
-              </div>
-
-              {/* App Preferences: Language & Theme */}
-              <div style={{ padding: '10px 12px', borderRadius: '10px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <span style={{ fontSize: '0.78rem', fontWeight: '800', color: 'var(--text-dark)', textTransform: 'uppercase' }}>{t('nav.language', 'Language')}</span>
-                <LanguageSelector variant="segmented-full" />
-              </div>
-
-              <div style={{ padding: '10px 12px', borderRadius: '10px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: '0.78rem', fontWeight: '800', color: 'var(--text-dark)', textTransform: 'uppercase' }}>{t('nav.themeMode', 'Theme Mode')}</span>
-                <ThemeToggle variant="segmented" />
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -1355,9 +1372,10 @@ function Header({
 
       {/* Mobile Drawer Menu via Portal */}
       {isMobileMenuOpen && createPortal(
-        <div style={{ position: 'fixed', inset: 0, zIndex: 999999, display: 'flex' }}>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 999999, display: 'flex', overflow: 'hidden' }}>
           <div 
             onClick={() => setIsMobileMenuOpen(false)}
+            onTouchMove={(e) => e.preventDefault()}
             style={{
               position: 'fixed',
               inset: 0,
@@ -1500,18 +1518,6 @@ function Header({
                 </div>
               </div>
             )}
-
-            {/* App Settings: 3-Tab Language Selector (No Line Wrap) */}
-            <div style={{ padding: '10px 12px', borderRadius: '12px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <span style={{ fontSize: '0.80rem', fontWeight: '800', color: 'var(--text-dark)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{t('nav.language', 'Language')}</span>
-              <LanguageSelector variant="segmented-full" />
-            </div>
-
-            {/* Theme Mode Segmented Toggle */}
-            <div style={{ padding: '10px 12px', borderRadius: '12px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '0.80rem', fontWeight: '800', color: 'var(--text-dark)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{t('nav.themeMode', 'Theme Mode')}</span>
-              <ThemeToggle variant="segmented" />
-            </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
               <Link to="/" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600', color: 'var(--text-dark)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>

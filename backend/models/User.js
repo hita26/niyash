@@ -87,6 +87,19 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  isApproved: {
+    type: Boolean,
+    default: false
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'pending'
+  },
+  rejectionReason: {
+    type: String,
+    default: ''
+  },
   permissions: {
     canManageProducts: { type: Boolean, default: true },
     canDeleteProducts: { type: Boolean, default: false },

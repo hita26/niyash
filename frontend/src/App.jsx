@@ -72,6 +72,39 @@ function AppContent() {
     return true;
   });
 
+  // Detect whether app is opened in PWA Standalone Mode (Installed App on Home Screen)
+  // Public website uses top header with hamburger menu; bottom navigation is exclusive to installed PWA
+  const [isStandalone, setIsStandalone] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return (
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.navigator.standalone === true ||
+      document.referrer.includes('android-app://')
+    );
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mediaQuery = window.matchMedia('(display-mode: standalone)');
+    const handleChange = (e) => setIsStandalone(e.matches || window.navigator.standalone === true);
+    try {
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    } catch (_) {
+      mediaQuery.addListener(handleChange);
+      return () => mediaQuery.removeListener(handleChange);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    if (isStandalone) {
+      document.body.classList.add('standalone-pwa');
+    } else {
+      document.body.classList.remove('standalone-pwa');
+    }
+  }, [isStandalone]);
+
   // Detect whether current view is within the B2B Chemist Workstation
   const isB2BPortal = location.pathname.startsWith('/dashboard') || 
                       location.pathname.startsWith('/portal') || 
@@ -270,7 +303,7 @@ function AppContent() {
       )}
       <BioNanoProgressBar />
       <ScrollToTop />
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', position: 'relative' }}>
         <Header 
           cartCount={enquiryCart.reduce((total, item) => total + item.quantity, 0)} 
           onOpenCart={() => setIsCartOpen(true)}
@@ -363,13 +396,16 @@ function AppContent() {
 
         <Footer compact={isB2BPortal} />
 
-        <MobileBottomNav 
-          cartCount={enquiryCart.reduce((total, item) => total + item.quantity, 0)} 
-          onOpenCart={() => setIsCartOpen(true)} 
-          isB2BPortal={isB2BPortal}
-          isMenuOpen={isMobileMenuOpen}
-          onOpenMenu={() => setIsMobileMenuOpen(prev => !prev)}
-        />
+        {/* Mobile Bottom Navigation: Strictly rendered for installed PWA standalone mode only */}
+        {isStandalone && (
+          <MobileBottomNav 
+            cartCount={enquiryCart.reduce((total, item) => total + item.quantity, 0)} 
+            onOpenCart={() => setIsCartOpen(true)} 
+            isB2BPortal={isB2BPortal}
+            isMenuOpen={isMobileMenuOpen}
+            onOpenMenu={() => setIsMobileMenuOpen(prev => !prev)}
+          />
+        )}
 
         <InstallAppBanner />
 

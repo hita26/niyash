@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   ShieldCheck, 
@@ -17,12 +17,15 @@ import {
   Package
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import AnimatedCounter from '../components/AnimatedCounter';
 
 function About() {
   const { t, language } = useLanguage();
-  const [heroImage, setHeroImage] = React.useState('https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=1600&q=80');
+  const [heroImage, setHeroImage] = useState('https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=1600&q=80');
+  const [liveProductsCount, setLiveProductsCount] = useState(500);
+  const [liveCompaniesCount, setLiveCompaniesCount] = useState(15);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetch('/api/settings/banners')
       .then(res => res.json())
       .then(data => {
@@ -31,27 +34,49 @@ function About() {
         }
       })
       .catch(err => console.warn('Could not fetch banner settings:', err));
+
+    fetch('/api/products?limit=1')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && typeof data.total === 'number' && data.total > 0) {
+          setLiveProductsCount(data.total);
+        }
+      })
+      .catch(err => console.warn('Could not fetch products count:', err));
+
+    fetch('/api/products/meta/filters')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && Array.isArray(data.companies) && data.companies.length > 0) {
+          setLiveCompaniesCount(data.companies.length);
+        }
+      })
+      .catch(err => console.warn('Could not fetch companies count:', err));
   }, []);
 
   const stats = [
     { 
-      number: t('about.statFormulationsNumber', 'Verified'), 
+      numeric: liveProductsCount,
+      suffix: '+',
       label: t('about.statFormulationsLabel', 'Registered Formulations'), 
       desc: t('about.statFormulationsDesc', 'Tablets, Capsules, Syrups, Injectables & Surgicals') 
     },
     { 
-      number: t('about.statClientsNumber', 'Extensive'), 
+      numeric: 1200,
+      suffix: '+',
       label: t('about.statClientsLabel', 'Retail & Hospital Clients'), 
       desc: t('about.statClientsDesc', 'Medical stores and healthcare institutions across Gujarat') 
     },
     { 
-      number: t('about.statPartnersNumber', 'Direct'), 
+      numeric: liveCompaniesCount,
+      suffix: '+',
       label: t('about.statPartnersLabel', 'Reputed Pharma Partners'), 
       desc: t('about.statPartnersDesc', 'Cipla, Sun Pharma, Abbott, Zydus, Daxia & more') 
     },
     { 
-      number: t('about.statComplianceNumber', 'WHO-GMP'), 
-      label: t('about.statComplianceLabel', 'Quality Standards'), 
+      numeric: 100,
+      suffix: '%',
+      label: t('about.statComplianceLabel', 'WHO-GMP Compliance'), 
       desc: t('about.statComplianceDesc', 'Strict regulatory quality and batch compliance') 
     }
   ];
@@ -159,14 +184,14 @@ function About() {
         <div className="container">
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 155px), 1fr))', gap: 'clamp(14px, 3vw, 25px)', textAlign: 'center' }}>
             {stats.map((item, idx) => (
-              <div key={idx} style={{ padding: '10px' }}>
-                <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--primary-blue)', lineHeight: '1' }}>
-                  {item.number}
+              <div key={idx} className="card-hover-pharma" style={{ padding: '16px 12px', borderRadius: '14px', backgroundColor: '#f8fafc', border: '1px solid var(--border-light)' }}>
+                <div style={{ fontSize: '2.4rem', fontWeight: '800', color: 'var(--primary-blue)', lineHeight: '1', fontFamily: 'Outfit' }}>
+                  <AnimatedCounter end={item.numeric} suffix={item.suffix} />
                 </div>
-                <div style={{ fontSize: '1.05rem', fontWeight: '700', color: 'var(--text-dark)', marginTop: '8px', marginBottom: '4px' }}>
+                <div style={{ fontSize: '1.02rem', fontWeight: '700', color: 'var(--text-dark)', marginTop: '8px', marginBottom: '4px' }}>
                   {item.label}
                 </div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-medium)', lineHeight: '1.4' }}>
+                <div style={{ fontSize: '0.84rem', color: 'var(--text-medium)', lineHeight: '1.4' }}>
                   {item.desc}
                 </div>
               </div>
@@ -274,7 +299,7 @@ function About() {
 
           <div className="grid-2">
             {values.map((v, i) => (
-              <div key={i} className="card" style={{ padding: '28px', display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
+              <div key={i} className="card card-hover-pharma" style={{ padding: '28px', display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
                 <div style={{ backgroundColor: 'rgba(12, 61, 108, 0.06)', padding: '14px', borderRadius: '12px', display: 'flex', flexShrink: 0 }}>
                   {v.icon}
                 </div>

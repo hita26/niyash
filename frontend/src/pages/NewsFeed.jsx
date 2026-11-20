@@ -761,7 +761,7 @@ function NewsFeed() {
               return (
                 <div
                   key={item._id}
-                  className="card news-card"
+                  className="card news-card card-hover-pharma"
                   style={{
                     backgroundColor: '#ffffff',
                     borderRadius: '16px',

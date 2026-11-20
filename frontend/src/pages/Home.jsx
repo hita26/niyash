@@ -5,11 +5,15 @@ import {
   PhoneCall, Mail, Search, ArrowRight, Award, Building2, Package, CheckCircle2, Sparkles 
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import PharmaMoleculesCanvas from '../components/PharmaMoleculesCanvas';
+import AnimatedCounter from '../components/AnimatedCounter';
 
 function Home({ addToCart }) {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [heroSearch, setHeroSearch] = useState('');
+  const [liveProductsCount, setLiveProductsCount] = useState(500);
+  const [liveCompaniesCount, setLiveCompaniesCount] = useState(15);
 
   // Dynamic Banners & Home Content Settings
   const [heroBgImage, setHeroBgImage] = useState('https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=1600&q=80');
@@ -74,6 +78,25 @@ function Home({ addToCart }) {
         }
       })
       .catch(err => console.warn('Could not load home content:', err));
+
+    // 3. Fetch live dynamic counts for products and pharma network
+    fetch('/api/products?limit=1')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && typeof data.total === 'number' && data.total > 0) {
+          setLiveProductsCount(data.total);
+        }
+      })
+      .catch(err => console.warn('Could not load live product stats:', err));
+
+    fetch('/api/products/meta/filters')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && Array.isArray(data.companies) && data.companies.length > 0) {
+          setLiveCompaniesCount(data.companies.length);
+        }
+      })
+      .catch(err => console.warn('Could not load live company stats:', err));
   }, []);
 
   const handleHeroSearchSubmit = (e) => {
@@ -148,16 +171,21 @@ function Home({ addToCart }) {
   return (
     <div style={{ width: '100%' }} className="animate-fade-in">
       
-      {/* Hero Banner Section */}
+      {/* Hero Banner Section with Floating Molecular Particles */}
       <section className="home-hero-section" style={{
-        background: `linear-gradient(135deg, rgba(10, 48, 86, 0.97), rgba(20, 83, 138, 0.92)), url("${heroBgImage}")`,
+        background: `linear-gradient(135deg, rgba(10, 48, 86, 0.96), rgba(20, 83, 138, 0.91)), url("${heroBgImage}")`,
         backgroundSize: 'cover', backgroundPosition: 'center', color: '#ffffff',
         padding: 'clamp(36px, 6vw, 75px) 0 clamp(44px, 7vw, 85px) 0', position: 'relative', overflow: 'hidden'
       }}>
-        <div className="container hero-container-grid">
+        {/* Floating Molecule Particle Mesh (Polpharma & Moderna Style) */}
+        <PharmaMoleculesCanvas particleCount={36} speed={0.42} />
+
+        <div className="container hero-container-grid" style={{ position: 'relative', zIndex: 2 }}>
           <div style={{ minWidth: 0 }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: 'rgba(34, 197, 94, 0.15)', border: '1px solid rgba(74, 222, 128, 0.35)', padding: '6px 14px', borderRadius: '30px', fontSize: 'clamp(0.72rem, 2.5vw, 0.82rem)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.6px', color: '#86efac', marginBottom: '16px', maxWidth: '100%' }}>
-              <ShieldCheck size={15} style={{ flexShrink: 0 }} /> <span>{t('hero.badge', 'Authorized Wholesale & Distribution • PAN Gujarat')}</span>
+            {/* Live Gujarat Dispatch Pulse Badge */}
+            <div className="live-dispatch-pulse" style={{ backgroundColor: 'rgba(34, 197, 94, 0.16)', border: '1px solid rgba(74, 222, 128, 0.45)', padding: '6px 14px', borderRadius: '30px', fontSize: 'clamp(0.72rem, 2.5vw, 0.82rem)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.6px', color: '#86efac', marginBottom: '16px', maxWidth: '100%' }}>
+              <span className="live-pulse-dot" />
+              <span>{t('hero.badge', 'Authorized Wholesale & Distribution • PAN Gujarat')}</span>
             </div>
             
             <h1 style={{ fontSize: 'clamp(1.75rem, 4.8vw, 3.2rem)', color: '#ffffff', lineHeight: '1.18', fontWeight: '800', marginBottom: '16px', fontFamily: 'Outfit' }}>
@@ -171,13 +199,13 @@ function Home({ addToCart }) {
 
             {/* High-Impact Action CTAs for Chemists */}
             <div className="hero-cta-buttons" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '22px' }}>
-              <Link to="/companies" className="btn btn-secondary" style={{ padding: '12px 22px', fontSize: '0.94rem', fontWeight: '700', borderRadius: '30px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              <Link to="/companies" className="btn btn-secondary card-hover-pharma" style={{ padding: '12px 22px', fontSize: '0.94rem', fontWeight: '700', borderRadius: '30px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
                 <Building2 size={18} /> {t('hero.browseCompanies', 'Browse Pharma Companies')}
               </Link>
-              <Link to="/quick-order" className="btn btn-primary" style={{ padding: '12px 22px', fontSize: '0.94rem', fontWeight: '700', borderRadius: '30px', display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#ffffff', color: 'var(--primary-blue)' }}>
+              <Link to="/quick-order" className="btn btn-primary card-hover-pharma" style={{ padding: '12px 22px', fontSize: '0.94rem', fontWeight: '700', borderRadius: '30px', display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#ffffff', color: 'var(--primary-blue)' }}>
                 <Package size={18} /> {t('hero.quickOrder', 'Fast Quick Order ⚡')}
               </Link>
-              <button onClick={handleQuickWhatsApp} className="btn btn-outline" style={{ borderColor: 'rgba(255,255,255,0.7)', color: '#ffffff', padding: '12px 20px', fontSize: '0.94rem', fontWeight: '600', borderRadius: '30px' }}>
+              <button onClick={handleQuickWhatsApp} className="btn btn-outline card-hover-pharma" style={{ borderColor: 'rgba(255,255,255,0.7)', color: '#ffffff', padding: '12px 20px', fontSize: '0.94rem', fontWeight: '600', borderRadius: '30px' }}>
                 <MessageSquare size={17} /> {t('hero.whatsappOrder', 'WhatsApp Order')}
               </button>
             </div>
@@ -192,11 +220,9 @@ function Home({ addToCart }) {
             </div>
           </div>
 
-          {/* Wholesale Trust & Statistics Card */}
-          <div className="hero-trust-card" style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.12)', backdropFilter: 'blur(16px)',
-            borderRadius: '20px', padding: 'clamp(16px, 3vw, 28px)', border: '1px solid rgba(255, 255, 255, 0.25)',
-            boxShadow: '0 25px 60px rgba(0,0,0,0.2)', minWidth: 0
+          {/* Wholesale Trust & Real-time Live Statistics Card */}
+          <div className="hero-trust-card pharma-glass-card float-gentle" style={{
+            borderRadius: '20px', padding: 'clamp(16px, 3vw, 28px)', minWidth: 0
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '18px', borderBottom: '1px solid rgba(255, 255, 255, 0.15)', paddingBottom: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -205,33 +231,41 @@ function Home({ addToCart }) {
                   {t('hero.wholesaleAdvantage', 'Wholesale Advantage')}
                 </h3>
               </div>
-              <span style={{ fontSize: '0.72rem', backgroundColor: '#22c55e', color: '#ffffff', fontWeight: '800', padding: '2px 8px', borderRadius: '10px' }}>
-                {t('hero.liveB2B', 'LIVE B2B')}
+              <span style={{ fontSize: '0.72rem', backgroundColor: '#22c55e', color: '#ffffff', fontWeight: '800', padding: '2px 8px', borderRadius: '10px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <span className="live-pulse-dot" style={{ width: 6, height: 6 }} /> {t('hero.liveB2B', 'LIVE B2B')}
               </span>
             </div>
 
-            {/* Stat Grid */}
+            {/* Dynamic Stat Grid with Animated Counters */}
             <div className="hero-stat-grid" style={{ marginBottom: '18px' }}>
               <div style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <div style={{ fontSize: 'clamp(1.15rem, 3.2vw, 1.45rem)', fontWeight: '800', color: '#ffffff', lineHeight: 1.1 }}>{t('hero.statFormulations', '100% Genuine')}</div>
-                <div style={{ fontSize: '0.76rem', color: '#cbd5e1', marginTop: '4px' }}>{t('hero.statFormulationsLabel', 'Quality Formulations')}</div>
+                <div style={{ fontSize: 'clamp(1.15rem, 3.2vw, 1.45rem)', fontWeight: '800', color: '#ffffff', lineHeight: 1.1 }}>
+                  <AnimatedCounter end={liveProductsCount} suffix="+" className="animated-stat-glow" />
+                </div>
+                <div style={{ fontSize: '0.76rem', color: '#cbd5e1', marginTop: '4px' }}>{t('hero.statFormulationsLabel', 'WHO-GMP Formulations')}</div>
               </div>
               <div style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <div style={{ fontSize: 'clamp(1.15rem, 3.2vw, 1.45rem)', fontWeight: '800', color: '#86efac', lineHeight: 1.1 }}>{t('hero.statCompanies', 'Certified')}</div>
-                <div style={{ fontSize: '0.76rem', color: '#cbd5e1', marginTop: '4px' }}>{t('hero.statCompaniesLabel', 'Pharma Network')}</div>
+                <div style={{ fontSize: 'clamp(1.15rem, 3.2vw, 1.45rem)', fontWeight: '800', color: '#86efac', lineHeight: 1.1 }}>
+                  <AnimatedCounter end={liveCompaniesCount} suffix="+" className="animated-stat-glow" style={{ color: '#86efac' }} />
+                </div>
+                <div style={{ fontSize: '0.76rem', color: '#cbd5e1', marginTop: '4px' }}>{t('hero.statCompaniesLabel', 'Pharma Manufacturers')}</div>
               </div>
               <div style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <div style={{ fontSize: 'clamp(1.05rem, 3vw, 1.25rem)', fontWeight: '800', color: '#ffffff', lineHeight: 1.1 }}>{t('hero.statSupplyChain', 'WHO-GMP')}</div>
-                <div style={{ fontSize: '0.76rem', color: '#cbd5e1', marginTop: '4px' }}>{t('hero.statSupplyChainLabel', 'Certified Supply Chain')}</div>
+                <div style={{ fontSize: 'clamp(1.05rem, 3vw, 1.25rem)', fontWeight: '800', color: '#ffffff', lineHeight: 1.1 }}>
+                  <AnimatedCounter end={100} suffix="%" className="animated-stat-glow" />
+                </div>
+                <div style={{ fontSize: '0.76rem', color: '#cbd5e1', marginTop: '4px' }}>{t('hero.statSupplyChainLabel', 'WHO-GMP Verified Batch')}</div>
               </div>
               <div style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <div style={{ fontSize: 'clamp(1.05rem, 3vw, 1.25rem)', fontWeight: '800', color: '#93c5fd', lineHeight: 1.1 }}>{t('hero.statDispatch', 'Same-Day')}</div>
-                <div style={{ fontSize: '0.76rem', color: '#cbd5e1', marginTop: '4px' }}>{t('hero.statDispatchLabel', 'Dispatch in Saurashtra')}</div>
+                <div style={{ fontSize: 'clamp(1.05rem, 3vw, 1.25rem)', fontWeight: '800', color: '#93c5fd', lineHeight: 1.1 }}>
+                  <AnimatedCounter end={99.8} decimals={1} suffix="%" className="animated-stat-glow" style={{ color: '#93c5fd' }} />
+                </div>
+                <div style={{ fontSize: '0.76rem', color: '#cbd5e1', marginTop: '4px' }}>{t('hero.statDispatchLabel', 'Same-Day Dispatch Rate')}</div>
               </div>
             </div>
 
             {/* Direct Order Help */}
-            <div style={{ padding: '12px 14px', backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
+            <div style={{ padding: '12px 14px', backgroundColor: 'rgba(0,0,0,0.25)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
               <div>
                 <span style={{ fontSize: '0.74rem', color: '#cbd5e1', display: 'block' }}>{t('hero.callWholesaleDesk', 'Call Wholesale Desk:')}</span>
                 <a href="tel:+919909923130" style={{ color: '#ffffff', fontWeight: '700', fontSize: '1rem', textDecoration: 'none', whiteSpace: 'nowrap' }}>+91 99099 23130</a>
@@ -240,7 +274,8 @@ function Home({ addToCart }) {
                 href="https://wa.me/919909923130?text=Hello%20Niyansh%20Pharma%2C%20I%20would%20like%20to%20place%20a%20wholesale%20order." 
                 target="_blank" 
                 rel="noopener noreferrer"
-                style={{ backgroundColor: '#22c55e', color: '#ffffff', padding: '8px 14px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '5px', textDecoration: 'none', minHeight: '38px' }}
+                className="card-hover-pharma"
+                style={{ backgroundColor: '#22c55e', color: '#ffffff', padding: '8px 14px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '5px', textDecoration: 'none', minHeight: '38px', boxShadow: '0 4px 12px rgba(34, 197, 94, 0.4)' }}
               >
                 <MessageSquare size={14} /> WhatsApp
               </a>
@@ -259,7 +294,7 @@ function Home({ addToCart }) {
             {categories.map((cat, i) => (
               <div 
                 key={i} 
-                className="card category-card-hover" 
+                className="card category-card-hover card-hover-pharma" 
                 style={{
                   padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column',
                   border: '1px solid #f1f5f9'
@@ -304,7 +339,7 @@ function Home({ addToCart }) {
             {features.map((feat, i) => (
               <div 
                 key={i} 
-                className="card" 
+                className="card card-hover-pharma" 
                 style={{
                   display: 'flex', gap: '20px', alignItems: 'flex-start', padding: '25px'
                 }}
@@ -341,6 +376,7 @@ function Home({ addToCart }) {
             ].map((step, i) => (
               <div 
                 key={i} 
+                className="card-hover-pharma"
                 style={{
                   padding: '30px 20px', border: '1px solid var(--border-light)',
                   borderRadius: '12px', backgroundColor: '#f8fafc', position: 'relative',

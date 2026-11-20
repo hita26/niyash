@@ -207,6 +207,7 @@ export default function AIAssistant({ addToCart }) {
             e.currentTarget.style.boxShadow = '0 8px 25px rgba(12, 61, 108, 0.35)';
           }}
         >
+          <span className="b2b-pulse-ring" style={{ borderRadius: '50px', borderColor: 'rgba(56, 189, 248, 0.5)' }} />
           <div style={{
             position: 'relative',
             display: 'flex',

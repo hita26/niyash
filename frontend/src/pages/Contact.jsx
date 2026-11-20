@@ -123,7 +123,7 @@ function Contact() {
           
           {/* Contact Details & Info */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-            <div className="card" style={{ padding: '30px', flex: 1, display: 'flex', flexDirection: 'column', gap: '25px' }}>
+            <div className="card card-hover-pharma" style={{ padding: '30px', flex: 1, display: 'flex', flexDirection: 'column', gap: '25px' }}>
               <h2 style={{ fontSize: '1.4rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '10px' }}>
                 {t('contact.title', 'Contact & Dispatch Desk')}
               </h2>

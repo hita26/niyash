@@ -246,7 +246,7 @@ function CompanyDirectory() {
               return (
                 <div 
                   key={company._id} 
-                  className="card"
+                  className="card card-hover-pharma"
                   style={{
                     padding: '0',
                     overflow: 'hidden',

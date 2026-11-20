@@ -4617,3 +4617,197 @@ html[lang="gu"] .nav-link, html[lang="hi"] .nav-link {
 [data-theme="dark"] .admin-mgmt-table tbody tr:hover td {
   background-color: rgba(51, 65, 85, 0.3);
 }
+
+/* ========================================================
+   MODERN PHARMA WEBSITE ANIMATIONS & VISUAL EFFECTS SUITE
+   ======================================================== */
+
+/* 1. Live Dispatch Status Pulse Dot & Concentric Ring */
+.live-dispatch-pulse {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.live-pulse-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background-color: #22c55e;
+  box-shadow: 0 0 10px #22c55e;
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.live-pulse-dot::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 50%;
+  border: 2px solid #4ade80;
+  animation: liveRingPulse 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+}
+
+@keyframes liveRingPulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+/* 2. Floating B2B Action Widget Ripple Rings */
+.b2b-pulse-ring,
+.b2b-pulse-ring-delayed {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid rgba(34, 197, 94, 0.7);
+  pointer-events: none;
+  animation: b2bRipple 2.4s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+
+.b2b-pulse-ring-delayed {
+  animation-delay: 1.2s;
+}
+
+@keyframes b2bRipple {
+  0% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.85);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .floating-b2b-widget {
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+    right: 16px !important;
+  }
+}
+
+/* 3. High-End Pharma Product & Category Card 3D Lift & Glow */
+.card-hover-pharma {
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.28s ease !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-hover-pharma:hover {
+  transform: translateY(-6px) scale(1.008) !important;
+  box-shadow: 0 20px 35px -8px rgba(12, 61, 108, 0.16), 0 8px 16px -6px rgba(0, 0, 0, 0.06) !important;
+  border-color: rgba(37, 99, 235, 0.38) !important;
+}
+
+/* Diagonal glass shine effect on hover */
+.card-hover-pharma::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -70%;
+  width: 50%;
+  height: 200%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.18) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(30deg);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.card-hover-pharma:hover::after {
+  opacity: 1;
+  animation: shineSwipe 0.85s ease-out;
+}
+
+@keyframes shineSwipe {
+  0% {
+    left: -70%;
+  }
+  100% {
+    left: 140%;
+  }
+}
+
+/* 4. Marquee Smooth Continuous Infinite Scroll with Edge Blur Mask */
+.brands-marquee-container {
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  padding: 12px 0;
+  mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+}
+
+.brands-marquee-track {
+  display: flex;
+  gap: 16px;
+  width: max-content;
+  animation: marqueeContinuous 32s linear infinite;
+}
+
+.brands-marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes marqueeContinuous {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* 5. Hero Dynamic Float Animation */
+@keyframes floatGentle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.float-gentle {
+  animation: floatGentle 4.5s ease-in-out infinite;
+}
+
+/* 6. High-Tech Glassmorphism Panel */
+.pharma-glass-card {
+  background: rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.22) !important;
+}
+
+[data-theme="dark"] .pharma-glass-card {
+  background: rgba(15, 23, 42, 0.75) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* 7. Animated Counter Glow */
+.animated-stat-glow {
+  text-shadow: 0 0 20px rgba(134, 239, 172, 0.35);
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: -0.5px;
+}

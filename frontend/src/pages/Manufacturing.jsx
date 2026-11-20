@@ -116,7 +116,7 @@ function Manufacturing() {
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {highlights.map((item, idx) => (
-              <div key={idx} className="card" style={{ padding: '20px', display: 'flex', gap: '15px', alignItems: 'flex-start' }}>
+              <div key={idx} className="card card-hover-pharma" style={{ padding: '20px', display: 'flex', gap: '15px', alignItems: 'flex-start' }}>
                 <div style={{ backgroundColor: 'rgba(56, 142, 60, 0.08)', padding: '10px', borderRadius: '8px', color: 'var(--secondary-green)', display: 'flex' }}>
                   <CheckSquare size={18} />
                 </div>
@@ -129,7 +129,7 @@ function Manufacturing() {
           </div>
 
           {/* Direct Production Contact Desk */}
-          <div className="card" style={{ marginTop: '25px', padding: '22px', display: 'flex', alignItems: 'center', gap: '16px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-light)' }}>
+          <div className="card card-hover-pharma" style={{ marginTop: '25px', padding: '22px', display: 'flex', alignItems: 'center', gap: '16px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-light)' }}>
             <div style={{ backgroundColor: 'rgba(12, 61, 108, 0.08)', padding: '12px', borderRadius: '12px', color: 'var(--primary-blue)', display: 'flex', flexShrink: 0 }}>
               <Mail size={24} />
             </div>

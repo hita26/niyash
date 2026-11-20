@@ -177,7 +177,7 @@ function Career() {
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {positions.map((pos, i) => (
-              <div key={i} className="card" style={{ padding: '25px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div key={i} className="card card-hover-pharma" style={{ padding: '25px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
                   <h3 style={{ fontSize: '1.15rem', color: 'var(--primary-blue)' }}>{pos.title}</h3>
                   <span style={{ fontSize: '0.75rem', padding: '4px 10px', backgroundColor: 'rgba(56, 142, 60, 0.1)', color: 'var(--secondary-green)', borderRadius: '20px', fontWeight: '700' }}>
@@ -202,7 +202,7 @@ function Career() {
           </div>
 
           {/* Direct HR & Careers Recruitment Desk */}
-          <div className="card" style={{ marginTop: '25px', padding: '22px', display: 'flex', alignItems: 'center', gap: '16px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-light)' }}>
+          <div className="card card-hover-pharma" style={{ marginTop: '25px', padding: '22px', display: 'flex', alignItems: 'center', gap: '16px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-light)' }}>
             <div style={{ backgroundColor: 'rgba(12, 61, 108, 0.08)', padding: '12px', borderRadius: '12px', color: 'var(--primary-blue)', display: 'flex', flexShrink: 0 }}>
               <Mail size={24} />
             </div>

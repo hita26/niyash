@@ -86,7 +86,7 @@ function ProductCard({ product, addToCart }) {
 
   return (
     <div 
-      className="card card-hover-lift product-card-item" 
+      className="card card-hover-lift card-hover-pharma product-card-item" 
       style={{ 
         display: 'flex', 
         flexDirection: 'column', 

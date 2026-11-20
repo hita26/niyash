@@ -278,7 +278,11 @@ function CompanyDirectory() {
                         loading="lazy"
                         style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                         onError={(e) => {
-                          e.target.src = getCleanLogoUrl(company);
+                          e.target.onerror = null;
+                          const clean = (company.name || '').replace(/\([^)]*\)/g, '').trim();
+                          const words = clean.split(/\s+/).filter(Boolean);
+                          const initials = words.length >= 2 ? (words[0][0] + words[1][0]).toUpperCase() : clean.slice(0, 2).toUpperCase();
+                          e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(initials || 'NP')}&background=0284c7&color=ffffff&size=120&bold=true`;
                         }}
                       />
                     </div>

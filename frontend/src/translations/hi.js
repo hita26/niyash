@@ -38,6 +38,9 @@
     "email": "info@niyanshpharma.com",
     "tagline": "देखभाल • गुणवत्ता • विश्वास",
     "location": "राजकोट, गुजरात",
+    "operatingHours": "सुबह ९:०० से रात ९:००",
+    "lunchBreak": "लंच ब्रेक: दोपहर २:०० से ४:००",
+    "sundayHoliday": "रविवार: अवकाश",
     "certification": "WHO-GMP प्रमाणित थोक वितरण",
     "helpDesk": "टोल-फ्री थोक हेल्पडेस्क"
   },
@@ -862,10 +865,13 @@
   "theme": {
     "light": "लाइट",
     "dark": "डार्क",
+    "bw": "B&W",
     "lightMode": "लाइट मोड",
     "darkMode": "डार्क मोड",
+    "bwMode": "ब्लैक एंड व्हाइट मोड",
     "switchToLight": "लाइट मोड चालू करें",
     "switchToDark": "डार्क मोड चालू करें",
+    "switchToBW": "ब्लैक एंड व्हाइट मोड चालू करें",
     "title": "थीम"
   }
 };

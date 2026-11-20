@@ -525,7 +525,7 @@ For billing queries, call +91 9316566894 or reply to this email.
 Niyansh Pharma Wholesale & Distribution
 Rajkot, Gujarat`);
 
-    const mailto = `mailto:${ledgerData.email || 'accounts@niyanshpharma.com'}?subject=${subject}&body=${body}`;
+    const mailto = `mailto:${ledgerData.email || 'info@niyanshpharma.com'}?subject=${subject}&body=${body}`;
     window.open(mailto, '_blank');
     showToast('Email client opened with statement');
   };

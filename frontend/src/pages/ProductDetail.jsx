@@ -130,7 +130,14 @@ function ProductDetail({ addToCart }) {
   const rawGallery = (product.images && product.images.length > 0)
     ? product.images
     : (product.imageUrl ? [product.imageUrl] : []);
-  const gallery = rawGallery.filter(img => img && typeof img === 'string' && img.trim() !== '' && img !== '/pharma-products.jpg');
+  const gallery = rawGallery.filter(img => 
+    img && 
+    typeof img === 'string' && 
+    img.trim() !== '' && 
+    img !== '/pharma-products.jpg' &&
+    !img.includes('unsplash.com') &&
+    !img.includes('placeholder.com')
+  );
   const hasPhotos = gallery.length > 0;
   const currentPhoto = hasPhotos ? (gallery[activeImageIndex] || gallery[0]) : null;
 

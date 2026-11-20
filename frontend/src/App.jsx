@@ -21,9 +21,11 @@ import NewsFeed from './pages/NewsFeed';
 import QuickOrder from './pages/QuickOrder';
 import OutstandingLedger from './pages/OutstandingLedger';
 import RetailerDashboard from './pages/RetailerDashboard';
-import Admin from './pages/Admin';
 import CompanyDirectory from './pages/CompanyDirectory';
 import CompanyDetail from './pages/CompanyDetail';
+
+// Code-split heavy administrative portal to keep initial public bundles ultra-fast
+const Admin = React.lazy(() => import('./pages/Admin'));
 import ScrollToTop from './components/ScrollToTop';
 import MobileBottomNav from './components/MobileBottomNav';
 import AIAssistant from './components/AIAssistant';
@@ -61,13 +63,13 @@ function AppContent() {
   // Auth state from centralized context
   const { user, token, login, logout, isAuthOpen, openAuth, closeAuth } = useAuth();
 
-  // Cloudflare-Style Bot Security Verification Gate State
+  // Cloudflare-Style Bot Security Verification Gate State (Non-blocking for legitimate public visitors)
   const [isSecurityCleared, setIsSecurityCleared] = useState(() => {
     if (typeof window === 'undefined') return true;
     if (localStorage.getItem('niyansh_bypass_security') === 'true') return true;
     const params = new URLSearchParams(window.location.search);
     if (params.has('verify') || params.has('test-security')) return false;
-    return sessionStorage.getItem('niyansh_security_cleared') === 'true';
+    return true;
   });
 
   // Detect whether current view is within the B2B Chemist Workstation
@@ -327,8 +329,35 @@ function AppContent() {
             <Route path="/partner" element={<Partner />} />
             <Route path="/supplier" element={<Supplier />} />
             <Route path="/manufacturing" element={<Manufacturing />} />
-            <Route path="/admin" element={<Admin />} />
+            <Route path="/services" element={<Navigate to="/manufacturing" replace />} />
+            <Route path="/catalog" element={<Navigate to="/products" replace />} />
+            <Route 
+              path="/admin/*" 
+              element={
+                <React.Suspense fallback={
+                  <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div className="loading-spinner" />
+                  </div>
+                }>
+                  <Admin />
+                </React.Suspense>
+              } 
+            />
+            <Route 
+              path="/admin" 
+              element={
+                <React.Suspense fallback={
+                  <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div className="loading-spinner" />
+                  </div>
+                }>
+                  <Admin />
+                </React.Suspense>
+              } 
+            />
             <Route path="/security-check" element={<SecurityCheck />} />
+            {/* Catch-all route to safely redirect any undefined route back to Home */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
 

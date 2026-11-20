@@ -9,7 +9,8 @@ import {
   AlertCircle,
   ShieldCheck, 
   MessageCircle,
-  ChevronRight
+  ChevronRight,
+  Clock
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
@@ -222,6 +223,25 @@ function Footer({ compact = false }) {
                     <a href="mailto:info@niyanshpharma.com" className="footer-contact-link">
                       info@niyanshpharma.com
                     </a>
+                  </span>
+                </div>
+              </div>
+
+              {/* Operating Hours & Lunch Break */}
+              <div className="footer-contact-card">
+                <div className="footer-contact-icon-box" aria-hidden="true">
+                  <Clock size={17} />
+                </div>
+                <div className="footer-contact-details">
+                  <span className="footer-contact-label">Operating Hours</span>
+                  <span className="footer-contact-val" style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <span>9:00 AM – 9:00 PM (Mon – Sat)</span>
+                    <span style={{ fontSize: '0.74rem', color: '#f59e0b', fontWeight: '600' }}>
+                      Lunch Break: 2:00 PM – 4:00 PM
+                    </span>
+                    <span style={{ fontSize: '0.72rem', color: '#ef4444' }}>
+                      Sunday: Holiday
+                    </span>
                   </span>
                 </div>
               </div>

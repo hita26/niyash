@@ -21,6 +21,7 @@ function ProductCard({ product, addToCart }) {
   const { isLoggedIn, openAuth } = useAuth();
   const [quantity, setQuantity] = useState(0);
   const [isAdded, setIsAdded] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   const handleWhatsAppOrder = (e) => {
     e.preventDefault();
@@ -78,7 +79,14 @@ function ProductCard({ product, addToCart }) {
   const hasMargin = displayMrp > displayPrice && displayPrice > 0;
   const marginPercent = hasMargin ? Math.round(((displayMrp - displayPrice) / displayMrp) * 100) : 0;
 
-  const hasValidImage = Boolean(product.imageUrl && product.imageUrl.trim() !== '' && product.imageUrl !== '/pharma-products.jpg');
+  const hasValidImage = Boolean(
+    product.imageUrl && 
+    typeof product.imageUrl === 'string' &&
+    product.imageUrl.trim() !== '' && 
+    product.imageUrl !== '/pharma-products.jpg' &&
+    !product.imageUrl.includes('unsplash.com') &&
+    !product.imageUrl.includes('placeholder.com')
+  );
 
   // Avoid duplicate brand chip if brand name is identical to product title
   const brandName = (product.company || product.brand || '').trim();
@@ -120,13 +128,13 @@ function ProductCard({ product, addToCart }) {
         }}
         title={`View details for ${product.name}`}
       >
-        {hasValidImage ? (
+        {hasValidImage && !imgError ? (
           <img 
             src={product.imageUrl} 
             alt={product.name}
             loading="lazy"
-            onError={(e) => {
-              e.target.style.display = 'none';
+            onError={() => {
+              setImgError(true);
             }}
             style={{ 
               width: '100%', 

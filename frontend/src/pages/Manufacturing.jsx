@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, CheckCircle2, ShieldAlert, CheckSquare, Layers, AlertCircle, Mail, Phone } from 'lucide-react';
+import { Send, CheckCircle2, ShieldAlert, CheckSquare, Layers, AlertCircle, Mail, Phone, Clock } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 function Manufacturing() {
@@ -135,15 +135,31 @@ function Manufacturing() {
             </div>
             <div>
               <div style={{ fontSize: '0.78rem', fontWeight: '800', color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                {language === 'gu' ? 'ઉત્પાદન સંપર્ક ડેસ્ક' : language === 'hi' ? 'उत्पादन संपर्क डेस्क' : 'Manufacturing Contact Desk'}
+                {language === 'gu' ? 'સત્તાવાર સંપર્ક ડેસ્ક' : language === 'hi' ? 'आधिकारिक संपर्क डेस्क' : 'Official Contact Desk'}
               </div>
               <div style={{ fontSize: '1.08rem', fontWeight: '700', marginTop: '3px' }}>
-                <a href="mailto:production@niyanshpharma.com" style={{ color: 'var(--primary-blue)', textDecoration: 'none' }}>
-                  production@niyanshpharma.com
+                <a href="mailto:info@niyanshpharma.com" style={{ color: 'var(--primary-blue)', textDecoration: 'none' }}>
+                  info@niyanshpharma.com
                 </a>
               </div>
               <div style={{ fontSize: '0.82rem', color: 'var(--text-medium)', marginTop: '3px' }}>
                 {language === 'gu' ? 'કોન્ટ્રાક્ટ ઉત્પાદન અને થર્ડ-પાર્ટી ઇન્ક્વાયરી માટે સીધો ઇમેઇલ કરો.' : language === 'hi' ? 'अनुबंध विनिर्माण और थर्ड-पार्टी पूछताछ के लिए सीधे ईमेल करें।' : 'Direct email for contract manufacturing & formulation enquiries.'}
+              </div>
+            </div>
+          </div>
+
+          {/* Operating Hours Card */}
+          <div className="card" style={{ marginTop: '16px', padding: '18px 22px', display: 'flex', alignItems: 'flex-start', gap: '14px', backgroundColor: 'rgba(12, 61, 108, 0.03)', border: '1px solid var(--border-light)' }}>
+            <div style={{ backgroundColor: 'rgba(12, 61, 108, 0.08)', padding: '10px', borderRadius: '10px', color: 'var(--primary-blue)', display: 'flex', flexShrink: 0 }}>
+              <Clock size={20} />
+            </div>
+            <div style={{ fontSize: '0.86rem', lineHeight: '1.5' }}>
+              <div style={{ fontWeight: '700', color: 'var(--text-dark)', marginBottom: '3px' }}>
+                {language === 'gu' ? 'કામકાજના કલાકો (સોમ - શનિ)' : language === 'hi' ? 'कार्य समय (सोम - शनि)' : 'Operating Hours (Mon – Sat)'}: <span style={{ color: 'var(--primary-blue)' }}>9:00 AM – 9:00 PM</span>
+              </div>
+              <div style={{ color: 'var(--text-medium)', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <span><strong>{language === 'gu' ? 'લંચ બ્રેક' : language === 'hi' ? 'लंच ब्रेक' : 'Lunch Break'}:</strong> 2:00 PM – 4:00 PM</span>
+                <span style={{ color: '#b91c1c', fontWeight: '600' }}>• {language === 'gu' ? 'રવિવાર: રજા' : language === 'hi' ? 'रविवार: अवकाश' : 'Sunday: Holiday'}</span>
               </div>
             </div>
           </div>
@@ -300,8 +316,8 @@ function Manufacturing() {
 
                 <div style={{ textAlign: 'center', marginTop: '14px', fontSize: '0.82rem', color: 'var(--text-medium)' }}>
                   {language === 'gu' ? 'અથવા સીધો ઇમેઇલ કરો:' : language === 'hi' ? 'या सीधे ईमेल करें:' : 'Or email directly:'}{' '}
-                  <a href="mailto:production@niyanshpharma.com" style={{ color: 'var(--primary-blue)', fontWeight: '700' }}>
-                    production@niyanshpharma.com
+                  <a href="mailto:info@niyanshpharma.com" style={{ color: 'var(--primary-blue)', fontWeight: '700' }}>
+                    info@niyanshpharma.com
                   </a>
                 </div>
               </form>

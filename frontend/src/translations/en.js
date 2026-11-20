@@ -38,6 +38,9 @@ export const en = {
     "email": "info@niyanshpharma.com",
     "tagline": "Care • Quality • Trust",
     "location": "Rajkot, Gujarat",
+    "operatingHours": "9:00 AM – 9:00 PM",
+    "lunchBreak": "Lunch Break: 2:00 PM – 4:00 PM",
+    "sundayHoliday": "Sunday: Holiday",
     "certification": "WHO-GMP Certified Wholesale",
     "helpDesk": "Toll-Free Wholesale Desk"
   },
@@ -862,10 +865,13 @@ export const en = {
   "theme": {
     "light": "Light",
     "dark": "Dark",
+    "bw": "B&W",
     "lightMode": "Light Mode",
     "darkMode": "Dark Mode",
+    "bwMode": "Black & White Mode",
     "switchToLight": "Switch to Light Mode",
     "switchToDark": "Switch to Dark Mode",
+    "switchToBW": "Switch to Black & White Mode",
     "title": "Theme"
   }
 };

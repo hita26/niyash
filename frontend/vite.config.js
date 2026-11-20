@@ -27,6 +27,7 @@ export default defineConfig({
         manualChunks: {
           'vendor-core': ['react', 'react-dom', 'react-router-dom'],
           'vendor-icons': ['lucide-react'],
+          'vendor-xlsx': ['xlsx'],
         },
       },
     },

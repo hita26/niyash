@@ -1,5 +1,5 @@
 import React from 'react';
-import { Phone, Mail, MapPin } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 function TopBar() {
@@ -16,7 +16,7 @@ function TopBar() {
         <div className="website-topbar-left">
           <span className="website-topbar-item">
             <span className="website-topbar-icon" aria-hidden="true">
-              <Phone size={16} color="#A9D3F5" />
+              <Phone size={15} color="#A9D3F5" />
             </span>
             <a href="tel:+919909923130" aria-label="Call Niyansh Pharma at +91 99099 23130">
               +91 99099 23130
@@ -24,7 +24,7 @@ function TopBar() {
           </span>
           <span className="website-topbar-item">
             <span className="website-topbar-icon" aria-hidden="true">
-              <Mail size={16} color="#A9D3F5" />
+              <Mail size={15} color="#A9D3F5" />
             </span>
             <a href="mailto:info@niyanshpharma.com" aria-label="Email Niyansh Pharma at info@niyanshpharma.com">
               info@niyanshpharma.com
@@ -42,11 +42,17 @@ function TopBar() {
           ))}
         </div>
 
-        {/* RIGHT SECTION: Location */}
-        <div className="website-topbar-right" style={{ display: 'flex', alignItems: 'center' }}>
+        {/* RIGHT SECTION: Business Hours & Location */}
+        <div className="website-topbar-right" style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <span className="website-topbar-item hide-mobile" title="Lunch break: 2:00 PM – 4:00 PM">
+            <span className="website-topbar-icon" aria-hidden="true">
+              <Clock size={14} color="#A9D3F5" />
+            </span>
+            <span>9:00 AM – 9:00 PM</span>
+          </span>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
             <span className="website-topbar-icon" aria-hidden="true">
-              <MapPin size={15} color="#A9D3F5" />
+              <MapPin size={14} color="#A9D3F5" />
             </span>
             <span>{t('topbar.location', 'Rajkot, Gujarat')}</span>
           </span>

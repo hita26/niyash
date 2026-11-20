@@ -19,6 +19,10 @@
     <meta name="keywords" content="Niyansh Pharma, Pharmaceutical Distributor Rajkot, Pharma Wholesale Gujarat, Medicine Supplier, PCD Pharma, Daxia Healthcare, Generic Medicine Distributor, Surgical Supplies, Medical Store Wholesale" />
     <meta name="author" content="Niyansh Pharma" />
     <link rel="canonical" href="https://niyanshpharma.com/" />
+    <link rel="alternate" hreflang="en" href="https://niyanshpharma.com/" />
+    <link rel="alternate" hreflang="gu" href="https://niyanshpharma.com/?lang=gu" />
+    <link rel="alternate" hreflang="hi" href="https://niyanshpharma.com/?lang=hi" />
+    <link rel="alternate" hreflang="x-default" href="https://niyanshpharma.com/" />
     <meta name="robots" content="index, follow" />
     <meta name="format-detection" content="telephone=no" />
     
@@ -35,21 +39,30 @@
           "url": "https://niyanshpharma.com",
           "logo": "https://niyanshpharma.com/logo.jpg",
           "image": "https://niyanshpharma.com/logo.jpg",
+          "email": "info@niyanshpharma.com",
           "description": "Leading wholesale pharmaceutical distributor and B2B medicine supplier in Rajkot, Gujarat. Wholesale supply of WHO-GMP certified pharmaceuticals, tablets, capsules, injectables, syrups, and surgical medical products.",
           "address": {
             "@type": "PostalAddress",
-            "streetAddress": "Niyansh Pharma Hub, Ring Road",
+            "streetAddress": "Block no. 52B, Panchayat Nagar-3, Ram Park Main Road, University Rd",
             "addressLocality": "Rajkot",
             "addressRegion": "Gujarat",
-            "postalCode": "360001",
+            "postalCode": "360005",
             "addressCountry": "IN"
           },
           "geo": {
             "@type": "GeoCoordinates",
-            "latitude": 22.3039,
-            "longitude": 70.8022
+            "latitude": 22.2872,
+            "longitude": 70.7619
           },
-          "telephone": "+91-9876543210",
+          "telephone": ["+91-9909923130", "+91-9316566894"],
+          "openingHoursSpecification": [
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+              "opens": "09:00",
+              "closes": "21:00"
+            }
+          ],
           "priceRange": "₹₹",
           "areaServed": [
             { "@type": "State", "name": "Gujarat" },
@@ -85,15 +98,16 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Niyansh Pharma" />
-    <meta property="og:title" content="Niyansh Pharma - Wholesale Pharmaceutical Distributor" />
+    <meta property="og:url" content="https://niyanshpharma.com/" />
+    <meta property="og:title" content="Niyansh Pharma - Wholesale Pharmaceutical Distributor | Gujarat" />
     <meta property="og:description" content="Trusted wholesale distributor of pharma formulations, OTC medicines, injectables, and surgical supplies across Gujarat." />
-    <meta property="og:image" content="/logo.jpg" />
+    <meta property="og:image" content="https://niyanshpharma.com/logo.jpg" />
     
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Niyansh Pharma - Wholesale Pharmaceutical Distributor" />
+    <meta name="twitter:title" content="Niyansh Pharma - Wholesale Pharmaceutical Distributor | Gujarat" />
     <meta name="twitter:description" content="Trusted wholesale distributor of pharma formulations, OTC medicines, injectables, and surgical supplies across Gujarat." />
-    <meta name="twitter:image" content="/logo.jpg" />
+    <meta name="twitter:image" content="https://niyanshpharma.com/logo.jpg" />
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -112,6 +126,10 @@
             document.documentElement.classList.add('dark-theme');
             var metaTheme = document.querySelector('meta[name="theme-color"]');
             if (metaTheme) metaTheme.setAttribute('content', '#0b0f19');
+          } else if (theme === 'bw') {
+            document.documentElement.classList.add('theme-bw');
+            var metaTheme = document.querySelector('meta[name="theme-color"]');
+            if (metaTheme) metaTheme.setAttribute('content', '#000000');
           }
         } catch (e) {}
       })();

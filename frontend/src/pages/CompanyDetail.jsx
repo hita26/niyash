@@ -155,6 +155,7 @@ function CompanyDetail({ addToCart }) {
                 loading="lazy"
                 style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                 onError={(e) => {
+                  e.target.onerror = null;
                   const cleanName = (company.name || '').replace(/\s*\([^)]*\)/g, '').trim() || company.name || 'Pharma';
                   e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanName)}&background=0284c7&color=ffffff&size=160&bold=true`;
                 }}

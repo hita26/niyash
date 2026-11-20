@@ -211,12 +211,28 @@ function Career() {
                 {language === 'gu' ? 'એચઆર અને ભરતી ડેસ્ક' : language === 'hi' ? 'एचआर एवं भर्ती डेस्क' : 'HR & Recruitment Desk'}
               </div>
               <div style={{ fontSize: '1.08rem', fontWeight: '700', marginTop: '3px' }}>
-                <a href="mailto:career@niyanshpharma.com" style={{ color: 'var(--primary-blue)', textDecoration: 'none' }}>
-                  career@niyanshpharma.com
+                <a href="mailto:info@niyanshpharma.com" style={{ color: 'var(--primary-blue)', textDecoration: 'none' }}>
+                  info@niyanshpharma.com
                 </a>
               </div>
               <div style={{ fontSize: '0.82rem', color: 'var(--text-medium)', marginTop: '3px' }}>
                 {language === 'gu' ? 'આપનો રેઝ્યુમે અથવા સીવી સીધા આ ઇમેઇલ પર પણ મોકલી શકો છો.' : language === 'hi' ? 'अपना बायोडाटा (CV) सीधे इस ईमेल पर भी भेज सकते हैं।' : 'Send your CV or resume directly to our HR recruitment desk.'}
+              </div>
+            </div>
+          </div>
+
+          {/* Operating Hours Card */}
+          <div className="card" style={{ marginTop: '16px', padding: '18px 22px', display: 'flex', alignItems: 'flex-start', gap: '14px', backgroundColor: 'rgba(12, 61, 108, 0.03)', border: '1px solid var(--border-light)' }}>
+            <div style={{ backgroundColor: 'rgba(12, 61, 108, 0.08)', padding: '10px', borderRadius: '10px', color: 'var(--primary-blue)', display: 'flex', flexShrink: 0 }}>
+              <Clock size={20} />
+            </div>
+            <div style={{ fontSize: '0.86rem', lineHeight: '1.5' }}>
+              <div style={{ fontWeight: '700', color: 'var(--text-dark)', marginBottom: '3px' }}>
+                {language === 'gu' ? 'કામકાજના કલાકો (સોમ - શનિ)' : language === 'hi' ? 'कार्य समय (सोम - शनि)' : 'Office Hours (Mon – Sat)'}: <span style={{ color: 'var(--primary-blue)' }}>9:00 AM – 9:00 PM</span>
+              </div>
+              <div style={{ color: 'var(--text-medium)', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <span><strong>{language === 'gu' ? 'લંચ બ્રેક' : language === 'hi' ? 'लंच ब्रेक' : 'Lunch Break'}:</strong> 2:00 PM – 4:00 PM</span>
+                <span style={{ color: '#b91c1c', fontWeight: '600' }}>• {language === 'gu' ? 'રવિવાર: રજા' : language === 'hi' ? 'रविवार: अवकाश' : 'Sunday: Holiday'}</span>
               </div>
             </div>
           </div>
@@ -390,8 +406,8 @@ function Career() {
 
                 <div style={{ textAlign: 'center', marginTop: '14px', fontSize: '0.82rem', color: 'var(--text-medium)' }}>
                   {language === 'gu' ? 'અથવા રેઝ્યુમે સીધો ઇમેઇલ કરો:' : language === 'hi' ? 'या बायोडाटा सीधे ईमेल करें:' : 'Or email resume directly:'}{' '}
-                  <a href="mailto:career@niyanshpharma.com" style={{ color: 'var(--primary-blue)', fontWeight: '700' }}>
-                    career@niyanshpharma.com
+                  <a href="mailto:info@niyanshpharma.com" style={{ color: 'var(--primary-blue)', fontWeight: '700' }}>
+                    info@niyanshpharma.com
                   </a>
                 </div>
               </form>

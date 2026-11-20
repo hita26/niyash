@@ -38,6 +38,9 @@ export const gu = {
     "email": "info@niyanshpharma.com",
     "tagline": "કાળજી • ગુણવત્તા • વિશ્વાસ",
     "location": "રાજકોટ, ગુજરાત",
+    "operatingHours": "સવારે ૯:૦૦ થી રાત્રે ૯:૦૦",
+    "lunchBreak": "બપોરનું ભોજન વિરામ: બપોરે ૨:૦૦ થી ૪:૦૦",
+    "sundayHoliday": "રવિવાર: રજા",
     "certification": "WHO-GMP પ્રમાણિત જથ્થાબંધ વિતરણ",
     "helpDesk": "ટોલ-ફ્રી હોલસેલ હેલ્પડેસ્ક"
   },
@@ -862,10 +865,13 @@ export const gu = {
   "theme": {
     "light": "લાઇટ",
     "dark": "ડાર્ક",
+    "bw": "B&W",
     "lightMode": "લાઇટ મોડ",
     "darkMode": "ડાર્ક મોડ",
+    "bwMode": "બ્લેક એન્ડ વ્હાઇટ મોડ",
     "switchToLight": "લાઇટ મોડ ચાલુ કરો",
     "switchToDark": "ડાર્ક મોડ ચાલુ કરો",
+    "switchToBW": "બ્લેક એન્ડ વ્હાઇટ મોડ ચાલુ કરો",
     "title": "થીમ"
   }
 };

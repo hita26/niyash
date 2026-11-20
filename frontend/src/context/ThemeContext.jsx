@@ -7,7 +7,7 @@ export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => {
     try {
       const saved = localStorage.getItem('niyansh_theme') || localStorage.getItem('theme');
-      if (saved === 'dark' || saved === 'light') return saved;
+      if (saved === 'dark' || saved === 'light' || saved === 'bw') return saved;
       if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
         return 'dark';
       }
@@ -33,18 +33,23 @@ export function ThemeProvider({ children }) {
     }
     
     if (theme === 'dark') {
-      root.classList.add('dark');
-      root.classList.add('dark-theme');
+      root.classList.add('dark', 'dark-theme');
+      root.classList.remove('theme-bw');
       if (document.body) {
-        document.body.classList.add('dark');
-        document.body.classList.add('dark-theme');
+        document.body.classList.add('dark', 'dark-theme');
+        document.body.classList.remove('theme-bw');
+      }
+    } else if (theme === 'bw') {
+      root.classList.add('theme-bw');
+      root.classList.remove('dark', 'dark-theme');
+      if (document.body) {
+        document.body.classList.add('theme-bw');
+        document.body.classList.remove('dark', 'dark-theme');
       }
     } else {
-      root.classList.remove('dark');
-      root.classList.remove('dark-theme');
+      root.classList.remove('dark', 'dark-theme', 'theme-bw');
       if (document.body) {
-        document.body.classList.remove('dark');
-        document.body.classList.remove('dark-theme');
+        document.body.classList.remove('dark', 'dark-theme', 'theme-bw');
       }
     }
 
@@ -52,7 +57,7 @@ export function ThemeProvider({ children }) {
     try {
       const metaThemeColor = document.querySelector('meta[name="theme-color"]');
       if (metaThemeColor) {
-        metaThemeColor.setAttribute('content', theme === 'dark' ? '#0b0f19' : '#0c3d6c');
+        metaThemeColor.setAttribute('content', theme === 'dark' ? '#0b0f19' : theme === 'bw' ? '#18181b' : '#0c3d6c');
       }
     } catch {
       // ignore in SSR/restricted environments
@@ -96,10 +101,45 @@ export function ThemeProvider({ children }) {
     }
   };
 
+  const toggleBW = () => {
+    try {
+      const root = document.documentElement;
+      root.classList.add('theme-switching');
+      if (document.body) document.body.classList.add('theme-switching');
+      
+      setTheme((prev) => (prev === 'bw' ? 'light' : 'bw'));
+
+      setTimeout(() => {
+        root.classList.remove('theme-switching');
+        if (document.body) document.body.classList.remove('theme-switching');
+      }, 450);
+    } catch {
+      setTheme((prev) => (prev === 'bw' ? 'light' : 'bw'));
+    }
+  };
+
+  const cycleTheme = () => {
+    try {
+      const root = document.documentElement;
+      root.classList.add('theme-switching');
+      if (document.body) document.body.classList.add('theme-switching');
+      
+      setTheme((prev) => (prev === 'light' ? 'dark' : prev === 'dark' ? 'bw' : 'light'));
+
+      setTimeout(() => {
+        root.classList.remove('theme-switching');
+        if (document.body) document.body.classList.remove('theme-switching');
+      }, 450);
+    } catch {
+      setTheme((prev) => (prev === 'light' ? 'dark' : prev === 'dark' ? 'bw' : 'light'));
+    }
+  };
+
   const isDark = theme === 'dark';
+  const isBW = theme === 'bw';
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme, isDark }}>
+    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme, toggleBW, cycleTheme, isDark, isBW }}>
       {children}
     </ThemeContext.Provider>
   );
@@ -112,7 +152,10 @@ export function useTheme() {
       theme: 'light',
       setTheme: () => {},
       toggleTheme: () => {},
+      toggleBW: () => {},
+      cycleTheme: () => {},
       isDark: false,
+      isBW: false,
     };
   }
   return context;

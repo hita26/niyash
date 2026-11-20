@@ -2094,6 +2094,180 @@ body.dark-theme {
   --secondary-green: #34d399;
 }
 
+/* Black & White High-Contrast Pharmaceutical Corporate Mode */
+[data-theme="bw"],
+html.theme-bw,
+body.theme-bw {
+  --primary-navy: #000000;
+  --corporate-blue: #18181b;
+  --accent-green: #27272a;
+  --accent-green-hover: #09090b;
+  --text-secondary: #52525b;
+  --bg-corporate-light: #f4f4f5;
+
+  --primary-blue: #18181b;
+  --primary-blue-rgb: 24, 24, 27;
+  --secondary-green: #27272a;
+  --secondary-green-rgb: 39, 39, 42;
+  --accent-blue: #3f3f46;
+
+  /* Crisp high-contrast monochrome background and surface */
+  --bg-main: #f9f9fb;
+  --bg-surface: #ffffff;
+  --bg-surface-elevated: #ffffff;
+  --bg-surface-alt: #f4f4f5;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f4f4f5;
+  --bg-input: #ffffff;
+
+  --text-dark: #09090b;
+  --text-medium: #27272a;
+  --text-light: #52525b;
+  --text-white: #ffffff;
+
+  --border-light: #d4d4d8;
+  --border-medium: #a1a1aa;
+  --border-subtle: #e4e4e7;
+
+  --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.14);
+  --header-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="bw"] body,
+body.theme-bw {
+  background-color: #f9f9fb !important;
+  color: #09090b !important;
+}
+
+[data-theme="bw"] h1,
+[data-theme="bw"] h2,
+[data-theme="bw"] h3,
+[data-theme="bw"] h4,
+[data-theme="bw"] h5,
+[data-theme="bw"] h6 {
+  color: #09090b !important;
+}
+
+[data-theme="bw"] .website-topbar {
+  background-color: #09090b !important;
+  color: #f4f4f5 !important;
+  border-bottom: 1px solid #27272a !important;
+}
+
+[data-theme="bw"] .website-topbar a,
+[data-theme="bw"] .website-topbar span {
+  color: #f4f4f5 !important;
+}
+
+[data-theme="bw"] .main-header,
+[data-theme="bw"] .b2b-header-shell {
+  background-color: #ffffff !important;
+  border-bottom: 1px solid #d4d4d8 !important;
+}
+
+[data-theme="bw"] .nav-bar {
+  background-color: #18181b !important;
+  border-bottom: 1px solid #09090b !important;
+}
+
+[data-theme="bw"] .nav-link {
+  color: #e4e4e7 !important;
+}
+
+[data-theme="bw"] .nav-link:hover,
+[data-theme="bw"] .nav-link.active {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme="bw"] .btn-primary {
+  background-color: #09090b !important;
+  color: #ffffff !important;
+  border: 1px solid #09090b !important;
+}
+
+[data-theme="bw"] .btn-primary:hover {
+  background-color: #27272a !important;
+  border-color: #27272a !important;
+}
+
+[data-theme="bw"] .btn-secondary {
+  background-color: #27272a !important;
+  color: #ffffff !important;
+  border: 1px solid #27272a !important;
+}
+
+[data-theme="bw"] .btn-secondary:hover {
+  background-color: #09090b !important;
+}
+
+[data-theme="bw"] .btn-outline {
+  background-color: #ffffff !important;
+  color: #09090b !important;
+  border: 1.5px solid #09090b !important;
+}
+
+[data-theme="bw"] .btn-outline:hover {
+  background-color: #09090b !important;
+  color: #ffffff !important;
+}
+
+[data-theme="bw"] .footer {
+  background-color: #09090b !important;
+  color: #e4e4e7 !important;
+  border-top: 1px solid #27272a !important;
+}
+
+[data-theme="bw"] .footer-heading {
+  color: #ffffff !important;
+}
+
+[data-theme="bw"] .footer-nav-link {
+  color: #d4d4d8 !important;
+}
+
+[data-theme="bw"] .footer-nav-link:hover {
+  color: #ffffff !important;
+}
+
+[data-theme="bw"] .footer-contact-link,
+[data-theme="bw"] .footer-contact-val {
+  color: #d4d4d8 !important;
+}
+
+[data-theme="bw"] .footer-bottom-strip {
+  background-color: #000000 !important;
+  border-top: 1px solid #27272a !important;
+  color: #a1a1aa !important;
+}
+
+[data-theme="bw"] .card {
+  background-color: #ffffff !important;
+  border: 1px solid #d4d4d8 !important;
+  color: #09090b !important;
+}
+
+/* PRESERVE AUTHENTIC MEDICINE IMAGES, PRODUCT PACKAGING & LOGOS IN B&W MODE */
+[data-theme="bw"] img,
+[data-theme="bw"] .product-card-img-wrap,
+[data-theme="bw"] .product-card-img-wrap img,
+[data-theme="bw"] .header-brand-logo,
+[data-theme="bw"] .footer-logo-img,
+[data-theme="bw"] picture,
+[data-theme="bw"] canvas {
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+[data-theme="bw"] input,
+[data-theme="bw"] select,
+[data-theme="bw"] textarea {
+  background-color: #ffffff !important;
+  color: #09090b !important;
+  border-color: #a1a1aa !important;
+}
+
 /* Smooth Enterprise Theme Switching Across Entire Website */
 html.theme-switching,
 html.theme-switching *,

@@ -14,7 +14,9 @@ import {
   Layers, 
   Globe,
   ArrowRight,
-  Package
+  Package,
+  Clock,
+  Mail
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import AnimatedCounter from '../components/AnimatedCounter';
@@ -389,6 +391,78 @@ function About() {
                 <span>{b}</span>
               </Link>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Verified Corporate Credentials & Operating Hours */}
+      <section style={{ backgroundColor: 'var(--bg-card)', borderTop: '1px solid var(--border-light)', borderBottom: '1px solid var(--border-light)', padding: '40px 0' }}>
+        <div className="container">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '20px' }}>
+            
+            {/* Box 1: Operating Hours */}
+            <div className="card card-hover-pharma" style={{ padding: '22px', display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+              <div style={{ backgroundColor: 'rgba(12, 61, 108, 0.08)', padding: '12px', borderRadius: '12px', color: 'var(--primary-blue)', flexShrink: 0 }}>
+                <Clock size={22} />
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1rem', fontWeight: '800', marginBottom: '6px', color: 'var(--text-dark)' }}>
+                  {language === 'gu' ? 'કામકાજના કલાકો' : language === 'hi' ? 'कार्य समय' : 'Business Operating Hours'}
+                </h3>
+                <div style={{ fontSize: '0.92rem', fontWeight: '700', color: 'var(--primary-blue)', marginBottom: '4px' }}>
+                  9:00 AM – 9:00 PM <span style={{ fontSize: '0.8rem', color: 'var(--text-medium)', fontWeight: '500' }}>({language === 'gu' ? 'સોમવાર - શનિવાર' : language === 'hi' ? 'सोमवार - शनिवार' : 'Mon – Sat'})</span>
+                </div>
+                <div style={{ fontSize: '0.82rem', color: 'var(--text-medium)', lineHeight: '1.4' }}>
+                  <span><strong>{language === 'gu' ? 'લંચ બ્રેક' : language === 'hi' ? 'लंच ब्रेक' : 'Lunch Break'}:</strong> 2:00 PM – 4:00 PM</span><br/>
+                  <span style={{ color: '#b91c1c', fontWeight: '600' }}>• {language === 'gu' ? 'રવિવાર: રજા' : language === 'hi' ? 'रविवार: अवकाश' : 'Sunday: Holiday'}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Box 2: Official Contact */}
+            <div className="card card-hover-pharma" style={{ padding: '22px', display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+              <div style={{ backgroundColor: 'rgba(56, 142, 60, 0.08)', padding: '12px', borderRadius: '12px', color: 'var(--secondary-green)', flexShrink: 0 }}>
+                <Mail size={22} />
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1rem', fontWeight: '800', marginBottom: '6px', color: 'var(--text-dark)' }}>
+                  {language === 'gu' ? 'સત્તાવાર સંપર્ક' : language === 'hi' ? 'आधिकारिक संपर्क' : 'Official Communications'}
+                </h3>
+                <div style={{ fontSize: '0.92rem', fontWeight: '700', marginBottom: '4px' }}>
+                  <a href="mailto:info@niyanshpharma.com" style={{ color: 'var(--primary-blue)', textDecoration: 'none' }}>
+                    info@niyanshpharma.com
+                  </a>
+                </div>
+                <div style={{ fontSize: '0.84rem', color: 'var(--text-medium)' }}>
+                  <a href="tel:+919909923130" style={{ color: 'var(--text-dark)', fontWeight: '600', textDecoration: 'none' }}>
+                    +91 99099 23130
+                  </a> / <a href="tel:+919316566894" style={{ color: 'var(--text-dark)', fontWeight: '600', textDecoration: 'none' }}>
+                    +91 93165 66894
+                  </a>
+                </div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-light)', marginTop: '4px' }}>
+                  Rajkot, Gujarat - 360005
+                </div>
+              </div>
+            </div>
+
+            {/* Box 3: Verified Statutory Registrations */}
+            <div className="card card-hover-pharma" style={{ padding: '22px', display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+              <div style={{ backgroundColor: 'rgba(12, 61, 108, 0.08)', padding: '12px', borderRadius: '12px', color: 'var(--primary-blue)', flexShrink: 0 }}>
+                <ShieldCheck size={22} />
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1rem', fontWeight: '800', marginBottom: '6px', color: 'var(--text-dark)' }}>
+                  {language === 'gu' ? 'ચકાસાયેલ લાયસન્સ અને નોંધણી' : language === 'hi' ? 'सत्यापित लाइसेंस एवं पंजीकरण' : 'Verified Statutory Licenses'}
+                </h3>
+                <div style={{ fontSize: '0.82rem', color: 'var(--text-medium)', lineHeight: '1.5' }}>
+                  <div><strong>Drug Lic:</strong> 20B GJ-RJT-264618, 21B GJ-RJT-264619</div>
+                  <div><strong>GSTIN:</strong> 24BVXPP6108F2Z7</div>
+                  <div><strong>FSSAI Lic:</strong> 20726030000567</div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>

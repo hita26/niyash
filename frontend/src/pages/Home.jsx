@@ -79,9 +79,9 @@ function Home({ addToCart }) {
       const addBrand = (name) => {
         if (!name || typeof name !== 'string') return;
         const clean = name.trim();
-        // Skip empty, numbers, or non-brand entries like long product descriptions
-        if (clean.length < 2 || clean.length > 30) return;
-        if (/sanitary|pad|diaper|condom|\b\d+\s*(ml|gm|mg|tab|cap|vial|amp)\b/i.test(clean)) return;
+        // Skip empty, numbers, medical sundries, or non-brand entries like long product descriptions
+        if (clean.length < 2 || clean.length > 35) return;
+        if (/sanitary|pads?|napkin|diaper|condom|bandage|cotton|dressing|\b\d+\s*(ml|gm|mg|tab|cap|vial|amp|pack|strip|pads?)\b|\(\d+/i.test(clean)) return;
         const lower = clean.toLowerCase();
         if (!brandMap.has(lower)) {
           // Normalize all-caps names like "BIOCHEM" -> "Biochem"
@@ -91,6 +91,8 @@ function Home({ addToCart }) {
           
           if (lower === 'daxia') formatted = 'Daxia Healthcare';
           if (lower === 'zydus') formatted = 'Zydus Cadila';
+          if (lower === 'troikaa') formatted = 'Troikaa Pharmaceuticals';
+          if (lower === 'biochem') formatted = 'Biochem';
           brandMap.set(lower, formatted);
         }
       };

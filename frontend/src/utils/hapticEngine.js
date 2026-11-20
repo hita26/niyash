@@ -16,6 +16,11 @@ let audioContext = null;
  */
 function playTactileAudioTick(frequency = 70, durationMs = 8, volume = 0.035) {
   try {
+    if (typeof window === 'undefined') return;
+    // Strictly require prior user activation on page to prevent Chrome autoplay intervention warning
+    if (typeof navigator !== 'undefined' && navigator.userActivation && !navigator.userActivation.hasBeenActive) {
+      return;
+    }
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     if (!AudioCtx) return;
     if (!audioContext) {
@@ -24,6 +29,7 @@ function playTactileAudioTick(frequency = 70, durationMs = 8, volume = 0.035) {
     if (audioContext.state === 'suspended') {
       audioContext.resume().catch(() => {});
     }
+    if (audioContext.state !== 'running') return;
 
     const osc = audioContext.createOscillator();
     const gain = audioContext.createGain();
@@ -50,6 +56,11 @@ function playTactileAudioTick(frequency = 70, durationMs = 8, volume = 0.035) {
  */
 export function triggerHaptic(type = 'light') {
   if (typeof window === 'undefined') return;
+
+  // Prevent vibration before user gesture intervention
+  if (typeof navigator !== 'undefined' && navigator.userActivation && !navigator.userActivation.hasBeenActive) {
+    return;
+  }
 
   const now = Date.now();
   if (now - lastVibrationTime < THROTTLE_MS) {
@@ -147,7 +158,8 @@ export function initGlobalHaptics() {
   ].join(',');
 
   const handlePointerDown = (e) => {
-    // Only respond to primary touch/mouse clicks
+    // Only respond to authentic trusted user clicks/taps
+    if (!e.isTrusted) return;
     if (e.isPrimary === false || (e.button !== undefined && e.button !== 0)) return;
 
     const target = e.target;

@@ -17,8 +17,6 @@ function Home({ addToCart }) {
   const [heroSearch, setHeroSearch] = useState('');
   const [liveProductsCount, setLiveProductsCount] = useState(500);
   const [liveCompaniesCount, setLiveCompaniesCount] = useState(15);
-  const [brandSearch, setBrandSearch] = useState('');
-  const [selectedLetterRange, setSelectedLetterRange] = useState('ALL');
 
   // Dynamic Banners & Home Content Settings
   const [heroBgImage, setHeroBgImage] = useState('https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=1600&q=80');
@@ -76,12 +74,30 @@ function Home({ addToCart }) {
       fetch('/api/companies').then(r => r.json()),
       fetch('/api/products?limit=1').then(r => r.json())
     ]).then(([settingsRes, filtersRes, companiesRes, countRes]) => {
-      const brandSet = new Set(brandsList);
+      const brandMap = new Map();
+      const addBrand = (name) => {
+        if (!name || typeof name !== 'string') return;
+        const clean = name.trim();
+        // Skip empty, numbers, or non-brand entries like long product descriptions
+        if (clean.length < 2 || clean.length > 28) return;
+        if (/sanitary|pad|diaper|condom|ml|gm|mg|tablet|capsule/i.test(clean)) return;
+        const lower = clean.toLowerCase();
+        if (!brandMap.has(lower)) {
+          // Normalize all-caps names like "BIOCHEM" -> "Biochem"
+          const formatted = clean === clean.toUpperCase() && clean.length > 3
+            ? clean.charAt(0).toUpperCase() + clean.slice(1).toLowerCase()
+            : clean;
+          brandMap.set(lower, formatted);
+        }
+      };
+
+      // Initial defaults
+      brandsList.forEach(addBrand);
 
       // From Settings
       if (settingsRes.status === 'fulfilled' && settingsRes.value.success) {
         if (Array.isArray(settingsRes.value.brands)) {
-          settingsRes.value.brands.forEach(b => b && brandSet.add(b.trim()));
+          settingsRes.value.brands.forEach(addBrand);
         }
         if (Array.isArray(settingsRes.value.categories) && settingsRes.value.categories.length > 0) {
           setDynamicCategories(settingsRes.value.categories);
@@ -91,10 +107,10 @@ function Home({ addToCart }) {
       // From Product Database Filter Meta (Live active stock)
       if (filtersRes.status === 'fulfilled' && filtersRes.value.success) {
         if (Array.isArray(filtersRes.value.brands)) {
-          filtersRes.value.brands.forEach(b => b && brandSet.add(b.trim()));
+          filtersRes.value.brands.forEach(addBrand);
         }
         if (Array.isArray(filtersRes.value.companies)) {
-          filtersRes.value.companies.forEach(c => c && brandSet.add(c.trim()));
+          filtersRes.value.companies.forEach(addBrand);
           if (filtersRes.value.companies.length > 0) {
             setLiveCompaniesCount(filtersRes.value.companies.length);
           }
@@ -104,7 +120,7 @@ function Home({ addToCart }) {
       // From Company Directory
       if (companiesRes.status === 'fulfilled' && companiesRes.value.success && Array.isArray(companiesRes.value.companies)) {
         companiesRes.value.companies.forEach(c => {
-          if (c && c.name) brandSet.add(c.name.trim());
+          if (c && c.name) addBrand(c.name);
         });
       }
 
@@ -113,7 +129,7 @@ function Home({ addToCart }) {
         setLiveProductsCount(countRes.value.total);
       }
 
-      const mergedBrands = Array.from(brandSet).filter(Boolean).sort((a, b) => a.localeCompare(b));
+      const mergedBrands = Array.from(brandMap.values()).filter(Boolean).sort((a, b) => a.localeCompare(b));
       if (mergedBrands.length > 0) {
         setBrandsList(mergedBrands);
       }
@@ -136,24 +152,6 @@ function Home({ addToCart }) {
       fetchBrandsAndStats();
     }
   });
-
-  // Filtered brands for the quick interactive explorer below the marquees
-  const filteredBrands = useMemo(() => {
-    return brandsList.filter(brand => {
-      const matchesSearch = !brandSearch.trim() || brand.toLowerCase().includes(brandSearch.trim().toLowerCase());
-      if (!matchesSearch) return false;
-      
-      if (selectedLetterRange === 'ALL') return true;
-      const firstChar = brand.charAt(0).toUpperCase();
-      if (selectedLetterRange === 'A-D') return firstChar >= 'A' && firstChar <= 'D';
-      if (selectedLetterRange === 'E-H') return firstChar >= 'E' && firstChar <= 'H';
-      if (selectedLetterRange === 'I-L') return firstChar >= 'I' && firstChar <= 'L';
-      if (selectedLetterRange === 'M-P') return firstChar >= 'M' && firstChar <= 'P';
-      if (selectedLetterRange === 'Q-T') return firstChar >= 'Q' && firstChar <= 'T';
-      if (selectedLetterRange === 'U-Z') return firstChar >= 'U' && firstChar <= 'Z';
-      return true;
-    });
-  }, [brandsList, brandSearch, selectedLetterRange]);
 
   // Dual counter-flow marquee streams
   const { track1Stream, track2Stream } = useMemo(() => {
@@ -546,108 +544,6 @@ function Home({ addToCart }) {
             </div>
           </div>
 
-          {/* Interactive Dynamic Quick Brand Search & Alpha Filter Bar */}
-          <div className="pharma-reveal" style={{ marginTop: '28px', maxWidth: '900px', margin: '28px auto 0 auto' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
-              
-              {/* Search Box */}
-              <div className="brand-search-box" style={{ width: '100%' }}>
-                <Search size={17} color="var(--text-light)" />
-                <input 
-                  type="text"
-                  value={brandSearch}
-                  onChange={(e) => setBrandSearch(e.target.value)}
-                  placeholder={language === 'gu' ? 'બ્રાન્ડ શોધો (દા.ત. Cipla, Zydus, Sun, Daxia...)' : language === 'hi' ? 'ब्रांड खोजें (उदा. Cipla, Zydus, Sun, Daxia...)' : 'Search brands (e.g. Cipla, Zydus, Sun, Daxia...)'}
-                  style={{
-                    border: 'none',
-                    background: 'transparent',
-                    outline: 'none',
-                    width: '100%',
-                    fontSize: '0.9rem',
-                    color: 'var(--text-dark)'
-                  }}
-                />
-                {brandSearch && (
-                  <button 
-                    type="button" 
-                    onClick={() => setBrandSearch('')} 
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-light)', padding: 0 }}
-                    aria-label="Clear brand search"
-                  >
-                    <X size={16} />
-                  </button>
-                )}
-              </div>
-
-              {/* Letter Range Filters */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '6px' }}>
-                {['ALL', 'A-D', 'E-H', 'I-L', 'M-P', 'Q-T', 'U-Z'].map((range) => (
-                  <button
-                    key={range}
-                    type="button"
-                    onClick={() => setSelectedLetterRange(range)}
-                    className={`brand-letter-pill ${selectedLetterRange === range ? 'active' : ''}`}
-                  >
-                    {range === 'ALL' ? (language === 'gu' ? 'તમામ' : language === 'hi' ? 'सभी' : 'All') : range}
-                  </button>
-                ))}
-              </div>
-
-              {/* Filtered Interactive Brands Cloud */}
-              <div style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                justifyContent: 'center',
-                gap: '10px',
-                marginTop: '10px',
-                maxHeight: '260px',
-                overflowY: 'auto',
-                padding: '10px 4px'
-              }}>
-                {filteredBrands.length > 0 ? (
-                  filteredBrands.map((brand, i) => (
-                    <Link 
-                      key={i} 
-                      to={`/products?brand=${encodeURIComponent(brand)}`}
-                      title={`Browse medicines manufactured by ${brand}`}
-                      className="brand-pill-card"
-                    >
-                      <span className="brand-pill-emblem">
-                        {brand.charAt(0)}
-                      </span>
-                      <span>{brand}</span>
-                    </Link>
-                  ))
-                ) : (
-                  <div style={{ padding: '20px', color: 'var(--text-medium)', fontSize: '0.9rem' }}>
-                    {language === 'gu' ? 'કોઈ બ્રાન્ડ મળી નથી' : language === 'hi' ? 'कोई ब्रांड नहीं मिला' : 'No matching brands found'}
-                  </div>
-                )}
-              </div>
-
-              {/* Bottom Quick Action: Link to Company Directory */}
-              <div style={{ marginTop: '10px', textAlign: 'center' }}>
-                <Link 
-                  to="/companies" 
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    fontSize: '0.92rem',
-                    fontWeight: '700',
-                    color: 'var(--primary-blue)',
-                    textDecoration: 'none'
-                  }}
-                  onMouseOver={(e) => e.currentTarget.style.textDecoration = 'underline'}
-                  onMouseOut={(e) => e.currentTarget.style.textDecoration = 'none'}
-                >
-                  <span>{language === 'gu' ? 'બધી ફાર્મા કંપનીઓની વિગતો જુઓ' : language === 'hi' ? 'सभी फार्मा कंपनियों का विवरण देखें' : 'View Full Pharma Companies Directory'}</span>
-                  <ChevronRight size={17} />
-                </Link>
-              </div>
-
-            </div>
-          </div>
         </div>
       </section>
     </div>

@@ -91,6 +91,37 @@ function AppContent() {
     };
   }, [location.pathname, openAuth]);
 
+  // Real-time Public Visitor Tracking (Non-blocking telemetry)
+  useEffect(() => {
+    // Exclude internal admin panel visits from public analytics
+    if (location.pathname.startsWith('/admin')) return;
+
+    try {
+      let sid = sessionStorage.getItem('niyansh_visitor_sid');
+      if (!sid) {
+        sid = 'v_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 9);
+        sessionStorage.setItem('niyansh_visitor_sid', sid);
+      }
+
+      const payload = {
+        path: location.pathname,
+        pageTitle: document.title || 'Niyansh Pharma',
+        referrer: document.referrer || 'Direct',
+        sessionId: sid
+      };
+
+      // Non-blocking fetch with keepalive
+      fetch('/api/analytics/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        keepalive: true
+      }).catch(() => {});
+    } catch (e) {
+      // Ignore background telemetry errors
+    }
+  }, [location.pathname]);
+
   // Load cart from localStorage on mount
   useEffect(() => {
     const savedCart = localStorage.getItem('niyansh_enquiry_cart');

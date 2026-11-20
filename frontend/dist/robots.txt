@@ -1,0 +1,23 @@
+# Niyansh Pharma robots.txt
+User-agent: *
+Allow: /
+Allow: /products
+Allow: /companies
+Allow: /about
+Allow: /contact
+Allow: /partner
+Allow: /supplier
+Allow: /manufacturing
+Allow: /news
+Disallow: /admin
+Disallow: /admin/
+Disallow: /api/
+Disallow: /dashboard
+Disallow: /portal
+Disallow: /retailer-dashboard
+Disallow: /quick-order
+Disallow: /order
+Disallow: /ledger
+Disallow: /outstanding
+
+Sitemap: https://niyanshpharma.com/sitemap.xml

@@ -4762,34 +4762,170 @@ html[lang="gu"] .nav-link, html[lang="hi"] .nav-link {
   }
 }
 
-/* 4. Marquee Smooth Continuous Infinite Scroll with Edge Blur Mask */
+/* 4. Bi-Directional Continuous Infinite Pharma Brand Streaming */
 .brands-marquee-container {
   overflow: hidden;
   position: relative;
   width: 100%;
-  padding: 12px 0;
-  mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+  padding: 8px 0;
+  mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
 }
 
 .brands-marquee-track {
   display: flex;
-  gap: 16px;
+  gap: 14px;
   width: max-content;
-  animation: marqueeContinuous 32s linear infinite;
+  animation: marqueeContinuousLeft 34s linear infinite;
+  will-change: transform;
 }
 
-.brands-marquee-track:hover {
+.brands-marquee-track-reverse {
+  display: flex;
+  gap: 14px;
+  width: max-content;
+  animation: marqueeContinuousRight 38s linear infinite;
+  will-change: transform;
+}
+
+.brands-marquee-track:hover,
+.brands-marquee-track-reverse:hover {
   animation-play-state: paused;
 }
 
-@keyframes marqueeContinuous {
+@keyframes marqueeContinuousLeft {
   0% {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
   100% {
-    transform: translateX(-50%);
+    transform: translate3d(-50%, 0, 0);
   }
+}
+
+@keyframes marqueeContinuousRight {
+  0% {
+    transform: translate3d(-50%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Brand Pill Card High-End Visual Effects */
+.brand-pill-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 18px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-light);
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--text-dark);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.26s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.26s ease, 
+              background 0.26s ease, 
+              color 0.26s ease;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.brand-pill-emblem {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(12, 61, 108, 0.08);
+  color: var(--primary-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.74rem;
+  font-weight: 800;
+  flex-shrink: 0;
+  transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease;
+}
+
+.brand-pill-card:hover {
+  transform: translateY(-4px) scale(1.04);
+  background: linear-gradient(135deg, #0c3d6c 0%, #1e40af 100%) !important;
+  color: #ffffff !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 10px 24px -4px rgba(12, 61, 108, 0.28), 0 0 14px rgba(37, 99, 235, 0.2) !important;
+}
+
+.brand-pill-card:hover .brand-pill-emblem {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  transform: scale(1.12);
+}
+
+[data-theme="dark"] .brand-pill-card {
+  background: var(--bg-card);
+  border-color: var(--border-light);
+  color: #f8fafc;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] .brand-pill-emblem {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+}
+
+[data-theme="dark"] .brand-pill-card:hover {
+  background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%) !important;
+  color: #ffffff !important;
+  border-color: #38bdf8 !important;
+  box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.7), 0 0 18px rgba(56, 189, 248, 0.3) !important;
+}
+
+[data-theme="dark"] .brand-pill-card:hover .brand-pill-emblem {
+  background: rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+}
+
+/* Brand Filter Chip & Search Bar */
+.brand-search-box {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-light);
+  border-radius: 30px;
+  padding: 8px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.brand-search-box:focus-within {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.brand-letter-pill {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border: 1px solid var(--border-light);
+  background: var(--bg-card);
+  color: var(--text-medium);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.brand-letter-pill:hover,
+.brand-letter-pill.active {
+  background: var(--primary-blue);
+  color: #ffffff;
+  border-color: var(--primary-blue);
 }
 
 /* 5. Hero Dynamic Float Animation */

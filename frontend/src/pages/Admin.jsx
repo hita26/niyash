@@ -10,7 +10,7 @@ import {
   TrendingUp, Percent, Upload, Image as ImageIcon, Star, Grid, List,
   FileSpreadsheet, ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Layers,
   Copy, CheckCheck, MapPin, Mail, Save, EyeOff, Shield, Users, Key, Crown, UserCheck, UserX, Camera, UserPlus,
-  Zap, Activity, Cpu, Server, Terminal, Play
+  Zap, Activity, Cpu, Server, Terminal, Play, Globe
 } from 'lucide-react';
 import { broadcastLiveEvent, SYNC_EVENTS } from '../utils/liveSync';
 import { useLanguage } from '../context/LanguageContext';
@@ -842,6 +842,17 @@ function Admin() {
   const [showProfileConfirmPassword, setShowProfileConfirmPassword] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
 
+  // Real-time Traffic & Visitor Analytics State
+  const [visitorStats, setVisitorStats] = useState({ onlineNow: 0, todayVisits: 0, todayUniques: 0, totalVisits: 0 });
+  const [visitorTopPages, setVisitorTopPages] = useState([]);
+  const [visitorReferrers, setVisitorReferrers] = useState([]);
+  const [visitorDevices, setVisitorDevices] = useState([]);
+  const [visitorRecentLogs, setVisitorRecentLogs] = useState([]);
+  const [visitorLoading, setVisitorLoading] = useState(false);
+  const [visitorAutoRefresh, setVisitorAutoRefresh] = useState(true);
+  const [visitorSearch, setVisitorSearch] = useState('');
+  const [copiedIp, setCopiedIp] = useState(null);
+
   // Active Tab
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -1617,6 +1628,63 @@ function Admin() {
       showToast('Cleanup failed: ' + err.message, 'error');
     }
   };
+
+  const fetchVisitorAnalytics = async (silent = false) => {
+    if (!silent) setVisitorLoading(true);
+    try {
+      const token = adminToken || localStorage.getItem('niyansh_admin_token');
+      const res = await fetch('/api/analytics/live', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        if (data.stats) setVisitorStats(data.stats);
+        if (data.topPages) setVisitorTopPages(data.topPages);
+        if (data.referrerSources) setVisitorReferrers(data.referrerSources);
+        if (data.deviceTypes) setVisitorDevices(data.deviceTypes);
+        if (data.recentLogs) setVisitorRecentLogs(data.recentLogs);
+      }
+    } catch (err) {
+      console.warn('Error fetching visitor analytics:', err);
+    } finally {
+      if (!silent) setVisitorLoading(false);
+    }
+  };
+
+  const handleExportVisitorLogs = async () => {
+    try {
+      const token = adminToken || localStorage.getItem('niyansh_admin_token');
+      const res = await fetch('/api/analytics/export', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Export request failed');
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Niyansh_Pharma_Visitors_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+      showToast('Visitor traffic logs exported successfully as CSV!');
+    } catch (err) {
+      showToast('Failed to export visitor logs: ' + err.message, 'error');
+    }
+  };
+
+  // Auto-refresh visitor analytics when on 'traffic' tab
+  useEffect(() => {
+    if (activeTab === 'traffic') {
+      fetchVisitorAnalytics();
+      if (visitorAutoRefresh) {
+        const timer = setInterval(() => {
+          fetchVisitorAnalytics(true);
+        }, 6000);
+        return () => clearInterval(timer);
+      }
+    }
+  }, [activeTab, visitorAutoRefresh]);
 
   const handleOpenAdminModal = (admin = null) => {
     setAdminFormSendEmail(true);
@@ -4247,6 +4315,19 @@ _Helpline: +91 9316566894_`;
   const otcCount = useMemo(() => products.filter(p => p.category && p.category.match(/otc|wellness|personal/i)).length, [products]);
   const ayurvedicCount = useMemo(() => products.filter(p => p.category && p.category.match(/ayurved|herbal/i)).length, [products]);
 
+  const filteredVisitorLogs = useMemo(() => {
+    if (!visitorSearch.trim()) return visitorRecentLogs;
+    const q = visitorSearch.toLowerCase().trim();
+    return visitorRecentLogs.filter(log => 
+      (log.ip && log.ip.toLowerCase().includes(q)) ||
+      (log.path && log.path.toLowerCase().includes(q)) ||
+      (log.pageTitle && log.pageTitle.toLowerCase().includes(q)) ||
+      (log.referrerSource && log.referrerSource.toLowerCase().includes(q)) ||
+      (log.device && log.device.toLowerCase().includes(q)) ||
+      (log.city && log.city.toLowerCase().includes(q))
+    );
+  }, [visitorRecentLogs, visitorSearch]);
+
   // ==========================================
   // RENDER: LOGIN SCREEN
   // ==========================================
@@ -4775,6 +4856,35 @@ _Helpline: +91 9316566894_`;
                 </span>
               </button>
             )}
+
+            <button 
+              onClick={() => { setActiveTab('traffic'); fetchVisitorAnalytics(); }} 
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '10px 14px',
+                borderRadius: '8px', fontWeight: '600', fontSize: '0.9rem',
+                backgroundColor: activeTab === 'traffic' ? 'rgba(16, 185, 129, 0.12)' : 'transparent',
+                color: activeTab === 'traffic' ? '#059669' : 'var(--text-medium)',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Globe size={16} color="#10b981" /> Live Traffic
+              </div>
+              <span style={{ 
+                fontSize: '0.68rem', 
+                padding: '2px 7px', 
+                borderRadius: '10px', 
+                backgroundColor: '#d1fae5', 
+                color: '#065f46', 
+                fontWeight: '700',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}>
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#10b981', display: 'inline-block' }}></span>
+                Live
+              </span>
+            </button>
           </nav>
 
           <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '15px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -4871,6 +4981,18 @@ _Helpline: +91 9316566894_`;
                   <ShieldCheck size={14} color="#2563eb" /> Audit Logs
                 </button>
               )}
+              <button 
+                onClick={() => { setActiveTab('traffic'); fetchVisitorAnalytics(); }} 
+                className={`admin-tab-chip ${activeTab === 'traffic' ? 'active' : ''}`}
+                style={{
+                  backgroundColor: activeTab === 'traffic' ? '#ecfdf5' : undefined,
+                  color: activeTab === 'traffic' ? '#059669' : undefined,
+                  borderColor: activeTab === 'traffic' ? '#a7f3d0' : undefined,
+                  fontWeight: activeTab === 'traffic' ? '700' : undefined
+                }}
+              >
+                <Globe size={14} color="#10b981" /> Live Traffic
+              </button>
               <button onClick={handleOpenProfileModal} className="admin-tab-chip" style={{ color: '#059669', borderColor: '#a7f3d0' }}>
                 <User size={14} /> Profile
               </button>
@@ -9679,6 +9801,442 @@ _Helpline: +91 9316566894_`;
                           <ChevronsRight size={14} />
                         </button>
                       </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ==========================================
+                  TAB: LIVE TRAFFIC & VISITOR ANALYTICS
+                  ========================================== */}
+              {activeTab === 'traffic' && (
+                <div className="admin-traffic-section animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  {/* Top Bar Banner */}
+                  <div className="card" style={{ padding: '20px', borderRadius: '12px', background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)', border: '1px solid #a7f3d0' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ width: '44px', height: '44px', borderRadius: '10px', backgroundColor: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)' }}>
+                          <Globe size={24} />
+                        </div>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#065f46', margin: 0 }}>Live Public Traffic & Visitor Analytics</h2>
+                            <span style={{ 
+                              display: 'inline-flex', alignItems: 'center', gap: '5px', 
+                              backgroundColor: '#059669', color: '#fff', fontSize: '0.7rem', 
+                              fontWeight: '700', padding: '2px 8px', borderRadius: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' 
+                            }}>
+                              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#fff', display: 'inline-block' }}></span>
+                              Live Engine
+                            </span>
+                          </div>
+                          <p style={{ margin: '3px 0 0', fontSize: '0.85rem', color: '#047857' }}>
+                            Real-time tracking of public website visitors, client IP addresses, timestamps with seconds, visited URLs, and referral sources.
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Header Actions */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                        {/* Auto-Refresh Toggle */}
+                        <button
+                          type="button"
+                          onClick={() => setVisitorAutoRefresh(!visitorAutoRefresh)}
+                          style={{
+                            display: 'inline-flex', alignItems: 'center', gap: '6px',
+                            padding: '7px 12px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: '600',
+                            backgroundColor: visitorAutoRefresh ? '#d1fae5' : '#f3f4f6',
+                            color: visitorAutoRefresh ? '#065f46' : '#6b7280',
+                            border: `1px solid ${visitorAutoRefresh ? '#6ee7b7' : '#e5e7eb'}`,
+                            cursor: 'pointer'
+                          }}
+                          title="Toggle automatic live polling every 6 seconds"
+                        >
+                          <Activity size={14} color={visitorAutoRefresh ? '#059669' : '#9ca3af'} />
+                          {visitorAutoRefresh ? 'Auto-Polling: ON (6s)' : 'Auto-Polling: OFF'}
+                        </button>
+
+                        {/* Manual Refresh */}
+                        <button
+                          type="button"
+                          onClick={() => fetchVisitorAnalytics(false)}
+                          disabled={visitorLoading}
+                          className="btn btn-outline btn-sm"
+                          style={{ borderColor: '#10b981', color: '#059669', backgroundColor: '#fff', fontSize: '0.82rem', padding: '7px 12px' }}
+                        >
+                          <RefreshCw size={14} className={visitorLoading ? 'animate-spin' : ''} />
+                          {visitorLoading ? 'Updating...' : 'Refresh Now'}
+                        </button>
+
+                        {/* Export CSV */}
+                        <button
+                          type="button"
+                          onClick={handleExportVisitorLogs}
+                          className="btn btn-sm"
+                          style={{ backgroundColor: '#059669', color: '#fff', fontSize: '0.82rem', padding: '7px 14px', border: 'none' }}
+                        >
+                          <Download size={14} /> Export CSV
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 4 Hero KPI Cards */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '15px' }}>
+                    {/* Live Online Now */}
+                    <div className="card" style={{ padding: '18px', borderRadius: '10px', borderLeft: '4px solid #10b981', background: 'var(--bg-card)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-medium)', textTransform: 'uppercase' }}>Active Online Now</span>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.7rem', padding: '2px 8px', borderRadius: '10px', backgroundColor: '#dcfce7', color: '#15803d', fontWeight: '700' }}>
+                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#16a34a' }}></span> 5m Window
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '2.1rem', fontWeight: '800', color: '#059669', margin: '8px 0 2px', lineHeight: 1.1 }}>
+                        {visitorStats.onlineNow || 0}
+                      </div>
+                      <span style={{ fontSize: '0.78rem', color: 'var(--text-light)' }}>
+                        Distinct active sessions right now
+                      </span>
+                    </div>
+
+                    {/* Today's Visits */}
+                    <div className="card" style={{ padding: '18px', borderRadius: '10px', borderLeft: '4px solid #2563eb', background: 'var(--bg-card)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-medium)', textTransform: 'uppercase' }}>Page Views Today</span>
+                        <Calendar size={15} color="#2563eb" />
+                      </div>
+                      <div style={{ fontSize: '2.1rem', fontWeight: '800', color: '#2563eb', margin: '8px 0 2px', lineHeight: 1.1 }}>
+                        {visitorStats.todayVisits || 0}
+                      </div>
+                      <span style={{ fontSize: '0.78rem', color: 'var(--text-light)' }}>
+                        Total page hits since midnight
+                      </span>
+                    </div>
+
+                    {/* Today's Unique Visitors */}
+                    <div className="card" style={{ padding: '18px', borderRadius: '10px', borderLeft: '4px solid #7c3aed', background: 'var(--bg-card)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-medium)', textTransform: 'uppercase' }}>Unique Visitors Today</span>
+                        <Users size={15} color="#7c3aed" />
+                      </div>
+                      <div style={{ fontSize: '2.1rem', fontWeight: '800', color: '#7c3aed', margin: '8px 0 2px', lineHeight: 1.1 }}>
+                        {visitorStats.todayUniques || 0}
+                      </div>
+                      <span style={{ fontSize: '0.78rem', color: 'var(--text-light)' }}>
+                        Individual visitors / unique devices
+                      </span>
+                    </div>
+
+                    {/* All-Time Visits */}
+                    <div className="card" style={{ padding: '18px', borderRadius: '10px', borderLeft: '4px solid #d97706', background: 'var(--bg-card)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-medium)', textTransform: 'uppercase' }}>All-Time Total Traffic</span>
+                        <Layers size={15} color="#d97706" />
+                      </div>
+                      <div style={{ fontSize: '2.1rem', fontWeight: '800', color: '#d97706', margin: '8px 0 2px', lineHeight: 1.1 }}>
+                        {visitorStats.totalVisits || 0}
+                      </div>
+                      <span style={{ fontSize: '0.78rem', color: 'var(--text-light)' }}>
+                        Cumulative recorded page visits
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Middle Deep Dive Row: Top Pages & Traffic Channels */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+                    {/* Top Visited Pages Today */}
+                    <div className="card" style={{ padding: '20px', borderRadius: '12px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                        <h3 style={{ fontSize: '1rem', fontWeight: '700', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <FileText size={16} color="#059669" /> Top Visited Pages Today
+                        </h3>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>Today's Views</span>
+                      </div>
+
+                      {visitorTopPages && visitorTopPages.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                          {visitorTopPages.map((page, idx) => {
+                            const maxCount = visitorTopPages[0]?.count || 1;
+                            const pct = Math.round((page.count / maxCount) * 100);
+                            return (
+                              <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.84rem' }}>
+                                  <span style={{ fontWeight: '600', color: 'var(--text-dark)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '240px' }}>
+                                    {page._id || '/'} <span style={{ fontWeight: '400', fontSize: '0.75rem', color: 'var(--text-light)' }}>({page.title || 'Page'})</span>
+                                  </span>
+                                  <span style={{ fontWeight: '700', color: '#059669' }}>{page.count} hits</span>
+                                </div>
+                                <div style={{ width: '100%', height: '6px', backgroundColor: 'var(--border-light)', borderRadius: '3px', overflow: 'hidden' }}>
+                                  <div style={{ width: `${pct}%`, height: '100%', backgroundColor: '#10b981', borderRadius: '3px' }}></div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div style={{ textAlign: 'center', padding: '25px', color: 'var(--text-light)', fontSize: '0.85rem' }}>
+                          No page views logged yet today.
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Traffic Channels & Referrers */}
+                    <div className="card" style={{ padding: '20px', borderRadius: '12px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                        <h3 style={{ fontSize: '1rem', fontWeight: '700', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <Share2 size={16} color="#2563eb" /> Traffic Acquisition Sources
+                        </h3>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>Channels</span>
+                      </div>
+
+                      {visitorReferrers && visitorReferrers.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                          {visitorReferrers.map((ref, idx) => {
+                            const badgeColor = 
+                              ref._id === 'Google Search' ? '#16a34a' :
+                              ref._id === 'WhatsApp' ? '#059669' :
+                              ref._id === 'Direct' ? '#2563eb' :
+                              ref._id === 'IndiaMART' ? '#dc2626' : '#7c3aed';
+                            return (
+                              <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', borderRadius: '8px', backgroundColor: 'var(--bg-main)' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: badgeColor }}></span>
+                                  <span style={{ fontWeight: '600', fontSize: '0.85rem', color: 'var(--text-dark)' }}>{ref._id || 'Direct'}</span>
+                                </div>
+                                <span style={{ fontWeight: '700', fontSize: '0.85rem', padding: '2px 8px', borderRadius: '12px', backgroundColor: 'var(--border-light)' }}>
+                                  {ref.count} views
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div style={{ textAlign: 'center', padding: '25px', color: 'var(--text-light)', fontSize: '0.85rem' }}>
+                          Awaiting referral traffic logs.
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Device & Platform Distribution */}
+                    <div className="card" style={{ padding: '20px', borderRadius: '12px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                        <h3 style={{ fontSize: '1rem', fontWeight: '700', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <Cpu size={16} color="#7c3aed" /> Device Distribution
+                        </h3>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>Platforms</span>
+                      </div>
+
+                      {visitorDevices && visitorDevices.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                          {visitorDevices.map((dev, idx) => (
+                            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', borderRadius: '8px', backgroundColor: 'var(--bg-main)' }}>
+                              <span style={{ fontWeight: '600', fontSize: '0.85rem', color: 'var(--text-dark)' }}>{dev._id || 'Desktop'}</span>
+                              <span style={{ fontWeight: '700', fontSize: '0.85rem', padding: '2px 8px', borderRadius: '12px', backgroundColor: 'var(--border-light)' }}>
+                                {dev.count} visits
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div style={{ textAlign: 'center', padding: '25px', color: 'var(--text-light)', fontSize: '0.85rem' }}>
+                          No device data yet.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Forensic Live Visitor Stream Table */}
+                  <div className="card" style={{ padding: '20px', borderRadius: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '15px' }}>
+                      <div>
+                        <h3 style={{ fontSize: '1.05rem', fontWeight: '700', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <Activity size={17} color="#059669" /> Live Visitor Access Stream (Forensic Trail)
+                        </h3>
+                        <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: 'var(--text-light)' }}>
+                          Showing latest 50 page requests with verified client IPs, exact timestamps with seconds, and browser telemetry.
+                        </p>
+                      </div>
+
+                      {/* Search in Live Stream */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '260px' }}>
+                        <div style={{ position: 'relative', width: '100%' }}>
+                          <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
+                          <input
+                            type="text"
+                            placeholder="Search IP, page path, or device..."
+                            value={visitorSearch}
+                            onChange={(e) => setVisitorSearch(e.target.value)}
+                            style={{
+                              width: '100%', padding: '7px 10px 7px 32px', fontSize: '0.82rem',
+                              borderRadius: '8px', border: '1px solid var(--border-light)',
+                              backgroundColor: 'var(--bg-main)', color: 'var(--text-dark)'
+                            }}
+                          />
+                        </div>
+                        {visitorSearch && (
+                          <button
+                            type="button"
+                            onClick={() => setVisitorSearch('')}
+                            style={{ padding: '6px 10px', fontSize: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-light)', cursor: 'pointer' }}
+                          >
+                            Clear
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Table */}
+                    <div style={{ overflowX: 'auto' }}>
+                      <table className="admin-table" style={{ width: '100%', fontSize: '0.82rem', borderCollapse: 'collapse' }}>
+                        <thead>
+                          <tr style={{ backgroundColor: 'var(--bg-main)', borderBottom: '2px solid var(--border-light)' }}>
+                            <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: '600' }}>Time (IST)</th>
+                            <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: '600' }}>Client IP Address</th>
+                            <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: '600' }}>Page Visited</th>
+                            <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: '600' }}>Traffic Source</th>
+                            <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: '600' }}>Device & Platform</th>
+                            <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: '600' }}>Location</th>
+                            <th style={{ padding: '10px 12px', textAlign: 'center', fontWeight: '600' }}>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredVisitorLogs && filteredVisitorLogs.length > 0 ? (
+                            filteredVisitorLogs.map((log) => {
+                              const dateObj = log.timestamp ? new Date(log.timestamp) : new Date();
+                              const formattedTime = dateObj.toLocaleString('en-IN', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: '2-digit',
+                                hour12: true
+                              });
+
+                              const isCopied = copiedIp === log._id;
+
+                              return (
+                                <tr key={log._id} style={{ borderBottom: '1px solid var(--border-light)', transition: 'background-color 0.15s' }}>
+                                  {/* Timestamp with seconds */}
+                                  <td style={{ padding: '10px 12px', whiteSpace: 'nowrap', fontWeight: '500', color: 'var(--text-medium)' }}>
+                                    <Clock size={12} style={{ display: 'inline', marginRight: '5px', verticalAlign: '-1px' }} />
+                                    {formattedTime}
+                                  </td>
+
+                                  {/* IP with Copy Button */}
+                                  <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>
+                                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                      <code style={{ 
+                                        backgroundColor: 'var(--bg-main)', 
+                                        padding: '2px 6px', 
+                                        borderRadius: '4px', 
+                                        border: '1px solid var(--border-light)',
+                                        fontWeight: '600',
+                                        fontSize: '0.8rem',
+                                        color: '#0369a1'
+                                      }}>
+                                        {log.ip || '127.0.0.1'}
+                                      </code>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          if (navigator.clipboard) {
+                                            navigator.clipboard.writeText(log.ip || '127.0.0.1');
+                                          }
+                                          setCopiedIp(log._id);
+                                          showToast('IP copied to clipboard!');
+                                          setTimeout(() => setCopiedIp(null), 2000);
+                                        }}
+                                        title="Copy IP Address"
+                                        style={{
+                                          background: 'none',
+                                          border: 'none',
+                                          cursor: 'pointer',
+                                          padding: '2px',
+                                          color: isCopied ? '#16a34a' : 'var(--text-light)',
+                                          display: 'inline-flex',
+                                          alignItems: 'center'
+                                        }}
+                                      >
+                                        {isCopied ? <CheckCheck size={14} color="#16a34a" /> : <Copy size={13} />}
+                                      </button>
+                                    </div>
+                                  </td>
+
+                                  {/* Visited Path */}
+                                  <td style={{ padding: '10px 12px' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                      <span style={{ fontWeight: '700', color: '#0c3d6c' }}>
+                                        {log.path || '/'}
+                                      </span>
+                                      <span style={{ fontSize: '0.72rem', color: 'var(--text-light)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '220px' }}>
+                                        {log.pageTitle || 'Niyansh Pharma'}
+                                      </span>
+                                    </div>
+                                  </td>
+
+                                  {/* Traffic Source */}
+                                  <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>
+                                    <span style={{
+                                      fontSize: '0.72rem',
+                                      fontWeight: '700',
+                                      padding: '3px 8px',
+                                      borderRadius: '12px',
+                                      backgroundColor: 
+                                        log.referrerSource === 'Google Search' ? '#dcfce7' :
+                                        log.referrerSource === 'WhatsApp' ? '#d1fae5' :
+                                        log.referrerSource === 'Direct' ? '#dbeafe' :
+                                        log.referrerSource === 'IndiaMART' ? '#fee2e2' : '#f3e8ff',
+                                      color: 
+                                        log.referrerSource === 'Google Search' ? '#15803d' :
+                                        log.referrerSource === 'WhatsApp' ? '#065f46' :
+                                        log.referrerSource === 'Direct' ? '#1d4ed8' :
+                                        log.referrerSource === 'IndiaMART' ? '#991b1b' : '#6b21a8'
+                                    }}>
+                                      {log.referrerSource || 'Direct'}
+                                    </span>
+                                  </td>
+
+                                  {/* Device & Browser */}
+                                  <td style={{ padding: '10px 12px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                      <span style={{ fontSize: '0.78rem', color: 'var(--text-medium)' }}>
+                                        {log.device || `${log.deviceType || 'Desktop'} • ${log.browser || 'Browser'}`}
+                                      </span>
+                                    </div>
+                                  </td>
+
+                                  {/* Location */}
+                                  <td style={{ padding: '10px 12px', whiteSpace: 'nowrap', color: 'var(--text-medium)', fontSize: '0.78rem' }}>
+                                    <MapPin size={12} style={{ display: 'inline', marginRight: '4px', verticalAlign: '-1px', color: '#059669' }} />
+                                    {log.city || 'Rajkot'}, {log.country || 'IN'}
+                                  </td>
+
+                                  {/* Bot / Human Status */}
+                                  <td style={{ padding: '10px 12px', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                                    {log.isBot ? (
+                                      <span style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', backgroundColor: '#fee2e2', color: '#b91c1c', fontWeight: '700' }}>
+                                        Crawler / Bot
+                                      </span>
+                                    ) : (
+                                      <span style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', backgroundColor: '#dcfce7', color: '#15803d', fontWeight: '700' }}>
+                                        Human Visitor
+                                      </span>
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            })
+                          ) : (
+                            <tr>
+                              <td colSpan="7" style={{ textAlign: 'center', padding: '35px', color: 'var(--text-light)' }}>
+                                <Globe size={28} style={{ opacity: 0.3, marginBottom: '8px' }} />
+                                <div>No visitor activity matching search query.</div>
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                 </div>

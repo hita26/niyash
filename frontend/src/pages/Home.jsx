@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   ShieldCheck, Truck, Percent, Headset, Globe, ShoppingCart, MessageSquare, 
-  PhoneCall, Mail, Search, ArrowRight, Award, Building2, Package, CheckCircle2, Sparkles 
+  PhoneCall, Mail, Search, ArrowRight, Award, Building2, Package, CheckCircle2, Sparkles, X, ChevronRight
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import PharmaMoleculesCanvas from '../components/PharmaMoleculesCanvas';
 import AnimatedCounter from '../components/AnimatedCounter';
 import useScrollReveal from '../hooks/useScrollReveal';
+import { useLiveSync, SYNC_EVENTS } from '../utils/liveSync';
 
 function Home({ addToCart }) {
   const { t, language } = useLanguage();
@@ -16,13 +17,15 @@ function Home({ addToCart }) {
   const [heroSearch, setHeroSearch] = useState('');
   const [liveProductsCount, setLiveProductsCount] = useState(500);
   const [liveCompaniesCount, setLiveCompaniesCount] = useState(15);
+  const [brandSearch, setBrandSearch] = useState('');
+  const [selectedLetterRange, setSelectedLetterRange] = useState('ALL');
 
   // Dynamic Banners & Home Content Settings
   const [heroBgImage, setHeroBgImage] = useState('https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=1600&q=80');
   const [brandsList, setBrandsList] = useState([
-    'Abbott', 'Alkem', 'Biochem', 'Cipla', 'Dr. Morepen', 'Daxia',
-    'Glenmark', 'Healing Pharma', 'Intas', 'Leeford Healthcare',
-    'Mankind', 'Sun Pharma', 'Torrent', 'Troikaa Pharmaceuticals', 'Zydus'
+    'Abbott', 'Alkem', 'Aristo', 'Biochem', 'Cipla', 'Daxia Healthcare', 'Dr. Morepen',
+    'Glenmark', 'Healing Pharma', 'Intas', 'Ipca', 'Leeford Healthcare',
+    'Lupin', 'Macleods', 'Mankind', 'Sun Pharma', 'Torrent', 'Troikaa Pharmaceuticals', 'Zydus Cadila'
   ]);
   const [dynamicCategories, setDynamicCategories] = useState([
     {
@@ -55,7 +58,7 @@ function Home({ addToCart }) {
     }
   ]);
 
-  useEffect(() => {
+  const fetchBrandsAndStats = useCallback(() => {
     // 1. Fetch dynamic banners
     fetch('/api/settings/banners')
       .then(res => res.json())
@@ -66,40 +69,103 @@ function Home({ addToCart }) {
       })
       .catch(err => console.warn('Could not load banner settings:', err));
 
-    // 2. Fetch dynamic home brands & categories
-    fetch('/api/settings/home-content')
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          if (Array.isArray(data.brands) && data.brands.length > 0) {
-            setBrandsList(data.brands);
-          }
-          if (Array.isArray(data.categories) && data.categories.length > 0) {
-            setDynamicCategories(data.categories);
-          }
-        }
-      })
-      .catch(err => console.warn('Could not load home content:', err));
+    // 2. Fetch dynamic home brands & categories from settings + filters + companies + total count
+    Promise.allSettled([
+      fetch('/api/settings/home-content').then(r => r.json()),
+      fetch('/api/products/meta/filters').then(r => r.json()),
+      fetch('/api/companies').then(r => r.json()),
+      fetch('/api/products?limit=1').then(r => r.json())
+    ]).then(([settingsRes, filtersRes, companiesRes, countRes]) => {
+      const brandSet = new Set(brandsList);
 
-    // 3. Fetch live dynamic counts for products and pharma network
-    fetch('/api/products?limit=1')
-      .then(res => res.json())
-      .then(data => {
-        if (data.success && typeof data.total === 'number' && data.total > 0) {
-          setLiveProductsCount(data.total);
+      // From Settings
+      if (settingsRes.status === 'fulfilled' && settingsRes.value.success) {
+        if (Array.isArray(settingsRes.value.brands)) {
+          settingsRes.value.brands.forEach(b => b && brandSet.add(b.trim()));
         }
-      })
-      .catch(err => console.warn('Could not load live product stats:', err));
+        if (Array.isArray(settingsRes.value.categories) && settingsRes.value.categories.length > 0) {
+          setDynamicCategories(settingsRes.value.categories);
+        }
+      }
 
-    fetch('/api/products/meta/filters')
-      .then(res => res.json())
-      .then(data => {
-        if (data.success && Array.isArray(data.companies) && data.companies.length > 0) {
-          setLiveCompaniesCount(data.companies.length);
+      // From Product Database Filter Meta (Live active stock)
+      if (filtersRes.status === 'fulfilled' && filtersRes.value.success) {
+        if (Array.isArray(filtersRes.value.brands)) {
+          filtersRes.value.brands.forEach(b => b && brandSet.add(b.trim()));
         }
-      })
-      .catch(err => console.warn('Could not load live company stats:', err));
+        if (Array.isArray(filtersRes.value.companies)) {
+          filtersRes.value.companies.forEach(c => c && brandSet.add(c.trim()));
+          if (filtersRes.value.companies.length > 0) {
+            setLiveCompaniesCount(filtersRes.value.companies.length);
+          }
+        }
+      }
+
+      // From Company Directory
+      if (companiesRes.status === 'fulfilled' && companiesRes.value.success && Array.isArray(companiesRes.value.companies)) {
+        companiesRes.value.companies.forEach(c => {
+          if (c && c.name) brandSet.add(c.name.trim());
+        });
+      }
+
+      // Live product total
+      if (countRes.status === 'fulfilled' && countRes.value.success && typeof countRes.value.total === 'number') {
+        setLiveProductsCount(countRes.value.total);
+      }
+
+      const mergedBrands = Array.from(brandSet).filter(Boolean).sort((a, b) => a.localeCompare(b));
+      if (mergedBrands.length > 0) {
+        setBrandsList(mergedBrands);
+      }
+    }).catch(err => console.warn('Dynamic brands sync error:', err));
   }, []);
+
+  useEffect(() => {
+    fetchBrandsAndStats();
+  }, [fetchBrandsAndStats]);
+
+  // Real-time live sync across admin changes
+  useLiveSync((event) => {
+    if (
+      event.type === SYNC_EVENTS.SETTINGS_UPDATED ||
+      event.type === SYNC_EVENTS.COMPANY_MUTATED ||
+      event.type === SYNC_EVENTS.PRODUCT_CREATED ||
+      event.type === SYNC_EVENTS.PRODUCT_BULK_IMPORTED ||
+      event.type === SYNC_EVENTS.PRODUCT_DELETED
+    ) {
+      fetchBrandsAndStats();
+    }
+  });
+
+  // Filtered brands for the quick interactive explorer below the marquees
+  const filteredBrands = useMemo(() => {
+    return brandsList.filter(brand => {
+      const matchesSearch = !brandSearch.trim() || brand.toLowerCase().includes(brandSearch.trim().toLowerCase());
+      if (!matchesSearch) return false;
+      
+      if (selectedLetterRange === 'ALL') return true;
+      const firstChar = brand.charAt(0).toUpperCase();
+      if (selectedLetterRange === 'A-D') return firstChar >= 'A' && firstChar <= 'D';
+      if (selectedLetterRange === 'E-H') return firstChar >= 'E' && firstChar <= 'H';
+      if (selectedLetterRange === 'I-L') return firstChar >= 'I' && firstChar <= 'L';
+      if (selectedLetterRange === 'M-P') return firstChar >= 'M' && firstChar <= 'P';
+      if (selectedLetterRange === 'Q-T') return firstChar >= 'Q' && firstChar <= 'T';
+      if (selectedLetterRange === 'U-Z') return firstChar >= 'U' && firstChar <= 'Z';
+      return true;
+    });
+  }, [brandsList, brandSearch, selectedLetterRange]);
+
+  // Dual counter-flow marquee streams
+  const { track1Stream, track2Stream } = useMemo(() => {
+    const t1 = brandsList.filter((_, idx) => idx % 2 === 0);
+    const t2 = brandsList.filter((_, idx) => idx % 2 === 1);
+    const s1 = t1.length >= 8 ? t1 : brandsList;
+    const s2 = t2.length >= 8 ? t2 : [...brandsList].reverse();
+    return {
+      track1Stream: [...s1, ...s1],
+      track2Stream: [...s2, ...s2]
+    };
+  }, [brandsList]);
 
   const handleHeroSearchSubmit = (e) => {
     e.preventDefault();
@@ -427,47 +493,160 @@ function Home({ addToCart }) {
         </div>
       </section>
 
-      {/* Brands We Deal In Section - Animated Marquee + Grid */}
+      {/* Brands We Deal In Section - Bi-Directional Animated Marquees + Interactive Explorer */}
       <section className="section" style={{ backgroundColor: 'var(--bg-surface)', overflow: 'hidden' }}>
         <div className="container">
-          <div className="pharma-reveal" style={{ textAlign: 'center', maxWidth: '750px', margin: '0 auto 20px auto' }}>
-            <h2 className="section-title">{t('about.brandNetworkTitle', 'Brands We Deal In')}</h2>
-            <p className="section-subtitle">{t('about.brandNetworkSubtitle', 'We distribute high-quality medical supplies from reputed pharmaceutical corporations.')}</p>
+          <div className="pharma-reveal" style={{ textAlign: 'center', maxWidth: '780px', margin: '0 auto 24px auto' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 16px', borderRadius: '30px', backgroundColor: 'rgba(12, 61, 108, 0.08)', color: 'var(--primary-blue)', fontSize: '0.82rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '14px' }}>
+              <Sparkles size={15} color="var(--secondary-green)" />
+              <span>{t('about.brandNetworkBadge', 'Direct Manufacturer Network')} • {brandsList.length}+ {t('about.brandsCountLabel', 'Partners')}</span>
+            </div>
+            <h2 className="section-title">{t('about.brandNetworkTitle', 'Our Brand Network')}</h2>
+            <p className="section-subtitle">{t('about.brandNetworkSubtitle', 'Authorised distribution partner for India’s most trusted pharmaceutical manufacturers.')}</p>
           </div>
 
-          {/* Animated Infinite Marquee Banner */}
-          <div className="brands-marquee-container">
-            <div className="brands-marquee-track">
-              {[...brandsList, ...brandsList].map((brand, i) => (
-                <Link 
-                  key={i} 
-                  to={`/products?brand=${encodeURIComponent(brand)}`}
-                  title={`Browse medicines manufactured by ${brand}`}
-                  className="brand-pill-card"
-                >
-                  <Building2 size={15} style={{ opacity: 0.65, color: 'var(--primary-blue)' }} />
-                  <span>{brand}</span>
-                </Link>
-              ))}
+          {/* Dual Counter-Flow Animated Marquees */}
+          <div className="brands-marquee-wrap">
+            {/* Track 1: Streaming Left */}
+            <div className="brands-marquee-container">
+              <div className="brands-marquee-track">
+                {track1Stream.map((brand, i) => (
+                  <Link 
+                    key={`t1-${i}`} 
+                    to={`/products?brand=${encodeURIComponent(brand)}`}
+                    title={`Browse medicines manufactured by ${brand}`}
+                    className="brand-pill-card"
+                  >
+                    <span className="brand-pill-emblem">
+                      <Building2 size={13} />
+                    </span>
+                    <span>{brand}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Track 2: Streaming Right in Counter-Flow Direction */}
+            <div className="brands-marquee-container">
+              <div className="brands-marquee-track-reverse">
+                {track2Stream.map((brand, i) => (
+                  <Link 
+                    key={`t2-${i}`} 
+                    to={`/products?brand=${encodeURIComponent(brand)}`}
+                    title={`Browse medicines manufactured by ${brand}`}
+                    className="brand-pill-card"
+                  >
+                    <span className="brand-pill-emblem">
+                      <Building2 size={13} />
+                    </span>
+                    <span>{brand}</span>
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Clean Interactive Grid */}
-          <div style={{
-            display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '10px',
-            marginTop: '15px'
-          }}>
-            {brandsList.map((brand, i) => (
-              <Link 
-                key={i} 
-                to={`/products?brand=${encodeURIComponent(brand)}`}
-                title={`Browse medicines manufactured by ${brand}`}
-                className="brand-pill-card"
-                style={{ fontSize: '0.86rem', padding: '7px 18px' }}
-              >
-                <span>{brand}</span>
-              </Link>
-            ))}
+          {/* Interactive Dynamic Quick Brand Search & Alpha Filter Bar */}
+          <div className="pharma-reveal" style={{ marginTop: '28px', maxWidth: '900px', margin: '28px auto 0 auto' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
+              
+              {/* Search Box */}
+              <div className="brand-search-box" style={{ width: '100%' }}>
+                <Search size={17} color="var(--text-light)" />
+                <input 
+                  type="text"
+                  value={brandSearch}
+                  onChange={(e) => setBrandSearch(e.target.value)}
+                  placeholder={language === 'gu' ? 'બ્રાન્ડ શોધો (દા.ત. Cipla, Zydus, Sun, Daxia...)' : language === 'hi' ? 'ब्रांड खोजें (उदा. Cipla, Zydus, Sun, Daxia...)' : 'Search brands (e.g. Cipla, Zydus, Sun, Daxia...)'}
+                  style={{
+                    border: 'none',
+                    background: 'transparent',
+                    outline: 'none',
+                    width: '100%',
+                    fontSize: '0.9rem',
+                    color: 'var(--text-dark)'
+                  }}
+                />
+                {brandSearch && (
+                  <button 
+                    type="button" 
+                    onClick={() => setBrandSearch('')} 
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-light)', padding: 0 }}
+                    aria-label="Clear brand search"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
+
+              {/* Letter Range Filters */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '6px' }}>
+                {['ALL', 'A-D', 'E-H', 'I-L', 'M-P', 'Q-T', 'U-Z'].map((range) => (
+                  <button
+                    key={range}
+                    type="button"
+                    onClick={() => setSelectedLetterRange(range)}
+                    className={`brand-letter-pill ${selectedLetterRange === range ? 'active' : ''}`}
+                  >
+                    {range === 'ALL' ? (language === 'gu' ? 'તમામ' : language === 'hi' ? 'सभी' : 'All') : range}
+                  </button>
+                ))}
+              </div>
+
+              {/* Filtered Interactive Brands Cloud */}
+              <div style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+                gap: '10px',
+                marginTop: '10px',
+                maxHeight: '260px',
+                overflowY: 'auto',
+                padding: '10px 4px'
+              }}>
+                {filteredBrands.length > 0 ? (
+                  filteredBrands.map((brand, i) => (
+                    <Link 
+                      key={i} 
+                      to={`/products?brand=${encodeURIComponent(brand)}`}
+                      title={`Browse medicines manufactured by ${brand}`}
+                      className="brand-pill-card"
+                    >
+                      <span className="brand-pill-emblem">
+                        {brand.charAt(0)}
+                      </span>
+                      <span>{brand}</span>
+                    </Link>
+                  ))
+                ) : (
+                  <div style={{ padding: '20px', color: 'var(--text-medium)', fontSize: '0.9rem' }}>
+                    {language === 'gu' ? 'કોઈ બ્રાન્ડ મળી નથી' : language === 'hi' ? 'कोई ब्रांड नहीं मिला' : 'No matching brands found'}
+                  </div>
+                )}
+              </div>
+
+              {/* Bottom Quick Action: Link to Company Directory */}
+              <div style={{ marginTop: '10px', textAlign: 'center' }}>
+                <Link 
+                  to="/companies" 
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '0.92rem',
+                    fontWeight: '700',
+                    color: 'var(--primary-blue)',
+                    textDecoration: 'none'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.textDecoration = 'underline'}
+                  onMouseOut={(e) => e.currentTarget.style.textDecoration = 'none'}
+                >
+                  <span>{language === 'gu' ? 'બધી ફાર્મા કંપનીઓની વિગતો જુઓ' : language === 'hi' ? 'सभी फार्मा कंपनियों का विवरण देखें' : 'View Full Pharma Companies Directory'}</span>
+                  <ChevronRight size={17} />
+                </Link>
+              </div>
+
+            </div>
           </div>
         </div>
       </section>

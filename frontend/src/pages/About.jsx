@@ -26,6 +26,11 @@ function About() {
   const [heroImage, setHeroImage] = useState('https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=1600&q=80');
   const [liveProductsCount, setLiveProductsCount] = useState(500);
   const [liveCompaniesCount, setLiveCompaniesCount] = useState(15);
+  const [brandsList, setBrandsList] = useState([
+    'Abbott', 'Alkem', 'Aristo', 'Biochem', 'Cipla', 'Daxia Healthcare', 'Dr. Morepen',
+    'Glenmark', 'Healing Pharma', 'Intas', 'Ipca', 'Leeford Healthcare',
+    'Lupin', 'Macleods', 'Mankind', 'Sun Pharma', 'Torrent', 'Troikaa Pharmaceuticals', 'Zydus Cadila'
+  ]);
 
   useEffect(() => {
     fetch('/api/settings/banners')
@@ -49,8 +54,15 @@ function About() {
     fetch('/api/products/meta/filters')
       .then(res => res.json())
       .then(data => {
-        if (data.success && Array.isArray(data.companies) && data.companies.length > 0) {
-          setLiveCompaniesCount(data.companies.length);
+        if (data.success) {
+          const brandSet = new Set(brandsList);
+          if (Array.isArray(data.brands)) data.brands.forEach(b => b && brandSet.add(b.trim()));
+          if (Array.isArray(data.companies)) data.companies.forEach(c => c && brandSet.add(c.trim()));
+          const combined = Array.from(brandSet).filter(Boolean).sort((a, b) => a.localeCompare(b));
+          if (combined.length > 0) setBrandsList(combined);
+          if (Array.isArray(data.companies) && data.companies.length > 0) {
+            setLiveCompaniesCount(data.companies.length);
+          }
         }
       })
       .catch(err => console.warn('Could not fetch companies count:', err));

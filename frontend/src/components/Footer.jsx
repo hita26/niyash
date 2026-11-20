@@ -12,10 +12,13 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import TopBar from './TopBar';
 
 function Footer({ compact = false }) {
   const { t } = useLanguage();
+  const { isDark } = useTheme();
+  const brandLogo = isDark ? '/logo-dark.png' : '/logo.jpg';
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -99,7 +102,7 @@ function Footer({ compact = false }) {
           <div className="footer-widget">
             <div className="footer-logo-card">
               <img 
-                src="/logo.jpg" 
+                src={brandLogo} 
                 alt="Niyansh Pharma" 
                 className="footer-logo-img" 
                 loading="lazy"

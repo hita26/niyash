@@ -53,7 +53,7 @@ function formatPermissions(perms = {}) {
 
 /**
  * Sends an enterprise-grade, hardcore responsive, dark/light mode compatible
- * pharmaceutical welcome & credentials email.
+ * pharmaceutical welcome & credentials email with animated GIF branding.
  * 
  * @param {Object} options
  * @param {string} options.to - Recipient email (e.g. haripatel267998@gmail.com)
@@ -75,7 +75,8 @@ async function sendAdminWelcomeEmail({
     const transporter = getTransporter();
     const fromAddress = process.env.EMAIL_FROM || '"Niyansh Pharma" <info@niyanshpharma.com>';
     const loginUrl = 'https://niyanshpharma.com/admin';
-    const logoUrl = 'https://niyanshpharma.com/logo.jpg';
+    const gifUrl = 'https://niyanshpharma.com/niyansh.gif';
+    const darkLogoUrl = 'https://niyanshpharma.com/logo-dark.png';
     const badges = formatPermissions(permissions);
     const currentDate = new Date().toLocaleDateString('en-IN', {
       day: '2-digit',
@@ -95,7 +96,7 @@ async function sendAdminWelcomeEmail({
     const permissionsHtml = badges.map(b => `
       <tr class="perm-row" style="border-bottom:1px solid #f1f5f9;">
         <td style="padding:10px 12px;vertical-align:top;" width="26">
-          <span style="display:inline-block;width:18px;height:18px;line-height:18px;text-align:center;background:#dcfce7;color:#15803d;border-radius:50%;font-size:11px;font-weight:bold;">✓</span>
+          <span class="perm-check-badge" style="display:inline-block;width:18px;height:18px;line-height:18px;text-align:center;background:#dcfce7;color:#15803d;border-radius:50%;font-size:11px;font-weight:bold;">✓</span>
         </td>
         <td style="padding:10px 12px 10px 2px;">
           <div class="perm-title" style="font-size:13px;font-weight:700;color:#0f172a;">${b.title}</div>
@@ -122,24 +123,29 @@ async function sendAdminWelcomeEmail({
       supported-color-schemes: light dark;
     }
     
-    /* Global Reset */
+    /* Global Client Resets */
     body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
     table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
     img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
     body { margin: 0; padding: 0; width: 100% !important; min-width: 100%; }
 
-    /* Base Styling Defaults (Light Mode) */
+    /* Light Theme Base Defaults */
     .bg-body { background-color: #f1f5f9; }
     .email-card { background-color: #ffffff; border-color: #e2e8f0; }
     .email-content { background-color: #ffffff; }
+    .email-hero-header { background: #071e3d; background: linear-gradient(135deg, #071e3d 0%, #0c3d6c 60%, #1e40af 100%); }
     .text-heading { color: #0f172a; }
     .text-body { color: #334155; }
     .text-muted { color: #64748b; }
+    .ref-date-bar { border-bottom-color: #f1f5f9; }
     .credentials-card { background-color: #f8fafc; border-color: #cbd5e1; }
+    .cred-card-head { background-color: #0f172a; border-bottom: 2px solid #059669; }
     .cred-value-box { background-color: #ffffff; border-color: #e2e8f0; color: #0f172a; }
     .password-box { background-color: #fef3c7; border-color: #f59e0b; color: #0f172a; }
+    .cta-btn-cell { background: #0c3d6c; background: linear-gradient(135deg, #071e3d 0%, #0c3d6c 100%); box-shadow: 0 4px 14px rgba(12,61,108,0.35); }
     .permissions-table { background-color: #f8fafc; border-color: #e2e8f0; }
     .perm-row { border-bottom-color: #f1f5f9; }
+    .perm-check-badge { background-color: #dcfce7; color: #15803d; }
     .perm-title { color: #0f172a; }
     .perm-desc { color: #64748b; }
     .advisory-box { background-color: #fffbeb; border-color: #f59e0b; }
@@ -152,17 +158,25 @@ async function sendAdminWelcomeEmail({
     .footer-link { color: #0c3d6c; }
     .footer-legal { color: #94a3b8; border-top-color: #e2e8f0; }
 
+    /* Logo Visibility Controls */
+    .light-logo-wrap { display: block !important; }
+    .dark-logo-wrap { display: none !important; mso-hide: all; }
+
     /* HARDCORE RESPONSIVE MOBILE STYLES (Screen widths 600px and below) */
     @media only screen and (max-width: 600px) {
       .container-table { width: 100% !important; max-width: 100% !important; }
-      .mobile-pad { padding: 22px 14px 20px !important; }
-      .mobile-header-pad { padding: 26px 14px 22px !important; }
+      .mobile-pad { padding: 20px 14px 18px !important; }
+      .mobile-header-pad { padding: 22px 14px 18px !important; }
       .mobile-footer-pad { padding: 20px 14px !important; }
       
-      /* Stacking Credential Columns on narrow screens */
+      /* Mobile Logo GIF / Dark Logo Scaling */
+      .mobile-logo-gif { max-width: 170px !important; height: auto !important; }
+      .mobile-logo-dark { max-width: 140px !important; height: auto !important; }
+      
+      /* Stacking Credential Columns on narrow screens (320px - 400px) */
       .cred-row { display: block !important; width: 100% !important; box-sizing: border-box !important; }
       .cred-col-label { display: block !important; width: 100% !important; box-sizing: border-box !important; padding-right: 0 !important; padding-bottom: 4px !important; }
-      .cred-col-value { display: block !important; width: 100% !important; box-sizing: border-box !important; padding-left: 0 !important; margin-bottom: 14px !important; }
+      .cred-col-value { display: block !important; width: 100% !important; box-sizing: border-box !important; padding-left: 0 !important; margin-bottom: 12px !important; }
       
       /* Ensure full width and word-wrapping for emails on narrow screens */
       .cred-value-box { display: block !important; width: 100% !important; box-sizing: border-box !important; font-size: 13.5px !important; padding: 10px 12px !important; word-break: break-all !important; }
@@ -175,26 +189,37 @@ async function sendAdminWelcomeEmail({
       /* Typography Scaling */
       .mobile-h1 { font-size: 18px !important; }
       .mobile-h2 { font-size: 17px !important; line-height: 1.35 !important; }
-      .mobile-logo { max-width: 110px !important; height: auto !important; }
       .mobile-tagline { font-size: 10px !important; letter-spacing: 1px !important; }
     }
 
-    /* DARK MODE STYLES (iOS Mail, Apple Mail, Android Gmail, Modern Webmail) */
+    /* COMPLETE PHARMA EXECUTIVE DARK THEME (Apple Mail, iOS, Android Gmail, Modern Webmail) */
     @media (prefers-color-scheme: dark) {
       body, .bg-body {
-        background-color: #0b0f19 !important;
+        background-color: #070c16 !important;
         color: #e2e8f0 !important;
       }
       .email-card {
-        background-color: #111827 !important;
-        border-color: #1f2937 !important;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.5) !important;
+        background-color: #0d1524 !important;
+        border-color: #1a273e !important;
+        box-shadow: 0 8px 28px rgba(0,0,0,0.6) !important;
       }
       .email-content {
-        background-color: #111827 !important;
+        background-color: #0d1524 !important;
+      }
+      .email-hero-header {
+        background: #060b14 !important;
+        border-bottom: 2px solid #059669 !important;
+      }
+      /* Switch to Dark Mode Logo */
+      .light-logo-wrap {
+        display: none !important;
+      }
+      .dark-logo-wrap {
+        display: block !important;
+        mso-hide: none !important;
       }
       .text-heading {
-        color: #f8fafc !important;
+        color: #ffffff !important;
       }
       .text-body {
         color: #cbd5e1 !important;
@@ -202,49 +227,66 @@ async function sendAdminWelcomeEmail({
       .text-muted {
         color: #94a3b8 !important;
       }
+      .ref-date-bar {
+        border-bottom-color: #1a273e !important;
+      }
       .credentials-card {
-        background-color: #1e293b !important;
-        border-color: #334155 !important;
+        background-color: #121c2e !important;
+        border-color: #243550 !important;
+      }
+      .cred-card-head {
+        background-color: #080f1c !important;
+        border-bottom: 2px solid #10b981 !important;
       }
       .cred-value-box {
-        background-color: #0f172a !important;
-        border-color: #334155 !important;
-        color: #f1f5f9 !important;
+        background-color: #0a111e !important;
+        border-color: #243550 !important;
+        color: #f8fafc !important;
       }
       .password-box {
-        background-color: #291804 !important;
-        border-color: #d97706 !important;
-        color: #fef08a !important;
+        background-color: #261603 !important;
+        border: 1.5px dashed #f59e0b !important;
+        color: #fbbf24 !important;
+        text-shadow: 0 0 10px rgba(245, 158, 11, 0.25) !important;
+      }
+      .cta-btn-cell {
+        background: linear-gradient(135deg, #1d4ed8 0%, #0c3d6c 100%) !important;
+        border: 1px solid #3b82f6 !important;
+        box-shadow: 0 4px 18px rgba(37,99,235,0.45) !important;
       }
       .permissions-table {
-        background-color: #1e293b !important;
-        border-color: #334155 !important;
+        background-color: #121c2e !important;
+        border-color: #243550 !important;
       }
       .perm-row {
-        border-bottom-color: #334155 !important;
+        border-bottom-color: #1a273e !important;
+      }
+      .perm-check-badge {
+        background-color: #064e3b !important;
+        color: #34d399 !important;
       }
       .perm-title {
-        color: #f1f5f9 !important;
+        color: #ffffff !important;
       }
       .perm-desc {
         color: #94a3b8 !important;
       }
       .advisory-box {
-        background-color: #1c1917 !important;
-        border-left-color: #d97706 !important;
+        background-color: #1f1406 !important;
+        border-left: 4px solid #f59e0b !important;
       }
       .advisory-title {
-        color: #fef08a !important;
+        color: #fbbf24 !important;
       }
       .advisory-text {
         color: #fde68a !important;
       }
       .email-footer {
-        background-color: #090d16 !important;
-        border-top-color: #1f2937 !important;
+        background-color: #070b12 !important;
+        border-top-color: #1a273e !important;
       }
       .footer-title {
-        color: #f1f5f9 !important;
+        color: #ffffff !important;
       }
       .footer-sub {
         color: #94a3b8 !important;
@@ -257,24 +299,27 @@ async function sendAdminWelcomeEmail({
       }
       .footer-legal {
         color: #64748b !important;
-        border-top-color: #1f2937 !important;
+        border-top-color: #1a273e !important;
       }
     }
 
     /* OUTLOOK & OFFICE 365 DARK MODE SELECTORS */
-    [data-ogsc] body, [data-ogsc] .bg-body { background-color: #0b0f19 !important; }
-    [data-ogsc] .email-card { background-color: #111827 !important; }
-    [data-ogsc] .email-content { background-color: #111827 !important; }
-    [data-ogsc] .text-heading { color: #f8fafc !important; }
+    [data-ogsc] body, [data-ogsc] .bg-body { background-color: #070c16 !important; }
+    [data-ogsc] .email-card { background-color: #0d1524 !important; }
+    [data-ogsc] .email-content { background-color: #0d1524 !important; }
+    [data-ogsc] .email-hero-header { background: #060b14 !important; }
+    [data-ogsc] .light-logo-wrap { display: none !important; }
+    [data-ogsc] .dark-logo-wrap { display: block !important; }
+    [data-ogsc] .text-heading { color: #ffffff !important; }
     [data-ogsc] .text-body { color: #cbd5e1 !important; }
-    [data-ogsc] .credentials-card { background-color: #1e293b !important; }
-    [data-ogsc] .cred-value-box { background-color: #0f172a !important; color: #f1f5f9 !important; }
-    [data-ogsc] .password-box { background-color: #291804 !important; color: #fef08a !important; }
-    [data-ogsc] .permissions-table { background-color: #1e293b !important; }
-    [data-ogsc] .perm-title { color: #f1f5f9 !important; }
-    [data-ogsc] .advisory-box { background-color: #1c1917 !important; }
-    [data-ogsc] .email-footer { background-color: #090d16 !important; }
-    [data-ogsc] .footer-title { color: #f1f5f9 !important; }
+    [data-ogsc] .credentials-card { background-color: #121c2e !important; }
+    [data-ogsc] .cred-value-box { background-color: #0a111e !important; color: #f8fafc !important; }
+    [data-ogsc] .password-box { background-color: #261603 !important; color: #fbbf24 !important; }
+    [data-ogsc] .permissions-table { background-color: #121c2e !important; }
+    [data-ogsc] .perm-title { color: #ffffff !important; }
+    [data-ogsc] .advisory-box { background-color: #1f1406 !important; }
+    [data-ogsc] .email-footer { background-color: #070b12 !important; }
+    [data-ogsc] .footer-title { color: #ffffff !important; }
     [data-ogsc] .footer-link { color: #60a5fa !important; }
   </style>
 </head>
@@ -292,24 +337,31 @@ async function sendAdminWelcomeEmail({
         <!-- Main Card Container (Responsive 600px max) -->
         <table role="presentation" width="100%" class="container-table email-card" style="max-width:600px;background-color:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 8px 24px rgba(15,23,42,0.08);border:1px solid #e2e8f0;" cellspacing="0" cellpadding="0" border="0">
           
-          <!-- Top Corporate Pharma Header -->
+          <!-- Top Corporate Pharma Header (No Ugly White Patch Box) -->
           <tr>
-            <td class="mobile-header-pad" style="background:linear-gradient(135deg, #071e3d 0%, #0c3d6c 60%, #1e40af 100%);padding:32px 28px 26px;text-align:center;">
+            <td class="email-hero-header mobile-header-pad" style="background:#071e3d;background:linear-gradient(135deg, #071e3d 0%, #0c3d6c 60%, #1e40af 100%);padding:28px 24px 22px;text-align:center;">
               
-              <!-- Unique Official Logo Card Lockup -->
-              <table role="presentation" align="center" cellspacing="0" cellpadding="0" border="0" style="margin:0 auto 14px;">
-                <tr>
-                  <td align="center" style="background:#ffffff;padding:8px 16px;border-radius:12px;box-shadow:0 4px 14px rgba(0,0,0,0.22);border:1px solid rgba(255,255,255,0.4);">
-                    <img 
-                      src="${logoUrl}" 
-                      alt="Niyansh Pharma" 
-                      width="130" 
-                      class="mobile-logo"
-                      style="display:block;max-width:130px;height:auto;object-fit:contain;border:0;outline:none;" 
-                    />
-                  </td>
-                </tr>
-              </table>
+              <!-- Light Mode Logo: Animated GIF (Seamless floating animation) -->
+              <div class="light-logo-wrap" style="display:block;margin:0 auto 12px;text-align:center;">
+                <img 
+                  src="${gifUrl}" 
+                  alt="Niyansh Pharma" 
+                  width="180" 
+                  class="mobile-logo-gif"
+                  style="display:block;margin:0 auto;max-width:180px;width:100%;height:auto;border:0;outline:none;border-radius:8px;" 
+                />
+              </div>
+
+              <!-- Dark Mode Logo: Dedicated Dark Mode Emblem (Seamless on dark bg) -->
+              <div class="dark-logo-wrap" style="display:none;margin:0 auto 12px;text-align:center;mso-hide:all;">
+                <img 
+                  src="${darkLogoUrl}" 
+                  alt="Niyansh Pharma" 
+                  width="150" 
+                  class="mobile-logo-dark"
+                  style="display:block;margin:0 auto;max-width:150px;width:100%;height:auto;border:0;outline:none;" 
+                />
+              </div>
 
               <!-- Tagline -->
               <div class="mobile-tagline" style="color:#93c5fd;font-size:11px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;margin-top:6px;line-height:1.4;">
@@ -317,7 +369,7 @@ async function sendAdminWelcomeEmail({
               </div>
               
               <!-- Security Badge -->
-              <div style="margin-top:12px;display:inline-block;background:rgba(255,255,255,0.12);padding:4px 14px;border-radius:20px;color:#e0f2fe;font-size:10.5px;font-weight:600;letter-spacing:0.5px;border:1px solid rgba(255,255,255,0.2);">
+              <div style="margin-top:10px;display:inline-block;background:rgba(255,255,255,0.12);padding:4px 14px;border-radius:20px;color:#e0f2fe;font-size:10px;font-weight:600;letter-spacing:0.5px;border:1px solid rgba(255,255,255,0.2);">
                 SECURE ADMINISTRATIVE PROVISIONING • GxP COMPLIANT
               </div>
             </td>
@@ -328,7 +380,7 @@ async function sendAdminWelcomeEmail({
             <td class="email-content mobile-pad" style="padding:32px 32px 26px;background-color:#ffffff;">
 
               <!-- Ref & Date Bar -->
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-bottom:20px;border-bottom:1px solid #f1f5f9;padding-bottom:12px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" class="ref-date-bar" style="margin-bottom:20px;border-bottom:1px solid #f1f5f9;padding-bottom:12px;">
                 <tr>
                   <td class="text-muted" style="font-size:11.5px;color:#64748b;font-weight:600;">
                     REF: <span class="text-heading" style="color:#0f172a;font-family:monospace;font-weight:700;">NP-AUTH-${Math.random().toString(36).substring(2, 7).toUpperCase()}</span>
@@ -357,7 +409,7 @@ async function sendAdminWelcomeEmail({
               <!-- High-Security Credentials Card (Hardcore Responsive Stacked Layout) -->
               <table role="presentation" width="100%" class="credentials-card" cellspacing="0" cellpadding="0" border="0" style="background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:12px;margin:22px 0 26px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.02);">
                 <tr>
-                  <td style="background:#0f172a;padding:12px 18px;border-bottom:2px solid #059669;">
+                  <td class="cred-card-head" style="background:#0f172a;padding:12px 18px;border-bottom:2px solid #059669;">
                     <table width="100%" cellspacing="0" cellpadding="0" border="0">
                       <tr>
                         <td style="color:#ffffff;font-size:11.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;">
@@ -407,14 +459,14 @@ async function sendAdminWelcomeEmail({
                 </tr>
               </table>
 
-              <!-- Big Primary Enterprise CTA Button (Responsive Full Width on Mobile) -->
+              <!-- Big Primary Enterprise CTA Button (Opens in New Tab) -->
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:24px 0 28px;">
                 <tr>
                   <td align="center">
                     <table role="presentation" cellspacing="0" cellpadding="0" border="0" class="btn-container" style="margin:0 auto;">
                       <tr>
-                        <td align="center" style="background:linear-gradient(135deg, #071e3d 0%, #0c3d6c 100%);border-radius:8px;box-shadow:0 4px 14px rgba(12,61,108,0.35);">
-                          <a href="${loginUrl}" target="_blank" class="mobile-btn" style="display:inline-block;padding:15px 36px;font-size:14px;font-weight:800;color:#ffffff;text-decoration:none;letter-spacing:0.8px;text-transform:uppercase;border-radius:8px;font-family:Arial,Helvetica,sans-serif;">
+                        <td align="center" class="cta-btn-cell" style="background:#0c3d6c;background:linear-gradient(135deg, #071e3d 0%, #0c3d6c 100%);border-radius:8px;box-shadow:0 4px 14px rgba(12,61,108,0.35);">
+                          <a href="${loginUrl}" target="_blank" rel="noopener noreferrer" class="mobile-btn" style="display:inline-block;padding:15px 36px;font-size:14px;font-weight:800;color:#ffffff;text-decoration:none;letter-spacing:0.8px;text-transform:uppercase;border-radius:8px;font-family:Arial,Helvetica,sans-serif;">
                             Secure Sign In to Admin Console &nbsp;→
                           </a>
                         </td>

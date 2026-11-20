@@ -7,9 +7,12 @@ import {
 } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import { useLanguage, LanguageSelector } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 
 function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogout, onOpenAuth, isB2BPortal }) {
   const { t, language } = useLanguage();
+  const { isDark } = useTheme();
+  const brandLogo = isDark ? '/logo-dark.png' : '/logo.jpg';
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -184,7 +187,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
           {/* Brand Logo */}
           <Link to="/admin" aria-label="Niyansh Pharma Admin Console" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
             <img 
-              src="/logo.jpg" 
+              src={brandLogo} 
               alt="Niyansh Pharma" 
               style={{ height: '42px', width: 'auto', display: 'block', objectFit: 'contain' }} 
             />
@@ -217,7 +220,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Link to="/dashboard" aria-label="Niyansh Pharma B2B Dashboard" style={{ display: 'flex', alignItems: 'center' }}>
                   <img 
-                    src="/logo.jpg" 
+                    src={brandLogo} 
                     alt="Niyansh Pharma B2B" 
                     style={{ height: '38px', width: 'auto', display: 'block', objectFit: 'contain' }} 
                   />
@@ -281,7 +284,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
               <Link to="/dashboard" aria-label="Niyansh Pharma B2B Dashboard" style={{ display: 'flex', alignItems: 'center' }}>
                 <img 
-                  src="/logo.jpg" 
+                  src={brandLogo} 
                   alt="Niyansh Pharma B2B" 
                   style={{ height: '48px', width: 'auto', display: 'block', objectFit: 'contain' }} 
                 />
@@ -925,7 +928,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
         <div className="container main-header-content">
           <Link to="/" className="logo-container" aria-label="Niyansh Pharma Home">
             <img 
-              src="/logo.jpg" 
+              src={brandLogo} 
               alt="Niyansh Pharma Wholesale Distribution Logo" 
               className="header-brand-logo"
               style={{ width: 'auto', display: 'block', objectFit: 'contain' }} 
@@ -1078,9 +1081,11 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
             {/* Dark / Light Mode Toggle */}
             <ThemeToggle />
 
-            {/* Direct Admin Console Access Button */}
+            {/* Direct Admin Console Access Button (Opens in New Tab) */}
             <Link
               to="/admin"
+              target="_blank"
+              rel="noopener noreferrer"
               className="admin-nav-pill"
               title="Admin & Operations Console"
               style={{
@@ -1366,7 +1371,7 @@ function Header({ cartCount, onOpenCart, searchTerm, setSearchTerm, user, onLogo
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '14px', borderBottom: '1px solid var(--border-light)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <img src="/logo.jpg" alt="" style={{ height: '36px', width: 'auto', borderRadius: '4px', backgroundColor: '#ffffff', padding: '2px 4px' }} />
+                <img src={brandLogo} alt="Niyansh Pharma" style={{ height: '36px', width: 'auto', borderRadius: '4px', objectFit: 'contain' }} />
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   <span style={{ fontWeight: '800', color: 'var(--text-dark)', fontSize: '1.02rem', lineHeight: '1.2' }}>Niyansh Pharma</span>
                   <span style={{ fontSize: '0.74rem', color: 'var(--secondary-green)', fontWeight: '700' }}>Care • Quality • Trust</span>

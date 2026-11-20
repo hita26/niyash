@@ -2265,10 +2265,17 @@ body.dark-theme {
 
 /* Dark Mode Logo Treatment */
 [data-theme="dark"] .logo-container img {
-  background-color: #ffffff !important;
-  padding: 4px 8px !important;
-  border-radius: 8px !important;
-  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.08) !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .footer-logo-card {
+  background-color: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
 }
 
 /* Dark Mode Cards, Sections & Grids */

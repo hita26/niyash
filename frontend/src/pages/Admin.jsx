@@ -1409,6 +1409,7 @@ function Admin() {
   const [bulkPreviewPage, setBulkPreviewPage] = useState(1);
   const [bulkPreviewPageSize, setBulkPreviewPageSize] = useState(50);
   const [isBulkModalMaximized, setIsBulkModalMaximized] = useState(false);
+  const [isStatsCollapsed, setIsStatsCollapsed] = useState(false);
   const [editingBulkRow, setEditingBulkRow] = useState(null);
   const [isDetectingRows, setIsDetectingRows] = useState(false);
   const [importProgress, setImportProgress] = useState({ current: 0, total: 0, percent: 0, batch: 0, totalBatches: 0 });
@@ -4241,6 +4242,7 @@ _Helpline: +91 9316566894_`;
     setBulkPreviewPage(1);
     setEditingBulkRow(null);
     setIsBulkModalMaximized(false);
+    setIsStatsCollapsed(false);
     setBulkImportResults(null);
     if (excelFileInputRef.current) {
       excelFileInputRef.current.value = '';
@@ -12424,10 +12426,10 @@ _Helpline: +91 9316566894_`;
           <div className="card" style={{
             backgroundColor: '#ffffff',
             borderRadius: isBulkModalMaximized ? '8px' : '16px',
-            width: isBulkModalMaximized ? '99vw' : '95vw',
-            maxWidth: isBulkModalMaximized ? '100vw' : '1360px',
-            height: isBulkModalMaximized ? '98vh' : 'auto',
-            maxHeight: isBulkModalMaximized ? '99vh' : '92vh',
+            width: isBulkModalMaximized ? '99vw' : '96vw',
+            maxWidth: isBulkModalMaximized ? '100vw' : '1520px',
+            height: isBulkModalMaximized ? '98vh' : '94vh',
+            maxHeight: '98vh',
             display: 'flex',
             flexDirection: 'column',
             boxShadow: '0 25px 65px -10px rgba(0, 0, 0, 0.5)',
@@ -12439,7 +12441,7 @@ _Helpline: +91 9316566894_`;
 
             {/* MODAL HEADER */}
             <div style={{
-              padding: '14px 20px',
+              padding: '12px 20px',
               borderBottom: '1px solid #e2e8f0',
               backgroundColor: '#f8fafc',
               display: 'flex',
@@ -12448,7 +12450,7 @@ _Helpline: +91 9316566894_`;
               flexShrink: 0
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '10px', backgroundColor: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <FileSpreadsheet size={22} />
                 </div>
                 <div>
@@ -12494,11 +12496,21 @@ _Helpline: +91 9316566894_`;
               </div>
             </div>
 
-            {/* MODAL BODY (SCROLLABLE & RESPONSIVE) */}
-            <div style={{ position: 'relative', padding: '20px 24px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '16px', boxSizing: 'border-box' }}>
+            {/* MODAL BODY (EXPANDED FOR MAXIMUM TALL TABLE VIEW) */}
+            <div style={{
+              position: 'relative',
+              padding: '12px 18px',
+              overflowY: 'hidden',
+              flex: 1,
+              minHeight: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px',
+              boxSizing: 'border-box'
+            }}>
               
               {/* TOP ACTION BAR: UPLOAD BUTTON & CURRENT FILE CHIP */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', padding: '12px 16px', backgroundColor: '#f1f5f9', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', padding: '10px 16px', backgroundColor: '#f1f5f9', borderRadius: '12px', border: '1px solid #e2e8f0', flexShrink: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                   <input 
                     type="file" 
@@ -12646,33 +12658,35 @@ _Helpline: +91 9316566894_`;
                 const pageRows = displayedRows.slice(startIndex, startIndex + bulkPreviewPageSize);
 
                 return (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1, minHeight: 0 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1, minHeight: 0 }}>
                     
-                    {/* STATS SUMMARY BAR (RESPONSIVE CARDS) */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px' }}>
-                      <div style={{ padding: '10px 14px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-medium)', fontWeight: '700', textTransform: 'uppercase' }}>Total In File</div>
-                        <div style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--text-dark)' }}>{totalCount.toLocaleString()}</div>
-                      </div>
+                    {/* STATS SUMMARY BAR (COLLAPSIBLE FOR MAXIMUM TALL TABLE VIEW) */}
+                    {!isStatsCollapsed && (
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px', flexShrink: 0 }}>
+                        <div style={{ padding: '8px 12px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                          <div style={{ fontSize: '0.68rem', color: 'var(--text-medium)', fontWeight: '700', textTransform: 'uppercase' }}>Total In File</div>
+                          <div style={{ fontSize: '1.15rem', fontWeight: '800', color: 'var(--text-dark)' }}>{totalCount.toLocaleString()}</div>
+                        </div>
 
-                      <div style={{ padding: '10px 14px', backgroundColor: '#ecfdf5', borderRadius: '10px', border: '1px solid #a7f3d0' }}>
-                        <div style={{ fontSize: '0.7rem', color: '#047857', fontWeight: '700', textTransform: 'uppercase' }}>Ready to Import</div>
-                        <div style={{ fontSize: '1.2rem', fontWeight: '800', color: '#059669' }}>{validCount.toLocaleString()}</div>
-                      </div>
+                        <div style={{ padding: '8px 12px', backgroundColor: '#ecfdf5', borderRadius: '10px', border: '1px solid #a7f3d0' }}>
+                          <div style={{ fontSize: '0.68rem', color: '#047857', fontWeight: '700', textTransform: 'uppercase' }}>Ready to Import</div>
+                          <div style={{ fontSize: '1.15rem', fontWeight: '800', color: '#059669' }}>{validCount.toLocaleString()}</div>
+                        </div>
 
-                      <div style={{ padding: '10px 14px', backgroundColor: duplicateCount > 0 ? '#fffbeb' : '#f8fafc', borderRadius: '10px', border: `1px solid ${duplicateCount > 0 ? '#fde68a' : '#e2e8f0'}` }}>
-                        <div style={{ fontSize: '0.7rem', color: duplicateCount > 0 ? '#b45309' : 'var(--text-medium)', fontWeight: '700', textTransform: 'uppercase' }}>Duplicates Flagged</div>
-                        <div style={{ fontSize: '1.2rem', fontWeight: '800', color: duplicateCount > 0 ? '#d97706' : 'var(--text-dark)' }}>{duplicateCount.toLocaleString()}</div>
-                      </div>
+                        <div style={{ padding: '8px 12px', backgroundColor: duplicateCount > 0 ? '#fffbeb' : '#f8fafc', borderRadius: '10px', border: `1px solid ${duplicateCount > 0 ? '#fde68a' : '#e2e8f0'}` }}>
+                          <div style={{ fontSize: '0.68rem', color: duplicateCount > 0 ? '#b45309' : 'var(--text-medium)', fontWeight: '700', textTransform: 'uppercase' }}>Duplicates Flagged</div>
+                          <div style={{ fontSize: '1.15rem', fontWeight: '800', color: duplicateCount > 0 ? '#d97706' : 'var(--text-dark)' }}>{duplicateCount.toLocaleString()}</div>
+                        </div>
 
-                      <div style={{ padding: '10px 14px', backgroundColor: '#eff6ff', borderRadius: '10px', border: '1px solid #bfdbfe' }}>
-                        <div style={{ fontSize: '0.7rem', color: '#1d4ed8', fontWeight: '700', textTransform: 'uppercase' }}>Selected for Import</div>
-                        <div style={{ fontSize: '1.2rem', fontWeight: '800', color: '#2563eb' }}>{selectedCount.toLocaleString()}</div>
+                        <div style={{ padding: '8px 12px', backgroundColor: '#eff6ff', borderRadius: '10px', border: '1px solid #bfdbfe' }}>
+                          <div style={{ fontSize: '0.68rem', color: '#1d4ed8', fontWeight: '700', textTransform: 'uppercase' }}>Selected for Import</div>
+                          <div style={{ fontSize: '1.15rem', fontWeight: '800', color: '#2563eb' }}>{selectedCount.toLocaleString()}</div>
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     {/* SMART CONTROLS BAR: SEARCH, FILTER PILLS & SELECTION TOGGLES */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '10px 14px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '8px 12px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0', flexShrink: 0 }}>
                       
                       {/* Row 1: Search & Filter Tabs */}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
@@ -12727,7 +12741,7 @@ _Helpline: +91 9316566894_`;
                         </div>
                       </div>
 
-                      {/* Row 2: Selection Helpers & Duplicate Checkbox */}
+                      {/* Row 2: Selection Helpers, Table Size Toggle & Duplicate Checkbox */}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', paddingTop: '4px', borderTop: '1px solid #edf2f7' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                           <button
@@ -12743,6 +12757,23 @@ _Helpline: +91 9316566894_`;
                             style={{ padding: '4px 10px', fontSize: '0.76rem', fontWeight: '700', borderRadius: '5px', border: '1px solid #cbd5e1', backgroundColor: '#fff', color: '#64748b', cursor: 'pointer' }}
                           >
                             ✕ Deselect All
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setIsStatsCollapsed(prev => !prev)}
+                            style={{
+                              padding: '4px 10px',
+                              fontSize: '0.76rem',
+                              fontWeight: '700',
+                              borderRadius: '5px',
+                              border: '1px solid #cbd5e1',
+                              backgroundColor: isStatsCollapsed ? '#eff6ff' : '#fff',
+                              color: isStatsCollapsed ? '#2563eb' : '#475569',
+                              cursor: 'pointer'
+                            }}
+                            title="Toggle Summary Cards for maximum tall table"
+                          >
+                            {isStatsCollapsed ? '▼ Show Summary Cards' : '▲ Extra Tall Table (Hide Cards)'}
                           </button>
                           <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
                             Found {displayedRows.length.toLocaleString()} matching rows
@@ -12762,21 +12793,22 @@ _Helpline: +91 9316566894_`;
 
                     </div>
 
-                    {/* HARD RESPONSIVE DATA TABLE WITH STICKY HEADERS & STICKY FIRST COLUMNS */}
+                    {/* HARD RESPONSIVE DATA TABLE WITH STICKY HEADERS & STICKY FIRST COLUMNS (EXTRA TALL & WIDE) */}
                     <div style={{
-                      maxHeight: isBulkModalMaximized ? 'calc(98vh - 410px)' : '380px',
+                      flex: '1 1 auto',
+                      minHeight: isStatsCollapsed ? '480px' : '360px',
                       overflowX: 'auto',
                       overflowY: 'auto',
                       border: '1px solid #cbd5e1',
                       borderRadius: '10px',
                       backgroundColor: '#ffffff',
-                      boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.05)',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
                       position: 'relative'
                     }}>
-                      <table style={{ width: '100%', minWidth: '1150px', borderCollapse: 'separate', borderSpacing: 0, fontSize: '0.8rem', textAlign: 'left' }}>
+                      <table style={{ width: '100%', minWidth: '1420px', borderCollapse: 'separate', borderSpacing: 0, fontSize: '0.82rem', textAlign: 'left' }}>
                         <thead style={{ position: 'sticky', top: 0, zIndex: 10 }}>
                           <tr style={{ backgroundColor: '#f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
-                            <th style={{ position: 'sticky', left: 0, zIndex: 11, backgroundColor: '#f1f5f9', padding: '9px 10px', width: '38px', textAlign: 'center', borderBottom: '1px solid #cbd5e1' }}>
+                            <th style={{ position: 'sticky', left: 0, zIndex: 11, backgroundColor: '#f1f5f9', padding: '10px 12px', width: '38px', textAlign: 'center', borderBottom: '1px solid #cbd5e1' }}>
                               <input 
                                 type="checkbox"
                                 checked={selectedCount > 0 && selectedCount === validCount}
@@ -12785,23 +12817,23 @@ _Helpline: +91 9316566894_`;
                                 title="Select / Deselect all valid rows"
                               />
                             </th>
-                            <th style={{ position: 'sticky', left: '38px', zIndex: 11, backgroundColor: '#f1f5f9', padding: '9px 10px', width: '55px', borderBottom: '1px solid #cbd5e1' }}>
+                            <th style={{ position: 'sticky', left: '38px', zIndex: 11, backgroundColor: '#f1f5f9', padding: '10px 12px', width: '55px', borderBottom: '1px solid #cbd5e1' }}>
                               Row
                             </th>
-                            <th style={{ padding: '9px 10px', width: '90px', minWidth: '90px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1', textAlign: 'center' }}>
+                            <th style={{ padding: '10px 12px', width: '95px', minWidth: '95px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1', textAlign: 'center' }}>
                               Actions
                             </th>
-                            <th style={{ padding: '9px 10px', minWidth: '110px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Status</th>
-                            <th style={{ padding: '9px 10px', minWidth: '180px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Product Name / Brand</th>
-                            <th style={{ padding: '9px 10px', minWidth: '100px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>SKU / ID</th>
-                            <th style={{ padding: '9px 10px', minWidth: '130px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Company</th>
-                            <th style={{ padding: '9px 10px', minWidth: '160px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Contain</th>
-                            <th style={{ padding: '9px 10px', minWidth: '120px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Packing & Form</th>
-                            <th style={{ padding: '9px 10px', minWidth: '90px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Wholesale</th>
-                            <th style={{ padding: '9px 10px', minWidth: '80px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>MRP</th>
-                            <th style={{ padding: '9px 10px', minWidth: '65px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Stock</th>
-                            <th style={{ padding: '9px 10px', minWidth: '110px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Batch & Expiry</th>
-                            <th style={{ padding: '9px 10px', minWidth: '60px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>GST</th>
+                            <th style={{ padding: '10px 12px', minWidth: '120px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Status</th>
+                            <th style={{ padding: '10px 12px', minWidth: '240px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Product Name / Brand</th>
+                            <th style={{ padding: '10px 12px', minWidth: '110px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>SKU / ID</th>
+                            <th style={{ padding: '10px 12px', minWidth: '150px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Company</th>
+                            <th style={{ padding: '10px 12px', minWidth: '260px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Contain</th>
+                            <th style={{ padding: '10px 12px', minWidth: '140px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Packing & Form</th>
+                            <th style={{ padding: '10px 12px', minWidth: '105px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Wholesale</th>
+                            <th style={{ padding: '10px 12px', minWidth: '95px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>MRP</th>
+                            <th style={{ padding: '10px 12px', minWidth: '75px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Stock</th>
+                            <th style={{ padding: '10px 12px', minWidth: '150px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Batch & Expiry</th>
+                            <th style={{ padding: '10px 12px', minWidth: '70px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>GST</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -12826,7 +12858,7 @@ _Helpline: +91 9316566894_`;
                                     transition: 'background-color 0.15s ease'
                                   }}
                                 >
-                                  <td style={{ position: 'sticky', left: 0, zIndex: 2, backgroundColor: rowBg, padding: '7px 10px', textAlign: 'center', borderRight: '1px solid #f1f5f9' }}>
+                                  <td style={{ position: 'sticky', left: 0, zIndex: 2, backgroundColor: rowBg, padding: '9px 12px', textAlign: 'center', borderRight: '1px solid #f1f5f9' }}>
                                     <input 
                                       type="checkbox"
                                       checked={r.selected && (!bulkSkipDuplicates || !isRowDuplicate) && !isRowError}
@@ -12835,17 +12867,17 @@ _Helpline: +91 9316566894_`;
                                       style={{ accentColor: '#2563eb', cursor: (isRowError || (bulkSkipDuplicates && isRowDuplicate)) ? 'not-allowed' : 'pointer' }}
                                     />
                                   </td>
-                                  <td style={{ position: 'sticky', left: '38px', zIndex: 2, backgroundColor: rowBg, padding: '7px 10px', color: '#64748b', fontWeight: '700', borderRight: '1px solid #f1f5f9' }}>
+                                  <td style={{ position: 'sticky', left: '38px', zIndex: 2, backgroundColor: rowBg, padding: '9px 12px', color: '#64748b', fontWeight: '700', borderRight: '1px solid #f1f5f9' }}>
                                     #{r._rowId}
                                   </td>
-                                  <td style={{ padding: '7px 10px', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                                  <td style={{ padding: '9px 12px', textAlign: 'center', whiteSpace: 'nowrap' }}>
                                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                                       <button
                                         type="button"
                                         onClick={() => setEditingBulkRow({ ...r })}
                                         style={{
-                                          padding: '4px 7px',
-                                          borderRadius: '5px',
+                                          padding: '5px 8px',
+                                          borderRadius: '6px',
                                           border: '1px solid #bfdbfe',
                                           backgroundColor: '#eff6ff',
                                           color: '#2563eb',
@@ -12864,8 +12896,8 @@ _Helpline: +91 9316566894_`;
                                         type="button"
                                         onClick={() => handleDeleteBulkRow(r._rowId)}
                                         style={{
-                                          padding: '4px 6px',
-                                          borderRadius: '5px',
+                                          padding: '5px 7px',
+                                          borderRadius: '6px',
                                           border: '1px solid #fecaca',
                                           backgroundColor: '#fee2e2',
                                           color: '#dc2626',
@@ -12879,53 +12911,53 @@ _Helpline: +91 9316566894_`;
                                       </button>
                                     </div>
                                   </td>
-                                  <td style={{ padding: '7px 10px' }}>
+                                  <td style={{ padding: '9px 12px' }}>
                                     {isRowError ? (
-                                      <span style={{ backgroundColor: '#fee2e2', color: '#b91c1c', fontSize: '0.72rem', padding: '2px 7px', borderRadius: '4px', fontWeight: '700', whiteSpace: 'nowrap' }}>
+                                      <span style={{ backgroundColor: '#fee2e2', color: '#b91c1c', fontSize: '0.72rem', padding: '3px 8px', borderRadius: '4px', fontWeight: '700', whiteSpace: 'nowrap' }}>
                                         ✕ {r.errorMessage}
                                       </span>
                                     ) : isRowDuplicate ? (
-                                      <span style={{ backgroundColor: '#fef3c7', color: '#b45309', fontSize: '0.72rem', padding: '2px 7px', borderRadius: '4px', fontWeight: '700', whiteSpace: 'nowrap' }} title={r.duplicateReason}>
+                                      <span style={{ backgroundColor: '#fef3c7', color: '#b45309', fontSize: '0.72rem', padding: '3px 8px', borderRadius: '4px', fontWeight: '700', whiteSpace: 'nowrap' }} title={r.duplicateReason}>
                                         Duplicate (Skip)
                                       </span>
                                     ) : (
-                                      <span style={{ backgroundColor: '#dcfce7', color: '#15803d', fontSize: '0.72rem', padding: '2px 7px', borderRadius: '4px', fontWeight: '700', whiteSpace: 'nowrap' }}>
+                                      <span style={{ backgroundColor: '#dcfce7', color: '#15803d', fontSize: '0.72rem', padding: '3px 8px', borderRadius: '4px', fontWeight: '700', whiteSpace: 'nowrap' }}>
                                         ✓ Ready
                                       </span>
                                     )}
                                   </td>
-                                  <td style={{ padding: '7px 10px', fontWeight: '700', color: 'var(--text-dark)' }}>
+                                  <td style={{ padding: '9px 12px', fontWeight: '700', color: 'var(--text-dark)' }}>
                                     {r.name || <span style={{ color: '#ef4444' }}>[Missing Name]</span>}
                                   </td>
-                                  <td style={{ padding: '7px 10px', fontFamily: 'monospace', color: '#334155' }}>
+                                  <td style={{ padding: '9px 12px', fontFamily: 'monospace', color: '#334155' }}>
                                     {r.sku}
                                   </td>
-                                  <td style={{ padding: '7px 10px', color: '#1d4ed8', fontWeight: '600' }}>
+                                  <td style={{ padding: '9px 12px', color: '#1d4ed8', fontWeight: '600' }}>
                                     {r.company}
                                   </td>
-                                  <td style={{ padding: '7px 10px', color: 'var(--text-medium)' }}>
+                                  <td style={{ padding: '9px 12px', color: 'var(--text-medium)', whiteSpace: 'normal', lineHeight: '1.3' }}>
                                     {r.composition || '—'}
                                   </td>
-                                  <td style={{ padding: '7px 10px', color: 'var(--text-medium)' }}>
+                                  <td style={{ padding: '9px 12px', color: 'var(--text-medium)' }}>
                                     <span style={{ fontWeight: '600', color: '#0f172a' }}>{r.packing}</span> {r.form && `• ${r.form}`}
                                   </td>
-                                  <td style={{ padding: '7px 10px', fontWeight: '700', color: '#16a34a' }}>
+                                  <td style={{ padding: '9px 12px', fontWeight: '800', color: '#16a34a' }}>
                                     ₹{r.price != null && !isNaN(r.price) ? Number(r.price).toFixed(2) : (r.price || '0.00')}
                                   </td>
-                                  <td style={{ padding: '7px 10px', color: 'var(--text-dark)' }}>
+                                  <td style={{ padding: '9px 12px', fontWeight: '700', color: 'var(--text-dark)' }}>
                                     ₹{r.mrp != null && !isNaN(r.mrp) ? Number(r.mrp).toFixed(2) : (r.mrp || '0.00')}
                                   </td>
-                                  <td style={{ padding: '7px 10px', color: 'var(--text-dark)' }}>
+                                  <td style={{ padding: '9px 12px', color: 'var(--text-dark)' }}>
                                     {r.stockQuantity}
                                   </td>
-                                  <td style={{ padding: '7px 10px', color: 'var(--text-medium)', fontSize: '0.76rem' }}>
+                                  <td style={{ padding: '9px 12px', color: 'var(--text-medium)', fontSize: '0.76rem' }}>
                                     {r.batchNumber ? (
                                       <span><strong>B:</strong> {r.batchNumber} {r.expiryDate ? `(${r.expiryDate})` : ''}</span>
                                     ) : (
                                       r.expiryDate || '—'
                                     )}
                                   </td>
-                                  <td style={{ padding: '7px 10px', color: 'var(--text-medium)' }}>
+                                  <td style={{ padding: '9px 12px', color: 'var(--text-medium)' }}>
                                     {r.salesGst}%
                                   </td>
                                 </tr>
@@ -12947,7 +12979,8 @@ _Helpline: +91 9316566894_`;
                       backgroundColor: '#f8fafc',
                       borderRadius: '8px',
                       border: '1px solid #e2e8f0',
-                      fontSize: '0.8rem'
+                      fontSize: '0.8rem',
+                      flexShrink: 0
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                         <span style={{ color: '#475569', fontWeight: '600' }}>

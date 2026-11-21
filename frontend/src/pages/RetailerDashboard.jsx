@@ -105,7 +105,9 @@ export default function RetailerDashboard() {
         if (cleanMobile) queryParams.append('retailerMobile', cleanMobile);
         queryParams.append('limit', '50');
 
-        const res = await fetch(`/api/orders?${queryParams.toString()}`);
+        const res = await fetch(`/api/orders?${queryParams.toString()}`, {
+          headers: { 'x-silent-request': 'true' }
+        });
         if (res.ok) {
           const data = await res.json();
           if (isMounted) {
@@ -139,7 +141,9 @@ export default function RetailerDashboard() {
       setLoadingLedger(true);
       try {
         const target = cleanMobile || '9974442291';
-        const res = await fetch(`/api/ledger/${target}?shopName=${encodeURIComponent(shopName)}`);
+        const res = await fetch(`/api/ledger/${target}?shopName=${encodeURIComponent(shopName)}`, {
+          headers: { 'x-silent-request': 'true' }
+        });
         if (res.ok) {
           const data = await res.json();
           if (isMounted && data.success && data.ledger) {
@@ -169,7 +173,9 @@ export default function RetailerDashboard() {
   const fetchSchemes = useCallback(async (isSilent = false) => {
     if (!isSilent) setLoadingSchemes(true);
     try {
-      const res = await fetch('/api/products?limit=12&sort=featured');
+      const res = await fetch('/api/products?limit=12&sort=featured', {
+        headers: { 'x-silent-request': 'true' }
+      });
       if (res.ok) {
         const data = await res.json();
         setSchemes(data.products || []);
@@ -365,60 +371,67 @@ export default function RetailerDashboard() {
         </div>
       )}
 
-      {/* Chemist Identity Banner - Clean, high contrast, readable store name */}
+      {/* Chemist Identity Banner - Clean, High-Contrast Modern Enterprise Header */}
       <section style={{ 
-        background: 'linear-gradient(135deg, #0c3d6c 0%, #1e40af 100%)', 
+        background: 'linear-gradient(135deg, #091e3a 0%, #0f2b48 50%, #153e66 100%)', 
         color: '#ffffff', 
-        padding: '32px 16px', 
-        borderBottom: '4px solid #10b981' 
+        padding: '28px 16px', 
+        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+        position: 'relative',
+        overflow: 'hidden'
       }}>
-        <div style={{ maxWidth: '1240px', margin: '0 auto' }}>
+        {/* Subtle decorative glow */}
+        <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '220px', height: '220px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
+
+        <div style={{ maxWidth: '1240px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
             
             {/* Store & Chemist Details */}
-            <div style={{ flex: '1 1 360px' }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: 'rgba(255,255,255,0.15)', padding: '4px 14px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: '800', letterSpacing: '0.6px', marginBottom: '12px' }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#4ade80', display: 'inline-block' }}></span>
+            <div style={{ flex: '1 1 340px' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', backgroundColor: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(52, 211, 153, 0.3)', padding: '3px 12px', borderRadius: '20px', fontSize: '0.74rem', fontWeight: '800', letterSpacing: '0.5px', marginBottom: '10px', color: '#6ee7b7' }}>
+                <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#10b981', display: 'inline-block', boxShadow: '0 0 8px #10b981' }}></span>
                 {t('retailerDashboard.verifiedPharmacyBadge', 'WHO-GMP VERIFIED B2B RETAIL PHARMACY')}
               </div>
               
-              {/* Force white color on H1 so index.css does not turn it into invisible blue */}
               <h1 style={{ 
                 color: '#ffffff', 
-                fontSize: 'clamp(1.5rem, 3vw, 2.1rem)', 
+                fontSize: 'clamp(1.4rem, 2.5vw, 1.95rem)', 
                 fontWeight: '900', 
-                margin: '0 0 8px 0', 
+                margin: '0 0 10px 0', 
                 display: 'flex', 
                 alignItems: 'center', 
                 gap: '12px',
-                letterSpacing: '-0.5px'
+                letterSpacing: '-0.02em',
+                lineHeight: 1.2
               }}>
-                <Building2 size={32} color="#38bdf8" style={{ flexShrink: 0 }} />
+                <div style={{ width: '42px', height: '42px', borderRadius: '12px', backgroundColor: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Building2 size={24} color="#38bdf8" />
+                </div>
                 <span style={{ color: '#ffffff' }}>{shopName}</span>
               </h1>
               
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', color: '#e2e8f0', fontSize: '0.86rem', marginTop: '6px' }}>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                  <User size={15} color="#93c5fd" /> {user?.name || 'Authorized B2B Partner'}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', color: '#cbd5e1', fontSize: '0.82rem' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(255, 255, 255, 0.08)', padding: '4px 10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <User size={13} color="#93c5fd" /> {user?.name || 'Authorized Partner'}
                 </span>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                  <Phone size={15} color="#93c5fd" /> +91 {cleanMobile}
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(255, 255, 255, 0.08)', padding: '4px 10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <Phone size={13} color="#93c5fd" /> +91 {cleanMobile}
                 </span>
                 {user?.gstin ? (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(56, 189, 248, 0.2)', color: '#bae6fd', padding: '2px 8px', borderRadius: '4px', fontWeight: '700', fontSize: '0.76rem' }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#bae6fd', padding: '4px 10px', borderRadius: '8px', fontWeight: '700', fontSize: '0.78rem', border: '1px solid rgba(56, 189, 248, 0.25)' }}>
                     GST: {user.gstin}
                   </span>
                 ) : user?.pan ? (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(56, 189, 248, 0.2)', color: '#bae6fd', padding: '2px 8px', borderRadius: '4px', fontWeight: '700', fontSize: '0.76rem' }}>
-                    PAN: {user.pan} (No GST)
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#bae6fd', padding: '4px 10px', borderRadius: '8px', fontWeight: '700', fontSize: '0.78rem', border: '1px solid rgba(56, 189, 248, 0.25)' }}>
+                    PAN: {user.pan}
                   </span>
                 ) : (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(56, 189, 248, 0.2)', color: '#bae6fd', padding: '2px 8px', borderRadius: '4px', fontWeight: '700', fontSize: '0.76rem' }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#bae6fd', padding: '4px 10px', borderRadius: '8px', fontWeight: '700', fontSize: '0.78rem', border: '1px solid rgba(56, 189, 248, 0.25)' }}>
                     GST: Exempted
                   </span>
                 )}
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(74, 222, 128, 0.2)', color: '#bbf7d0', padding: '2px 8px', borderRadius: '4px', fontWeight: '700', fontSize: '0.76rem' }}>
-                  DL: {user?.drugLicense1 || user?.drugLicense || 'Form 20 Verified'}
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#a7f3d0', padding: '4px 10px', borderRadius: '8px', fontWeight: '700', fontSize: '0.78rem', border: '1px solid rgba(16, 185, 129, 0.25)' }}>
+                  DL: {user?.drugLicense1 || user?.drugLicense || '20B/21B Verified'}
                 </span>
               </div>
             </div>
@@ -430,59 +443,60 @@ export default function RetailerDashboard() {
                 style={{
                   backgroundColor: '#ea580c',
                   color: '#ffffff',
-                  padding: '11px 20px',
+                  padding: '10px 18px',
                   borderRadius: '10px',
                   textDecoration: 'none',
                   fontWeight: '800',
-                  fontSize: '0.9rem',
+                  fontSize: '0.88rem',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '8px',
-                  boxShadow: '0 4px 14px rgba(234, 88, 12, 0.4)',
-                  transition: 'transform 0.15s ease'
+                  gap: '7px',
+                  boxShadow: '0 4px 14px rgba(234, 88, 12, 0.35)',
+                  transition: 'all 0.15s ease'
                 }}
               >
-                <Zap size={18} /> {t('retailerDashboard.quickOrderPad', 'Quick Order Pad')}
+                <Zap size={16} /> {t('retailerDashboard.quickOrderPad', 'Quick Order Pad')}
               </Link>
 
               <button
                 onClick={handleShareStatement}
                 style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
                   color: '#ffffff',
-                  border: '1.5px solid rgba(255, 255, 255, 0.3)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
                   padding: '10px 16px',
                   borderRadius: '10px',
                   cursor: 'pointer',
                   fontWeight: '700',
-                  fontSize: '0.88rem',
+                  fontSize: '0.85rem',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '8px'
+                  gap: '7px',
+                  transition: 'all 0.15s ease'
                 }}
                 title="Send ledger statement to WhatsApp"
               >
-                <MessageCircle size={18} color="#4ade80" /> {t('retailerDashboard.whatsAppStatement', 'WhatsApp Statement')}
+                <MessageCircle size={16} color="#34d399" /> {t('retailerDashboard.whatsAppStatement', 'WhatsApp Statement')}
               </button>
 
               <button
                 onClick={logout}
                 style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                  color: '#cbd5e1',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  backgroundColor: 'transparent',
+                  color: '#94a3b8',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
                   padding: '10px 14px',
                   borderRadius: '10px',
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  fontSize: '0.85rem',
+                  fontSize: '0.82rem',
                   fontWeight: '600'
                 }}
                 title="Sign out of B2B portal"
               >
-                <LogOut size={16} /> {t('retailerDashboard.exit', 'Exit')}
+                <LogOut size={15} /> {t('retailerDashboard.exit', 'Exit')}
               </button>
             </div>
 
@@ -493,43 +507,61 @@ export default function RetailerDashboard() {
       {/* Main Workstation Workspace */}
       <main style={{ maxWidth: '1240px', margin: '0 auto', padding: '24px 16px' }}>
 
-        {/* 4 Financial & Operational Metric Cards - No stuck "..." */}
-        <div className="dashboard-metrics-grid" style={{ marginBottom: '28px' }}>
+        {/* 4 Financial & Operational Metric Cards */}
+        <div className="dashboard-metrics-grid" style={{ marginBottom: '26px' }}>
           
           {/* Card 1: Outstanding Due Balance */}
           <div style={{
             backgroundColor: 'var(--bg-card)',
-            borderRadius: '14px',
+            borderRadius: '16px',
             padding: '20px',
             border: '1px solid var(--border-light)',
-            boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
+            boxShadow: '0 4px 16px -2px rgba(0,0,0,0.04)',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            position: 'relative',
-            overflow: 'hidden'
+            transition: 'transform 0.2s ease, box-shadow 0.2s ease'
           }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', backgroundColor: outstandingBal > 0 ? '#ef4444' : '#10b981' }}></div>
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <span style={{ fontSize: '0.78rem', fontWeight: '800', color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Total Outstanding Dues
-                </span>
-                <span style={{
-                  fontSize: '0.72rem',
-                  fontWeight: '800',
-                  padding: '3px 8px',
-                  borderRadius: '12px',
-                  backgroundColor: outstandingBal > 0 ? '#fef2f2' : '#ecfdf5',
-                  color: outstandingBal > 0 ? '#dc2626' : '#059669'
-                }}>
-                  {outstandingBal > 0 ? (overdueInvoices.length > 0 ? `${overdueInvoices.length} Overdue` : 'Pending') : 'Clean - No Dues'}
-                </span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '10px',
+                    backgroundColor: outstandingBal > 0 ? '#fef2f2' : '#ecfdf5',
+                    color: outstandingBal > 0 ? '#dc2626' : '#059669',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <CreditCard size={18} />
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '0.74rem', fontWeight: '800', color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block' }}>
+                      Outstanding Dues
+                    </span>
+                    <span style={{
+                      fontSize: '0.7rem',
+                      fontWeight: '800',
+                      padding: '2px 7px',
+                      borderRadius: '10px',
+                      backgroundColor: outstandingBal > 0 ? '#fef2f2' : '#ecfdf5',
+                      color: outstandingBal > 0 ? '#dc2626' : '#059669',
+                      display: 'inline-block',
+                      marginTop: '2px'
+                    }}>
+                      {outstandingBal > 0 ? (overdueInvoices.length > 0 ? `${overdueInvoices.length} Overdue` : 'Pending') : 'Clean - No Dues'}
+                    </span>
+                  </div>
+                </div>
               </div>
-              <div style={{ fontSize: '1.75rem', fontWeight: '900', color: 'var(--text-dark)', marginBottom: '4px' }}>
+
+              <div style={{ fontSize: '1.75rem', fontWeight: '900', color: 'var(--text-dark)', marginBottom: '4px', letterSpacing: '-0.02em' }} className="tabular-nums">
                 {formatINR(outstandingBal)}
               </div>
-              <div style={{ fontSize: '0.76rem', color: overdueTotal > 0 ? '#b91c1c' : 'var(--text-medium)', fontWeight: '600' }}>
+              <div style={{ fontSize: '0.74rem', color: overdueTotal > 0 ? '#b91c1c' : 'var(--text-medium)', fontWeight: '600' }}>
                 {overdueTotal > 0 ? `⚠️ Overdue > 21 days: ${formatINR(overdueTotal)}` : 'Standard 21-day credit terms apply'}
               </div>
             </div>
@@ -540,12 +572,12 @@ export default function RetailerDashboard() {
                 disabled={outstandingBal <= 0}
                 style={{
                   flex: 1,
-                  backgroundColor: outstandingBal > 0 ? '#0c3d6c' : '#f1f5f9',
-                  color: outstandingBal > 0 ? '#ffffff' : '#94a3b8',
+                  backgroundColor: outstandingBal > 0 ? '#0c3d6c' : 'var(--bg-surface-alt)',
+                  color: outstandingBal > 0 ? '#ffffff' : 'var(--text-light)',
                   border: 'none',
-                  padding: '9px 12px',
+                  padding: '8px 12px',
                   borderRadius: '8px',
-                  fontSize: '0.82rem',
+                  fontSize: '0.8rem',
                   fontWeight: '700',
                   cursor: outstandingBal > 0 ? 'pointer' : 'default',
                   display: 'flex',
@@ -554,17 +586,17 @@ export default function RetailerDashboard() {
                   gap: '6px'
                 }}
               >
-                <CreditCard size={15} /> Pay Dues Now
+                <CreditCard size={14} /> Pay Dues Now
               </button>
               <Link
                 to="/outstanding"
                 style={{
-                  padding: '9px 12px',
+                  padding: '8px 12px',
                   borderRadius: '8px',
-                  border: '1px solid #cbd5e1',
+                  border: '1px solid var(--border-light)',
                   color: 'var(--text-medium)',
                   textDecoration: 'none',
-                  fontSize: '0.82rem',
+                  fontSize: '0.8rem',
                   fontWeight: '700',
                   display: 'flex',
                   alignItems: 'center'
@@ -579,36 +611,52 @@ export default function RetailerDashboard() {
           {/* Card 2: Wholesale Credit Limit */}
           <div style={{
             backgroundColor: 'var(--bg-card)',
-            borderRadius: '14px',
+            borderRadius: '16px',
             padding: '20px',
             border: '1px solid var(--border-light)',
-            boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
+            boxShadow: '0 4px 16px -2px rgba(0,0,0,0.04)',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            position: 'relative',
-            overflow: 'hidden'
+            transition: 'transform 0.2s ease, box-shadow 0.2s ease'
           }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', backgroundColor: '#3b82f6' }}></div>
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <span style={{ fontSize: '0.78rem', fontWeight: '800', color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Available Credit Limit
-                </span>
-                <span style={{ fontSize: '0.72rem', fontWeight: '800', padding: '3px 8px', borderRadius: '12px', backgroundColor: '#eff6ff', color: '#2563eb' }}>
-                  {100 - creditUsedPercent}% Avail
-                </span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '10px',
+                    backgroundColor: '#eff6ff',
+                    color: '#2563eb',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <ShieldCheck size={20} />
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '0.74rem', fontWeight: '800', color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block' }}>
+                      Available Credit Line
+                    </span>
+                    <span style={{ fontSize: '0.7rem', fontWeight: '800', padding: '2px 7px', borderRadius: '10px', backgroundColor: '#eff6ff', color: '#2563eb', display: 'inline-block', marginTop: '2px' }}>
+                      {100 - creditUsedPercent}% Avail
+                    </span>
+                  </div>
+                </div>
               </div>
-              <div style={{ fontSize: '1.75rem', fontWeight: '900', color: '#2563eb', marginBottom: '4px' }}>
+
+              <div style={{ fontSize: '1.75rem', fontWeight: '900', color: '#2563eb', marginBottom: '4px', letterSpacing: '-0.02em' }} className="tabular-nums">
                 {formatINR(availableCredit)}
               </div>
-              <div style={{ fontSize: '0.76rem', color: 'var(--text-light)' }}>
+              <div style={{ fontSize: '0.74rem', color: 'var(--text-light)' }}>
                 Total Allocated Limit: {formatINR(creditLimit)}
               </div>
             </div>
 
             <div style={{ marginTop: '16px' }}>
-              <div style={{ height: '7px', backgroundColor: '#f1f5f9', borderRadius: '4px', overflow: 'hidden' }}>
+              <div style={{ height: '7px', backgroundColor: 'var(--bg-surface-alt)', borderRadius: '4px', overflow: 'hidden' }}>
                 <div style={{
                   height: '100%',
                   width: `${creditUsedPercent}%`,
@@ -627,31 +675,47 @@ export default function RetailerDashboard() {
           {/* Card 3: Wholesale Orders Placed */}
           <div style={{
             backgroundColor: 'var(--bg-card)',
-            borderRadius: '14px',
+            borderRadius: '16px',
             padding: '20px',
             border: '1px solid var(--border-light)',
-            boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
+            boxShadow: '0 4px 16px -2px rgba(0,0,0,0.04)',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            position: 'relative',
-            overflow: 'hidden'
+            transition: 'transform 0.2s ease, box-shadow 0.2s ease'
           }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', backgroundColor: '#8b5cf6' }}></div>
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <span style={{ fontSize: '0.78rem', fontWeight: '800', color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Total Orders Placed
-                </span>
-                <span style={{ fontSize: '0.72rem', fontWeight: '800', padding: '3px 8px', borderRadius: '12px', backgroundColor: '#f5f3ff', color: '#7c3aed' }}>
-                  Wholesale
-                </span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '10px',
+                    backgroundColor: '#f5f3ff',
+                    color: '#7c3aed',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <Package size={20} />
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '0.74rem', fontWeight: '800', color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block' }}>
+                      Orders Placed
+                    </span>
+                    <span style={{ fontSize: '0.7rem', fontWeight: '800', padding: '2px 7px', borderRadius: '10px', backgroundColor: '#f5f3ff', color: '#7c3aed', display: 'inline-block', marginTop: '2px' }}>
+                      Wholesale
+                    </span>
+                  </div>
+                </div>
               </div>
-              <div style={{ fontSize: '1.75rem', fontWeight: '900', color: 'var(--text-dark)', marginBottom: '4px' }}>
+
+              <div style={{ fontSize: '1.75rem', fontWeight: '900', color: 'var(--text-dark)', marginBottom: '4px', letterSpacing: '-0.02em' }} className="tabular-nums">
                 {orders.length}
               </div>
-              <div style={{ fontSize: '0.76rem', color: 'var(--text-medium)' }}>
-                {orders[0] ? `Latest: ${orders[0].orderNumber} (${new Date(orders[0].createdAt).toLocaleDateString('en-IN')})` : 'Zero active balance pending'}
+              <div style={{ fontSize: '0.74rem', color: 'var(--text-medium)' }}>
+                {orders[0] ? `Latest: ${orders[0].orderNumber}` : 'Zero active balance pending'}
               </div>
             </div>
 
@@ -660,11 +724,11 @@ export default function RetailerDashboard() {
                 onClick={() => handleTabChange('orders')}
                 style={{
                   width: '100%',
-                  backgroundColor: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  padding: '9px 12px',
+                  backgroundColor: 'var(--bg-surface-alt)',
+                  border: '1px solid var(--border-light)',
+                  padding: '8px 12px',
                   borderRadius: '8px',
-                  fontSize: '0.82rem',
+                  fontSize: '0.8rem',
                   fontWeight: '700',
                   color: 'var(--primary-blue)',
                   cursor: 'pointer',
@@ -674,7 +738,7 @@ export default function RetailerDashboard() {
                   gap: '6px'
                 }}
               >
-                <Package size={15} /> View Order History
+                <Package size={14} /> View Order History
               </button>
             </div>
           </div>
@@ -682,31 +746,47 @@ export default function RetailerDashboard() {
           {/* Card 4: Chemist Margins & Live Schemes */}
           <div style={{
             backgroundColor: 'var(--bg-card)',
-            borderRadius: '14px',
+            borderRadius: '16px',
             padding: '20px',
             border: '1px solid var(--border-light)',
-            boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
+            boxShadow: '0 4px 16px -2px rgba(0,0,0,0.04)',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            position: 'relative',
-            overflow: 'hidden'
+            transition: 'transform 0.2s ease, box-shadow 0.2s ease'
           }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', backgroundColor: '#ea580c' }}></div>
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <span style={{ fontSize: '0.78rem', fontWeight: '800', color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Live Bonus Schemes
-                </span>
-                <span style={{ fontSize: '0.72rem', fontWeight: '800', padding: '3px 8px', borderRadius: '12px', backgroundColor: '#fff7ed', color: '#ea580c' }}>
-                  Active Deals
-                </span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '10px',
+                    backgroundColor: '#fff7ed',
+                    color: '#ea580c',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <Sparkles size={20} />
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '0.74rem', fontWeight: '800', color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block' }}>
+                      Bonus Schemes
+                    </span>
+                    <span style={{ fontSize: '0.7rem', fontWeight: '800', padding: '2px 7px', borderRadius: '10px', backgroundColor: '#fff7ed', color: '#ea580c', display: 'inline-block', marginTop: '2px' }}>
+                      Active Deals
+                    </span>
+                  </div>
+                </div>
               </div>
-              <div style={{ fontSize: '1.75rem', fontWeight: '900', color: '#ea580c', marginBottom: '4px' }}>
+
+              <div style={{ fontSize: '1.75rem', fontWeight: '900', color: '#ea580c', marginBottom: '4px', letterSpacing: '-0.02em' }}>
                 10+1 & 15+2
               </div>
-              <div style={{ fontSize: '0.76rem', color: '#059669', fontWeight: '800' }}>
-                ✨ Up to 40% Chemist Profit Margin
+              <div style={{ fontSize: '0.74rem', color: '#059669', fontWeight: '800' }}>
+                ✨ Up to 40% Chemist Margin
               </div>
             </div>
 
@@ -717,9 +797,9 @@ export default function RetailerDashboard() {
                   width: '100%',
                   backgroundColor: '#fff7ed',
                   border: '1px solid #fed7aa',
-                  padding: '9px 12px',
+                  padding: '8px 12px',
                   borderRadius: '8px',
-                  fontSize: '0.82rem',
+                  fontSize: '0.8rem',
                   fontWeight: '700',
                   color: '#ea580c',
                   cursor: 'pointer',
@@ -729,86 +809,93 @@ export default function RetailerDashboard() {
                   gap: '6px'
                 }}
               >
-                <Sparkles size={15} /> View Margin Schemes
+                <Sparkles size={14} /> View Margin Schemes
               </button>
             </div>
           </div>
 
         </div>
 
-        {/* Tab Navigation Controls */}
+        {/* Floating Segmented Pill Tab Switcher */}
         <div style={{
           display: 'flex',
-          gap: '8px',
-          borderBottom: '2px solid var(--border-light)',
-          marginBottom: '20px',
+          gap: '6px',
+          backgroundColor: 'var(--bg-surface-alt, #f1f5f9)',
+          padding: '5px',
+          borderRadius: '14px',
+          border: '1px solid var(--border-light, #e2e8f0)',
+          marginBottom: '22px',
           overflowX: 'auto',
           WebkitOverflowScrolling: 'touch',
-          paddingBottom: '2px'
+          width: 'fit-content',
+          maxWidth: '100%'
         }}>
           <button
             onClick={() => handleTabChange('orders')}
             style={{
-              padding: '11px 20px',
+              padding: '9px 18px',
+              borderRadius: '10px',
               border: 'none',
-              background: 'transparent',
-              fontSize: '0.94rem',
-              fontWeight: '800',
-              color: activeTab === 'orders' ? 'var(--primary-blue)' : 'var(--text-medium)',
-              borderBottom: activeTab === 'orders' ? '3px solid var(--primary-blue)' : '3px solid transparent',
+              background: activeTab === 'orders' ? 'var(--primary-blue, #0c3d6c)' : 'transparent',
+              color: activeTab === 'orders' ? '#ffffff' : 'var(--text-medium, #64748b)',
+              fontSize: '0.86rem',
+              fontWeight: '700',
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: '7px',
               whiteSpace: 'nowrap',
-              marginBottom: '-2px'
+              boxShadow: activeTab === 'orders' ? '0 2px 8px rgba(12, 61, 108, 0.25)' : 'none',
+              transition: 'all 0.18s ease'
             }}
           >
-            <Package size={18} />
+            <Package size={16} />
             <span>{t('retailerDashboard.tabMyOrders', 'My Wholesale Orders')} ({orders.length})</span>
           </button>
 
           <button
             onClick={() => handleTabChange('invoices')}
             style={{
-              padding: '11px 20px',
+              padding: '9px 18px',
+              borderRadius: '10px',
               border: 'none',
-              background: 'transparent',
-              fontSize: '0.94rem',
-              fontWeight: '800',
-              color: activeTab === 'invoices' ? 'var(--primary-blue)' : 'var(--text-medium)',
-              borderBottom: activeTab === 'invoices' ? '3px solid var(--primary-blue)' : '3px solid transparent',
+              background: activeTab === 'invoices' ? 'var(--primary-blue, #0c3d6c)' : 'transparent',
+              color: activeTab === 'invoices' ? '#ffffff' : 'var(--text-medium, #64748b)',
+              fontSize: '0.86rem',
+              fontWeight: '700',
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: '7px',
               whiteSpace: 'nowrap',
-              marginBottom: '-2px'
+              boxShadow: activeTab === 'invoices' ? '0 2px 8px rgba(12, 61, 108, 0.25)' : 'none',
+              transition: 'all 0.18s ease'
             }}
           >
-            <FileText size={18} />
+            <FileText size={16} />
             <span>{t('retailerDashboard.tabInvoicesStatements', 'Invoices & Statements')} ({ledger?.invoices?.length || 0})</span>
           </button>
 
           <button
             onClick={() => handleTabChange('schemes')}
             style={{
-              padding: '11px 20px',
+              padding: '9px 18px',
+              borderRadius: '10px',
               border: 'none',
-              background: 'transparent',
-              fontSize: '0.94rem',
-              fontWeight: '800',
-              color: activeTab === 'schemes' ? '#ea580c' : 'var(--text-medium)',
-              borderBottom: activeTab === 'schemes' ? '3px solid #ea580c' : '3px solid transparent',
+              background: activeTab === 'schemes' ? '#ea580c' : 'transparent',
+              color: activeTab === 'schemes' ? '#ffffff' : 'var(--text-medium, #64748b)',
+              fontSize: '0.86rem',
+              fontWeight: '700',
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: '7px',
               whiteSpace: 'nowrap',
-              marginBottom: '-2px'
+              boxShadow: activeTab === 'schemes' ? '0 2px 8px rgba(234, 88, 12, 0.3)' : 'none',
+              transition: 'all 0.18s ease'
             }}
           >
-            <Sparkles size={18} />
+            <Sparkles size={16} />
             <span>{t('retailerDashboard.tabHighMarginSchemes', 'High-Margin Schemes & PTR Rates')}</span>
           </button>
         </div>

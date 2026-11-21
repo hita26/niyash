@@ -2275,6 +2275,14 @@ body.theme-bw {
 }
 
 /* Smooth Enterprise Theme Switching Across Entire Website */
+.theme-toggle-single-btn:hover {
+  transform: scale(1.08);
+  border-color: var(--primary-blue, #0c3d6c);
+}
+.theme-toggle-single-btn:active {
+  transform: scale(0.94);
+}
+
 html.theme-switching,
 html.theme-switching *,
 html.theme-switching *::before,

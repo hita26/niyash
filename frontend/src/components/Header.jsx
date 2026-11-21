@@ -4,7 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   ShoppingBag, Search, Phone, Mail, ChevronDown, ChevronRight, Menu, X, User, LogOut, LogIn, ShieldCheck, FileText, Zap,
   Package, Flame, CreditCard, Factory, Handshake, Users, PhoneCall, Shield,
-  ArrowRight, MessageCircle, ExternalLink, Lock, Info, Building2, Store, Sparkles, RefreshCw
+  ArrowRight, MessageCircle, ExternalLink, Lock, Info, Building2, Store, Sparkles, RefreshCw, Globe
 } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import { useLanguage, LanguageSelector } from '../context/LanguageContext';
@@ -265,45 +265,36 @@ function Header({
     return (
       <header className="b2b-header-shell" style={{ width: '100%', position: 'sticky', top: 0, zIndex: 1000, boxShadow: '0 4px 20px rgba(0,0,0,0.08)', backgroundColor: 'var(--bg-surface)' }}>
         
-        {/* Main Workstation Header Bar */}
-        <div style={{ backgroundColor: 'var(--bg-surface)', borderBottom: '1px solid var(--border-light)', padding: '10px 16px' }}>
-          <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+        {/* Main Workstation Header Bar - STRICT SINGLE LINE ENTERPRISE B2B BAR */}
+        <div style={{ backgroundColor: 'var(--bg-surface)', borderBottom: '1px solid var(--border-light)', padding: '8px 16px' }}>
+          <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'nowrap', minHeight: '50px' }}>
             
-            {/* Top Row on Mobile: Logo & Portal Badge (Left) + Cart, Theme, Hamburger (Right) */}
+            {/* Top Row on Mobile: Logo (Left) + Cart, Theme, Hamburger (Right) */}
             <div className="hide-desktop" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '8px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Link to="/dashboard" aria-label="Niyansh Pharma B2B Dashboard" style={{ display: 'flex', alignItems: 'center' }}>
-                  <img 
-                    src={brandLogo} 
-                    alt="Niyansh Pharma B2B" 
-                    style={{ height: '38px', width: 'auto', display: 'block', objectFit: 'contain' }} 
-                  />
-                </Link>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', padding: '2px 8px', borderRadius: '16px' }}>
-                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#10b981', display: 'inline-block' }}></span>
-                  <span style={{ fontSize: '0.7rem', fontWeight: '800', color: '#065f46', letterSpacing: '0.4px', textTransform: 'uppercase' }}>
-                    {t('nav.chemistPortal', 'Chemist Portal')}
-                  </span>
-                </div>
-              </div>
+              <Link to="/dashboard" aria-label="Niyansh Pharma B2B Dashboard" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+                <img 
+                  src={brandLogo} 
+                  alt="Niyansh Pharma" 
+                  style={{ height: '36px', width: 'auto', display: 'block', objectFit: 'contain' }} 
+                />
+              </Link>
 
-              {/* Mobile Action Controls: Theme & Admin Access */}
+              {/* Mobile Action Controls: Cart, Theme Toggle & Hamburger */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <button 
                   onClick={onOpenCart}
-                  className="cart-icon-btn hide-mobile"
                   style={{
-                    display: 'none',
+                    display: 'inline-flex',
                     alignItems: 'center',
                     gap: '4px',
-                    backgroundColor: cartCount > 0 ? '#ea580c' : '#f1f5f9',
+                    backgroundColor: cartCount > 0 ? '#ea580c' : 'var(--bg-surface-alt)',
                     color: cartCount > 0 ? '#ffffff' : 'var(--text-dark)',
-                    border: cartCount > 0 ? 'none' : '1px solid #cbd5e1',
+                    border: '1px solid var(--border-light)',
                     borderRadius: '16px',
-                    padding: '4px 8px',
+                    padding: '5px 10px',
                     cursor: 'pointer',
                     fontWeight: '700',
-                    fontSize: '0.76rem'
+                    fontSize: '0.78rem'
                   }}
                   title={`Wholesale Cart (${cartCount})`}
                 >
@@ -335,25 +326,19 @@ function Header({
               </div>
             </div>
 
-            {/* Left: Brand Logo & B2B Workstation Chip on Desktop */}
-            <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <Link to="/dashboard" aria-label="Niyansh Pharma B2B Dashboard" style={{ display: 'flex', alignItems: 'center' }}>
+            {/* Left: Brand Logo on Desktop */}
+            <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+              <Link to="/dashboard" aria-label="Niyansh Pharma B2B Dashboard" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
                 <img 
                   src={brandLogo} 
-                  alt="Niyansh Pharma B2B" 
-                  style={{ height: '48px', width: 'auto', display: 'block', objectFit: 'contain' }} 
+                  alt="Niyansh Pharma" 
+                  style={{ height: '42px', width: 'auto', display: 'block', objectFit: 'contain' }} 
                 />
               </Link>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', padding: '3px 10px', borderRadius: '20px' }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981', display: 'inline-block' }}></span>
-                <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#065f46', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-                  {t('nav.chemistPortal', 'Chemist Portal')}
-                </span>
-              </div>
             </div>
 
-            {/* Center: Fast Wholesale Medicine Search */}
-            <div ref={searchContainerRef} className="search-wrapper" style={{ position: 'relative', flex: '1 1 220px', minWidth: 0, maxWidth: '540px' }}>
+            {/* Center: Fast Wholesale Medicine Search (Flexible Single-Line Width) */}
+            <div ref={searchContainerRef} className="search-wrapper hide-mobile" style={{ position: 'relative', flex: '1 1 auto', minWidth: '160px', maxWidth: '440px', margin: '0 8px' }}>
               <form 
                 onSubmit={handleSearchSubmit} 
                 style={{ 
@@ -362,12 +347,12 @@ function Header({
                   backgroundColor: 'var(--bg-surface-alt)', 
                   border: '1.5px solid var(--border-light)', 
                   borderRadius: '30px', 
-                  padding: '4px 6px 4px 16px',
+                  padding: '4px 6px 4px 14px',
                   transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
                 }}
                 role="search"
               >
-                <Search size={16} color="#64748b" style={{ marginRight: '8px', flexShrink: 0 }} />
+                <Search size={15} color="#64748b" style={{ marginRight: '8px', flexShrink: 0 }} />
                 <input
                   ref={searchInputRef}
                   type="text"
@@ -385,7 +370,7 @@ function Header({
                     background: 'transparent',
                     outline: 'none',
                     width: '100%',
-                    fontSize: '0.85rem',
+                    fontSize: '0.84rem',
                     color: 'var(--text-dark)',
                     fontWeight: '500'
                   }}
@@ -398,8 +383,8 @@ function Header({
                     color: '#ffffff', 
                     border: 'none', 
                     borderRadius: '20px', 
-                    padding: '6px 14px', 
-                    fontSize: '0.78rem', 
+                    padding: '5px 12px', 
+                    fontSize: '0.76rem', 
                     fontWeight: '700', 
                     cursor: 'pointer',
                     flexShrink: 0 
@@ -525,32 +510,28 @@ function Header({
               )}
             </div>
 
-            {/* Right: Operational Controls & Store Profile (Desktop) */}
-            <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {/* Right: Operational Controls & Store Profile on Desktop (SINGLE ROW, NO WRAP) */}
+            <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
               
-              {/* Language Selector in B2B Header */}
-              <LanguageSelector />
-
-              {/* Credit Line Status Badge (Desktop only) */}
+              {/* Credit Line Status Badge */}
               <div 
-                className="hide-mobile"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '6px',
-                  backgroundColor: '#eff6ff',
-                  border: '1px solid #bfdbfe',
-                  color: '#1d4ed8',
-                  padding: '6px 12px',
+                  gap: '5px',
+                  backgroundColor: 'rgba(2, 132, 199, 0.08)',
+                  border: '1px solid rgba(2, 132, 199, 0.25)',
+                  color: 'var(--primary-blue, #0284c7)',
+                  padding: '5px 10px',
                   borderRadius: '20px',
-                  fontSize: '0.78rem',
-                  fontWeight: '700'
+                  fontSize: '0.76rem',
+                  fontWeight: '700',
+                  whiteSpace: 'nowrap'
                 }}
-                title="Allocated Wholesale Credit Line"
+                title="Allocated Wholesale Credit Line: ₹1,00,000"
               >
-                <CreditCard size={14} />
-                <span>{t('retailerDashboard.creditAllocated', 'Credit')}: ₹1.00L</span>
-                <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#3b82f6' }}></span>
+                <CreditCard size={13} />
+                <span>₹1.00L Limit</span>
               </div>
 
               {/* Wholesale Cart Button */}
@@ -559,25 +540,29 @@ function Header({
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '6px',
-                  backgroundColor: cartCount > 0 ? '#ea580c' : '#f1f5f9',
+                  gap: '5px',
+                  backgroundColor: cartCount > 0 ? '#ea580c' : 'var(--bg-surface-alt, #f8fafc)',
                   color: cartCount > 0 ? '#ffffff' : 'var(--text-dark)',
-                  border: cartCount > 0 ? 'none' : '1px solid #cbd5e1',
+                  border: cartCount > 0 ? '1.5px solid #ea580c' : '1.5px solid var(--border-light, #e2e8f0)',
                   borderRadius: '20px',
-                  padding: '6px 14px',
+                  padding: '5px 11px',
                   cursor: 'pointer',
                   fontWeight: '700',
-                  fontSize: '0.82rem',
+                  fontSize: '0.78rem',
+                  whiteSpace: 'nowrap',
                   transition: 'all 0.2s ease'
                 }}
                 title={`Wholesale Cart (${cartCount} items)`}
               >
-                <ShoppingBag size={16} />
-                <span>{t('nav.cart', 'Cart')} ({cartCount})</span>
+                <ShoppingBag size={14} />
+                <span>Cart ({cartCount})</span>
               </button>
 
-              {/* Theme Toggle */}
+              {/* Single Theme Toggle Button (Light ☀️ / Dark 🌙 Only) */}
               <ThemeToggle />
+
+              {/* Language Selector */}
+              <LanguageSelector />
 
               {/* Chemist Store Profile Dropdown */}
               <div style={{ position: 'relative' }} ref={userMenuRef}>
@@ -586,24 +571,25 @@ function Header({
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '7px',
-                    backgroundColor: 'var(--bg-surface-alt)',
-                    border: '1.5px solid var(--border-light)',
+                    gap: '6px',
+                    backgroundColor: 'var(--bg-surface-alt, #f8fafc)',
+                    border: '1.5px solid var(--border-light, #e2e8f0)',
                     borderRadius: '24px',
-                    padding: '6px 12px',
+                    padding: '5px 12px',
                     cursor: 'pointer',
-                    fontSize: '0.84rem',
+                    fontSize: '0.82rem',
                     fontWeight: '700',
-                    color: 'var(--primary-blue)'
+                    color: 'var(--primary-blue, #0c3d6c)',
+                    whiteSpace: 'nowrap'
                   }}
                   aria-expanded={isUserMenuOpen}
                   aria-haspopup="true"
                 >
-                  <Building2 size={16} color="var(--primary-blue)" />
-                  <span style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <Building2 size={15} color="var(--primary-blue, #0c3d6c)" />
+                  <span style={{ maxWidth: '110px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {chemistInitial}
                   </span>
-                  <ChevronDown size={14} style={{ transform: isUserMenuOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }} />
+                  <ChevronDown size={13} style={{ transform: isUserMenuOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }} />
                 </button>
 
                 {isUserMenuOpen && (
@@ -665,6 +651,13 @@ function Header({
                     >
                       <Package size={16} color="#6366f1" /> {t('nav.publicCatalog', 'Browse Public Catalog (MRP)')}
                     </Link>
+                    <Link 
+                      to="/" 
+                      onClick={() => setIsUserMenuOpen(false)}
+                      style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', fontSize: '0.85rem', color: 'var(--primary-blue)', textDecoration: 'none', fontWeight: '700', borderBottom: '1px solid #f1f5f9' }}
+                    >
+                      <Globe size={16} /> {t('nav.publicSite', 'Switch to Public Website')}
+                    </Link>
 
                     <button 
                       onClick={() => { setIsUserMenuOpen(false); onLogout(); navigate('/', { replace: true }); }}
@@ -689,72 +682,76 @@ function Header({
                 )}
               </div>
 
-              {/* Exit to Public Website Button */}
+              {/* Exit to Public Website Quick Icon */}
               <Link
                 to="/"
-                className="hide-mobile"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '5px',
-                  backgroundColor: '#f1f5f9',
-                  color: '#475569',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '20px',
-                  padding: '6px 12px',
-                  fontSize: '0.78rem',
-                  fontWeight: '700',
+                  justifyContent: 'center',
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '50%',
+                  border: '1.5px solid var(--border-light, #e2e8f0)',
+                  backgroundColor: 'var(--bg-surface-alt, #f8fafc)',
+                  color: 'var(--text-medium, #64748b)',
                   textDecoration: 'none',
-                  transition: 'all 0.2s ease'
+                  transition: 'all 0.2s ease',
+                  flexShrink: 0
                 }}
-                title="Return to Public Retail Website"
+                title={t('nav.publicSite', 'Switch to Public Website')}
               >
-                <span>🌐 {t('nav.publicSite', 'Public Site')}</span>
+                <Globe size={16} />
               </Link>
 
-              {/* Mobile Drawer Hamburger */}
+            </div>
+
+          </div>
+
+          {/* Mobile Secondary Search Bar */}
+          <div className="hide-desktop" style={{ width: '100%', paddingTop: '8px' }}>
+            <form 
+              onSubmit={handleSearchSubmit} 
+              style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                backgroundColor: 'var(--bg-surface-alt)', 
+                border: '1.5px solid var(--border-light)', 
+                borderRadius: '30px', 
+                padding: '4px 6px 4px 12px'
+              }}
+              role="search"
+            >
+              <Search size={14} color="#64748b" style={{ marginRight: '6px', flexShrink: 0 }} />
+              <input
+                type="text"
+                placeholder={t('nav.searchB2BPlaceholder', 'Search Wholesale Medicines...')}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{
+                  border: 'none',
+                  background: 'transparent',
+                  outline: 'none',
+                  width: '100%',
+                  fontSize: '0.8rem',
+                  color: 'var(--text-dark)'
+                }}
+              />
               <button 
-                className="mobile-menu-btn" 
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-                aria-expanded={isMobileMenuOpen}
-                style={{ marginLeft: '4px' }}
+                type="submit" 
+                style={{ 
+                  backgroundColor: '#0c3d6c', 
+                  color: '#ffffff', 
+                  border: 'none', 
+                  borderRadius: '20px', 
+                  padding: '4px 10px', 
+                  fontSize: '0.74rem', 
+                  fontWeight: '700' 
+                }}
               >
-                {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                {t('common.search', 'Search')}
               </button>
-
-            </div>
-
-            {/* Mobile Sub-bar: Language & Profile dropdown (Mobile only) */}
-            <div className="hide-desktop" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '8px', paddingTop: '4px' }}>
-              <LanguageSelector />
-              <div style={{ position: 'relative' }}>
-                <button 
-                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    backgroundColor: 'var(--bg-surface-alt)',
-                    border: '1.5px solid var(--border-light)',
-                    borderRadius: '20px',
-                    padding: '4px 10px',
-                    cursor: 'pointer',
-                    fontSize: '0.78rem',
-                    fontWeight: '700',
-                    color: 'var(--primary-blue)'
-                  }}
-                  aria-expanded={isUserMenuOpen}
-                >
-                  <Building2 size={14} color="var(--primary-blue)" />
-                  <span style={{ maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {chemistInitial}
-                  </span>
-                  <ChevronDown size={13} style={{ transform: isUserMenuOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }} />
-                </button>
-              </div>
-            </div>
-
+            </form>
           </div>
         </div>
 

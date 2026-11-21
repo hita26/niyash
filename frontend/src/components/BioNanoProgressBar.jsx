@@ -106,9 +106,20 @@ export default function BioNanoProgressBar() {
     }, 180);
   };
 
+  // Check if current route is excluded from the top progress bar (Admin & Chemist Workstation)
+  const isExcluded = 
+    location.pathname.startsWith('/admin') ||
+    location.pathname.startsWith('/dashboard') ||
+    location.pathname.startsWith('/portal') ||
+    location.pathname.startsWith('/retailer-dashboard') ||
+    location.pathname.startsWith('/quick-order') ||
+    location.pathname.startsWith('/order') ||
+    location.pathname.startsWith('/outstanding') ||
+    location.pathname.startsWith('/ledger');
+
   // Check overall activity state
   const evaluateActivity = () => {
-    if (location.pathname.startsWith('/admin')) {
+    if (isExcluded) {
       clearTimers();
       setVisible(false);
       isVisibleRef.current = false;
@@ -156,8 +167,8 @@ export default function BioNanoProgressBar() {
     }
   }, [location.pathname, location.search]);
 
-  // Disable top progress bar completely on the admin panel to eliminate visual flickering
-  if (location.pathname.startsWith('/admin')) {
+  // Disable top progress bar completely on the admin panel & chemist workstation to eliminate visual distraction
+  if (isExcluded) {
     return null;
   }
 

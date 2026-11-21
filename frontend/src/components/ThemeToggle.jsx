@@ -1,224 +1,76 @@
-import React, { useState } from 'react';
-import { Sun, Moon, Contrast } from 'lucide-react';
+import React from 'react';
+import { Sun, Moon } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 
 /**
- * Responsive Multi-Mode Theme Toggle
- * Supports:
- * - Light Mode ☀️
- * - Dark Mode 🌙
- * - Black & White Mode ◐ (High-Contrast Corporate Monochrome)
- * Fully accessible with tooltips across English, Gujarati, and Hindi.
+ * Enterprise Single-Button Theme Toggle (Light ☀️ / Dark 🌙 Only)
+ * High-performance 1-click switcher matching modern SaaS standards (GitHub, Vercel, Stripe).
+ * Fully accessible with multilingual tooltips across English, Gujarati, and Hindi.
  */
 export default function ThemeToggle({ className = '', style = {}, variant = 'default' }) {
-  const { theme, setTheme, isDark, isBW } = useTheme();
+  const { isDark, toggleTheme } = useTheme();
   const { language } = useLanguage();
 
-  const handleSelect = (mode) => {
-    setTheme(mode);
+  const titleText = isDark
+    ? (language === 'gu' ? 'લાઇટ મોડ કરો' : language === 'hi' ? 'लाइट मोड चालू करें' : 'Switch to Light Mode')
+    : (language === 'gu' ? 'ડાર્ક મોડ કરો' : language === 'hi' ? 'डार्क मोड चालू करें' : 'Switch to Dark Mode');
+
+  const handleClick = (e) => {
+    e.stopPropagation();
+    toggleTheme();
     if (typeof window !== 'undefined' && window.triggerHaptic) {
       window.triggerHaptic('selection');
     }
   };
 
-  const labels = {
-    light: language === 'gu' ? 'લાઇટ' : language === 'hi' ? 'लाइट' : 'Light',
-    dark: language === 'gu' ? 'ડાર્ક' : language === 'hi' ? 'डार्क' : 'Dark',
-    bw: language === 'gu' ? 'B&W' : language === 'hi' ? 'B&W' : 'B&W'
-  };
-
-  const tooltips = {
-    light: language === 'gu' ? 'લાઇટ મોડ' : language === 'hi' ? 'लाइट मोड' : 'Light Mode',
-    dark: language === 'gu' ? 'ડાર્ક મોડ' : language === 'hi' ? 'डार्क मोड' : 'Dark Mode',
-    bw: language === 'gu' ? 'બ્લેક એન્ડ વ્હાઇટ મોડ' : language === 'hi' ? 'ब्लैक एंड व्हाइट मोड' : 'Black & White Mode'
-  };
-
-  if (variant === 'segmented') {
-    return (
-      <div 
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          backgroundColor: 'var(--bg-surface-alt, #f1f5f9)',
-          padding: '3px',
-          borderRadius: '24px',
-          border: '1px solid var(--border-light, #e2e8f0)',
-          gap: '3px',
-          width: '100%',
-          boxSizing: 'border-box',
-          ...style
-        }}
-        role="group"
-        aria-label="Theme selection"
-      >
-        <button
-          type="button"
-          onClick={() => handleSelect('light')}
-          title={tooltips.light}
-          aria-label={tooltips.light}
-          style={{
-            padding: '6px 8px',
-            borderRadius: '20px',
-            border: 'none',
-            backgroundColor: theme === 'light' ? 'var(--primary-blue, #0c3d6c)' : 'transparent',
-            color: theme === 'light' ? '#ffffff' : 'var(--text-medium, #475569)',
-            fontSize: '0.78rem',
-            fontWeight: theme === 'light' ? '800' : '600',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '4px',
-            boxShadow: theme === 'light' ? '0 2px 6px rgba(12, 61, 108, 0.25)' : 'none'
-          }}
-        >
-          <Sun size={13} />
-          <span>{labels.light}</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => handleSelect('dark')}
-          title={tooltips.dark}
-          aria-label={tooltips.dark}
-          style={{
-            padding: '6px 8px',
-            borderRadius: '20px',
-            border: 'none',
-            backgroundColor: theme === 'dark' ? 'var(--primary-blue, #0284c7)' : 'transparent',
-            color: theme === 'dark' ? '#ffffff' : 'var(--text-medium, #475569)',
-            fontSize: '0.78rem',
-            fontWeight: theme === 'dark' ? '800' : '600',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '4px',
-            boxShadow: theme === 'dark' ? '0 2px 6px rgba(2, 132, 199, 0.35)' : 'none'
-          }}
-        >
-          <Moon size={13} />
-          <span>{labels.dark}</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => handleSelect('bw')}
-          title={tooltips.bw}
-          aria-label={tooltips.bw}
-          style={{
-            padding: '6px 8px',
-            borderRadius: '20px',
-            border: 'none',
-            backgroundColor: theme === 'bw' ? '#09090b' : 'transparent',
-            color: theme === 'bw' ? '#ffffff' : 'var(--text-medium, #475569)',
-            fontSize: '0.78rem',
-            fontWeight: theme === 'bw' ? '800' : '600',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '4px',
-            boxShadow: theme === 'bw' ? '0 2px 6px rgba(0, 0, 0, 0.4)' : 'none'
-          }}
-        >
-          <Contrast size={13} />
-          <span>{labels.bw}</span>
-        </button>
-      </div>
-    );
-  }
-
-  // Default compact header control: Sleek 3-mode segmented pill
   return (
-    <div 
-      className={`theme-mode-pill ${className}`}
+    <button
+      type="button"
+      onClick={handleClick}
+      title={titleText}
+      aria-label={titleText}
+      className={`theme-toggle-single-btn ${className}`}
       style={{
+        width: '36px',
+        height: '36px',
+        borderRadius: '50%',
+        border: '1.5px solid var(--border-light, #e2e8f0)',
+        backgroundColor: 'var(--bg-surface-alt, #f8fafc)',
+        color: isDark ? '#f59e0b' : '#0c3d6c',
         display: 'inline-flex',
         alignItems: 'center',
-        backgroundColor: 'var(--bg-surface-alt, #f1f5f9)',
-        padding: '2px',
-        borderRadius: '20px',
-        border: '1.5px solid var(--border-light, #e2e8f0)',
-        gap: '2px',
-        boxSizing: 'border-box',
+        justifyContent: 'center',
+        cursor: 'pointer',
+        transition: 'all 0.22s cubic-bezier(0.4, 0, 0.2, 1)',
+        boxShadow: isDark 
+          ? '0 0 14px rgba(245, 158, 11, 0.25), 0 2px 4px rgba(0,0,0,0.3)' 
+          : '0 2px 6px rgba(0,0,0,0.06)',
+        flexShrink: 0,
+        position: 'relative',
         ...style
       }}
-      role="group"
-      aria-label="Theme mode switcher"
     >
-      <button
-        type="button"
-        onClick={() => handleSelect('light')}
-        title={tooltips.light}
-        aria-label={tooltips.light}
-        style={{
-          width: '28px',
-          height: '28px',
-          borderRadius: '50%',
-          border: 'none',
-          backgroundColor: theme === 'light' ? 'var(--primary-blue, #0c3d6c)' : 'transparent',
-          color: theme === 'light' ? '#ffffff' : 'var(--text-medium, #64748b)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-          boxShadow: theme === 'light' ? '0 2px 5px rgba(12, 61, 108, 0.25)' : 'none'
-        }}
-      >
-        <Sun size={14} strokeWidth={theme === 'light' ? 2.5 : 2} />
-      </button>
-
-      <button
-        type="button"
-        onClick={() => handleSelect('dark')}
-        title={tooltips.dark}
-        aria-label={tooltips.dark}
-        style={{
-          width: '28px',
-          height: '28px',
-          borderRadius: '50%',
-          border: 'none',
-          backgroundColor: theme === 'dark' ? 'var(--primary-blue, #0284c7)' : 'transparent',
-          color: theme === 'dark' ? '#ffffff' : 'var(--text-medium, #64748b)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-          boxShadow: theme === 'dark' ? '0 2px 5px rgba(2, 132, 199, 0.35)' : 'none'
-        }}
-      >
-        <Moon size={14} strokeWidth={theme === 'dark' ? 2.5 : 2} />
-      </button>
-
-      <button
-        type="button"
-        onClick={() => handleSelect('bw')}
-        title={tooltips.bw}
-        aria-label={tooltips.bw}
-        style={{
-          width: '28px',
-          height: '28px',
-          borderRadius: '50%',
-          border: 'none',
-          backgroundColor: theme === 'bw' ? '#09090b' : 'transparent',
-          color: theme === 'bw' ? '#ffffff' : 'var(--text-medium, #64748b)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-          boxShadow: theme === 'bw' ? '0 2px 5px rgba(0, 0, 0, 0.4)' : 'none'
-        }}
-      >
-        <Contrast size={14} strokeWidth={theme === 'bw' ? 2.5 : 2} />
-      </button>
-    </div>
+      {isDark ? (
+        <Sun 
+          size={18} 
+          strokeWidth={2.4} 
+          style={{ 
+            color: '#fbbf24',
+            filter: 'drop-shadow(0 0 4px rgba(251, 191, 36, 0.5))',
+            transition: 'transform 0.3s ease' 
+          }} 
+        />
+      ) : (
+        <Moon 
+          size={17} 
+          strokeWidth={2.3} 
+          style={{ 
+            color: '#1e293b',
+            transition: 'transform 0.3s ease' 
+          }} 
+        />
+      )}
+    </button>
   );
 }

@@ -66,7 +66,9 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
     let isCancelled = false;
     const fetchMetaFilters = async () => {
       try {
-        const res = await fetch('/api/products/meta/filters');
+        const res = await fetch('/api/products/meta/filters', {
+          headers: { 'x-silent-request': 'true' }
+        });
         if (res.ok) {
           const data = await res.json();
           if (!isCancelled) {
@@ -203,7 +205,9 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
       queryParams.append('page', pageVal);
       queryParams.append('limit', '12');
 
-      const response = await fetch(`/api/products?${queryParams.toString()}`);
+      const response = await fetch(`/api/products?${queryParams.toString()}`, {
+        headers: isSilent ? { 'x-silent-request': 'true' } : {}
+      });
       if (!response.ok) throw new Error('Failed to fetch products');
       
       const data = await response.json();

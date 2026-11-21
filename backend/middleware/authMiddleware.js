@@ -16,11 +16,11 @@ const protect = async (req, res, next) => {
       req.user = await User.findById(decoded.id).select('-password');
       
       if (!req.user) {
-        return res.status(401).json({ message: 'Not authorized, user not found' });
+        return res.status(401).json({ success: false, message: 'Not authorized, user not found', isTerminated: true });
       }
 
       if (req.user.isActive === false) {
-        return res.status(403).json({ message: 'Account deactivated. Please contact Super Admin.' });
+        return res.status(403).json({ success: false, message: 'Account deactivated. Please contact Super Admin.', isTerminated: true });
       }
 
       return next();

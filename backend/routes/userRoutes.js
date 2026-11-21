@@ -242,31 +242,38 @@ router.post('/register', async (req, res) => {
     });
 
     if (user) {
-      // 1. Dispatch background acknowledgment email to chemist with Document Security Guarantee
-      sendChemistRegistrationPendingEmail({
-        to: user.email,
-        name: user.name,
-        companyName: user.companyName,
-        drugLicense: `${user.drugLicense1} / ${user.drugLicense2}`,
-        dl1: user.drugLicense1,
-        dl2: user.drugLicense2,
-        pan: user.pan,
-        gstin: user.gstin,
-        phone: user.phone
-      }).catch(mailErr => console.warn('[Register] Pending email dispatch notice:', mailErr.message));
-
-      // 2. Dispatch real-time alert email to Superadmin (info@niyanshpharma.com)
-      sendSuperAdminNewChemistAlertEmail({
-        storeName: user.companyName,
-        contactPerson: user.name,
-        email: user.email,
-        phone: user.phone,
-        dl1: user.drugLicense1,
-        dl2: user.drugLicense2,
-        pan: user.pan,
-        gstin: user.gstin,
-        registeredAt: user.createdAt
-      }).catch(mailErr => console.warn('[Register] Superadmin alert email dispatch notice:', mailErr.message));
+      // 1. Dispatch background acknowledgment email to chemist with Document Security Guarantee & SuperAdmin Alert (Awaited with 4s timeout)
+      try {
+        await Promise.race([
+          Promise.allSettled([
+            sendChemistRegistrationPendingEmail({
+              to: user.email,
+              name: user.name,
+              companyName: user.companyName,
+              drugLicense: `${user.drugLicense1} / ${user.drugLicense2}`,
+              dl1: user.drugLicense1,
+              dl2: user.drugLicense2,
+              pan: user.pan,
+              gstin: user.gstin,
+              phone: user.phone
+            }),
+            sendSuperAdminNewChemistAlertEmail({
+              storeName: user.companyName,
+              contactPerson: user.name,
+              email: user.email,
+              phone: user.phone,
+              dl1: user.drugLicense1,
+              dl2: user.drugLicense2,
+              pan: user.pan,
+              gstin: user.gstin,
+              registeredAt: user.createdAt
+            })
+          ]),
+          new Promise((resolve) => setTimeout(resolve, 4000))
+        ]);
+      } catch (mailErr) {
+        console.warn('[Register] Email dispatch notice:', mailErr.message);
+      }
 
       logAuditEvent({
         req,
@@ -1336,12 +1343,19 @@ router.post('/chemists/:id/reject', protect, adminOnly, async (req, res) => {
     chemist.rejectionReason = reason?.trim() || 'KYC Documents or Drug License Verification Failed';
     await chemist.save();
 
-    sendChemistRejectionEmail({
-      to: chemist.email,
-      name: chemist.name,
-      companyName: chemist.companyName,
-      reason: chemist.rejectionReason
-    }).catch(e => console.warn('[Chemist Rejection] Email notification notice:', e.message));
+    try {
+      await Promise.race([
+        sendChemistRejectionEmail({
+          to: chemist.email,
+          name: chemist.name,
+          companyName: chemist.companyName,
+          reason: chemist.rejectionReason
+        }),
+        new Promise((resolve) => setTimeout(resolve, 3500))
+      ]);
+    } catch (e) {
+      console.warn('[Chemist Rejection] Email notification notice:', e.message);
+    }
 
     logAuditEvent({
       req,
@@ -1455,17 +1469,39 @@ router.post('/send-approval-email', async (req, res) => {
   }
 });
 
+// @desc    Validate current user session; detects deleted or deactivated accounts instantly
+// @route   GET /api/users/validate-session
+// @access  Private (Retailer & Admin)
+router.get('/validate-session', protect, async (req, res) => {
+  res.json({
+    success: true,
+    user: {
+      _id: req.user._id,
+      name: req.user.name,
+      email: req.user.email,
+      role: req.user.role,
+      isActive: req.user.isActive,
+      isApproved: req.user.isApproved,
+      status: req.user.status
+    }
+  });
+});
+
 // @desc    Delete Chemist registration entry
 // @route   DELETE /api/users/chemists/:id
 // @access  SuperAdmin & Admin
 router.delete('/chemists/:id', protect, adminOnly, async (req, res) => {
   try {
     const { id } = req.params;
+    const chemist = await User.findById(id);
+    const email = chemist?.email;
     await User.findByIdAndDelete(id);
 
     return res.json({
       success: true,
-      message: 'Chemist record deleted successfully'
+      message: 'Chemist record deleted successfully',
+      deletedId: id,
+      deletedEmail: email
     });
   } catch (err) {
     console.error('Error deleting chemist:', err);

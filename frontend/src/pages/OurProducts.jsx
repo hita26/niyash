@@ -43,7 +43,9 @@ export default function OurProducts({ addToCart, searchTerm, setSearchTerm }) {
     if (!isSilent) setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/products?isOurProduct=true&limit=250');
+      const res = await fetch('/api/products?isOurProduct=true&limit=250', {
+        headers: isSilent ? { 'x-silent-request': 'true' } : {}
+      });
       if (res.ok) {
         const data = await res.json();
         const items = data.products || data || [];
@@ -55,7 +57,9 @@ export default function OurProducts({ addToCart, searchTerm, setSearchTerm }) {
       }
 
       // Check if any products exist that match our brand
-      const fallbackRes = await fetch('/api/products?limit=250');
+      const fallbackRes = await fetch('/api/products?limit=250', {
+        headers: isSilent ? { 'x-silent-request': 'true' } : {}
+      });
       if (fallbackRes.ok) {
         const fbData = await fallbackRes.json();
         const allItems = fbData.products || fbData || [];

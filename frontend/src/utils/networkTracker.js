@@ -55,11 +55,13 @@ if (typeof window !== 'undefined' && window.fetch && !window.__NIYANSH_NETWORK_T
     const [resource, config] = args;
     const url = typeof resource === 'string' ? resource : (resource?.url || '');
 
-    // Ignore background telemetry, auto-polling pings, and silent requests to avoid visual distraction
+    // Ignore background telemetry, auto-polling pings, and silent background requests to avoid visual distraction
     const isSilent =
-      url.includes('/api/analytics/track') ||
-      url.includes('/api/analytics/live') ||
-      url.includes('/api/sync/status') ||
+      url.includes('/api/analytics/') ||
+      url.includes('/api/sync/') ||
+      url.includes('/api/products/meta/filters') ||
+      url.includes('/api/settings/') ||
+      url.includes('ipify.org') ||
       config?.silent === true ||
       config?.background === true ||
       (config?.headers && (
@@ -76,10 +78,22 @@ if (typeof window !== 'undefined' && window.fetch && !window.__NIYANSH_NETWORK_T
     }
 
     incrementRequests();
+    let decremented = false;
+    const safeDecrement = () => {
+      if (!decremented) {
+        decremented = true;
+        decrementRequests();
+      }
+    };
+
+    // Auto-release watchdog: after 2.5 seconds, automatically decrement so network tracker never hangs
+    const reqWatchdog = setTimeout(safeDecrement, 2500);
+
     try {
       return await originalFetch.apply(this, args);
     } finally {
-      decrementRequests();
+      clearTimeout(reqWatchdog);
+      safeDecrement();
     }
   };
 }
@@ -123,6 +137,16 @@ export const networkTracker = {
 
   isWorking() {
     return (activeRequests + manualLoadingCount) > 0;
+  },
+
+  reset() {
+    activeRequests = 0;
+    manualLoadingCount = 0;
+    if (doneTimeout) {
+      clearTimeout(doneTimeout);
+      doneTimeout = null;
+    }
+    notifySubscribers();
   }
 };
 

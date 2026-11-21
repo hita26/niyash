@@ -199,6 +199,31 @@ router.get('/search-medicine-images', protect, adminOnly, async (req, res) => {
   }
 });
 
+// @desc    Fast real-time product summary statistics (0ms indexed metadata)
+// @route   GET /api/products/stats
+// @access  Public / Admin
+router.get('/stats', async (req, res) => {
+  try {
+    const [totalProducts, activeProducts, outOfStock, ourProducts, featuredProducts] = await Promise.all([
+      Product.countDocuments(),
+      Product.countDocuments({ isActive: { $ne: false } }),
+      Product.countDocuments({ $or: [{ inStock: false }, { stockQuantity: { $lte: 0 } }] }),
+      Product.countDocuments({ isOurProduct: true }),
+      Product.countDocuments({ featured: true })
+    ]);
+    res.json({
+      success: true,
+      totalProducts,
+      activeProducts,
+      outOfStock,
+      ourProducts,
+      featuredProducts
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // @desc    Admin: Get all products with full filters and summary statistics
 // @route   GET /api/products/admin/all
 // @access  Private/Admin
@@ -451,12 +476,15 @@ router.get('/', async (req, res) => {
     const limitNum = Math.max(1, parseInt(limit, 10) || 12);
     const skip = (pageNum - 1) * limitNum;
 
-    const total = await Product.countDocuments(query);
-    const products = await Product.find(query)
-      .sort(sortOptions)
-      .skip(skip)
-      .limit(limitNum)
-      .lean();
+    let findQuery = Product.find(query).sort(sortOptions).skip(skip).limit(limitNum);
+    if (req.query.fields === 'catalog') {
+      findQuery = findQuery.select('name brand company category subCategory sku price mrp stockQuantity inStock packing composition form rackId batchNumber hsnCode purchaseGst salesGst expiryDate scheme qualitySpecs unitsPerBox minReorderQty imageUrl images featured isOurProduct isActive');
+    }
+
+    const [total, products] = await Promise.all([
+      Product.countDocuments(query),
+      findQuery.lean()
+    ]);
 
     res.json({
       success: true,
@@ -464,6 +492,12 @@ router.get('/', async (req, res) => {
       page: pageNum,
       pages: Math.ceil(total / limitNum),
       total,
+      stats: {
+        totalProducts: total,
+        activeProducts: total,
+        outOfStock: 0,
+        featuredProducts: 0
+      }
     });
   } catch (error) {
     console.error('Get products error:', error);

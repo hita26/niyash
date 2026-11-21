@@ -6,6 +6,7 @@ import { networkTracker } from '../utils/networkTracker';
  * Bio-Nano Top Progress Bar
  * Enterprise Pharmaceutical Grade, non-intrusive top-loading progress indicator.
  * Dynamically reacts to route changes, API fetch queries, and admin dashboard operations.
+ * Features hard watchdog auto-dismiss (max 1.8s) to guarantee it never hangs or freezes.
  */
 export default function BioNanoProgressBar() {
   const [progress, setProgress] = useState(0);
@@ -16,65 +17,104 @@ export default function BioNanoProgressBar() {
   const prevPathRef = useRef(location.pathname + location.search);
   const isNetworkActiveRef = useRef(false);
   const isRouteTransitionRef = useRef(false);
+  const isFinishingRef = useRef(false);
+  const isVisibleRef = useRef(false);
+
   const trickleTimerRef = useRef(null);
   const finishTimerRef = useRef(null);
   const hideTimerRef = useRef(null);
+  const watchdogTimerRef = useRef(null);
 
   // Clear all pending timers
   const clearTimers = () => {
-    if (trickleTimerRef.current) clearInterval(trickleTimerRef.current);
-    if (finishTimerRef.current) clearTimeout(finishTimerRef.current);
-    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-  };
-
-  // Start progress indicator
-  const startProgress = () => {
-    clearTimers();
-    setIsFinishing(false);
-    setVisible(true);
-    setProgress((prev) => (prev > 0 && prev < 90 ? prev : 16));
-
-    // Bio-nano trickle physics (fast start, gradual clinical creep up to 92%)
-    trickleTimerRef.current = setInterval(() => {
-      setProgress((curr) => {
-        if (curr >= 92) return curr;
-        if (curr < 35) return curr + Math.random() * 12 + 6;
-        if (curr < 65) return curr + Math.random() * 6 + 3;
-        if (curr < 85) return curr + Math.random() * 3 + 1;
-        return curr + Math.random() * 0.8 + 0.3;
-      });
-    }, 220);
+    if (trickleTimerRef.current) {
+      clearInterval(trickleTimerRef.current);
+      trickleTimerRef.current = null;
+    }
+    if (finishTimerRef.current) {
+      clearTimeout(finishTimerRef.current);
+      finishTimerRef.current = null;
+    }
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
+    }
+    if (watchdogTimerRef.current) {
+      clearTimeout(watchdogTimerRef.current);
+      watchdogTimerRef.current = null;
+    }
   };
 
   // Complete progress indicator smoothly
   const finishProgress = () => {
+    if (watchdogTimerRef.current) {
+      clearTimeout(watchdogTimerRef.current);
+      watchdogTimerRef.current = null;
+    }
     if (trickleTimerRef.current) {
       clearInterval(trickleTimerRef.current);
       trickleTimerRef.current = null;
     }
 
     setIsFinishing(true);
+    isFinishingRef.current = true;
     setProgress(100);
 
-    // Give time for width animation to hit 100%
+    if (finishTimerRef.current) clearTimeout(finishTimerRef.current);
     finishTimerRef.current = setTimeout(() => {
       setVisible(false);
-      // Wait for opacity fade-out before resetting width
+      isVisibleRef.current = false;
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
       hideTimerRef.current = setTimeout(() => {
         setProgress(0);
         setIsFinishing(false);
-      }, 300);
-    }, 220);
+        isFinishingRef.current = false;
+      }, 250);
+    }, 200);
+  };
+
+  // Start progress indicator
+  const startProgress = () => {
+    // If currently fading out or already actively trickling, do not reset
+    if (isFinishingRef.current) return;
+    if (isVisibleRef.current && trickleTimerRef.current) return;
+
+    if (finishTimerRef.current) clearTimeout(finishTimerRef.current);
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    if (watchdogTimerRef.current) clearTimeout(watchdogTimerRef.current);
+
+    setIsFinishing(false);
+    isFinishingRef.current = false;
+    setVisible(true);
+    isVisibleRef.current = true;
+    setProgress((prev) => (prev > 0 && prev < 85 ? prev : 18));
+
+    // Hard watchdog: Never allow progress bar to stay visible for more than 1.8 seconds under ANY circumstances
+    watchdogTimerRef.current = setTimeout(() => {
+      finishProgress();
+    }, 1800);
+
+    // Smooth bio-nano trickle physics
+    trickleTimerRef.current = setInterval(() => {
+      setProgress((curr) => {
+        if (curr >= 88) return curr;
+        if (curr < 35) return curr + Math.random() * 12 + 6;
+        if (curr < 65) return curr + Math.random() * 6 + 3;
+        if (curr < 85) return curr + Math.random() * 3 + 1;
+        return curr + Math.random() * 0.8 + 0.3;
+      });
+    }, 180);
   };
 
   // Check overall activity state
   const evaluateActivity = () => {
     if (location.pathname.startsWith('/admin')) {
       clearTimers();
-      if (visible || progress > 0) {
-        setVisible(false);
-        setProgress(0);
-      }
+      setVisible(false);
+      isVisibleRef.current = false;
+      setProgress(0);
+      setIsFinishing(false);
+      isFinishingRef.current = false;
       return;
     }
     const isBusy = isNetworkActiveRef.current || isRouteTransitionRef.current;
@@ -96,7 +136,7 @@ export default function BioNanoProgressBar() {
       unsubscribe();
       clearTimers();
     };
-  }, []);
+  }, [location.pathname]);
 
   // 2. Listen to Route Changes across the entire site
   useEffect(() => {
@@ -106,11 +146,11 @@ export default function BioNanoProgressBar() {
       isRouteTransitionRef.current = true;
       evaluateActivity();
 
-      // Ensure smooth completion even if route doesn't fire subsequent fetch requests
+      // Ensure smooth quick completion of route transition
       const routeDoneTimer = setTimeout(() => {
         isRouteTransitionRef.current = false;
         evaluateActivity();
-      }, 350);
+      }, 250);
 
       return () => clearTimeout(routeDoneTimer);
     }

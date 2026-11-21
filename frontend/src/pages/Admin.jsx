@@ -12410,7 +12410,36 @@ _Helpline: +91 9316566894_`;
       {/* ==========================================
           MODAL 7: BULK EXCEL & CSV IMPORT MODAL (WITH LIVE PREVIEW & DUPLICATION PREVENTER)
           ========================================== */}
-      {isBulkImportOpen && typeof document !== 'undefined' && createPortal(
+      {isBulkImportOpen && typeof document !== 'undefined' && (() => {
+        const totalCount = bulkParsedRows.length;
+        const duplicateCount = bulkParsedRows.filter(r => r.isDuplicate).length;
+        const errorCount = bulkParsedRows.filter(r => r.hasError).length;
+        const validCount = bulkParsedRows.filter(r => !r.isDuplicate && !r.hasError).length;
+        const selectedCount = bulkParsedRows.filter(r => r.selected && !r.hasError && (!bulkSkipDuplicates || !r.isDuplicate)).length;
+
+        const searchLower = bulkPreviewSearch.toLowerCase().trim();
+        const displayedRows = bulkParsedRows.filter(r => {
+          if (bulkPreviewFilter === 'valid' && (r.isDuplicate || r.hasError)) return false;
+          if (bulkPreviewFilter === 'duplicates' && !r.isDuplicate) return false;
+          if (bulkPreviewFilter === 'errors' && !r.hasError) return false;
+          if (searchLower) {
+            const match = (r.name && r.name.toLowerCase().includes(searchLower)) ||
+                          (r.sku && r.sku.toLowerCase().includes(searchLower)) ||
+                          (r.company && r.company.toLowerCase().includes(searchLower)) ||
+                          (r.composition && r.composition.toLowerCase().includes(searchLower)) ||
+                          (r.packing && r.packing.toLowerCase().includes(searchLower)) ||
+                          (r.batchNumber && r.batchNumber.toLowerCase().includes(searchLower));
+            if (!match) return false;
+          }
+          return true;
+        });
+
+        const totalPages = Math.max(1, Math.ceil(displayedRows.length / bulkPreviewPageSize));
+        const safeCurrentPage = Math.min(Math.max(1, bulkPreviewPage), totalPages);
+        const startIndex = (safeCurrentPage - 1) * bulkPreviewPageSize;
+        const pageRows = displayedRows.slice(startIndex, startIndex + bulkPreviewPageSize);
+
+        return createPortal(
         <div 
           onClick={(e) => { if (e.target === e.currentTarget) handleCloseBulkImportModal(); }}
           style={{
@@ -12628,37 +12657,8 @@ _Helpline: +91 9316566894_`;
               )}
 
               {/* STATE 2: FILE PARSED -> HARD-RESPONSIVE LIVE TABLE PREVIEW & CONTROLS */}
-              {!isDetectingRows && bulkParsedRows.length > 0 && (() => {
-                const totalCount = bulkParsedRows.length;
-                const duplicateCount = bulkParsedRows.filter(r => r.isDuplicate).length;
-                const errorCount = bulkParsedRows.filter(r => r.hasError).length;
-                const validCount = bulkParsedRows.filter(r => !r.isDuplicate && !r.hasError).length;
-                const selectedCount = bulkParsedRows.filter(r => r.selected && !r.hasError && (!bulkSkipDuplicates || !r.isDuplicate)).length;
-
-                const searchLower = bulkPreviewSearch.toLowerCase().trim();
-                const displayedRows = bulkParsedRows.filter(r => {
-                  if (bulkPreviewFilter === 'valid' && (r.isDuplicate || r.hasError)) return false;
-                  if (bulkPreviewFilter === 'duplicates' && !r.isDuplicate) return false;
-                  if (bulkPreviewFilter === 'errors' && !r.hasError) return false;
-                  if (searchLower) {
-                    const match = (r.name && r.name.toLowerCase().includes(searchLower)) ||
-                                  (r.sku && r.sku.toLowerCase().includes(searchLower)) ||
-                                  (r.company && r.company.toLowerCase().includes(searchLower)) ||
-                                  (r.composition && r.composition.toLowerCase().includes(searchLower)) ||
-                                  (r.packing && r.packing.toLowerCase().includes(searchLower)) ||
-                                  (r.batchNumber && r.batchNumber.toLowerCase().includes(searchLower));
-                    if (!match) return false;
-                  }
-                  return true;
-                });
-
-                const totalPages = Math.max(1, Math.ceil(displayedRows.length / bulkPreviewPageSize));
-                const safeCurrentPage = Math.min(Math.max(1, bulkPreviewPage), totalPages);
-                const startIndex = (safeCurrentPage - 1) * bulkPreviewPageSize;
-                const pageRows = displayedRows.slice(startIndex, startIndex + bulkPreviewPageSize);
-
-                return (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1, minHeight: 0 }}>
+              {!isDetectingRows && bulkParsedRows.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1, minHeight: 0 }}>
                     
                     {/* STATS SUMMARY BAR (COLLAPSIBLE FOR MAXIMUM TALL TABLE VIEW) */}
                     {!isStatsCollapsed && (
@@ -12775,8 +12775,86 @@ _Helpline: +91 9316566894_`;
                           >
                             {isStatsCollapsed ? '▼ Show Summary Cards' : '▲ Extra Tall Table (Hide Cards)'}
                           </button>
-                          <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                            Found {displayedRows.length.toLocaleString()} matching rows
+
+                          {/* TOP QUICK PAGINATION CONTROLS (ALWAYS IN SIGHT) */}
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', backgroundColor: '#ffffff', padding: '2px 8px', borderRadius: '6px', border: '1px solid #cbd5e1', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+                            <button
+                              type="button"
+                              onClick={() => setBulkPreviewPage(p => Math.max(1, p - 1))}
+                              disabled={safeCurrentPage <= 1}
+                              style={{
+                                border: 'none',
+                                background: 'none',
+                                cursor: safeCurrentPage <= 1 ? 'not-allowed' : 'pointer',
+                                color: safeCurrentPage <= 1 ? '#cbd5e1' : '#2563eb',
+                                fontWeight: '800',
+                                fontSize: '0.78rem',
+                                padding: '2px 6px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '2px'
+                              }}
+                              title="Previous Page"
+                            >
+                              <ChevronLeft size={14} /> Prev
+                            </button>
+
+                            <span style={{ fontSize: '0.8rem', fontWeight: '800', color: '#0f172a', padding: '0 6px', borderLeft: '1px solid #e2e8f0', borderRight: '1px solid #e2e8f0' }}>
+                              Page {safeCurrentPage} / {totalPages}
+                            </span>
+
+                            <button
+                              type="button"
+                              onClick={() => setBulkPreviewPage(p => Math.min(totalPages, p + 1))}
+                              disabled={safeCurrentPage >= totalPages}
+                              style={{
+                                border: 'none',
+                                background: 'none',
+                                cursor: safeCurrentPage >= totalPages ? 'not-allowed' : 'pointer',
+                                color: safeCurrentPage >= totalPages ? '#cbd5e1' : '#2563eb',
+                                fontWeight: '800',
+                                fontSize: '0.78rem',
+                                padding: '2px 6px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '2px'
+                              }}
+                              title="Next Page"
+                            >
+                              Next <ChevronRight size={14} />
+                            </button>
+                          </div>
+
+                          {/* Rows per page selector in top toolbar */}
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <select
+                              value={bulkPreviewPageSize}
+                              onChange={(e) => {
+                                setBulkPreviewPageSize(Number(e.target.value));
+                                setBulkPreviewPage(1);
+                              }}
+                              style={{
+                                padding: '3px 8px',
+                                borderRadius: '6px',
+                                border: '1px solid #cbd5e1',
+                                backgroundColor: '#fff',
+                                fontSize: '0.78rem',
+                                fontWeight: '700',
+                                color: '#1e293b',
+                                cursor: 'pointer'
+                              }}
+                              title="Select rows per page"
+                            >
+                              <option value={25}>25 / page</option>
+                              <option value={50}>50 / page</option>
+                              <option value={100}>100 / page</option>
+                              <option value={200}>200 / page</option>
+                              <option value={500}>500 / page</option>
+                            </select>
+                          </div>
+
+                          <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: '600' }}>
+                            ({displayedRows.length.toLocaleString()} total rows)
                           </span>
                         </div>
 
@@ -12795,8 +12873,8 @@ _Helpline: +91 9316566894_`;
 
                     {/* HARD RESPONSIVE DATA TABLE WITH STICKY HEADERS & STICKY FIRST COLUMNS (EXTRA TALL & WIDE) */}
                     <div style={{
-                      flex: '1 1 auto',
-                      minHeight: isStatsCollapsed ? '480px' : '360px',
+                      flex: '1 1 0px',
+                      minHeight: 0,
                       overflowX: 'auto',
                       overflowY: 'auto',
                       border: '1px solid #cbd5e1',
@@ -13098,8 +13176,7 @@ _Helpline: +91 9316566894_`;
                     </div>
 
                   </div>
-                );
-              })()}
+                )}
 
               {/* ANIMATED FULL-SCREEN MODAL OVERLAY WHILE IMPORTING TO CLOUD DATABASE */}
               {isImportingBulk && (
@@ -13166,7 +13243,7 @@ _Helpline: +91 9316566894_`;
 
             {/* MODAL FOOTER */}
             <div style={{
-              padding: '14px 24px',
+              padding: '12px 24px',
               backgroundColor: '#f8fafc',
               borderTop: '1px solid #e2e8f0',
               display: 'flex',
@@ -13180,13 +13257,113 @@ _Helpline: +91 9316566894_`;
                 {bulkParsedRows.length > 0 ? (
                   <span>
                     Selected <strong style={{ color: '#2563eb' }}>
-                      {bulkParsedRows.filter(r => r.selected && !r.hasError && (!bulkSkipDuplicates || !r.isDuplicate)).length.toLocaleString()}
+                      {selectedCount.toLocaleString()}
                     </strong> of {bulkParsedRows.length.toLocaleString()} products
                   </span>
                 ) : (
                   <span>Ready to parse Excel spreadsheet</span>
                 )}
               </div>
+
+              {/* CENTER PAGINATION DOCKED IN MODAL FOOTER (ALWAYS IN VIEW!) */}
+              {bulkParsedRows.length > 0 && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  backgroundColor: '#ffffff',
+                  padding: '4px 10px',
+                  borderRadius: '8px',
+                  border: '1px solid #cbd5e1',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+                }}>
+                  <button
+                    type="button"
+                    onClick={() => setBulkPreviewPage(1)}
+                    disabled={safeCurrentPage <= 1}
+                    style={{
+                      border: '1px solid #cbd5e1',
+                      background: safeCurrentPage <= 1 ? '#f1f5f9' : '#ffffff',
+                      color: safeCurrentPage <= 1 ? '#94a3b8' : '#0f172a',
+                      cursor: safeCurrentPage <= 1 ? 'not-allowed' : 'pointer',
+                      borderRadius: '5px',
+                      padding: '4px 7px',
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}
+                    title="First Page"
+                  >
+                    <ChevronsLeft size={15} />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setBulkPreviewPage(p => Math.max(1, p - 1))}
+                    disabled={safeCurrentPage <= 1}
+                    style={{
+                      border: '1px solid #cbd5e1',
+                      background: safeCurrentPage <= 1 ? '#f1f5f9' : '#ffffff',
+                      color: safeCurrentPage <= 1 ? '#94a3b8' : '#2563eb',
+                      cursor: safeCurrentPage <= 1 ? 'not-allowed' : 'pointer',
+                      borderRadius: '5px',
+                      padding: '4px 9px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '3px',
+                      fontWeight: '700',
+                      fontSize: '0.8rem'
+                    }}
+                    title="Previous Page"
+                  >
+                    <ChevronLeft size={15} /> Prev Page
+                  </button>
+
+                  <span style={{ padding: '0 8px', fontSize: '0.84rem', fontWeight: '800', color: '#0f172a' }}>
+                    Page {safeCurrentPage} / {totalPages}
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={() => setBulkPreviewPage(p => Math.min(totalPages, p + 1))}
+                    disabled={safeCurrentPage >= totalPages}
+                    style={{
+                      border: '1px solid #cbd5e1',
+                      background: safeCurrentPage >= totalPages ? '#f1f5f9' : '#ffffff',
+                      color: safeCurrentPage >= totalPages ? '#94a3b8' : '#2563eb',
+                      cursor: safeCurrentPage >= totalPages ? 'not-allowed' : 'pointer',
+                      borderRadius: '5px',
+                      padding: '4px 9px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '3px',
+                      fontWeight: '700',
+                      fontSize: '0.8rem'
+                    }}
+                    title="Next Page"
+                  >
+                    Next Page <ChevronRight size={15} />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setBulkPreviewPage(totalPages)}
+                    disabled={safeCurrentPage >= totalPages}
+                    style={{
+                      border: '1px solid #cbd5e1',
+                      background: safeCurrentPage >= totalPages ? '#f1f5f9' : '#ffffff',
+                      color: safeCurrentPage >= totalPages ? '#94a3b8' : '#0f172a',
+                      cursor: safeCurrentPage >= totalPages ? 'not-allowed' : 'pointer',
+                      borderRadius: '5px',
+                      padding: '4px 7px',
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}
+                    title="Last Page"
+                  >
+                    <ChevronsRight size={15} />
+                  </button>
+                </div>
+              )}
 
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button
@@ -13202,7 +13379,7 @@ _Helpline: +91 9316566894_`;
                   <button
                     type="button"
                     onClick={handleExecuteBulkImport}
-                    disabled={isImportingBulk || bulkParsedRows.filter(r => r.selected && !r.hasError && (!bulkSkipDuplicates || !r.isDuplicate)).length === 0}
+                    disabled={isImportingBulk || selectedCount === 0}
                     className="btn btn-primary btn-sm"
                     style={{ padding: '8px 24px', fontWeight: '700', gap: '8px', borderRadius: '8px' }}
                   >
@@ -13212,7 +13389,7 @@ _Helpline: +91 9316566894_`;
                         Syncing Atlas ({importProgress.percent}%)...
                       </>
                     ) : (
-                      `✓ Confirm & Import (${bulkParsedRows.filter(r => r.selected && !r.hasError && (!bulkSkipDuplicates || !r.isDuplicate)).length.toLocaleString()}) Products`
+                      `✓ Confirm & Import (${selectedCount.toLocaleString()}) Products`
                     )}
                   </button>
                 )}
@@ -13222,7 +13399,8 @@ _Helpline: +91 9316566894_`;
           </div>
         </div>,
         document.body
-      )}
+      );
+    })()}
 
       {/* ==========================================
           MODAL: EDIT INDIVIDUAL BULK IMPORT ROW

@@ -716,8 +716,11 @@ input[type="submit"]:disabled {
 }
 
 .logo-container img {
-  height: 55px;
+  height: 58px;
+  max-height: 64px;
+  width: auto;
   display: block;
+  object-fit: contain;
 }
 
 .search-bar {
@@ -1590,8 +1593,8 @@ input[type="submit"]:disabled {
     flex-wrap: wrap;
   }
   .logo-container img {
-    height: 44px;
-    max-width: 150px;
+    height: 52px;
+    max-width: 180px;
   }
   .header-actions {
     gap: 10px;

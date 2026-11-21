@@ -1058,15 +1058,17 @@ function Header({
               className="admin-nav-pill"
               title="Admin & Operations Console"
               style={{
+                height: '38px',
+                boxSizing: 'border-box',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '5px',
-                padding: '6px 12px',
+                padding: '0 12px',
                 borderRadius: '20px',
                 fontSize: '0.78rem',
                 fontWeight: '700',
                 color: 'var(--text-medium, #64748b)',
-                border: '1px solid var(--border-light, #cbd5e1)',
+                border: '1.5px solid var(--border-light, #cbd5e1)',
                 backgroundColor: 'var(--bg-main, #f8fafc)',
                 textDecoration: 'none'
               }}
@@ -1082,10 +1084,12 @@ function Header({
                   to="/dashboard"
                   className="hide-mobile"
                   style={{
+                    height: '38px',
+                    boxSizing: 'border-box',
                     backgroundColor: '#ecfdf5',
                     color: '#065f46',
                     border: '1.5px solid #a7f3d0',
-                    padding: '6px 14px',
+                    padding: '0 14px',
                     borderRadius: '20px',
                     fontSize: '0.82rem',
                     fontWeight: '800',
@@ -1104,13 +1108,15 @@ function Header({
                   <button 
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                     style={{
+                      height: '38px',
+                      boxSizing: 'border-box',
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '5px',
-                      background: '#f1f5f9',
-                      border: '1px solid #cbd5e1',
+                      background: 'var(--bg-surface-alt, #f1f5f9)',
+                      border: '1.5px solid var(--border-light, #cbd5e1)',
                       borderRadius: '20px',
-                      padding: '5px 10px',
+                      padding: '0 12px',
                       cursor: 'pointer',
                       fontSize: '0.82rem',
                       fontWeight: '700',
@@ -1178,6 +1184,7 @@ function Header({
                 onClick={onOpenAuth}
                 className="chemist-header-btn hide-mobile"
                 aria-label="Open Chemist login and registration modal"
+                style={{ height: '38px', boxSizing: 'border-box', display: 'inline-flex', alignItems: 'center' }}
               >
                 <LogIn size={15} aria-hidden="true" /> <span>{t('nav.login', 'Chemist Login / Register')}</span>
               </button>
@@ -1187,6 +1194,7 @@ function Header({
               className="cart-icon-btn hide-mobile" 
               onClick={onOpenCart} 
               aria-label={`Open Cart containing ${cartCount} items`}
+              style={{ width: '38px', height: '38px', boxSizing: 'border-box', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
             >
               <ShoppingBag size={20} aria-hidden="true" />
               {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}

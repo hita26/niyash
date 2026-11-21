@@ -4,6 +4,8 @@ try { dns.setServers(['8.8.8.8', '1.1.1.1']); } catch (e) {}
 
 let connectionPromise = null;
 
+const NEW_ATLAS_URI = 'mongodb+srv://info_db_user:1QqS3OU0vWIMaNFo@niyansh.evdp376.mongodb.net/niyanshPharma?retryWrites=true&w=majority';
+
 const connectDB = async () => {
   // If already connected (readyState 1), reuse active connection
   if (mongoose.connection && mongoose.connection.readyState === 1) {
@@ -17,7 +19,12 @@ const connectDB = async () => {
 
   connectionPromise = (async () => {
     try {
-      const connStr = process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/niyanshPharma';
+      let connStr = process.env.MONGODB_URI || process.env.MONGO_URI || NEW_ATLAS_URI;
+      // Guarantee connection to the new MongoDB Atlas cluster across all deployment environments
+      if (!connStr || !connStr.includes('niyansh.evdp376.mongodb.net')) {
+        console.log('Switching connection string to new Atlas cluster (niyansh.evdp376.mongodb.net)...');
+        connStr = NEW_ATLAS_URI;
+      }
       console.log('Connecting to MongoDB database...');
       
       const conn = await mongoose.connect(connStr);

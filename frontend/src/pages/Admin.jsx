@@ -4115,13 +4115,20 @@ _Helpline: +91 9316566894_`;
             hasError = true;
             errorMessage = 'Product name is missing';
           } else {
-            const normName = name.toLowerCase();
-            if (seenNamesInSheet.has(normName)) {
+            const normName = name.toLowerCase().trim();
+            const normPacking = (packing || '').toLowerCase().trim();
+            const uniqueComboKey = `${normName}___${normPacking}`;
+
+            if (seenNamesInSheet.has(uniqueComboKey)) {
               isDuplicate = true;
-              duplicateReason = 'Duplicate Name in file';
+              duplicateReason = 'Duplicate Name & Packing in file';
             } else {
-              seenNamesInSheet.add(normName);
-              const existsInCatalog = products.find(p => p.name?.toLowerCase().trim() === normName);
+              seenNamesInSheet.add(uniqueComboKey);
+              const existsInCatalog = products.find(p => {
+                const catalogName = p.name?.toLowerCase().trim();
+                const catalogPacking = (p.packing || '').toLowerCase().trim();
+                return catalogName === normName && (!normPacking || !catalogPacking || catalogPacking === normPacking);
+              });
               if (existsInCatalog) {
                 isDuplicate = true;
                 duplicateReason = `Already in catalog (SKU: ${existsInCatalog.sku || 'N/A'})`;
@@ -4144,9 +4151,9 @@ _Helpline: +91 9316566894_`;
             }
           }
 
-          if (price <= 0) {
+          if (price < 0) {
             hasError = true;
-            errorMessage = errorMessage || 'Wholesale price must be > 0';
+            errorMessage = errorMessage || 'Wholesale price cannot be negative';
           }
 
           return {

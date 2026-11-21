@@ -93,9 +93,9 @@ function ProductDetail({ addToCart }) {
   const hasMargin = unitMrp > unitPrice;
   const marginPercent = hasMargin ? Math.round(((unitMrp - unitPrice) / unitMrp) * 100) : 0;
   const unitSavings = hasMargin ? (unitMrp - unitPrice) : 0;
-  const totalOrderValue = unitPrice * quantity;
-  const totalRetailValue = unitMrp * quantity;
-  const totalChemistProfit = unitSavings * quantity;
+  const totalOrderValue = unitPrice * (Number(quantity) || 1);
+  const totalRetailValue = unitMrp * (Number(quantity) || 1);
+  const totalChemistProfit = unitSavings * (Number(quantity) || 1);
 
   const handleWhatsAppOrder = () => {
     const rateLine = isLoggedIn

@@ -833,7 +833,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                   required 
                   className="login-input"
                   data-no-uppercase="true"
-                  value={formData.email} 
+                  value={formData.email || ''} 
                   onChange={handleChange}
                   placeholder={t('auth.emailPlaceholder', 'example@mail.com')}
                   style={{ width: '100%', padding: '10px 10px 10px 38px', borderRadius: '8px', border: '1px solid var(--border-light)', fontSize: '0.9rem' }}
@@ -853,7 +853,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                   required 
                   className="login-input"
                   data-no-uppercase="true"
-                  value={formData.password} 
+                  value={formData.password || ''} 
                   onChange={handleChange}
                   placeholder="••••••••"
                   style={{ width: '100%', padding: '10px 40px 10px 38px', borderRadius: '8px', border: '1px solid var(--border-light)', fontSize: '0.9rem' }}
@@ -1015,7 +1015,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                         type="text" 
                         name="companyName" 
                         required
-                        value={formData.companyName} 
+                        value={formData.companyName || ''} 
                         onChange={handleChange}
                         placeholder={t('auth.companyPlaceholder', 'e.g. Niyansh Medical Store')}
                         style={{ width: '100%', padding: '9px 10px 9px 36px', borderRadius: '7px', border: '1px solid var(--border-light)', fontSize: '0.86rem' }}
@@ -1033,7 +1033,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                         type="text" 
                         name="name" 
                         required 
-                        value={formData.name} 
+                        value={formData.name || ''} 
                         onChange={handleChange}
                         placeholder={t('auth.namePlaceholder', 'e.g. John Doe')}
                         style={{ width: '100%', padding: '9px 10px 9px 36px', borderRadius: '7px', border: '1px solid var(--border-light)', fontSize: '0.86rem' }}
@@ -1055,7 +1055,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                         name="phone" 
                         required
                         maxLength={10}
-                        value={formData.phone} 
+                        value={formData.phone || ''} 
                         onChange={handleChange}
                         placeholder={t('auth.phonePlaceholder', '10-digit mobile number')}
                         style={{ width: '100%', padding: '9px 10px 9px 36px', borderRadius: '7px', border: '1px solid var(--border-light)', fontSize: '0.86rem' }}
@@ -1073,7 +1073,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                         type="email" 
                         name="email" 
                         required 
-                        value={formData.email} 
+                        value={formData.email || ''} 
                         onChange={handleChange}
                         placeholder={t('auth.emailPlaceholder', 'pharmacy@example.com')}
                         style={{ width: '100%', padding: '9px 10px 9px 36px', borderRadius: '7px', border: '1px solid var(--border-light)', fontSize: '0.86rem' }}
@@ -1093,7 +1093,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                       type={showLoginPassword ? 'text' : 'password'} 
                       name="password" 
                       required 
-                      value={formData.password} 
+                      value={formData.password || ''} 
                       onChange={handleChange}
                       placeholder="••••••••"
                       style={{ width: '100%', padding: '9px 40px 9px 36px', borderRadius: '7px', border: '1px solid var(--border-light)', fontSize: '0.86rem' }}
@@ -1199,7 +1199,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                         name="pan" 
                         required
                         maxLength={10}
-                        value={formData.pan} 
+                        value={formData.pan || ''} 
                         onChange={handleChange}
                         placeholder="e.g. ABCDE1234F"
                         style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.82rem', fontWeight: '600' }}
@@ -1230,7 +1230,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                         type="text" 
                         name="gstin" 
                         maxLength={15}
-                        value={formData.gstin} 
+                        value={formData.gstin || ''} 
                         onChange={handleChange}
                         placeholder="e.g. 24AAAAA0000A1Z"
                         style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }}
@@ -1285,7 +1285,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                         type="text" 
                         name="drugLicense1" 
                         required
-                        value={formData.drugLicense1} 
+                        value={formData.drugLicense1 || ''} 
                         onChange={handleChange}
                         placeholder="e.g. 20B/1234 or G/20/1234"
                         style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.82rem', fontWeight: '600' }}
@@ -1318,7 +1318,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                         type="text" 
                         name="drugLicense2" 
                         required
-                        value={formData.drugLicense2} 
+                        value={formData.drugLicense2 || ''} 
                         onChange={handleChange}
                         placeholder="e.g. 21B/5678 or G/21/5678"
                         style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.82rem', fontWeight: '600' }}

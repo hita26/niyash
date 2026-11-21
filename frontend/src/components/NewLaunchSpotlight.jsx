@@ -511,7 +511,7 @@ export default function NewLaunchSpotlight() {
                   alt={data.productName}
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = '/banners/hero-banner-2.jpg';
+                    e.target.src = '/pharma-products.jpg';
                   }}
                   style={{
                     width: '100%',

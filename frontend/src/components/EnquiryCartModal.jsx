@@ -112,7 +112,11 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
   };
 
   const totalValuation = cartItems.reduce(
-    (total, item) => total + (user ? item.product.price : (item.product.mrp || item.product.price)) * item.quantity,
+    (total, item) => {
+      const itemPrice = Number(user ? item.product?.price : (item.product?.mrp || item.product?.price)) || 0;
+      const itemQty = Number(item.quantity) || 1;
+      return total + (itemPrice * itemQty);
+    },
     0
   );
 
@@ -212,7 +216,9 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                         {t('common.brand', 'Brand')}: {item.product.brand} | {item.product.packing}
                       </p>
                       <p style={{ fontSize: '0.85rem', color: 'var(--primary-blue)', fontWeight: '600', marginTop: '3px' }}>
-                        {user ? `${t('products.ptr', 'PTR (Wholesale)')}: ₹${item.product.price.toFixed(2)} / ${t('productDetail.unit', 'Strip')}` : `MRP: ₹${(item.product.mrp || item.product.price).toFixed(2)} / ${t('productDetail.unit', 'Strip')}`}
+                        {user 
+                          ? `${t('products.ptr', 'PTR (Wholesale)')}: ₹${(Number(item.product?.price) || 0).toFixed(2)} / ${t('productDetail.unit', 'Strip')}` 
+                          : `MRP: ₹${(Number(item.product?.mrp || item.product?.price) || 0).toFixed(2)} / ${t('productDetail.unit', 'Strip')}`}
                       </p>
                     </div>
 
@@ -255,7 +261,7 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--border-light)'
               }}>
                 <span style={{ fontWeight: '600', color: 'var(--text-medium)', fontSize: '0.9rem' }}>{user ? t('cart.estWholesaleVal', 'Estimated Wholesale Value:') : t('cart.estRetailVal', 'Estimated Retail Value (MRP):')}</span>
-                <span style={{ fontWeight: '800', color: 'var(--primary-blue)', fontSize: '1.1rem' }}>₹{totalValuation.toFixed(2)}</span>
+                <span style={{ fontWeight: '800', color: 'var(--primary-blue)', fontSize: '1.1rem' }}>₹{(Number(totalValuation) || 0).toFixed(2)}</span>
               </div>
 
               {/* Enquiry Form or Auth Required Prompt */}

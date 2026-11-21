@@ -21,17 +21,19 @@ import {
 import { useLiveSync, SYNC_EVENTS } from '../utils/liveSync';
 import { useLanguage } from '../context/LanguageContext';
 
+const getFutureDate = (daysAhead) => new Date(Date.now() + daysAhead * 24 * 60 * 60 * 1000).toISOString();
+
 const FALLBACK_TICKER_ITEMS = [
   {
     _id: 'mock-1',
-    title: 'Special Monsoon Scheme: Buy 10 Get 1 Free on all Daxia Formulations',
+    title: 'Special Trade Scheme: Buy 10 Get 1 Free on all Daxia Formulations',
     content: 'Avail 10+1 free bonus strip on Mucidax 600, Clobedax-GM Cream, and Moxidax-D drops throughout this month. Fast dispatch and standard WHO-GMP quality guaranteed across Gujarat.',
     category: 'Scheme',
     company: 'DAXIA',
     isTickerActive: true,
     priority: 1,
-    expiryDate: '2026-09-30T23:59:59.000Z',
-    createdAt: '2026-08-18T10:00:00.000Z'
+    expiryDate: getFutureDate(25),
+    createdAt: new Date().toISOString()
   },
   {
     _id: 'mock-2',
@@ -41,8 +43,8 @@ const FALLBACK_TICKER_ITEMS = [
     company: 'DAXIA',
     isTickerActive: true,
     priority: 2,
-    expiryDate: '2026-10-15T23:59:59.000Z',
-    createdAt: '2026-08-19T14:30:00.000Z'
+    expiryDate: getFutureDate(45),
+    createdAt: new Date().toISOString()
   },
   {
     _id: 'mock-3',
@@ -52,8 +54,8 @@ const FALLBACK_TICKER_ITEMS = [
     company: 'General',
     isTickerActive: true,
     priority: 3,
-    expiryDate: '2026-09-15T23:59:59.000Z',
-    createdAt: '2026-08-20T09:15:00.000Z'
+    expiryDate: getFutureDate(18),
+    createdAt: new Date().toISOString()
   },
   {
     _id: 'mock-4',
@@ -63,8 +65,8 @@ const FALLBACK_TICKER_ITEMS = [
     company: 'DAXIA',
     isTickerActive: true,
     priority: 1,
-    expiryDate: '2026-09-25T23:59:59.000Z',
-    createdAt: '2026-08-21T11:45:00.000Z'
+    expiryDate: getFutureDate(30),
+    createdAt: new Date().toISOString()
   },
   {
     _id: 'mock-5',
@@ -74,8 +76,8 @@ const FALLBACK_TICKER_ITEMS = [
     company: 'General',
     isTickerActive: true,
     priority: 4,
-    expiryDate: '2026-12-31T23:59:59.000Z',
-    createdAt: '2026-08-22T08:00:00.000Z'
+    expiryDate: getFutureDate(90),
+    createdAt: new Date().toISOString()
   }
 ];
 

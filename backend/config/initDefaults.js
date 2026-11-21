@@ -10,15 +10,17 @@ const path = require('path');
 
 let isInitialized = false;
 
+const getFutureDate = (daysAhead) => new Date(Date.now() + daysAhead * 24 * 60 * 60 * 1000);
+
 const sampleNews = [
   {
-    title: 'Special Monsoon Scheme: Buy 10 Get 1 Free on all Daxia Formulations',
+    title: 'Special Trade Scheme: Buy 10 Get 1 Free on all Daxia Formulations',
     content: 'Avail 10+1 free bonus strip on Mucidax 600, Clobedax-GM Cream, and Moxidax-D drops throughout this month. Fast dispatch and standard WHO-GMP quality guaranteed across Gujarat.',
     category: 'Scheme',
     company: 'DAXIA',
     isTickerActive: true,
     priority: 1,
-    expiryDate: new Date('2026-10-31'),
+    expiryDate: getFutureDate(30),
   },
   {
     title: 'New Product Launch: Lulidax 1% Cream 30g & Ketodax 2% Soap',
@@ -27,7 +29,7 @@ const sampleNews = [
     company: 'DAXIA',
     isTickerActive: true,
     priority: 2,
-    expiryDate: new Date('2026-11-15'),
+    expiryDate: getFutureDate(45),
   },
   {
     title: 'Price Drop Alert: Ceftriaxone 1gm & Pantoprazole 40mg Injections',
@@ -36,7 +38,7 @@ const sampleNews = [
     company: 'General',
     isTickerActive: true,
     priority: 3,
-    expiryDate: new Date('2026-10-31'),
+    expiryDate: getFutureDate(20),
   },
   {
     title: 'Ayurvedic Rasayan & Herbal Joint Oils Special 15+2 Scheme',
@@ -45,7 +47,7 @@ const sampleNews = [
     company: 'DAXIA',
     isTickerActive: true,
     priority: 1,
-    expiryDate: new Date('2026-10-25'),
+    expiryDate: getFutureDate(35),
   },
   {
     title: 'GST Regulatory Notice: E-Invoicing Updates for Pharma Retailers',
@@ -54,7 +56,7 @@ const sampleNews = [
     company: 'General',
     isTickerActive: true,
     priority: 4,
-    expiryDate: new Date('2026-12-31'),
+    expiryDate: getFutureDate(90),
   },
 ];
 

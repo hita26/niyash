@@ -1002,13 +1002,13 @@ function QuickOrder() {
       .map((item, idx) => {
         const companyStr = item.company ? ` (${item.company})` : '';
         const schemeStr = item.scheme ? `\n   • Scheme: ${item.scheme}${item.bonusUnits > 0 ? ` (+${item.bonusUnits} Free Units)` : ''}` : '';
-        return `${idx + 1}. *${item.productName}*${companyStr}\n   • Qty: ${item.boxes} Box${item.boxes > 1 ? 'es' : ''} (${item.totalUnits} Units)\n   • Rate: ₹${item.unitPrice.toFixed(2)} | Subtotal: ₹${item.lineSubtotal.toFixed(2)} (+${item.gstRate}% GST)${schemeStr}`;
+        return `${idx + 1}. *${item.productName}*${companyStr}\n   • Qty: ${item.boxes} Box${item.boxes > 1 ? 'es' : ''} (${item.totalUnits} Units)\n   • Rate: ₹${(Number(item.unitPrice) || 0).toFixed(2)} | Subtotal: ₹${(Number(item.lineSubtotal) || 0).toFixed(2)} (+${item.gstRate}% GST)${schemeStr}`;
       })
       .join('\n\n');
 
     const gstinLine = gstin.trim() ? `\n*GSTIN:* ${gstin.trim()}` : '';
     const schemeBonusLine = commercialBilling.totalSchemeBonusUnits > 0
-      ? `\n*Estimated Scheme Bonus:* ${commercialBilling.totalSchemeBonusUnits} Units (~₹${commercialBilling.totalSchemeSavings.toFixed(2)} Free Value)`
+      ? `\n*Estimated Scheme Bonus:* ${commercialBilling.totalSchemeBonusUnits} Units (~₹${(Number(commercialBilling.totalSchemeSavings) || 0).toFixed(2)} Free Value)`
       : '';
 
     const text = `📦 *NEW B2B ORDER - NIYANSH PHARMA*
@@ -1022,9 +1022,9 @@ function QuickOrder() {
 ${formattedItems}
 
 ━━━━━━━━━━━━━━━━━━━━
-*Subtotal (Taxable):* ₹${commercialBilling.taxableSubtotal.toFixed(2)}
-*Total GST Tax:* ₹${commercialBilling.totalGstAmount.toFixed(2)}${schemeBonusLine}
-*Grand Commercial Total:* ₹${commercialBilling.grandTotal.toFixed(2)}
+*Subtotal (Taxable):* ₹${(Number(commercialBilling.taxableSubtotal) || 0).toFixed(2)}
+*Total GST Tax:* ₹${(Number(commercialBilling.totalGstAmount) || 0).toFixed(2)}${schemeBonusLine}
+*Grand Commercial Total:* ₹${(Number(commercialBilling.grandTotal) || 0).toFixed(2)}
 *Payment Status:* Pending Wholesale Dispatch
 *Order Status:* Booked via Quick Matrix
 ━━━━━━━━━━━━━━━━━━━━
@@ -1172,12 +1172,12 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
       item.unitsPerBox,
       item.boxes,
       item.totalUnits,
-      item.unitPrice.toFixed(2),
-      item.mrp.toFixed(2),
-      `${item.gstRate}%`,
-      item.lineSubtotal.toFixed(2),
-      item.lineGst.toFixed(2),
-      item.lineTotal.toFixed(2),
+      (Number(item.unitPrice) || 0).toFixed(2),
+      (Number(item.mrp) || 0).toFixed(2),
+      `${item.gstRate || 0}%`,
+      (Number(item.lineSubtotal) || 0).toFixed(2),
+      (Number(item.lineGst) || 0).toFixed(2),
+      (Number(item.lineTotal) || 0).toFixed(2),
       `"${item.scheme || 'None'}"`,
       item.bonusUnits
     ]);

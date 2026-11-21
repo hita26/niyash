@@ -11496,7 +11496,7 @@ _Helpline: +91 9316566894_`;
                                 onClick={() => setPreviewImage(img)}
                                 style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'zoom-in' }} 
                                 title="Click to view full photo preview"
-                                onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=200&q=80'; }}
+                                onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=200&q=80'; }}
                               />
 
                               {/* Main Badge */}
@@ -12634,10 +12634,10 @@ _Helpline: +91 9316566894_`;
                                     {r.form} • {r.packing}
                                   </td>
                                   <td style={{ padding: '8px 12px', fontWeight: '700', color: '#16a34a' }}>
-                                    ₹{r.price.toFixed(2)}
+                                    ₹{r.price != null && !isNaN(r.price) ? Number(r.price).toFixed(2) : (r.price || '0.00')}
                                   </td>
                                   <td style={{ padding: '8px 12px', color: 'var(--text-dark)' }}>
-                                    ₹{r.mrp.toFixed(2)}
+                                    ₹{r.mrp != null && !isNaN(r.mrp) ? Number(r.mrp).toFixed(2) : (r.mrp || '0.00')}
                                   </td>
                                   <td style={{ padding: '8px 12px', color: 'var(--text-dark)' }}>
                                     {r.stockQuantity}

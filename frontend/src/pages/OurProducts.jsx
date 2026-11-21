@@ -384,7 +384,7 @@ export default function OurProducts({ addToCart, searchTerm, setSearchTerm }) {
                   }}
                 >
                   <ChevronLeft size={16} />
-                  <span>{language === 'gu' ? 'પાછળ' : 'Prev'}</span>
+                  <span>{language === 'gu' ? 'પાછળ' : language === 'hi' ? 'पिछला' : 'Prev'}</span>
                 </button>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -431,7 +431,7 @@ export default function OurProducts({ addToCart, searchTerm, setSearchTerm }) {
                     gap: '4px'
                   }}
                 >
-                  <span>{language === 'gu' ? 'આગળ' : 'Next'}</span>
+                  <span>{language === 'gu' ? 'આગળ' : language === 'hi' ? 'अगला' : 'Next'}</span>
                   <ChevronRight size={16} />
                 </button>
               </div>
@@ -466,6 +466,8 @@ export default function OurProducts({ addToCart, searchTerm, setSearchTerm }) {
             <p style={{ color: 'var(--text-medium)', maxWidth: '440px', margin: '0 auto 18px auto', fontSize: '0.88rem', lineHeight: '1.5' }}>
               {language === 'gu'
                 ? 'તમારી શોધ મુજબ કોઈ પ્રોડક્ટ મળી નથી.'
+                : language === 'hi'
+                ? 'आपकी खोज के अनुसार कोई उत्पाद नहीं मिला।'
                 : 'No products match your current search criteria.'}
             </p>
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -475,7 +477,7 @@ export default function OurProducts({ addToCart, searchTerm, setSearchTerm }) {
                   className="btn btn-outline btn-sm"
                   style={{ borderRadius: '8px', padding: '8px 16px', fontWeight: '600' }}
                 >
-                  {language === 'gu' ? 'ફિલ્ટર્સ રીસેટ કરો' : 'Reset Filters'}
+                  {language === 'gu' ? 'ફિલ્ટર્સ રીસેટ કરો' : language === 'hi' ? 'फ़िल्टर रीसेट करें' : 'Reset Filters'}
                 </button>
               )}
               <Link 
@@ -483,7 +485,7 @@ export default function OurProducts({ addToCart, searchTerm, setSearchTerm }) {
                 className="btn btn-primary btn-sm"
                 style={{ borderRadius: '8px', padding: '8px 16px', fontWeight: '700', textDecoration: 'none' }}
               >
-                {language === 'gu' ? 'તમામ પ્રોડક્ટ્સ જુઓ' : 'Browse All Products'}
+                {language === 'gu' ? 'તમામ પ્રોડક્ટ્સ જુઓ' : language === 'hi' ? 'सभी उत्पाद देखें' : 'Browse All Products'}
               </Link>
             </div>
           </div>

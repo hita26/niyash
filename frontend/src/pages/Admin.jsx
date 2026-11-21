@@ -1402,10 +1402,13 @@ function Admin() {
   }, [companies, products]);
 
 
-  // Bulk Excel & CSV Import States
+  // Bulk Excel Import States
   const [bulkCsvText, setBulkCsvText] = useState('');
   const [bulkParsedRows, setBulkParsedRows] = useState([]);
   const [bulkPreviewFilter, setBulkPreviewFilter] = useState('all'); // 'all' | 'valid' | 'duplicates'
+  const [bulkPreviewSearch, setBulkPreviewSearch] = useState('');
+  const [isDetectingRows, setIsDetectingRows] = useState(false);
+  const [importProgress, setImportProgress] = useState({ current: 0, total: 0, percent: 0, batch: 0, totalBatches: 0 });
   const [uploadedFileName, setUploadedFileName] = useState('');
   const [bulkSkipDuplicates, setBulkSkipDuplicates] = useState(true);
   const [bulkImportResults, setBulkImportResults] = useState(null);
@@ -1579,12 +1582,12 @@ function Admin() {
     }
   }, [activeTab, auditCategoryFilter, auditActionFilter, auditLimit]);
 
-  // Auto-refresh products if opening products tab and products list is empty
+  // Auto-refresh products when opening or viewing products tab
   useEffect(() => {
-    if (activeTab === 'products' && products.length === 0 && isAuthenticated) {
+    if (activeTab === 'products' && isAuthenticated) {
       fetchDashboardData(false);
     }
-  }, [activeTab, products.length, isAuthenticated]);
+  }, [activeTab, isAuthenticated]);
 
   const fetchDashboardData = async (showSpinner = true) => {
     // Only show full-screen skeleton if we have zero products in memory/cache
@@ -4012,15 +4015,18 @@ _Helpline: +91 9316566894_`;
 
     setUploadedFileName(file.name);
     setBulkImportResults(null);
+    setIsDetectingRows(true);
 
     const reader = new FileReader();
     reader.onload = (evt) => {
-      try {
-        const data = new Uint8Array(evt.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        const rawJson = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+      // Small timeout allows browser to paint animated scanning card
+      setTimeout(() => {
+        try {
+          const data = new Uint8Array(evt.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const rawJson = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
 
         if (!rawJson || rawJson.length === 0) {
           showToast('The selected file has no data rows', 'error');
@@ -4191,14 +4197,17 @@ _Helpline: +91 9316566894_`;
         });
 
         setBulkParsedRows(parsed);
-        showToast(`Parsed ${parsed.length} products from ${file.name}`);
+        showToast(`Detected & verified ${parsed.length} products from ${file.name}`);
       } catch (err) {
         console.error('Error parsing spreadsheet:', err);
         showToast('Error reading spreadsheet: ' + err.message, 'error');
+      } finally {
+        setIsDetectingRows(false);
       }
-    };
-    reader.readAsArrayBuffer(file);
+    }, 60);
   };
+  reader.readAsArrayBuffer(file);
+};
 
   const handleToggleRowSelection = (rowId) => {
     setBulkParsedRows(prev => prev.map(r => r._rowId === rowId ? { ...r, selected: !r.selected } : r));
@@ -4276,32 +4285,55 @@ _Helpline: +91 9316566894_`;
 
     setIsImportingBulk(true);
     setBulkImportResults(null);
-    try {
-      const res = await fetch('/api/products/bulk', {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({
-          products: rowsToImport,
-          skipDuplicates: bulkSkipDuplicates
-        })
-      });
-      const data = await res.json();
 
-      if (res.ok && data.success) {
-        setBulkImportResults(data);
-        showToast(`Successfully imported ${data.successCount} products! ${data.skippedCount ? `(${data.skippedCount} duplicates skipped)` : ''}`);
-        broadcastLiveEvent(SYNC_EVENTS.PRODUCT_BULK_IMPORTED, { count: data.successCount });
-        fetchProducts();
-        fetchDashboardData();
-        // Clear preview after successful import
-        setBulkParsedRows([]);
-        setUploadedFileName('');
-        setBulkCsvText('');
-      } else {
-        showToast(data.message || 'Bulk import failed', 'error');
+    const BATCH_SIZE = 500;
+    const totalBatches = Math.ceil(rowsToImport.length / BATCH_SIZE);
+    let totalSuccess = 0;
+    let totalSkipped = 0;
+    setImportProgress({ current: 0, total: rowsToImport.length, percent: 0, batch: 1, totalBatches });
+
+    try {
+      for (let i = 0; i < totalBatches; i++) {
+        const batchSlice = rowsToImport.slice(i * BATCH_SIZE, (i + 1) * BATCH_SIZE);
+        const currentProcessed = Math.min((i + 1) * BATCH_SIZE, rowsToImport.length);
+        const pct = Math.round((currentProcessed / rowsToImport.length) * 100);
+        setImportProgress({
+          current: currentProcessed,
+          total: rowsToImport.length,
+          percent: pct,
+          batch: i + 1,
+          totalBatches
+        });
+
+        const res = await fetch('/api/products/bulk', {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({
+            products: batchSlice,
+            skipDuplicates: bulkSkipDuplicates
+          })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          totalSuccess += (data.successCount || 0);
+          totalSkipped += (data.skippedCount || 0);
+        } else {
+          throw new Error(data.message || `Failed on batch ${i + 1}`);
+        }
       }
+
+      setBulkImportResults({ successCount: totalSuccess, skippedCount: totalSkipped });
+      showToast(`Successfully imported ${totalSuccess} products! ${totalSkipped ? `(${totalSkipped} duplicates skipped)` : ''}`);
+      broadcastLiveEvent(SYNC_EVENTS.PRODUCT_BULK_IMPORTED, { count: totalSuccess });
+      fetchProducts();
+      fetchDashboardData();
+      // Clear preview after successful import
+      setBulkParsedRows([]);
+      setUploadedFileName('');
+      setBulkCsvText('');
     } catch (err) {
-      showToast('Error executing bulk import: ' + err.message, 'error');
+      showToast('Error during bulk import: ' + err.message, 'error');
     } finally {
       setIsImportingBulk(false);
     }
@@ -6263,30 +6295,12 @@ _Helpline: +91 9316566894_`;
                       </button>
 
                       <button 
-                        onClick={handleExportCSV} 
-                        className="btn btn-outline btn-sm"
-                        style={{ gap: '6px' }}
-                        title="Download CSV spreadsheet of entire catalog"
-                      >
-                        <Download size={14} /> Export CSV
-                      </button>
-
-                      <button 
                         onClick={() => { setBulkImportResults(null); setIsBulkImportOpen(true); }} 
                         className="btn btn-outline btn-sm"
-                        style={{ gap: '6px' }}
-                        title="Import multiple products from Excel or CSV with live preview"
+                        style={{ gap: '6px', fontWeight: '600' }}
+                        title="Import multiple products from Excel spreadsheet (.xlsx, .xls)"
                       >
-                        <FileSpreadsheet size={14} /> Import Excel / CSV
-                      </button>
-
-                      <button 
-                        onClick={handleDownloadExcelTemplate} 
-                        className="btn btn-outline btn-sm"
-                        style={{ gap: '6px', color: '#15803d', borderColor: '#86efac', backgroundColor: '#f0fdf4', fontWeight: '700' }}
-                        title="Download sample Excel template (.xlsx) with all fields and registered companies"
-                      >
-                        <Download size={14} /> Download Template
+                        <FileSpreadsheet size={14} /> Import Excel
                       </button>
 
                       {products.length > 0 && (isSuperAdmin || hasPermission('canClearDatabase')) && (
@@ -12308,7 +12322,7 @@ _Helpline: +91 9316566894_`;
 
             {/* MODAL HEADER */}
             <div style={{
-              padding: '18px 24px',
+              padding: '16px 24px',
               borderBottom: '1px solid #e2e8f0',
               backgroundColor: '#f8fafc',
               display: 'flex',
@@ -12322,7 +12336,7 @@ _Helpline: +91 9316566894_`;
                 </div>
                 <div>
                   <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text-dark)', fontWeight: '700' }}>
-                    Bulk Import Products via Excel / CSV
+                    Bulk Import Products via Excel
                   </h3>
                   <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: 'var(--text-medium)' }}>
                     Upload spreadsheet, inspect live table preview, verify duplication checks, and import all products in 1 click.
@@ -12334,6 +12348,7 @@ _Helpline: +91 9316566894_`;
                   setIsBulkImportOpen(false);
                   setBulkParsedRows([]);
                   setUploadedFileName('');
+                  setBulkPreviewSearch('');
                 }} 
                 style={{ color: 'var(--text-medium)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}
                 aria-label="Close"
@@ -12343,86 +12358,98 @@ _Helpline: +91 9316566894_`;
             </div>
 
             {/* MODAL BODY (SCROLLABLE & RESPONSIVE) */}
-            <div style={{ padding: '20px 24px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '16px', boxSizing: 'border-box' }}>
+            <div style={{ position: 'relative', padding: '20px 24px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '16px', boxSizing: 'border-box' }}>
               
-              {/* TOP ACTION BAR: UPLOAD BUTTON & DOWNLOAD TEMPLATE BUTTON */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', padding: '14px 18px', backgroundColor: '#f1f5f9', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+              {/* TOP ACTION BAR: UPLOAD BUTTON & CURRENT FILE CHIP */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', padding: '12px 16px', backgroundColor: '#f1f5f9', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                   <input 
                     type="file" 
                     ref={excelFileInputRef}
-                    accept=".xlsx, .xls, .csv, text/csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                    accept=".xlsx, .xls, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                     style={{ display: 'none' }}
                     onChange={handleBulkFileChange}
                   />
                   <button
                     type="button"
                     onClick={() => excelFileInputRef.current?.click()}
+                    disabled={isDetectingRows || isImportingBulk}
                     className="btn btn-primary btn-sm"
-                    style={{ gap: '6px', padding: '9px 16px', fontWeight: '700' }}
+                    style={{ gap: '6px', padding: '9px 18px', fontWeight: '700', borderRadius: '8px' }}
                   >
-                    <Upload size={16} /> {uploadedFileName ? 'Change Excel / CSV File' : 'Select Excel (.xlsx) or CSV File'}
+                    <Upload size={16} /> {uploadedFileName ? 'Change Excel File' : 'Select Excel File (.xlsx)'}
                   </button>
 
                   {uploadedFileName && (
-                    <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#1e293b', backgroundColor: '#ffffff', padding: '6px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
-                      {uploadedFileName} ({bulkParsedRows.length} rows detected)
+                    <span style={{ fontSize: '0.85rem', fontWeight: '700', color: '#1e293b', backgroundColor: '#ffffff', padding: '7px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <FileSpreadsheet size={15} color="#059669" />
+                      {uploadedFileName} ({bulkParsedRows.length.toLocaleString()} rows detected)
                     </span>
                   )}
                 </div>
 
-                <button
-                  type="button"
-                  onClick={handleDownloadExcelTemplate}
-                  className="btn btn-sm"
-                  style={{
-                    gap: '6px',
-                    padding: '9px 16px',
-                    backgroundColor: '#16a34a',
-                    color: '#ffffff',
-                    border: 'none',
-                    fontWeight: '700',
-                    boxShadow: '0 2px 6px rgba(22, 163, 74, 0.25)'
-                  }}
-                  title="Download ready sample Excel spreadsheet with all columns and registered companies"
-                >
-                  <Download size={15} /> Download Sample Excel Template
-                </button>
+                <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600' }}>
+                  ⚡ Auto-mapped • Name & Packing Duplicate Protection Active
+                </div>
               </div>
 
+              {/* STATE 0: ANIMATED ROW DETECTING SCANNER (WHEN USER SELECTS FILE) */}
+              {isDetectingRows && (
+                <div style={{
+                  padding: '50px 20px',
+                  textAlign: 'center',
+                  backgroundColor: '#f8fafc',
+                  borderRadius: '16px',
+                  border: '2px dashed #3b82f6',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '14px'
+                }}>
+                  <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: '#dbeafe', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <RefreshCw size={32} className="animate-spin" />
+                  </div>
+                  <div>
+                    <h4 style={{ margin: '0 0 6px', fontSize: '1.2rem', color: '#0f172a', fontWeight: '800' }}>
+                      Analyzing Excel Spreadsheet...
+                    </h4>
+                    <p style={{ margin: 0, fontSize: '0.88rem', color: '#64748b', maxWidth: '520px' }}>
+                      Detecting rows, mapping formulation columns & verifying duplicate combinations with live catalog...
+                    </p>
+                  </div>
+                  <div style={{ width: '280px', height: '6px', backgroundColor: '#e2e8f0', borderRadius: '999px', overflow: 'hidden' }}>
+                    <div style={{ width: '100%', height: '100%', backgroundColor: '#2563eb', borderRadius: '999px', animation: 'pulse 1.2s infinite ease-in-out' }} />
+                  </div>
+                </div>
+              )}
+
               {/* STATE 1: NO FILE UPLOADED YET (DRAG & DROP ZONE & INSTRUCTIONS) */}
-              {bulkParsedRows.length === 0 && (
+              {!isDetectingRows && bulkParsedRows.length === 0 && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div 
                     onClick={() => excelFileInputRef.current?.click()}
                     style={{
                       border: '2px dashed #94a3b8',
                       borderRadius: '14px',
-                      padding: '40px 20px',
+                      padding: '44px 20px',
                       textAlign: 'center',
                       backgroundColor: '#f8fafc',
                       cursor: 'pointer',
-                      transition: 'border-color 0.2s ease'
+                      transition: 'all 0.2s ease'
                     }}
                     onMouseOver={(e) => { e.currentTarget.style.borderColor = '#2563eb'; e.currentTarget.style.backgroundColor = '#eff6ff'; }}
                     onMouseOut={(e) => { e.currentTarget.style.borderColor = '#94a3b8'; e.currentTarget.style.backgroundColor = '#f8fafc'; }}
                   >
-                    <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: '#dbeafe', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
-                      <FileSpreadsheet size={30} />
+                    <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: '#dbeafe', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
+                      <FileSpreadsheet size={32} />
                     </div>
-                    <h4 style={{ margin: '0 0 6px', fontSize: '1.05rem', color: 'var(--text-dark)', fontWeight: '700' }}>
-                      Click or Drag & Drop Excel (.xlsx, .xls) or CSV file here
+                    <h4 style={{ margin: '0 0 6px', fontSize: '1.1rem', color: 'var(--text-dark)', fontWeight: '700' }}>
+                      Click or Drag & Drop Excel (.xlsx, .xls) file here
                     </h4>
-                    <p style={{ margin: '0 0 14px', fontSize: '0.85rem', color: 'var(--text-medium)' }}>
-                      Supports all pharma formulation columns. Images can be left empty and added later.
+                    <p style={{ margin: 0, fontSize: '0.86rem', color: 'var(--text-medium)' }}>
+                      Supports all standard pharma formulation columns. Rows with zero price or missing images are safely accepted.
                     </p>
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); handleDownloadExcelTemplate(); }}
-                      style={{ fontSize: '0.84rem', color: '#16a34a', background: 'none', border: 'none', cursor: 'pointer', fontWeight: '700', textDecoration: 'underline' }}
-                    >
-                      Don&apos;t have a format? Click here to download the ready Excel Template (.xlsx)
-                    </button>
                   </div>
 
                   <div style={{ backgroundColor: '#f8fafc', padding: '16px 20px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '0.85rem' }}>
@@ -12446,109 +12473,164 @@ _Helpline: +91 9316566894_`;
                       <div>• <strong>HSN Code *</strong></div>
                       <div>• <strong>Expiry Date *</strong></div>
                       <div>• <strong>Purchase & Sales GST (%) *</strong></div>
-                      <div>• <strong>Trade Scheme (e.g. 10+1)</strong></div>
-                      <div>• <strong>Quality Specs / Certifications</strong></div>
-                      <div>• <strong>Units Per Box & Min Reorder Qty</strong></div>
-                      <div>• <strong>Product Image URL & Gallery</strong></div>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* STATE 2: FILE PARSED -> INTERACTIVE RESPONSIVE PREVIEW TABLE WITH DUPLICATION PREVENTER */}
-              {bulkParsedRows.length > 0 && (() => {
+              {/* STATE 2: FILE PARSED -> HARD-RESPONSIVE LIVE TABLE PREVIEW & CONTROLS */}
+              {!isDetectingRows && bulkParsedRows.length > 0 && (() => {
                 const totalCount = bulkParsedRows.length;
                 const duplicateCount = bulkParsedRows.filter(r => r.isDuplicate).length;
                 const errorCount = bulkParsedRows.filter(r => r.hasError).length;
                 const validCount = bulkParsedRows.filter(r => !r.isDuplicate && !r.hasError).length;
                 const selectedCount = bulkParsedRows.filter(r => r.selected && !r.hasError && (!bulkSkipDuplicates || !r.isDuplicate)).length;
 
+                const searchLower = bulkPreviewSearch.toLowerCase().trim();
                 const displayedRows = bulkParsedRows.filter(r => {
-                  if (bulkPreviewFilter === 'valid') return !r.isDuplicate && !r.hasError;
-                  if (bulkPreviewFilter === 'duplicates') return r.isDuplicate;
-                  if (bulkPreviewFilter === 'errors') return r.hasError;
+                  if (bulkPreviewFilter === 'valid' && (r.isDuplicate || r.hasError)) return false;
+                  if (bulkPreviewFilter === 'duplicates' && !r.isDuplicate) return false;
+                  if (bulkPreviewFilter === 'errors' && !r.hasError) return false;
+                  if (searchLower) {
+                    const match = (r.name && r.name.toLowerCase().includes(searchLower)) ||
+                                  (r.sku && r.sku.toLowerCase().includes(searchLower)) ||
+                                  (r.company && r.company.toLowerCase().includes(searchLower)) ||
+                                  (r.composition && r.composition.toLowerCase().includes(searchLower)) ||
+                                  (r.packing && r.packing.toLowerCase().includes(searchLower));
+                    if (!match) return false;
+                  }
                   return true;
                 });
 
                 return (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1, minHeight: 0 }}>
                     
-                    {/* STATS SUMMARY BAR */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '10px' }}>
+                    {/* STATS SUMMARY BAR (RESPONSIVE CARDS) */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '10px' }}>
                       <div style={{ padding: '12px 14px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
                         <div style={{ fontSize: '0.72rem', color: 'var(--text-medium)', fontWeight: '700', textTransform: 'uppercase' }}>Total In File</div>
-                        <div style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--text-dark)' }}>{totalCount}</div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--text-dark)' }}>{totalCount.toLocaleString()}</div>
                       </div>
 
                       <div style={{ padding: '12px 14px', backgroundColor: '#ecfdf5', borderRadius: '10px', border: '1px solid #a7f3d0' }}>
                         <div style={{ fontSize: '0.72rem', color: '#047857', fontWeight: '700', textTransform: 'uppercase' }}>Ready to Import</div>
-                        <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#059669' }}>{validCount}</div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#059669' }}>{validCount.toLocaleString()}</div>
                       </div>
 
                       <div style={{ padding: '12px 14px', backgroundColor: duplicateCount > 0 ? '#fffbeb' : '#f8fafc', borderRadius: '10px', border: `1px solid ${duplicateCount > 0 ? '#fde68a' : '#e2e8f0'}` }}>
                         <div style={{ fontSize: '0.72rem', color: duplicateCount > 0 ? '#b45309' : 'var(--text-medium)', fontWeight: '700', textTransform: 'uppercase' }}>Duplicates Flagged</div>
-                        <div style={{ fontSize: '1.25rem', fontWeight: '800', color: duplicateCount > 0 ? '#d97706' : 'var(--text-dark)' }}>{duplicateCount}</div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: '800', color: duplicateCount > 0 ? '#d97706' : 'var(--text-dark)' }}>{duplicateCount.toLocaleString()}</div>
                       </div>
 
                       <div style={{ padding: '12px 14px', backgroundColor: '#eff6ff', borderRadius: '10px', border: '1px solid #bfdbfe' }}>
                         <div style={{ fontSize: '0.72rem', color: '#1d4ed8', fontWeight: '700', textTransform: 'uppercase' }}>Selected for Import</div>
-                        <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#2563eb' }}>{selectedCount}</div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#2563eb' }}>{selectedCount.toLocaleString()}</div>
                       </div>
                     </div>
 
-                    {/* CONTROLS BAR: FILTER TABS & DUPLICATION CHECKBOX */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', padding: '10px 14px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                        <button 
-                          type="button" 
-                          onClick={() => setBulkPreviewFilter('all')}
-                          style={{ padding: '5px 12px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: '700', border: 'none', cursor: 'pointer', backgroundColor: bulkPreviewFilter === 'all' ? '#2563eb' : '#e2e8f0', color: bulkPreviewFilter === 'all' ? '#fff' : '#475569' }}
-                        >
-                          All Rows ({totalCount})
-                        </button>
-                        <button 
-                          type="button" 
-                          onClick={() => setBulkPreviewFilter('valid')}
-                          style={{ padding: '5px 12px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: '700', border: 'none', cursor: 'pointer', backgroundColor: bulkPreviewFilter === 'valid' ? '#059669' : '#e2e8f0', color: bulkPreviewFilter === 'valid' ? '#fff' : '#475569' }}
-                        >
-                          Ready ({validCount})
-                        </button>
-                        {duplicateCount > 0 && (
+                    {/* SMART CONTROLS BAR: SEARCH, FILTER PILLS & SELECTION TOGGLES */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '12px 14px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                      
+                      {/* Row 1: Search & Filter Tabs */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                           <button 
                             type="button" 
-                            onClick={() => setBulkPreviewFilter('duplicates')}
-                            style={{ padding: '5px 12px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: '700', border: 'none', cursor: 'pointer', backgroundColor: bulkPreviewFilter === 'duplicates' ? '#d97706' : '#e2e8f0', color: bulkPreviewFilter === 'duplicates' ? '#fff' : '#475569' }}
+                            onClick={() => setBulkPreviewFilter('all')}
+                            style={{ padding: '6px 12px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: '700', border: 'none', cursor: 'pointer', backgroundColor: bulkPreviewFilter === 'all' ? '#2563eb' : '#e2e8f0', color: bulkPreviewFilter === 'all' ? '#fff' : '#475569' }}
                           >
-                            Duplicates ({duplicateCount})
+                            All Rows ({totalCount.toLocaleString()})
                           </button>
-                        )}
+                          <button 
+                            type="button" 
+                            onClick={() => setBulkPreviewFilter('valid')}
+                            style={{ padding: '6px 12px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: '700', border: 'none', cursor: 'pointer', backgroundColor: bulkPreviewFilter === 'valid' ? '#059669' : '#e2e8f0', color: bulkPreviewFilter === 'valid' ? '#fff' : '#475569' }}
+                          >
+                            Ready ({validCount.toLocaleString()})
+                          </button>
+                          {duplicateCount > 0 && (
+                            <button 
+                              type="button" 
+                              onClick={() => setBulkPreviewFilter('duplicates')}
+                              style={{ padding: '6px 12px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: '700', border: 'none', cursor: 'pointer', backgroundColor: bulkPreviewFilter === 'duplicates' ? '#d97706' : '#e2e8f0', color: bulkPreviewFilter === 'duplicates' ? '#fff' : '#475569' }}
+                            >
+                              Duplicates ({duplicateCount.toLocaleString()})
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Search Input */}
+                        <div style={{ position: 'relative', minWidth: '240px', flex: '1 1 240px', maxWidth: '380px' }}>
+                          <Search size={15} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                          <input 
+                            type="text"
+                            value={bulkPreviewSearch}
+                            onChange={(e) => setBulkPreviewSearch(e.target.value)}
+                            placeholder="Search in preview rows..."
+                            style={{ width: '100%', padding: '6px 10px 6px 32px', fontSize: '0.84rem', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#fff', boxSizing: 'border-box' }}
+                          />
+                          {bulkPreviewSearch && (
+                            <button 
+                              type="button" 
+                              onClick={() => setBulkPreviewSearch('')}
+                              style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: '0.8rem' }}
+                            >
+                              ✕
+                            </button>
+                          )}
+                        </div>
                       </div>
 
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.84rem', fontWeight: '700', color: '#1e293b' }}>
-                        <input 
-                          type="checkbox" 
-                          checked={bulkSkipDuplicates}
-                          onChange={(e) => setBulkSkipDuplicates(e.target.checked)}
-                          style={{ accentColor: '#2563eb', width: '16px', height: '16px' }}
-                        />
-                        <span>Automatically skip duplicates (prevent duplicates from being added)</span>
-                      </label>
+                      {/* Row 2: Selection Helpers & Duplicate Checkbox */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', paddingTop: '4px', borderTop: '1px solid #edf2f7' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleSelectAll(true)}
+                            style={{ padding: '4px 10px', fontSize: '0.78rem', fontWeight: '700', borderRadius: '5px', border: '1px solid #cbd5e1', backgroundColor: '#fff', color: '#0f172a', cursor: 'pointer' }}
+                          >
+                            ✓ Select All Ready
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleSelectAll(false)}
+                            style={{ padding: '4px 10px', fontSize: '0.78rem', fontWeight: '700', borderRadius: '5px', border: '1px solid #cbd5e1', backgroundColor: '#fff', color: '#64748b', cursor: 'pointer' }}
+                          >
+                            ✕ Deselect All
+                          </button>
+                          <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                            Showing {displayedRows.length.toLocaleString()} matching rows
+                          </span>
+                        </div>
+
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.84rem', fontWeight: '700', color: '#1e293b' }}>
+                          <input 
+                            type="checkbox" 
+                            checked={bulkSkipDuplicates}
+                            onChange={(e) => setBulkSkipDuplicates(e.target.checked)}
+                            style={{ accentColor: '#2563eb', width: '16px', height: '16px' }}
+                          />
+                          <span>Automatically skip duplicates (prevent duplicates from being added)</span>
+                        </label>
+                      </div>
+
                     </div>
 
-                    {/* RESPONSIVE SCROLLABLE DATA PREVIEW TABLE */}
+                    {/* HARD RESPONSIVE DATA TABLE WITH STICKY HEADERS & STICKY FIRST COLUMNS */}
                     <div style={{
-                      maxHeight: '380px',
+                      maxHeight: '400px',
                       overflowX: 'auto',
                       overflowY: 'auto',
                       border: '1px solid #cbd5e1',
                       borderRadius: '10px',
                       backgroundColor: '#ffffff',
-                      boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.05)'
+                      boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.05)',
+                      position: 'relative'
                     }}>
-                      <table style={{ width: '100%', minWidth: '1100px', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
-                        <thead style={{ position: 'sticky', top: 0, backgroundColor: '#f1f5f9', zIndex: 5, boxShadow: '0 1px 2px rgba(0,0,0,0.08)' }}>
-                          <tr>
-                            <th style={{ padding: '10px 12px', width: '38px', textAlign: 'center' }}>
+                      <table style={{ width: '100%', minWidth: '1050px', borderCollapse: 'separate', borderSpacing: 0, fontSize: '0.82rem', textAlign: 'left' }}>
+                        <thead style={{ position: 'sticky', top: 0, zIndex: 10 }}>
+                          <tr style={{ backgroundColor: '#f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+                            <th style={{ position: 'sticky', left: 0, zIndex: 11, backgroundColor: '#f1f5f9', padding: '10px 12px', width: '38px', textAlign: 'center', borderBottom: '1px solid #cbd5e1' }}>
                               <input 
                                 type="checkbox"
                                 checked={selectedCount > 0 && selectedCount === validCount}
@@ -12557,24 +12639,26 @@ _Helpline: +91 9316566894_`;
                                 title="Select / Deselect all valid rows"
                               />
                             </th>
-                            <th style={{ padding: '10px 12px', width: '70px' }}>Row</th>
-                            <th style={{ padding: '10px 12px', minWidth: '130px' }}>Status</th>
-                            <th style={{ padding: '10px 12px', minWidth: '190px' }}>Product Name / Brand</th>
-                            <th style={{ padding: '10px 12px', minWidth: '110px' }}>SKU / ID</th>
-                            <th style={{ padding: '10px 12px', minWidth: '140px' }}>Company</th>
-                            <th style={{ padding: '10px 12px', minWidth: '170px' }}>Contain</th>
-                            <th style={{ padding: '10px 12px', minWidth: '130px' }}>Packing & Form</th>
-                            <th style={{ padding: '10px 12px', minWidth: '95px' }}>Wholesale</th>
-                            <th style={{ padding: '10px 12px', minWidth: '85px' }}>MRP</th>
-                            <th style={{ padding: '10px 12px', minWidth: '70px' }}>Stock</th>
-                            <th style={{ padding: '10px 12px', minWidth: '80px' }}>GST</th>
+                            <th style={{ position: 'sticky', left: '38px', zIndex: 11, backgroundColor: '#f1f5f9', padding: '10px 12px', width: '65px', borderBottom: '1px solid #cbd5e1' }}>
+                              Row
+                            </th>
+                            <th style={{ padding: '10px 12px', minWidth: '140px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Status</th>
+                            <th style={{ padding: '10px 12px', minWidth: '190px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Product Name / Brand</th>
+                            <th style={{ padding: '10px 12px', minWidth: '110px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>SKU / ID</th>
+                            <th style={{ padding: '10px 12px', minWidth: '140px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Company</th>
+                            <th style={{ padding: '10px 12px', minWidth: '170px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Contain</th>
+                            <th style={{ padding: '10px 12px', minWidth: '130px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Packing & Form</th>
+                            <th style={{ padding: '10px 12px', minWidth: '95px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Wholesale</th>
+                            <th style={{ padding: '10px 12px', minWidth: '85px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>MRP</th>
+                            <th style={{ padding: '10px 12px', minWidth: '70px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Stock</th>
+                            <th style={{ padding: '10px 12px', minWidth: '80px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>GST</th>
                           </tr>
                         </thead>
                         <tbody>
                           {displayedRows.length === 0 ? (
                             <tr>
-                              <td colSpan="12" style={{ textAlign: 'center', padding: '30px', color: 'var(--text-medium)' }}>
-                                No products found matching this filter.
+                              <td colSpan="12" style={{ textAlign: 'center', padding: '36px', color: 'var(--text-medium)' }}>
+                                No products found matching your search and filter criteria.
                               </td>
                             </tr>
                           ) : (
@@ -12592,7 +12676,7 @@ _Helpline: +91 9316566894_`;
                                     transition: 'background-color 0.15s ease'
                                   }}
                                 >
-                                  <td style={{ padding: '8px 12px', textAlign: 'center' }}>
+                                  <td style={{ position: 'sticky', left: 0, zIndex: 2, backgroundColor: rowBg, padding: '8px 12px', textAlign: 'center', borderRight: '1px solid #f1f5f9' }}>
                                     <input 
                                       type="checkbox"
                                       checked={r.selected && (!bulkSkipDuplicates || !isRowDuplicate) && !isRowError}
@@ -12601,7 +12685,7 @@ _Helpline: +91 9316566894_`;
                                       style={{ accentColor: '#2563eb', cursor: (isRowError || (bulkSkipDuplicates && isRowDuplicate)) ? 'not-allowed' : 'pointer' }}
                                     />
                                   </td>
-                                  <td style={{ padding: '8px 12px', color: '#64748b', fontWeight: '600' }}>
+                                  <td style={{ position: 'sticky', left: '38px', zIndex: 2, backgroundColor: rowBg, padding: '8px 12px', color: '#64748b', fontWeight: '700', borderRight: '1px solid #f1f5f9' }}>
                                     #{r._rowId}
                                   </td>
                                   <td style={{ padding: '8px 12px' }}>
@@ -12611,7 +12695,7 @@ _Helpline: +91 9316566894_`;
                                       </span>
                                     ) : isRowDuplicate ? (
                                       <span style={{ backgroundColor: '#fef3c7', color: '#b45309', fontSize: '0.72rem', padding: '2px 7px', borderRadius: '4px', fontWeight: '700', whiteSpace: 'nowrap' }} title={r.duplicateReason}>
-                                        Duplicate: {r.duplicateReason}
+                                        Duplicate (Skip)
                                       </span>
                                     ) : (
                                       <span style={{ backgroundColor: '#dcfce7', color: '#15803d', fontSize: '0.72rem', padding: '2px 7px', borderRadius: '4px', fontWeight: '700', whiteSpace: 'nowrap' }}>
@@ -12632,7 +12716,7 @@ _Helpline: +91 9316566894_`;
                                     {r.composition || '—'}
                                   </td>
                                   <td style={{ padding: '8px 12px', color: 'var(--text-medium)' }}>
-                                    {r.form} • {r.packing}
+                                    <span style={{ fontWeight: '600', color: '#0f172a' }}>{r.packing}</span> {r.form && `• ${r.form}`}
                                   </td>
                                   <td style={{ padding: '8px 12px', fontWeight: '700', color: '#16a34a' }}>
                                     ₹{r.price != null && !isNaN(r.price) ? Number(r.price).toFixed(2) : (r.price || '0.00')}
@@ -12658,12 +12742,63 @@ _Helpline: +91 9316566894_`;
                 );
               })()}
 
+              {/* ANIMATED FULL-SCREEN MODAL OVERLAY WHILE IMPORTING TO CLOUD DATABASE */}
+              {isImportingBulk && (
+                <div style={{
+                  position: 'absolute',
+                  inset: 0,
+                  backgroundColor: 'rgba(255, 255, 255, 0.94)',
+                  backdropFilter: 'blur(5px)',
+                  zIndex: 50,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '24px',
+                  borderRadius: '16px'
+                }}>
+                  <div style={{
+                    width: '74px',
+                    height: '74px',
+                    borderRadius: '18px',
+                    backgroundColor: '#eff6ff',
+                    color: '#2563eb',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '18px',
+                    boxShadow: '0 8px 24px rgba(37, 99, 235, 0.2)'
+                  }}>
+                    <RefreshCw size={36} className="animate-spin" />
+                  </div>
+
+                  <h3 style={{ margin: '0 0 8px', fontSize: '1.35rem', fontWeight: '800', color: '#0f172a' }}>
+                    Importing Products into Cloud Database...
+                  </h3>
+                  <p style={{ margin: '0 0 18px', fontSize: '0.92rem', color: '#64748b', textAlign: 'center', maxWidth: '420px' }}>
+                    Syncing Batch {importProgress.batch} of {importProgress.totalBatches} — Processed {importProgress.current.toLocaleString()} of {importProgress.total.toLocaleString()} products
+                  </p>
+
+                  <div style={{ width: '100%', maxWidth: '400px', height: '12px', backgroundColor: '#e2e8f0', borderRadius: '999px', overflow: 'hidden', marginBottom: '10px' }}>
+                    <div style={{ width: `${importProgress.percent}%`, height: '100%', backgroundColor: '#2563eb', borderRadius: '999px', transition: 'width 0.3s ease' }} />
+                  </div>
+
+                  <div style={{ fontSize: '0.9rem', fontWeight: '800', color: '#2563eb', marginBottom: '16px' }}>
+                    {importProgress.percent}% Complete
+                  </div>
+
+                  <div style={{ fontSize: '0.8rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <AlertCircle size={14} /> Live MongoDB Atlas sync in progress. Please do not close this window.
+                  </div>
+                </div>
+              )}
+
               {/* SUCCESS RESULTS SUMMARY IF AVAILABLE */}
               {bulkImportResults && (
                 <div style={{ padding: '14px 18px', backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '10px', fontSize: '0.88rem', color: '#065f46', display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <CheckCircle2 size={20} color="#059669" />
                   <div>
-                    <strong>Import Successful:</strong> Added <strong>{bulkImportResults.successCount}</strong> products to catalog. {bulkImportResults.skippedCount > 0 && `(${bulkImportResults.skippedCount} duplicates skipped)`}
+                    <strong>Import Successful:</strong> Added <strong>{bulkImportResults.successCount.toLocaleString()}</strong> products to catalog. {bulkImportResults.skippedCount > 0 && `(${bulkImportResults.skippedCount.toLocaleString()} duplicates skipped)`}
                   </div>
                 </div>
               )}
@@ -12686,11 +12821,11 @@ _Helpline: +91 9316566894_`;
                 {bulkParsedRows.length > 0 ? (
                   <span>
                     Selected <strong style={{ color: '#2563eb' }}>
-                      {bulkParsedRows.filter(r => r.selected && !r.hasError && (!bulkSkipDuplicates || !r.isDuplicate)).length}
-                    </strong> of {bulkParsedRows.length} products
+                      {bulkParsedRows.filter(r => r.selected && !r.hasError && (!bulkSkipDuplicates || !r.isDuplicate)).length.toLocaleString()}
+                    </strong> of {bulkParsedRows.length.toLocaleString()} products
                   </span>
                 ) : (
-                  <span>Ready to parse Excel or CSV spreadsheet</span>
+                  <span>Ready to parse Excel spreadsheet</span>
                 )}
               </div>
 
@@ -12701,6 +12836,7 @@ _Helpline: +91 9316566894_`;
                     setIsBulkImportOpen(false);
                     setBulkParsedRows([]);
                     setUploadedFileName('');
+                    setBulkPreviewSearch('');
                   }}
                   className="btn btn-outline btn-sm"
                   style={{ padding: '8px 16px', fontWeight: '600' }}
@@ -12714,15 +12850,15 @@ _Helpline: +91 9316566894_`;
                     onClick={handleExecuteBulkImport}
                     disabled={isImportingBulk || bulkParsedRows.filter(r => r.selected && !r.hasError && (!bulkSkipDuplicates || !r.isDuplicate)).length === 0}
                     className="btn btn-primary btn-sm"
-                    style={{ padding: '8px 22px', fontWeight: '700', gap: '6px' }}
+                    style={{ padding: '8px 24px', fontWeight: '700', gap: '8px', borderRadius: '8px' }}
                   >
                     {isImportingBulk ? (
                       <>
-                        <div className="spinner" style={{ width: '14px', height: '14px', borderTopColor: '#fff' }}></div>
-                        Importing Products...
+                        <RefreshCw size={14} className="animate-spin" />
+                        Syncing Atlas ({importProgress.percent}%)...
                       </>
                     ) : (
-                      `✓ Confirm & Import (${bulkParsedRows.filter(r => r.selected && !r.hasError && (!bulkSkipDuplicates || !r.isDuplicate)).length}) Products`
+                      `✓ Confirm & Import (${bulkParsedRows.filter(r => r.selected && !r.hasError && (!bulkSkipDuplicates || !r.isDuplicate)).length.toLocaleString()}) Products`
                     )}
                   </button>
                 )}

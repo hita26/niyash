@@ -1077,8 +1077,10 @@ router.post('/bulk', protect, adminOnly, checkPermission('canBulkImport'), async
         const sku = p.sku && p.sku.trim() ? p.sku.trim() : `NP-${Date.now().toString().slice(-6)}-${i + 1}`;
         const normalizedSku = sku.toLowerCase();
 
-        // Duplication prevention: Check against batch itself
-        if (seenNamesInBatch.has(normalizedName)) {
+        // Duplication prevention: Check against batch itself (Name + Packing)
+        const packingStr = (p.packing || '').trim().toLowerCase();
+        const batchComboKey = `${normalizedName}___${packingStr}`;
+        if (seenNamesInBatch.has(batchComboKey)) {
           if (skipDuplicates) {
             skippedCount++;
             continue;
@@ -1091,22 +1093,32 @@ router.post('/bulk', protect, adminOnly, checkPermission('canBulkImport'), async
           }
         }
 
-        // Duplication prevention: Check against existing MongoDB collection
+        // Duplication prevention: Check against existing MongoDB collection (Name + Packing)
         if (skipDuplicates) {
           const escapedName = trimmedName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          const existingProduct = await Product.findOne({
-            $or: [
-              { name: { $regex: new RegExp(`^${escapedName}$`, 'i') } },
-              { sku: { $regex: new RegExp(`^${sku.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') } }
-            ]
-          });
+          const queryConditions = [
+            { sku: { $regex: new RegExp(`^${sku.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') } }
+          ];
+          if (packingStr) {
+            const escapedPack = (p.packing || '').trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            queryConditions.push({
+              name: { $regex: new RegExp(`^${escapedName}$`, 'i') },
+              packing: { $regex: new RegExp(`^${escapedPack}$`, 'i') }
+            });
+          } else {
+            queryConditions.push({
+              name: { $regex: new RegExp(`^${escapedName}$`, 'i') }
+            });
+          }
+
+          const existingProduct = await Product.findOne({ $or: queryConditions });
           if (existingProduct) {
             skippedCount++;
             continue; // Skip duplicate without throwing an error
           }
         }
 
-        seenNamesInBatch.add(normalizedName);
+        seenNamesInBatch.add(batchComboKey);
         seenSkusInBatch.add(normalizedSku);
 
         const assignedCompany = (p.company && p.company.trim()) || 'Daxia Healthcare';

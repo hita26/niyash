@@ -13,8 +13,9 @@ window.fetch = async (...args) => {
   let [resource, config] = args;
   const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
   const isVercel = typeof window !== 'undefined' && window.location.hostname.includes('vercel.app');
+  const isNiyansh = typeof window !== 'undefined' && window.location.hostname.includes('niyanshpharma.com');
 
-  if (!isLocal && !isVercel) {
+  if (!isLocal && !isVercel && !isNiyansh) {
     if (typeof resource === 'string' && resource.startsWith('/api') && !resource.includes('.php')) {
       resource = `https://pharma-bay-two.vercel.app${resource}`;
     } else if (typeof Request !== 'undefined' && resource instanceof Request && resource.url.startsWith(window.location.origin + '/api') && !resource.url.includes('.php')) {

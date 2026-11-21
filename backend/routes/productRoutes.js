@@ -1048,7 +1048,7 @@ router.delete('/:id', protect, adminOnly, checkPermission('canDeleteProducts'), 
   }
 });
 
-// @desc    Bulk import products (from CSV or JSON)
+// @desc    High-performance Bulk import products via spreadsheet with MongoDB bulkWrite
 // @route   POST /api/products/bulk
 // @access  Private/Admin
 router.post('/bulk', protect, adminOnly, checkPermission('canBulkImport'), async (req, res) => {
@@ -1065,132 +1065,159 @@ router.post('/bulk', protect, adminOnly, checkPermission('canBulkImport'), async
     const seenNamesInBatch = new Set();
     const seenSkusInBatch = new Set();
 
+    // 1. Separate valid rows and collect identifiers
+    const validRows = [];
     for (let i = 0; i < products.length; i++) {
       const p = products[i];
-      try {
-        if (!p.name || p.name.trim() === '') {
-          throw new Error(`Row ${i + 1}: Product name is required`);
-        }
-
-        const trimmedName = p.name.trim();
-        const normalizedName = trimmedName.toLowerCase();
-        const sku = p.sku && p.sku.trim() ? p.sku.trim() : `NP-${Date.now().toString().slice(-6)}-${i + 1}`;
-        const normalizedSku = sku.toLowerCase();
-
-        // Duplication prevention: Check against batch itself (Name + Packing)
-        const packingStr = (p.packing || '').trim().toLowerCase();
-        const batchComboKey = `${normalizedName}___${packingStr}`;
-        if (seenNamesInBatch.has(batchComboKey)) {
-          if (skipDuplicates) {
-            skippedCount++;
-            continue;
-          }
-        }
-        if (seenSkusInBatch.has(normalizedSku)) {
-          if (skipDuplicates) {
-            skippedCount++;
-            continue;
-          }
-        }
-
-        // Duplication prevention: Check against existing MongoDB collection (Name + Packing)
-        if (skipDuplicates) {
-          const escapedName = trimmedName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          const queryConditions = [
-            { sku: { $regex: new RegExp(`^${sku.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') } }
-          ];
-          if (packingStr) {
-            const escapedPack = (p.packing || '').trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            queryConditions.push({
-              name: { $regex: new RegExp(`^${escapedName}$`, 'i') },
-              packing: { $regex: new RegExp(`^${escapedPack}$`, 'i') }
-            });
-          } else {
-            queryConditions.push({
-              name: { $regex: new RegExp(`^${escapedName}$`, 'i') }
-            });
-          }
-
-          const existingProduct = await Product.findOne({ $or: queryConditions });
-          if (existingProduct) {
-            skippedCount++;
-            continue; // Skip duplicate without throwing an error
-          }
-        }
-
-        seenNamesInBatch.add(batchComboKey);
-        seenSkusInBatch.add(normalizedSku);
-
-        const assignedCompany = (p.company && p.company.trim()) || 'Daxia Healthcare';
-
-        // Auto-ensure Company exists in Company collection so it shows up on public website
-        try {
-          const escapedComp = assignedCompany.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          const compExists = await Company.findOne({ name: { $regex: new RegExp(`^${escapedComp}$`, 'i') } });
-          if (!compExists) {
-            const initials = assignedCompany.replace(/[^A-Za-z0-9]/g, '').slice(0, 3).toUpperCase() || 'PH';
-            const newComp = new Company({
-              name: assignedCompany,
-              category: p.category || 'Pharmaceutical Formulations',
-              location: 'Gujarat, India',
-              isPartner: true,
-              isPublished: true,
-              logoUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=0c3d6c&color=ffffff&bold=true&size=128`,
-              description: `Authorized pharmaceutical manufacturer for ${assignedCompany} formulations.`
-            });
-            await newComp.save();
-          }
-        } catch (cErr) {
-          console.warn('Auto-create company info in bulk import:', cErr.message);
-        }
-
-        const images = Array.isArray(p.images) ? p.images : p.imageUrl ? [p.imageUrl] : [];
-        const mainImage = p.imageUrl || (images.length > 0 ? images[0] : '');
-        const salesGstVal = !isNaN(parseFloat(p.salesGst)) ? parseFloat(p.salesGst) : (!isNaN(parseFloat(p.gstRate)) ? parseFloat(p.gstRate) : 12);
-        const purchaseGstVal = !isNaN(parseFloat(p.purchaseGst)) ? parseFloat(p.purchaseGst) : 12;
-
-        const productData = {
-          name: trimmedName,
-          brand: (p.brand && p.brand.trim()) || trimmedName,
-          company: assignedCompany,
-          category: (p.category && p.category.trim()) || 'Pharma Products',
-          subCategory: (p.subCategory && p.subCategory.trim()) || '',
-          sku,
-          price: parseFloat(p.price) || 0,
-          mrp: parseFloat(p.mrp) || parseFloat(p.price) || 0,
-          stockQuantity: parseInt(p.stockQuantity, 10) || 100,
-          inStock: p.inStock !== undefined ? Boolean(p.inStock) : true,
-          packing: (p.packing && p.packing.trim()) || '10 x 10 Tablets',
-          composition: (p.composition && p.composition.trim()) || '',
-          form: (p.form && p.form.trim()) || 'Tablet',
-          manufacturer: (p.manufacturer && p.manufacturer.trim()) || assignedCompany,
-          rackId: (p.rackId && p.rackId.trim()) || '',
-          batchNumber: (p.batchNumber && p.batchNumber.trim()) || (p.batchNo && p.batchNo.trim()) || '',
-          hsnCode: (p.hsnCode && p.hsnCode.trim()) || '3004',
-          purchaseGst: purchaseGstVal,
-          salesGst: salesGstVal,
-          gstRate: salesGstVal,
-          expiryDate: (p.expiryDate && p.expiryDate.trim()) || '',
-          scheme: (p.scheme && p.scheme.trim()) || '',
-          qualitySpecs: (p.qualitySpecs && p.qualitySpecs.trim()) || 'WHO-GMP Certified',
-          unitsPerBox: !isNaN(parseInt(p.unitsPerBox, 10)) ? parseInt(p.unitsPerBox, 10) : 10,
-          minReorderQty: !isNaN(parseInt(p.minReorderQty, 10)) ? parseInt(p.minReorderQty, 10) : 1,
-          customFields: Array.isArray(p.customFields) ? p.customFields : [],
-          imageUrl: mainImage,
-          images,
-          description: (p.description && p.description.trim()) || '',
-          featured: Boolean(p.featured),
-          isOurProduct: Boolean(p.isOurProduct),
-          isActive: p.isActive !== undefined ? Boolean(p.isActive) : true,
-        };
-
-        // If product with matching SKU exists and not skipping, update; otherwise insert
-        await Product.findOneAndUpdate({ sku }, { $set: productData }, { upsert: true, new: true });
-        successCount++;
-      } catch (rowErr) {
+      if (!p || !p.name || p.name.trim() === '') {
         errorCount++;
-        errors.push({ row: i + 1, error: rowErr.message });
+        errors.push({ row: i + 1, error: 'Product name is required' });
+        continue;
       }
+      validRows.push({ ...p, _rowIdx: i + 1 });
+    }
+
+    // 2. In-batch duplicate detection (O(1) memory lookup)
+    const candidates = [];
+    for (const p of validRows) {
+      const trimmedName = p.name.trim();
+      const normalizedName = trimmedName.toLowerCase();
+      const sku = p.sku && p.sku.trim() ? p.sku.trim() : `NP-${Date.now().toString().slice(-6)}-${p._rowIdx}`;
+      const normalizedSku = sku.toLowerCase();
+      const packingStr = (p.packing || '').trim().toLowerCase();
+      const batchComboKey = `${normalizedName}___${packingStr}`;
+
+      if (seenNamesInBatch.has(batchComboKey) || seenSkusInBatch.has(normalizedSku)) {
+        if (skipDuplicates) {
+          skippedCount++;
+          continue;
+        }
+      }
+
+      seenNamesInBatch.add(batchComboKey);
+      seenSkusInBatch.add(normalizedSku);
+      candidates.push({
+        ...p,
+        _trimmedName: trimmedName,
+        _normalizedName: normalizedName,
+        _sku: sku,
+        _normalizedSku: normalizedSku,
+        _packingStr: packingStr,
+        _batchComboKey: batchComboKey
+      });
+    }
+
+    // 3. Ultra-fast single-query check against existing MongoDB collection
+    let existingComboKeys = new Set();
+    let existingSkus = new Set();
+    if (skipDuplicates && candidates.length > 0) {
+      const skusToQuery = candidates.map(c => c._sku).filter(Boolean);
+      const namesToQuery = [...new Set(candidates.map(c => c._trimmedName))];
+
+      const existingInDb = await Product.find({
+        $or: [
+          { sku: { $in: skusToQuery } },
+          { name: { $in: namesToQuery } }
+        ]
+      }, { sku: 1, name: 1, packing: 1 }).lean();
+
+      existingComboKeys = new Set(existingInDb.map(p => `${(p.name || '').trim().toLowerCase()}___${(p.packing || '').trim().toLowerCase()}`));
+      existingSkus = new Set(existingInDb.map(p => (p.sku || '').trim().toLowerCase()));
+    }
+
+    // 4. Batch ensure unique companies exist using bulkWrite
+    const uniqueCompanies = [...new Set(candidates.map(p => (p.company && p.company.trim()) || 'Daxia Healthcare'))];
+    if (uniqueCompanies.length > 0) {
+      try {
+        const compOps = uniqueCompanies.map(compName => {
+          const initials = compName.replace(/[^A-Za-z0-9]/g, '').slice(0, 3).toUpperCase() || 'PH';
+          return {
+            updateOne: {
+              filter: { name: { $regex: new RegExp(`^${compName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') } },
+              update: {
+                $setOnInsert: {
+                  name: compName,
+                  category: 'Pharmaceutical Formulations',
+                  location: 'Gujarat, India',
+                  isPartner: true,
+                  isPublished: true,
+                  logoUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=0c3d6c&color=ffffff&bold=true&size=128`,
+                  description: `Authorized pharmaceutical manufacturer for ${compName} formulations.`
+                }
+              },
+              upsert: true
+            }
+          };
+        });
+        await Company.bulkWrite(compOps, { ordered: false });
+      } catch (cErr) {
+        console.warn('Auto-create company info in bulk import notice:', cErr.message);
+      }
+    }
+
+    // 5. Construct high-speed Product bulkWrite operations
+    const bulkOps = [];
+    for (const p of candidates) {
+      if (skipDuplicates) {
+        if (existingComboKeys.has(p._batchComboKey) || existingSkus.has(p._normalizedSku)) {
+          skippedCount++;
+          continue;
+        }
+      }
+
+      const assignedCompany = (p.company && p.company.trim()) || 'Daxia Healthcare';
+      const images = Array.isArray(p.images) ? p.images : p.imageUrl ? [p.imageUrl] : [];
+      const mainImage = p.imageUrl || (images.length > 0 ? images[0] : '');
+      const salesGstVal = !isNaN(parseFloat(p.salesGst)) ? parseFloat(p.salesGst) : (!isNaN(parseFloat(p.gstRate)) ? parseFloat(p.gstRate) : 12);
+      const purchaseGstVal = !isNaN(parseFloat(p.purchaseGst)) ? parseFloat(p.purchaseGst) : 12;
+
+      const productData = {
+        name: p._trimmedName,
+        brand: (p.brand && p.brand.trim()) || p._trimmedName,
+        company: assignedCompany,
+        category: (p.category && p.category.trim()) || 'Pharma Products',
+        subCategory: (p.subCategory && p.subCategory.trim()) || '',
+        sku: p._sku,
+        price: parseFloat(p.price) || 0,
+        mrp: parseFloat(p.mrp) || parseFloat(p.price) || 0,
+        stockQuantity: parseInt(p.stockQuantity, 10) || 100,
+        inStock: p.inStock !== undefined ? Boolean(p.inStock) : true,
+        packing: (p.packing && p.packing.trim()) || '10 x 10 Tablets',
+        composition: (p.composition && p.composition.trim()) || '',
+        form: (p.form && p.form.trim()) || 'Tablet',
+        manufacturer: (p.manufacturer && p.manufacturer.trim()) || assignedCompany,
+        rackId: (p.rackId && p.rackId.trim()) || '',
+        batchNumber: (p.batchNumber && p.batchNumber.trim()) || (p.batchNo && p.batchNo.trim()) || '',
+        hsnCode: (p.hsnCode && p.hsnCode.trim()) || '3004',
+        purchaseGst: purchaseGstVal,
+        salesGst: salesGstVal,
+        gstRate: salesGstVal,
+        expiryDate: (p.expiryDate && p.expiryDate.trim()) || '',
+        scheme: (p.scheme && p.scheme.trim()) || '',
+        qualitySpecs: (p.qualitySpecs && p.qualitySpecs.trim()) || 'WHO-GMP Certified',
+        unitsPerBox: !isNaN(parseInt(p.unitsPerBox, 10)) ? parseInt(p.unitsPerBox, 10) : 10,
+        minReorderQty: !isNaN(parseInt(p.minReorderQty, 10)) ? parseInt(p.minReorderQty, 10) : 1,
+        customFields: Array.isArray(p.customFields) ? p.customFields : [],
+        imageUrl: mainImage,
+        images,
+        description: (p.description && p.description.trim()) || '',
+        featured: Boolean(p.featured),
+        isOurProduct: Boolean(p.isOurProduct),
+        isActive: p.isActive !== undefined ? Boolean(p.isActive) : true,
+      };
+
+      bulkOps.push({
+        updateOne: {
+          filter: { sku: p._sku },
+          update: { $set: productData },
+          upsert: true
+        }
+      });
+    }
+
+    if (bulkOps.length > 0) {
+      const bulkRes = await Product.bulkWrite(bulkOps, { ordered: false });
+      successCount = (bulkRes.upsertedCount || 0) + (bulkRes.modifiedCount || 0) + (bulkRes.matchedCount || 0);
     }
 
     logAuditEvent({

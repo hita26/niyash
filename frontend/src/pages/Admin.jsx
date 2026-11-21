@@ -1412,7 +1412,7 @@ function Admin() {
   const [isStatsCollapsed, setIsStatsCollapsed] = useState(false);
   const [editingBulkRow, setEditingBulkRow] = useState(null);
   const [isDetectingRows, setIsDetectingRows] = useState(false);
-  const [importProgress, setImportProgress] = useState({ current: 0, total: 0, percent: 0, batch: 0, totalBatches: 0 });
+  const [importProgress, setImportProgress] = useState({ current: 0, total: 0, percent: 0, batch: 0, totalBatches: 0, etaText: '', speedText: '', currentSampleName: '' });
   const [uploadedFileName, setUploadedFileName] = useState('');
   const [bulkSkipDuplicates, setBulkSkipDuplicates] = useState(true);
   const [bulkImportResults, setBulkImportResults] = useState(null);
@@ -4368,66 +4368,111 @@ _Helpline: +91 9316566894_`;
       }
     }
 
-    const BATCH_SIZE = 500;
+    const BATCH_SIZE = 250;
     const totalBatches = Math.ceil(rowsToImport.length / BATCH_SIZE);
     let totalSuccess = 0;
     let totalSkipped = 0;
-    setImportProgress({ current: 0, total: rowsToImport.length, percent: 0, batch: 1, totalBatches });
+    const importStartTime = Date.now();
+    setImportProgress({
+      current: 0,
+      total: rowsToImport.length,
+      percent: 0,
+      batch: 1,
+      totalBatches,
+      etaText: 'Estimating sync speed...',
+      speedText: '',
+      currentSampleName: rowsToImport[0]?.name || ''
+    });
 
     try {
       for (let i = 0; i < totalBatches; i++) {
         const batchSlice = rowsToImport.slice(i * BATCH_SIZE, (i + 1) * BATCH_SIZE);
         const currentProcessed = Math.min((i + 1) * BATCH_SIZE, rowsToImport.length);
         const pct = Math.round((currentProcessed / rowsToImport.length) * 100);
+        const sampleName = batchSlice[0]?.name || '';
+
+        // Dynamic high-precision ETA & speed estimation
+        const elapsedSec = Math.max(0.4, (Date.now() - importStartTime) / 1000);
+        const itemsDoneSoFar = i * BATCH_SIZE;
+        const currentRate = itemsDoneSoFar > 0 ? Math.round(itemsDoneSoFar / elapsedSec) : 200;
+        const remainingItems = Math.max(0, rowsToImport.length - currentProcessed);
+        const remainingSec = Math.max(1, Math.round(remainingItems / Math.max(1, currentRate)));
+        const etaDisplay = remainingSec > 60 
+          ? `~${Math.floor(remainingSec / 60)}m ${remainingSec % 60}s remaining` 
+          : `~${remainingSec} seconds remaining`;
+
         setImportProgress({
           current: currentProcessed,
           total: rowsToImport.length,
           percent: pct,
           batch: i + 1,
-          totalBatches
+          totalBatches,
+          etaText: etaDisplay,
+          speedText: `~${currentRate} products / sec`,
+          currentSampleName: sampleName
         });
 
-        let res = await fetch('/api/products/bulk', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(currentToken ? { 'Authorization': `Bearer ${currentToken}` } : getAuthHeaders())
-          },
-          body: JSON.stringify({
-            products: batchSlice,
-            skipDuplicates: bulkSkipDuplicates
-          })
-        });
+        let res = null;
+        let attempt = 0;
+        const maxAttempts = 2;
 
-        // Auto-heal session if token was missing or expired
-        if (res.status === 401) {
+        while (attempt < maxAttempts) {
+          attempt++;
           try {
-            const loginRes = await fetch('/api/users/login', {
+            res = await fetch('/api/products/bulk', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email: 'info@niyanshpharma.com', password: 'NiyanshSuper@2026' })
+              headers: {
+                'Content-Type': 'application/json',
+                ...(currentToken ? { 'Authorization': `Bearer ${currentToken}` } : getAuthHeaders())
+              },
+              body: JSON.stringify({
+                products: batchSlice,
+                skipDuplicates: bulkSkipDuplicates
+              })
             });
-            const loginData = await loginRes.json();
-            if (loginData.token) {
-              currentToken = loginData.token;
-              setAdminToken(currentToken);
-              localStorage.setItem('niyansh_admin_token', currentToken);
-              res = await fetch('/api/products/bulk', {
+
+            // Auto-heal session if token was missing or expired
+            if (res.status === 401) {
+              const loginRes = await fetch('/api/users/login', {
                 method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${currentToken}`
-                },
-                body: JSON.stringify({
-                  products: batchSlice,
-                  skipDuplicates: bulkSkipDuplicates
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: 'info@niyanshpharma.com', password: 'NiyanshSuper@2026' })
               });
+              const loginData = await loginRes.json();
+              if (loginData.token) {
+                currentToken = loginData.token;
+                setAdminToken(currentToken);
+                localStorage.setItem('niyansh_admin_token', currentToken);
+                res = await fetch('/api/products/bulk', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${currentToken}`
+                  },
+                  body: JSON.stringify({
+                    products: batchSlice,
+                    skipDuplicates: bulkSkipDuplicates
+                  })
+                });
+              }
             }
-          } catch (_) {}
+
+            if (res.ok) {
+              break;
+            }
+          } catch (netErr) {
+            if (attempt >= maxAttempts) throw netErr;
+            await new Promise(r => setTimeout(r, 600));
+          }
         }
 
-        const data = await res.json();
+        let data = null;
+        try {
+          data = await res.json();
+        } catch (jsonErr) {
+          const rawText = await res.text().catch(() => '');
+          throw new Error(`Batch ${i + 1} server error (${res?.status}): ${rawText.slice(0, 100)}`);
+        }
 
         if (res.ok && data.success) {
           totalSuccess += (data.successCount || 0);
@@ -13208,23 +13253,50 @@ _Helpline: +91 9316566894_`;
                     <RefreshCw size={36} className="animate-spin" />
                   </div>
 
-                  <h3 style={{ margin: '0 0 8px', fontSize: '1.35rem', fontWeight: '800', color: '#0f172a' }}>
+                  <h3 style={{ margin: '0 0 6px', fontSize: '1.35rem', fontWeight: '800', color: '#0f172a' }}>
                     Importing Products into Cloud Database...
                   </h3>
-                  <p style={{ margin: '0 0 18px', fontSize: '0.92rem', color: '#64748b', textAlign: 'center', maxWidth: '420px' }}>
-                    Syncing Batch {importProgress.batch} of {importProgress.totalBatches} — Processed {importProgress.current.toLocaleString()} of {importProgress.total.toLocaleString()} products
+                  <p style={{ margin: '0 0 14px', fontSize: '0.92rem', color: '#64748b', textAlign: 'center', maxWidth: '460px' }}>
+                    Syncing Batch {importProgress.batch} of {importProgress.totalBatches} — Processed <strong>{importProgress.current.toLocaleString()}</strong> of <strong>{importProgress.total.toLocaleString()}</strong> products
                   </p>
 
-                  <div style={{ width: '100%', maxWidth: '400px', height: '12px', backgroundColor: '#e2e8f0', borderRadius: '999px', overflow: 'hidden', marginBottom: '10px' }}>
-                    <div style={{ width: `${importProgress.percent}%`, height: '100%', backgroundColor: '#2563eb', borderRadius: '999px', transition: 'width 0.3s ease' }} />
+                  {/* HIGH-PRECISION ANIMATED PROGRESS BAR */}
+                  <div style={{ width: '100%', maxWidth: '440px', height: '14px', backgroundColor: '#e2e8f0', borderRadius: '999px', overflow: 'hidden', marginBottom: '12px', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)' }}>
+                    <div style={{
+                      width: `${importProgress.percent}%`,
+                      height: '100%',
+                      background: 'linear-gradient(90deg, #2563eb, #3b82f6, #60a5fa)',
+                      borderRadius: '999px',
+                      transition: 'width 0.25s ease'
+                    }} />
                   </div>
 
-                  <div style={{ fontSize: '0.9rem', fontWeight: '800', color: '#2563eb', marginBottom: '16px' }}>
-                    {importProgress.percent}% Complete
+                  {/* PERCENT & LIVE ETA STATS CHIPS */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '14px' }}>
+                    <span style={{ fontSize: '1.1rem', fontWeight: '800', color: '#2563eb' }}>
+                      {importProgress.percent}% Complete
+                    </span>
+                    {importProgress.etaText && (
+                      <span style={{ fontSize: '0.82rem', fontWeight: '700', color: '#047857', backgroundColor: '#ecfdf5', padding: '3px 10px', borderRadius: '6px', border: '1px solid #a7f3d0' }}>
+                        ⏳ {importProgress.etaText}
+                      </span>
+                    )}
+                    {importProgress.speedText && (
+                      <span style={{ fontSize: '0.82rem', fontWeight: '700', color: '#475569', backgroundColor: '#f1f5f9', padding: '3px 10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+                        ⚡ {importProgress.speedText}
+                      </span>
+                    )}
                   </div>
+
+                  {/* LIVE CURRENT ITEM INDICATOR */}
+                  {importProgress.currentSampleName && (
+                    <div style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '14px', maxWidth: '440px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      Currently syncing: <strong style={{ color: '#0f172a' }}>{importProgress.currentSampleName}</strong>...
+                    </div>
+                  )}
 
                   <div style={{ fontSize: '0.8rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <AlertCircle size={14} /> Live MongoDB Atlas sync in progress. Please do not close this window.
+                    <AlertCircle size={14} /> Live MongoDB Atlas high-speed sync in progress. Please do not close this window.
                   </div>
                 </div>
               )}

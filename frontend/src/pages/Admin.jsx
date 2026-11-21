@@ -5172,43 +5172,43 @@ _Helpline: +91 9316566894_`;
 
   // ==========================================
   // ==========================================
-// NAVIGATION CONFIGURATION
+// NAVIGATION CONFIGURATION (Clean & Badge-Free)
   const NAV_SECTIONS = [
     {
       title: 'DASHBOARDS & LIVE',
       icon: Activity,
       items: [
-        { id: 'overview', label: 'Overview', icon: LayoutDashboard, badge: 'Live', badgeBg: 'rgba(2, 132, 199, 0.15)', badgeColor: '#0284c7' },
-        { id: 'traffic', label: 'Live Traffic', icon: Globe, badge: 'Live', isLivePulse: true, badgeBg: '#d1fae5', badgeColor: '#065f46', onClick: () => { setActiveTab('traffic'); fetchVisitorAnalytics(); } }
+        { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+        { id: 'traffic', label: 'Live Traffic', icon: Globe, onClick: () => { setActiveTab('traffic'); fetchVisitorAnalytics(); } }
       ]
     },
     {
       title: 'B2B OPERATIONS',
       icon: Building2,
       items: [
-        { id: 'chemists', label: 'Chemist Approvals', icon: Building2, badge: 'KYC', badgeBg: '#10b981', badgeColor: '#ffffff', visible: (isSuperAdmin || hasPermission('canManageEnquiries') || hasPermission('canManageOrders')) },
-        { id: 'orders', label: 'B2B Orders', icon: Package, badge: orders.length },
-        { id: 'ledgers', label: 'Outstanding Ledger', icon: CreditCard, badge: overdueLedgersCount > 0 ? `${overdueLedgersCount} Due` : (ledgers.length || 'Clean'), badgeBg: overdueLedgersCount > 0 ? '#fee2e2' : undefined, badgeColor: overdueLedgersCount > 0 ? '#ef4444' : undefined, visible: (isSuperAdmin || hasPermission('canManageLedgers')) }
+        { id: 'chemists', label: 'Chemist Approvals', icon: Building2, visible: (isSuperAdmin || hasPermission('canManageEnquiries') || hasPermission('canManageOrders')) },
+        { id: 'orders', label: 'B2B Orders', icon: Package },
+        { id: 'ledgers', label: 'Outstanding Ledger', icon: CreditCard, visible: (isSuperAdmin || hasPermission('canManageLedgers')) }
       ]
     },
     {
       title: 'CATALOG & DEALS',
       icon: ShoppingBag,
       items: [
-        { id: 'products', label: 'Products Catalog', icon: ShoppingBag, badge: (productStats.totalProducts || products.length) },
-        { id: 'news', label: 'News & Schemes', icon: Flame, badge: news.length },
-        { id: 'sync', label: 'ERP Sync & Logs', icon: Zap, badge: 'Auto', badgeBg: '#fef3c7', badgeColor: '#b45309', onClick: () => { setActiveTab('sync'); fetchSyncStatus(); } }
+        { id: 'products', label: 'Products Catalog', icon: ShoppingBag },
+        { id: 'news', label: 'News & Schemes', icon: Flame },
+        { id: 'sync', label: 'ERP Sync & Logs', icon: Zap, onClick: () => { setActiveTab('sync'); fetchSyncStatus(); } }
       ]
     },
     {
       title: 'GOVERNANCE & HUB',
       icon: Shield,
       items: [
-        { id: 'manage-admins', label: 'Manage Admins', icon: Users, badge: adminList.length, badgeBg: '#f59e0b', badgeColor: '#ffffff', visible: isSuperAdmin, onClick: () => { setActiveTab('manage-admins'); fetchAdmins(); } },
-        { id: 'audit', label: 'Security & Audit', icon: ShieldCheck, badge: 'IP Log', badgeBg: '#eff6ff', badgeColor: '#1e40af', visible: isSuperAdmin, onClick: () => { setActiveTab('audit'); fetchAuditLogs(1); } },
-        { id: 'enquiries', label: 'Enquiries', icon: MessageSquare, badge: enquiries.length },
-        { id: 'careers', label: 'Careers', icon: Briefcase, badge: careers.length },
-        { id: 'contact', label: 'Contact & Hub', icon: Phone, badge: 'Live', badgeBg: '#dcfce7', badgeColor: '#15803d' }
+        { id: 'manage-admins', label: 'Manage Admins', icon: Users, visible: isSuperAdmin, onClick: () => { setActiveTab('manage-admins'); fetchAdmins(); } },
+        { id: 'audit', label: 'Security & Audit', icon: ShieldCheck, visible: isSuperAdmin, onClick: () => { setActiveTab('audit'); fetchAuditLogs(1); } },
+        { id: 'enquiries', label: 'Enquiries', icon: MessageSquare },
+        { id: 'careers', label: 'Careers', icon: Briefcase },
+        { id: 'contact', label: 'Contact & Hub', icon: Phone }
       ]
     }
   ];
@@ -5236,15 +5236,27 @@ _Helpline: +91 9316566894_`;
               className="admin-sidebar-section-header"
               onClick={() => toggleSection(section.title)}
               title={`Click to ${isCollapsed ? 'expand' : 'collapse'} ${section.title}`}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '6px 8px',
+                cursor: 'pointer',
+                userSelect: 'none',
+                borderRadius: '8px',
+                transition: 'background-color 0.15s ease'
+              }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, overflow: 'hidden' }}>
-                <SectionIcon size={12} style={{ flexShrink: 0 }} />
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{section.title}</span>
+                <SectionIcon size={13} style={{ flexShrink: 0, opacity: 0.7 }} />
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.7rem', fontWeight: '800', letterSpacing: '0.5px' }}>
+                  {section.title}
+                </span>
               </div>
-              <ChevronDown size={12} style={{ transform: isCollapsed ? 'rotate(-90deg)' : 'none', transition: 'transform 0.2s ease', flexShrink: 0, marginLeft: 'auto' }} />
+              <ChevronDown size={12} style={{ transform: isCollapsed ? 'rotate(-90deg)' : 'none', transition: 'transform 0.2s ease', flexShrink: 0, marginLeft: 'auto', opacity: 0.6 }} />
             </div>
           ) : (
-            <div style={{ height: '1px', backgroundColor: 'var(--border-light, #e2e8f0)', margin: '8px 4px 4px 4px' }} />
+            <div style={{ height: '1px', backgroundColor: 'var(--border-light, #e2e8f0)', margin: '6px 4px' }} />
           )}
 
           {(!isCollapsed || !isExpanded) && visibleItems.map(item => {
@@ -5264,53 +5276,29 @@ _Helpline: +91 9316566894_`;
                 style={{
                   minHeight: '40px',
                   padding: isExpanded ? '8px 12px' : '8px',
-                  justifyContent: isExpanded ? 'space-between' : 'center',
-                  gap: '8px'
+                  justifyContent: isExpanded ? 'flex-start' : 'center',
+                  gap: '10px'
                 }}
               >
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  minWidth: 0,
-                  flex: isExpanded ? 1 : 'none',
-                  overflow: 'hidden'
-                }}>
-                  <ItemIcon size={16} className="nav-icon" style={{ flexShrink: 0 }} />
-                  {isExpanded && (
-                    <span style={{
-                      fontSize: '0.84rem',
-                      fontWeight: '600',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      lineHeight: 1.2
-                    }}>
-                      {item.label}
-                    </span>
-                  )}
-                </div>
-                {isExpanded && item.badge !== undefined && item.badge !== null && (
-                  <span style={{
-                    fontSize: '0.68rem',
-                    padding: '2px 7px',
-                    borderRadius: '10px',
-                    backgroundColor: isActive ? 'rgba(255, 255, 255, 0.22)' : (item.badgeBg || 'var(--border-light, #e2e8f0)'),
-                    color: isActive ? '#ffffff' : (item.badgeColor || 'var(--text-dark)'),
-                    fontWeight: '700',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    flexShrink: 0,
-                    marginLeft: 'auto',
-                    lineHeight: 1
-                  }}>
-                    {item.isLivePulse && (
-                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isActive ? '#ffffff' : '#10b981', display: 'inline-block' }}></span>
-                    )}
-                    {item.badge}
-                  </span>
-                )}
+                <ItemIcon size={17} className="nav-icon" style={{ flexShrink: 0 }} />
+                <span 
+                  className="admin-nav-label"
+                  style={{
+                    fontSize: '0.85rem',
+                    fontWeight: isActive ? '700' : '600',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    lineHeight: 1.2,
+                    opacity: isExpanded ? 1 : 0,
+                    maxWidth: isExpanded ? '210px' : '0px',
+                    transform: isExpanded ? 'translateX(0)' : 'translateX(-6px)',
+                    transition: 'opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), max-width 0.28s cubic-bezier(0.16, 1, 0.3, 1)',
+                    display: 'inline-block'
+                  }}
+                >
+                  {item.label}
+                </span>
               </button>
             );
           })}
@@ -5319,7 +5307,7 @@ _Helpline: +91 9316566894_`;
     });
   };
 
-  // ==========================================
+    // ==========================================
   // RENDER: ADMIN DASHBOARD
   // ==========================================
 
@@ -5394,9 +5382,9 @@ _Helpline: +91 9316566894_`;
           onMouseEnter={() => setIsSidebarHovered(true)}
           onMouseLeave={() => setIsSidebarHovered(false)}
           style={{
-            width: isSidebarExpanded ? '275px' : '68px',
-            minWidth: isSidebarExpanded ? '275px' : '68px',
-            padding: isSidebarExpanded ? '16px' : '14px 8px'
+            width: isSidebarExpanded ? '265px' : '68px',
+            minWidth: isSidebarExpanded ? '265px' : '68px',
+            padding: isSidebarExpanded ? '16px 14px' : '14px 8px'
           }}
         >
           {/* Sidebar Header: Role-based title without V2 */}

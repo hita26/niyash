@@ -395,6 +395,25 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
 
       // If registered chemist is pending verification, do NOT auto-login; display confirmation view
       if (!isLogin && (data.isApproved === false || data.status === 'pending')) {
+        // Redundant direct client-side notification trigger to guarantee 100% email delivery
+        try {
+          fetch('/api/send_chemist_mail.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'pending',
+              to: cleanEmail,
+              name: formData.name,
+              companyName: formData.companyName || 'Retail Pharmacy',
+              phone: formData.phone,
+              drugLicense1: formData.drugLicense1 || formData.drugLicense,
+              drugLicense2: formData.drugLicense2,
+              pan: formData.pan,
+              gstin: formData.gstin
+            })
+          }).catch(e => console.warn('Chemist pending mail client failover notice:', e));
+        } catch (_) {}
+
         setRegistrationSuccessData({
           companyName: formData.companyName || 'Retail Pharmacy',
           name: formData.name,

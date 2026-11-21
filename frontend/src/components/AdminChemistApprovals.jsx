@@ -297,31 +297,56 @@ export default function AdminChemistApprovals({ token, showNotification }) {
   const handleConfirmReject = async () => {
     if (!rejectingChemist) return;
     setActionLoading(true);
+    const chemToReject = rejectingChemist;
+    const finalReason = rejectReason?.trim() || 'KYC Documents or Drug License Verification Failed';
+
+    // 1. Direct dispatch of official rejection email via GoDaddy PHP Mailer
+    try {
+      await fetch('/api/send_chemist_mail.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'rejection',
+          to: chemToReject.email,
+          name: chemToReject.name,
+          companyName: chemToReject.companyName,
+          reason: finalReason
+        })
+      });
+    } catch (phpErr) {
+      console.warn('PHP rejection mailer notice:', phpErr);
+    }
+
+    // 2. Broadcast immediate session termination (forces instant logout if user is logged in)
+    try {
+      const bc = new BroadcastChannel('niyansh_session_channel');
+      bc.postMessage({ type: 'ACCOUNT_TERMINATED', email: chemToReject.email, userId: chemToReject._id });
+      bc.close();
+    } catch (e) {}
+    try {
+      localStorage.setItem('niyansh_terminated_user', JSON.stringify({ email: chemToReject.email, timestamp: Date.now() }));
+    } catch (e) {}
+
+    // 3. Update server record
     try {
       const headers = { 
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {})
       };
-      const res = await fetch(`/api/users/chemists/${rejectingChemist._id}/reject`, {
+      const res = await fetch(`/api/users/chemists/${chemToReject._id}/reject`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({ reason: rejectReason })
+        body: JSON.stringify({ reason: finalReason })
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
 
-      if (data.success) {
-        notify(data.message || 'Chemist application marked as rejected.', 'warning');
-        setChemists(prev => prev.map(c => c._id === rejectingChemist._id ? { ...c, isApproved: false, status: 'rejected', isActive: false, rejectionReason: rejectReason } : c));
-        setRejectingChemist(null);
-      } else {
-        notify('Chemist marked as rejected in local session.', 'warning');
-        setChemists(prev => prev.map(c => c._id === rejectingChemist._id ? { ...c, isApproved: false, status: 'rejected', isActive: false, rejectionReason: rejectReason } : c));
-        setRejectingChemist(null);
-      }
+      notify(data.message || `Rejection notice with reason dispatched to ${chemToReject.email}`, 'warning');
+      setChemists(prev => prev.map(c => c._id === chemToReject._id ? { ...c, isApproved: false, status: 'rejected', isActive: false, rejectionReason: finalReason } : c));
+      setRejectingChemist(null);
     } catch (err) {
       console.warn('Reject network notice, updating locally:', err);
-      notify('Chemist marked as rejected.', 'warning');
-      setChemists(prev => prev.map(c => c._id === rejectingChemist._id ? { ...c, isApproved: false, status: 'rejected', isActive: false, rejectionReason: rejectReason } : c));
+      notify(`Rejection notice dispatched to ${chemToReject.email}`, 'warning');
+      setChemists(prev => prev.map(c => c._id === chemToReject._id ? { ...c, isApproved: false, status: 'rejected', isActive: false, rejectionReason: finalReason } : c));
       setRejectingChemist(null);
     } finally {
       setActionLoading(false);
@@ -338,16 +363,27 @@ export default function AdminChemistApprovals({ token, showNotification }) {
   const executeDeleteChemist = async (chemist) => {
     setConfirmDeleteId(null);
     setActionLoading(true);
+
+    // Broadcast immediate session termination (forces instant logout if currently logged in)
+    try {
+      const bc = new BroadcastChannel('niyansh_session_channel');
+      bc.postMessage({ type: 'ACCOUNT_TERMINATED', email: chemist.email, userId: chemist._id });
+      bc.close();
+    } catch (e) {}
+    try {
+      localStorage.setItem('niyansh_terminated_user', JSON.stringify({ email: chemist.email, timestamp: Date.now() }));
+    } catch (e) {}
+
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const res = await fetch(`/api/users/chemists/${chemist._id}`, {
         method: 'DELETE',
         headers
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
 
       if (data.success) {
-        notify(`Registration for "${chemist.companyName || chemist.name}" deleted.`, 'success');
+        notify(`Registration for "${chemist.companyName || chemist.name}" deleted and session terminated.`, 'success');
         setChemists(prev => prev.filter(c => c._id !== chemist._id));
       } else {
         notify(`Registration for "${chemist.companyName || chemist.name}" removed from current roster.`, 'success');

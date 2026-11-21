@@ -759,19 +759,40 @@ async function sendChemistRegistrationPendingEmail({ to, name, companyName, drug
     `;
 
     if (!transporter) {
+      if (typeof fetch === 'function') {
+        const phpRes = await fetch('https://niyanshpharma.com/api/send_chemist_mail.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'pending', to, name, companyName, dl1, dl2, pan, gstin, phone })
+        }).catch(() => null);
+        if (phpRes && phpRes.ok) return { success: true, method: 'PHP_MAIL' };
+      }
       console.log(`[EmailService - PENDING] Chemist registration pending email prepared for ${to}`);
       return { success: false, pendingConfig: true };
     }
 
-    const info = await transporter.sendMail({
-      from: fromAddress,
-      to,
-      subject: emailSubject,
-      html: htmlContent
-    });
+    try {
+      const info = await transporter.sendMail({
+        from: fromAddress,
+        to,
+        subject: emailSubject,
+        html: htmlContent
+      });
 
-    console.log(`[EmailService] Chemist pending email sent to ${to}. MessageId: ${info.messageId}`);
-    return { success: true, messageId: info.messageId };
+      console.log(`[EmailService] Chemist pending email sent to ${to}. MessageId: ${info.messageId}`);
+      return { success: true, messageId: info.messageId };
+    } catch (smtpErr) {
+      console.warn(`[EmailService] SMTP error, triggering GoDaddy PHP mailer fallback:`, smtpErr.message);
+      if (typeof fetch === 'function') {
+        const phpRes = await fetch('https://niyanshpharma.com/api/send_chemist_mail.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'pending', to, name, companyName, dl1, dl2, pan, gstin, phone })
+        }).catch(() => null);
+        if (phpRes && phpRes.ok) return { success: true, method: 'PHP_MAIL_FALLBACK' };
+      }
+      throw smtpErr;
+    }
   } catch (err) {
     console.error(`[EmailService] Error sending chemist pending email to ${to}:`, err.message);
     return { success: false, error: err.message };
@@ -932,19 +953,40 @@ async function sendChemistApprovalEmail({ to, name, companyName, email, plainPas
     `;
 
     if (!transporter) {
+      if (typeof fetch === 'function') {
+        const phpRes = await fetch('https://niyanshpharma.com/api/send_chemist_mail.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'approval', to, name, companyName, plainPassword, drugLicense })
+        }).catch(() => null);
+        if (phpRes && phpRes.ok) return { success: true, method: 'PHP_MAIL' };
+      }
       console.log(`[EmailService - PENDING] Chemist approval email prepared for ${to}. Password: ${passwordDisplay}`);
       return { success: false, pendingConfig: true };
     }
 
-    const info = await transporter.sendMail({
-      from: fromAddress,
-      to,
-      subject: emailSubject,
-      html: htmlContent
-    });
+    try {
+      const info = await transporter.sendMail({
+        from: fromAddress,
+        to,
+        subject: emailSubject,
+        html: htmlContent
+      });
 
-    console.log(`[EmailService] Chemist approval email successfully sent to ${to}. MessageId: ${info.messageId}`);
-    return { success: true, messageId: info.messageId };
+      console.log(`[EmailService] Chemist approval email successfully sent to ${to}. MessageId: ${info.messageId}`);
+      return { success: true, messageId: info.messageId };
+    } catch (smtpErr) {
+      console.warn(`[EmailService] SMTP error, triggering GoDaddy PHP mailer fallback:`, smtpErr.message);
+      if (typeof fetch === 'function') {
+        const phpRes = await fetch('https://niyanshpharma.com/api/send_chemist_mail.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'approval', to, name, companyName, plainPassword, drugLicense })
+        }).catch(() => null);
+        if (phpRes && phpRes.ok) return { success: true, method: 'PHP_MAIL_FALLBACK' };
+      }
+      throw smtpErr;
+    }
   } catch (err) {
     console.error(`[EmailService] Error sending chemist approval email to ${to}:`, err.message);
     return { success: false, error: err.message };
@@ -1069,14 +1111,38 @@ async function sendChemistRejectionEmail({ to, name, companyName, reason }) {
 </html>
     `;
 
-    if (!transporter) return { success: false, pendingConfig: true };
-    const info = await transporter.sendMail({
-      from: fromAddress,
-      to,
-      subject: emailSubject,
-      html: htmlContent
-    });
-    return { success: true, messageId: info.messageId };
+    if (!transporter) {
+      if (typeof fetch === 'function') {
+        const phpRes = await fetch('https://niyanshpharma.com/api/send_chemist_mail.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'rejection', to, name, companyName, reason })
+        }).catch(() => null);
+        if (phpRes && phpRes.ok) return { success: true, method: 'PHP_MAIL' };
+      }
+      return { success: false, pendingConfig: true };
+    }
+
+    try {
+      const info = await transporter.sendMail({
+        from: fromAddress,
+        to,
+        subject: emailSubject,
+        html: htmlContent
+      });
+      return { success: true, messageId: info.messageId };
+    } catch (smtpErr) {
+      console.warn(`[EmailService] Rejection SMTP error, triggering GoDaddy PHP mailer fallback:`, smtpErr.message);
+      if (typeof fetch === 'function') {
+        const phpRes = await fetch('https://niyanshpharma.com/api/send_chemist_mail.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'rejection', to, name, companyName, reason })
+        }).catch(() => null);
+        if (phpRes && phpRes.ok) return { success: true, method: 'PHP_MAIL_FALLBACK' };
+      }
+      throw smtpErr;
+    }
   } catch (err) {
     return { success: false, error: err.message };
   }

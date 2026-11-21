@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 
 const AuthContext = createContext();
 
@@ -17,6 +17,13 @@ export function AuthProvider({ children }) {
   });
 
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const userRef = useRef(user);
+  const tokenRef = useRef(token);
+
+  useEffect(() => {
+    userRef.current = user;
+    tokenRef.current = token;
+  }, [user, token]);
 
   // Sync state with local storage and custom events across windows / components
   useEffect(() => {
@@ -79,6 +86,144 @@ export function AuthProvider({ children }) {
       window.location.replace('/');
     }
   };
+
+  // Real-time instant logout on account deletion or deactivation across all tabs & windows
+  useEffect(() => {
+    let channel = null;
+    try {
+      if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+        channel = new BroadcastChannel('niyansh_session_channel');
+        channel.onmessage = (event) => {
+          const data = event?.data;
+          if (data?.type === 'ACCOUNT_TERMINATED' || data?.type === 'USER_DELETED') {
+            const currentUser = userRef.current;
+            const targetEmail = data?.email?.toLowerCase()?.trim();
+            const targetId = data?.userId;
+            const currentEmail = currentUser?.email?.toLowerCase()?.trim();
+            const currentId = currentUser?._id || currentUser?.id;
+
+            if (
+              (targetEmail && currentEmail && targetEmail === currentEmail) ||
+              (targetId && currentId && String(targetId) === String(currentId))
+            ) {
+              console.warn('[Session] Real-time termination broadcast received. Auto-logging out.');
+              logout();
+              alert('Your account has been deactivated or removed by administration. You have been logged out.');
+              window.location.replace('/');
+            }
+          }
+        };
+      }
+    } catch (e) {
+      console.warn('BroadcastChannel init notice:', e);
+    }
+
+    const handleStorageEvent = (e) => {
+      if (e.key === 'niyansh_terminated_user' && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          const currentUser = userRef.current;
+          const targetEmail = parsed?.email?.toLowerCase()?.trim();
+          const targetId = parsed?.userId;
+          const currentEmail = currentUser?.email?.toLowerCase()?.trim();
+          const currentId = currentUser?._id || currentUser?.id;
+
+          if (
+            (targetEmail && currentEmail && targetEmail === currentEmail) ||
+            (targetId && currentId && String(targetId) === String(currentId))
+          ) {
+            console.warn('[Session] Storage termination event received. Auto-logging out.');
+            logout();
+            alert('Your account has been deactivated or removed by administration. You have been logged out.');
+            window.location.replace('/');
+          }
+        } catch (_) {}
+      }
+    };
+
+    window.addEventListener('storage', handleStorageEvent);
+
+    return () => {
+      if (channel) {
+        try { channel.close(); } catch (_) {}
+      }
+      window.removeEventListener('storage', handleStorageEvent);
+    };
+  }, []);
+
+  // Heartbeat session check: automatically validates user session with the server
+  useEffect(() => {
+    if (!token && !user) return;
+
+    const checkSession = async () => {
+      const currentToken = tokenRef.current || localStorage.getItem('niyansh_token');
+      const currentUser = userRef.current;
+      if (!currentToken || !currentUser) return;
+
+      try {
+        const res = await fetch('/api/users/validate-session', {
+          headers: {
+            'Authorization': `Bearer ${currentToken}`
+          }
+        });
+
+        if (res.status === 401 || res.status === 403) {
+          const data = await res.json().catch(() => ({}));
+          console.warn('[Session] Session invalidated by server:', data);
+          logout();
+          alert('Your account has been deactivated or removed by administration. You have been logged out.');
+          window.location.replace('/');
+          return;
+        }
+
+        if (res.ok) {
+          const data = await res.json().catch(() => ({}));
+          if (data?.user?.isActive === false || data?.isTerminated) {
+            console.warn('[Session] User is inactive or terminated:', data);
+            logout();
+            alert('Your account has been deactivated. Please contact administration.');
+            window.location.replace('/');
+          }
+        }
+      } catch (e) {
+        // Network offline or transient error - do not log out on simple connection blip
+      }
+    };
+
+    // Run check immediately on mount/focus and every 15 seconds
+    const interval = setInterval(checkSession, 15000);
+    window.addEventListener('focus', checkSession);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', checkSession);
+    };
+  }, [token, user]);
+
+  // Global fetch response interceptor for 401/403 with isTerminated
+  useEffect(() => {
+    const originalFetch = window.fetch;
+    window.fetch = async (...args) => {
+      const response = await originalFetch(...args);
+      if (response && (response.status === 401 || response.status === 403)) {
+        try {
+          const cloned = response.clone();
+          cloned.json().then(data => {
+            if (data?.isTerminated) {
+              console.warn('[Fetch Interceptor] API returned isTerminated=true. Logging out.');
+              logout();
+              alert('Your account has been deactivated or removed by administration. You have been logged out.');
+              window.location.replace('/');
+            }
+          }).catch(() => {});
+        } catch (_) {}
+      }
+      return response;
+    };
+    return () => {
+      window.fetch = originalFetch;
+    };
+  }, []);
 
   const openAuth = () => setIsAuthOpen(true);
   const closeAuth = () => setIsAuthOpen(false);

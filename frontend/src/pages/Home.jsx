@@ -307,7 +307,7 @@ function Home({ addToCart }) {
               <Link to="/companies" className="btn btn-secondary card-hover-pharma" style={{ padding: '12px 22px', fontSize: '0.94rem', fontWeight: '700', borderRadius: '30px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
                 <Building2 size={18} /> {t('hero.browseCompanies', 'Browse Pharma Companies')}
               </Link>
-              <Link to="/quick-order" className="btn btn-primary card-hover-pharma" style={{ padding: '12px 22px', fontSize: '0.94rem', fontWeight: '700', borderRadius: '30px', display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#ffffff', color: 'var(--primary-blue)' }}>
+              <Link to="/quick-order" className="btn btn-primary card-hover-pharma hero-quick-order-btn" style={{ padding: '12px 22px', fontSize: '0.94rem', fontWeight: '700', borderRadius: '30px', display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#ffffff', color: '#0c3d6c' }}>
                 <Package size={18} /> {t('hero.quickOrder', 'Fast Quick Order ⚡')}
               </Link>
               <button onClick={handleQuickWhatsApp} className="btn btn-outline card-hover-pharma" style={{ borderColor: 'rgba(255,255,255,0.7)', color: '#ffffff', padding: '12px 20px', fontSize: '0.94rem', fontWeight: '600', borderRadius: '30px' }}>

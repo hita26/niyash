@@ -993,12 +993,12 @@ input[type="submit"]:disabled {
     padding-bottom: 36px;
   }
   .footer-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 32px;
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .footer-main-container {
     padding-top: 34px;
     padding-bottom: 30px;
@@ -5051,6 +5051,17 @@ html[lang="gu"] .nav-link, html[lang="hi"] .nav-link {
     transform: scale(2.4);
     opacity: 0;
   }
+}
+
+.hero-quick-order-btn,
+[data-theme="dark"] .hero-quick-order-btn {
+  background-color: #ffffff !important;
+  color: #0c3d6c !important;
+  border: 1.5px solid #ffffff !important;
+}
+.hero-quick-order-btn:hover {
+  background-color: #f1f5f9 !important;
+  color: #0c3d6c !important;
 }
 
 /* 2. Floating B2B Action Widget Ripple Rings */

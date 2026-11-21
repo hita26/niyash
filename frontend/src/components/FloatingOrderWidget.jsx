@@ -47,6 +47,8 @@ export default function FloatingOrderWidget() {
             bottom: '70px',
             left: 0,
             width: '290px',
+            maxWidth: 'calc(100vw - 32px)',
+            boxSizing: 'border-box',
             backgroundColor: 'var(--bg-card)',
             color: 'var(--text-dark)',
             borderRadius: '16px',

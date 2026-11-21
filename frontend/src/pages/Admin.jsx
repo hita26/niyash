@@ -1607,7 +1607,7 @@ function Admin() {
 
           if (res && res.ok) {
             const data = await res.json();
-            if (Array.isArray(data.products) && data.products.length > 0) {
+            if (Array.isArray(data.products)) {
               setProducts(data.products);
               try { localStorage.setItem('cached_admin_products', JSON.stringify(data.products)); } catch (_) {}
               if (data.stats) setProductAdminStats(data.stats);

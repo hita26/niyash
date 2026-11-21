@@ -11,7 +11,7 @@ import {
   FileSpreadsheet, ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Layers,
   Copy, CheckCheck, MapPin, Mail, Save, EyeOff, Shield, Users, Key, Crown, UserCheck, UserX, Camera, UserPlus,
   Zap, Activity, Cpu, Server, Terminal, Play, Globe, Volume2, VolumeX, Bell, Maximize2, Minimize2,
-  ArrowUpRight, ArrowDownRight, Menu
+  ArrowUpRight, ArrowDownRight, Menu, Pin
 } from 'lucide-react';
 import { broadcastLiveEvent, SYNC_EVENTS } from '../utils/liveSync';
 import { useLanguage } from '../context/LanguageContext';

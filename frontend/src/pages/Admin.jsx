@@ -5111,6 +5111,111 @@ _Helpline: +91 9316566894_`;
   }
 
   // ==========================================
+  // ==========================================
+  // NAVIGATION CONFIGURATION & HELPERS FOR V2
+  // ==========================================
+  const NAV_SECTIONS = [
+    {
+      title: 'DASHBOARDS & LIVE',
+      icon: Activity,
+      items: [
+        { id: 'overview', label: 'Overview', icon: LayoutDashboard, badge: 'Live', badgeBg: 'rgba(2, 132, 199, 0.15)', badgeColor: '#0284c7' },
+        { id: 'traffic', label: 'Live Traffic', icon: Globe, badge: 'Live', isLivePulse: true, badgeBg: '#d1fae5', badgeColor: '#065f46', onClick: () => { setActiveTab('traffic'); fetchVisitorAnalytics(); } }
+      ]
+    },
+    {
+      title: 'B2B OPERATIONS',
+      icon: Building2,
+      items: [
+        { id: 'chemists', label: 'Chemist Approvals', icon: Building2, badge: 'KYC', badgeBg: '#10b981', badgeColor: '#ffffff', visible: (isSuperAdmin || hasPermission('canManageEnquiries') || hasPermission('canManageOrders')) },
+        { id: 'orders', label: 'B2B Orders', icon: Package, badge: orders.length },
+        { id: 'ledgers', label: 'Outstanding Ledger', icon: CreditCard, badge: overdueLedgersCount > 0 ? `${overdueLedgersCount} Due` : (ledgers.length || 'Clean'), badgeBg: overdueLedgersCount > 0 ? '#fee2e2' : undefined, badgeColor: overdueLedgersCount > 0 ? '#ef4444' : undefined, visible: (isSuperAdmin || hasPermission('canManageLedgers')) }
+      ]
+    },
+    {
+      title: 'CATALOG & DEALS',
+      icon: ShoppingBag,
+      items: [
+        { id: 'products', label: 'Products Catalog', icon: ShoppingBag, badge: (productStats.totalProducts || products.length) },
+        { id: 'news', label: 'News & Schemes', icon: Flame, badge: news.length },
+        { id: 'sync', label: 'ERP Sync & Logs', icon: Zap, badge: 'Auto', badgeBg: '#fef3c7', badgeColor: '#b45309', onClick: () => { setActiveTab('sync'); fetchSyncStatus(); } }
+      ]
+    },
+    {
+      title: 'GOVERNANCE & HUB',
+      icon: Shield,
+      items: [
+        { id: 'manage-admins', label: 'Manage Admins', icon: Users, badge: adminList.length, badgeBg: '#f59e0b', badgeColor: '#ffffff', visible: isSuperAdmin, onClick: () => { setActiveTab('manage-admins'); fetchAdmins(); } },
+        { id: 'audit', label: 'Security & Audit', icon: ShieldCheck, badge: 'IP Log', badgeBg: '#eff6ff', badgeColor: '#1e40af', visible: isSuperAdmin, onClick: () => { setActiveTab('audit'); fetchAuditLogs(1); } },
+        { id: 'enquiries', label: 'Enquiries', icon: MessageSquare, badge: enquiries.length },
+        { id: 'careers', label: 'Careers', icon: Briefcase, badge: careers.length },
+        { id: 'contact', label: 'Contact & Hub', icon: Phone, badge: 'Live', badgeBg: '#dcfce7', badgeColor: '#15803d' }
+      ]
+    }
+  ];
+
+  const renderNavGroups = (isDrawer = false) => {
+    return NAV_SECTIONS.map(section => {
+      const visibleItems = section.items.filter(item => {
+        if (item.visible === false) return false;
+        if (sidebarSearch.trim()) {
+          return item.label.toLowerCase().includes(sidebarSearch.trim().toLowerCase());
+        }
+        return true;
+      });
+
+      if (visibleItems.length === 0) return null;
+      const SectionIcon = section.icon;
+
+      return (
+        <div key={section.title} style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+          <div className="admin-sidebar-section-header">
+            <SectionIcon size={12} /> {section.title}
+          </div>
+          {visibleItems.map(item => {
+            const ItemIcon = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => {
+                  if (item.onClick) item.onClick();
+                  else setActiveTab(item.id);
+                  if (isDrawer) setIsMobileNavOpen(false);
+                }}
+                className={`admin-glass-nav-btn ${isActive ? 'active' : ''}`}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <ItemIcon size={16} className="nav-icon" />
+                  <span>{item.label}</span>
+                </div>
+                {item.badge !== undefined && item.badge !== null && (
+                  <span style={{
+                    fontSize: '0.68rem',
+                    padding: '2px 7px',
+                    borderRadius: '10px',
+                    backgroundColor: isActive ? 'rgba(255, 255, 255, 0.22)' : (item.badgeBg || 'var(--border-light, #e2e8f0)'),
+                    color: isActive ? '#ffffff' : (item.badgeColor || 'var(--text-dark)'),
+                    fontWeight: '700',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    {item.isLivePulse && (
+                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isActive ? '#ffffff' : '#10b981', display: 'inline-block' }}></span>
+                    )}
+                    {item.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      );
+    });
+  };
+
   // RENDER: ADMIN DASHBOARD
   // ==========================================
 
@@ -5180,383 +5285,190 @@ _Helpline: +91 9316566894_`;
 
       <div className="admin-workspace-container admin-layout-container">
         
-        {/* Sidebar Nav */}
-        /* Smart Grouped Navigation Data for Admin Console V2 */
-        {(() => {
-          const NAV_SECTIONS = [
-            {
-              title: 'DASHBOARDS & LIVE',
-              icon: Activity,
-              items: [
-                { id: 'overview', label: 'Overview', icon: LayoutDashboard, badge: 'Live', badgeBg: 'rgba(2, 132, 199, 0.15)', badgeColor: '#0284c7' },
-                { id: 'traffic', label: 'Live Traffic', icon: Globe, badge: 'Live', isLivePulse: true, badgeBg: '#d1fae5', badgeColor: '#065f46', onClick: () => { setActiveTab('traffic'); fetchVisitorAnalytics(); } }
-              ]
-            },
-            {
-              title: 'B2B OPERATIONS',
-              icon: Building2,
-              items: [
-                { id: 'chemists', label: 'Chemist Approvals', icon: Building2, badge: 'KYC', badgeBg: '#10b981', badgeColor: '#ffffff', visible: (isSuperAdmin || hasPermission('canManageEnquiries') || hasPermission('canManageOrders')) },
-                { id: 'orders', label: 'B2B Orders', icon: Package, badge: orders.length },
-                { id: 'ledgers', label: 'Outstanding Ledger', icon: CreditCard, badge: overdueLedgersCount > 0 ? `${overdueLedgersCount} Due` : (ledgers.length || 'Clean'), badgeBg: overdueLedgersCount > 0 ? '#fee2e2' : undefined, badgeColor: overdueLedgersCount > 0 ? '#ef4444' : undefined, visible: (isSuperAdmin || hasPermission('canManageLedgers')) }
-              ]
-            },
-            {
-              title: 'CATALOG & DEALS',
-              icon: ShoppingBag,
-              items: [
-                { id: 'products', label: 'Products Catalog', icon: ShoppingBag, badge: (productStats.totalProducts || products.length) },
-                { id: 'news', label: 'News & Schemes', icon: Flame, badge: news.length },
-                { id: 'sync', label: 'ERP Sync & Logs', icon: Zap, badge: 'Auto', badgeBg: '#fef3c7', badgeColor: '#b45309', onClick: () => { setActiveTab('sync'); fetchSyncStatus(); } }
-              ]
-            },
-            {
-              title: 'GOVERNANCE & HUB',
-              icon: Shield,
-              items: [
-                { id: 'manage-admins', label: 'Manage Admins', icon: Users, badge: adminList.length, badgeBg: '#f59e0b', badgeColor: '#ffffff', visible: isSuperAdmin, onClick: () => { setActiveTab('manage-admins'); fetchAdmins(); } },
-                { id: 'audit', label: 'Security & Audit', icon: ShieldCheck, badge: 'IP Log', badgeBg: '#eff6ff', badgeColor: '#1e40af', visible: isSuperAdmin, onClick: () => { setActiveTab('audit'); fetchAuditLogs(1); } },
-                { id: 'enquiries', label: 'Enquiries', icon: MessageSquare, badge: enquiries.length },
-                { id: 'careers', label: 'Careers', icon: Briefcase, badge: careers.length },
-                { id: 'contact', label: 'Contact & Hub', icon: Phone, badge: 'Live', badgeBg: '#dcfce7', badgeColor: '#15803d' }
-              ]
-            }
-          ];
+        {/* ============================================================
+            COLUMN 1 (LEFT, 260px): DESKTOP FROSTED GLASS SIDEBAR
+            ============================================================ */}
+        <aside className="admin-glass-sidebar admin-desktop-sidebar">
+          <div style={{ borderBottom: '1px solid var(--border-light)', paddingBottom: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#22c55e', animation: 'pulse 2s infinite' }}></div>
+                <h3 style={{ fontSize: '1.15rem', color: 'var(--text-dark)', margin: 0, fontWeight: '800' }}>Admin Console</h3>
+              </div>
+              <span style={{ fontSize: '0.68rem', padding: '2px 7px', borderRadius: '8px', backgroundColor: 'rgba(2, 132, 199, 0.12)', color: '#0284c7', fontWeight: '800' }}>
+                V2
+              </span>
+            </div>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', display: 'block', marginTop: '4px' }}>
+              Niyansh Pharma B2B Portal
+            </span>
 
-          const renderNavGroups = (isDrawer = false) => {
-            return NAV_SECTIONS.map(section => {
-              const visibleItems = section.items.filter(item => {
-                if (item.visible === false) return false;
-                if (sidebarSearch.trim()) {
-                  return item.label.toLowerCase().includes(sidebarSearch.trim().toLowerCase());
-                }
-                return true;
-              });
+            {/* Smart Search Tabs Filter */}
+            <div style={{ position: 'relative', marginTop: '12px' }}>
+              <Search size={14} style={{ position: 'absolute', left: '11px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
+              <input 
+                type="text"
+                placeholder="Search tabs / modules..."
+                value={sidebarSearch}
+                onChange={(e) => setSidebarSearch(e.target.value)}
+                className="admin-glass-input"
+              />
+              {sidebarSearch && (
+                <button
+                  type="button"
+                  onClick={() => setSidebarSearch('')}
+                  style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0 }}
+                >
+                  <X size={13} />
+                </button>
+              )}
+            </div>
 
-              if (visibleItems.length === 0) return null;
-              const SectionIcon = section.icon;
-
-              return (
-                <div key={section.title} style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                  <div className="admin-sidebar-section-header">
-                    <SectionIcon size={12} /> {section.title}
-                  </div>
-                  {visibleItems.map(item => {
-                    const ItemIcon = item.icon;
-                    const isActive = activeTab === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => {
-                          if (item.onClick) item.onClick();
-                          else setActiveTab(item.id);
-                          if (isDrawer) setIsMobileNavOpen(false);
-                        }}
-                        className={`admin-glass-nav-btn ${isActive ? 'active' : ''}`}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <ItemIcon size={16} className="nav-icon" />
-                          <span>{item.label}</span>
-                        </div>
-                        {item.badge !== undefined && item.badge !== null && (
-                          <span style={{
-                            fontSize: '0.68rem',
-                            padding: '2px 7px',
-                            borderRadius: '10px',
-                            backgroundColor: isActive ? 'rgba(255, 255, 255, 0.22)' : (item.badgeBg || 'var(--border-light, #e2e8f0)'),
-                            color: isActive ? '#ffffff' : (item.badgeColor || 'var(--text-dark)'),
-                            fontWeight: '700',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px'
-                          }}>
-                            {item.isLivePulse && (
-                              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isActive ? '#ffffff' : '#10b981', display: 'inline-block' }}></span>
-                            )}
-                            {item.badge}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
+            {/* Logged in User Profile Card */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '10px 12px',
+              backgroundColor: isSuperAdmin ? 'rgba(254, 243, 199, 0.4)' : 'rgba(248, 250, 252, 0.8)',
+              border: `1.5px solid ${isSuperAdmin ? '#fde68a' : 'rgba(226, 232, 240, 0.8)'}`,
+              borderRadius: '12px',
+              marginTop: '12px'
+            }}>
+              <img 
+                src={currentUser?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser?.name || (isSuperAdmin ? 'Super Admin' : 'Admin'))}&background=${isSuperAdmin ? 'f59e0b' : '0284c7'}&color=ffffff&bold=true`}
+                alt="Avatar"
+                style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover', border: `2px solid ${isSuperAdmin ? '#f59e0b' : '#0284c7'}`, flexShrink: 0 }}
+              />
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ fontSize: '0.86rem', fontWeight: '700', color: 'var(--text-dark)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {currentUser?.name || (isSuperAdmin ? 'Niyansh Super Admin' : 'Operations Admin')}
                 </div>
-              );
-            });
-          };
-
-          return (
-            <>
-              {/* Desktop Smart Glassmorphism Sidebar */}
-              <aside className="admin-glass-sidebar admin-desktop-sidebar">
-                <div style={{ borderBottom: '1px solid var(--border-light)', paddingBottom: '14px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#22c55e', animation: 'pulse 2s infinite' }}></div>
-                      <h3 style={{ fontSize: '1.15rem', color: 'var(--text-dark)', margin: 0, fontWeight: '800' }}>Admin Console</h3>
-                    </div>
-                    <span style={{ fontSize: '0.68rem', padding: '2px 7px', borderRadius: '8px', backgroundColor: 'rgba(2, 132, 199, 0.12)', color: '#0284c7', fontWeight: '800' }}>
-                      V2
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+                  {isSuperAdmin ? (
+                    <span style={{ fontSize: '0.68rem', fontWeight: '800', backgroundColor: '#f59e0b', color: '#ffffff', padding: '1px 7px', borderRadius: '10px', letterSpacing: '0.3px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                      <Crown size={10} /> Super Admin
                     </span>
-                  </div>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', display: 'block', marginTop: '4px' }}>
-                    Niyansh Pharma B2B Portal
-                  </span>
+                  ) : (
+                    <span style={{ fontSize: '0.68rem', fontWeight: '800', backgroundColor: '#0284c7', color: '#ffffff', padding: '1px 7px', borderRadius: '10px', letterSpacing: '0.3px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                      <Shield size={10} /> Staff Admin
+                    </span>
+                  )}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleOpenProfileModal}
+                title="Edit My Profile & Password"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: isSuperAdmin ? '#b45309' : '#0284c7',
+                  padding: '5px',
+                  borderRadius: '6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: '#ffffff',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.06)'
+                }}
+              >
+                <Edit2 size={13} />
+              </button>
+            </div>
+          </div>
 
-                  {/* Smart Search Tabs Filter */}
-                  <div style={{ position: 'relative', marginTop: '12px' }}>
-                    <Search size={14} style={{ position: 'absolute', left: '11px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
-                    <input 
-                      type="text"
-                      placeholder="Search tabs / modules..."
-                      value={sidebarSearch}
-                      onChange={(e) => setSidebarSearch(e.target.value)}
-                      className="admin-glass-input"
-                    />
-                    {sidebarSearch && (
-                      <button
-                        type="button"
-                        onClick={() => setSidebarSearch('')}
-                        style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0 }}
-                      >
-                        <X size={13} />
-                      </button>
-                    )}
-                  </div>
+          {/* Categorized Navigation List */}
+          <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {renderNavGroups(false)}
+          </nav>
 
-                  {/* Logged in User Profile Card */}
-                  <div style={{
+          {/* Statutory Compliance & Regulatory Licenses Box */}
+          <div style={{
+            padding: '12px',
+            backgroundColor: 'rgba(248, 250, 252, 0.75)',
+            border: '1px solid var(--border-light)',
+            borderRadius: '12px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-light)', paddingBottom: '6px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', fontWeight: '800', color: 'var(--primary-blue)', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+                <ShieldCheck size={14} color="#16a34a" /> Statutory Licenses
+              </div>
+              <span style={{ fontSize: '0.62rem', backgroundColor: '#dcfce7', color: '#15803d', fontWeight: '800', padding: '1px 6px', borderRadius: '6px' }}>FDCA GUJ</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+              {[
+                { key: 'dl', label: 'D.L.No.', val: '20B GJ-RJT-264618, 21B GJ-RJT-264619' },
+                { key: 'gstin', label: 'GSTIN', val: '24BVXPP6108F2Z7' },
+                { key: 'pan', label: 'PAN', val: 'BVXPP6108F' },
+                { key: 'food', label: 'Food Lic.', val: '20726030000567' }
+              ].map(lic => (
+                <button
+                  key={lic.key}
+                  type="button"
+                  onClick={() => {
+                    if (navigator.clipboard) {
+                      navigator.clipboard.writeText(lic.val);
+                      setCopiedLicenseKey(lic.key);
+                      showToast(`${lic.label} copied to clipboard!`, 'info');
+                      setTimeout(() => setCopiedLicenseKey(null), 1800);
+                    }
+                  }}
+                  style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '10px',
-                    padding: '10px 12px',
-                    backgroundColor: isSuperAdmin ? 'rgba(254, 243, 199, 0.4)' : 'rgba(248, 250, 252, 0.8)',
-                    border: `1.5px solid ${isSuperAdmin ? '#fde68a' : 'rgba(226, 232, 240, 0.8)'}`,
-                    borderRadius: '12px',
-                    marginTop: '12px'
-                  }}>
-                    <img 
-                      src={currentUser?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser?.name || (isSuperAdmin ? 'Super Admin' : 'Admin'))}&background=${isSuperAdmin ? 'f59e0b' : '0284c7'}&color=ffffff&bold=true`}
-                      alt="Avatar"
-                      style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover', border: `2px solid ${isSuperAdmin ? '#f59e0b' : '#0284c7'}`, flexShrink: 0 }}
-                    />
-                    <div style={{ minWidth: 0, flex: 1 }}>
-                      <div style={{ fontSize: '0.86rem', fontWeight: '700', color: 'var(--text-dark)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {currentUser?.name || (isSuperAdmin ? 'Niyansh Super Admin' : 'Operations Admin')}
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-                        {isSuperAdmin ? (
-                          <span style={{ fontSize: '0.68rem', fontWeight: '800', backgroundColor: '#f59e0b', color: '#ffffff', padding: '1px 7px', borderRadius: '10px', letterSpacing: '0.3px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                            <Crown size={10} /> Super Admin
-                          </span>
-                        ) : (
-                          <span style={{ fontSize: '0.68rem', fontWeight: '800', backgroundColor: '#0284c7', color: '#ffffff', padding: '1px 7px', borderRadius: '10px', letterSpacing: '0.3px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                            <Shield size={10} /> Staff Admin
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleOpenProfileModal}
-                      title="Edit My Profile & Password"
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        color: isSuperAdmin ? '#b45309' : '#0284c7',
-                        padding: '5px',
-                        borderRadius: '6px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: '#ffffff',
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.06)'
-                      }}
-                    >
-                      <Edit2 size={13} />
-                    </button>
-                  </div>
-                </div>
+                    justifyContent: 'space-between',
+                    padding: '5px 8px',
+                    backgroundColor: 'var(--bg-surface)',
+                    border: '1px solid var(--border-light)',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '0.7rem',
+                    textAlign: 'left',
+                    width: '100%',
+                    gap: '6px',
+                    transition: 'all 0.15s ease'
+                  }}
+                  title={`Click to copy ${lic.label}`}
+                >
+                  <span style={{ color: 'var(--text-medium)', fontWeight: '600', whiteSpace: 'nowrap' }}>{lic.label}:</span>
+                  <strong style={{ color: 'var(--text-dark)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, textAlign: 'right', fontSize: '0.69rem' }}>{lic.val}</strong>
+                  {copiedLicenseKey === lic.key ? (
+                    <Check size={11} color="#16a34a" style={{ flexShrink: 0 }} />
+                  ) : (
+                    <Copy size={10} style={{ opacity: 0.45, flexShrink: 0 }} />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
 
-                {/* Categorized Navigation List */}
-                <nav style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {renderNavGroups(false)}
-                </nav>
+          <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <button 
+              onClick={fetchDashboardData}
+              className="btn btn-outline btn-sm"
+              style={{ width: '100%', fontSize: '0.8rem', gap: '6px', height: '36px', borderRadius: '10px' }}
+            >
+              <RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} /> {t('admin.refreshData', 'Refresh Live Data')}
+            </button>
 
-                {/* Statutory Compliance & Regulatory Licenses Box */}
-                <div style={{
-                  padding: '12px',
-                  backgroundColor: 'rgba(248, 250, 252, 0.75)',
-                  border: '1px solid var(--border-light)',
-                  borderRadius: '12px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '8px'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-light)', paddingBottom: '6px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', fontWeight: '800', color: 'var(--primary-blue)', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
-                      <ShieldCheck size={14} color="#16a34a" /> Statutory Licenses
-                    </div>
-                    <span style={{ fontSize: '0.62rem', backgroundColor: '#dcfce7', color: '#15803d', fontWeight: '800', padding: '1px 6px', borderRadius: '6px' }}>FDCA GUJ</span>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                    {[
-                      { key: 'dl', label: 'D.L.No.', val: '20B GJ-RJT-264618, 21B GJ-RJT-264619' },
-                      { key: 'gstin', label: 'GSTIN', val: '24BVXPP6108F2Z7' },
-                      { key: 'pan', label: 'PAN', val: 'BVXPP6108F' },
-                      { key: 'food', label: 'Food Lic.', val: '20726030000567' }
-                    ].map(lic => (
-                      <button
-                        key={lic.key}
-                        type="button"
-                        onClick={() => {
-                          if (navigator.clipboard) {
-                            navigator.clipboard.writeText(lic.val);
-                            setCopiedLicenseKey(lic.key);
-                            showToast(`${lic.label} copied to clipboard!`, 'info');
-                            setTimeout(() => setCopiedLicenseKey(null), 1800);
-                          }
-                        }}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          padding: '5px 8px',
-                          backgroundColor: 'var(--bg-surface)',
-                          border: '1px solid var(--border-light)',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                          fontSize: '0.7rem',
-                          textAlign: 'left',
-                          width: '100%',
-                          gap: '6px',
-                          transition: 'all 0.15s ease'
-                        }}
-                        title={`Click to copy ${lic.label}`}
-                      >
-                        <span style={{ color: 'var(--text-medium)', fontWeight: '600', whiteSpace: 'nowrap' }}>{lic.label}:</span>
-                        <strong style={{ color: 'var(--text-dark)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, textAlign: 'right', fontSize: '0.69rem' }}>{lic.val}</strong>
-                        {copiedLicenseKey === lic.key ? (
-                          <Check size={11} color="#16a34a" style={{ flexShrink: 0 }} />
-                        ) : (
-                          <Copy size={10} style={{ opacity: 0.45, flexShrink: 0 }} />
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+            <button 
+              onClick={handleLogout}
+              className="btn btn-outline btn-sm"
+              style={{ width: '100%', borderColor: '#ef4444', color: '#ef4444', gap: '6px', fontSize: '0.8rem', height: '36px', borderRadius: '10px' }}
+            >
+              <LogOut size={13} /> {t('admin.logout', 'Log Out')}
+            </button>
+          </div>
+        </aside>
 
-                <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <button 
-                    onClick={fetchDashboardData}
-                    className="btn btn-outline btn-sm"
-                    style={{ width: '100%', fontSize: '0.8rem', gap: '6px', height: '36px', borderRadius: '10px' }}
-                  >
-                    <RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} /> {t('admin.refreshData', 'Refresh Live Data')}
-                  </button>
-
-                  <button 
-                    onClick={handleLogout}
-                    className="btn btn-outline btn-sm"
-                    style={{ width: '100%', borderColor: '#ef4444', color: '#ef4444', gap: '6px', fontSize: '0.8rem', height: '36px', borderRadius: '10px' }}
-                  >
-                    <LogOut size={13} /> {t('admin.logout', 'Log Out')}
-                  </button>
-                </div>
-              </aside>
-
-              {/* Mobile Slide-Out Frosted Glass Drawer */}
-              {isMobileNavOpen && (
-                <>
-                  <div 
-                    className="admin-mobile-drawer-backdrop" 
-                    onClick={() => setIsMobileNavOpen(false)} 
-                  />
-                  <aside className="admin-mobile-drawer-glass">
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '12px', borderBottom: '1px solid var(--border-light)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#22c55e', animation: 'pulse 2s infinite' }}></div>
-                        <strong style={{ fontSize: '1.05rem', color: 'var(--text-dark)' }}>Admin Console V2</strong>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setIsMobileNavOpen(false)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-medium)', padding: '4px' }}
-                      >
-                        <X size={20} />
-                      </button>
-                    </div>
-
-                    {/* Drawer Profile Card */}
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      padding: '10px 12px',
-                      backgroundColor: isSuperAdmin ? 'rgba(254, 243, 199, 0.4)' : 'rgba(248, 250, 252, 0.8)',
-                      border: `1.5px solid ${isSuperAdmin ? '#fde68a' : 'rgba(226, 232, 240, 0.8)'}`,
-                      borderRadius: '12px'
-                    }}>
-                      <img 
-                        src={currentUser?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser?.name || (isSuperAdmin ? 'Super Admin' : 'Admin'))}&background=${isSuperAdmin ? 'f59e0b' : '0284c7'}&color=ffffff&bold=true`}
-                        alt="Avatar"
-                        style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: `2px solid ${isSuperAdmin ? '#f59e0b' : '#0284c7'}`, flexShrink: 0 }}
-                      />
-                      <div style={{ minWidth: 0, flex: 1 }}>
-                        <div style={{ fontSize: '0.84rem', fontWeight: '700', color: 'var(--text-dark)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {currentUser?.name || (isSuperAdmin ? 'Niyansh Super Admin' : 'Operations Admin')}
-                        </div>
-                        <span style={{ fontSize: '0.65rem', fontWeight: '800', backgroundColor: isSuperAdmin ? '#f59e0b' : '#0284c7', color: '#ffffff', padding: '1px 6px', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                          {isSuperAdmin ? <Crown size={9} /> : <Shield size={9} />} {isSuperAdmin ? 'Super Admin' : 'Staff Admin'}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Drawer Search Filter */}
-                    <div style={{ position: 'relative' }}>
-                      <Search size={14} style={{ position: 'absolute', left: '11px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
-                      <input 
-                        type="text"
-                        placeholder="Search tabs / modules..."
-                        value={sidebarSearch}
-                        onChange={(e) => setSidebarSearch(e.target.value)}
-                        className="admin-glass-input"
-                      />
-                    </div>
-
-                    {/* Navigation Groups */}
-                    <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
-                      {renderNavGroups(true)}
-                    </nav>
-
-                    {/* Drawer Footer Actions */}
-                    <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <button 
-                        type="button"
-                        onClick={() => { fetchDashboardData(); setIsMobileNavOpen(false); }}
-                        className="btn btn-outline btn-sm"
-                        style={{ width: '100%', fontSize: '0.8rem', gap: '6px', height: '36px', borderRadius: '10px' }}
-                      >
-                        <RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} /> {t('admin.refreshData', 'Refresh Live Data')}
-                      </button>
-                      <button 
-                        type="button"
-                        onClick={handleLogout}
-                        className="btn btn-outline btn-sm"
-                        style={{ width: '100%', borderColor: '#ef4444', color: '#ef4444', gap: '6px', fontSize: '0.8rem', height: '36px', borderRadius: '10px' }}
-                      >
-                        <LogOut size={13} /> {t('admin.logout', 'Log Out')}
-                      </button>
-                    </div>
-                  </aside>
-                </>
-              )}
-            </>
-          );
-        })()}
-
-        {/* Main Content Area */}
+        {/* ============================================================
+            COLUMN 2 (RIGHT, minmax(0, 1fr)): MAIN CONTENT AREA
+            ============================================================ */}
         <main style={{ minWidth: 0 }}>
           {/* Mobile & Tablet Responsive Horizontal Tab Bar */}
           <div className="admin-mobile-tabs-bar" style={{ marginBottom: '18px' }}>
@@ -6083,6 +5995,94 @@ _Helpline: +91 9316566894_`;
                   </div>
 
                 </div>
+              )}
+
+              {/* Mobile Slide-Out Frosted Glass Drawer via Portal */}
+              {isMobileNavOpen && typeof document !== 'undefined' && createPortal(
+                <>
+                  <div 
+                    className="admin-mobile-drawer-backdrop" 
+                    onClick={() => setIsMobileNavOpen(false)} 
+                  />
+                  <aside className="admin-mobile-drawer-glass">
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '12px', borderBottom: '1px solid var(--border-light)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#22c55e', animation: 'pulse 2s infinite' }}></div>
+                        <strong style={{ fontSize: '1.05rem', color: 'var(--text-dark)' }}>Admin Console V2</strong>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setIsMobileNavOpen(false)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-medium)', padding: '4px' }}
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+
+                    {/* Drawer Profile Card */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      padding: '10px 12px',
+                      backgroundColor: isSuperAdmin ? 'rgba(254, 243, 199, 0.4)' : 'rgba(248, 250, 252, 0.8)',
+                      border: `1.5px solid ${isSuperAdmin ? '#fde68a' : 'rgba(226, 232, 240, 0.8)'}`,
+                      borderRadius: '12px'
+                    }}>
+                      <img 
+                        src={currentUser?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser?.name || (isSuperAdmin ? 'Super Admin' : 'Admin'))}&background=${isSuperAdmin ? 'f59e0b' : '0284c7'}&color=ffffff&bold=true`}
+                        alt="Avatar"
+                        style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: `2px solid ${isSuperAdmin ? '#f59e0b' : '#0284c7'}`, flexShrink: 0 }}
+                      />
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ fontSize: '0.84rem', fontWeight: '700', color: 'var(--text-dark)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {currentUser?.name || (isSuperAdmin ? 'Niyansh Super Admin' : 'Operations Admin')}
+                        </div>
+                        <span style={{ fontSize: '0.65rem', fontWeight: '800', backgroundColor: isSuperAdmin ? '#f59e0b' : '#0284c7', color: '#ffffff', padding: '1px 6px', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                          {isSuperAdmin ? <Crown size={9} /> : <Shield size={9} />} {isSuperAdmin ? 'Super Admin' : 'Staff Admin'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Drawer Search Filter */}
+                    <div style={{ position: 'relative' }}>
+                      <Search size={14} style={{ position: 'absolute', left: '11px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
+                      <input 
+                        type="text"
+                        placeholder="Search tabs / modules..."
+                        value={sidebarSearch}
+                        onChange={(e) => setSidebarSearch(e.target.value)}
+                        className="admin-glass-input"
+                      />
+                    </div>
+
+                    {/* Navigation Groups */}
+                    <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
+                      {renderNavGroups(true)}
+                    </nav>
+
+                    {/* Drawer Footer Actions */}
+                    <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <button 
+                        type="button"
+                        onClick={() => { fetchDashboardData(); setIsMobileNavOpen(false); }}
+                        className="btn btn-outline btn-sm"
+                        style={{ width: '100%', fontSize: '0.8rem', gap: '6px', height: '36px', borderRadius: '10px' }}
+                      >
+                        <RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} /> {t('admin.refreshData', 'Refresh Live Data')}
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={handleLogout}
+                        className="btn btn-outline btn-sm"
+                        style={{ width: '100%', borderColor: '#ef4444', color: '#ef4444', gap: '6px', fontSize: '0.8rem', height: '36px', borderRadius: '10px' }}
+                      >
+                        <LogOut size={13} /> {t('admin.logout', 'Log Out')}
+                      </button>
+                    </div>
+                  </aside>
+                </>,
+                document.body
               )}
 
               {/* ==========================================

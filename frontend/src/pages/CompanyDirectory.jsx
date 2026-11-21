@@ -60,7 +60,9 @@ function CompanyDirectory() {
       if (searchTerm.trim()) queryParams.set('search', searchTerm.trim());
       if (selectedCategory !== 'All') queryParams.set('category', selectedCategory);
 
-      const res = await fetch(`/api/companies?${queryParams.toString()}`);
+      const res = await fetch(`/api/companies?${queryParams.toString()}`, {
+        headers: isSilent ? { 'x-silent-request': 'true' } : {}
+      });
       const data = await res.json();
 
       if (data.success) {

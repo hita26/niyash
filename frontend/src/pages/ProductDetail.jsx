@@ -28,7 +28,9 @@ function ProductDetail({ addToCart }) {
   const fetchProduct = useCallback(async (isSilent = false) => {
     if (!isSilent) setLoading(true);
     try {
-      const response = await fetch(`/api/products/${id}`);
+      const response = await fetch(`/api/products/${id}`, {
+        headers: isSilent ? { 'x-silent-request': 'true' } : {}
+      });
       if (!response.ok) {
         setProduct(null);
         return;

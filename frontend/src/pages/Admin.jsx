@@ -1108,6 +1108,15 @@ function Admin() {
   const [previewImage, setPreviewImage] = useState(null);
 
   // Lock body & document scroll whenever any modal is active to prevent page scrolling behind modals
+  // Clean & Sanitize Dirty Pharma Spreadsheet Text (removes 'NULL', 'undefined', '#N/A', etc.)
+  const cleanPharmaText = (val, fallback = '—') => {
+    if (val === undefined || val === null) return fallback;
+    const s = String(val).trim();
+    const lower = s.toLowerCase();
+    if (['null', 'undefined', 'none', '#n/a', 'nil', ''].includes(lower)) return fallback;
+    return s;
+  };
+
   const hasActiveModal = Boolean(
     isAdminModalOpen ||
     isProfileModalOpen ||
@@ -4085,7 +4094,12 @@ _Helpline: +91 9316566894_`;
                       rk.toLowerCase().replace(/[^a-z0-9]/g, '') === k.toLowerCase().replace(/[^a-z0-9]/g, '')
               );
               if (matchedKey && row[matchedKey] !== undefined && row[matchedKey] !== null) {
-                return String(row[matchedKey]).trim();
+                const val = String(row[matchedKey]).trim();
+                const lower = val.toLowerCase();
+                if (['null', 'undefined', 'none', '#n/a', 'nil', ''].includes(lower)) {
+                  continue; // Skip dirty 'NULL' values so fallback applies
+                }
+                return val;
               }
             }
             return '';
@@ -6950,7 +6964,7 @@ _Helpline: +91 9316566894_`;
                                     {/* Column 2: Category & Tax */}
                                     <td style={{ padding: '10px 12px', verticalAlign: 'middle' }}>
                                       <div style={{ fontSize: '0.84rem', fontWeight: '700', color: '#334155' }}>
-                                        {p.category}
+                                        {cleanPharmaText(p.category, 'Pharma Products')}
                                       </div>
                                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '3px', flexWrap: 'wrap' }}>
                                         {(p.salesGst !== undefined || p.gstRate !== undefined) && (
@@ -7084,7 +7098,7 @@ _Helpline: +91 9316566894_`;
                       </div>
 
                       {/* Mobile & Tablet Product List Cards (Screens <= 992px) */}
-                      <div className="admin-product-mobile-cards" style={{ display: 'none', flexDirection: 'column', gap: '12px' }}>
+                      <div className="admin-product-mobile-cards" style={{ flexDirection: 'column', gap: '12px' }}>
                         {paginatedProducts.map((p) => {
                           const photoUrl = (p.images && p.images.length > 0) ? p.images[0] : (p.imageUrl || '');
                           const isOutOfStock = !p.inStock || (p.stockQuantity !== undefined && p.stockQuantity <= 0);
@@ -7125,11 +7139,11 @@ _Helpline: +91 9316566894_`;
                                     )}
                                   </div>
                                   <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '2px' }}>
-                                    {p.category} • <span style={{ color: '#0f172a', fontWeight: '600' }}>{p.form || 'Tablet'}</span> {p.packing ? `(${p.packing})` : ''}
+                                    {cleanPharmaText(p.category, 'Pharma Products')} • <span style={{ color: '#0f172a', fontWeight: '600' }}>{cleanPharmaText(p.form, 'Tablet')}</span> {p.packing && cleanPharmaText(p.packing) ? `(${cleanPharmaText(p.packing)})` : ''}
                                   </div>
-                                  {p.composition && (
+                                  {p.composition && cleanPharmaText(p.composition) && (
                                     <div style={{ fontSize: '0.76rem', color: '#475569', marginTop: '3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                      <strong>Contains:</strong> {p.composition}
+                                      <strong>Contains:</strong> {cleanPharmaText(p.composition)}
                                     </div>
                                   )}
                                 </div>
@@ -12989,7 +13003,7 @@ _Helpline: +91 9316566894_`;
                     </div>
 
                     {/* HARD RESPONSIVE DATA TABLE WITH STICKY HEADERS & STICKY FIRST COLUMNS (EXTRA TALL & WIDE) */}
-                    <div style={{
+                    <div className="bulk-desktop-table" style={{
                       flex: '1 1 0px',
                       minHeight: 0,
                       overflowX: 'auto',
@@ -13161,6 +13175,104 @@ _Helpline: +91 9316566894_`;
                           )}
                         </tbody>
                       </table>
+                    </div>
+
+                    {/* MOBILE PREVIEW SMART CARDS (Screens <= 768px - Touch-Friendly, No Cramped Tables) */}
+                    <div className="bulk-mobile-cards">
+                      {pageRows.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '30px', color: '#64748b' }}>
+                          No products found matching filters.
+                        </div>
+                      ) : (
+                        pageRows.map((r) => {
+                          const isRowDuplicate = r.isDuplicate;
+                          const isRowError = r.hasError;
+                          const rowBg = isRowError ? '#fef2f2' : isRowDuplicate ? '#fffbeb' : (r.selected ? '#ffffff' : '#f8fafc');
+                          return (
+                            <div 
+                              key={r._rowId}
+                              style={{
+                                backgroundColor: rowBg,
+                                borderRadius: '12px',
+                                padding: '12px 14px',
+                                border: isRowError ? '1px solid #fecaca' : isRowDuplicate ? '1px solid #fde68a' : '1px solid #e2e8f0',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '8px',
+                                boxShadow: '0 2px 6px rgba(0,0,0,0.03)'
+                              }}
+                            >
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <input 
+                                    type="checkbox"
+                                    checked={r.selected && (!bulkSkipDuplicates || !isRowDuplicate) && !isRowError}
+                                    disabled={isRowError || (bulkSkipDuplicates && isRowDuplicate)}
+                                    onChange={() => handleToggleRowSelection(r._rowId)}
+                                    style={{ accentColor: '#2563eb', width: '18px', height: '18px' }}
+                                  />
+                                  <span style={{ fontWeight: '800', fontSize: '0.82rem', color: '#64748b' }}>#{r._rowId}</span>
+                                  {isRowError ? (
+                                    <span style={{ backgroundColor: '#fee2e2', color: '#b91c1c', fontSize: '0.72rem', padding: '2px 8px', borderRadius: '4px', fontWeight: '700' }}>
+                                      ✕ {r.errorMessage}
+                                    </span>
+                                  ) : isRowDuplicate ? (
+                                    <span style={{ backgroundColor: '#fef3c7', color: '#b45309', fontSize: '0.72rem', padding: '2px 8px', borderRadius: '4px', fontWeight: '700' }}>
+                                      Duplicate (Skip)
+                                    </span>
+                                  ) : (
+                                    <span style={{ backgroundColor: '#dcfce7', color: '#15803d', fontSize: '0.72rem', padding: '2px 8px', borderRadius: '4px', fontWeight: '700' }}>
+                                      ✓ Ready
+                                    </span>
+                                  )}
+                                </div>
+                                <div style={{ display: 'flex', gap: '6px' }}>
+                                  <button 
+                                    type="button" 
+                                    onClick={() => setEditingBulkRow({ ...r })}
+                                    style={{ padding: '4px 8px', borderRadius: '6px', border: '1px solid #bfdbfe', backgroundColor: '#eff6ff', color: '#2563eb', fontSize: '0.74rem', fontWeight: '700' }}
+                                  >
+                                    Edit
+                                  </button>
+                                  <button 
+                                    type="button" 
+                                    onClick={() => handleDeleteBulkRow(r._rowId)}
+                                    style={{ padding: '4px 8px', borderRadius: '6px', border: '1px solid #fecaca', backgroundColor: '#fee2e2', color: '#dc2626', fontSize: '0.74rem', fontWeight: '700' }}
+                                  >
+                                    Del
+                                  </button>
+                                </div>
+                              </div>
+
+                              <div>
+                                <div style={{ fontWeight: '800', color: '#0f172a', fontSize: '0.94rem' }}>{r.name}</div>
+                                <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: '2px' }}>
+                                  <span style={{ color: '#1d4ed8', fontWeight: '700' }}>{cleanPharmaText(r.company, 'Daxia')}</span> • {cleanPharmaText(r.packing, 'Pack')} {r.form ? `• ${r.form}` : ''}
+                                </div>
+                                {r.composition && cleanPharmaText(r.composition) && (
+                                  <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>
+                                    <em>{cleanPharmaText(r.composition)}</em>
+                                  </div>
+                                )}
+                              </div>
+
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '6px', borderTop: '1px solid #f1f5f9' }}>
+                                <div style={{ display: 'flex', gap: '12px' }}>
+                                  <span style={{ fontSize: '0.86rem', fontWeight: '800', color: '#16a34a' }}>
+                                    ₹{r.price != null && !isNaN(r.price) ? Number(r.price).toFixed(2) : (r.price || '0.00')}
+                                  </span>
+                                  <span style={{ fontSize: '0.8rem', color: '#94a3b8', textDecoration: 'line-through' }}>
+                                    MRP ₹{r.mrp != null && !isNaN(r.mrp) ? Number(r.mrp).toFixed(2) : (r.mrp || '0.00')}
+                                  </span>
+                                </div>
+                                <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                                  Stock: <strong>{r.stockQuantity || 100}</strong>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
                     </div>
 
                     {/* HARD RESPONSIVE PAGINATION CONTROLS (ZERO LAG & INSTANT NAVIGATION) */}

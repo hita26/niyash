@@ -478,26 +478,6 @@ export default function RetailerDashboard() {
               >
                 <MessageCircle size={16} color="#34d399" /> {t('retailerDashboard.whatsAppStatement', 'WhatsApp Statement')}
               </button>
-
-              <button
-                onClick={logout}
-                style={{
-                  backgroundColor: 'transparent',
-                  color: '#94a3b8',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  padding: '10px 14px',
-                  borderRadius: '10px',
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  fontSize: '0.82rem',
-                  fontWeight: '600'
-                }}
-                title="Sign out of B2B portal"
-              >
-                <LogOut size={15} /> {t('retailerDashboard.exit', 'Exit')}
-              </button>
             </div>
 
           </div>

@@ -305,9 +305,25 @@ router.get('/admin/all', protect, adminOnly, async (req, res) => {
         Product.find().sort({ createdAt: -1 }).limit(5).select('name brand sku price mrp inStock stockQuantity createdAt').lean(),
       ]);
 
+    // Sanitize products so UI never receives dirty 'NULL' or 'undefined' values
+    const cleanedProducts = products.map(p => ({
+      ...p,
+      category: (!p.category || ['null', 'undefined', 'none', '#n/a', 'nil', ''].includes(String(p.category).trim().toLowerCase())) ? 'Pharma Products' : p.category,
+      company: (!p.company || ['null', 'undefined', 'none', '#n/a', 'nil', ''].includes(String(p.company).trim().toLowerCase())) ? (p.brand || 'Daxia Healthcare') : p.company,
+      composition: (!p.composition || ['null', 'undefined', 'none', '#n/a', 'nil', ''].includes(String(p.composition).trim().toLowerCase())) ? '' : p.composition,
+      form: (!p.form || ['null', 'undefined', 'none', '#n/a', 'nil', ''].includes(String(p.form).trim().toLowerCase())) ? 'Tablet' : p.form,
+      packing: (!p.packing || ['null', 'undefined', 'none', '#n/a', 'nil', ''].includes(String(p.packing).trim().toLowerCase())) ? '10 x 10 Tablets' : p.packing
+    }));
+
+    // Auto-repair any legacy dirty 'NULL' category records in MongoDB collection asynchronously
+    Product.updateMany(
+      { category: { $in: ['NULL', 'null', 'undefined', null, ''] } },
+      { $set: { category: 'Pharma Products' } }
+    ).catch(() => {});
+
     res.json({
       success: true,
-      products,
+      products: cleanedProducts,
       total,
       page: pageNum,
       pages: Math.ceil(total / limitNum),
@@ -1214,6 +1230,17 @@ router.post('/bulk', protect, adminOnly, checkPermission('canBulkImport'), async
       }
     }
 
+    // Helper to sanitize dirty spreadsheet strings (e.g. 'NULL', 'undefined', '#N/A')
+    const cleanField = (val, fallback = '') => {
+      if (val === undefined || val === null) return fallback;
+      const s = String(val).trim();
+      const lower = s.toLowerCase();
+      if (lower === 'null' || lower === 'undefined' || lower === 'none' || lower === '#n/a' || lower === 'nil' || lower === '') {
+        return fallback;
+      }
+      return s;
+    };
+
     // 5. Construct high-speed Product bulkWrite operations
     const bulkOps = [];
     for (const p of candidates) {
@@ -1224,45 +1251,46 @@ router.post('/bulk', protect, adminOnly, checkPermission('canBulkImport'), async
         }
       }
 
-      const assignedCompany = (p.company && p.company.trim()) || 'Daxia Healthcare';
+      const assignedCompany = cleanField(p.company, 'Daxia Healthcare');
+      const assignedCategory = cleanField(p.category, 'Pharma Products');
       const images = Array.isArray(p.images) ? p.images : p.imageUrl ? [p.imageUrl] : [];
       const mainImage = p.imageUrl || (images.length > 0 ? images[0] : '');
       const salesGstVal = !isNaN(parseFloat(p.salesGst)) ? parseFloat(p.salesGst) : (!isNaN(parseFloat(p.gstRate)) ? parseFloat(p.gstRate) : 12);
       const purchaseGstVal = !isNaN(parseFloat(p.purchaseGst)) ? parseFloat(p.purchaseGst) : 12;
 
       const productData = {
-        name: p._trimmedName,
-        brand: (p.brand && p.brand.trim()) || p._trimmedName,
+        name: cleanField(p._trimmedName, 'Generic Formulation'),
+        brand: cleanField(p.brand, cleanField(p._trimmedName, 'Generic Formulation')),
         company: assignedCompany,
-        category: (p.category && p.category.trim()) || 'Pharma Products',
-        subCategory: (p.subCategory && p.subCategory.trim()) || '',
-        sku: p._sku,
+        category: assignedCategory,
+        subCategory: cleanField(p.subCategory, ''),
+        sku: cleanField(p._sku, `NP-${Date.now().toString().slice(-6)}`),
         price: parseFloat(p.price) || 0,
         mrp: parseFloat(p.mrp) || parseFloat(p.price) || 0,
         stockQuantity: parseInt(p.stockQuantity, 10) || 100,
         inStock: p.inStock !== undefined ? Boolean(p.inStock) : true,
-        packing: (p.packing && p.packing.trim()) || '10 x 10 Tablets',
-        composition: (p.composition && p.composition.trim()) || '',
-        form: (p.form && p.form.trim()) || 'Tablet',
-        manufacturer: (p.manufacturer && p.manufacturer.trim()) || assignedCompany,
-        rackId: (p.rackId && p.rackId.trim()) || '',
-        batchNumber: (p.batchNumber && p.batchNumber.trim()) || (p.batchNo && p.batchNo.trim()) || '',
-        hsnCode: (p.hsnCode && p.hsnCode.trim()) || '3004',
-        purchaseGst: purchaseGstVal,
+        packing: cleanField(p.packing, '10 x 10 Tablets'),
+        composition: cleanField(p.composition, ''),
+        form: cleanField(p.form, 'Tablet'),
+        manufacturer: cleanField(p.manufacturer, assignedCompany),
+        rackId: cleanField(p.rackId, ''),
+        batchNumber: cleanField(p.batchNumber || p.batchNo, ''),
+        hsnCode: cleanField(p.hsnCode, '3004'),
+        expiryDate: cleanField(p.expiryDate, ''),
         salesGst: salesGstVal,
+        purchaseGst: purchaseGstVal,
         gstRate: salesGstVal,
-        expiryDate: (p.expiryDate && p.expiryDate.trim()) || '',
-        scheme: (p.scheme && p.scheme.trim()) || '',
-        qualitySpecs: (p.qualitySpecs && p.qualitySpecs.trim()) || 'WHO-GMP Certified',
-        unitsPerBox: !isNaN(parseInt(p.unitsPerBox, 10)) ? parseInt(p.unitsPerBox, 10) : 10,
-        minReorderQty: !isNaN(parseInt(p.minReorderQty, 10)) ? parseInt(p.minReorderQty, 10) : 1,
-        customFields: Array.isArray(p.customFields) ? p.customFields : [],
+        scheme: cleanField(p.scheme, ''),
+        qualitySpecs: cleanField(p.qualitySpecs, 'WHO-GMP Certified'),
+        unitsPerBox: parseInt(p.unitsPerBox, 10) || 10,
+        minReorderQty: parseInt(p.minReorderQty, 10) || 1,
         imageUrl: mainImage,
-        images,
-        description: (p.description && p.description.trim()) || '',
+        images: images,
+        description: cleanField(p.description, `${p._trimmedName} pharmaceutical formulation by ${assignedCompany}.`),
+        customFields: Array.isArray(p.customFields) ? p.customFields : [],
         featured: Boolean(p.featured),
         isOurProduct: Boolean(p.isOurProduct),
-        isActive: p.isActive !== undefined ? Boolean(p.isActive) : true,
+        isActive: p.isActive !== undefined ? Boolean(p.isActive) : true
       };
 
       bulkOps.push({

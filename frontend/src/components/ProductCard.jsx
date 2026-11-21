@@ -88,9 +88,21 @@ function ProductCard({ product, addToCart }) {
     !product.imageUrl.includes('placeholder.com')
   );
 
-  // Avoid duplicate brand chip if brand name is identical to product title
-  const brandName = (product.company || product.brand || '').trim();
-  const showBrandTag = brandName && brandName.toLowerCase() !== (product.name || '').trim().toLowerCase();
+  // Sanitize text fields to eliminate raw 'NULL' or 'undefined'
+  const cleanPharmaStr = (val, fallback = '') => {
+    if (!val) return fallback;
+    const s = String(val).trim();
+    if (['null', 'undefined', 'none', '#n/a', 'nil'].includes(s.toLowerCase())) return fallback;
+    return s;
+  };
+
+  const validCategory = cleanPharmaStr(product.category, 'Pharma Products');
+  const cleanComposition = cleanPharmaStr(product.composition, '');
+
+  // Avoid duplicate brand chip if brand name is identical to product title or null
+  const rawBrand = cleanPharmaStr(product.company || product.brand, '');
+  const brandName = rawBrand;
+  const showBrandTag = Boolean(brandName && brandName.toLowerCase() !== (product.name || '').trim().toLowerCase());
 
   return (
     <div 
@@ -287,7 +299,7 @@ function ProductCard({ product, addToCart }) {
         {/* Category Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
           <span style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-            {translateCategory(product.category || 'Pharma Products')}
+            {translateCategory(validCategory)}
           </span>
           {product.sku && (
             <span style={{ fontSize: '0.68rem', color: '#94a3b8', fontFamily: 'monospace' }}>
@@ -338,10 +350,10 @@ function ProductCard({ product, addToCart }) {
             textOverflow: 'ellipsis', 
             whiteSpace: 'nowrap' 
           }} 
-          title={product.composition || ''}
+          title={cleanComposition} 
         >
-          {product.composition ? (
-            <span>Comp: <em style={{ color: 'var(--text-medium)', fontStyle: 'normal' }}>{product.composition}</em></span>
+          {cleanComposition ? (
+            <span>Comp: <em style={{ color: 'var(--text-medium)', fontStyle: 'normal' }}>{cleanComposition}</em></span>
           ) : (
             <span style={{ visibility: 'hidden' }}>&nbsp;</span>
           )}

@@ -163,7 +163,9 @@ export function AuthProvider({ children }) {
       try {
         const res = await fetch('/api/users/validate-session', {
           headers: {
-            'Authorization': `Bearer ${currentToken}`
+            'Authorization': `Bearer ${currentToken}`,
+            'x-silent-request': 'true',
+            'x-background-request': 'true'
           }
         });
 

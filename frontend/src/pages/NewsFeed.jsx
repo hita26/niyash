@@ -132,11 +132,13 @@ function NewsFeed() {
   const [copiedId, setCopiedId] = useState(null);
 
   // Fetch all news updates
-  const fetchNews = useCallback(async () => {
-    setLoading(true);
+  const fetchNews = useCallback(async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/news');
+      const response = await fetch('/api/news', {
+        headers: isSilent ? { 'x-silent-request': 'true' } : {}
+      });
       if (!response.ok) {
         throw new Error(`Server returned ${response.status}`);
       }
@@ -150,7 +152,7 @@ function NewsFeed() {
       console.warn('Could not fetch news from server, using preloaded updates:', err.message);
       setNews(FALLBACK_NEWS_ITEMS);
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   }, []);
 
@@ -161,7 +163,7 @@ function NewsFeed() {
   // Live multi-tab sync for news and schemes
   useLiveSync((event) => {
     if (event.type === SYNC_EVENTS.SCHEME_MUTATED || event.type === 'TAB_FOCUSED_REVALIDATE') {
-      fetchNews();
+      fetchNews(true);
     }
   }, [fetchNews]);
 

@@ -1966,6 +1966,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
             {/* TABLE / MATRIX VIEW MODE */}
             {viewMode === 'table' && filteredProducts.length > 0 && (
               <div
+                className="quickorder-desktop-table"
                 style={{
                   backgroundColor: 'var(--bg-card)',
                   borderRadius: '12px',
@@ -2300,9 +2301,12 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
               </div>
             )}
 
-            {/* CARD VIEW MODE */}
-            {viewMode === 'card' && filteredProducts.length > 0 && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '16px' }}>
+            {/* CARD VIEW MODE / MOBILE SMART CARDS */}
+            {filteredProducts.length > 0 && (
+              <div 
+                className={viewMode === 'card' ? 'quickorder-cards-container' : 'quickorder-mobile-cards-forced'}
+                style={{ display: viewMode === 'card' ? 'grid' : undefined, gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '16px' }}
+              >
                 {paginatedProducts.map((product) => {
                   const boxQty = getBoxQty(product._id);
                   const isSelected = boxQty > 0;

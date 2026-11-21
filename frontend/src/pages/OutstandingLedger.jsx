@@ -1295,7 +1295,7 @@ Rajkot, Gujarat`);
           </div>
 
           {/* Invoices Data Table */}
-          <div className="table-responsive" style={{ overflowX: 'auto' }}>
+          <div className="table-responsive ledger-desktop-table" style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
               <thead>
                 <tr style={{ backgroundColor: 'var(--bg-surface-elevated)', borderBottom: '2px solid var(--border-light)', color: '#475569' }}>
@@ -1438,6 +1438,97 @@ Rajkot, Gujarat`);
               )}
             </table>
           </div>
+
+          {/* Mobile Invoices Smart Cards (Screens <= 768px - Touch-Friendly, No Cramped Tables) */}
+          <div className="ledger-mobile-cards">
+            {isLoading ? (
+              <SkeletonLoader variant="cards" count={3} />
+            ) : filteredInvoices.length > 0 ? (
+              filteredInvoices.map((inv, idx) => {
+                const isOverdue = inv.status === 'Overdue' || (inv.dueDate && new Date(inv.dueDate) < now && inv.balance > 0);
+                return (
+                  <div
+                    key={inv.invoiceNumber || idx}
+                    style={{
+                      backgroundColor: 'var(--bg-card)',
+                      borderRadius: '12px',
+                      padding: '14px',
+                      border: isOverdue ? '1.5px solid #fecaca' : '1px solid var(--border-light)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '10px',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <span style={{ fontWeight: 800, color: 'var(--primary-blue)', fontSize: '0.94rem' }}>{inv.invoiceNumber}</span>
+                        <div style={{ fontSize: '0.76rem', color: '#64748b', marginTop: '2px' }}>
+                          Date: {formatDate(inv.invoiceDate)} · Due: <span style={{ color: isOverdue ? '#dc2626' : '#475569', fontWeight: 600 }}>{formatDate(inv.dueDate)}</span>
+                        </div>
+                      </div>
+                      <span style={{
+                        fontSize: '0.74rem',
+                        fontWeight: 700,
+                        padding: '3px 8px',
+                        borderRadius: '20px',
+                        backgroundColor: inv.status === 'Paid' ? '#dcfce7' : isOverdue ? '#fee2e2' : '#fef3c7',
+                        color: inv.status === 'Paid' ? '#166534' : isOverdue ? '#991b1b' : '#b45309'
+                      }}>
+                        {inv.status}
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--bg-surface-alt)', padding: '8px 12px', borderRadius: '8px', fontSize: '0.82rem' }}>
+                      <div>
+                        <div style={{ color: '#64748b', fontSize: '0.72rem' }}>Total Amount</div>
+                        <div style={{ fontWeight: 700, color: '#0f172a' }}>{formatINR(inv.amount)}</div>
+                      </div>
+                      <div>
+                        <div style={{ color: '#64748b', fontSize: '0.72rem' }}>Paid</div>
+                        <div style={{ fontWeight: 700, color: '#16a34a' }}>{formatINR(inv.paidAmount || 0)}</div>
+                      </div>
+                      <div>
+                        <div style={{ color: '#64748b', fontSize: '0.72rem' }}>Balance Due</div>
+                        <div style={{ fontWeight: 800, color: inv.balance > 0 ? '#dc2626' : '#16a34a' }}>{formatINR(inv.balance)}</div>
+                      </div>
+                    </div>
+
+                    {inv.balance > 0 ? (
+                      <button
+                        onClick={() => openPaymentModal(inv.balance, inv.invoiceNumber)}
+                        style={{
+                          width: '100%',
+                          padding: '9px',
+                          borderRadius: '8px',
+                          backgroundColor: isOverdue ? '#dc2626' : '#0c3d6c',
+                          color: '#ffffff',
+                          fontSize: '0.86rem',
+                          fontWeight: 700,
+                          border: 'none',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '6px'
+                        }}
+                      >
+                        <CreditCard size={15} /> Pay {formatINR(inv.balance)} Now
+                      </button>
+                    ) : (
+                      <div style={{ textAlign: 'center', fontSize: '0.8rem', color: '#16a34a', fontWeight: 700 }}>
+                        ✓ Paid & Settled
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            ) : (
+              <div style={{ padding: '24px', textAlign: 'center', color: '#94a3b8' }}>
+                No invoices found.
+              </div>
+            )}
+          </div>
         </div>
 
         {/* SECTION 2: PAYMENT TRANSACTIONS HISTORY TABLE */}
@@ -1500,7 +1591,7 @@ Rajkot, Gujarat`);
           </div>
 
           {/* Payment History Table */}
-          <div className="table-responsive" style={{ overflowX: 'auto' }}>
+          <div className="table-responsive ledger-desktop-table" style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
               <thead>
                 <tr style={{ backgroundColor: 'var(--bg-surface-elevated)', borderBottom: '2px solid var(--border-light)', color: '#475569' }}>
@@ -1598,6 +1689,56 @@ Rajkot, Gujarat`);
                 </tfoot>
               )}
             </table>
+          </div>
+
+          {/* Mobile Payment History Smart Cards (Screens <= 768px) */}
+          <div className="ledger-mobile-cards">
+            {filteredPayments.length > 0 ? (
+              filteredPayments.map((pmt, idx) => (
+                <div
+                  key={pmt.paymentId || idx}
+                  style={{
+                    backgroundColor: 'var(--bg-card)',
+                    borderRadius: '12px',
+                    padding: '14px',
+                    border: '1px solid var(--border-light)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontWeight: 800, color: '#0c3d6c', fontFamily: 'monospace', fontSize: '0.88rem' }}>
+                      {pmt.paymentId}
+                    </span>
+                    <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#16a34a' }}>
+                      {formatINR(pmt.amount)}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: '#64748b' }}>
+                    <span>Date: {formatDate(pmt.date)}</span>
+                    <span style={{ backgroundColor: '#f1f5f9', padding: '2px 8px', borderRadius: '12px', fontWeight: 700, color: '#334155' }}>
+                      {pmt.method === 'UPI' ? '⚡ UPI' : pmt.method === 'Card' ? '💳 Card' : pmt.method === 'NetBanking' ? '🏛️ NetBank' : '📄 Cheque'}
+                    </span>
+                  </div>
+                  {pmt.transactionRef && (
+                    <div style={{ fontSize: '0.74rem', color: '#475569', backgroundColor: 'var(--bg-surface-alt)', padding: '4px 8px', borderRadius: '4px', fontFamily: 'monospace' }}>
+                      Ref: {pmt.transactionRef}
+                    </div>
+                  )}
+                  {pmt.notes && (
+                    <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                      {pmt.notes}
+                    </div>
+                  )}
+                </div>
+              ))
+            ) : (
+              <div style={{ padding: '24px', textAlign: 'center', color: '#94a3b8' }}>
+                No payment transactions recorded.
+              </div>
+            )}
           </div>
         </div>
 

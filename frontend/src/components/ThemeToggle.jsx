@@ -32,8 +32,9 @@ export default function ThemeToggle({ className = '', style = {}, variant = 'def
       aria-label={titleText}
       className={`theme-toggle-single-btn ${className}`}
       style={{
-        width: '36px',
-        height: '36px',
+        width: '38px',
+        height: '38px',
+        boxSizing: 'border-box',
         borderRadius: '50%',
         border: '1.5px solid var(--border-light, #e2e8f0)',
         backgroundColor: 'var(--bg-surface-alt, #f8fafc)',

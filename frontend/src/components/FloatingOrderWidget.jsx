@@ -13,8 +13,17 @@ export default function FloatingOrderWidget() {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
-  // Strictly do not render in Admin portal (/admin)
-  if (location.pathname.startsWith('/admin')) {
+  // Strictly do not render in Admin portal (/admin) or Chemist B2B Workstation pages
+  const isB2BPortal = location.pathname.startsWith('/admin') ||
+                      location.pathname.startsWith('/dashboard') || 
+                      location.pathname.startsWith('/portal') || 
+                      location.pathname.startsWith('/retailer-dashboard') ||
+                      location.pathname.startsWith('/quick-order') || 
+                      location.pathname.startsWith('/order') || 
+                      location.pathname.startsWith('/outstanding') || 
+                      location.pathname.startsWith('/ledger');
+
+  if (isB2BPortal) {
     return null;
   }
 

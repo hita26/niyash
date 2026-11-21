@@ -266,8 +266,8 @@ function Header({
       <header className="b2b-header-shell" style={{ width: '100%', position: 'sticky', top: 0, zIndex: 1000, boxShadow: '0 4px 20px rgba(0,0,0,0.08)', backgroundColor: 'var(--bg-surface)' }}>
         
         {/* Main Workstation Header Bar - STRICT SINGLE LINE ENTERPRISE B2B BAR */}
-        <div style={{ backgroundColor: 'var(--bg-surface)', borderBottom: '1px solid var(--border-light)', padding: '8px 16px' }}>
-          <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'nowrap', minHeight: '50px' }}>
+        <div style={{ backgroundColor: 'var(--bg-surface)', borderBottom: '1px solid var(--border-light)', padding: '10px 16px' }}>
+          <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'nowrap', minHeight: '62px' }}>
             
             {/* Top Row on Mobile: Logo (Left) + Cart, Theme, Hamburger (Right) */}
             <div className="hide-desktop" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '8px' }}>
@@ -275,7 +275,7 @@ function Header({
                 <img 
                   src={brandLogo} 
                   alt="Niyansh Pharma" 
-                  style={{ height: '36px', width: 'auto', display: 'block', objectFit: 'contain' }} 
+                  style={{ height: '48px', width: 'auto', display: 'block', objectFit: 'contain' }} 
                 />
               </Link>
 
@@ -284,14 +284,16 @@ function Header({
                 <button 
                   onClick={onOpenCart}
                   style={{
+                    height: '38px',
+                    boxSizing: 'border-box',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '4px',
+                    gap: '5px',
                     backgroundColor: cartCount > 0 ? '#ea580c' : 'var(--bg-surface-alt)',
                     color: cartCount > 0 ? '#ffffff' : 'var(--text-dark)',
-                    border: '1px solid var(--border-light)',
-                    borderRadius: '16px',
-                    padding: '5px 10px',
+                    border: '1.5px solid var(--border-light)',
+                    borderRadius: '20px',
+                    padding: '0 10px',
                     cursor: 'pointer',
                     fontWeight: '700',
                     fontSize: '0.78rem'
@@ -310,8 +312,10 @@ function Header({
                   aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
                   aria-expanded={isMobileMenuOpen}
                   style={{ 
-                    padding: '6px', 
-                    border: '1px solid var(--border-light)', 
+                    width: '38px',
+                    height: '38px',
+                    boxSizing: 'border-box',
+                    border: '1.5px solid var(--border-light)', 
                     borderRadius: '8px', 
                     background: 'var(--bg-surface-alt)', 
                     color: 'var(--text-dark)',
@@ -332,7 +336,7 @@ function Header({
                 <img 
                   src={brandLogo} 
                   alt="Niyansh Pharma" 
-                  style={{ height: '42px', width: 'auto', display: 'block', objectFit: 'contain' }} 
+                  style={{ height: '54px', width: 'auto', display: 'block', objectFit: 'contain' }} 
                 />
               </Link>
             </div>
@@ -342,17 +346,19 @@ function Header({
               <form 
                 onSubmit={handleSearchSubmit} 
                 style={{ 
+                  height: '38px',
+                  boxSizing: 'border-box',
                   display: 'flex', 
                   alignItems: 'center', 
                   backgroundColor: 'var(--bg-surface-alt)', 
                   border: '1.5px solid var(--border-light)', 
-                  borderRadius: '30px', 
-                  padding: '4px 6px 4px 14px',
+                  borderRadius: '24px', 
+                  padding: '0 4px 0 14px',
                   transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
                 }}
                 role="search"
               >
-                <Search size={15} color="#64748b" style={{ marginRight: '8px', flexShrink: 0 }} />
+                <Search size={15} color="var(--primary-blue, #0c3d6c)" style={{ marginRight: '8px', flexShrink: 0 }} />
                 <input
                   ref={searchInputRef}
                   type="text"
@@ -370,6 +376,7 @@ function Header({
                     background: 'transparent',
                     outline: 'none',
                     width: '100%',
+                    height: '100%',
                     fontSize: '0.84rem',
                     color: 'var(--text-dark)',
                     fontWeight: '500'
@@ -379,18 +386,23 @@ function Header({
                 <button 
                   type="submit" 
                   style={{ 
+                    width: '30px',
+                    height: '30px',
+                    borderRadius: '50%',
                     backgroundColor: '#0c3d6c', 
                     color: '#ffffff', 
                     border: 'none', 
-                    borderRadius: '20px', 
-                    padding: '5px 12px', 
-                    fontSize: '0.76rem', 
-                    fontWeight: '700', 
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     cursor: 'pointer',
-                    flexShrink: 0 
+                    flexShrink: 0,
+                    transition: 'opacity 0.15s ease'
                   }}
+                  title={t('common.search', 'Search')}
+                  aria-label={t('common.search', 'Search')}
                 >
-                  {t('common.search', 'Search')}
+                  <Search size={14} color="#ffffff" />
                 </button>
               </form>
 

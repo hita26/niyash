@@ -316,19 +316,22 @@ export function LanguageSelector({ variant = 'default' }) {
         aria-label="Change website language"
         aria-expanded={isOpen}
         style={{
+          height: '38px',
+          boxSizing: 'border-box',
           display: 'inline-flex',
           alignItems: 'center',
           gap: '6px',
-          padding: '6px 14px',
+          padding: '0 12px',
           borderRadius: '20px',
           border: '1.5px solid var(--border-light, #e2e8f0)',
           backgroundColor: 'var(--bg-card, #ffffff)',
           color: 'var(--text-dark, #0f172a)',
-          fontSize: '0.86rem',
+          fontSize: '0.82rem',
           fontWeight: '700',
           cursor: 'pointer',
           transition: 'all 0.2s ease',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.06)'
+          boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+          whiteSpace: 'nowrap'
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.borderColor = 'var(--primary-blue, #0c3d6c)';
@@ -337,7 +340,7 @@ export function LanguageSelector({ variant = 'default' }) {
           if (!isOpen) e.currentTarget.style.borderColor = 'var(--border-light, #e2e8f0)';
         }}
       >
-        <Globe size={16} color="var(--primary-blue, #0c3d6c)" style={{ flexShrink: 0 }} />
+        <Globe size={15} color="var(--primary-blue, #0c3d6c)" style={{ flexShrink: 0 }} />
         <span className="lang-label-full">{currentLangObj.native}</span>
         <span className="lang-label-compact">{currentLangObj.code.toUpperCase()}</span>
         <ChevronDown size={13} style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease', flexShrink: 0 }} />

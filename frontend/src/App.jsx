@@ -31,7 +31,6 @@ import MobileBottomNav from './components/MobileBottomNav';
 import AIAssistant from './components/AIAssistant';
 import FloatingOrderWidget from './components/FloatingOrderWidget';
 import InstallAppBanner from './components/InstallAppBanner';
-import BioNanoProgressBar from './components/BioNanoProgressBar';
 import SecurityVerification from './components/SecurityVerification';
 import SecurityCheck from './pages/SecurityCheck';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -225,7 +224,12 @@ function AppContent() {
         return;
       }
 
-      // 6. Perform Uppercase Transformation for data entry
+      // 6. Only perform uppercase transformation for pharma codes explicitly marked (e.g. GSTIN, SKU, DL, PAN)
+      const requiresUppercase = target.dataset.uppercase === 'true' || 
+                                target.classList.contains('uppercase-input') || 
+                                ['sku', 'gstin', 'pan', 'dlno'].some(k => target.name?.toLowerCase().includes(k) || target.id?.toLowerCase().includes(k));
+      if (!requiresUppercase) return;
+
       const original = target.value;
       if (typeof original !== 'string') return;
       const upper = original.toUpperCase();
@@ -302,7 +306,6 @@ function AppContent() {
           onVerified={() => setIsSecurityCleared(true)} 
         />
       )}
-      <BioNanoProgressBar />
       <ScrollToTop />
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', position: 'relative' }}>
         <Header 
@@ -427,9 +430,9 @@ function AppContent() {
           onClose={closeAuth}
           onSuccess={login}
         />
-        {!isMobileMenuOpen && (
+        {!isMobileMenuOpen && !location.pathname.startsWith('/admin') && (
           <>
-            {!location.pathname.startsWith('/admin') && <FloatingOrderWidget />}
+            <FloatingOrderWidget />
             <AIAssistant addToCart={addToCart} />
           </>
         )}

@@ -35,8 +35,10 @@ jobs:
           chmod 600 /tmp/id_rsa_decrypted
 
           echo "Pushing frontend/dist files to GoDaddy public_html..."
+          shopt -s dotglob
           scp -o StrictHostKeyChecking=no -i /tmp/id_rsa_decrypted -r frontend/dist/* "$SSH_USER@$SSH_HOST:public_html/"
-          scp -o StrictHostKeyChecking=no -i /tmp/id_rsa_decrypted frontend/dist/.htaccess "$SSH_USER@$SSH_HOST:public_html/" || true
+          scp -o StrictHostKeyChecking=no -i /tmp/id_rsa_decrypted frontend/dist/.htaccess "$SSH_USER@$SSH_HOST:public_html/.htaccess" || true
+          scp -o StrictHostKeyChecking=no -i /tmp/id_rsa_decrypted frontend/dist/products/.htaccess "$SSH_USER@$SSH_HOST:public_html/products/.htaccess" || true
 
           echo "Verifying deployment on live server..."
           ssh -o StrictHostKeyChecking=no -i /tmp/id_rsa_decrypted "$SSH_USER@$SSH_HOST" "cd ~/public_html && echo 'Live index.html JS bundle:' && grep 'index-' index.html"

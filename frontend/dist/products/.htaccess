@@ -1,0 +1,20 @@
+# ----------------------------------------------------------------------
+# Products Directory Subfolder .htaccess
+# Handles direct folder requests to /products/ or /products
+# ----------------------------------------------------------------------
+DirectoryIndex index.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # 1. If a specific file is requested (e.g. /products/dolo-650.jpg), serve it directly
+  RewriteCond %{REQUEST_FILENAME} -f
+  RewriteRule ^ - [L]
+
+  # 2. Any request to the folder itself (/products/ or /products) rewrites to root index.html
+  RewriteRule ^.*$ /index.html [L,QSA]
+</IfModule>
+
+ErrorDocument 403 /index.html
+ErrorDocument 404 /index.html

@@ -1,9 +1,34 @@
+# ----------------------------------------------------------------------
+# Single Page Application (SPA) Apache Rewrite Configuration
+# Niyansh Pharma (cPanel / Apache)
+# ----------------------------------------------------------------------
+Options -Indexes +FollowSymLinks
+DirectoryIndex index.html
+
+# Prevent Apache mod_dir from issuing 301 redirects on directories that match SPA routes
+<IfModule mod_dir.c>
+  DirectorySlash Off
+</IfModule>
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
-  RewriteRule ^index\.html$ - [L]
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteCond %{REQUEST_FILENAME} !-l
+
+  # 1. Directly intercept /products and /products/ and rewrite to index.html immediately
+  RewriteRule ^products/?$ /index.html [L,QSA]
+
+  # 2. Never rewrite physical files that actually exist (images, css, js, fonts, pdf, php, json)
+  RewriteCond %{REQUEST_FILENAME} -f
+  RewriteRule ^ - [L]
+
+  # 3. Allow API PHP scripts to execute directly
+  RewriteCond %{REQUEST_URI} ^/api/
+  RewriteRule ^ - [L]
+
+  # 4. Route all other requests (including any directory request without a file) to index.html
   RewriteRule . /index.html [L]
 </IfModule>
+
+# Safety ErrorDocuments for 403 and 404 - Always load React App
+ErrorDocument 403 /index.html
+ErrorDocument 404 /index.html

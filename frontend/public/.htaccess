@@ -5,11 +5,6 @@
 Options -Indexes +FollowSymLinks
 DirectoryIndex index.html
 
-# Prevent Apache mod_dir from issuing 301 redirects on directories that match SPA routes
-<IfModule mod_dir.c>
-  DirectorySlash Off
-</IfModule>
-
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /

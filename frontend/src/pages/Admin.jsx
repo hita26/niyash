@@ -10,7 +10,7 @@ import {
   TrendingUp, Percent, Upload, Image as ImageIcon, Star, Grid, List,
   FileSpreadsheet, ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Layers,
   Copy, CheckCheck, MapPin, Mail, Save, EyeOff, Shield, Users, Key, Crown, UserCheck, UserX, Camera, UserPlus,
-  Zap, Activity, Cpu, Server, Terminal, Play, Globe, Volume2, VolumeX, Bell
+  Zap, Activity, Cpu, Server, Terminal, Play, Globe, Volume2, VolumeX, Bell, Maximize2, Minimize2
 } from 'lucide-react';
 import { broadcastLiveEvent, SYNC_EVENTS } from '../utils/liveSync';
 import { useLanguage } from '../context/LanguageContext';
@@ -1403,10 +1403,13 @@ function Admin() {
 
 
   // Bulk Excel Import States
-  const [bulkCsvText, setBulkCsvText] = useState('');
   const [bulkParsedRows, setBulkParsedRows] = useState([]);
   const [bulkPreviewFilter, setBulkPreviewFilter] = useState('all'); // 'all' | 'valid' | 'duplicates'
   const [bulkPreviewSearch, setBulkPreviewSearch] = useState('');
+  const [bulkPreviewPage, setBulkPreviewPage] = useState(1);
+  const [bulkPreviewPageSize, setBulkPreviewPageSize] = useState(50);
+  const [isBulkModalMaximized, setIsBulkModalMaximized] = useState(false);
+  const [editingBulkRow, setEditingBulkRow] = useState(null);
   const [isDetectingRows, setIsDetectingRows] = useState(false);
   const [importProgress, setImportProgress] = useState({ current: 0, total: 0, percent: 0, batch: 0, totalBatches: 0 });
   const [uploadedFileName, setUploadedFileName] = useState('');
@@ -4214,6 +4217,9 @@ _Helpline: +91 9316566894_`;
         });
 
         setBulkParsedRows(parsed);
+        setBulkPreviewPage(1);
+        setBulkPreviewSearch('');
+        setBulkPreviewFilter('all');
         showToast(`Detected & verified ${parsed.length} products from ${file.name}`);
       } catch (err) {
         console.error('Error parsing spreadsheet:', err);
@@ -4225,6 +4231,43 @@ _Helpline: +91 9316566894_`;
   };
   reader.readAsArrayBuffer(file);
 };
+
+  const handleCloseBulkImportModal = () => {
+    setIsBulkImportOpen(false);
+    setBulkParsedRows([]);
+    setUploadedFileName('');
+    setBulkPreviewSearch('');
+    setBulkPreviewFilter('all');
+    setBulkPreviewPage(1);
+    setEditingBulkRow(null);
+    setIsBulkModalMaximized(false);
+    setBulkImportResults(null);
+    if (excelFileInputRef.current) {
+      excelFileInputRef.current.value = '';
+    }
+  };
+
+  const handleSaveEditedBulkRow = (updatedRow) => {
+    setBulkParsedRows(prev => prev.map(r => {
+      if (r._rowId === updatedRow._rowId) {
+        const hasError = !updatedRow.name || updatedRow.name.trim() === '';
+        return {
+          ...r,
+          ...updatedRow,
+          hasError,
+          errorMessage: hasError ? 'Product Name is required' : ''
+        };
+      }
+      return r;
+    }));
+    setEditingBulkRow(null);
+    showToast(`Row #${updatedRow._rowId} updated successfully!`);
+  };
+
+  const handleDeleteBulkRow = (rowId) => {
+    setBulkParsedRows(prev => prev.filter(r => r._rowId !== rowId));
+    showToast(`Row #${rowId} removed from import list`);
+  };
 
   const handleToggleRowSelection = (rowId) => {
     setBulkParsedRows(prev => prev.map(r => r._rowId === rowId ? { ...r, selected: !r.selected } : r));
@@ -12366,32 +12409,37 @@ _Helpline: +91 9316566894_`;
           MODAL 7: BULK EXCEL & CSV IMPORT MODAL (WITH LIVE PREVIEW & DUPLICATION PREVENTER)
           ========================================== */}
       {isBulkImportOpen && typeof document !== 'undefined' && createPortal(
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          width: '100vw', height: '100vh',
-          backgroundColor: 'rgba(15, 23, 42, 0.78)', backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-          zIndex: 100010,
-          display: 'flex', justifyContent: 'center', alignItems: 'center',
-          padding: '16px', boxSizing: 'border-box'
-        }}>
+        <div 
+          onClick={(e) => { if (e.target === e.currentTarget) handleCloseBulkImportModal(); }}
+          style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            width: '100vw', height: '100vh',
+            backgroundColor: 'rgba(15, 23, 42, 0.78)', backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            zIndex: 100010,
+            display: 'flex', justifyContent: 'center', alignItems: 'center',
+            padding: isBulkModalMaximized ? '6px' : '16px', boxSizing: 'border-box'
+          }}
+        >
           <div className="card" style={{
             backgroundColor: '#ffffff',
-            borderRadius: '16px',
-            width: '100%',
-            maxWidth: '1240px',
-            maxHeight: '92vh',
+            borderRadius: isBulkModalMaximized ? '8px' : '16px',
+            width: isBulkModalMaximized ? '99vw' : '95vw',
+            maxWidth: isBulkModalMaximized ? '100vw' : '1360px',
+            height: isBulkModalMaximized ? '98vh' : 'auto',
+            maxHeight: isBulkModalMaximized ? '99vh' : '92vh',
             display: 'flex',
             flexDirection: 'column',
             boxShadow: '0 25px 65px -10px rgba(0, 0, 0, 0.5)',
             border: '1px solid #cbd5e1',
             overflow: 'hidden',
-            boxSizing: 'border-box'
+            boxSizing: 'border-box',
+            transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
           }} role="dialog" aria-modal="true">
 
             {/* MODAL HEADER */}
             <div style={{
-              padding: '16px 24px',
+              padding: '14px 20px',
               borderBottom: '1px solid #e2e8f0',
               backgroundColor: '#f8fafc',
               display: 'flex',
@@ -12400,30 +12448,50 @@ _Helpline: +91 9316566894_`;
               flexShrink: 0
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '42px', height: '42px', borderRadius: '10px', backgroundColor: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <FileSpreadsheet size={24} />
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <FileSpreadsheet size={22} />
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text-dark)', fontWeight: '700' }}>
+                  <h3 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: '700' }}>
                     Bulk Import Products via Excel
                   </h3>
-                  <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: 'var(--text-medium)' }}>
+                  <p style={{ margin: '2px 0 0', fontSize: '0.8rem', color: 'var(--text-medium)' }}>
                     Upload spreadsheet, inspect live table preview, verify duplication checks, and import all products in 1 click.
                   </p>
                 </div>
               </div>
-              <button 
-                onClick={() => {
-                  setIsBulkImportOpen(false);
-                  setBulkParsedRows([]);
-                  setUploadedFileName('');
-                  setBulkPreviewSearch('');
-                }} 
-                style={{ color: 'var(--text-medium)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}
-                aria-label="Close"
-              >
-                <XCircle size={24} />
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsBulkModalMaximized(prev => !prev)}
+                  style={{
+                    color: '#475569',
+                    backgroundColor: '#f1f5f9',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    padding: '6px 10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '0.8rem',
+                    fontWeight: '600'
+                  }}
+                  title={isBulkModalMaximized ? 'Exit Fullscreen' : 'Maximize Fullscreen'}
+                >
+                  {isBulkModalMaximized ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+                  <span>{isBulkModalMaximized ? 'Restore' : 'Maximize'}</span>
+                </button>
+                <button 
+                  type="button"
+                  onClick={handleCloseBulkImportModal} 
+                  style={{ color: 'var(--text-medium)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}
+                  aria-label="Close"
+                  title="Close and clean all data"
+                >
+                  <XCircle size={26} />
+                </button>
+              </div>
             </div>
 
             {/* MODAL BODY (SCROLLABLE & RESPONSIVE) */}
@@ -12565,63 +12633,69 @@ _Helpline: +91 9316566894_`;
                                   (r.sku && r.sku.toLowerCase().includes(searchLower)) ||
                                   (r.company && r.company.toLowerCase().includes(searchLower)) ||
                                   (r.composition && r.composition.toLowerCase().includes(searchLower)) ||
-                                  (r.packing && r.packing.toLowerCase().includes(searchLower));
+                                  (r.packing && r.packing.toLowerCase().includes(searchLower)) ||
+                                  (r.batchNumber && r.batchNumber.toLowerCase().includes(searchLower));
                     if (!match) return false;
                   }
                   return true;
                 });
 
+                const totalPages = Math.max(1, Math.ceil(displayedRows.length / bulkPreviewPageSize));
+                const safeCurrentPage = Math.min(Math.max(1, bulkPreviewPage), totalPages);
+                const startIndex = (safeCurrentPage - 1) * bulkPreviewPageSize;
+                const pageRows = displayedRows.slice(startIndex, startIndex + bulkPreviewPageSize);
+
                 return (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1, minHeight: 0 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1, minHeight: 0 }}>
                     
                     {/* STATS SUMMARY BAR (RESPONSIVE CARDS) */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '10px' }}>
-                      <div style={{ padding: '12px 14px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--text-medium)', fontWeight: '700', textTransform: 'uppercase' }}>Total In File</div>
-                        <div style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--text-dark)' }}>{totalCount.toLocaleString()}</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px' }}>
+                      <div style={{ padding: '10px 14px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-medium)', fontWeight: '700', textTransform: 'uppercase' }}>Total In File</div>
+                        <div style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--text-dark)' }}>{totalCount.toLocaleString()}</div>
                       </div>
 
-                      <div style={{ padding: '12px 14px', backgroundColor: '#ecfdf5', borderRadius: '10px', border: '1px solid #a7f3d0' }}>
-                        <div style={{ fontSize: '0.72rem', color: '#047857', fontWeight: '700', textTransform: 'uppercase' }}>Ready to Import</div>
-                        <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#059669' }}>{validCount.toLocaleString()}</div>
+                      <div style={{ padding: '10px 14px', backgroundColor: '#ecfdf5', borderRadius: '10px', border: '1px solid #a7f3d0' }}>
+                        <div style={{ fontSize: '0.7rem', color: '#047857', fontWeight: '700', textTransform: 'uppercase' }}>Ready to Import</div>
+                        <div style={{ fontSize: '1.2rem', fontWeight: '800', color: '#059669' }}>{validCount.toLocaleString()}</div>
                       </div>
 
-                      <div style={{ padding: '12px 14px', backgroundColor: duplicateCount > 0 ? '#fffbeb' : '#f8fafc', borderRadius: '10px', border: `1px solid ${duplicateCount > 0 ? '#fde68a' : '#e2e8f0'}` }}>
-                        <div style={{ fontSize: '0.72rem', color: duplicateCount > 0 ? '#b45309' : 'var(--text-medium)', fontWeight: '700', textTransform: 'uppercase' }}>Duplicates Flagged</div>
-                        <div style={{ fontSize: '1.25rem', fontWeight: '800', color: duplicateCount > 0 ? '#d97706' : 'var(--text-dark)' }}>{duplicateCount.toLocaleString()}</div>
+                      <div style={{ padding: '10px 14px', backgroundColor: duplicateCount > 0 ? '#fffbeb' : '#f8fafc', borderRadius: '10px', border: `1px solid ${duplicateCount > 0 ? '#fde68a' : '#e2e8f0'}` }}>
+                        <div style={{ fontSize: '0.7rem', color: duplicateCount > 0 ? '#b45309' : 'var(--text-medium)', fontWeight: '700', textTransform: 'uppercase' }}>Duplicates Flagged</div>
+                        <div style={{ fontSize: '1.2rem', fontWeight: '800', color: duplicateCount > 0 ? '#d97706' : 'var(--text-dark)' }}>{duplicateCount.toLocaleString()}</div>
                       </div>
 
-                      <div style={{ padding: '12px 14px', backgroundColor: '#eff6ff', borderRadius: '10px', border: '1px solid #bfdbfe' }}>
-                        <div style={{ fontSize: '0.72rem', color: '#1d4ed8', fontWeight: '700', textTransform: 'uppercase' }}>Selected for Import</div>
-                        <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#2563eb' }}>{selectedCount.toLocaleString()}</div>
+                      <div style={{ padding: '10px 14px', backgroundColor: '#eff6ff', borderRadius: '10px', border: '1px solid #bfdbfe' }}>
+                        <div style={{ fontSize: '0.7rem', color: '#1d4ed8', fontWeight: '700', textTransform: 'uppercase' }}>Selected for Import</div>
+                        <div style={{ fontSize: '1.2rem', fontWeight: '800', color: '#2563eb' }}>{selectedCount.toLocaleString()}</div>
                       </div>
                     </div>
 
                     {/* SMART CONTROLS BAR: SEARCH, FILTER PILLS & SELECTION TOGGLES */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '12px 14px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '10px 14px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
                       
                       {/* Row 1: Search & Filter Tabs */}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                           <button 
                             type="button" 
-                            onClick={() => setBulkPreviewFilter('all')}
-                            style={{ padding: '6px 12px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: '700', border: 'none', cursor: 'pointer', backgroundColor: bulkPreviewFilter === 'all' ? '#2563eb' : '#e2e8f0', color: bulkPreviewFilter === 'all' ? '#fff' : '#475569' }}
+                            onClick={() => { setBulkPreviewFilter('all'); setBulkPreviewPage(1); }}
+                            style={{ padding: '5px 12px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '700', border: 'none', cursor: 'pointer', backgroundColor: bulkPreviewFilter === 'all' ? '#2563eb' : '#e2e8f0', color: bulkPreviewFilter === 'all' ? '#fff' : '#475569' }}
                           >
-                            All Rows ({totalCount.toLocaleString()})
+                            All ({totalCount.toLocaleString()})
                           </button>
                           <button 
                             type="button" 
-                            onClick={() => setBulkPreviewFilter('valid')}
-                            style={{ padding: '6px 12px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: '700', border: 'none', cursor: 'pointer', backgroundColor: bulkPreviewFilter === 'valid' ? '#059669' : '#e2e8f0', color: bulkPreviewFilter === 'valid' ? '#fff' : '#475569' }}
+                            onClick={() => { setBulkPreviewFilter('valid'); setBulkPreviewPage(1); }}
+                            style={{ padding: '5px 12px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '700', border: 'none', cursor: 'pointer', backgroundColor: bulkPreviewFilter === 'valid' ? '#059669' : '#e2e8f0', color: bulkPreviewFilter === 'valid' ? '#fff' : '#475569' }}
                           >
                             Ready ({validCount.toLocaleString()})
                           </button>
                           {duplicateCount > 0 && (
                             <button 
                               type="button" 
-                              onClick={() => setBulkPreviewFilter('duplicates')}
-                              style={{ padding: '6px 12px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: '700', border: 'none', cursor: 'pointer', backgroundColor: bulkPreviewFilter === 'duplicates' ? '#d97706' : '#e2e8f0', color: bulkPreviewFilter === 'duplicates' ? '#fff' : '#475569' }}
+                              onClick={() => { setBulkPreviewFilter('duplicates'); setBulkPreviewPage(1); }}
+                              style={{ padding: '5px 12px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '700', border: 'none', cursor: 'pointer', backgroundColor: bulkPreviewFilter === 'duplicates' ? '#d97706' : '#e2e8f0', color: bulkPreviewFilter === 'duplicates' ? '#fff' : '#475569' }}
                             >
                               Duplicates ({duplicateCount.toLocaleString()})
                             </button>
@@ -12629,19 +12703,22 @@ _Helpline: +91 9316566894_`;
                         </div>
 
                         {/* Search Input */}
-                        <div style={{ position: 'relative', minWidth: '240px', flex: '1 1 240px', maxWidth: '380px' }}>
+                        <div style={{ position: 'relative', minWidth: '220px', flex: '1 1 220px', maxWidth: '380px' }}>
                           <Search size={15} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                           <input 
                             type="text"
                             value={bulkPreviewSearch}
-                            onChange={(e) => setBulkPreviewSearch(e.target.value)}
-                            placeholder="Search in preview rows..."
-                            style={{ width: '100%', padding: '6px 10px 6px 32px', fontSize: '0.84rem', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#fff', boxSizing: 'border-box' }}
+                            onChange={(e) => {
+                              setBulkPreviewSearch(e.target.value);
+                              setBulkPreviewPage(1);
+                            }}
+                            placeholder="Search name, SKU, composition, batch..."
+                            style={{ width: '100%', padding: '6px 10px 6px 32px', fontSize: '0.82rem', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#fff', boxSizing: 'border-box' }}
                           />
                           {bulkPreviewSearch && (
                             <button 
                               type="button" 
-                              onClick={() => setBulkPreviewSearch('')}
+                              onClick={() => { setBulkPreviewSearch(''); setBulkPreviewPage(1); }}
                               style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: '0.8rem' }}
                             >
                               ✕
@@ -12652,34 +12729,34 @@ _Helpline: +91 9316566894_`;
 
                       {/* Row 2: Selection Helpers & Duplicate Checkbox */}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', paddingTop: '4px', borderTop: '1px solid #edf2f7' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                           <button
                             type="button"
                             onClick={() => handleToggleSelectAll(true)}
-                            style={{ padding: '4px 10px', fontSize: '0.78rem', fontWeight: '700', borderRadius: '5px', border: '1px solid #cbd5e1', backgroundColor: '#fff', color: '#0f172a', cursor: 'pointer' }}
+                            style={{ padding: '4px 10px', fontSize: '0.76rem', fontWeight: '700', borderRadius: '5px', border: '1px solid #cbd5e1', backgroundColor: '#fff', color: '#0f172a', cursor: 'pointer' }}
                           >
                             ✓ Select All Ready
                           </button>
                           <button
                             type="button"
                             onClick={() => handleToggleSelectAll(false)}
-                            style={{ padding: '4px 10px', fontSize: '0.78rem', fontWeight: '700', borderRadius: '5px', border: '1px solid #cbd5e1', backgroundColor: '#fff', color: '#64748b', cursor: 'pointer' }}
+                            style={{ padding: '4px 10px', fontSize: '0.76rem', fontWeight: '700', borderRadius: '5px', border: '1px solid #cbd5e1', backgroundColor: '#fff', color: '#64748b', cursor: 'pointer' }}
                           >
                             ✕ Deselect All
                           </button>
-                          <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                            Showing {displayedRows.length.toLocaleString()} matching rows
+                          <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                            Found {displayedRows.length.toLocaleString()} matching rows
                           </span>
                         </div>
 
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.84rem', fontWeight: '700', color: '#1e293b' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.82rem', fontWeight: '700', color: '#1e293b' }}>
                           <input 
                             type="checkbox" 
                             checked={bulkSkipDuplicates}
                             onChange={(e) => setBulkSkipDuplicates(e.target.checked)}
-                            style={{ accentColor: '#2563eb', width: '16px', height: '16px' }}
+                            style={{ accentColor: '#2563eb', width: '15px', height: '15px' }}
                           />
-                          <span>Automatically skip duplicates (prevent duplicates from being added)</span>
+                          <span>Auto-skip duplicates (Name + Packing)</span>
                         </label>
                       </div>
 
@@ -12687,7 +12764,7 @@ _Helpline: +91 9316566894_`;
 
                     {/* HARD RESPONSIVE DATA TABLE WITH STICKY HEADERS & STICKY FIRST COLUMNS */}
                     <div style={{
-                      maxHeight: '400px',
+                      maxHeight: isBulkModalMaximized ? 'calc(98vh - 410px)' : '380px',
                       overflowX: 'auto',
                       overflowY: 'auto',
                       border: '1px solid #cbd5e1',
@@ -12696,10 +12773,10 @@ _Helpline: +91 9316566894_`;
                       boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.05)',
                       position: 'relative'
                     }}>
-                      <table style={{ width: '100%', minWidth: '1050px', borderCollapse: 'separate', borderSpacing: 0, fontSize: '0.82rem', textAlign: 'left' }}>
+                      <table style={{ width: '100%', minWidth: '1150px', borderCollapse: 'separate', borderSpacing: 0, fontSize: '0.8rem', textAlign: 'left' }}>
                         <thead style={{ position: 'sticky', top: 0, zIndex: 10 }}>
                           <tr style={{ backgroundColor: '#f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
-                            <th style={{ position: 'sticky', left: 0, zIndex: 11, backgroundColor: '#f1f5f9', padding: '10px 12px', width: '38px', textAlign: 'center', borderBottom: '1px solid #cbd5e1' }}>
+                            <th style={{ position: 'sticky', left: 0, zIndex: 11, backgroundColor: '#f1f5f9', padding: '9px 10px', width: '38px', textAlign: 'center', borderBottom: '1px solid #cbd5e1' }}>
                               <input 
                                 type="checkbox"
                                 checked={selectedCount > 0 && selectedCount === validCount}
@@ -12708,30 +12785,34 @@ _Helpline: +91 9316566894_`;
                                 title="Select / Deselect all valid rows"
                               />
                             </th>
-                            <th style={{ position: 'sticky', left: '38px', zIndex: 11, backgroundColor: '#f1f5f9', padding: '10px 12px', width: '65px', borderBottom: '1px solid #cbd5e1' }}>
+                            <th style={{ position: 'sticky', left: '38px', zIndex: 11, backgroundColor: '#f1f5f9', padding: '9px 10px', width: '55px', borderBottom: '1px solid #cbd5e1' }}>
                               Row
                             </th>
-                            <th style={{ padding: '10px 12px', minWidth: '140px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Status</th>
-                            <th style={{ padding: '10px 12px', minWidth: '190px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Product Name / Brand</th>
-                            <th style={{ padding: '10px 12px', minWidth: '110px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>SKU / ID</th>
-                            <th style={{ padding: '10px 12px', minWidth: '140px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Company</th>
-                            <th style={{ padding: '10px 12px', minWidth: '170px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Contain</th>
-                            <th style={{ padding: '10px 12px', minWidth: '130px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Packing & Form</th>
-                            <th style={{ padding: '10px 12px', minWidth: '95px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Wholesale</th>
-                            <th style={{ padding: '10px 12px', minWidth: '85px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>MRP</th>
-                            <th style={{ padding: '10px 12px', minWidth: '70px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Stock</th>
-                            <th style={{ padding: '10px 12px', minWidth: '80px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>GST</th>
+                            <th style={{ padding: '9px 10px', width: '90px', minWidth: '90px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1', textAlign: 'center' }}>
+                              Actions
+                            </th>
+                            <th style={{ padding: '9px 10px', minWidth: '110px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Status</th>
+                            <th style={{ padding: '9px 10px', minWidth: '180px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Product Name / Brand</th>
+                            <th style={{ padding: '9px 10px', minWidth: '100px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>SKU / ID</th>
+                            <th style={{ padding: '9px 10px', minWidth: '130px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Company</th>
+                            <th style={{ padding: '9px 10px', minWidth: '160px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Contain</th>
+                            <th style={{ padding: '9px 10px', minWidth: '120px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Packing & Form</th>
+                            <th style={{ padding: '9px 10px', minWidth: '90px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Wholesale</th>
+                            <th style={{ padding: '9px 10px', minWidth: '80px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>MRP</th>
+                            <th style={{ padding: '9px 10px', minWidth: '65px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Stock</th>
+                            <th style={{ padding: '9px 10px', minWidth: '110px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>Batch & Expiry</th>
+                            <th style={{ padding: '9px 10px', minWidth: '60px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>GST</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {displayedRows.length === 0 ? (
+                          {pageRows.length === 0 ? (
                             <tr>
-                              <td colSpan="12" style={{ textAlign: 'center', padding: '36px', color: 'var(--text-medium)' }}>
+                              <td colSpan="14" style={{ textAlign: 'center', padding: '36px', color: 'var(--text-medium)' }}>
                                 No products found matching your search and filter criteria.
                               </td>
                             </tr>
                           ) : (
-                            displayedRows.map((r) => {
+                            pageRows.map((r) => {
                               const isRowDuplicate = r.isDuplicate;
                               const isRowError = r.hasError;
                               const rowBg = isRowError ? '#fef2f2' : isRowDuplicate ? '#fffbeb' : (r.selected ? '#ffffff' : '#f8fafc');
@@ -12745,7 +12826,7 @@ _Helpline: +91 9316566894_`;
                                     transition: 'background-color 0.15s ease'
                                   }}
                                 >
-                                  <td style={{ position: 'sticky', left: 0, zIndex: 2, backgroundColor: rowBg, padding: '8px 12px', textAlign: 'center', borderRight: '1px solid #f1f5f9' }}>
+                                  <td style={{ position: 'sticky', left: 0, zIndex: 2, backgroundColor: rowBg, padding: '7px 10px', textAlign: 'center', borderRight: '1px solid #f1f5f9' }}>
                                     <input 
                                       type="checkbox"
                                       checked={r.selected && (!bulkSkipDuplicates || !isRowDuplicate) && !isRowError}
@@ -12754,10 +12835,51 @@ _Helpline: +91 9316566894_`;
                                       style={{ accentColor: '#2563eb', cursor: (isRowError || (bulkSkipDuplicates && isRowDuplicate)) ? 'not-allowed' : 'pointer' }}
                                     />
                                   </td>
-                                  <td style={{ position: 'sticky', left: '38px', zIndex: 2, backgroundColor: rowBg, padding: '8px 12px', color: '#64748b', fontWeight: '700', borderRight: '1px solid #f1f5f9' }}>
+                                  <td style={{ position: 'sticky', left: '38px', zIndex: 2, backgroundColor: rowBg, padding: '7px 10px', color: '#64748b', fontWeight: '700', borderRight: '1px solid #f1f5f9' }}>
                                     #{r._rowId}
                                   </td>
-                                  <td style={{ padding: '8px 12px' }}>
+                                  <td style={{ padding: '7px 10px', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                      <button
+                                        type="button"
+                                        onClick={() => setEditingBulkRow({ ...r })}
+                                        style={{
+                                          padding: '4px 7px',
+                                          borderRadius: '5px',
+                                          border: '1px solid #bfdbfe',
+                                          backgroundColor: '#eff6ff',
+                                          color: '#2563eb',
+                                          cursor: 'pointer',
+                                          display: 'inline-flex',
+                                          alignItems: 'center',
+                                          gap: '3px',
+                                          fontSize: '0.74rem',
+                                          fontWeight: '700'
+                                        }}
+                                        title="Inspect & Edit Row"
+                                      >
+                                        <Edit2 size={12} /> Edit
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleDeleteBulkRow(r._rowId)}
+                                        style={{
+                                          padding: '4px 6px',
+                                          borderRadius: '5px',
+                                          border: '1px solid #fecaca',
+                                          backgroundColor: '#fee2e2',
+                                          color: '#dc2626',
+                                          cursor: 'pointer',
+                                          display: 'inline-flex',
+                                          alignItems: 'center'
+                                        }}
+                                        title="Delete Row"
+                                      >
+                                        <Trash2 size={12} />
+                                      </button>
+                                    </div>
+                                  </td>
+                                  <td style={{ padding: '7px 10px' }}>
                                     {isRowError ? (
                                       <span style={{ backgroundColor: '#fee2e2', color: '#b91c1c', fontSize: '0.72rem', padding: '2px 7px', borderRadius: '4px', fontWeight: '700', whiteSpace: 'nowrap' }}>
                                         ✕ {r.errorMessage}
@@ -12772,31 +12894,38 @@ _Helpline: +91 9316566894_`;
                                       </span>
                                     )}
                                   </td>
-                                  <td style={{ padding: '8px 12px', fontWeight: '700', color: 'var(--text-dark)' }}>
+                                  <td style={{ padding: '7px 10px', fontWeight: '700', color: 'var(--text-dark)' }}>
                                     {r.name || <span style={{ color: '#ef4444' }}>[Missing Name]</span>}
                                   </td>
-                                  <td style={{ padding: '8px 12px', fontFamily: 'monospace', color: '#334155' }}>
+                                  <td style={{ padding: '7px 10px', fontFamily: 'monospace', color: '#334155' }}>
                                     {r.sku}
                                   </td>
-                                  <td style={{ padding: '8px 12px', color: '#1d4ed8', fontWeight: '600' }}>
+                                  <td style={{ padding: '7px 10px', color: '#1d4ed8', fontWeight: '600' }}>
                                     {r.company}
                                   </td>
-                                  <td style={{ padding: '8px 12px', color: 'var(--text-medium)' }}>
+                                  <td style={{ padding: '7px 10px', color: 'var(--text-medium)' }}>
                                     {r.composition || '—'}
                                   </td>
-                                  <td style={{ padding: '8px 12px', color: 'var(--text-medium)' }}>
+                                  <td style={{ padding: '7px 10px', color: 'var(--text-medium)' }}>
                                     <span style={{ fontWeight: '600', color: '#0f172a' }}>{r.packing}</span> {r.form && `• ${r.form}`}
                                   </td>
-                                  <td style={{ padding: '8px 12px', fontWeight: '700', color: '#16a34a' }}>
+                                  <td style={{ padding: '7px 10px', fontWeight: '700', color: '#16a34a' }}>
                                     ₹{r.price != null && !isNaN(r.price) ? Number(r.price).toFixed(2) : (r.price || '0.00')}
                                   </td>
-                                  <td style={{ padding: '8px 12px', color: 'var(--text-dark)' }}>
+                                  <td style={{ padding: '7px 10px', color: 'var(--text-dark)' }}>
                                     ₹{r.mrp != null && !isNaN(r.mrp) ? Number(r.mrp).toFixed(2) : (r.mrp || '0.00')}
                                   </td>
-                                  <td style={{ padding: '8px 12px', color: 'var(--text-dark)' }}>
+                                  <td style={{ padding: '7px 10px', color: 'var(--text-dark)' }}>
                                     {r.stockQuantity}
                                   </td>
-                                  <td style={{ padding: '8px 12px', color: 'var(--text-medium)' }}>
+                                  <td style={{ padding: '7px 10px', color: 'var(--text-medium)', fontSize: '0.76rem' }}>
+                                    {r.batchNumber ? (
+                                      <span><strong>B:</strong> {r.batchNumber} {r.expiryDate ? `(${r.expiryDate})` : ''}</span>
+                                    ) : (
+                                      r.expiryDate || '—'
+                                    )}
+                                  </td>
+                                  <td style={{ padding: '7px 10px', color: 'var(--text-medium)' }}>
                                     {r.salesGst}%
                                   </td>
                                 </tr>
@@ -12805,6 +12934,134 @@ _Helpline: +91 9316566894_`;
                           )}
                         </tbody>
                       </table>
+                    </div>
+
+                    {/* HARD RESPONSIVE PAGINATION CONTROLS (ZERO LAG & INSTANT NAVIGATION) */}
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                      gap: '10px',
+                      padding: '8px 12px',
+                      backgroundColor: '#f8fafc',
+                      borderRadius: '8px',
+                      border: '1px solid #e2e8f0',
+                      fontSize: '0.8rem'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                        <span style={{ color: '#475569', fontWeight: '600' }}>
+                          Showing <strong>{displayedRows.length > 0 ? (startIndex + 1).toLocaleString() : 0}</strong> - <strong>{Math.min(startIndex + bulkPreviewPageSize, displayedRows.length).toLocaleString()}</strong> of <strong>{displayedRows.length.toLocaleString()}</strong> rows
+                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ color: '#64748b' }}>Per page:</span>
+                          <select
+                            value={bulkPreviewPageSize}
+                            onChange={(e) => {
+                              setBulkPreviewPageSize(Number(e.target.value));
+                              setBulkPreviewPage(1);
+                            }}
+                            style={{
+                              padding: '3px 8px',
+                              borderRadius: '5px',
+                              border: '1px solid #cbd5e1',
+                              backgroundColor: '#fff',
+                              fontSize: '0.8rem',
+                              fontWeight: '600',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            <option value={25}>25</option>
+                            <option value={50}>50</option>
+                            <option value={100}>100</option>
+                            <option value={200}>200</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <button
+                          type="button"
+                          onClick={() => setBulkPreviewPage(1)}
+                          disabled={safeCurrentPage <= 1}
+                          style={{
+                            padding: '4px 7px',
+                            borderRadius: '5px',
+                            border: '1px solid #cbd5e1',
+                            backgroundColor: safeCurrentPage <= 1 ? '#f1f5f9' : '#fff',
+                            color: safeCurrentPage <= 1 ? '#94a3b8' : '#0f172a',
+                            cursor: safeCurrentPage <= 1 ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            alignItems: 'center'
+                          }}
+                          title="First Page"
+                        >
+                          <ChevronsLeft size={15} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setBulkPreviewPage(p => Math.max(1, p - 1))}
+                          disabled={safeCurrentPage <= 1}
+                          style={{
+                            padding: '4px 9px',
+                            borderRadius: '5px',
+                            border: '1px solid #cbd5e1',
+                            backgroundColor: safeCurrentPage <= 1 ? '#f1f5f9' : '#fff',
+                            color: safeCurrentPage <= 1 ? '#94a3b8' : '#0f172a',
+                            cursor: safeCurrentPage <= 1 ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '3px',
+                            fontWeight: '600'
+                          }}
+                          title="Previous Page"
+                        >
+                          <ChevronLeft size={15} /> Prev
+                        </button>
+
+                        <span style={{ padding: '0 8px', fontWeight: '700', color: '#1e293b' }}>
+                          Page {safeCurrentPage} of {totalPages}
+                        </span>
+
+                        <button
+                          type="button"
+                          onClick={() => setBulkPreviewPage(p => Math.min(totalPages, p + 1))}
+                          disabled={safeCurrentPage >= totalPages}
+                          style={{
+                            padding: '4px 9px',
+                            borderRadius: '5px',
+                            border: '1px solid #cbd5e1',
+                            backgroundColor: safeCurrentPage >= totalPages ? '#f1f5f9' : '#fff',
+                            color: safeCurrentPage >= totalPages ? '#94a3b8' : '#0f172a',
+                            cursor: safeCurrentPage >= totalPages ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '3px',
+                            fontWeight: '600'
+                          }}
+                          title="Next Page"
+                        >
+                          Next <ChevronRight size={15} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setBulkPreviewPage(totalPages)}
+                          disabled={safeCurrentPage >= totalPages}
+                          style={{
+                            padding: '4px 7px',
+                            borderRadius: '5px',
+                            border: '1px solid #cbd5e1',
+                            backgroundColor: safeCurrentPage >= totalPages ? '#f1f5f9' : '#fff',
+                            color: safeCurrentPage >= totalPages ? '#94a3b8' : '#0f172a',
+                            cursor: safeCurrentPage >= totalPages ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            alignItems: 'center'
+                          }}
+                          title="Last Page"
+                        >
+                          <ChevronsRight size={15} />
+                        </button>
+                      </div>
                     </div>
 
                   </div>
@@ -12901,12 +13158,7 @@ _Helpline: +91 9316566894_`;
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button
                   type="button"
-                  onClick={() => {
-                    setIsBulkImportOpen(false);
-                    setBulkParsedRows([]);
-                    setUploadedFileName('');
-                    setBulkPreviewSearch('');
-                  }}
+                  onClick={handleCloseBulkImportModal}
                   className="btn btn-outline btn-sm"
                   style={{ padding: '8px 16px', fontWeight: '600' }}
                 >
@@ -12934,6 +13186,243 @@ _Helpline: +91 9316566894_`;
               </div>
             </div>
 
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ==========================================
+          MODAL: EDIT INDIVIDUAL BULK IMPORT ROW
+          ========================================== */}
+      {editingBulkRow && typeof document !== 'undefined' && createPortal(
+        <div 
+          onClick={(e) => { if (e.target === e.currentTarget) setEditingBulkRow(null); }}
+          style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            width: '100vw', height: '100vh',
+            backgroundColor: 'rgba(15, 23, 42, 0.8)', backdropFilter: 'blur(6px)',
+            zIndex: 100030, display: 'flex', justifyContent: 'center', alignItems: 'center',
+            padding: '16px', boxSizing: 'border-box'
+          }}
+        >
+          <div className="card" style={{
+            width: '100%', maxWidth: '840px', maxHeight: '92vh', overflowY: 'auto',
+            borderRadius: '16px', padding: '24px', backgroundColor: '#ffffff',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4)',
+            display: 'flex', flexDirection: 'column', gap: '18px', boxSizing: 'border-box'
+          }}>
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', paddingBottom: '14px' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '800', color: '#0f172a' }}>
+                  Edit Product Row #{editingBulkRow._rowId}
+                </h3>
+                <p style={{ margin: '4px 0 0', fontSize: '0.82rem', color: '#64748b' }}>
+                  Modify product details, fill missing formulations, adjust wholesale prices or add batch details before import.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingBulkRow(null)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}
+              >
+                <XCircle size={24} />
+              </button>
+            </div>
+
+            {/* Fields Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>
+                  Product Name / Brand *
+                </label>
+                <input
+                  type="text"
+                  value={editingBulkRow.name || ''}
+                  onChange={(e) => setEditingBulkRow({ ...editingBulkRow, name: e.target.value })}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>
+                  SKU / ID *
+                </label>
+                <input
+                  type="text"
+                  value={editingBulkRow.sku || ''}
+                  onChange={(e) => setEditingBulkRow({ ...editingBulkRow, sku: e.target.value })}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>
+                  Company / Manufacturer *
+                </label>
+                <input
+                  type="text"
+                  value={editingBulkRow.company || ''}
+                  onChange={(e) => setEditingBulkRow({ ...editingBulkRow, company: e.target.value })}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>
+                  Category *
+                </label>
+                <input
+                  type="text"
+                  value={editingBulkRow.category || ''}
+                  onChange={(e) => setEditingBulkRow({ ...editingBulkRow, category: e.target.value })}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>
+                  Active Composition (Contain)
+                </label>
+                <input
+                  type="text"
+                  value={editingBulkRow.composition || ''}
+                  onChange={(e) => setEditingBulkRow({ ...editingBulkRow, composition: e.target.value })}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>
+                  Formulation Form (Tablet, Syrup, etc.)
+                </label>
+                <input
+                  type="text"
+                  value={editingBulkRow.form || ''}
+                  onChange={(e) => setEditingBulkRow({ ...editingBulkRow, form: e.target.value })}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>
+                  Packing Specifications *
+                </label>
+                <input
+                  type="text"
+                  value={editingBulkRow.packing || ''}
+                  onChange={(e) => setEditingBulkRow({ ...editingBulkRow, packing: e.target.value })}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>
+                  Wholesale Price (₹) *
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={editingBulkRow.price != null ? editingBulkRow.price : ''}
+                  onChange={(e) => setEditingBulkRow({ ...editingBulkRow, price: parseFloat(e.target.value) || 0 })}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem', fontWeight: '700', color: '#16a34a' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>
+                  MRP (₹) *
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={editingBulkRow.mrp != null ? editingBulkRow.mrp : ''}
+                  onChange={(e) => setEditingBulkRow({ ...editingBulkRow, mrp: parseFloat(e.target.value) || 0 })}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem', fontWeight: '700' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>
+                  Stock Quantity
+                </label>
+                <input
+                  type="number"
+                  value={editingBulkRow.stockQuantity != null ? editingBulkRow.stockQuantity : ''}
+                  onChange={(e) => setEditingBulkRow({ ...editingBulkRow, stockQuantity: parseInt(e.target.value, 10) || 0 })}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>
+                  Batch Number
+                </label>
+                <input
+                  type="text"
+                  value={editingBulkRow.batchNumber || ''}
+                  onChange={(e) => setEditingBulkRow({ ...editingBulkRow, batchNumber: e.target.value })}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>
+                  Expiry Date
+                </label>
+                <input
+                  type="text"
+                  placeholder="YYYY-MM"
+                  value={editingBulkRow.expiryDate || ''}
+                  onChange={(e) => setEditingBulkRow({ ...editingBulkRow, expiryDate: e.target.value })}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>
+                  GST Rate (%)
+                </label>
+                <input
+                  type="number"
+                  value={editingBulkRow.salesGst != null ? editingBulkRow.salesGst : 12}
+                  onChange={(e) => setEditingBulkRow({ ...editingBulkRow, salesGst: parseFloat(e.target.value) || 0, purchaseGst: parseFloat(e.target.value) || 0 })}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: '700', color: '#334155', marginBottom: '4px' }}>
+                  Rack / Storage Location
+                </label>
+                <input
+                  type="text"
+                  value={editingBulkRow.rackId || ''}
+                  onChange={(e) => setEditingBulkRow({ ...editingBulkRow, rackId: e.target.value })}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}
+                />
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', borderTop: '1px solid #e2e8f0', paddingTop: '14px' }}>
+              <button
+                type="button"
+                onClick={() => setEditingBulkRow(null)}
+                className="btn btn-outline btn-sm"
+                style={{ padding: '8px 16px', fontWeight: '600' }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSaveEditedBulkRow(editingBulkRow)}
+                className="btn btn-primary btn-sm"
+                style={{ padding: '8px 20px', fontWeight: '700' }}
+              >
+                ✓ Save & Update Row
+              </button>
+            </div>
           </div>
         </div>,
         document.body

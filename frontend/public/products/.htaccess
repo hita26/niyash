@@ -2,13 +2,13 @@
 # Products Directory Subfolder .htaccess
 # Handles direct folder requests to /products/ or /products
 # ----------------------------------------------------------------------
-DirectoryIndex index.html
+DirectoryIndex /index.html
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
 
-  # 1. If a specific file is requested (e.g. /products/dolo-650.jpg), serve it directly
+  # 1. If a specific static file is requested (e.g. /products/dolo-650.jpg), serve it directly
   RewriteCond %{REQUEST_FILENAME} -f
   RewriteRule ^ - [L]
 

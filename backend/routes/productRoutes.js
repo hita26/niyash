@@ -522,10 +522,18 @@ router.get('/', async (req, res) => {
       findQuery = findQuery.select('name brand company category subCategory sku price mrp stockQuantity inStock packing composition form rackId batchNumber hsnCode purchaseGst salesGst expiryDate scheme qualitySpecs unitsPerBox minReorderQty imageUrl images featured isOurProduct isActive');
     }
 
-    const [total, products] = await Promise.all([
+    const [total, rawProducts] = await Promise.all([
       Product.countDocuments(query),
       findQuery.lean()
     ]);
+
+    const products = rawProducts.map(p => ({
+      ...p,
+      category: (!p.category || ['null', 'undefined', 'none', '#n/a', 'nil', ''].includes(String(p.category).trim().toLowerCase())) ? 'Pharma Products' : p.category,
+      company: (!p.company || ['null', 'undefined', 'none', '#n/a', 'nil', ''].includes(String(p.company).trim().toLowerCase())) ? (p.brand || 'Daxia Healthcare') : p.company,
+      form: (!p.form || ['null', 'undefined', 'none', '#n/a', 'nil', ''].includes(String(p.form).trim().toLowerCase())) ? 'Tablet' : p.form,
+      packing: (!p.packing || ['null', 'undefined', 'none', '#n/a', 'nil', ''].includes(String(p.packing).trim().toLowerCase())) ? '10 x 10 Tablets' : p.packing,
+    }));
 
     res.json({
       success: true,

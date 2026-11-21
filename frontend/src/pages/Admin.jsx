@@ -933,7 +933,12 @@ function Admin() {
       const cached = localStorage.getItem('cached_admin_products');
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        // Clean legacy partial snapshot if stuck below full catalog size
+        if (Array.isArray(parsed) && parsed.length > 0 && parsed.length < 5000) {
+          localStorage.removeItem('cached_admin_products');
+        } else if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
       }
     } catch (_) {}
     return FALLBACK_PRODUCTS;
@@ -1660,7 +1665,8 @@ function Admin() {
             const data = await res.json();
             if (Array.isArray(data.products)) {
               setProducts(data.products);
-              try { localStorage.setItem('cached_admin_products', JSON.stringify(data.products)); } catch (_) {}
+              // Clean stale cache to avoid browser 5MB QuotaExceededError
+              try { localStorage.removeItem('cached_admin_products'); } catch (_) {}
               if (data.stats) setProductAdminStats(data.stats);
               return;
             }
@@ -4868,7 +4874,13 @@ _Helpline: +91 9316566894_`;
   }, [products]);
 
   const productStats = useMemo(() => {
-    if (productAdminStats) return productAdminStats;
+    if (productAdminStats && productAdminStats.totalProducts) {
+      return {
+        ...productAdminStats,
+        totalProducts: Math.max(productAdminStats.totalProducts, products.length),
+        activeProducts: Math.max(productAdminStats.activeProducts ?? productAdminStats.totalProducts, products.filter(p => p.isActive !== false).length),
+      };
+    }
     const total = products.length;
     const active = products.filter(p => p.isActive !== false).length;
     const outOfStock = products.filter(p => !p.inStock || (p.stockQuantity !== undefined && p.stockQuantity <= 0)).length;

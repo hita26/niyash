@@ -1,5 +1,5 @@
 // Niyansh Pharma Service Worker (PWA Offline & App Shell Engine)
-const CACHE_NAME = 'niyansh-pharma-v2';
+const CACHE_NAME = 'niyansh-pharma-v3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -53,7 +53,25 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Stale-While-Revalidate for static assets and HTML
+  // HTML Page Navigation: Always Network-First so users always get fresh app versions
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, responseToCache));
+          }
+          return networkResponse;
+        })
+        .catch(() => {
+          return caches.match(request) || caches.match('/') || caches.match('/index.html');
+        })
+    );
+    return;
+  }
+
+  // Static Assets (Images, fonts, CSS, JS): Stale-While-Revalidate
   event.respondWith(
     caches.match(request).then((cachedResponse) => {
       const fetchPromise = fetch(request).then((networkResponse) => {
@@ -64,13 +82,7 @@ self.addEventListener('fetch', (event) => {
           });
         }
         return networkResponse;
-      }).catch(() => {
-        // If offline and requesting navigation, return cached root/index.html
-        if (request.mode === 'navigate') {
-          return caches.match('/') || caches.match('/index.html');
-        }
-        return null;
-      });
+      }).catch(() => null);
 
       return cachedResponse || fetchPromise;
     })

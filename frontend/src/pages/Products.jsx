@@ -198,7 +198,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
   }, [showMobileFilters]);
 
   // Fetch products query handler with silent background refresh support
-  const fetchProducts = useCallback(async (isSilent = false) => {
+  const fetchProducts = useCallback(async (isSilent = false, isRetry = false) => {
     if (!isSilent) {
       setLoading(true);
     }
@@ -236,6 +236,10 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
       setTotal(data.total || 0);
     } catch (error) {
       console.error('Error fetching products:', error);
+      // Auto-recover once on cold boot or network lag
+      if (!isSilent && !isRetry) {
+        setTimeout(() => fetchProducts(false, true), 1200);
+      }
     } finally {
       if (!isSilent) {
         setLoading(false);

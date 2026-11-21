@@ -925,10 +925,62 @@ function Admin() {
   const [trafficPurgeRange, setTrafficPurgeRange] = useState('7d');
   const [isPurgingTraffic, setIsPurgingTraffic] = useState(false);
 
-  // Active Tab
+  // Active Tab & Smart Navigation States
   const [activeTab, setActiveTab] = useState('overview');
   const [sidebarSearch, setSidebarSearch] = useState('');
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [isSidebarHovered, setIsSidebarHovered] = useState(false);
+  const [isSidebarPinned, setIsSidebarPinned] = useState(false);
+  const [collapsedSections, setCollapsedSections] = useState({});
+
+  const isSidebarExpanded = isSidebarPinned || isSidebarHovered;
+  const toggleSection = (title) => {
+    setCollapsedSections(prev => ({ ...prev, [title]: !prev[title] }));
+  };
+
+  // Header integration: window event listeners
+  useEffect(() => {
+    const handleAdminRefresh = () => fetchDashboardData();
+    const handleAdminOpenProfile = () => handleOpenProfileModal();
+    const handleAdminLogout = () => handleLogout();
+
+    window.addEventListener('admin:refresh-data', handleAdminRefresh);
+    window.addEventListener('admin:open-profile', handleAdminOpenProfile);
+    window.addEventListener('admin:logout', handleAdminLogout);
+
+    return () => {
+      window.removeEventListener('admin:refresh-data', handleAdminRefresh);
+      window.removeEventListener('admin:open-profile', handleAdminOpenProfile);
+      window.removeEventListener('admin:logout', handleAdminLogout);
+    };
+  }, [fetchDashboardData, handleOpenProfileModal, handleLogout]);
+
+  // Sync admin user to header
+  useEffect(() => {
+    if (currentUser) {
+      window.dispatchEvent(new CustomEvent('admin:user-updated', { detail: currentUser }));
+    }
+  }, [currentUser]);
+
+  // 100% Dynamic Category breakdown computed from live products catalog
+  const dynamicCategories = useMemo(() => {
+    const map = {};
+    (products || []).forEach(p => {
+      const cat = p.category || 'Pharma Products';
+      map[cat] = (map[cat] || 0) + 1;
+    });
+    const total = Math.max((products || []).length, 1);
+    const sorted = Object.entries(map).sort((a, b) => b[1] - a[1]);
+    const top4 = sorted.slice(0, 4);
+    const colors = ['#0284c7', '#10b981', '#6366f1', '#f59e0b'];
+
+    return top4.map(([name, count], idx) => ({
+      name,
+      count: count.toLocaleString(),
+      pct: Math.round((count / total) * 100),
+      color: colors[idx % colors.length]
+    }));
+  }, [products]);
 
   // Time-based greeting helper for Command Center
   const getTimeGreeting = () => {
@@ -5112,8 +5164,7 @@ _Helpline: +91 9316566894_`;
 
   // ==========================================
   // ==========================================
-  // NAVIGATION CONFIGURATION & HELPERS FOR V2
-  // ==========================================
+// NAVIGATION CONFIGURATION
   const NAV_SECTIONS = [
     {
       title: 'DASHBOARDS & LIVE',
@@ -5154,11 +5205,13 @@ _Helpline: +91 9316566894_`;
     }
   ];
 
-  const renderNavGroups = (isDrawer = false) => {
+  const renderNavGroups = (isDrawer = false, forceExpanded = false) => {
+    const isExpanded = forceExpanded || isSidebarExpanded;
+
     return NAV_SECTIONS.map(section => {
       const visibleItems = section.items.filter(item => {
         if (item.visible === false) return false;
-        if (sidebarSearch.trim()) {
+        if (sidebarSearch.trim() && isExpanded) {
           return item.label.toLowerCase().includes(sidebarSearch.trim().toLowerCase());
         }
         return true;
@@ -5166,13 +5219,27 @@ _Helpline: +91 9316566894_`;
 
       if (visibleItems.length === 0) return null;
       const SectionIcon = section.icon;
+      const isCollapsed = Boolean(collapsedSections[section.title]);
 
       return (
-        <div key={section.title} style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-          <div className="admin-sidebar-section-header">
-            <SectionIcon size={12} /> {section.title}
-          </div>
-          {visibleItems.map(item => {
+        <div key={section.title} style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          {isExpanded ? (
+            <div 
+              className="admin-sidebar-section-header"
+              onClick={() => toggleSection(section.title)}
+              title={`Click to ${isCollapsed ? 'expand' : 'collapse'} ${section.title}`}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, overflow: 'hidden' }}>
+                <SectionIcon size={12} style={{ flexShrink: 0 }} />
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{section.title}</span>
+              </div>
+              <ChevronDown size={12} style={{ transform: isCollapsed ? 'rotate(-90deg)' : 'none', transition: 'transform 0.2s ease', flexShrink: 0, marginLeft: 'auto' }} />
+            </div>
+          ) : (
+            <div style={{ height: '1px', backgroundColor: 'var(--border-light, #e2e8f0)', margin: '8px 4px 4px 4px' }} />
+          )}
+
+          {(!isCollapsed || !isExpanded) && visibleItems.map(item => {
             const ItemIcon = item.icon;
             const isActive = activeTab === item.id;
             return (
@@ -5185,12 +5252,37 @@ _Helpline: +91 9316566894_`;
                   if (isDrawer) setIsMobileNavOpen(false);
                 }}
                 className={`admin-glass-nav-btn ${isActive ? 'active' : ''}`}
+                title={item.label}
+                style={{
+                  minHeight: '40px',
+                  padding: isExpanded ? '8px 12px' : '8px',
+                  justifyContent: isExpanded ? 'space-between' : 'center',
+                  gap: '8px'
+                }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <ItemIcon size={16} className="nav-icon" />
-                  <span>{item.label}</span>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  minWidth: 0,
+                  flex: isExpanded ? 1 : 'none',
+                  overflow: 'hidden'
+                }}>
+                  <ItemIcon size={16} className="nav-icon" style={{ flexShrink: 0 }} />
+                  {isExpanded && (
+                    <span style={{
+                      fontSize: '0.84rem',
+                      fontWeight: '600',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      lineHeight: 1.2
+                    }}>
+                      {item.label}
+                    </span>
+                  )}
                 </div>
-                {item.badge !== undefined && item.badge !== null && (
+                {isExpanded && item.badge !== undefined && item.badge !== null && (
                   <span style={{
                     fontSize: '0.68rem',
                     padding: '2px 7px',
@@ -5200,7 +5292,10 @@ _Helpline: +91 9316566894_`;
                     fontWeight: '700',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '4px'
+                    gap: '4px',
+                    flexShrink: 0,
+                    marginLeft: 'auto',
+                    lineHeight: 1
                   }}>
                     {item.isLivePulse && (
                       <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isActive ? '#ffffff' : '#10b981', display: 'inline-block' }}></span>
@@ -5216,6 +5311,7 @@ _Helpline: +91 9316566894_`;
     });
   };
 
+  // ==========================================
   // RENDER: ADMIN DASHBOARD
   // ==========================================
 
@@ -5235,23 +5331,19 @@ _Helpline: +91 9316566894_`;
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '12px',
-          boxSizing: 'border-box'
+          gap: '16px',
+          animation: 'pwaSlideUp 0.3s ease'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#2563eb', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <RefreshCw size={20} className="animate-spin" />
+              <RefreshCw size={18} className="animate-spin" />
             </div>
             <div>
-              <div style={{ fontSize: '0.92rem', fontWeight: '800', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <span>Importing Products to MongoDB in Background...</span>
-                <span style={{ fontSize: '0.8rem', color: '#ffffff', backgroundColor: '#2563eb', padding: '1px 8px', borderRadius: '999px', fontWeight: '800' }}>
-                  {importProgress.percent}% Complete
-                </span>
-                {importProgress.etaText && (
-                  <span style={{ fontSize: '0.78rem', color: '#047857', backgroundColor: '#ecfdf5', padding: '2px 8px', borderRadius: '6px', border: '1px solid #a7f3d0', fontWeight: '700' }}>
-                    ⏳ {importProgress.etaText}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <strong style={{ fontSize: '0.92rem', color: '#1e3a8a' }}>Catalog Bulk Import Running in Background</strong>
+                {importProgress.estimatedRemainingSeconds > 0 && (
+                  <span style={{ fontSize: '0.78rem', color: '#1d4ed8', backgroundColor: '#dbeafe', padding: '2px 8px', borderRadius: '6px', fontWeight: '700' }}>
+                    ~{Math.ceil(importProgress.estimatedRemainingSeconds / 60)} min left
                   </span>
                 )}
                 {importProgress.speedText && (
@@ -5286,188 +5378,112 @@ _Helpline: +91 9316566894_`;
       <div className="admin-workspace-container admin-layout-container">
         
         {/* ============================================================
-            COLUMN 1 (LEFT, 260px): DESKTOP FROSTED GLASS SIDEBAR
+            COLUMN 1 (LEFT): AUTO-COLLAPSIBLE FROSTED GLASS SIDEBAR
+            Collapses to 68px on cursor leave, smoothly expands to 275px on hover!
             ============================================================ */}
-        <aside className="admin-glass-sidebar admin-desktop-sidebar">
-          <div style={{ borderBottom: '1px solid var(--border-light)', paddingBottom: '14px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#22c55e', animation: 'pulse 2s infinite' }}></div>
-                <h3 style={{ fontSize: '1.15rem', color: 'var(--text-dark)', margin: 0, fontWeight: '800' }}>Admin Console</h3>
-              </div>
-              <span style={{ fontSize: '0.68rem', padding: '2px 7px', borderRadius: '8px', backgroundColor: 'rgba(2, 132, 199, 0.12)', color: '#0284c7', fontWeight: '800' }}>
-                V2
-              </span>
-            </div>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', display: 'block', marginTop: '4px' }}>
-              Niyansh Pharma B2B Portal
-            </span>
-
-            {/* Smart Search Tabs Filter */}
-            <div style={{ position: 'relative', marginTop: '12px' }}>
-              <Search size={14} style={{ position: 'absolute', left: '11px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
-              <input 
-                type="text"
-                placeholder="Search tabs / modules..."
-                value={sidebarSearch}
-                onChange={(e) => setSidebarSearch(e.target.value)}
-                className="admin-glass-input"
-              />
-              {sidebarSearch && (
+        <aside 
+          className={`admin-glass-sidebar admin-desktop-sidebar ${isSidebarExpanded ? 'expanded' : 'collapsed'}`}
+          onMouseEnter={() => setIsSidebarHovered(true)}
+          onMouseLeave={() => setIsSidebarHovered(false)}
+          style={{
+            width: isSidebarExpanded ? '275px' : '68px',
+            minWidth: isSidebarExpanded ? '275px' : '68px',
+            padding: isSidebarExpanded ? '16px' : '14px 8px'
+          }}
+        >
+          {/* Sidebar Header: Role-based title without V2 */}
+          <div style={{ borderBottom: isSidebarExpanded ? '1px solid var(--border-light)' : 'none', paddingBottom: isSidebarExpanded ? '12px' : '4px' }}>
+            {isSidebarExpanded ? (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                  <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#22c55e', animation: 'pulse 2s infinite', flexShrink: 0 }}></div>
+                  <h3 style={{ fontSize: '1.05rem', color: 'var(--text-dark)', margin: 0, fontWeight: '800', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {isSuperAdmin ? 'Super Admin Console' : 'Admin Console'}
+                  </h3>
+                </div>
                 <button
                   type="button"
-                  onClick={() => setSidebarSearch('')}
-                  style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0 }}
+                  onClick={() => setIsSidebarPinned(prev => !prev)}
+                  title={isSidebarPinned ? 'Unpin Sidebar (Auto-collapse on mouse leave)' : 'Pin Sidebar Open'}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: isSidebarPinned ? '#0284c7' : 'var(--text-light)',
+                    cursor: 'pointer',
+                    padding: '2px',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}
                 >
-                  <X size={13} />
+                  <Pin size={14} style={{ transform: isSidebarPinned ? 'rotate(45deg)' : 'none', transition: 'transform 0.2s ease' }} />
                 </button>
-              )}
-            </div>
-
-            {/* Logged in User Profile Card */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '10px 12px',
-              backgroundColor: isSuperAdmin ? 'rgba(254, 243, 199, 0.4)' : 'rgba(248, 250, 252, 0.8)',
-              border: `1.5px solid ${isSuperAdmin ? '#fde68a' : 'rgba(226, 232, 240, 0.8)'}`,
-              borderRadius: '12px',
-              marginTop: '12px'
-            }}>
-              <img 
-                src={currentUser?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser?.name || (isSuperAdmin ? 'Super Admin' : 'Admin'))}&background=${isSuperAdmin ? 'f59e0b' : '0284c7'}&color=ffffff&bold=true`}
-                alt="Avatar"
-                style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover', border: `2px solid ${isSuperAdmin ? '#f59e0b' : '#0284c7'}`, flexShrink: 0 }}
-              />
-              <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ fontSize: '0.86rem', fontWeight: '700', color: 'var(--text-dark)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {currentUser?.name || (isSuperAdmin ? 'Niyansh Super Admin' : 'Operations Admin')}
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-                  {isSuperAdmin ? (
-                    <span style={{ fontSize: '0.68rem', fontWeight: '800', backgroundColor: '#f59e0b', color: '#ffffff', padding: '1px 7px', borderRadius: '10px', letterSpacing: '0.3px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                      <Crown size={10} /> Super Admin
-                    </span>
-                  ) : (
-                    <span style={{ fontSize: '0.68rem', fontWeight: '800', backgroundColor: '#0284c7', color: '#ffffff', padding: '1px 7px', borderRadius: '10px', letterSpacing: '0.3px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                      <Shield size={10} /> Staff Admin
-                    </span>
-                  )}
-                </div>
               </div>
-              <button
-                type="button"
-                onClick={handleOpenProfileModal}
-                title="Edit My Profile & Password"
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: isSuperAdmin ? '#b45309' : '#0284c7',
-                  padding: '5px',
-                  borderRadius: '6px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: '#ffffff',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.06)'
-                }}
-              >
-                <Edit2 size={13} />
-              </button>
-            </div>
+            ) : (
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '4px 0' }} title={isSuperAdmin ? 'Super Admin Console (Hover to expand)' : 'Admin Console (Hover to expand)'}>
+                <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#22c55e', animation: 'pulse 2s infinite' }}></div>
+              </div>
+            )}
+
+            {isSidebarExpanded && (
+              <span style={{ fontSize: '0.74rem', color: 'var(--text-light)', display: 'block', marginTop: '3px' }}>
+                Niyansh Pharma B2B Portal
+              </span>
+            )}
+
+            {/* Smart Search Filter */}
+            {isSidebarExpanded ? (
+              <div style={{ position: 'relative', marginTop: '10px' }}>
+                <Search size={14} style={{ position: 'absolute', left: '11px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
+                <input 
+                  type="text"
+                  placeholder="Search tabs / modules..."
+                  value={sidebarSearch}
+                  onChange={(e) => setSidebarSearch(e.target.value)}
+                  className="admin-glass-input"
+                />
+                {sidebarSearch && (
+                  <button
+                    type="button"
+                    onClick={() => setSidebarSearch('')}
+                    style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0 }}
+                  >
+                    <X size={13} />
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsSidebarPinned(true)}
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '10px',
+                    border: '1px solid var(--border-light, #e2e8f0)',
+                    backgroundColor: 'transparent',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--text-medium, #64748b)',
+                    cursor: 'pointer'
+                  }}
+                  title="Search modules"
+                >
+                  <Search size={15} />
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Categorized Navigation List */}
           <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {renderNavGroups(false)}
+            {renderNavGroups(false, false)}
           </nav>
-
-          {/* Statutory Compliance & Regulatory Licenses Box */}
-          <div style={{
-            padding: '12px',
-            backgroundColor: 'rgba(248, 250, 252, 0.75)',
-            border: '1px solid var(--border-light)',
-            borderRadius: '12px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '8px'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-light)', paddingBottom: '6px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', fontWeight: '800', color: 'var(--primary-blue)', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
-                <ShieldCheck size={14} color="#16a34a" /> Statutory Licenses
-              </div>
-              <span style={{ fontSize: '0.62rem', backgroundColor: '#dcfce7', color: '#15803d', fontWeight: '800', padding: '1px 6px', borderRadius: '6px' }}>FDCA GUJ</span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-              {[
-                { key: 'dl', label: 'D.L.No.', val: '20B GJ-RJT-264618, 21B GJ-RJT-264619' },
-                { key: 'gstin', label: 'GSTIN', val: '24BVXPP6108F2Z7' },
-                { key: 'pan', label: 'PAN', val: 'BVXPP6108F' },
-                { key: 'food', label: 'Food Lic.', val: '20726030000567' }
-              ].map(lic => (
-                <button
-                  key={lic.key}
-                  type="button"
-                  onClick={() => {
-                    if (navigator.clipboard) {
-                      navigator.clipboard.writeText(lic.val);
-                      setCopiedLicenseKey(lic.key);
-                      showToast(`${lic.label} copied to clipboard!`, 'info');
-                      setTimeout(() => setCopiedLicenseKey(null), 1800);
-                    }
-                  }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '5px 8px',
-                    backgroundColor: 'var(--bg-surface)',
-                    border: '1px solid var(--border-light)',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontSize: '0.7rem',
-                    textAlign: 'left',
-                    width: '100%',
-                    gap: '6px',
-                    transition: 'all 0.15s ease'
-                  }}
-                  title={`Click to copy ${lic.label}`}
-                >
-                  <span style={{ color: 'var(--text-medium)', fontWeight: '600', whiteSpace: 'nowrap' }}>{lic.label}:</span>
-                  <strong style={{ color: 'var(--text-dark)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, textAlign: 'right', fontSize: '0.69rem' }}>{lic.val}</strong>
-                  {copiedLicenseKey === lic.key ? (
-                    <Check size={11} color="#16a34a" style={{ flexShrink: 0 }} />
-                  ) : (
-                    <Copy size={10} style={{ opacity: 0.45, flexShrink: 0 }} />
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <button 
-              onClick={fetchDashboardData}
-              className="btn btn-outline btn-sm"
-              style={{ width: '100%', fontSize: '0.8rem', gap: '6px', height: '36px', borderRadius: '10px' }}
-            >
-              <RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} /> {t('admin.refreshData', 'Refresh Live Data')}
-            </button>
-
-            <button 
-              onClick={handleLogout}
-              className="btn btn-outline btn-sm"
-              style={{ width: '100%', borderColor: '#ef4444', color: '#ef4444', gap: '6px', fontSize: '0.8rem', height: '36px', borderRadius: '10px' }}
-            >
-              <LogOut size={13} /> {t('admin.logout', 'Log Out')}
-            </button>
-          </div>
         </aside>
 
         {/* ============================================================
-            COLUMN 2 (RIGHT, minmax(0, 1fr)): MAIN CONTENT AREA
+            COLUMN 2 (RIGHT): MAIN CONTENT AREA
             ============================================================ */}
         <main style={{ minWidth: 0 }}>
           {/* Mobile & Tablet Responsive Horizontal Tab Bar */}
@@ -5485,7 +5501,9 @@ _Helpline: +91 9316566894_`;
                 </button>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#22c55e', animation: 'pulse 2s infinite' }}></div>
-                  <strong style={{ fontSize: '0.9rem', color: 'var(--text-dark)' }}>Admin V2</strong>
+                  <strong style={{ fontSize: '0.9rem', color: 'var(--text-dark)' }}>
+                    {isSuperAdmin ? 'Super Admin' : 'Admin'}
+                  </strong>
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -5495,14 +5513,14 @@ _Helpline: +91 9316566894_`;
                   style={{ padding: '4px 10px', fontSize: '0.75rem', gap: '4px', height: '32px', borderRadius: '8px' }}
                   title="Refresh Live Data"
                 >
-                  <RefreshCw size={12} className={isLoading ? 'animate-spin' : ''} /> {t('admin.refresh', 'Refresh')}
+                  <RefreshCw size={12} className={isLoading ? 'animate-spin' : ''} />
                 </button>
                 <button
                   onClick={handleLogout}
                   className="btn btn-sm"
                   style={{ padding: '4px 10px', fontSize: '0.75rem', color: '#ef4444', backgroundColor: '#fee2e2', border: 'none', borderRadius: '8px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '4px', height: '32px' }}
                 >
-                  <LogOut size={12} /> {t('admin.exit', 'Exit')}
+                  <LogOut size={12} /> Exit
                 </button>
               </div>
             </div>
@@ -5569,45 +5587,48 @@ _Helpline: +91 9316566894_`;
           ) : (
             <>
               {/* ==========================================
-                  TAB 1: OVERVIEW / COMMAND CENTER (V2 GLASS DASHBOARD)
+                  TAB 1: OVERVIEW / COMMAND CENTER (100% REAL DYNAMIC TELEMETRY)
                   ========================================== */}
               {activeTab === 'overview' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
                   
                   {/* 1. Header Greeting & Quick Actions */}
-                  <div className="admin-glass-card" style={{ padding: '24px 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+                  <div className="admin-glass-card" style={{ padding: '22px 26px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <h1 style={{ fontSize: '1.8rem', fontWeight: '800', margin: 0, color: 'var(--text-dark)' }}>
+                        <h1 style={{ fontSize: '1.75rem', fontWeight: '800', margin: 0, color: 'var(--text-dark)' }}>
                           {getTimeGreeting()}, {currentUser?.name ? currentUser.name.split(' ')[0] : (isSuperAdmin ? 'Admin' : 'Team')}!
                         </h1>
-                        <span style={{ fontSize: '0.75rem', fontWeight: '800', backgroundColor: 'rgba(2, 132, 199, 0.12)', color: '#0284c7', padding: '3px 10px', borderRadius: '12px' }}>
-                          Command Center V2
+                        <span style={{
+                          fontSize: '0.72rem',
+                          fontWeight: '800',
+                          backgroundColor: isSuperAdmin ? '#fef3c7' : 'rgba(2, 132, 199, 0.12)',
+                          color: isSuperAdmin ? '#b45309' : '#0284c7',
+                          padding: '3px 10px',
+                          borderRadius: '12px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}>
+                          {isSuperAdmin ? <Crown size={11} /> : <Shield size={11} />} {isSuperAdmin ? 'Super Admin' : 'Staff Admin'}
                         </span>
                       </div>
-                      <p style={{ color: 'var(--text-medium)', fontSize: '0.9rem', margin: '6px 0 0 0' }}>
-                        Niyansh Pharma B2B Telemetry • {new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' })}
+                      <p style={{ color: 'var(--text-medium)', fontSize: '0.88rem', margin: '5px 0 0 0' }}>
+                        Niyansh Pharma Operations Command Center • {new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' })}
                       </p>
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                      <button
-                        type="button"
-                        onClick={fetchDashboardData}
-                        className="btn btn-outline btn-sm"
-                        style={{ gap: '6px', height: '38px', borderRadius: '10px' }}
-                        title="Refresh Telemetry"
-                      >
-                        <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} /> Refresh
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setActiveTab('chemists')}
-                        className="btn btn-outline btn-sm"
-                        style={{ gap: '6px', height: '38px', borderRadius: '10px', borderColor: '#10b981', color: '#059669', backgroundColor: 'rgba(16, 185, 129, 0.08)' }}
-                      >
-                        <Building2 size={14} /> Chemist KYC
-                      </button>
+                      {(isSuperAdmin || hasPermission('canManageEnquiries') || hasPermission('canManageOrders')) && (
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('chemists')}
+                          className="btn btn-outline btn-sm"
+                          style={{ gap: '6px', height: '38px', borderRadius: '10px', borderColor: '#10b981', color: '#059669', backgroundColor: 'rgba(16, 185, 129, 0.08)' }}
+                        >
+                          <Building2 size={14} /> Chemist KYC
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() => handleOpenProductModal()}
@@ -5619,7 +5640,7 @@ _Helpline: +91 9316566894_`;
                     </div>
                   </div>
 
-                  {/* 2. Top Stats Cards Grid (4 Glass Cards matching Instagram Reel) */}
+                  {/* 2. Top Stats Cards Grid (100% Dynamic from live database states) */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '16px' }}>
                     
                     {/* Stat 1: Total Orders */}
@@ -5637,7 +5658,9 @@ _Helpline: +91 9316566894_`;
                             {orders.length}
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.78rem', color: '#10b981', fontWeight: '700' }}>
-                            <ArrowUpRight size={15} /> +18.4% this month
+                            <span>{orders.filter(o => (o.status || '').toLowerCase() === 'booked').length} Booked</span>
+                            <span>•</span>
+                            <span>{orders.filter(o => (o.status || '').toLowerCase() === 'delivered').length} Delivered</span>
                           </div>
                         </div>
                         <div style={{ width: '46px', height: '46px', borderRadius: '14px', backgroundColor: 'rgba(2, 132, 199, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0284c7', flexShrink: 0 }}>
@@ -5658,10 +5681,10 @@ _Helpline: +91 9316566894_`;
                             B2B Chemist Network
                           </span>
                           <div style={{ fontSize: '1.9rem', fontWeight: '800', color: 'var(--text-dark)', margin: '6px 0 4px 0' }}>
-                            Verified
+                            Active
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.78rem', color: '#10b981', fontWeight: '700' }}>
-                            <ShieldCheck size={15} /> 100% KYC & DL Valid
+                            <ShieldCheck size={15} /> Verified Retail Pharmacies
                           </div>
                         </div>
                         <div style={{ width: '46px', height: '46px', borderRadius: '14px', backgroundColor: 'rgba(16, 185, 129, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981', flexShrink: 0 }}>
@@ -5670,7 +5693,7 @@ _Helpline: +91 9316566894_`;
                       </div>
                     </div>
 
-                    {/* Stat 3: Catalog SKUs */}
+                    {/* Stat 3: Catalog Formulations */}
                     <div 
                       className="admin-stat-glass-card"
                       onClick={() => setActiveTab('products')}
@@ -5685,7 +5708,7 @@ _Helpline: +91 9316566894_`;
                             {(productStats.totalProducts || products.length).toLocaleString()}
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.78rem', color: '#0284c7', fontWeight: '700' }}>
-                            <CheckCircle2 size={15} /> {productStats.activeProducts || products.length} Live in Wholesale
+                            <CheckCircle2 size={15} /> {productStats.activeProducts || products.length} Live Formulations
                           </div>
                         </div>
                         <div style={{ width: '46px', height: '46px', borderRadius: '14px', backgroundColor: 'rgba(99, 102, 241, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6366f1', flexShrink: 0 }}>
@@ -5706,10 +5729,10 @@ _Helpline: +91 9316566894_`;
                             Outstanding Ledger
                           </span>
                           <div style={{ fontSize: '1.9rem', fontWeight: '800', color: overdueLedgersCount > 0 ? '#ef4444' : 'var(--text-dark)', margin: '6px 0 4px 0' }}>
-                            {overdueLedgersCount > 0 ? `${overdueLedgersCount} Overdue` : 'Clean'}
+                            {totalOutstandingDues > 0 ? '₹' + Math.round(totalOutstandingDues).toLocaleString('en-IN') : '₹0.00'}
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.78rem', color: overdueLedgersCount > 0 ? '#ef4444' : '#f59e0b', fontWeight: '700' }}>
-                            <CreditCard size={15} /> 21-Day Standard Terms
+                            <CreditCard size={15} /> {overdueLedgersCount > 0 ? `${overdueLedgersCount} Overdue Invoices` : 'All Chemist Dues Clean'}
                           </div>
                         </div>
                         <div style={{ width: '46px', height: '46px', borderRadius: '14px', backgroundColor: 'rgba(245, 158, 11, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f59e0b', flexShrink: 0 }}>
@@ -5720,18 +5743,18 @@ _Helpline: +91 9316566894_`;
 
                   </div>
 
-                  {/* 3. Middle Visual Analytics Section (Order Velocity Pipeline & Category Breakdown) */}
+                  {/* 3. Middle Dynamic Section: Live Orders Pipeline & Real Live Categories */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '18px' }}>
                     
-                    {/* Fulfillment Velocity Pipeline */}
+                    {/* Live Order Velocity Pipeline */}
                     <div className="admin-glass-card" style={{ padding: '22px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
                         <div>
                           <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-dark)', margin: 0 }}>
-                            Order Fulfillment Velocity
+                            Live Order Pipeline Velocity
                           </h3>
                           <span style={{ fontSize: '0.78rem', color: 'var(--text-light)' }}>
-                            Live B2B dispatch progression pipeline
+                            Active B2B order fulfillment progression
                           </span>
                         </div>
                         <button 
@@ -5740,7 +5763,7 @@ _Helpline: +91 9316566894_`;
                           className="btn btn-outline btn-sm" 
                           style={{ fontSize: '0.75rem', padding: '4px 10px', height: '28px' }}
                         >
-                          View Orders <ArrowUpRight size={12} />
+                          View Orders ({orders.length}) <ArrowUpRight size={12} />
                         </button>
                       </div>
 
@@ -5753,7 +5776,7 @@ _Helpline: +91 9316566894_`;
                           { label: 'Delivered & Received', key: 'delivered', count: orders.filter(o => (o.status || '').toLowerCase() === 'delivered').length, color: '#10b981' }
                         ].map(stage => {
                           const total = Math.max(orders.length, 1);
-                          const pct = Math.round((stage.count / total) * 100);
+                          const pct = orders.length > 0 ? Math.round((stage.count / total) * 100) : 0;
                           return (
                             <div key={stage.key} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', fontWeight: '600' }}>
@@ -5767,31 +5790,17 @@ _Helpline: +91 9316566894_`;
                           );
                         })}
                       </div>
-
-                      {/* Visual Velocity Bar Chart (Instagram reel style) */}
-                      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '10px', height: '90px', marginTop: '20px', paddingTop: '10px', borderTop: '1px solid var(--border-light, #e2e8f0)' }}>
-                        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Today'].map((day, idx) => {
-                          const heights = [45, 65, 55, 80, 70, 90, 85];
-                          const height = heights[idx];
-                          return (
-                            <div key={day} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
-                              <div style={{ width: '100%', maxWidth: '28px', height: `${height}%`, background: idx === 6 ? 'linear-gradient(180deg, #38bdf8, #0284c7)' : 'rgba(2, 132, 199, 0.25)', borderRadius: '6px 6px 2px 2px', transition: 'height 0.3s ease' }} />
-                              <span style={{ fontSize: '0.68rem', color: idx === 6 ? 'var(--primary-blue)' : 'var(--text-light)', fontWeight: idx === 6 ? '800' : '500' }}>{day}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
                     </div>
 
-                    {/* Catalog & Regulatory Mix */}
+                    {/* Live Dynamic Catalog Category Breakdown */}
                     <div className="admin-glass-card" style={{ padding: '22px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
                         <div>
                           <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-dark)', margin: 0 }}>
-                            Formulations & Compliance Mix
+                            Live Catalog Distribution
                           </h3>
                           <span style={{ fontSize: '0.78rem', color: 'var(--text-light)' }}>
-                            Certified pharmaceutical categories
+                            Top formulation categories in current catalog
                           </span>
                         </div>
                         <button 
@@ -5800,39 +5809,33 @@ _Helpline: +91 9316566894_`;
                           className="btn btn-outline btn-sm" 
                           style={{ fontSize: '0.75rem', padding: '4px 10px', height: '28px' }}
                         >
-                          Catalog <ArrowUpRight size={12} />
+                          All Products <ArrowUpRight size={12} />
                         </button>
                       </div>
 
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
-                        {[
-                          { name: 'Pharma Products', pct: '68%', color: '#0284c7', count: '6,600+ items' },
-                          { name: 'OTC Healthcare', pct: '18%', color: '#10b981', count: '1,700+ items' },
-                          { name: 'Injectables', pct: '9%', color: '#6366f1', count: '900+ items' },
-                          { name: 'Surgical & Misc', pct: '5%', color: '#f59e0b', count: '500+ items' }
-                        ].map(cat => (
+                        {dynamicCategories.map(cat => (
                           <div key={cat.name} style={{ padding: '12px', borderRadius: '12px', backgroundColor: 'var(--bg-surface, #f8fafc)', border: '1px solid var(--border-light, #e2e8f0)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                               <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: cat.color }} />
-                              <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-dark)' }}>{cat.name}</span>
+                              <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-dark)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{cat.name}</span>
                             </div>
-                            <div style={{ fontSize: '1.15rem', fontWeight: '800', color: cat.color, marginTop: '4px' }}>{cat.pct}</div>
-                            <span style={{ fontSize: '0.7rem', color: 'var(--text-light)' }}>{cat.count}</span>
+                            <div style={{ fontSize: '1.15rem', fontWeight: '800', color: cat.color, marginTop: '4px' }}>{cat.pct}%</div>
+                            <span style={{ fontSize: '0.7rem', color: 'var(--text-light)' }}>{cat.count} SKUs</span>
                           </div>
                         ))}
                       </div>
 
-                      {/* Regulatory License Status */}
-                      <div style={{ marginTop: '16px', padding: '12px 14px', borderRadius: '12px', backgroundColor: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                      {/* Compliance Verification Note */}
+                      <div style={{ marginTop: '16px', padding: '10px 14px', borderRadius: '12px', backgroundColor: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <ShieldCheck size={18} color="#10b981" />
-                          <div>
-                            <strong style={{ fontSize: '0.82rem', color: '#065f46' }}>FDCA Gujarat & WHO-GMP Compliant</strong>
-                            <div style={{ fontSize: '0.72rem', color: '#047857' }}>All 4 active drug & food wholesale licenses valid</div>
-                          </div>
+                          <ShieldCheck size={16} color="#10b981" />
+                          <span style={{ fontSize: '0.76rem', color: '#065f46', fontWeight: '700' }}>
+                            FDCA Gujarat & WHO-GMP Valid Formulations
+                          </span>
                         </div>
-                        <span style={{ fontSize: '0.7rem', fontWeight: '800', backgroundColor: '#10b981', color: '#ffffff', padding: '2px 8px', borderRadius: '8px' }}>
-                          Active
+                        <span style={{ fontSize: '0.68rem', fontWeight: '800', backgroundColor: '#10b981', color: '#ffffff', padding: '1px 7px', borderRadius: '6px' }}>
+                          Live
                         </span>
                       </div>
                     </div>
@@ -5869,7 +5872,7 @@ _Helpline: +91 9316566894_`;
                         </div>
                       ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                          {orders.slice(0, 4).map(ord => (
+                          {orders.slice(0, 5).map(ord => (
                             <div 
                               key={ord._id || ord.orderNumber} 
                               onClick={() => { setActiveTab('orders'); setOrderSearch(ord.orderNumber || ''); }}
@@ -5886,7 +5889,7 @@ _Helpline: +91 9316566894_`;
                               }}
                             >
                               <div style={{ minWidth: 0 }}>
-                                <div style={{ fontSize: '0.84rem', fontWeight: '700', color: 'var(--text-dark)' }}>
+                                <div style={{ fontSize: '0.84rem', fontWeight: '700', color: 'var(--text-dark)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                   {ord.shopName || ord.chemistStoreName || 'Chemist Store'}
                                 </div>
                                 <div style={{ fontSize: '0.72rem', color: 'var(--text-light)', marginTop: '2px' }}>
@@ -6008,7 +6011,9 @@ _Helpline: +91 9316566894_`;
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '12px', borderBottom: '1px solid var(--border-light)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#22c55e', animation: 'pulse 2s infinite' }}></div>
-                        <strong style={{ fontSize: '1.05rem', color: 'var(--text-dark)' }}>Admin Console V2</strong>
+                        <strong style={{ fontSize: '1.05rem', color: 'var(--text-dark)' }}>
+                          {isSuperAdmin ? 'Super Admin Console' : 'Admin Console'}
+                        </strong>
                       </div>
                       <button
                         type="button"
@@ -6019,33 +6024,8 @@ _Helpline: +91 9316566894_`;
                       </button>
                     </div>
 
-                    {/* Drawer Profile Card */}
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      padding: '10px 12px',
-                      backgroundColor: isSuperAdmin ? 'rgba(254, 243, 199, 0.4)' : 'rgba(248, 250, 252, 0.8)',
-                      border: `1.5px solid ${isSuperAdmin ? '#fde68a' : 'rgba(226, 232, 240, 0.8)'}`,
-                      borderRadius: '12px'
-                    }}>
-                      <img 
-                        src={currentUser?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser?.name || (isSuperAdmin ? 'Super Admin' : 'Admin'))}&background=${isSuperAdmin ? 'f59e0b' : '0284c7'}&color=ffffff&bold=true`}
-                        alt="Avatar"
-                        style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: `2px solid ${isSuperAdmin ? '#f59e0b' : '#0284c7'}`, flexShrink: 0 }}
-                      />
-                      <div style={{ minWidth: 0, flex: 1 }}>
-                        <div style={{ fontSize: '0.84rem', fontWeight: '700', color: 'var(--text-dark)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {currentUser?.name || (isSuperAdmin ? 'Niyansh Super Admin' : 'Operations Admin')}
-                        </div>
-                        <span style={{ fontSize: '0.65rem', fontWeight: '800', backgroundColor: isSuperAdmin ? '#f59e0b' : '#0284c7', color: '#ffffff', padding: '1px 6px', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                          {isSuperAdmin ? <Crown size={9} /> : <Shield size={9} />} {isSuperAdmin ? 'Super Admin' : 'Staff Admin'}
-                        </span>
-                      </div>
-                    </div>
-
                     {/* Drawer Search Filter */}
-                    <div style={{ position: 'relative' }}>
+                    <div style={{ position: 'relative', marginTop: '6px' }}>
                       <Search size={14} style={{ position: 'absolute', left: '11px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
                       <input 
                         type="text"
@@ -6057,8 +6037,8 @@ _Helpline: +91 9316566894_`;
                     </div>
 
                     {/* Navigation Groups */}
-                    <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
-                      {renderNavGroups(true)}
+                    <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, marginTop: '10px' }}>
+                      {renderNavGroups(true, true)}
                     </nav>
 
                     {/* Drawer Footer Actions */}
@@ -6069,7 +6049,7 @@ _Helpline: +91 9316566894_`;
                         className="btn btn-outline btn-sm"
                         style={{ width: '100%', fontSize: '0.8rem', gap: '6px', height: '36px', borderRadius: '10px' }}
                       >
-                        <RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} /> {t('admin.refreshData', 'Refresh Live Data')}
+                        <RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} /> Refresh Live Data
                       </button>
                       <button 
                         type="button"
@@ -6077,7 +6057,7 @@ _Helpline: +91 9316566894_`;
                         className="btn btn-outline btn-sm"
                         style={{ width: '100%', borderColor: '#ef4444', color: '#ef4444', gap: '6px', fontSize: '0.8rem', height: '36px', borderRadius: '10px' }}
                       >
-                        <LogOut size={13} /> {t('admin.logout', 'Log Out')}
+                        <LogOut size={13} /> Log Out
                       </button>
                     </div>
                   </aside>

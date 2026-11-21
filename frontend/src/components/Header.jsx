@@ -4,7 +4,8 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   ShoppingBag, Search, Phone, Mail, ChevronDown, ChevronRight, Menu, X, User, LogOut, LogIn, ShieldCheck, FileText, Zap,
   Package, Flame, CreditCard, Factory, Handshake, Users, PhoneCall, Shield,
-  ArrowRight, MessageCircle, ExternalLink, Lock, Info, Building2, Store, Sparkles, RefreshCw, Globe
+  ArrowRight, MessageCircle, ExternalLink, Lock, Info, Building2, Store, Sparkles, RefreshCw, Globe,
+  Edit2, Crown
 } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import { useLanguage, LanguageSelector } from '../context/LanguageContext';
@@ -42,6 +43,48 @@ function Header({
   const [matchedCompanies, setMatchedCompanies] = useState([]);
   const [isTypeaheadOpen, setIsTypeaheadOpen] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+
+  // Dedicated Admin Header Profile & Control States
+  const [adminUser, setAdminUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('niyansh_admin_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch (_) {
+      return null;
+    }
+  });
+  const [isAdminProfileOpen, setIsAdminProfileOpen] = useState(false);
+  const [isAdminRefreshing, setIsAdminRefreshing] = useState(false);
+  const adminDropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleAdminUserUpdate = (e) => {
+      if (e && e.detail) {
+        setAdminUser(e.detail);
+      } else {
+        try {
+          const saved = localStorage.getItem('niyansh_admin_user');
+          setAdminUser(saved ? JSON.parse(saved) : null);
+        } catch (_) {}
+      }
+    };
+    window.addEventListener('admin:user-updated', handleAdminUserUpdate);
+    window.addEventListener('storage', handleAdminUserUpdate);
+    return () => {
+      window.removeEventListener('admin:user-updated', handleAdminUserUpdate);
+      window.removeEventListener('storage', handleAdminUserUpdate);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (adminDropdownRef.current && !adminDropdownRef.current.contains(e.target)) {
+        setIsAdminProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Global Keyboard Shortcut: Ctrl+K or Cmd+K focuses search
   useEffect(() => {
@@ -247,10 +290,192 @@ function Header({
             </div>
           </div>
 
-          {/* Right Action Controls: Language & Theme Toggle */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {/* Right Action Controls: Refresh (Icon Only), Language, Theme & Admin Profile Dropdown */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {/* Header Refresh Button - Strictly ICON ONLY */}
+            <button
+              type="button"
+              onClick={() => {
+                setIsAdminRefreshing(true);
+                window.dispatchEvent(new CustomEvent('admin:refresh-data'));
+                setTimeout(() => setIsAdminRefreshing(false), 800);
+              }}
+              title="Refresh Live Data"
+              aria-label="Refresh Live Data"
+              style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '50%',
+                border: '1px solid var(--border-light, #e2e8f0)',
+                backgroundColor: 'var(--bg-surface, #ffffff)',
+                color: 'var(--text-dark, #1e293b)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+              }}
+            >
+              <RefreshCw size={17} className={isAdminRefreshing ? 'animate-spin' : ''} />
+            </button>
+
             <LanguageSelector />
             <ThemeToggle />
+
+            {/* Admin Profile Pill & Hover Dropdown */}
+            {adminUser && (
+              <div 
+                ref={adminDropdownRef} 
+                style={{ position: 'relative' }}
+                onMouseEnter={() => setIsAdminProfileOpen(true)}
+                onMouseLeave={() => setIsAdminProfileOpen(false)}
+              >
+                <button
+                  type="button"
+                  onClick={() => setIsAdminProfileOpen(prev => !prev)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '9px',
+                    padding: '4px 12px 4px 5px',
+                    height: '38px',
+                    borderRadius: '20px',
+                    border: `1.5px solid ${(adminUser?.role === 'superadmin' || adminUser?.email === 'info@niyanshpharma.com') ? '#fde68a' : 'var(--border-light, #e2e8f0)'}`,
+                    backgroundColor: (adminUser?.role === 'superadmin' || adminUser?.email === 'info@niyanshpharma.com') ? '#fffbeb' : 'var(--bg-surface, #ffffff)',
+                    cursor: 'pointer',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
+                    transition: 'all 0.2s ease'
+                  }}
+                  title="My Admin Account"
+                >
+                  <img
+                    src={adminUser?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(adminUser?.name || ((adminUser?.role === 'superadmin' || adminUser?.email === 'info@niyanshpharma.com') ? 'Super Admin' : 'Admin'))}&background=${(adminUser?.role === 'superadmin' || adminUser?.email === 'info@niyanshpharma.com') ? 'f59e0b' : '0284c7'}&color=ffffff&bold=true`}
+                    alt="Avatar"
+                    style={{
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      border: `1.5px solid ${(adminUser?.role === 'superadmin' || adminUser?.email === 'info@niyanshpharma.com') ? '#f59e0b' : '#0284c7'}`
+                    }}
+                  />
+                  <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-dark, #1e293b)', lineHeight: 1.1, maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {adminUser?.name || ((adminUser?.role === 'superadmin' || adminUser?.email === 'info@niyanshpharma.com') ? 'Super Admin' : 'Admin')}
+                    </span>
+                    <span style={{ fontSize: '0.62rem', fontWeight: '800', color: (adminUser?.role === 'superadmin' || adminUser?.email === 'info@niyanshpharma.com') ? '#b45309' : '#0284c7', letterSpacing: '0.3px', lineHeight: 1 }}>
+                      {(adminUser?.role === 'superadmin' || adminUser?.email === 'info@niyanshpharma.com') ? 'SUPER ADMIN' : 'STAFF ADMIN'}
+                    </span>
+                  </div>
+                  <ChevronDown size={14} style={{ color: 'var(--text-medium, #64748b)', transform: isAdminProfileOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }} />
+                </button>
+
+                {/* Profile Dropdown Menu */}
+                {isAdminProfileOpen && (
+                  <div style={{
+                    position: 'absolute',
+                    top: 'calc(100% + 6px)',
+                    right: 0,
+                    width: '240px',
+                    backgroundColor: 'var(--bg-surface, #ffffff)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid var(--border-light, #e2e8f0)',
+                    borderRadius: '16px',
+                    boxShadow: '0 12px 32px rgba(12, 61, 108, 0.12)',
+                    padding: '14px',
+                    zIndex: 1050,
+                    animation: 'pwaSlideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+                  }}>
+                    {/* User info */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingBottom: '12px', borderBottom: '1px solid var(--border-light, #e2e8f0)' }}>
+                      <img
+                        src={adminUser?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(adminUser?.name || ((adminUser?.role === 'superadmin' || adminUser?.email === 'info@niyanshpharma.com') ? 'Super Admin' : 'Admin'))}&background=${(adminUser?.role === 'superadmin' || adminUser?.email === 'info@niyanshpharma.com') ? 'f59e0b' : '0284c7'}&color=ffffff&bold=true`}
+                        alt="Avatar"
+                        style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: `2px solid ${(adminUser?.role === 'superadmin' || adminUser?.email === 'info@niyanshpharma.com') ? '#f59e0b' : '#0284c7'}` }}
+                      />
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ fontSize: '0.88rem', fontWeight: '800', color: 'var(--text-dark, #1e293b)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {adminUser?.name || 'Administrator'}
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-light, #94a3b8)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {adminUser?.email || 'admin@niyanshpharma.com'}
+                        </div>
+                        <span style={{
+                          display: 'inline-block',
+                          fontSize: '0.62rem',
+                          fontWeight: '800',
+                          backgroundColor: (adminUser?.role === 'superadmin' || adminUser?.email === 'info@niyanshpharma.com') ? '#fef3c7' : '#e0f2fe',
+                          color: (adminUser?.role === 'superadmin' || adminUser?.email === 'info@niyanshpharma.com') ? '#b45309' : '#0369a1',
+                          padding: '1px 7px',
+                          borderRadius: '8px',
+                          marginTop: '3px'
+                        }}>
+                          {(adminUser?.role === 'superadmin' || adminUser?.email === 'info@niyanshpharma.com') ? 'Super Administrator' : 'Operations Staff'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '10px' }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsAdminProfileOpen(false);
+                          window.dispatchEvent(new CustomEvent('admin:open-profile'));
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          width: '100%',
+                          padding: '8px 10px',
+                          borderRadius: '8px',
+                          border: 'none',
+                          background: 'transparent',
+                          color: 'var(--text-dark, #1e293b)',
+                          fontSize: '0.82rem',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.15s ease'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-main, #f8fafc)'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                      >
+                        <User size={15} color="var(--primary-blue, #0284c7)" /> Edit Profile
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsAdminProfileOpen(false);
+                          window.dispatchEvent(new CustomEvent('admin:logout'));
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          width: '100%',
+                          padding: '8px 10px',
+                          borderRadius: '8px',
+                          border: 'none',
+                          backgroundColor: '#fee2e2',
+                          color: '#ef4444',
+                          fontSize: '0.82rem',
+                          fontWeight: '700',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.15s ease'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fecaca'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#fee2e2'}
+                      >
+                        <LogOut size={15} color="#ef4444" /> Sign Out
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </header>

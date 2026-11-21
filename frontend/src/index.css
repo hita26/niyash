@@ -3573,8 +3573,8 @@ body.dark-theme {
 /* Admin Layout Container */
 .admin-layout-container {
   display: grid;
-  grid-template-columns: 260px minmax(0, 1fr);
-  gap: 28px;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 24px;
   align-items: start;
 }
 
@@ -5783,13 +5783,12 @@ a:active,
 
 /* Smart Glass Sidebar */
 .admin-glass-sidebar {
-  background: rgba(255, 255, 255, 0.84);
+  background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(226, 232, 240, 0.8);
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(12, 61, 108, 0.06);
-  padding: 16px;
   position: sticky !important;
   top: 75px !important;
   align-self: flex-start !important;
@@ -5799,20 +5798,23 @@ a:active,
   z-index: 40;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
+  transition: width 0.28s cubic-bezier(0.16, 1, 0.3, 1), min-width 0.28s cubic-bezier(0.16, 1, 0.3, 1), padding 0.2s ease;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.25) transparent;
 }
 
 [data-theme="dark"] .admin-glass-sidebar {
-  background: rgba(15, 23, 42, 0.78);
+  background: rgba(15, 23, 42, 0.82);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
 }
 
 .admin-glass-sidebar::-webkit-scrollbar {
-  width: 4px;
+  width: 3px;
 }
 .admin-glass-sidebar::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.4);
+  background: rgba(148, 163, 184, 0.35);
   border-radius: 4px;
 }
 
@@ -5823,10 +5825,17 @@ a:active,
   text-transform: uppercase;
   letter-spacing: 0.8px;
   color: #64748b;
-  margin: 10px 0 4px 6px;
+  margin: 8px 0 2px 4px;
   display: flex;
   align-items: center;
   gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s ease;
+}
+
+.admin-sidebar-section-header:hover {
+  color: var(--primary-blue);
 }
 
 [data-theme="dark"] .admin-sidebar-section-header {
@@ -5839,17 +5848,20 @@ a:active,
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 9px 12px;
+  min-height: 40px;
+  padding: 8px 12px;
   border-radius: 12px;
   font-weight: 600;
-  font-size: 0.86rem;
+  font-size: 0.85rem;
   background: transparent;
   color: var(--text-dark);
   border: 1px solid transparent;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   text-align: left;
   user-select: none;
+  white-space: nowrap;
+  gap: 8px;
 }
 
 .admin-glass-nav-btn:hover {

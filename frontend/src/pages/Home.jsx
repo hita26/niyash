@@ -135,16 +135,13 @@ function Home({ addToCart }) {
         });
       }
 
-      // 4. From Product Database Companies / Brands (Sanitized)
+      // 4. From Product Database Companies (Real Manufacturer Entities only)
       if (filtersRes.status === 'fulfilled' && filtersRes.value.success) {
         if (Array.isArray(filtersRes.value.companies)) {
           filtersRes.value.companies.forEach(addBrand);
           if (filtersRes.value.companies.length > 0) {
             setLiveCompaniesCount(filtersRes.value.companies.length);
           }
-        }
-        if (Array.isArray(filtersRes.value.brands)) {
-          filtersRes.value.brands.forEach(addBrand);
         }
       }
 

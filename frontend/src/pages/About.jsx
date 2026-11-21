@@ -83,7 +83,6 @@ function About() {
           };
 
           brandsList.forEach(sanitizeAndAdd);
-          if (Array.isArray(data.brands)) data.brands.forEach(sanitizeAndAdd);
           if (Array.isArray(data.companies)) data.companies.forEach(sanitizeAndAdd);
 
           const combined = Array.from(brandMap.values()).filter(Boolean).sort((a, b) => a.localeCompare(b));

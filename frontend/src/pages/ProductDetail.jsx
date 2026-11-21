@@ -143,6 +143,11 @@ function ProductDetail({ addToCart }) {
   const hasPhotos = gallery.length > 0;
   const currentPhoto = hasPhotos ? (gallery[activeImageIndex] || gallery[0]) : null;
 
+  const cleanVal = (val, fb = '') => (!val || ['null', 'undefined', 'none', '#n/a'].includes(String(val).toLowerCase().trim()) ? fb : String(val).trim());
+  const displayCategory = cleanVal(product.category, 'Pharma Products');
+  const displayComposition = cleanVal(product.composition, '');
+  const displayPacking = cleanVal(product.packing, 'Standard Pack');
+
   return (
     <div className="section animate-fade-in" style={{ backgroundColor: 'var(--bg-main)', paddingTop: '20px', paddingBottom: '70px' }}>
       <div className="container">
@@ -153,11 +158,11 @@ function ProductDetail({ addToCart }) {
             <Link to="/" style={{ color: 'var(--text-medium)', textDecoration: 'none' }}>{t('nav.home', 'Home')}</Link>
             <ChevronRight size={14} />
             <Link to="/products" style={{ color: 'var(--text-medium)', textDecoration: 'none' }}>{t('nav.products', 'Products')}</Link>
-            {product.category && (
+            {displayCategory && (
               <>
                 <ChevronRight size={14} />
-                <Link to={`/products?category=${encodeURIComponent(product.category)}`} style={{ color: 'var(--text-medium)', textDecoration: 'none' }}>
-                  {product.category}
+                <Link to={`/products?category=${encodeURIComponent(displayCategory)}`} style={{ color: 'var(--text-medium)', textDecoration: 'none' }}>
+                  {displayCategory}
                 </Link>
               </>
             )}
@@ -434,15 +439,15 @@ function ProductDetail({ addToCart }) {
                 {product.name}
               </h1>
 
-              {product.composition && (
+              {displayComposition && (
                 <p style={{ color: 'var(--text-medium)', fontSize: '0.95rem', fontStyle: 'italic', margin: '0 0 6px 0' }}>
-                  {product.composition}
+                  {displayComposition}
                 </p>
               )}
 
               <p style={{ color: 'var(--text-light)', fontSize: '0.86rem', margin: 0 }}>
-                Category: <strong style={{ color: 'var(--text-dark)' }}>{product.category || 'Pharmaceutical Products'}</strong>
-                {product.packing && <span> • Packing: <strong style={{ color: 'var(--text-dark)' }}>{product.packing}</strong></span>}
+                Category: <strong style={{ color: 'var(--text-dark)' }}>{displayCategory}</strong>
+                {displayPacking && <span> • Packing: <strong style={{ color: 'var(--text-dark)' }}>{displayPacking}</strong></span>}
               </p>
             </div>
 
@@ -750,35 +755,35 @@ function ProductDetail({ addToCart }) {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                   <span style={{ fontSize: '0.74rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase' }}>{t('products.composition', 'Composition')}</span>
                   <span style={{ fontSize: '0.9rem', color: 'var(--text-dark)', fontWeight: '600', fontStyle: 'italic' }}>
-                    {product.composition || 'As per formulation standard'}
+                    {displayComposition || 'As per formulation standard'}
                   </span>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                   <span style={{ fontSize: '0.74rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase' }}>{t('products.packing', 'Packaging')}</span>
                   <span style={{ fontSize: '0.9rem', color: 'var(--text-dark)', fontWeight: '600' }}>
-                    {product.packing || 'Standard Pack'}
+                    {displayPacking || 'Standard Pack'}
                   </span>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                   <span style={{ fontSize: '0.74rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase' }}>Dosage Form</span>
                   <span style={{ fontSize: '0.9rem', color: 'var(--text-dark)', fontWeight: '600' }}>
-                    {product.form || 'Tablet / Capsule'}
+                    {cleanVal(product.form, 'Tablet / Capsule')}
                   </span>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                   <span style={{ fontSize: '0.74rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase' }}>{t('productDetail.manufacturer', 'Manufacturer / Marketer')}</span>
                   <span style={{ fontSize: '0.9rem', color: 'var(--text-dark)', fontWeight: '600' }}>
-                    {product.manufacturer || product.brand || 'Authorized Pharma Partner'}
+                    {cleanVal(product.manufacturer || product.brand || product.company, 'Authorized Pharma Partner')}
                   </span>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                   <span style={{ fontSize: '0.74rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase' }}>Category</span>
                   <span style={{ fontSize: '0.9rem', color: 'var(--text-dark)', fontWeight: '600' }}>
-                    {product.category || 'Pharmaceutical Products'}
+                    {displayCategory}
                   </span>
                 </div>
 

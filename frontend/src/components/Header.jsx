@@ -279,33 +279,8 @@ function Header({
                 />
               </Link>
 
-              {/* Mobile Action Controls: Cart (Chemist Only), Theme Toggle & Hamburger */}
+              {/* Mobile Action Controls: Theme Toggle & Hamburger */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {user && cartCount > 0 && (
-                  <button 
-                    onClick={onOpenCart}
-                    style={{
-                      height: '38px',
-                      boxSizing: 'border-box',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '5px',
-                      backgroundColor: '#ea580c',
-                      color: '#ffffff',
-                      border: '1.5px solid #ea580c',
-                      borderRadius: '20px',
-                      padding: '0 10px',
-                      cursor: 'pointer',
-                      fontWeight: '700',
-                      fontSize: '0.78rem'
-                    }}
-                    title={`Wholesale Cart (${cartCount})`}
-                  >
-                    <ShoppingBag size={14} />
-                    <span>({cartCount})</span>
-                  </button>
-                )}
-
                 <ThemeToggle />
 
                 <button 
@@ -1079,139 +1054,21 @@ function Header({
               <span>Admin</span>
             </Link>
 
-            {/* SINGLE, NON-REDUNDANT B2B PORTAL ACCESS BUTTON */}
-            {user ? (
-              <div className="header-user-controls" style={{ display: 'flex', alignItems: 'center', gap: '8px', borderRight: '1px solid var(--border-light)', paddingRight: '12px', position: 'relative' }} ref={userMenuRef}>
-                <a
-                  href="/dashboard"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hide-mobile"
-                  style={{
-                    height: '38px',
-                    boxSizing: 'border-box',
-                    backgroundColor: '#ecfdf5',
-                    color: '#065f46',
-                    border: '1.5px solid #a7f3d0',
-                    padding: '0 14px',
-                    borderRadius: '20px',
-                    fontSize: '0.82rem',
-                    fontWeight: '800',
-                    textDecoration: 'none',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }}
-                  title="Open Chemist Portal in a new tab"
-                >
-                  <ShieldCheck size={15} color="#059669" />
-                  <span>Chemist Portal ↗</span>
-                </a>
-
-                <div style={{ position: 'relative' }}>
-                  <button 
-                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    style={{
-                      height: '38px',
-                      boxSizing: 'border-box',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '5px',
-                      background: 'var(--bg-surface-alt, #f1f5f9)',
-                      border: '1.5px solid var(--border-light, #cbd5e1)',
-                      borderRadius: '20px',
-                      padding: '0 12px',
-                      cursor: 'pointer',
-                      fontSize: '0.82rem',
-                      fontWeight: '700',
-                      color: 'var(--primary-blue)'
-                    }}
-                  >
-                    <User size={14} />
-                    <span style={{ maxWidth: '85px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {chemistInitial}
-                    </span>
-                    <ChevronDown size={12} />
-                  </button>
-
-                  {isUserMenuOpen && (
-                    <div style={{
-                      position: 'absolute',
-                      top: '100%',
-                      right: 0,
-                      marginTop: '6px',
-                      backgroundColor: '#ffffff',
-                      borderRadius: '10px',
-                      boxShadow: '0 10px 25px -5px rgba(0,0,0,0.15)',
-                      border: '1px solid #e2e8f0',
-                      minWidth: '220px',
-                      zIndex: 1000,
-                      overflow: 'hidden'
-                    }}>
-                      <div style={{ padding: '10px 14px', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                        <div style={{ fontSize: '0.72rem', color: '#059669', fontWeight: '800', textTransform: 'uppercase' }}>● Verified B2B Partner</div>
-                        <div style={{ fontSize: '0.88rem', fontWeight: '800', color: 'var(--text-dark)' }}>{chemistName}</div>
-                      </div>
-                      <a 
-                        href="/dashboard" 
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={() => setIsUserMenuOpen(false)}
-                        style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', fontSize: '0.84rem', color: 'var(--text-dark)', textDecoration: 'none', fontWeight: '600' }}
-                      >
-                        <ShieldCheck size={16} color="#059669" /> B2B Dashboard ↗
-                      </a>
-                      <a 
-                        href="/quick-order" 
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={() => setIsUserMenuOpen(false)}
-                        style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', fontSize: '0.84rem', color: 'var(--text-dark)', textDecoration: 'none', fontWeight: '600' }}
-                      >
-                        <Zap size={16} color="#ea580c" /> Quick Order Pad ↗
-                      </a>
-                      <a 
-                        href="/outstanding" 
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={() => setIsUserMenuOpen(false)}
-                        style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', fontSize: '0.84rem', color: 'var(--text-dark)', textDecoration: 'none', fontWeight: '600' }}
-                      >
-                        <FileText size={16} color="#3b82f6" /> Ledger & Invoices ↗
-                      </a>
-                      <button 
-                        onClick={() => { setIsUserMenuOpen(false); onLogout(); navigate('/', { replace: true }); }}
-                        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', fontSize: '0.84rem', color: '#dc2626', background: 'none', border: 'none', borderTop: '1px solid #f1f5f9', cursor: 'pointer', fontWeight: '600', textAlign: 'left' }}
-                      >
-                        <LogOut size={16} /> Sign Out
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <button 
-                onClick={onOpenAuth}
-                className="chemist-header-btn hide-mobile"
-                aria-label="Open Chemist login and registration modal"
-                style={{ height: '38px', boxSizing: 'border-box', display: 'inline-flex', alignItems: 'center' }}
-              >
-                <LogIn size={15} aria-hidden="true" /> <span>{t('nav.login', 'Chemist Login / Register')}</span>
-              </button>
-            )}
-
-            {/* Cart Icon: Strictly visible ONLY when logged-in chemist has items */}
-            {user && cartCount > 0 && (
-              <button 
-                className="cart-icon-btn hide-mobile" 
-                onClick={onOpenCart} 
-                aria-label={`Open Cart containing ${cartCount} items`}
-                style={{ width: '38px', height: '38px', boxSizing: 'border-box', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-              >
-                <ShoppingBag size={20} aria-hidden="true" />
-                <span className="cart-badge">{cartCount}</span>
-              </button>
-            )}
+            {/* PUBLIC WEBSITE ACCESS: Strictly Clean Chemist Login / Register Button */}
+            <button 
+              onClick={() => {
+                if (user) {
+                  window.open('/dashboard', '_blank');
+                } else {
+                  onOpenAuth();
+                }
+              }}
+              className="chemist-header-btn hide-mobile"
+              aria-label="Open Chemist Login or Portal"
+              style={{ height: '38px', boxSizing: 'border-box', display: 'inline-flex', alignItems: 'center' }}
+            >
+              <LogIn size={15} aria-hidden="true" /> <span>{t('nav.login', 'Chemist Login / Register')}</span>
+            </button>
 
             <button 
               className="mobile-menu-btn" 
@@ -1372,92 +1229,36 @@ function Header({
               </button>
             </div>
 
-            {/* Wholesale Cart Quick Access Card - Only when logged-in chemist has items */}
-            {user && cartCount > 0 && (
-              <div 
-                onClick={() => { setIsMobileMenuOpen(false); onOpenCart(); }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '12px 14px',
-                  borderRadius: '12px',
-                  backgroundColor: 'rgba(37, 99, 235, 0.08)',
-                  border: '1.5px solid var(--primary-blue)',
-                  cursor: 'pointer'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{ width: '38px', height: '38px', borderRadius: '10px', backgroundColor: 'var(--primary-blue)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <ShoppingBag size={20} />
-                  </div>
-                  <div>
-                    <div style={{ fontWeight: '800', fontSize: '0.92rem', color: 'var(--text-dark)' }}>{t('nav.cart', 'Wholesale Inquiry Cart')}</div>
-                    <div style={{ fontSize: '0.76rem', color: 'var(--text-medium)' }}>
-                      {`${cartCount} items selected for quotation`}
-                    </div>
-                  </div>
-                </div>
-                <span style={{ backgroundColor: '#ea580c', color: '#ffffff', fontSize: '0.75rem', fontWeight: '800', padding: '3px 9px', borderRadius: '12px' }}>
-                  {cartCount}
-                </span>
-              </div>
-            )}
-
-            {/* Quick Order Workstation Link */}
-            <Link 
-              to="/quick-order"
-              onClick={() => setIsMobileMenuOpen(false)}
+            {/* Chemist / B2B Wholesale Portal Access Button */}
+            <button 
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                if (user) {
+                  window.open('/dashboard', '_blank');
+                } else {
+                  onOpenAuth();
+                }
+              }}
+              className="btn btn-primary"
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
+                width: '100%',
                 padding: '12px 14px',
                 borderRadius: '12px',
-                backgroundColor: '#fff7ed',
-                border: '1px solid #fed7aa',
-                textDecoration: 'none',
-                color: '#9a3412'
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                fontWeight: '700',
+                fontSize: '0.90rem',
+                backgroundColor: 'var(--primary-blue)',
+                color: '#ffffff',
+                border: 'none',
+                cursor: 'pointer'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '38px', height: '38px', borderRadius: '10px', backgroundColor: '#ea580c', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Zap size={20} />
-                </div>
-                <div>
-                  <div style={{ fontWeight: '800', fontSize: '0.92rem', color: '#9a3412' }}>Fast Quick Order ⚡</div>
-                  <div style={{ fontSize: '0.76rem', color: '#c2410c' }}>Bulk order grid for registered pharmacies</div>
-                </div>
-              </div>
-              <ChevronRight size={18} color="#ea580c" />
-            </Link>
-
-            {user && (
-              <div style={{ backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '10px', padding: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', fontWeight: '800', color: '#047857', textTransform: 'uppercase' }}>
-                  <ShieldCheck size={14} /> Verified B2B Partner
-                </div>
-                <div style={{ fontSize: '0.98rem', fontWeight: '800', color: '#064e3b', margin: '2px 0 8px 0' }}>
-                  {chemistName}
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
-                  <Link 
-                    to="/dashboard"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    style={{ backgroundColor: '#059669', color: '#ffffff', padding: '7px 10px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '700', textAlign: 'center', textDecoration: 'none' }}
-                  >
-                    Chemist Portal
-                  </Link>
-                  <Link 
-                    to="/quick-order"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    style={{ backgroundColor: '#ffffff', border: '1px solid #a7f3d0', color: '#047857', padding: '7px 10px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '700', textAlign: 'center', textDecoration: 'none' }}
-                  >
-                    Quick Order
-                  </Link>
-                </div>
-              </div>
-            )}
+              <LogIn size={17} />
+              <span>{t('nav.login', 'Chemist Login / Register')}</span>
+            </button>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
               <Link to="/" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '11px 12px', borderRadius: '8px', fontWeight: '600', color: 'var(--text-dark)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -1530,22 +1331,8 @@ function Header({
               </a>
             </div>
 
-            <div style={{ marginTop: 'auto', paddingTop: '15px', borderTop: '1px solid var(--border-light)' }}>
-              {user ? (
-                <button 
-                  onClick={() => { onLogout(); setIsMobileMenuOpen(false); navigate('/', { replace: true }); }}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px 15px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)', borderRadius: '8px', color: 'var(--text-medium)', fontWeight: '600', cursor: 'pointer', width: '100%' }}
-                >
-                  <LogOut size={16} /> {t('nav.logout', 'Log Out')}
-                </button>
-              ) : (
-                <button 
-                  onClick={() => { onOpenAuth(); setIsMobileMenuOpen(false); }}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px 15px', backgroundColor: 'var(--primary-blue)', color: '#ffffff', borderRadius: '8px', fontWeight: '700', cursor: 'pointer', border: 'none', width: '100%', boxShadow: '0 4px 15px rgba(12, 61, 108, 0.3)' }}
-                >
-                  <LogIn size={16} /> {t('nav.login', 'Chemist Login / Register')}
-                </button>
-              )}
+            <div style={{ marginTop: 'auto', paddingTop: '15px', borderTop: '1px solid var(--border-light)', textAlign: 'center', fontSize: '0.78rem', color: 'var(--text-light)' }}>
+              <span>© {new Date().getFullYear()} Niyansh Pharma B2B</span>
             </div>
           </div>
         </div>,

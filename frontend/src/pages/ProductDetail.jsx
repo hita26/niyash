@@ -16,7 +16,7 @@ import { useLanguage } from '../context/LanguageContext';
 function ProductDetail({ addToCart }) {
   const { t, translateCategory, translateDosageForm, formatCurrency } = useLanguage();
   const { id } = useParams();
-  const { isLoggedIn, openAuth } = useAuth();
+  const { isLoggedIn, user, openAuth } = useAuth();
   const [product, setProduct] = useState(null);
   const [related, setRelated] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -110,8 +110,13 @@ function ProductDetail({ addToCart }) {
   };
 
   const handleAddToCart = () => {
+    if (!isLoggedIn && !user) {
+      if (openAuth) openAuth();
+      return;
+    }
     if (addToCart) {
-      addToCart(product, quantity);
+      const added = addToCart(product, quantity);
+      if (added === false) return;
       setIsAdded(true);
       setTimeout(() => setIsAdded(false), 2200);
     }

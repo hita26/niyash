@@ -12,7 +12,7 @@ import { useLanguage } from '../context/LanguageContext';
 
 function CompanyDetail({ addToCart }) {
   const { id } = useParams();
-  const { isLoggedIn, openAuth } = useAuth();
+  const { isLoggedIn, user, openAuth } = useAuth();
   const { t, language, translateDosageForm, translateCategory, formatCurrency } = useLanguage();
   const [company, setCompany] = useState(null);
   const [products, setProducts] = useState([]);
@@ -54,8 +54,13 @@ function CompanyDetail({ addToCart }) {
   }, [id]);
 
   const handleAdd = (prod) => {
+    if (!isLoggedIn && !user) {
+      if (openAuth) openAuth();
+      return;
+    }
     if (addToCart) {
-      addToCart(prod);
+      const added = addToCart(prod);
+      if (added === false) return;
       setAddedItemIds(prev => new Set(prev).add(prod._id));
       setTimeout(() => {
         setAddedItemIds(prev => {

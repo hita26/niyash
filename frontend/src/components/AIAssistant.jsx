@@ -120,7 +120,8 @@ export default function AIAssistant({ addToCart }) {
 
   const handleAddToCart = (product) => {
     if (typeof addToCart === 'function') {
-      addToCart(product, 1);
+      const added = addToCart(product, 1);
+      if (added === false) return;
       setAddedItemIds((prev) => ({ ...prev, [product._id]: true }));
       setTimeout(() => {
         setAddedItemIds((prev) => ({ ...prev, [product._id]: false }));

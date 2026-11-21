@@ -279,30 +279,32 @@ function Header({
                 />
               </Link>
 
-              {/* Mobile Action Controls: Cart, Theme Toggle & Hamburger */}
+              {/* Mobile Action Controls: Cart (Chemist Only), Theme Toggle & Hamburger */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <button 
-                  onClick={onOpenCart}
-                  style={{
-                    height: '38px',
-                    boxSizing: 'border-box',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '5px',
-                    backgroundColor: cartCount > 0 ? '#ea580c' : 'var(--bg-surface-alt)',
-                    color: cartCount > 0 ? '#ffffff' : 'var(--text-dark)',
-                    border: '1.5px solid var(--border-light)',
-                    borderRadius: '20px',
-                    padding: '0 10px',
-                    cursor: 'pointer',
-                    fontWeight: '700',
-                    fontSize: '0.78rem'
-                  }}
-                  title={`Wholesale Cart (${cartCount})`}
-                >
-                  <ShoppingBag size={14} />
-                  <span>({cartCount})</span>
-                </button>
+                {user && cartCount > 0 && (
+                  <button 
+                    onClick={onOpenCart}
+                    style={{
+                      height: '38px',
+                      boxSizing: 'border-box',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      backgroundColor: '#ea580c',
+                      color: '#ffffff',
+                      border: '1.5px solid #ea580c',
+                      borderRadius: '20px',
+                      padding: '0 10px',
+                      cursor: 'pointer',
+                      fontWeight: '700',
+                      fontSize: '0.78rem'
+                    }}
+                    title={`Wholesale Cart (${cartCount})`}
+                  >
+                    <ShoppingBag size={14} />
+                    <span>({cartCount})</span>
+                  </button>
+                )}
 
                 <ThemeToggle />
 
@@ -1080,8 +1082,10 @@ function Header({
             {/* SINGLE, NON-REDUNDANT B2B PORTAL ACCESS BUTTON */}
             {user ? (
               <div className="header-user-controls" style={{ display: 'flex', alignItems: 'center', gap: '8px', borderRight: '1px solid var(--border-light)', paddingRight: '12px', position: 'relative' }} ref={userMenuRef}>
-                <Link
-                  to="/dashboard"
+                <a
+                  href="/dashboard"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="hide-mobile"
                   style={{
                     height: '38px',
@@ -1098,11 +1102,11 @@ function Header({
                     alignItems: 'center',
                     gap: '6px'
                   }}
-                  title="Open Chemist Portal"
+                  title="Open Chemist Portal in a new tab"
                 >
                   <ShieldCheck size={15} color="#059669" />
-                  <span>Chemist Portal ➔</span>
-                </Link>
+                  <span>Chemist Portal ↗</span>
+                </a>
 
                 <div style={{ position: 'relative' }}>
                   <button 
@@ -1148,27 +1152,33 @@ function Header({
                         <div style={{ fontSize: '0.72rem', color: '#059669', fontWeight: '800', textTransform: 'uppercase' }}>● Verified B2B Partner</div>
                         <div style={{ fontSize: '0.88rem', fontWeight: '800', color: 'var(--text-dark)' }}>{chemistName}</div>
                       </div>
-                      <Link 
-                        to="/dashboard" 
+                      <a 
+                        href="/dashboard" 
+                        target="_blank"
+                        rel="noopener noreferrer"
                         onClick={() => setIsUserMenuOpen(false)}
                         style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', fontSize: '0.84rem', color: 'var(--text-dark)', textDecoration: 'none', fontWeight: '600' }}
                       >
-                        <ShieldCheck size={16} color="#059669" /> B2B Dashboard
-                      </Link>
-                      <Link 
-                        to="/quick-order" 
+                        <ShieldCheck size={16} color="#059669" /> B2B Dashboard ↗
+                      </a>
+                      <a 
+                        href="/quick-order" 
+                        target="_blank"
+                        rel="noopener noreferrer"
                         onClick={() => setIsUserMenuOpen(false)}
                         style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', fontSize: '0.84rem', color: 'var(--text-dark)', textDecoration: 'none', fontWeight: '600' }}
                       >
-                        <Zap size={16} color="#ea580c" /> Quick Order Pad
-                      </Link>
-                      <Link 
-                        to="/outstanding" 
+                        <Zap size={16} color="#ea580c" /> Quick Order Pad ↗
+                      </a>
+                      <a 
+                        href="/outstanding" 
+                        target="_blank"
+                        rel="noopener noreferrer"
                         onClick={() => setIsUserMenuOpen(false)}
                         style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', fontSize: '0.84rem', color: 'var(--text-dark)', textDecoration: 'none', fontWeight: '600' }}
                       >
-                        <FileText size={16} color="#3b82f6" /> Ledger & Invoices
-                      </Link>
+                        <FileText size={16} color="#3b82f6" /> Ledger & Invoices ↗
+                      </a>
                       <button 
                         onClick={() => { setIsUserMenuOpen(false); onLogout(); navigate('/', { replace: true }); }}
                         style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', fontSize: '0.84rem', color: '#dc2626', background: 'none', border: 'none', borderTop: '1px solid #f1f5f9', cursor: 'pointer', fontWeight: '600', textAlign: 'left' }}
@@ -1190,15 +1200,18 @@ function Header({
               </button>
             )}
 
-            <button 
-              className="cart-icon-btn hide-mobile" 
-              onClick={onOpenCart} 
-              aria-label={`Open Cart containing ${cartCount} items`}
-              style={{ width: '38px', height: '38px', boxSizing: 'border-box', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-            >
-              <ShoppingBag size={20} aria-hidden="true" />
-              {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
-            </button>
+            {/* Cart Icon: Strictly visible ONLY when logged-in chemist has items */}
+            {user && cartCount > 0 && (
+              <button 
+                className="cart-icon-btn hide-mobile" 
+                onClick={onOpenCart} 
+                aria-label={`Open Cart containing ${cartCount} items`}
+                style={{ width: '38px', height: '38px', boxSizing: 'border-box', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <ShoppingBag size={20} aria-hidden="true" />
+                <span className="cart-badge">{cartCount}</span>
+              </button>
+            )}
 
             <button 
               className="mobile-menu-btn" 
@@ -1359,39 +1372,37 @@ function Header({
               </button>
             </div>
 
-            {/* Wholesale Cart Quick Access Card */}
-            <div 
-              onClick={() => { setIsMobileMenuOpen(false); onOpenCart(); }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '12px 14px',
-                borderRadius: '12px',
-                backgroundColor: cartCount > 0 ? 'rgba(37, 99, 235, 0.08)' : 'var(--bg-main)',
-                border: cartCount > 0 ? '1.5px solid var(--primary-blue)' : '1px solid var(--border-light)',
-                cursor: 'pointer'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '38px', height: '38px', borderRadius: '10px', backgroundColor: 'var(--primary-blue)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <ShoppingBag size={20} />
-                </div>
-                <div>
-                  <div style={{ fontWeight: '800', fontSize: '0.92rem', color: 'var(--text-dark)' }}>{t('nav.cart', 'Wholesale Inquiry Cart')}</div>
-                  <div style={{ fontSize: '0.76rem', color: 'var(--text-medium)' }}>
-                    {cartCount > 0 ? `${cartCount} items selected for quotation` : 'Cart is currently empty'}
+            {/* Wholesale Cart Quick Access Card - Only when logged-in chemist has items */}
+            {user && cartCount > 0 && (
+              <div 
+                onClick={() => { setIsMobileMenuOpen(false); onOpenCart(); }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '12px 14px',
+                  borderRadius: '12px',
+                  backgroundColor: 'rgba(37, 99, 235, 0.08)',
+                  border: '1.5px solid var(--primary-blue)',
+                  cursor: 'pointer'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '38px', height: '38px', borderRadius: '10px', backgroundColor: 'var(--primary-blue)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <ShoppingBag size={20} />
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: '800', fontSize: '0.92rem', color: 'var(--text-dark)' }}>{t('nav.cart', 'Wholesale Inquiry Cart')}</div>
+                    <div style={{ fontSize: '0.76rem', color: 'var(--text-medium)' }}>
+                      {`${cartCount} items selected for quotation`}
+                    </div>
                   </div>
                 </div>
-              </div>
-              {cartCount > 0 ? (
                 <span style={{ backgroundColor: '#ea580c', color: '#ffffff', fontSize: '0.75rem', fontWeight: '800', padding: '3px 9px', borderRadius: '12px' }}>
                   {cartCount}
                 </span>
-              ) : (
-                <ChevronRight size={18} color="var(--text-medium)" />
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Quick Order Workstation Link */}
             <Link 

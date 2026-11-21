@@ -18,7 +18,7 @@ function getFormIcon(form) {
 
 function ProductCard({ product, addToCart }) {
   const { t, language, translateCategory, translateDosageForm, formatCurrency } = useLanguage();
-  const { isLoggedIn, openAuth } = useAuth();
+  const { isLoggedIn, user, openAuth } = useAuth();
   const [quantity, setQuantity] = useState(0);
   const [isAdded, setIsAdded] = useState(false);
   const [imgError, setImgError] = useState(false);
@@ -45,8 +45,15 @@ function ProductCard({ product, addToCart }) {
     e.preventDefault();
     e.stopPropagation();
     if (!product.inStock) return;
+    if (!isLoggedIn && !user) {
+      if (openAuth) openAuth();
+      return;
+    }
+    if (addToCart) {
+      const added = addToCart(product, 1);
+      if (added === false) return;
+    }
     setQuantity(1);
-    if (addToCart) addToCart(product, 1);
     setIsAdded(true);
     setTimeout(() => {
       setIsAdded(false);
@@ -56,21 +63,34 @@ function ProductCard({ product, addToCart }) {
   const handleIncrement = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!isLoggedIn && !user) {
+      if (openAuth) openAuth();
+      return;
+    }
+    if (addToCart) {
+      const added = addToCart(product, 1);
+      if (added === false) return;
+    }
     const nextQty = quantity + 1;
     setQuantity(nextQty);
-    if (addToCart) addToCart(product, 1);
   };
 
   const handleDecrement = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!isLoggedIn && !user) {
+      if (openAuth) openAuth();
+      return;
+    }
+    if (addToCart) {
+      const added = addToCart(product, -1);
+      if (added === false) return;
+    }
     if (quantity <= 1) {
       setQuantity(0);
-      if (addToCart) addToCart(product, -1);
     } else {
       const nextQty = quantity - 1;
       setQuantity(nextQty);
-      if (addToCart) addToCart(product, -1);
     }
   };
 

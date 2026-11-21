@@ -56,6 +56,7 @@ function ProtectedRoute({ children }) {
 function AppContent() {
   const [enquiryCart, setEnquiryCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [pendingCartProduct, setPendingCartProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
@@ -171,8 +172,12 @@ function AppContent() {
     }
   }, [location.pathname]);
 
-  // Load cart from localStorage on mount
+  // Load cart from localStorage (strictly for authenticated chemists only)
   useEffect(() => {
+    if (!user) {
+      setEnquiryCart([]);
+      return;
+    }
     const savedCart = localStorage.getItem('niyansh_enquiry_cart');
     if (savedCart) {
       try {
@@ -181,12 +186,16 @@ function AppContent() {
         console.error('Error loading cart from local storage', e);
       }
     }
-  }, []);
+  }, [user]);
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('niyansh_enquiry_cart', JSON.stringify(enquiryCart));
-  }, [enquiryCart]);
+    if (user) {
+      localStorage.setItem('niyansh_enquiry_cart', JSON.stringify(enquiryCart));
+    } else {
+      localStorage.removeItem('niyansh_enquiry_cart');
+    }
+  }, [enquiryCart, user]);
 
   // Global Uppercase Form Input Enforcer (All forms except Login credentials & passwords)
   useEffect(() => {
@@ -264,6 +273,13 @@ function AppContent() {
   }, []);
 
   const addToCart = (product, quantity = 1) => {
+    // Only authenticated verified chemists can add products to wholesale inquiry cart
+    if (!user) {
+      setPendingCartProduct({ product, quantity });
+      openAuth();
+      return false;
+    }
+
     setEnquiryCart((prevCart) => {
       const existingItem = prevCart.find((item) => item.product._id === product._id);
       if (existingItem) {
@@ -276,6 +292,33 @@ function AppContent() {
       return [...prevCart, { product, quantity }];
     });
     setIsCartOpen(true);
+    return true;
+  };
+
+  const handleAuthSuccess = (userData) => {
+    login(userData);
+    if (pendingCartProduct) {
+      const { product, quantity } = pendingCartProduct;
+      setEnquiryCart((prevCart) => {
+        const existingItem = prevCart.find((item) => item.product._id === product._id);
+        if (existingItem) {
+          return prevCart.map((item) =>
+            item.product._id === product._id
+              ? { ...item, quantity: item.quantity + quantity }
+              : item
+          );
+        }
+        return [...prevCart, { product, quantity }];
+      });
+      setIsCartOpen(true);
+      setPendingCartProduct(null);
+    }
+  };
+
+  const handleLogout = () => {
+    logout();
+    setEnquiryCart([]);
+    localStorage.removeItem('niyansh_enquiry_cart');
   };
 
   const updateQuantity = (productId, quantity) => {
@@ -314,7 +357,7 @@ function AppContent() {
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
           user={user}
-          onLogout={logout}
+          onLogout={handleLogout}
           onOpenAuth={openAuth}
           isB2BPortal={isB2BPortal}
           isMobileMenuOpen={isMobileMenuOpen}
@@ -428,7 +471,7 @@ function AppContent() {
         <AuthModal 
           isOpen={isAuthOpen}
           onClose={closeAuth}
-          onSuccess={login}
+          onSuccess={handleAuthSuccess}
         />
         {!isMobileMenuOpen && !location.pathname.startsWith('/admin') && (
           <>

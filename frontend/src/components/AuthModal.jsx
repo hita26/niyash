@@ -73,6 +73,52 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
     return () => clearInterval(timer);
   }, [countdown]);
 
+  const resetAllFields = () => {
+    setFormData({
+      name: '',
+      email: '',
+      password: '',
+      companyName: '',
+      gstin: '',
+      pan: '',
+      drugLicense: '',
+      drugLicense1: '',
+      drugLicense2: '',
+      phone: '',
+      gstinDoc: '',
+      panDoc: '',
+      drugLicense1Doc: '',
+      drugLicense2Doc: '',
+    });
+    setDocFiles({
+      gstin: null,
+      pan: null,
+      drugLicense1: null,
+      drugLicense2: null,
+    });
+    setForgotEmail('');
+    setResetData({
+      otp: '',
+      newPassword: '',
+      confirmPassword: '',
+    });
+    setServerOtp('');
+    setCountdown(0);
+    setError('');
+    setInfoMessage('');
+    setRegisterStep(1);
+    setRegistrationSuccessData(null);
+    setShowLoginPassword(false);
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
+    setAuthMode('login');
+  };
+
+  const handleModalClose = () => {
+    resetAllFields();
+    if (onClose) onClose();
+  };
+
   // Lock body & documentElement scroll and listen for Escape key
   useEffect(() => {
     if (!isOpen) return;
@@ -85,7 +131,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
     document.body.style.touchAction = 'none';
 
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') handleModalClose();
     };
     window.addEventListener('keydown', handleKeyDown);
 
@@ -95,11 +141,13 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
       document.body.style.touchAction = originalBodyTouch;
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
-  // Reset modal state when closed or opened
+  // Clean all fields completely every time modal opens or closes
   useEffect(() => {
-    if (isOpen) {
+    if (!isOpen) {
+      resetAllFields();
+    } else {
       setError('');
       setInfoMessage('');
       setRegisterStep(1);
@@ -429,11 +477,14 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
       }
 
       onSuccess(data);
-      onClose();
+      handleModalClose();
 
-      // In real-world B2B pharma flow: redirect chemist straight into their Wholesale Dashboard
-      if (!window.location.pathname.startsWith('/admin') && !window.location.pathname.startsWith('/dashboard')) {
-        navigate('/dashboard');
+      // Open Chemist B2B Wholesale Portal in a new separate tab
+      try {
+        const portalUrl = window.location.origin + '/dashboard';
+        window.open(portalUrl, '_blank');
+      } catch (tabErr) {
+        console.warn('Could not open portal tab automatically:', tabErr);
       }
     } catch (err) {
       setError(err.message);
@@ -534,7 +585,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
         if (data.token) {
           onSuccess(data);
         }
-        onClose();
+        handleModalClose();
       }, 2200);
 
     } catch (err) {
@@ -546,7 +597,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
 
   return (
     <div 
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      onClick={(e) => { if (e.target === e.currentTarget) handleModalClose(); }}
       onWheel={(e) => { if (e.target === e.currentTarget) e.preventDefault(); }}
       style={{
         position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -582,10 +633,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
       >
         {/* Close Button */}
         <button 
-          onClick={() => {
-            setRegistrationSuccessData(null);
-            onClose();
-          }}
+          onClick={handleModalClose}
           style={{ 
             position: 'absolute', top: '16px', right: '16px', 
             color: 'var(--text-light)', background: 'var(--bg-main, #f8fafc)', 
@@ -706,10 +754,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
             </div>
 
             <button
-              onClick={() => {
-                setRegistrationSuccessData(null);
-                onClose();
-              }}
+              onClick={handleModalClose}
               style={{
                 width: '100%',
                 padding: '13px',

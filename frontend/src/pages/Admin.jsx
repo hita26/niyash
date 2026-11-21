@@ -1604,9 +1604,6 @@ function Admin() {
       const fetchProducts = async () => {
         try {
           let res = await fetch('/api/products?limit=2500&includeInactive=true').catch(() => null);
-          if (!res || !res.ok) {
-            res = await fetch('https://pharma-bay-two.vercel.app/api/products?limit=2500&includeInactive=true').catch(() => null);
-          }
 
           if (res && res.ok) {
             const data = await res.json();
@@ -1827,9 +1824,6 @@ function Admin() {
     setIsAdminListLoading(true);
     try {
       let res = await fetch('/api/users/admins', { headers: getAuthHeaders() }).catch(() => null);
-      if (!res || !res.ok) {
-        res = await fetch('https://pharma-bay-two.vercel.app/api/users/admins', { headers: getAuthHeaders() }).catch(() => null);
-      }
       if (res && res.ok) {
         const data = await res.json();
         if (data.success && Array.isArray(data.admins) && data.admins.length > 0) {

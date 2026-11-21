@@ -36,7 +36,7 @@ export default function SecurityVerification({
     // Detect actual domain or default to niyanshpharma.com
     if (typeof window !== 'undefined') {
       const host = window.location.hostname;
-      if (host && host !== 'localhost' && host !== '127.0.0.1' && !host.includes('vercel.app')) {
+      if (host && host !== 'localhost' && host !== '127.0.0.1') {
         setBrandDomain(host);
       } else {
         setBrandDomain('niyanshpharma.com');

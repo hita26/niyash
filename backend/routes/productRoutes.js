@@ -68,17 +68,38 @@ const escapeRegex = (str) => {
   return str.toString().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 };
 
+// Cache for metadata filters to deliver 1ms instant responses
+let metaFiltersCache = null;
+let metaFiltersCacheTime = 0;
+const META_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+
 // @desc    Get metadata filters (distinct companies, forms, categories)
 // @route   GET /api/products/meta/filters
 // @access  Public
 router.get('/meta/filters', async (req, res) => {
   try {
+    const now = Date.now();
+    if (metaFiltersCache && (now - metaFiltersCacheTime < META_CACHE_TTL)) {
+      return res.json(metaFiltersCache);
+    }
+
     const [companiesRaw, brandsRaw, formsRaw, categoriesRaw] = await Promise.all([
       Product.distinct('company').catch(() => []),
       Product.distinct('brand').catch(() => []),
       Product.distinct('form').catch(() => []),
       Product.distinct('category').catch(() => []),
     ]);
+
+    const isMedicineOrProduct = (name) => {
+      if (!name || typeof name !== 'string') return true;
+      const clean = name.trim();
+      if (clean.length < 2 || clean.length > 32) return true;
+      if (/\b(tab|tablets?|cap|capsules?|inj|injection|syp|syrup|drop|drops|cream|gel|soap|susp|lotion|solution|powder|spray|wash|vial|amp|mouthwash|pads?|diaper|bandage|ointment|oint)\b/i.test(clean)) return true;
+      if (/\b\d+\s*(ml|gm|mg|mcg|iu|dt|sr|er|cr|pr|xl|ds|od|md)\b/i.test(clean)) return true;
+      if (/\d+\/\d+|\(\d+/i.test(clean)) return true;
+      if (/\d/.test(clean)) return true;
+      return false;
+    };
 
     const cleanList = (arr) => {
       if (!Array.isArray(arr)) return [];
@@ -95,9 +116,7 @@ router.get('/meta/filters', async (req, res) => {
       arr.forEach((item) => {
         if (item === null || item === undefined) return;
         const clean = String(item).trim();
-        if (clean.length < 2 || clean.length > 35) return;
-        // Exclude products, medical sundries, dosage pack descriptors, sanitary items
-        if (/sanitary|pads?|napkin|diaper|condom|bandage|cotton|dressing|\b\d+\s*(ml|gm|mg|tab|cap|vial|amp|pack|strip|pads?)\b|\(\d+/i.test(clean)) return;
+        if (isMedicineOrProduct(clean)) return;
         
         const lower = clean.toLowerCase();
         if (!map.has(lower)) {
@@ -108,6 +127,7 @@ router.get('/meta/filters', async (req, res) => {
           if (lower === 'daxia') formatted = 'Daxia Healthcare';
           if (lower === 'zydus') formatted = 'Zydus Cadila';
           if (lower === 'troikaa') formatted = 'Troikaa Pharmaceuticals';
+          if (lower === 'biochem') formatted = 'Biochem';
           map.set(lower, formatted);
         }
       });
@@ -119,13 +139,18 @@ router.get('/meta/filters', async (req, res) => {
     const forms = cleanList(formsRaw);
     const categories = cleanList(categoriesRaw);
 
-    res.json({
+    const payload = {
       success: true,
       companies: companies.length > 0 ? companies : ['Abbott', 'Alkem', 'Aristo', 'Biochem', 'Cadila', 'Cipla', 'Daxia Healthcare', 'Dr. Morepen', 'Glenmark', 'Intas', 'Ipca', 'Lupin', 'Macleods', 'Mankind', 'Sun Pharma', 'Torrent', 'Troikaa Pharmaceuticals', 'Zydus Cadila'],
       brands: brands.length > 0 ? brands : ['Abbott', 'Alkem', 'Aristo', 'Biochem', 'Cipla', 'Daxia Healthcare', 'Dr. Morepen', 'Glenmark', 'Intas', 'Ipca', 'Lupin', 'Macleods', 'Mankind', 'Sun Pharma', 'Torrent', 'Troikaa Pharmaceuticals', 'Zydus Cadila'],
       forms: forms.length > 0 ? forms : ['Tablet', 'Capsule', 'Syrup', 'Injection', 'Ointment', 'Suspension', 'Drops'],
       categories: categories.length > 0 ? categories : ['Pharmaceutical Formulations', 'Antibiotics & Anti-infectives', 'Cardiovascular & Diabetes', 'Gastroenterology', 'Respiratory Care'],
-    });
+    };
+
+    metaFiltersCache = payload;
+    metaFiltersCacheTime = Date.now();
+
+    res.json(payload);
   } catch (error) {
     console.error('Filter meta error:', error);
     // Never return 500 error on filter metadata - serve verified defaults

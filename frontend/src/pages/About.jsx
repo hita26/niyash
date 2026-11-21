@@ -59,11 +59,20 @@ function About() {
       .then(data => {
         if (data.success) {
           const brandMap = new Map();
-          const sanitizeAndAdd = (name) => {
-            if (!name || typeof name !== 'string') return;
+          const isMedicineOrProduct = (name) => {
+            if (!name || typeof name !== 'string') return true;
             const clean = name.trim();
-            if (clean.length < 2 || clean.length > 30) return;
-            if (/sanitary|pad|diaper|condom|\b\d+\s*(ml|gm|mg|tab|cap|vial|amp)\b/i.test(clean)) return;
+            if (clean.length < 2 || clean.length > 32) return true;
+            if (/\b(tab|tablets?|cap|capsules?|inj|injection|syp|syrup|drop|drops|cream|gel|soap|susp|lotion|solution|powder|spray|wash|vial|amp|mouthwash|pads?|diaper|bandage)\b/i.test(clean)) return true;
+            if (/\b\d+\s*(ml|gm|mg|mcg|iu|dt|sr|er|cr|pr|xl|ds|od|md)\b/i.test(clean)) return true;
+            if (/\d+\/\d+|\(\d+/i.test(clean)) return true;
+            if (/\d/.test(clean)) return true;
+            return false;
+          };
+
+          const sanitizeAndAdd = (name) => {
+            if (isMedicineOrProduct(name)) return;
+            const clean = name.trim();
             const lower = clean.toLowerCase();
             if (!brandMap.has(lower)) {
               const formatted = clean === clean.toUpperCase() && clean.length > 3
@@ -383,7 +392,7 @@ function About() {
           </p>
 
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '12px', marginTop: '24px' }}>
-            {brandsList.map((b, i) => (
+            {brandsList.slice(0, 36).map((b, i) => (
               <Link 
                 key={i} 
                 to={`/products?brand=${encodeURIComponent(b)}`}
@@ -396,6 +405,16 @@ function About() {
                 <span>{b}</span>
               </Link>
             ))}
+          </div>
+
+          <div style={{ marginTop: '28px', textAlign: 'center' }}>
+            <Link 
+              to="/companies" 
+              className="btn btn-outline"
+              style={{ fontWeight: '700', padding: '10px 24px', fontSize: '0.9rem', borderRadius: '30px', borderColor: 'var(--primary-blue)', color: 'var(--primary-blue)' }}
+            >
+              Explore All Authorized Pharmaceutical Companies &rarr;
+            </Link>
           </div>
         </div>
       </section>

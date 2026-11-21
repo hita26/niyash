@@ -27,6 +27,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
   const [selectedCompanies, setSelectedCompanies] = useState([]);
   const [selectedForms, setSelectedForms] = useState([]);
   const [companySearchTerm, setCompanySearchTerm] = useState('');
+  const [brandSearchTerm, setBrandSearchTerm] = useState('');
   const MAX_PRICE_LIMIT = 2000;
   const [maxPrice, setMaxPrice] = useState(MAX_PRICE_LIMIT);
 
@@ -73,11 +74,20 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
           const data = await res.json();
           if (!isCancelled) {
             const brandMap = new Map();
-            const sanitizeBrand = (name) => {
-              if (!name || typeof name !== 'string') return;
+            const isMedicineOrProduct = (name) => {
+              if (!name || typeof name !== 'string') return true;
               const clean = name.trim();
-              if (clean.length < 2 || clean.length > 30) return;
-              if (/sanitary|pad|diaper|condom|\b\d+\s*(ml|gm|mg|tab|cap|vial|amp)\b/i.test(clean)) return;
+              if (clean.length < 2 || clean.length > 32) return true;
+              if (/\b(tab|tablets?|cap|capsules?|inj|injection|syp|syrup|drop|drops|cream|gel|soap|susp|lotion|solution|powder|spray|wash|vial|amp|mouthwash|pads?|diaper|bandage)\b/i.test(clean)) return true;
+              if (/\b\d+\s*(ml|gm|mg|mcg|iu|dt|sr|er|cr|pr|xl|ds|od|md)\b/i.test(clean)) return true;
+              if (/\d+\/\d+|\(\d+/i.test(clean)) return true;
+              if (/\d/.test(clean)) return true;
+              return false;
+            };
+
+            const sanitizeBrand = (name) => {
+              if (isMedicineOrProduct(name)) return;
+              const clean = name.trim();
               const lower = clean.toLowerCase();
               if (!brandMap.has(lower)) {
                 const formatted = clean === clean.toUpperCase() && clean.length > 3
@@ -98,7 +108,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
               data.companies.forEach(c => {
                 if (c && typeof c === 'string' && c.trim().length >= 2) {
                   const clean = c.trim();
-                  if (!/sanitary|pad|diaper|condom/i.test(clean)) {
+                  if (!isMedicineOrProduct(clean)) {
                     compMap.set(clean.toLowerCase(), clean);
                   }
                 }
@@ -118,6 +128,16 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
   const brands = useMemo(() => {
     return [...availableBrands].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
   }, [availableBrands]);
+
+  const filteredBrandsList = useMemo(() => {
+    const checked = brands.filter(b => selectedBrands.includes(b));
+    const term = brandSearchTerm.toLowerCase().trim();
+    const remaining = brands.filter(b => !selectedBrands.includes(b));
+    const matches = term 
+      ? remaining.filter(b => b.toLowerCase().includes(term))
+      : remaining;
+    return [...checked, ...matches].slice(0, 45);
+  }, [brands, brandSearchTerm, selectedBrands]);
 
   const filteredCompaniesList = useMemo(() => {
     if (!companySearchTerm.trim()) return availableCompanies.slice(0, 50);
@@ -479,9 +499,30 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
 
             {/* Brands filter */}
             <div style={{ marginBottom: '22px', borderBottom: '1px solid #f1f5f9', paddingBottom: '18px' }}>
-              <h4 style={{ fontSize: '0.92rem', marginBottom: '10px', color: 'var(--text-dark)', fontWeight: '700' }}>{t('hero.featuredBrands', 'Brands')}</h4>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <h4 style={{ fontSize: '0.92rem', margin: 0, color: 'var(--text-dark)', fontWeight: '700' }}>{t('hero.featuredBrands', 'Brands')}</h4>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>({brands.length})</span>
+              </div>
+              <div style={{ position: 'relative', marginBottom: '8px' }}>
+                <Search size={13} style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
+                <input
+                  type="text"
+                  placeholder="Search brands..."
+                  value={brandSearchTerm}
+                  onChange={(e) => setBrandSearchTerm(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '5px 8px 5px 26px',
+                    fontSize: '0.78rem',
+                    borderRadius: '6px',
+                    border: '1px solid #cbd5e1',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '180px', overflowY: 'auto', paddingRight: '5px' }}>
-                {brands.map((br, i) => (
+                {filteredBrandsList.map((br, i) => (
                   <label key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.88rem', cursor: 'pointer', color: selectedBrands.includes(br) ? 'var(--primary-blue)' : 'var(--text-dark)', fontWeight: selectedBrands.includes(br) ? '600' : '400' }}>
                     <input
                       type="checkbox"

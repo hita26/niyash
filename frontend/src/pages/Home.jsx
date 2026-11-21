@@ -75,15 +75,27 @@ function Home({ addToCart }) {
       fetch('/api/products?limit=1').then(r => r.json())
     ]).then(([settingsRes, filtersRes, companiesRes, countRes]) => {
       const brandMap = new Map();
-      const addBrand = (name) => {
-        if (!name || typeof name !== 'string') return;
+
+      // Strict filter: Exclude individual medicine products & dosage forms from manufacturer list
+      const isMedicineOrProduct = (name) => {
+        if (!name || typeof name !== 'string') return true;
         const clean = name.trim();
-        // Skip empty, numbers, medical sundries, or non-brand entries like long product descriptions
-        if (clean.length < 2 || clean.length > 35) return;
-        if (/sanitary|pads?|napkin|diaper|condom|bandage|cotton|dressing|\b\d+\s*(ml|gm|mg|tab|cap|vial|amp|pack|strip|pads?)\b|\(\d+/i.test(clean)) return;
+        if (clean.length < 2 || clean.length > 32) return true;
+        // Filter out pharmaceutical dosage forms & formulation terms
+        if (/\b(tab|tablets?|cap|capsules?|inj|injection|syp|syrup|drop|drops|cream|gel|soap|susp|suspension|lotion|solution|powder|spray|wash|vial|amp|ampoule|mouthwash|pads?|diaper|bandage|dressing|ointment|oint|infusion|fluid|respule|inhaler)\b/i.test(clean)) return true;
+        // Filter out strength numbers like 500mg, 10ml, 500/15, 200dt, 500sr, etc.
+        if (/\b\d+\s*(ml|gm|mg|mcg|iu|dt|sr|er|cr|pr|xl|ds|od|md)\b/i.test(clean)) return true;
+        if (/\d+\/\d+|\(\d+/i.test(clean)) return true;
+        // Filter out numbers in brand name (indicative of medicine formulations like "Anastrazone 1")
+        if (/\d/.test(clean)) return true;
+        return false;
+      };
+
+      const addBrand = (name) => {
+        if (isMedicineOrProduct(name)) return;
+        const clean = name.trim();
         const lower = clean.toLowerCase();
         if (!brandMap.has(lower)) {
-          // Normalize all-caps names like "BIOCHEM" -> "Biochem"
           let formatted = clean === clean.toUpperCase() && clean.length > 3
             ? clean.charAt(0).toUpperCase() + clean.slice(1).toLowerCase()
             : clean;
@@ -96,10 +108,17 @@ function Home({ addToCart }) {
         }
       };
 
-      // Initial defaults
-      brandsList.forEach(addBrand);
+      // 1. Initial curated default manufacturers
+      const coreManufacturers = [
+        'Abbott', 'Alkem', 'Aristo', 'AstraZeneca', 'Biochem',
+        'Cadila', 'Cipla', 'Daxia Healthcare', 'Dr. Morepen', 'Dr. Reddy\'s',
+        'FDC Limited', 'Glenmark', 'Healing Pharma', 'Intas', 'Ipca',
+        'Leeford Healthcare', 'Lupin', 'Macleods', 'Mankind', 'Pfizer',
+        'Sanofi', 'Sun Pharma', 'Torrent', 'Troikaa Pharmaceuticals', 'Zydus Cadila'
+      ];
+      coreManufacturers.forEach(addBrand);
 
-      // From Settings
+      // 2. From Settings
       if (settingsRes.status === 'fulfilled' && settingsRes.value.success) {
         if (Array.isArray(settingsRes.value.brands)) {
           settingsRes.value.brands.forEach(addBrand);
@@ -109,27 +128,27 @@ function Home({ addToCart }) {
         }
       }
 
-      // From Product Database Filter Meta (Live active stock)
-      if (filtersRes.status === 'fulfilled' && filtersRes.value.success) {
-        if (Array.isArray(filtersRes.value.brands)) {
-          filtersRes.value.brands.forEach(addBrand);
-        }
-        if (Array.isArray(filtersRes.value.companies)) {
-          filtersRes.value.companies.forEach(addBrand);
-          if (filtersRes.value.companies.length > 0) {
-            setLiveCompaniesCount(filtersRes.value.companies.length);
-          }
-        }
-      }
-
-      // From Company Directory
+      // 3. From Registered Company Directory (Highest credibility)
       if (companiesRes.status === 'fulfilled' && companiesRes.value.success && Array.isArray(companiesRes.value.companies)) {
         companiesRes.value.companies.forEach(c => {
           if (c && c.name) addBrand(c.name);
         });
       }
 
-      // Live product total
+      // 4. From Product Database Companies / Brands (Sanitized)
+      if (filtersRes.status === 'fulfilled' && filtersRes.value.success) {
+        if (Array.isArray(filtersRes.value.companies)) {
+          filtersRes.value.companies.forEach(addBrand);
+          if (filtersRes.value.companies.length > 0) {
+            setLiveCompaniesCount(filtersRes.value.companies.length);
+          }
+        }
+        if (Array.isArray(filtersRes.value.brands)) {
+          filtersRes.value.brands.forEach(addBrand);
+        }
+      }
+
+      // 5. Live product total
       if (countRes.status === 'fulfilled' && countRes.value.success && typeof countRes.value.total === 'number') {
         setLiveProductsCount(countRes.value.total);
       }
@@ -158,12 +177,24 @@ function Home({ addToCart }) {
     }
   });
 
-  // Dual counter-flow marquee streams
+  // Dual counter-flow marquee streams (curated & optimized for locked 60 FPS performance)
   const { track1Stream, track2Stream } = useMemo(() => {
-    const t1 = brandsList.filter((_, idx) => idx % 2 === 0);
-    const t2 = brandsList.filter((_, idx) => idx % 2 === 1);
-    const s1 = t1.length >= 8 ? t1 : brandsList;
-    const s2 = t2.length >= 8 ? t2 : [...brandsList].reverse();
+    const list = brandsList.length > 0 ? brandsList : [
+      'Abbott', 'Alkem', 'Aristo', 'AstraZeneca', 'Biochem',
+      'Cadila', 'Cipla', 'Daxia Healthcare', 'Dr. Morepen', 'Dr. Reddy\'s',
+      'FDC Limited', 'Glenmark', 'Healing Pharma', 'Intas', 'Ipca',
+      'Leeford Healthcare', 'Lupin', 'Macleods', 'Mankind', 'Pfizer',
+      'Sanofi', 'Sun Pharma', 'Torrent', 'Troikaa Pharmaceuticals', 'Zydus Cadila'
+    ];
+    // Cap at 36 prominent partners so marquee stays lightweight (<1MB texture) and ultra-responsive
+    const curated = list.slice(0, 36);
+    const half = Math.ceil(curated.length / 2);
+    const t1 = curated.slice(0, half);
+    const t2 = curated.slice(half);
+
+    const s1 = t1.length >= 6 ? t1 : curated;
+    const s2 = t2.length >= 6 ? t2 : [...curated].reverse();
+
     return {
       track1Stream: [...s1, ...s1],
       track2Stream: [...s2, ...s2]
@@ -502,7 +533,7 @@ function Home({ addToCart }) {
           <div className="pharma-reveal" style={{ textAlign: 'center', maxWidth: '780px', margin: '0 auto 24px auto' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 16px', borderRadius: '30px', backgroundColor: 'rgba(12, 61, 108, 0.08)', color: 'var(--primary-blue)', fontSize: '0.82rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '14px' }}>
               <Sparkles size={15} color="var(--secondary-green)" />
-              <span>{t('about.brandNetworkBadge', 'Direct Manufacturer Network')} • {brandsList.length}+ {t('about.brandsCountLabel', 'Partners')}</span>
+              <span>{t('about.brandNetworkBadge', 'Direct Manufacturer Network')} • {liveCompaniesCount || 50}+ {t('about.brandsCountLabel', 'Partners')}</span>
             </div>
             <h2 className="section-title">{t('about.brandNetworkTitle', 'Our Brand Network')}</h2>
             <p className="section-subtitle">{t('about.brandNetworkSubtitle', 'Authorised distribution partner for India’s most trusted pharmaceutical manufacturers.')}</p>

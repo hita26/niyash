@@ -26,6 +26,12 @@ export default function AIAssistant({ addToCart }) {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
+  const isStandalone = typeof window !== 'undefined' && (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true ||
+    document.body.classList.contains('standalone-pwa')
+  );
+
   // Quick suggestion chips
   const quickChips = [
     t('aiAssistant.chip1', 'Amoxyclav 625 stock?'),
@@ -243,7 +249,7 @@ export default function AIAssistant({ addToCart }) {
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
-            bottom: ${isAdmin ? 'calc(20px + env(safe-area-inset-bottom, 0px))' : 'calc(74px + env(safe-area-inset-bottom, 0px))'} !important;
+            bottom: ${isAdmin ? 'calc(16px + env(safe-area-inset-bottom, 0px))' : (isStandalone ? 'calc(76px + env(safe-area-inset-bottom, 0px))' : 'calc(16px + env(safe-area-inset-bottom, 0px))')} !important;
             right: max(14px, env(safe-area-inset-right, 14px)) !important;
             box-shadow: 0 4px 18px rgba(12, 61, 108, 0.45) !important;
           }
@@ -251,7 +257,7 @@ export default function AIAssistant({ addToCart }) {
             display: none !important;
           }
           .ai-chat-window {
-            bottom: ${isAdmin ? 'calc(16px + env(safe-area-inset-bottom, 0px))' : 'calc(74px + env(safe-area-inset-bottom, 0px))'} !important;
+            bottom: ${isAdmin ? 'calc(16px + env(safe-area-inset-bottom, 0px))' : (isStandalone ? 'calc(76px + env(safe-area-inset-bottom, 0px))' : 'calc(16px + env(safe-area-inset-bottom, 0px))')} !important;
             right: max(10px, env(safe-area-inset-right, 10px)) !important;
             left: max(10px, env(safe-area-inset-left, 10px)) !important;
             width: auto !important;

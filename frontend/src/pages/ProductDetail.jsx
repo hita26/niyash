@@ -154,34 +154,34 @@ function ProductDetail({ addToCart }) {
   const displayPacking = cleanVal(product.packing, 'Standard Pack');
 
   return (
-    <div className="section animate-fade-in" style={{ backgroundColor: 'var(--bg-main)', paddingTop: '20px', paddingBottom: '70px' }}>
+    <div className="section animate-fade-in product-detail-section" style={{ backgroundColor: 'var(--bg-main)', paddingTop: '20px', paddingBottom: '100px' }}>
       <div className="container">
         
         {/* Breadcrumb & Navigation Bar */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', marginBottom: '20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--text-medium)', flexWrap: 'wrap' }}>
+        <div className="product-detail-nav-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', marginBottom: '20px' }}>
+          <div className="product-breadcrumb-wrap" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--text-medium)', flexWrap: 'wrap', maxWidth: '100%', wordBreak: 'break-word' }}>
             <Link to="/" style={{ color: 'var(--text-medium)', textDecoration: 'none' }}>{t('nav.home', 'Home')}</Link>
-            <ChevronRight size={14} />
+            <ChevronRight size={14} style={{ flexShrink: 0 }} />
             <Link to="/products" style={{ color: 'var(--text-medium)', textDecoration: 'none' }}>{t('nav.products', 'Products')}</Link>
             {displayCategory && (
               <>
-                <ChevronRight size={14} />
+                <ChevronRight size={14} style={{ flexShrink: 0 }} />
                 <Link to={`/products?category=${encodeURIComponent(displayCategory)}`} style={{ color: 'var(--text-medium)', textDecoration: 'none' }}>
                   {displayCategory}
                 </Link>
               </>
             )}
-            <ChevronRight size={14} />
-            <span style={{ color: 'var(--primary-blue)', fontWeight: '700' }}>
+            <ChevronRight size={14} style={{ flexShrink: 0 }} />
+            <span style={{ color: 'var(--primary-blue)', fontWeight: '700', wordBreak: 'break-word' }}>
               {product.name}
             </span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div className="product-detail-top-btns" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             <button
               onClick={handleShare}
               className="btn btn-outline btn-sm"
-              style={{ padding: '5px 12px', fontSize: '0.78rem', gap: '5px', borderRadius: '20px', backgroundColor: '#fff' }}
+              style={{ padding: '5px 12px', fontSize: '0.78rem', gap: '5px', borderRadius: '20px', backgroundColor: '#fff', whiteSpace: 'nowrap' }}
               title="Copy product link"
             >
               <Share2 size={13} /> {copied ? t('productDetail.linkCopied', 'Link Copied!') : t('productDetail.share', 'Share')}
@@ -189,7 +189,7 @@ function ProductDetail({ addToCart }) {
             <Link 
               to="/products" 
               className="btn btn-outline btn-sm"
-              style={{ padding: '5px 12px', fontSize: '0.78rem', gap: '5px', borderRadius: '20px', backgroundColor: '#fff', textDecoration: 'none' }}
+              style={{ padding: '5px 12px', fontSize: '0.78rem', gap: '5px', borderRadius: '20px', backgroundColor: '#fff', textDecoration: 'none', whiteSpace: 'nowrap' }}
             >
               <ArrowLeft size={13} /> {t('productDetail.backToCatalog', 'All Products')}
             </Link>
@@ -538,7 +538,7 @@ function ProductDetail({ addToCart }) {
 
               {/* Protected Wholesale Callout for Logged-Out Users */}
               {!isLoggedIn && (
-                <div style={{
+                <div className="wholesale-protect-box" style={{
                   backgroundColor: '#eff6ff',
                   border: '1.5px dashed #3b82f6',
                   borderRadius: '10px',
@@ -547,17 +547,19 @@ function ProductDetail({ addToCart }) {
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   flexWrap: 'wrap',
-                  gap: '12px'
+                  gap: '12px',
+                  width: '100%',
+                  boxSizing: 'border-box'
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: '1 1 200px', minWidth: 0 }}>
                     <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: '#dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       <Lock size={18} color="var(--primary-blue)" />
                     </div>
-                    <div>
+                    <div style={{ minWidth: 0 }}>
                       <div style={{ fontSize: '0.88rem', fontWeight: '800', color: 'var(--primary-blue)' }}>
                         {t('productDetail.wholesaleProtected', 'Wholesale PTR Rate Protected')}
                       </div>
-                      <div style={{ fontSize: '0.78rem', color: '#475569' }}>
+                      <div style={{ fontSize: '0.78rem', color: '#475569', lineHeight: 1.35 }}>
                         {t('productDetail.wholesaleProtectedDesc', 'Special wholesale PTR rates and chemist trade margins are visible only to verified accounts.')}
                       </div>
                     </div>
@@ -565,8 +567,8 @@ function ProductDetail({ addToCart }) {
                   <button
                     type="button"
                     onClick={openAuth}
-                    className="btn btn-primary btn-sm"
-                    style={{ padding: '7px 16px', fontSize: '0.82rem', fontWeight: '700', borderRadius: '6px', gap: '6px' }}
+                    className="btn btn-primary btn-sm wholesale-protect-login-btn"
+                    style={{ padding: '7px 16px', fontSize: '0.82rem', fontWeight: '700', borderRadius: '6px', gap: '6px', whiteSpace: 'nowrap' }}
                   >
                     <LogIn size={14} /> {t('productDetail.loginToViewPtr', 'Login to View PTR')}
                   </button>
@@ -575,11 +577,11 @@ function ProductDetail({ addToCart }) {
 
               {/* Quantity Stepper & Bulk Ordering Presets */}
               {product.inStock && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', paddingTop: '10px', borderTop: '1px solid #e2e8f0' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', paddingTop: '10px', borderTop: '1px solid #e2e8f0', width: '100%' }}>
+                  <div className="product-qty-bulk-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', width: '100%' }}>
                     
                     {/* Stepper */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
                       <span style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-dark)' }}>
                         Quantity:
                       </span>
@@ -613,7 +615,7 @@ function ProductDetail({ addToCart }) {
                     </div>
 
                     {/* Bulk Preset Chips for Retailers */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                    <div className="product-bulk-chips-wrap" style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                       <span style={{ fontSize: '0.74rem', color: 'var(--text-light)', fontWeight: '600' }}>{t('productDetail.addBulk', 'Add Bulk:')}</span>
                       {[5, 10, 25, 50, 100].map((preset) => (
                         <button
@@ -685,23 +687,10 @@ function ProductDetail({ addToCart }) {
                   </div>
 
                   {/* Primary Call-to-Action Buttons */}
-                  <div className="product-detail-actions" style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '4px' }}>
+                  <div className="product-detail-actions">
                     <button 
                       onClick={handleAddToCart}
-                      className={`btn ${isAdded ? 'btn-secondary' : 'btn-primary'}`}
-                      style={{
-                        height: '48px',
-                        flex: '1 1 200px',
-                        padding: '0 24px',
-                        fontSize: '0.96rem',
-                        fontWeight: '700',
-                        borderRadius: '8px',
-                        gap: '8px',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'all 0.2s ease'
-                      }}
+                      className={`btn product-cta-btn ${isAdded ? 'btn-secondary' : 'btn-primary'}`}
                     >
                       {isAdded ? (
                         <>
@@ -716,23 +705,7 @@ function ProductDetail({ addToCart }) {
 
                     <button 
                       onClick={handleWhatsAppOrder}
-                      className="btn"
-                      style={{
-                        height: '48px',
-                        flex: '1 1 180px',
-                        padding: '0 20px',
-                        fontSize: '0.96rem',
-                        fontWeight: '700',
-                        borderRadius: '8px',
-                        gap: '8px',
-                        backgroundColor: '#22c55e',
-                        color: '#ffffff',
-                        border: 'none',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer'
-                      }}
+                      className="btn product-cta-btn product-cta-whatsapp"
                     >
                       <MessageSquare size={18} /> {t('productDetail.orderOnWhatsApp', 'WhatsApp Order')}
                     </button>

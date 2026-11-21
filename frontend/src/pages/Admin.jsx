@@ -938,50 +938,6 @@ function Admin() {
     setCollapsedSections(prev => ({ ...prev, [title]: !prev[title] }));
   };
 
-  // Header integration: window event listeners
-  useEffect(() => {
-    const handleAdminRefresh = () => fetchDashboardData();
-    const handleAdminOpenProfile = () => handleOpenProfileModal();
-    const handleAdminLogout = () => handleLogout();
-
-    window.addEventListener('admin:refresh-data', handleAdminRefresh);
-    window.addEventListener('admin:open-profile', handleAdminOpenProfile);
-    window.addEventListener('admin:logout', handleAdminLogout);
-
-    return () => {
-      window.removeEventListener('admin:refresh-data', handleAdminRefresh);
-      window.removeEventListener('admin:open-profile', handleAdminOpenProfile);
-      window.removeEventListener('admin:logout', handleAdminLogout);
-    };
-  }, [fetchDashboardData, handleOpenProfileModal, handleLogout]);
-
-  // Sync admin user to header
-  useEffect(() => {
-    if (currentUser) {
-      window.dispatchEvent(new CustomEvent('admin:user-updated', { detail: currentUser }));
-    }
-  }, [currentUser]);
-
-  // 100% Dynamic Category breakdown computed from live products catalog
-  const dynamicCategories = useMemo(() => {
-    const map = {};
-    (products || []).forEach(p => {
-      const cat = p.category || 'Pharma Products';
-      map[cat] = (map[cat] || 0) + 1;
-    });
-    const total = Math.max((products || []).length, 1);
-    const sorted = Object.entries(map).sort((a, b) => b[1] - a[1]);
-    const top4 = sorted.slice(0, 4);
-    const colors = ['#0284c7', '#10b981', '#6366f1', '#f59e0b'];
-
-    return top4.map(([name, count], idx) => ({
-      name,
-      count: count.toLocaleString(),
-      pct: Math.round((count / total) * 100),
-      color: colors[idx % colors.length]
-    }));
-  }, [products]);
-
   // Time-based greeting helper for Command Center
   const getTimeGreeting = () => {
     const hour = new Date().getHours();
@@ -5070,6 +5026,58 @@ _Helpline: +91 9316566894_`;
       (log.city && log.city.toLowerCase().includes(q))
     );
   }, [visitorRecentLogs, visitorSearch]);
+
+  // 100% Dynamic Category breakdown computed from live products catalog
+  const dynamicCategories = useMemo(() => {
+    const map = {};
+    (products || []).forEach(p => {
+      const cat = p.category || 'Pharma Products';
+      map[cat] = (map[cat] || 0) + 1;
+    });
+    const total = Math.max((products || []).length, 1);
+    const sorted = Object.entries(map).sort((a, b) => b[1] - a[1]);
+    const top4 = sorted.slice(0, 4);
+    const colors = ['#0284c7', '#10b981', '#6366f1', '#f59e0b'];
+
+    return top4.map(([name, count], idx) => ({
+      name,
+      count: count.toLocaleString(),
+      pct: Math.round((count / total) * 100),
+      color: colors[idx % colors.length]
+    }));
+  }, [products]);
+
+  // Header integration refs for latest callbacks
+  const fetchDashboardDataRef = useRef(fetchDashboardData);
+  fetchDashboardDataRef.current = fetchDashboardData;
+  const handleOpenProfileModalRef = useRef(handleOpenProfileModal);
+  handleOpenProfileModalRef.current = handleOpenProfileModal;
+  const handleLogoutRef = useRef(handleLogout);
+  handleLogoutRef.current = handleLogout;
+
+  // Header integration: window event listeners
+  useEffect(() => {
+    const handleAdminRefresh = () => fetchDashboardDataRef.current?.();
+    const handleAdminOpenProfile = () => handleOpenProfileModalRef.current?.();
+    const handleAdminLogout = () => handleLogoutRef.current?.();
+
+    window.addEventListener('admin:refresh-data', handleAdminRefresh);
+    window.addEventListener('admin:open-profile', handleAdminOpenProfile);
+    window.addEventListener('admin:logout', handleAdminLogout);
+
+    return () => {
+      window.removeEventListener('admin:refresh-data', handleAdminRefresh);
+      window.removeEventListener('admin:open-profile', handleAdminOpenProfile);
+      window.removeEventListener('admin:logout', handleAdminLogout);
+    };
+  }, []);
+
+  // Sync admin user to header
+  useEffect(() => {
+    if (currentUser) {
+      window.dispatchEvent(new CustomEvent('admin:user-updated', { detail: currentUser }));
+    }
+  }, [currentUser]);
 
   // ==========================================
   // RENDER: LOGIN SCREEN

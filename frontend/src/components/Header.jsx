@@ -1252,17 +1252,16 @@ function Header({
             {/* Dark / Light Mode Toggle */}
             <ThemeToggle />
 
-            {/* Direct Admin Console Access Button (Opens in New Tab) */}
+            {/* Direct Admin Console Access Button (Opens in New Tab - Desktop Only) */}
             <Link
               to="/admin"
               target="_blank"
               rel="noopener noreferrer"
-              className="admin-nav-pill"
+              className="admin-nav-pill hide-mobile"
               title="Admin & Operations Console"
               style={{
                 height: '38px',
                 boxSizing: 'border-box',
-                display: 'inline-flex',
                 alignItems: 'center',
                 gap: '5px',
                 padding: '0 12px',
@@ -1279,7 +1278,7 @@ function Header({
               <span>Admin</span>
             </Link>
 
-            {/* PUBLIC WEBSITE ACCESS: Strictly Clean Chemist Login / Register Button */}
+            {/* PUBLIC WEBSITE ACCESS: Strictly Clean Chemist Login / Register Button (Desktop Only) */}
             <button 
               onClick={() => {
                 if (user) {
@@ -1290,7 +1289,7 @@ function Header({
               }}
               className="chemist-header-btn hide-mobile"
               aria-label="Open Chemist Login or Portal"
-              style={{ height: '38px', boxSizing: 'border-box', display: 'inline-flex', alignItems: 'center' }}
+              style={{ height: '38px', boxSizing: 'border-box' }}
             >
               <LogIn size={15} aria-hidden="true" /> <span>{t('nav.login', 'Chemist Login / Register')}</span>
             </button>

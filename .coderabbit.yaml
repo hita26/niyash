@@ -1,0 +1,30 @@
+# CodeRabbit Configuration for Niyansh Pharma B2B Portal
+# Language: JavaScript, React, Node.js, Express, MongoDB
+
+language: "en-US"
+tone_instructions: "Be rigorous, professional, and thorough. Focus on pharmaceutical data integrity, security of chemist regulatory documents, and UI performance."
+
+reviews:
+  profile: "assertive"
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - "main"
+
+chat:
+  auto_reply: true
+
+# Custom Review Guidelines tailored for Niyansh Pharma
+knowledge_base:
+  guidelines:
+    - "Never allow visual top progress bars or loaders to trigger on background polling or session heartbeats."
+    - "Chemist Form 20/21 drug licenses and PAN card documents must always be uploaded and served securely."
+    - "Ensure uppercase input transformation is strictly restricted to SKU, GSTIN, PAN, and DL numbers, and never applied to passwords or emails."
+    - "All MongoDB product queries must use lean projections and indexes to avoid memory bloat with 9,800+ SKUs."
+    - "Session validation endpoints must return 401/403 with isTerminated: true when a user account is deleted by administration."

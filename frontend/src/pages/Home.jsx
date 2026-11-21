@@ -176,25 +176,31 @@ function Home({ addToCart }) {
 
   // Dual counter-flow marquee streams (curated & optimized for locked 60 FPS performance)
   const { track1Stream, track2Stream } = useMemo(() => {
-    const list = brandsList.length > 0 ? brandsList : [
-      'Abbott', 'Alkem', 'Aristo', 'AstraZeneca', 'Biochem',
-      'Cadila', 'Cipla', 'Daxia Healthcare', 'Dr. Morepen', 'Dr. Reddy\'s',
-      'FDC Limited', 'Glenmark', 'Healing Pharma', 'Intas', 'Ipca',
-      'Leeford Healthcare', 'Lupin', 'Macleods', 'Mankind', 'Pfizer',
-      'Sanofi', 'Sun Pharma', 'Torrent', 'Troikaa Pharmaceuticals', 'Zydus Cadila'
+    const premierTrack1 = [
+      'Cipla', 'Sun Pharma', 'Biochem', 'Zydus Cadila', 'Daxia Healthcare',
+      'Abbott', 'Alkem Laboratories', 'Dr. Reddy\'s', 'Lupin', 'Mankind Pharma',
+      'Torrent Pharmaceuticals', 'Glenmark', 'Ajanta Pharma', 'Macleods'
     ];
-    // Cap at 36 prominent partners so marquee stays lightweight (<1MB texture) and ultra-responsive
-    const curated = list.slice(0, 36);
-    const half = Math.ceil(curated.length / 2);
-    const t1 = curated.slice(0, half);
-    const t2 = curated.slice(half);
 
-    const s1 = t1.length >= 6 ? t1 : curated;
-    const s2 = t2.length >= 6 ? t2 : [...curated].reverse();
+    const premierTrack2 = [
+      'Troikaa Pharmaceuticals', 'Intas Pharmaceuticals', 'Ipca Laboratories',
+      'Leeford Healthcare', 'Aristo Pharmaceuticals', 'Healing Pharma',
+      'FDC Limited', 'Cadila Pharmaceuticals', 'AstraZeneca', 'Sanofi India',
+      'Dr. Morepen', 'Pfizer', 'Akumentis Healthcare', 'Amanta Healthcare'
+    ];
+
+    // Combine premier list with any additional verified corporate companies from database
+    const extraCompanies = (brandsList || []).filter(c => 
+      !premierTrack1.includes(c) && !premierTrack2.includes(c) &&
+      !/\b(clip|shampoo|freight|rotacaps?|forte|pudina|drops?|cream|gel|soap|tab|tablets?|cap|capsules?|inj|injection|dus\.pow|support|watch|bandage|dressing)\b/i.test(c)
+    );
+
+    const fullTrack1 = [...premierTrack1, ...extraCompanies.filter((_, i) => i % 2 === 0).slice(0, 4)];
+    const fullTrack2 = [...premierTrack2, ...extraCompanies.filter((_, i) => i % 2 === 1).slice(0, 4)];
 
     return {
-      track1Stream: [...s1, ...s1],
-      track2Stream: [...s2, ...s2]
+      track1Stream: [...fullTrack1, ...fullTrack1], // Loop twice for continuous infinite marquee
+      track2Stream: [...fullTrack2, ...fullTrack2]
     };
   }, [brandsList]);
 

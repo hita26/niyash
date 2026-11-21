@@ -1717,6 +1717,8 @@ function Admin() {
     }
   };
 
+  const fetchProducts = (showSpinner = false) => fetchDashboardData(showSpinner);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoginError('');
@@ -4235,17 +4237,21 @@ _Helpline: +91 9316566894_`;
 
   const handleCloseBulkImportModal = () => {
     setIsBulkImportOpen(false);
-    setBulkParsedRows([]);
-    setUploadedFileName('');
-    setBulkPreviewSearch('');
-    setBulkPreviewFilter('all');
-    setBulkPreviewPage(1);
-    setEditingBulkRow(null);
-    setIsBulkModalMaximized(false);
-    setIsStatsCollapsed(false);
-    setBulkImportResults(null);
-    if (excelFileInputRef.current) {
-      excelFileInputRef.current.value = '';
+    if (!isImportingBulk) {
+      setBulkParsedRows([]);
+      setUploadedFileName('');
+      setBulkPreviewSearch('');
+      setBulkPreviewFilter('all');
+      setBulkPreviewPage(1);
+      setEditingBulkRow(null);
+      setIsBulkModalMaximized(false);
+      setIsStatsCollapsed(false);
+      setBulkImportResults(null);
+      if (excelFileInputRef.current) {
+        excelFileInputRef.current.value = '';
+      }
+    } else {
+      showToast('Bulk import running in background. You can track progress from the top banner.', 'info');
     }
   };
 
@@ -4483,14 +4489,15 @@ _Helpline: +91 9316566894_`;
       }
 
       setBulkImportResults({ successCount: totalSuccess, skippedCount: totalSkipped });
-      showToast(`Successfully imported ${totalSuccess} products! ${totalSkipped ? `(${totalSkipped} duplicates skipped)` : ''}`);
+      showToast(`Successfully imported ${totalSuccess} products! ${totalSkipped ? `(${totalSkipped} duplicates skipped)` : ''}`, 'success');
       broadcastLiveEvent(SYNC_EVENTS.PRODUCT_BULK_IMPORTED, { count: totalSuccess });
-      fetchProducts();
-      fetchDashboardData();
+      await fetchDashboardData(false);
       // Clear preview after successful import
       setBulkParsedRows([]);
       setUploadedFileName('');
       setBulkCsvText('');
+      // Auto-close bulk import modal on successful completion
+      setIsBulkImportOpen(false);
     } catch (err) {
       showToast('Error during bulk import: ' + err.message, 'error');
     } finally {
@@ -5020,6 +5027,68 @@ _Helpline: +91 9316566894_`;
 
   return (
     <div className="section" style={{ backgroundColor: 'var(--bg-main)', minHeight: '85vh', padding: '24px 0' }}>
+      
+      {/* PERSISTENT BACKGROUND BULK IMPORT NOTIFICATION BANNER */}
+      {isImportingBulk && !isBulkImportOpen && (
+        <div style={{
+          maxWidth: '1420px',
+          margin: '0 auto 16px auto',
+          padding: '12px 20px',
+          backgroundColor: '#eff6ff',
+          border: '1.5px solid #93c5fd',
+          borderRadius: '12px',
+          boxShadow: '0 4px 18px rgba(37, 99, 235, 0.12)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px',
+          boxSizing: 'border-box'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#2563eb', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <RefreshCw size={20} className="animate-spin" />
+            </div>
+            <div>
+              <div style={{ fontSize: '0.92rem', fontWeight: '800', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <span>Importing Products to MongoDB in Background...</span>
+                <span style={{ fontSize: '0.8rem', color: '#ffffff', backgroundColor: '#2563eb', padding: '1px 8px', borderRadius: '999px', fontWeight: '800' }}>
+                  {importProgress.percent}% Complete
+                </span>
+                {importProgress.etaText && (
+                  <span style={{ fontSize: '0.78rem', color: '#047857', backgroundColor: '#ecfdf5', padding: '2px 8px', borderRadius: '6px', border: '1px solid #a7f3d0', fontWeight: '700' }}>
+                    ⏳ {importProgress.etaText}
+                  </span>
+                )}
+                {importProgress.speedText && (
+                  <span style={{ fontSize: '0.78rem', color: '#475569', backgroundColor: '#ffffff', padding: '2px 8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontWeight: '700' }}>
+                    ⚡ {importProgress.speedText}
+                  </span>
+                )}
+              </div>
+              <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px' }}>
+                Syncing Batch <strong>{importProgress.batch} of {importProgress.totalBatches}</strong> ({importProgress.current.toLocaleString()} / {importProgress.total.toLocaleString()} products)
+                {importProgress.currentSampleName && <span> • Current: <strong style={{ color: '#1e293b' }}>{importProgress.currentSampleName}</strong></span>}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ width: '140px', height: '10px', backgroundColor: '#cbd5e1', borderRadius: '999px', overflow: 'hidden' }}>
+              <div style={{ width: `${importProgress.percent}%`, height: '100%', background: 'linear-gradient(90deg, #2563eb, #60a5fa)', borderRadius: '999px', transition: 'width 0.25s ease' }} />
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsBulkImportOpen(true)}
+              className="btn btn-primary btn-sm"
+              style={{ padding: '6px 16px', fontWeight: '700', borderRadius: '8px', fontSize: '0.8rem', gap: '6px' }}
+            >
+              <Maximize2 size={14} /> View Live Progress
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="admin-workspace-container admin-layout-container">
         
         {/* Sidebar Nav */}
@@ -12821,55 +12890,6 @@ _Helpline: +91 9316566894_`;
                             {isStatsCollapsed ? '▼ Show Summary Cards' : '▲ Extra Tall Table (Hide Cards)'}
                           </button>
 
-                          {/* TOP QUICK PAGINATION CONTROLS (ALWAYS IN SIGHT) */}
-                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', backgroundColor: '#ffffff', padding: '2px 8px', borderRadius: '6px', border: '1px solid #cbd5e1', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
-                            <button
-                              type="button"
-                              onClick={() => setBulkPreviewPage(p => Math.max(1, p - 1))}
-                              disabled={safeCurrentPage <= 1}
-                              style={{
-                                border: 'none',
-                                background: 'none',
-                                cursor: safeCurrentPage <= 1 ? 'not-allowed' : 'pointer',
-                                color: safeCurrentPage <= 1 ? '#cbd5e1' : '#2563eb',
-                                fontWeight: '800',
-                                fontSize: '0.78rem',
-                                padding: '2px 6px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '2px'
-                              }}
-                              title="Previous Page"
-                            >
-                              <ChevronLeft size={14} /> Prev
-                            </button>
-
-                            <span style={{ fontSize: '0.8rem', fontWeight: '800', color: '#0f172a', padding: '0 6px', borderLeft: '1px solid #e2e8f0', borderRight: '1px solid #e2e8f0' }}>
-                              Page {safeCurrentPage} / {totalPages}
-                            </span>
-
-                            <button
-                              type="button"
-                              onClick={() => setBulkPreviewPage(p => Math.min(totalPages, p + 1))}
-                              disabled={safeCurrentPage >= totalPages}
-                              style={{
-                                border: 'none',
-                                background: 'none',
-                                cursor: safeCurrentPage >= totalPages ? 'not-allowed' : 'pointer',
-                                color: safeCurrentPage >= totalPages ? '#cbd5e1' : '#2563eb',
-                                fontWeight: '800',
-                                fontSize: '0.78rem',
-                                padding: '2px 6px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '2px'
-                              }}
-                              title="Next Page"
-                            >
-                              Next <ChevronRight size={14} />
-                            </button>
-                          </div>
-
                           {/* Rows per page selector in top toolbar */}
                           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                             <select
@@ -13295,6 +13315,30 @@ _Helpline: +91 9316566894_`;
                     </div>
                   )}
 
+                  {/* RUN IN BACKGROUND BUTTON */}
+                  <button
+                    type="button"
+                    onClick={() => setIsBulkImportOpen(false)}
+                    style={{
+                      padding: '7px 20px',
+                      borderRadius: '8px',
+                      border: '1.5px solid #2563eb',
+                      backgroundColor: '#eff6ff',
+                      color: '#1d4ed8',
+                      fontWeight: '800',
+                      fontSize: '0.82rem',
+                      cursor: 'pointer',
+                      marginBottom: '14px',
+                      boxShadow: '0 2px 6px rgba(37, 99, 235, 0.1)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                    title="Let sync finish in background while you do other work"
+                  >
+                    <span>Run in Background & Work on Dashboard</span> ↗
+                  </button>
+
                   <div style={{ fontSize: '0.8rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <AlertCircle size={14} /> Live MongoDB Atlas high-speed sync in progress. Please do not close this window.
                   </div>
@@ -13337,8 +13381,8 @@ _Helpline: +91 9316566894_`;
                 )}
               </div>
 
-              {/* CENTER PAGINATION DOCKED IN MODAL FOOTER (ALWAYS IN VIEW!) */}
-              {bulkParsedRows.length > 0 && (
+              {/* CENTER PAGINATION DOCKED IN MODAL FOOTER (HIDDEN DURING SYNC) */}
+              {!isImportingBulk && bulkParsedRows.length > 0 && (
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -13444,25 +13488,18 @@ _Helpline: +91 9316566894_`;
                   className="btn btn-outline btn-sm"
                   style={{ padding: '8px 16px', fontWeight: '600' }}
                 >
-                  Cancel / Close
+                  Cancel
                 </button>
 
-                {bulkParsedRows.length > 0 && (
+                {!isImportingBulk && bulkParsedRows.length > 0 && (
                   <button
                     type="button"
                     onClick={handleExecuteBulkImport}
-                    disabled={isImportingBulk || selectedCount === 0}
+                    disabled={selectedCount === 0}
                     className="btn btn-primary btn-sm"
                     style={{ padding: '8px 24px', fontWeight: '700', gap: '8px', borderRadius: '8px' }}
                   >
-                    {isImportingBulk ? (
-                      <>
-                        <RefreshCw size={14} className="animate-spin" />
-                        Syncing Atlas ({importProgress.percent}%)...
-                      </>
-                    ) : (
-                      `✓ Confirm & Import (${selectedCount.toLocaleString()}) Products`
-                    )}
+                    {`✓ Confirm & Import (${selectedCount.toLocaleString()}) Products`}
                   </button>
                 )}
               </div>

@@ -5904,10 +5904,88 @@ a:active,
   z-index: 40;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), min-width 0.3s cubic-bezier(0.16, 1, 0.3, 1), padding 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   scrollbar-width: thin;
   scrollbar-color: rgba(148, 163, 184, 0.25) transparent;
+}
+
+/* Collapsed Icon Rail (68px) - Pixel-perfect Centering */
+.admin-glass-sidebar.collapsed {
+  width: 68px !important;
+  min-width: 68px !important;
+  padding: 14px 12px !important;
+  align-items: center !important;
+}
+
+.admin-glass-sidebar.collapsed .admin-glass-nav-btn {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  max-width: 44px !important;
+  padding: 0 !important;
+  margin: 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0 !important;
+  border-radius: 12px !important;
+  border: 1px solid transparent;
+}
+
+.admin-glass-sidebar.collapsed .admin-glass-nav-btn .nav-icon {
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+
+.admin-glass-sidebar.collapsed .admin-glass-nav-btn .admin-nav-label {
+  display: none !important;
+}
+
+.admin-glass-sidebar.collapsed .admin-nav-group-separator {
+  width: 26px !important;
+  height: 1px !important;
+  margin: 6px auto !important;
+  background-color: var(--border-light, #e2e8f0) !important;
+  opacity: 0.8 !important;
+}
+
+/* Expanded Full Navigation (265px) */
+.admin-glass-sidebar.expanded {
+  width: 265px !important;
+  min-width: 265px !important;
+  padding: 16px 14px !important;
+  align-items: stretch !important;
+}
+
+.admin-glass-sidebar.expanded .admin-glass-nav-btn {
+  width: 100% !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 0 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 12px !important;
+  border-radius: 12px !important;
+}
+
+.admin-glass-sidebar.expanded .admin-glass-nav-btn .nav-icon {
+  flex-shrink: 0;
+}
+
+.admin-glass-sidebar.expanded .admin-glass-nav-btn:hover {
+  transform: translateX(3px);
+  background: rgba(12, 61, 108, 0.06);
+}
+
+.admin-glass-sidebar.collapsed .admin-glass-nav-btn:hover {
+  transform: scale(1.06);
+  background: rgba(12, 61, 108, 0.06);
 }
 
 [data-theme="dark"] .admin-glass-sidebar {
@@ -5952,10 +6030,8 @@ a:active,
 .admin-glass-nav-btn {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   width: 100%;
   min-height: 40px;
-  padding: 8px 12px;
   border-radius: 12px;
   font-weight: 600;
   font-size: 0.85rem;
@@ -5963,11 +6039,10 @@ a:active,
   color: var(--text-dark);
   border: 1px solid transparent;
   cursor: pointer;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   text-align: left;
   user-select: none;
   white-space: nowrap;
-  gap: 8px;
 }
 
 .admin-glass-nav-btn:hover {

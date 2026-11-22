@@ -5256,7 +5256,7 @@ _Helpline: +91 9316566894_`;
               <ChevronDown size={12} style={{ transform: isCollapsed ? 'rotate(-90deg)' : 'none', transition: 'transform 0.2s ease', flexShrink: 0, marginLeft: 'auto', opacity: 0.6 }} />
             </div>
           ) : (
-            <div style={{ height: '1px', backgroundColor: 'var(--border-light, #e2e8f0)', margin: '6px 4px' }} />
+            <div className="admin-nav-group-separator" />
           )}
 
           {(!isCollapsed || !isExpanded) && visibleItems.map(item => {
@@ -5273,32 +5273,23 @@ _Helpline: +91 9316566894_`;
                 }}
                 className={`admin-glass-nav-btn ${isActive ? 'active' : ''}`}
                 title={item.label}
-                style={{
-                  minHeight: '40px',
-                  padding: isExpanded ? '8px 12px' : '8px',
-                  justifyContent: isExpanded ? 'flex-start' : 'center',
-                  gap: '10px'
-                }}
               >
-                <ItemIcon size={17} className="nav-icon" style={{ flexShrink: 0 }} />
-                <span 
-                  className="admin-nav-label"
-                  style={{
-                    fontSize: '0.85rem',
-                    fontWeight: isActive ? '700' : '600',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    lineHeight: 1.2,
-                    opacity: isExpanded ? 1 : 0,
-                    maxWidth: isExpanded ? '210px' : '0px',
-                    transform: isExpanded ? 'translateX(0)' : 'translateX(-6px)',
-                    transition: 'opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), max-width 0.28s cubic-bezier(0.16, 1, 0.3, 1)',
-                    display: 'inline-block'
-                  }}
-                >
-                  {item.label}
-                </span>
+                <ItemIcon size={18} className="nav-icon" />
+                {isExpanded && (
+                  <span 
+                    className="admin-nav-label"
+                    style={{
+                      fontSize: '0.86rem',
+                      fontWeight: isActive ? '700' : '600',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      lineHeight: 1.2
+                    }}
+                  >
+                    {item.label}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -5381,19 +5372,14 @@ _Helpline: +91 9316566894_`;
           className={`admin-glass-sidebar admin-desktop-sidebar ${isSidebarExpanded ? 'expanded' : 'collapsed'}`}
           onMouseEnter={() => setIsSidebarHovered(true)}
           onMouseLeave={() => setIsSidebarHovered(false)}
-          style={{
-            width: isSidebarExpanded ? '265px' : '68px',
-            minWidth: isSidebarExpanded ? '265px' : '68px',
-            padding: isSidebarExpanded ? '16px 14px' : '14px 8px'
-          }}
         >
           {/* Sidebar Header: Role-based title without V2 */}
-          <div style={{ borderBottom: isSidebarExpanded ? '1px solid var(--border-light)' : 'none', paddingBottom: isSidebarExpanded ? '12px' : '4px' }}>
+          <div style={{ borderBottom: isSidebarExpanded ? '1px solid var(--border-light, #e2e8f0)' : 'none', paddingBottom: isSidebarExpanded ? '12px' : '4px', width: '100%' }}>
             {isSidebarExpanded ? (
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
                   <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#22c55e', animation: 'pulse 2s infinite', flexShrink: 0 }}></div>
-                  <h3 style={{ fontSize: '1.05rem', color: 'var(--text-dark)', margin: 0, fontWeight: '800', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <h3 style={{ fontSize: '1.02rem', color: 'var(--text-dark)', margin: 0, fontWeight: '800', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {isSuperAdmin ? 'Super Admin Console' : 'Admin Console'}
                   </h3>
                 </div>
@@ -5415,13 +5401,13 @@ _Helpline: +91 9316566894_`;
                 </button>
               </div>
             ) : (
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '4px 0' }} title={isSuperAdmin ? 'Super Admin Console (Hover to expand)' : 'Admin Console (Hover to expand)'}>
-                <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#22c55e', animation: 'pulse 2s infinite' }}></div>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '44px', height: '24px', margin: '0 auto' }} title={isSuperAdmin ? 'Super Admin Console (Hover to expand)' : 'Admin Console (Hover to expand)'}>
+                <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#22c55e', animation: 'pulse 2s infinite' }}></div>
               </div>
             )}
 
             {isSidebarExpanded && (
-              <span style={{ fontSize: '0.74rem', color: 'var(--text-light)', display: 'block', marginTop: '3px' }}>
+              <span style={{ fontSize: '0.74rem', color: 'var(--text-light)', display: 'block', marginTop: '3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 Niyansh Pharma B2B Portal
               </span>
             )}
@@ -5448,32 +5434,33 @@ _Helpline: +91 9316566894_`;
                 )}
               </div>
             ) : (
-              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '6px' }}>
                 <button
                   type="button"
                   onClick={() => setIsSidebarPinned(true)}
                   style={{
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '10px',
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '12px',
                     border: '1px solid var(--border-light, #e2e8f0)',
                     backgroundColor: 'transparent',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     color: 'var(--text-medium, #64748b)',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    transition: 'all 0.18s ease'
                   }}
                   title="Search modules"
                 >
-                  <Search size={15} />
+                  <Search size={16} />
                 </button>
               </div>
             )}
           </div>
 
           {/* Categorized Navigation List */}
-          <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <nav style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '100%' }}>
             {renderNavGroups(false, false)}
           </nav>
         </aside>

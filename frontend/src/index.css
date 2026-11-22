@@ -1989,17 +1989,6 @@ input[type="submit"]:disabled {
   }
 }
 
-@media (max-width: 640px) {
-  .product-detail-actions {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 10px !important;
-  }
-  .product-detail-actions > * {
-    width: 100% !important;
-  }
-}
-
 /* Quick Order Mobile Floating Sticky Action Bar (Screens <= 992px) */
 .quickorder-mobile-sticky-bar {
   display: none;
@@ -4647,6 +4636,7 @@ html[lang="gu"] .nav-link, html[lang="hi"] .nav-link {
 /* Product Detail Ergonomics & Clean Mobile Stack */
 .product-detail-actions {
   display: flex;
+  flex-direction: row;
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 6px;
@@ -4682,14 +4672,21 @@ html[lang="gu"] .nav-link, html[lang="hi"] .nav-link {
 
 @media (max-width: 640px) {
   .product-detail-actions {
+    display: flex !important;
     flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch !important;
     gap: 10px !important;
     width: 100% !important;
   }
+  .product-detail-actions > *,
   .product-cta-btn {
     width: 100% !important;
-    flex: 1 1 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 auto !important;
+    height: 48px !important;
     min-height: 48px !important;
+    box-sizing: border-box !important;
   }
   .wholesale-protect-box {
     flex-direction: column !important;

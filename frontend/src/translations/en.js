@@ -821,6 +821,7 @@ export const en = {
   },
   "aiAssistant": {
     "title": "Niyansh AI Pharma Assistant",
+    "shortTitle": "Ask AI",
     "subtitle": "Ask about medicines, salt compositions, dosage forms, wholesale schemes & stock availability",
     "greeting": "Hello! I am your Niyansh Pharma wholesale digital assistant. How can I assist you with formulations, stock, or trade schemes today?",
     "placeholder": "Type your pharma question or medicine name...",

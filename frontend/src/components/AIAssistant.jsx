@@ -179,71 +179,136 @@ export default function AIAssistant({ addToCart }) {
 
   return (
     <>
-      {/* Floating Trigger Button */}
+      {/* Floating Smart AI Trigger Button */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          aria-label="Open Niyansh AI Assistant"
-          className="ai-chat-trigger"
-          style={{
-            position: 'fixed',
-            bottom: '24px',
-            right: '24px',
-            zIndex: 9995,
-            background: 'linear-gradient(135deg, #0c3d6c 0%, #1b75bc 100%)',
-            color: '#ffffff',
-            border: 'none',
-            borderRadius: '50px',
-            padding: '12px 20px',
-            boxShadow: '0 8px 25px rgba(12, 61, 108, 0.35)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            cursor: 'pointer',
-            fontWeight: 600,
-            fontSize: '14px',
-            letterSpacing: '0.3px',
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-3px) scale(1.02)';
-            e.currentTarget.style.boxShadow = '0 12px 30px rgba(12, 61, 108, 0.45)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0) scale(1)';
-            e.currentTarget.style.boxShadow = '0 8px 25px rgba(12, 61, 108, 0.35)';
-          }}
+          aria-label={t('aiAssistant.title', 'Niyansh AI Pharma Assistant')}
+          title={t('aiAssistant.title', 'Niyansh AI Pharma Assistant')}
+          className="ai-chat-trigger ai-smart-trigger-btn"
         >
-          <span className="b2b-pulse-ring" style={{ borderRadius: '50px', borderColor: 'rgba(56, 189, 248, 0.5)' }} />
-          <div style={{
-            position: 'relative',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <Sparkles size={18} style={{ color: '#38bdf8' }} />
-            <span style={{
-              position: 'absolute',
-              top: '-2px',
-              right: '-2px',
-              width: '8px',
-              height: '8px',
-              backgroundColor: '#4ade80',
-              borderRadius: '50%',
-              border: '2px solid #0c3d6c',
-            }} />
+          <div className="ai-smart-icon-wrapper">
+            <Sparkles size={20} className="ai-smart-sparkle" />
+            <span className="ai-smart-ping" />
+            <span className="ai-smart-dot" />
           </div>
-          <span className="ai-chat-label">{t('aiAssistant.title', 'Ask Niyansh AI')}</span>
+          <span className="ai-smart-label">
+            {t('aiAssistant.shortTitle', 'Ask AI')}
+          </span>
         </button>
       )}
 
-      {/* Responsive styles for floating button on mobile - compact FAB so it never covers content */}
+      {/* Responsive Smart Styles for Floating Button & Modal Window */}
       <style>{`
+        .ai-smart-trigger-btn {
+          position: fixed;
+          bottom: 24px;
+          right: 24px;
+          z-index: 9995;
+          height: 48px;
+          min-width: 48px;
+          padding: 0;
+          border-radius: 50px;
+          border: 1.5px solid rgba(56, 189, 248, 0.45);
+          background: linear-gradient(135deg, #092644 0%, #0c3d6c 50%, #0284c7 100%);
+          color: #ffffff;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          box-shadow: 0 6px 20px rgba(12, 61, 108, 0.35), 0 0 12px rgba(56, 189, 248, 0.2);
+          transition: all 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+          overflow: hidden;
+          white-space: nowrap;
+          animation: aiSmartAura 3.2s ease-in-out infinite;
+        }
+
+        @keyframes aiSmartAura {
+          0%, 100% {
+            box-shadow: 0 6px 20px rgba(12, 61, 108, 0.35), 0 0 0 0 rgba(56, 189, 248, 0.45);
+          }
+          50% {
+            box-shadow: 0 8px 24px rgba(12, 61, 108, 0.45), 0 0 0 6px rgba(56, 189, 248, 0);
+          }
+        }
+
+        .ai-smart-icon-wrapper {
+          position: relative;
+          width: 48px;
+          height: 48px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+
+        .ai-smart-sparkle {
+          color: #38bdf8;
+          filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.6));
+          transition: transform 0.3s ease;
+        }
+
+        .ai-smart-dot {
+          position: absolute;
+          top: 9px;
+          right: 9px;
+          width: 7.5px;
+          height: 7.5px;
+          background-color: #22c55e;
+          border-radius: 50%;
+          border: 1.5px solid #092644;
+        }
+
+        .ai-smart-ping {
+          position: absolute;
+          top: 9px;
+          right: 9px;
+          width: 7.5px;
+          height: 7.5px;
+          background-color: #4ade80;
+          border-radius: 50%;
+          animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+          opacity: 0.75;
+          pointer-events: none;
+        }
+
+        .ai-smart-label {
+          display: inline-block;
+          max-width: 0;
+          opacity: 0;
+          overflow: hidden;
+          font-size: 13.5px;
+          font-weight: 700;
+          letter-spacing: 0.2px;
+          color: #ffffff;
+          transition: max-width 0.32s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease, padding 0.32s ease;
+          pointer-events: none;
+          padding: 0;
+        }
+
+        /* Desktop Smart Hover Expansion: Smoothly slides open to reveal "Ask AI" */
+        @media (hover: hover) and (min-width: 769px) {
+          .ai-smart-trigger-btn:hover {
+            padding-right: 15px;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 26px rgba(2, 132, 199, 0.45), 0 0 16px rgba(56, 189, 248, 0.35);
+            border-color: rgba(56, 189, 248, 0.75);
+          }
+          .ai-smart-trigger-btn:hover .ai-smart-sparkle {
+            transform: scale(1.1) rotate(6deg);
+          }
+          .ai-smart-trigger-btn:hover .ai-smart-label {
+            max-width: 100px;
+            opacity: 1;
+            padding-left: 2px;
+          }
+        }
+
         @media (max-width: 768px) {
-          .ai-chat-trigger {
-            width: 48px !important;
-            height: 48px !important;
-            min-width: 48px !important;
+          .ai-smart-trigger-btn {
+            width: 46px !important;
+            height: 46px !important;
+            min-width: 46px !important;
             padding: 0 !important;
             border-radius: 50% !important;
             display: flex !important;
@@ -253,7 +318,11 @@ export default function AIAssistant({ addToCart }) {
             right: max(14px, env(safe-area-inset-right, 14px)) !important;
             box-shadow: 0 4px 18px rgba(12, 61, 108, 0.45) !important;
           }
-          .ai-chat-trigger .ai-chat-label {
+          .ai-smart-icon-wrapper {
+            width: 46px !important;
+            height: 46px !important;
+          }
+          .ai-smart-label {
             display: none !important;
           }
           .ai-chat-window {

@@ -139,7 +139,12 @@ export default function RetailerDashboard() {
       setLoadingLedger(true);
       try {
         const target = cleanMobile || '9974442291';
-        const res = await fetch(`/api/ledger/${target}?shopName=${encodeURIComponent(shopName)}`);
+        const authToken = localStorage.getItem('niyansh_token') || localStorage.getItem('token') || '';
+        const res = await fetch(`/api/ledger/${target}?shopName=${encodeURIComponent(shopName)}`, {
+          headers: {
+            ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
+          }
+        });
         if (res.ok) {
           const data = await res.json();
           if (isMounted && data.success && data.ledger) {
@@ -224,9 +229,13 @@ export default function RetailerDashboard() {
   // Share Statement via WhatsApp
   const handleShareStatement = async () => {
     try {
+      const authToken = localStorage.getItem('niyansh_token') || localStorage.getItem('token') || '';
       const res = await fetch('/api/ledger/send-statement', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
+        },
         body: JSON.stringify({ retailerMobile: cleanMobile, channel: 'whatsapp' }),
       });
       const data = await res.json();

@@ -139,8 +139,8 @@ router.get('/', protect, adminOnly, checkPermission('canManageLedgers'), async (
 
 // @desc    Record payment transaction and deduct from oldest unpaid/partial invoices
 // @route   POST /api/ledger/payment
-// @access  Public
-router.post('/payment', async (req, res) => {
+// @access  Private (Admin or Authenticated Retailer for own account)
+router.post('/payment', protect, async (req, res) => {
   try {
     const {
       retailerMobile,
@@ -156,6 +156,13 @@ router.post('/payment', async (req, res) => {
     const targetMobile = (retailerMobile || mobile || '').toString().replace(/\D/g, '');
     if (!targetMobile || targetMobile.length !== 10) {
       return res.status(400).json({ message: 'Retailer mobile number must contain exactly 10 numeric digits' });
+    }
+
+    // Authorization check: Admin can record payment for any ledger; Retailer can ONLY pay their own ledger
+    const isAdmin = req.user && (req.user.role === 'admin' || req.user.role === 'superadmin');
+    const userPhone = cleanMobileDigits(req.user?.phone);
+    if (!isAdmin && userPhone !== targetMobile) {
+      return res.status(403).json({ success: false, message: 'Access denied: You can only record payments for your own account' });
     }
 
     const payAmount = parseFloat(amount);
@@ -242,14 +249,20 @@ router.post('/payment', async (req, res) => {
 
 // @desc    Generate and send formatted ledger statement via WhatsApp/Email
 // @route   POST /api/ledger/send-statement
-// @access  Public
-router.post('/send-statement', async (req, res) => {
+// @access  Private (Admin or Authenticated Retailer for own account)
+router.post('/send-statement', protect, async (req, res) => {
   try {
     const { retailerMobile, mobile, channel = 'whatsapp' } = req.body;
 
     const targetMobile = (retailerMobile || mobile || '').toString().replace(/\D/g, '');
     if (!targetMobile || targetMobile.length !== 10) {
       return res.status(400).json({ message: 'Retailer mobile number must contain exactly 10 numeric digits' });
+    }
+
+    const isAdmin = req.user && (req.user.role === 'admin' || req.user.role === 'superadmin');
+    const userPhone = cleanMobileDigits(req.user?.phone);
+    if (!isAdmin && userPhone !== targetMobile) {
+      return res.status(403).json({ success: false, message: 'Access denied: You can only access your own statements' });
     }
 
     const ledger = await findLedgerByMobile(targetMobile);
@@ -281,13 +294,19 @@ router.post('/send-statement', async (req, res) => {
 
 // @desc    Get retailer ledger by mobile number (creates initial if not found)
 // @route   GET /api/ledger/:mobile
-// @access  Public
-router.get('/:mobile', async (req, res) => {
+// @access  Private (Admin or Authenticated Retailer for own account)
+router.get('/:mobile', protect, async (req, res) => {
   try {
     const rawMobile = req.params.mobile.trim();
     const cleanMobile = cleanMobileDigits(rawMobile);
     if (cleanMobile.length !== 10) {
       return res.status(400).json({ message: 'Retailer mobile number must contain exactly 10 numeric digits' });
+    }
+
+    const isAdmin = req.user && (req.user.role === 'admin' || req.user.role === 'superadmin');
+    const userPhone = cleanMobileDigits(req.user?.phone);
+    if (!isAdmin && userPhone !== cleanMobile) {
+      return res.status(403).json({ success: false, message: 'Access denied: You can only view your own ledger' });
     }
 
     let ledger = await findLedgerByMobile(rawMobile);

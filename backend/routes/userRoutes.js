@@ -219,7 +219,6 @@ router.post('/register', async (req, res) => {
       name: name.trim(),
       email: normalizedEmail,
       password,
-      plainPassword: password, // Retained so superadmin approval email can send chemist's registered credentials
       companyName: companyName.trim(),
       gstin: normalizedGstin,
       pan: normalizedPan,
@@ -706,7 +705,6 @@ router.put('/profile', protect, async (req, res) => {
 
       if (req.body.password) {
         user.password = req.body.password;
-        user.plainPassword = req.body.password;
       }
 
       const updatedUser = await user.save();
@@ -764,7 +762,6 @@ router.get('/admins', protect, superAdminOnly, async (req, res) => {
         phone: a.phone || '',
         role: a.role,
         avatar: a.avatar || '',
-        plainPassword: a.plainPassword || '••••••••',
         isActive: a.isActive !== false,
         permissions: a.permissions || {},
         createdAt: a.createdAt,
@@ -831,7 +828,6 @@ router.post('/admins', protect, superAdminOnly, async (req, res) => {
       name: name.trim(),
       email: normalizedEmail,
       password: password.trim(),
-      plainPassword: password.trim(),
       phone: cleanPhone,
       role: 'admin',
       avatar: avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name.trim())}&background=2563eb&color=ffffff&bold=true`,
@@ -872,7 +868,6 @@ router.post('/admins', protect, superAdminOnly, async (req, res) => {
         phone: newAdmin.phone,
         role: newAdmin.role,
         avatar: newAdmin.avatar,
-        plainPassword: newAdmin.plainPassword,
         isActive: newAdmin.isActive,
         permissions: newAdmin.permissions,
         createdAt: newAdmin.createdAt
@@ -925,7 +920,6 @@ router.put('/admins/:id', protect, superAdminOnly, async (req, res) => {
 
     if (req.body.password && req.body.password.trim().length >= 6) {
       admin.password = req.body.password.trim();
-      admin.plainPassword = req.body.password.trim();
     }
 
     // Role and active status protection
@@ -959,7 +953,7 @@ router.put('/admins/:id', protect, superAdminOnly, async (req, res) => {
         sendAdminWelcomeEmail({
           to: admin.email,
           name: admin.name,
-          password: admin.plainPassword || (req.body.password ? req.body.password.trim() : 'admin123'),
+          password: req.body.password ? req.body.password.trim() : 'Updated by Administrator',
           permissions: admin.permissions,
           role: admin.role,
           isUpdate: true
@@ -977,7 +971,6 @@ router.put('/admins/:id', protect, superAdminOnly, async (req, res) => {
         phone: admin.phone,
         role: admin.role,
         avatar: admin.avatar,
-        plainPassword: admin.plainPassword,
         isActive: admin.isActive !== false,
         permissions: admin.permissions || {},
         updatedAt: admin.updatedAt
@@ -999,13 +992,9 @@ router.post('/admins/:id/resend-credentials', protect, superAdminOnly, async (re
       return res.status(404).json({ success: false, message: 'Admin account not found' });
     }
 
-    let pwdToSend = admin.plainPassword;
-    if (!pwdToSend || pwdToSend.length < 4) {
-      pwdToSend = 'NpAdmin@' + Math.floor(1000 + Math.random() * 9000);
-      admin.password = pwdToSend;
-      admin.plainPassword = pwdToSend;
-      await admin.save();
-    }
+    const pwdToSend = 'NpAdmin@' + Math.floor(100000 + Math.random() * 900000);
+    admin.password = pwdToSend;
+    await admin.save();
 
     const { sendAdminWelcomeEmail } = require('../utils/emailService');
     const mailResult = await sendAdminWelcomeEmail({
@@ -1102,7 +1091,7 @@ router.get('/inspect/:identifier', async (req, res) => {
       } catch (e) {}
     }
     const apiKey = req.headers['x-sync-api-key'] || req.query.apiKey;
-    if (apiKey === (process.env.ERP_SYNC_SECRET || 'NP_PROMPT_SECRET_KEY_2026')) {
+    if (process.env.ERP_SYNC_SECRET && apiKey === process.env.ERP_SYNC_SECRET) {
       isAuthorized = true;
     }
 
@@ -1147,7 +1136,7 @@ router.delete('/account/:identifier', async (req, res) => {
       } catch (e) {}
     }
     const apiKey = req.headers['x-sync-api-key'] || req.query.apiKey;
-    if (apiKey === (process.env.ERP_SYNC_SECRET || 'NP_PROMPT_SECRET_KEY_2026')) {
+    if (process.env.ERP_SYNC_SECRET && apiKey === process.env.ERP_SYNC_SECRET) {
       isAuthorized = true;
     }
 
@@ -1238,13 +1227,12 @@ router.post('/chemists/:id/approve', protect, adminOnly, async (req, res) => {
     chemist.rejectionReason = '';
     await chemist.save();
 
-    // Send Activation Email with username and registered password
+    // Send Activation Email with username and login link
     sendChemistApprovalEmail({
       to: chemist.email,
       name: chemist.name,
       companyName: chemist.companyName,
       email: chemist.email,
-      plainPassword: chemist.plainPassword || '',
       drugLicense: chemist.drugLicense1 || chemist.drugLicense || ''
     }).catch(e => console.warn('[Chemist Approval] Email notification notice:', e.message));
 
@@ -1333,7 +1321,6 @@ router.post('/chemists/:id/resend-credentials', protect, adminOnly, async (req, 
       name: chemist.name,
       companyName: chemist.companyName,
       email: chemist.email,
-      plainPassword: chemist.plainPassword || '',
       drugLicense: chemist.drugLicense1 || chemist.drugLicense || ''
     });
 

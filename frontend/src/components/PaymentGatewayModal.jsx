@@ -316,9 +316,13 @@ export default function PaymentGatewayModal({
     };
 
     try {
+      const authToken = localStorage.getItem('niyansh_token') || localStorage.getItem('token') || '';
       const response = await fetch('/api/ledger/payment', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
+        },
         body: JSON.stringify(paymentPayload),
       });
 

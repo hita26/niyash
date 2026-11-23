@@ -1427,7 +1427,7 @@ function Admin() {
               }
             }
             // Fallback 1: Standard public products endpoint
-            const fallback = await fetch('/api/products?limit=15000');
+            const fallback = await fetch('/api/products?limit=15000', { headers });
             if (fallback.ok) {
               const fbCt = fallback.headers.get('content-type') || '';
               if (fbCt.includes('application/json')) {
@@ -1437,23 +1437,9 @@ function Admin() {
                 }
               }
             }
-            // Fallback 2: Direct Vercel backend URL
-            const direct = await fetch('https://pharma-bay-two.vercel.app/api/products?limit=15000');
-            if (direct.ok) {
-              const directData = await direct.json();
-              if (Array.isArray(directData.products) && directData.products.length > 0) {
-                return directData;
-              }
-            }
             return { products: [] };
           })
-          .catch(async () => {
-            try {
-              const direct = await fetch('https://pharma-bay-two.vercel.app/api/products?limit=15000');
-              if (direct.ok) return await direct.json();
-            } catch (_) {}
-            return { products: [] };
-          }),
+          .catch(() => ({ products: [] })),
         fetch('/api/orders?limit=100', { headers })
           .then(r => r.ok ? r.json() : { orders: FALLBACK_ORDERS })
           .catch(() => ({ orders: FALLBACK_ORDERS })),
@@ -1483,15 +1469,8 @@ function Admin() {
       // 1. Products
       if (prodResult.status === 'fulfilled' && prodResult.value) {
         const pData = prodResult.value;
-        if (Array.isArray(pData.products) && pData.products.length > 0) {
+        if (Array.isArray(pData.products)) {
           setProducts(pData.products);
-        } else {
-          try {
-            const fallbackDirect = await fetch('https://pharma-bay-two.vercel.app/api/products?limit=15000').then(r => r.json());
-            if (fallbackDirect && Array.isArray(fallbackDirect.products) && fallbackDirect.products.length > 0) {
-              setProducts(fallbackDirect.products);
-            }
-          } catch (_) {}
         }
         if (pData.stats) setProductAdminStats(pData.stats);
       }

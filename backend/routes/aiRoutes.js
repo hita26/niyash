@@ -158,11 +158,38 @@ const generateFallbackReply = (query, products) => {
   return `I couldn't find an exact match for "${query}" in our instant catalog, but Niyansh Pharma distributes thousands of formulations across Gujarat. You can try searching by the salt name (e.g., Amoxicillin, Paracetamol) or contact our sales desk directly!`;
 };
 
+// Rate limiter for AI chat (20 requests per minute per IP to prevent Gemini quota exhaustion)
+const aiRateLimitMap = new Map();
+const checkAiRateLimit = (ip) => {
+  const now = Date.now();
+  const windowMs = 60 * 1000;
+  const maxRequests = 20;
+
+  const clientHistory = aiRateLimitMap.get(ip) || [];
+  const recent = clientHistory.filter(t => now - t < windowMs);
+
+  if (recent.length >= maxRequests) {
+    return false;
+  }
+
+  recent.push(now);
+  aiRateLimitMap.set(ip, recent);
+  return true;
+};
+
 // @desc    Chat with AI Assistant (Medicine, Stock, Composition, Order assistance)
 // @route   POST /api/ai/chat
-// @access  Public
+// @access  Public (Rate Limited)
 router.post('/chat', async (req, res) => {
   try {
+    const clientIp = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || 'unknown';
+    if (!checkAiRateLimit(clientIp)) {
+      return res.status(429).json({
+        success: false,
+        message: 'Too many queries. Please wait a moment before asking again.'
+      });
+    }
+
     const { message, history = [] } = req.body;
 
     if (!message || typeof message !== 'string' || !message.trim()) {

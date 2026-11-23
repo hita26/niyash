@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -8,22 +8,25 @@ import Footer from './components/Footer';
 import EnquiryCartModal from './components/EnquiryCartModal';
 import AuthModal from './components/AuthModal';
 import Home from './pages/Home';
-import About from './pages/About';
-import Products from './pages/Products';
-import OurProducts from './pages/OurProducts';
-import ProductDetail from './pages/ProductDetail';
-import Contact from './pages/Contact';
-import Career from './pages/Career';
-import Partner from './pages/Partner';
-import Supplier from './pages/Supplier';
-import Manufacturing from './pages/Manufacturing';
-import NewsFeed from './pages/NewsFeed';
-import QuickOrder from './pages/QuickOrder';
-import OutstandingLedger from './pages/OutstandingLedger';
-import RetailerDashboard from './pages/RetailerDashboard';
-import Admin from './pages/Admin';
-import CompanyDirectory from './pages/CompanyDirectory';
-import CompanyDetail from './pages/CompanyDetail';
+
+// Code-split dynamic imports for secondary routes to optimize bundle size and page load speed
+const About = lazy(() => import('./pages/About'));
+const Products = lazy(() => import('./pages/Products'));
+const OurProducts = lazy(() => import('./pages/OurProducts'));
+const ProductDetail = lazy(() => import('./pages/ProductDetail'));
+const Contact = lazy(() => import('./pages/Contact'));
+const Career = lazy(() => import('./pages/Career'));
+const Partner = lazy(() => import('./pages/Partner'));
+const Supplier = lazy(() => import('./pages/Supplier'));
+const Manufacturing = lazy(() => import('./pages/Manufacturing'));
+const NewsFeed = lazy(() => import('./pages/NewsFeed'));
+const QuickOrder = lazy(() => import('./pages/QuickOrder'));
+const OutstandingLedger = lazy(() => import('./pages/OutstandingLedger'));
+const RetailerDashboard = lazy(() => import('./pages/RetailerDashboard'));
+const Admin = lazy(() => import('./pages/Admin'));
+const CompanyDirectory = lazy(() => import('./pages/CompanyDirectory'));
+const CompanyDetail = lazy(() => import('./pages/CompanyDetail'));
+const SecurityCheck = lazy(() => import('./pages/SecurityCheck'));
 import ScrollToTop from './components/ScrollToTop';
 import MobileBottomNav from './components/MobileBottomNav';
 import AIAssistant from './components/AIAssistant';
@@ -31,7 +34,17 @@ import FloatingOrderWidget from './components/FloatingOrderWidget';
 import InstallAppBanner from './components/InstallAppBanner';
 import BioNanoProgressBar from './components/BioNanoProgressBar';
 import SecurityVerification from './components/SecurityVerification';
-import SecurityCheck from './pages/SecurityCheck';
+
+// Fast, elegant page loading fallback for code-split chunks
+function PageLoadingFallback() {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', flexDirection: 'column', gap: '16px' }}>
+      <div style={{ width: '40px', height: '40px', border: '3px solid #e2e8f0', borderTopColor: '#059669', borderRadius: '50%', animation: 'npSpin 0.8s linear infinite' }} />
+      <p style={{ color: '#64748b', fontSize: '14px', fontWeight: 600 }}>Loading Niyansh Pharma...</p>
+      <style>{`@keyframes npSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+}
 
 // Security Auth Guard: blocks unauthenticated access and forces login if user presses Back after logout
 function ProtectedRoute({ children }) {
@@ -61,13 +74,12 @@ function AppContent() {
   // Auth state from centralized context
   const { user, token, login, logout, isAuthOpen, openAuth, closeAuth } = useAuth();
 
-  // Cloudflare-Style Bot Security Verification Gate State
+  // Bot Security Verification Gate: instant access for legitimate users; triggered only on explicit verify query
   const [isSecurityCleared, setIsSecurityCleared] = useState(() => {
     if (typeof window === 'undefined') return true;
-    if (localStorage.getItem('niyansh_bypass_security') === 'true') return true;
     const params = new URLSearchParams(window.location.search);
     if (params.has('verify') || params.has('test-security')) return false;
-    return sessionStorage.getItem('niyansh_security_cleared') === 'true';
+    return true;
   });
 
   // Detect whether app is opened in PWA Standalone Mode (Installed App on Home Screen)
@@ -316,53 +328,55 @@ function AppContent() {
         />
 
         <main style={{ flex: 1 }}>
-          <Routes>
-            <Route path="/" element={<Home addToCart={addToCart} />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/about-us" element={<About />} />
-            <Route 
-              path="/our-products" 
-              element={
-                <OurProducts 
-                  addToCart={addToCart} 
-                  searchTerm={searchTerm} 
-                  setSearchTerm={setSearchTerm} 
-                />
-              } 
-            />
-            <Route 
-              path="/products" 
-              element={
-                <Products 
-                  addToCart={addToCart} 
-                  searchTerm={searchTerm} 
-                  setSearchTerm={setSearchTerm} 
-                />
-              } 
-            />
-            <Route path="/products/:id" element={<ProductDetail addToCart={addToCart} />} />
-            <Route path="/companies" element={<CompanyDirectory />} />
-            <Route path="/companies/:id" element={<CompanyDetail addToCart={addToCart} />} />
-            <Route path="/manufacturers" element={<Navigate to="/companies" replace />} />
-            <Route path="/brands" element={<Navigate to="/companies" replace />} />
-            <Route path="/news" element={<NewsFeed />} />
-            <Route path="/schemes" element={<NewsFeed />} />
-            <Route path="/dashboard" element={<ProtectedRoute><RetailerDashboard /></ProtectedRoute>} />
-            <Route path="/portal" element={<ProtectedRoute><RetailerDashboard /></ProtectedRoute>} />
-            <Route path="/retailer-dashboard" element={<ProtectedRoute><RetailerDashboard /></ProtectedRoute>} />
-            <Route path="/quick-order" element={<ProtectedRoute><QuickOrder /></ProtectedRoute>} />
-            <Route path="/order" element={<ProtectedRoute><QuickOrder /></ProtectedRoute>} />
-            <Route path="/ledger" element={<ProtectedRoute><OutstandingLedger /></ProtectedRoute>} />
-            <Route path="/outstanding" element={<ProtectedRoute><OutstandingLedger /></ProtectedRoute>} />
-            <Route path="/outstanding-ledger" element={<ProtectedRoute><OutstandingLedger /></ProtectedRoute>} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/career" element={<Career />} />
-            <Route path="/partner" element={<Partner />} />
-            <Route path="/supplier" element={<Supplier />} />
-            <Route path="/manufacturing" element={<Manufacturing />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/security-check" element={<SecurityCheck />} />
-          </Routes>
+          <Suspense fallback={<PageLoadingFallback />}>
+            <Routes>
+              <Route path="/" element={<Home addToCart={addToCart} />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/about-us" element={<About />} />
+              <Route 
+                path="/our-products" 
+                element={
+                  <OurProducts 
+                    addToCart={addToCart} 
+                    searchTerm={searchTerm} 
+                    setSearchTerm={setSearchTerm} 
+                  />
+                } 
+              />
+              <Route 
+                path="/products" 
+                element={
+                  <Products 
+                    addToCart={addToCart} 
+                    searchTerm={searchTerm} 
+                    setSearchTerm={setSearchTerm} 
+                  />
+                } 
+              />
+              <Route path="/products/:id" element={<ProductDetail addToCart={addToCart} />} />
+              <Route path="/companies" element={<CompanyDirectory />} />
+              <Route path="/companies/:id" element={<CompanyDetail addToCart={addToCart} />} />
+              <Route path="/manufacturers" element={<Navigate to="/companies" replace />} />
+              <Route path="/brands" element={<Navigate to="/companies" replace />} />
+              <Route path="/news" element={<NewsFeed />} />
+              <Route path="/schemes" element={<NewsFeed />} />
+              <Route path="/dashboard" element={<ProtectedRoute><RetailerDashboard /></ProtectedRoute>} />
+              <Route path="/portal" element={<ProtectedRoute><RetailerDashboard /></ProtectedRoute>} />
+              <Route path="/retailer-dashboard" element={<ProtectedRoute><RetailerDashboard /></ProtectedRoute>} />
+              <Route path="/quick-order" element={<ProtectedRoute><QuickOrder /></ProtectedRoute>} />
+              <Route path="/order" element={<ProtectedRoute><QuickOrder /></ProtectedRoute>} />
+              <Route path="/ledger" element={<ProtectedRoute><OutstandingLedger /></ProtectedRoute>} />
+              <Route path="/outstanding" element={<ProtectedRoute><OutstandingLedger /></ProtectedRoute>} />
+              <Route path="/outstanding-ledger" element={<ProtectedRoute><OutstandingLedger /></ProtectedRoute>} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/career" element={<Career />} />
+              <Route path="/partner" element={<Partner />} />
+              <Route path="/supplier" element={<Supplier />} />
+              <Route path="/manufacturing" element={<Manufacturing />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/security-check" element={<SecurityCheck />} />
+            </Routes>
+          </Suspense>
         </main>
 
         <Footer compact={isB2BPortal} />

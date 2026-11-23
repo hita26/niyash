@@ -1420,7 +1420,12 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
     setStatementSentMessage(false);
 
     try {
-      const response = await fetch(`/api/ledger/${targetMobile}?shopName=${encodeURIComponent(shopName || 'Retailer')}`);
+      const authToken = localStorage.getItem('niyansh_token') || localStorage.getItem('token') || '';
+      const response = await fetch(`/api/ledger/${targetMobile}?shopName=${encodeURIComponent(shopName || 'Retailer')}`, {
+        headers: {
+          ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
+        }
+      });
       if (!response.ok) throw new Error('Could not fetch ledger from server');
       const data = await response.json();
       if (data.ledger) {
@@ -1480,9 +1485,13 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
   const handleSendStatementWhatsApp = async () => {
     if (!ledgerData) return;
     try {
+      const authToken = localStorage.getItem('niyansh_token') || localStorage.getItem('token') || '';
       const res = await fetch('/api/ledger/send-statement', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
+        },
         body: JSON.stringify({ retailerMobile: ledgerData.retailerMobile })
       });
       if (res.ok) {

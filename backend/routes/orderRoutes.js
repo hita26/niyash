@@ -3,6 +3,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const Order = require('../models/Order');
 const Ledger = require('../models/Ledger');
+const Product = require('../models/Product');
 const { protect, adminOnly, checkPermission } = require('../middleware/authMiddleware');
 const { logAuditEvent } = require('../utils/auditLogger');
 
@@ -98,43 +99,73 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ message: 'Order must contain at least one item' });
     }
 
-    // Process and calculate items
+    // Process and validate items against authoritative Product database
     let calculatedSubTotal = 0;
     let calculatedGstAmount = 0;
+    const processedItems = [];
 
-    const processedItems = items.map((item) => {
+    for (const item of items) {
       const boxes = Math.max(1, parseInt(item.boxes, 10) || 1);
       const unitsPerBox = Math.max(1, parseInt(item.unitsPerBox, 10) || 10);
       const totalUnits = item.totalUnits ? parseInt(item.totalUnits, 10) : boxes * unitsPerBox;
-      const unitPrice = parseFloat(item.unitPrice) || 0;
-      const gstRate = item.gstRate !== undefined ? parseFloat(item.gstRate) : 12;
 
-      // itemTotal can be supplied or computed as totalUnits * unitPrice (or boxes * unitPrice if unitPrice is per box)
-      let itemTotal = 0;
-      if (item.itemTotal !== undefined && !isNaN(parseFloat(item.itemTotal))) {
-        itemTotal = parseFloat(item.itemTotal);
-      } else {
-        itemTotal = Math.round(totalUnits * unitPrice * 100) / 100;
+      // Look up authoritative product in DB
+      let productDoc = null;
+      if (item.product && mongoose.isValidObjectId(item.product)) {
+        productDoc = await Product.findById(item.product);
+      }
+      if (!productDoc && item.productName) {
+        productDoc = await Product.findOne({
+          name: { $regex: new RegExp('^' + escapeRegex(item.productName.trim()) + '$', 'i') }
+        });
       }
 
+      // Authoritative wholesale unit price: use DB price if set, else fallback to safe client unitPrice
+      let unitPrice = 0;
+      let gstRate = 12;
+      let productName = item.productName || 'Pharma Product';
+      let company = item.company || 'DAXIA';
+      let form = item.form || 'Tablet';
+
+      if (productDoc) {
+        productName = productDoc.name;
+        company = productDoc.company || productDoc.brand || company;
+        form = productDoc.form || form;
+        unitPrice = productDoc.price > 0 ? productDoc.price : (productDoc.mrp > 0 ? productDoc.mrp : (parseFloat(item.unitPrice) || 0));
+        gstRate = productDoc.gstRate || productDoc.salesGst || 12;
+
+        // Inventory Stock Deduction
+        if (typeof productDoc.stockQuantity === 'number') {
+          productDoc.stockQuantity = Math.max(0, productDoc.stockQuantity - totalUnits);
+          if (productDoc.stockQuantity === 0) {
+            productDoc.inStock = false;
+          }
+          await productDoc.save();
+        }
+      } else {
+        unitPrice = Math.max(0, parseFloat(item.unitPrice) || 0);
+        gstRate = item.gstRate !== undefined ? Math.max(0, parseFloat(item.gstRate)) : 12;
+      }
+
+      const itemTotal = Math.round(totalUnits * unitPrice * 100) / 100;
       const itemGst = Math.round(((itemTotal * gstRate) / 100) * 100) / 100;
 
       calculatedSubTotal += itemTotal;
       calculatedGstAmount += itemGst;
 
-      return {
-        product: item.product || null,
-        productName: item.productName || 'Pharma Product',
-        company: item.company || 'DAXIA',
-        form: item.form || 'Tablet',
+      processedItems.push({
+        product: productDoc ? productDoc._id : (mongoose.isValidObjectId(item.product) ? item.product : null),
+        productName,
+        company,
+        form,
         boxes,
         unitsPerBox,
         totalUnits,
         unitPrice,
         gstRate,
         itemTotal,
-      };
-    });
+      });
+    }
 
     const finalDiscount = parseFloat(discountAmount) || 0;
     const finalSubTotal = Math.round(calculatedSubTotal * 100) / 100;

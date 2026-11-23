@@ -99,50 +99,18 @@ router.get('/status', protect, adminOnly, async (req, res) => {
   }
 });
 
-// @desc    Debug helper to inspect accounts and audit logs
+// @desc    Debug helper to inspect accounts and audit logs (Protected SuperAdmin Only)
 // @route   GET /api/sync/debug-users
-// @access  Internal Sync API Key
-router.get('/debug-users', async (req, res) => {
+// @access  SuperAdmin Only
+router.get('/debug-users', protect, superAdminOnly, async (req, res) => {
   try {
-    const apiKey = req.headers['x-sync-api-key'] || req.query.apiKey;
-    const validApiKey = process.env.ERP_SYNC_SECRET || 'NP_PROMPT_SECRET_KEY_2026';
-    if (apiKey !== validApiKey) {
-      return res.status(401).json({ success: false });
-    }
     const User = require('../models/User');
     const AuditLog = require('../models/AuditLog');
 
-    // Auto-heal / restore Hari Patel admin if missing
-    let hari = await User.findOne({ email: 'haripatel267998@gmail.com' });
-    if (!hari) {
-      hari = await User.create({
-        name: 'Hari Patel',
-        email: 'haripatel267998@gmail.com',
-        phone: '9316566894',
-        password: 'admin123',
-        plainPassword: 'admin123',
-        role: 'admin',
-        isActive: true,
-        permissions: {
-          canManageProducts: true,
-          canDeleteProducts: false,
-          canBulkImport: true,
-          canManageOrders: true,
-          canManageLedgers: true,
-          canManageCompanies: true,
-          canManageNews: true,
-          canManageEnquiries: true,
-          canClearDatabase: false
-        },
-        companyName: 'Niyansh Pharma Wholesale Operations'
-      });
-      console.log('[SyncBridge] Restored Hari Patel admin account in MongoDB Atlas');
-    }
-
-    const users = await User.find({}).select('-password -resetPasswordOtp').lean();
+    const users = await User.find({}).select('-password -plainPassword -resetPasswordOtp').lean();
     const deleteLogs = await AuditLog.find({ action: 'DELETE' }).sort({ createdAt: -1 }).limit(30).lean();
     const adminLogs = await AuditLog.find({ category: 'ADMIN_USER' }).sort({ createdAt: -1 }).limit(30).lean();
-    return res.json({ success: true, count: users.length, users, deleteLogs, adminLogs, hariRestored: Boolean(hari) });
+    return res.json({ success: true, count: users.length, users, deleteLogs, adminLogs });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }
@@ -150,17 +118,12 @@ router.get('/debug-users', async (req, res) => {
 
 // @desc    Test trigger for admin welcome email
 // @route   POST /api/sync/test-welcome-email
-router.all('/test-welcome-email', async (req, res) => {
+router.all('/test-welcome-email', protect, superAdminOnly, async (req, res) => {
   try {
-    const apiKey = req.headers['x-sync-api-key'] || req.query.apiKey;
-    const validApiKey = process.env.ERP_SYNC_SECRET || 'NP_PROMPT_SECRET_KEY_2026';
-    if (apiKey !== validApiKey) {
-      return res.status(401).json({ success: false, message: 'Invalid API key' });
-    }
     const { sendAdminWelcomeEmail } = require('../utils/emailService');
-    const recipient = req.query.to || 'haripatel267998@gmail.com';
-    const recipientName = req.query.name || 'Hari Patel';
-    const pwd = req.query.password || 'admin123';
+    const recipient = req.query.to || req.user.email;
+    const recipientName = req.query.name || req.user.name;
+    const pwd = req.query.password || 'TemporaryPassword123!';
     const mailResult = await sendAdminWelcomeEmail({
       to: recipient,
       name: recipientName,
@@ -185,16 +148,35 @@ router.all('/test-welcome-email', async (req, res) => {
 
 // @desc    Ingest Prompt ERP Stock & Rate Batch from Local Bridge Agent (STRICT EXISTING CATALOG ONLY)
 // @route   POST /api/sync/prompt-stock
-// @access  Public with Sync Secret API Key OR SuperAdmin JWT
+// @access  Sync Secret API Key OR SuperAdmin JWT
 router.post('/prompt-stock', async (req, res) => {
   const startTime = Date.now();
   try {
     const apiKey = req.headers['x-sync-api-key'] || req.query.apiKey;
-    const validApiKey = process.env.ERP_SYNC_SECRET || 'NP_PROMPT_SECRET_KEY_2026';
+    const envSecret = process.env.ERP_SYNC_SECRET;
+    let isAuthorized = false;
 
-    // Verify authentication: either valid API key or Bearer token
-    if (apiKey !== validApiKey) {
-      return res.status(401).json({ success: false, message: 'Unauthorized: Invalid Prompt Sync API Key' });
+    // 1. Check ERP Sync API Key (strictly requires non-empty ERP_SYNC_SECRET in env)
+    if (envSecret && apiKey && apiKey === envSecret) {
+      isAuthorized = true;
+    }
+
+    // 2. Check Bearer JWT SuperAdmin
+    if (!isAuthorized && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+      try {
+        const token = req.headers.authorization.split(' ')[1];
+        const jwt = require('jsonwebtoken');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'niyansh_pharma_jwt_secret_key_2026');
+        const User = require('../models/User');
+        const user = await User.findById(decoded.id);
+        if (user && (user.role === 'superadmin' || user.permissions?.canBulkImport)) {
+          isAuthorized = true;
+        }
+      } catch (_) {}
+    }
+
+    if (!isAuthorized) {
+      return res.status(401).json({ success: false, message: 'Unauthorized: Valid Prompt Sync API Key or Admin Token required' });
     }
 
     const { items = [], source = 'Prompt ERP Desktop Bridge' } = req.body;

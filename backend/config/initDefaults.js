@@ -247,7 +247,6 @@ const initDefaults = async () => {
             name: 'Niyansh Super Admin',
             email: superAdminEmail,
             password: 'NiyanshSuper@2026',
-            plainPassword: 'NiyanshSuper@2026',
             companyName: 'Niyansh Pharma Wholesale Distribution',
             role: 'superadmin',
             phone: '9316566894',
@@ -265,10 +264,6 @@ const initDefaults = async () => {
         let needSave = false;
         if (superAdmin.role !== 'superadmin') {
           superAdmin.role = 'superadmin';
-          needSave = true;
-        }
-        if (!superAdmin.plainPassword) {
-          superAdmin.plainPassword = 'NiyanshSuper@2026';
           needSave = true;
         }
         if (!superAdmin.avatar) {
@@ -289,7 +284,6 @@ const initDefaults = async () => {
             name: 'Niyansh Staff Admin',
             email: 'admin@niyanshpharma.com',
             password: 'admin123',
-            plainPassword: 'admin123',
             companyName: 'Niyansh Pharma Wholesale Distribution',
             role: 'admin',
             phone: '9316566894',
@@ -314,9 +308,6 @@ const initDefaults = async () => {
             console.warn('Admin user setup:', uErr.message);
           }
         }
-      } else if (!adminUser.plainPassword) {
-        adminUser.plainPassword = 'admin123';
-        await adminUser.save();
       }
 
       // 1C. Permanent Safeguard: Ensure Hari Patel Admin Account is active and never purged
@@ -327,7 +318,6 @@ const initDefaults = async () => {
             name: 'Hari Patel',
             email: 'haripatel267998@gmail.com',
             password: 'admin123',
-            plainPassword: 'admin123',
             companyName: 'Niyansh Pharma Wholesale Operations',
             role: 'admin',
             phone: '9316566894',
@@ -348,11 +338,6 @@ const initDefaults = async () => {
           console.log('✅ Hari Patel admin permanently created and protected');
         } catch (hErr) {
           if (!hErr.message.includes('E11000')) console.warn('Hari Patel setup:', hErr.message);
-        }
-      } else {
-        if (!hariAdmin.plainPassword) {
-          hariAdmin.plainPassword = 'admin123';
-          await hariAdmin.save();
         }
       }
 

@@ -292,7 +292,12 @@ export default function OutstandingLedger({ user }) {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/ledger/${cleanMobile}`);
+      const authToken = localStorage.getItem('niyansh_token') || localStorage.getItem('token') || '';
+      const response = await fetch(`/api/ledger/${cleanMobile}`, {
+        headers: {
+          ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
+        }
+      });
       const data = await response.json();
 
       if (response.ok && data.success && data.ledger) {
@@ -463,9 +468,13 @@ export default function OutstandingLedger({ user }) {
   // WhatsApp Statement Dispatch
   const handleSendStatementWhatsApp = async () => {
     try {
+      const authToken = localStorage.getItem('niyansh_token') || localStorage.getItem('token') || '';
       const res = await fetch('/api/ledger/send-statement', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
+        },
         body: JSON.stringify({ retailerMobile: ledgerData.retailerMobile }),
       });
       const data = await res.json();

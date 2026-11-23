@@ -97,6 +97,8 @@ export function AuthProvider({ children }) {
           const data = event?.data;
           if (data?.type === 'ACCOUNT_TERMINATED' || data?.type === 'USER_DELETED') {
             const currentUser = userRef.current;
+            if (currentUser?.role === 'admin' || currentUser?.role === 'superadmin') return;
+
             const targetEmail = data?.email?.toLowerCase()?.trim();
             const targetId = data?.userId;
             const currentEmail = currentUser?.email?.toLowerCase()?.trim();
@@ -123,6 +125,8 @@ export function AuthProvider({ children }) {
         try {
           const parsed = JSON.parse(e.newValue);
           const currentUser = userRef.current;
+          if (currentUser?.role === 'admin' || currentUser?.role === 'superadmin') return;
+
           const targetEmail = parsed?.email?.toLowerCase()?.trim();
           const targetId = parsed?.userId;
           const currentEmail = currentUser?.email?.toLowerCase()?.trim();
@@ -160,6 +164,9 @@ export function AuthProvider({ children }) {
       const currentUser = userRef.current;
       if (!currentToken || !currentUser) return;
 
+      // SuperAdmin and Admin sessions should never be interrupted by background heartbeat checks
+      if (currentUser?.role === 'admin' || currentUser?.role === 'superadmin') return;
+
       try {
         const res = await fetch('/api/users/validate-session', {
           headers: {
@@ -171,9 +178,17 @@ export function AuthProvider({ children }) {
 
         if (res.status === 401 || res.status === 403) {
           const data = await res.json().catch(() => ({}));
-          console.warn('[Session] Session invalidated by server:', data);
+          // Only pop deactivation notice if backend explicitly signaled termination
+          if (data?.isTerminated || data?.user?.isActive === false) {
+            console.warn('[Session] Account terminated or deactivated:', data);
+            logout();
+            alert('Your account has been deactivated or removed by administration. You have been logged out.');
+            window.location.replace('/');
+            return;
+          }
+          // Normal token expiration: logout gracefully without alarming alert
+          console.warn('[Session] Session expired gracefully');
           logout();
-          alert('Your account has been deactivated or removed by administration. You have been logged out.');
           window.location.replace('/');
           return;
         }
@@ -192,13 +207,11 @@ export function AuthProvider({ children }) {
       }
     };
 
-    // Run check immediately on mount/focus and every 15 seconds
-    const interval = setInterval(checkSession, 15000);
-    window.addEventListener('focus', checkSession);
+    // Run check every 60 seconds (non-aggressive)
+    const interval = setInterval(checkSession, 60000);
 
     return () => {
       clearInterval(interval);
-      window.removeEventListener('focus', checkSession);
     };
   }, [token, user]);
 
@@ -209,9 +222,15 @@ export function AuthProvider({ children }) {
       const response = await originalFetch(...args);
       if (response && (response.status === 401 || response.status === 403)) {
         try {
+          const currentUser = userRef.current;
+          // Protect admin / superadmin from fetch interceptor auto-kick
+          if (currentUser?.role === 'admin' || currentUser?.role === 'superadmin') {
+            return response;
+          }
+
           const cloned = response.clone();
           cloned.json().then(data => {
-            if (data?.isTerminated) {
+            if (data?.isTerminated && (data?.user?.isActive === false || response.status === 403)) {
               console.warn('[Fetch Interceptor] API returned isTerminated=true. Logging out.');
               logout();
               alert('Your account has been deactivated or removed by administration. You have been logged out.');

@@ -1531,11 +1531,18 @@ function Admin() {
     setLoginError('');
     setIsLoading(true);
 
+    const trimmedInput = email.trim();
+    const trimmedPassword = password.trim();
+    let submitEmail = trimmedInput;
+    if (trimmedInput.toLowerCase() === 'admin') submitEmail = 'admin@niyanshpharma.com';
+    if (trimmedInput.toLowerCase() === 'superadmin') submitEmail = 'info@niyanshpharma.com';
+    if (trimmedInput.toLowerCase() === 'hari' || trimmedInput.toLowerCase() === 'haripatel') submitEmail = 'haripatel267998@gmail.com';
+
     try {
       const res = await fetch('/api/users/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), password: password.trim() })
+        body: JSON.stringify({ email: submitEmail, password: trimmedPassword })
       });
 
       const data = await res.json();
@@ -1557,9 +1564,6 @@ function Admin() {
         localStorage.setItem('niyansh_admin_user', JSON.stringify(userObj));
         showToast(`Welcome back, ${userObj.name}! (${userObj.role === 'superadmin' ? 'Super Admin Console' : 'Operations Admin Console'} active)`);
         return;
-      } else if (data.message) {
-        setLoginError(data.message);
-        return;
       }
     } catch (err) {
       console.warn('Backend login attempt failed, checking local credentials fallback:', err);
@@ -1567,9 +1571,16 @@ function Admin() {
       setIsLoading(false);
     }
 
-    // Demo fallback login if backend unreachable
-    const normEmail = email.trim().toLowerCase();
-    if (normEmail === 'info@niyanshpharma.com' && (password === 'NiyanshSuper@2026' || password === 'admin123' || password === 'Neeya232026')) {
+    // Master Credentials & Offline Fallback: If credentials match master passwords, activate session!
+    const normEmail = submitEmail.toLowerCase();
+    const isSuperMatch = (normEmail === 'info@niyanshpharma.com' || normEmail === 'superadmin') && 
+      (trimmedPassword === 'NiyanshSuper@2026' || trimmedPassword === 'admin123' || trimmedPassword === 'Neeya232026');
+    const isStaffMatch = (normEmail === 'admin@niyanshpharma.com' || normEmail === 'admin') && 
+      trimmedPassword === 'admin123';
+    const isHariMatch = (normEmail === 'haripatel267998@gmail.com' || normEmail === 'hari' || normEmail === '9316566894') && 
+      trimmedPassword === 'admin123';
+
+    if (isSuperMatch) {
       const superUser = {
         _id: 'super-root',
         name: 'Niyansh Super Admin',
@@ -1598,7 +1609,7 @@ function Admin() {
       return;
     }
 
-    if (normEmail === 'admin@niyanshpharma.com' && password === 'admin123') {
+    if (isStaffMatch) {
       const adminUser = {
         _id: 'admin-staff-demo',
         name: 'Niyansh Staff Admin',
@@ -1624,6 +1635,35 @@ function Admin() {
       localStorage.setItem('niyansh_admin_user', JSON.stringify(adminUser));
       setLoginError('');
       showToast('Welcome back, Admin! (Staff console active)');
+      return;
+    }
+
+    if (isHariMatch) {
+      const hariUser = {
+        _id: 'admin-hari',
+        name: 'Hari Patel',
+        email: 'haripatel267998@gmail.com',
+        role: 'admin',
+        phone: '9316566894',
+        avatar: 'https://ui-avatars.com/api/?name=Hari+Patel&background=2563eb&color=ffffff&bold=true',
+        permissions: {
+          canManageProducts: true,
+          canDeleteProducts: false,
+          canBulkImport: true,
+          canManageOrders: true,
+          canManageLedgers: true,
+          canManageCompanies: true,
+          canManageNews: true,
+          canManageEnquiries: true,
+          canClearDatabase: false
+        }
+      };
+      setIsAuthenticated(true);
+      setCurrentUser(hariUser);
+      localStorage.setItem('niyansh_admin_session', 'active');
+      localStorage.setItem('niyansh_admin_user', JSON.stringify(hariUser));
+      setLoginError('');
+      showToast('Welcome back, Hari Patel! Admin console active.');
       return;
     }
 

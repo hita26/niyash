@@ -126,9 +126,30 @@ userSchema.pre('save', async function() {
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-// Method to compare passwords
+// Method to compare passwords (supports bcrypt hashes and auto-migrates legacy unhashed entries)
 userSchema.methods.comparePassword = async function(enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
+  if (!enteredPassword || !this.password) return false;
+  
+  // 1. Direct plain text match (legacy unhashed accounts in DB)
+  if (this.password === enteredPassword) {
+    try {
+      const salt = await bcrypt.genSalt(10);
+      this.password = await bcrypt.hash(enteredPassword, salt);
+      await this.save();
+    } catch (_) {}
+    return true;
+  }
+
+  // 2. Standard Bcrypt comparison
+  if (this.password.startsWith('$2a$') || this.password.startsWith('$2b$') || this.password.startsWith('$2y$')) {
+    try {
+      return await bcrypt.compare(enteredPassword, this.password);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  return false;
 };
 
 module.exports = mongoose.model('User', userSchema);

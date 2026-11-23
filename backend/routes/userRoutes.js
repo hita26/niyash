@@ -419,6 +419,11 @@ router.post('/login', async (req, res) => {
         }
       }
 
+      // Ensure admin and superadmin accounts are always active
+      if (isAdminRole) {
+        user.isActive = true;
+      }
+
       if (user.isActive === false) {
         logAuditEvent({
           req,
@@ -479,6 +484,27 @@ router.post('/login', async (req, res) => {
   } catch (error) {
     console.error('Login error:', error);
     return res.status(500).json({ message: 'Server error during login' });
+  }
+});
+
+// @desc    Validate session heartbeat
+// @route   GET /api/users/validate-session
+// @access  Public / Bearer Token
+router.get('/validate-session', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.json({ success: true, active: true });
+    }
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'niyansh_pharma_jwt_secret_key_2026');
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return res.json({ success: false, isTerminated: false });
+    }
+    return res.json({ success: true, active: true, user });
+  } catch (_) {
+    return res.json({ success: true, active: true });
   }
 });
 

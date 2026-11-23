@@ -114,10 +114,10 @@ function Contact() {
   };
 
   return (
-    <div className="section animate-fade-in" style={{ backgroundColor: 'var(--bg-main)' }}>
+    <div className="section animate-fade-in" style={{ backgroundColor: 'var(--bg-main)', paddingTop: '18px', paddingBottom: '44px' }}>
       <div className="container">
-        <h1 className="section-title">{t('contact.title', 'Contact & Dispatch Desk')}</h1>
-        <p className="section-subtitle">{t('contact.subtitle', 'Reach out to Niyansh Pharma for wholesale distributorship queries, orders, or urgent dispatch assistance.')}</p>
+        <h1 className="section-title" style={{ marginBottom: '8px' }}>{t('contact.title', 'Contact & Dispatch Desk')}</h1>
+        <p className="section-subtitle" style={{ marginBottom: '22px' }}>{t('contact.subtitle', 'Reach out to Niyansh Pharma for wholesale distributorship queries, orders, or urgent dispatch assistance.')}</p>
 
         <div className="contact-layout">
           

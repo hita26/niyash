@@ -280,7 +280,7 @@ function Home({ addToCart }) {
       <section className="home-hero-section" style={{
         background: `linear-gradient(135deg, rgba(10, 48, 86, 0.96), rgba(20, 83, 138, 0.91)), url("${heroBgImage}")`,
         backgroundSize: 'cover', backgroundPosition: 'center', color: '#ffffff',
-        padding: 'clamp(36px, 6vw, 75px) 0 clamp(44px, 7vw, 85px) 0', position: 'relative', overflow: 'hidden'
+        padding: 'clamp(26px, 4.2vw, 44px) 0 clamp(30px, 4.8vw, 50px) 0', position: 'relative', overflow: 'hidden'
       }}>
         {/* Floating Molecule Particle Mesh (Polpharma & Moderna Style) */}
         <PharmaMoleculesCanvas particleCount={36} speed={0.42} />
@@ -503,7 +503,7 @@ function Home({ addToCart }) {
       {/* Quick Order Form / WhatsApp Integration Section */}
       <section className="section" style={{
         background: 'linear-gradient(135deg, #1b75bc, var(--primary-blue))',
-        color: '#ffffff', padding: 'clamp(40px, 6vw, 60px) 0'
+        color: '#ffffff', padding: 'clamp(24px, 3.8vw, 38px) 0'
       }}>
         <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
           <div style={{ flex: '1 1 280px', minWidth: 0 }}>

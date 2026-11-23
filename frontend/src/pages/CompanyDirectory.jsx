@@ -97,15 +97,15 @@ function CompanyDirectory() {
   }, [fetchCompanies]);
 
   return (
-    <div style={{ backgroundColor: 'var(--bg-light)', minHeight: '80vh', padding: '40px 0 60px' }}>
+    <div style={{ backgroundColor: 'var(--bg-light)', minHeight: '80vh', padding: '16px 0 44px' }}>
       <div className="container">
         
         {/* Header Hero Section */}
-        <div style={{ textAlign: 'center', marginBottom: 'clamp(22px, 4vw, 35px)' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: 'rgba(26, 86, 160, 0.08)', color: 'var(--primary-blue)', padding: '6px 14px', borderRadius: '30px', fontSize: 'clamp(0.74rem, 2.5vw, 0.85rem)', fontWeight: '700', marginBottom: '12px', maxWidth: '100%' }}>
+        <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: 'rgba(26, 86, 160, 0.08)', color: 'var(--primary-blue)', padding: '6px 14px', borderRadius: '30px', fontSize: 'clamp(0.74rem, 2.5vw, 0.85rem)', fontWeight: '700', marginBottom: '8px', maxWidth: '100%' }}>
             <Building2 size={16} style={{ flexShrink: 0 }} /> <span>{t('companies.title', 'Authorized Manufacturers & Partners Directory')}</span>
           </div>
-          <h1 style={{ fontSize: 'clamp(1.55rem, 4.5vw, 2.4rem)', color: 'var(--text-dark)', margin: '0 0 10px', fontWeight: '800', lineHeight: 1.2 }}>
+          <h1 style={{ fontSize: 'clamp(1.55rem, 4.5vw, 2.4rem)', color: 'var(--text-dark)', margin: '0 0 8px', fontWeight: '800', lineHeight: 1.2 }}>
             {t('companies.title', 'Browse Pharmaceutical Companies & Brands')}
           </h1>
           <p style={{ color: 'var(--text-medium)', fontSize: 'clamp(0.9rem, 2.5vw, 1.05rem)', maxWidth: '720px', margin: '0 auto', lineHeight: 1.6 }}>
@@ -114,7 +114,7 @@ function CompanyDirectory() {
         </div>
 
         {/* Search & Filter Toolbar */}
-        <div className="card" style={{ padding: '18px 20px', marginBottom: '24px' }}>
+        <div className="card" style={{ padding: '16px 20px', marginBottom: '18px' }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center', justifyContent: 'space-between' }}>
             {/* Search Input */}
             <div style={{ position: 'relative', flex: '1 1 260px', width: '100%', maxWidth: '520px' }}>

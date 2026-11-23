@@ -123,11 +123,11 @@ function CompanyDetail({ addToCart }) {
   }
 
   return (
-    <div style={{ backgroundColor: 'var(--bg-light)', minHeight: '85vh', padding: '30px 0 60px' }}>
+    <div style={{ backgroundColor: 'var(--bg-light)', minHeight: '85vh', padding: '16px 0 44px' }}>
       <div className="container">
         
         {/* Breadcrumb Navigation */}
-        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', fontSize: '0.85rem', color: 'var(--text-medium)', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', fontSize: '0.85rem', color: 'var(--text-medium)', marginBottom: '12px' }}>
           <Link to="/" style={{ color: 'var(--text-medium)', textDecoration: 'none' }}>{t('nav.home', 'Home')}</Link>
           <ChevronRight size={14} />
           <Link to="/companies" style={{ color: 'var(--text-medium)', textDecoration: 'none' }}>{t('nav.companies', 'Companies')}</Link>
@@ -136,7 +136,7 @@ function CompanyDetail({ addToCart }) {
         </div>
 
         {/* Company Profile Hero Banner */}
-        <div className="card" style={{ padding: 'clamp(16px, 3vw, 30px)', marginBottom: '30px', overflow: 'hidden' }}>
+        <div className="card" style={{ padding: 'clamp(16px, 3vw, 24px)', marginBottom: '18px', overflow: 'hidden' }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', alignItems: 'flex-start' }}>
             
             {/* Company Logo Box */}

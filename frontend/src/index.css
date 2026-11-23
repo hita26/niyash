@@ -249,13 +249,13 @@ button {
 }
 
 .section {
-  padding: 80px 0;
+  padding: 44px 0;
 }
 
 .section-title {
   text-align: center;
-  font-size: 2.2rem;
-  margin-bottom: 15px;
+  font-size: 2.1rem;
+  margin-bottom: 12px;
   position: relative;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -264,10 +264,10 @@ button {
 .section-title::after {
   content: '';
   display: block;
-  width: 60px;
-  height: 4px;
+  width: 50px;
+  height: 3.5px;
   background: var(--secondary-green);
-  margin: 15px auto 0 auto;
+  margin: 10px auto 0 auto;
   border-radius: 2px;
 }
 
@@ -275,8 +275,8 @@ button {
   text-align: center;
   color: var(--text-medium);
   max-width: 600px;
-  margin: 0 auto 50px auto;
-  font-size: 1.1rem;
+  margin: 0 auto 24px auto;
+  font-size: 1.02rem;
 }
 
 /* Button Utilities */
@@ -491,8 +491,8 @@ input[type="submit"]:disabled {
 }
 
 @media (max-width: 768px) {
-  .section { padding: clamp(40px, 6vw, 60px) 0; }
-  .section-title { font-size: clamp(1.4rem, 4vw, 1.8rem); }
+  .section { padding: clamp(22px, 4vw, 32px) 0; }
+  .section-title { font-size: clamp(1.35rem, 4vw, 1.7rem); }
 }
 
 /* Card Design */
@@ -879,10 +879,10 @@ input[type="submit"]:disabled {
 .nav-link {
   display: inline-flex;
   align-items: center;
-  padding: 18px 12px;
+  padding: 11px 12px;
   font-weight: 600;
   color: var(--text-dark);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   border-bottom: 2.5px solid transparent;
   white-space: nowrap;
   transition: color 0.25s ease, border-color 0.25s ease;
@@ -4640,13 +4640,19 @@ html[lang="gu"] .nav-link, html[lang="hi"] .nav-link {
   }
 
   .section {
-    padding: 36px 0 !important;
+    padding: 22px 0 !important;
   }
 
   .detail-layout {
     padding: 14px !important;
     gap: 16px !important;
   }
+}
+
+/* Catalog & Directory Pages Compact Header Spacing */
+.products-page-container {
+  padding-top: 14px !important;
+  padding-bottom: 48px !important;
 }
 
 /* Product Detail Ergonomics & Clean Mobile Stack */

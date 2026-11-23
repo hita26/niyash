@@ -362,7 +362,7 @@ function NewsFeed() {
         style={{
           background: 'linear-gradient(135deg, #072340 0%, #0c3d6c 60%, #1b75bc 100%)',
           color: '#ffffff',
-          padding: '60px 0 45px 0',
+          padding: '32px 0 28px 0',
           position: 'relative',
           overflow: 'hidden',
           borderBottom: '4px solid var(--secondary-green)'

@@ -182,7 +182,7 @@ function About() {
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         color: '#ffffff',
-        padding: '75px 0 85px 0',
+        padding: 'clamp(32px, 5vw, 50px) 0 clamp(36px, 5.5vw, 56px) 0',
         position: 'relative',
         overflow: 'hidden'
       }}>

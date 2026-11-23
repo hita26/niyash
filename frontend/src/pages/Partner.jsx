@@ -89,23 +89,23 @@ function Partner() {
   };
 
   return (
-    <div className="section animate-fade-in" style={{ backgroundColor: 'var(--bg-main)' }}>
+    <div className="section animate-fade-in" style={{ backgroundColor: 'var(--bg-main)', paddingTop: '18px', paddingBottom: '44px' }}>
       <div className="container responsive-split-layout">
         
         {/* Info Column */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <div>
             <span style={{
               backgroundColor: 'rgba(56, 142, 60, 0.1)', color: 'var(--secondary-green)',
               padding: '6px 14px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: '700',
-              textTransform: 'uppercase', display: 'inline-block', marginBottom: '15px'
+              textTransform: 'uppercase', display: 'inline-block', marginBottom: '10px'
             }}>
               {t('partner.badge', 'Retailer & Healthcare Business Partnership')}
             </span>
-            <h1 style={{ fontSize: '2.5rem', marginBottom: '20px', lineHeight: '1.2' }}>
+            <h1 style={{ fontSize: '2.3rem', marginBottom: '14px', lineHeight: '1.2' }}>
               {t('partner.title', 'Business With Niyansh Pharma')}
             </h1>
-            <p style={{ color: 'var(--text-medium)', fontSize: '1.05rem', lineHeight: '1.6' }}>
+            <p style={{ color: 'var(--text-medium)', fontSize: '1.02rem', lineHeight: '1.6' }}>
               {t('partner.subtitle', 'Are you a distributor, medical store owner, hospital procurement manager, or healthcare provider? Do business with Niyansh Pharma to secure reliable, bulk supplies of genuine WHO-GMP certified medicines and surgical formulations at highly competitive wholesale trade rates.')}
             </p>
           </div>

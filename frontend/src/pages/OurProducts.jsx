@@ -156,7 +156,7 @@ export default function OurProducts({ addToCart, searchTerm, setSearchTerm }) {
     <div className="page-wrapper our-products-page" style={{ minHeight: '85vh', backgroundColor: 'var(--bg-main)', paddingBottom: '60px' }}>
       
       {/* CLEAN COMPACT PAGE HEADER - Fast, sleek, no bulky green banner */}
-      <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px 20px 10px 20px' }}>
+      <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '14px 20px 10px 20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '14px', borderBottom: '1px solid var(--border-light)', paddingBottom: '16px' }}>
           <div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: '800', color: '#059669', textTransform: 'uppercase', marginBottom: '4px' }}>

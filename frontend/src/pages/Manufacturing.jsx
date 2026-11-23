@@ -92,7 +92,7 @@ function Manufacturing() {
   ];
 
   return (
-    <div className="section animate-fade-in" style={{ backgroundColor: 'var(--bg-main)' }}>
+    <div className="section animate-fade-in" style={{ backgroundColor: 'var(--bg-main)', paddingTop: '18px', paddingBottom: '44px' }}>
       <div className="container responsive-split-layout">
         
         {/* Info Column */}
@@ -100,14 +100,14 @@ function Manufacturing() {
           <span style={{
             backgroundColor: 'rgba(12, 61, 108, 0.08)', color: 'var(--primary-blue)',
             padding: '6px 14px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: '700',
-            textTransform: 'uppercase', display: 'inline-block', marginBottom: '15px'
+            textTransform: 'uppercase', display: 'inline-block', marginBottom: '10px'
           }}>
             {t('manufacturing.badge', 'Third-Party & Contract Manufacturing')}
           </span>
-          <h1 style={{ fontSize: '2.5rem', marginBottom: '20px' }}>
+          <h1 style={{ fontSize: '2.3rem', marginBottom: '14px' }}>
             {t('manufacturing.title', 'Pharmaceutical Manufacturing Services')}
           </h1>
-          <p style={{ color: 'var(--text-medium)', fontSize: '1.05rem', lineHeight: '1.6', marginBottom: '30px' }}>
+          <p style={{ color: 'var(--text-medium)', fontSize: '1.02rem', lineHeight: '1.6', marginBottom: '20px' }}>
             {t('manufacturing.subtitle', 'Niyansh Pharma facilitates high-quality contract manufacturing and third-party production services for domestic pharmaceutical companies. Leverage our partner network of WHO-GMP certified production units to manufacture your formulations with guaranteed quality standards.')}
           </p>
 

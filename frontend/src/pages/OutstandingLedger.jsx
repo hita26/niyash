@@ -578,7 +578,7 @@ Rajkot, Gujarat`);
   const creditUtilizationPercent = Math.min(100, Math.round(((ledgerData.outstandingBalance || 0) / creditLimitVal) * 100));
 
   return (
-    <div style={{ backgroundColor: 'var(--bg-main)', minHeight: '100vh', padding: '30px 0 80px' }}>
+    <div style={{ backgroundColor: 'var(--bg-main)', minHeight: '100vh', padding: '16px 0 60px' }}>
       {/* Print Specific CSS */}
       <style>{`
         @media print {

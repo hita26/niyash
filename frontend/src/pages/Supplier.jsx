@@ -169,20 +169,20 @@ function Supplier() {
   };
 
   return (
-    <div className="section animate-fade-in" style={{ backgroundColor: 'var(--bg-main)' }}>
+    <div className="section animate-fade-in" style={{ backgroundColor: 'var(--bg-main)', paddingTop: '18px', paddingBottom: '44px' }}>
       <div className="container responsive-split-layout" style={{ alignItems: 'start' }}>
         
         {/* Info Column */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', minWidth: 0 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', minWidth: 0 }}>
           <div>
             <span style={{
               backgroundColor: 'rgba(27, 117, 188, 0.1)', color: 'var(--accent-blue)',
               padding: '6px 14px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: '700',
-              textTransform: 'uppercase', display: 'inline-block', marginBottom: '15px'
+              textTransform: 'uppercase', display: 'inline-block', marginBottom: '10px'
             }}>
               {t('supplier.badge', 'Pharmaceutical Manufacturer Onboarding')}
             </span>
-            <h1 style={{ fontSize: 'clamp(1.6rem, 4.5vw, 2.5rem)', marginBottom: '20px', lineHeight: '1.2' }}>
+            <h1 style={{ fontSize: 'clamp(1.6rem, 4.5vw, 2.3rem)', marginBottom: '14px', lineHeight: '1.2' }}>
               {t('supplier.title', 'Supply Your Formulations to Niyansh Pharma')}
             </h1>
             <p style={{ color: 'var(--text-medium)', fontSize: '1.05rem', lineHeight: '1.6' }}>

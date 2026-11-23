@@ -379,7 +379,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
   };
 
   return (
-    <div className="section animate-fade-in" style={{ backgroundColor: 'var(--bg-main)', minHeight: '80vh' }}>
+    <div className="section animate-fade-in products-page-container" style={{ backgroundColor: 'var(--bg-main)', minHeight: '80vh', paddingTop: '14px', paddingBottom: '48px' }}>
       <div className="container products-layout">
         
         {/* Mobile Filter Drawer Backdrop */}

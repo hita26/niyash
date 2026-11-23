@@ -160,15 +160,15 @@ function Career() {
   };
 
   return (
-    <div className="section animate-fade-in" style={{ backgroundColor: 'var(--bg-main)' }}>
+    <div className="section animate-fade-in" style={{ backgroundColor: 'var(--bg-main)', paddingTop: '18px', paddingBottom: '44px' }}>
       <div className="container responsive-split-layout">
         
         {/* Left: Job Listings */}
         <div>
-          <h1 style={{ fontSize: '2.2rem', marginBottom: '15px' }}>
+          <h1 style={{ fontSize: '2.1rem', marginBottom: '10px' }}>
             {t('career.title', 'Careers at Niyansh Pharma')}
           </h1>
-          <p style={{ color: 'var(--text-medium)', marginBottom: '35px', fontSize: '1.05rem', lineHeight: '1.6' }}>
+          <p style={{ color: 'var(--text-medium)', marginBottom: '20px', fontSize: '1.02rem', lineHeight: '1.6' }}>
             {t('career.subtitle', 'Join our growing team and build a rewarding career in pharmaceutical distribution. We offer competitive salaries, performance incentives, and a collaborative work environment.')}
           </p>
 

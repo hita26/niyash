@@ -1260,22 +1260,26 @@ function Header({
               className="admin-nav-pill hide-mobile"
               title="Admin & Operations Console"
               style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 height: '38px',
                 boxSizing: 'border-box',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '0 12px',
+                gap: '6px',
+                padding: '0 14px',
                 borderRadius: '20px',
                 fontSize: '0.78rem',
                 fontWeight: '700',
                 color: 'var(--text-medium, #64748b)',
                 border: '1.5px solid var(--border-light, #cbd5e1)',
                 backgroundColor: 'var(--bg-main, #f8fafc)',
-                textDecoration: 'none'
+                textDecoration: 'none',
+                lineHeight: 1,
+                verticalAlign: 'middle'
               }}
             >
-              <Shield size={13} style={{ color: 'var(--primary-blue, #2563eb)' }} />
-              <span>Admin</span>
+              <Shield size={14} style={{ color: 'var(--primary-blue, #2563eb)', flexShrink: 0 }} />
+              <span style={{ lineHeight: 1 }}>Admin</span>
             </Link>
 
             {/* PUBLIC WEBSITE ACCESS: Strictly Clean Chemist Login / Register Button (Desktop Only) */}

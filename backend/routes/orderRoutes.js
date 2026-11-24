@@ -296,24 +296,31 @@ const executeGetOrders = async (req, res) => {
   }
 };
 
-// @desc    Get all orders (Admin with canManageOrders sees all, or retailer filters by their mobile)
+// @desc    Get all orders (Admin with canManageOrders sees all, or retailer filters by their own mobile)
 // @route   GET /api/orders
-// @access  Protected for All Orders / Public for Chemist Own Mobile Filter
-router.get('/', async (req, res) => {
+// @access  Protected
+router.get('/', protect, async (req, res) => {
   const { retailerMobile } = req.query;
 
-  // If fetching full platform orders (Admin view)
-  if (!retailerMobile || !retailerMobile.trim()) {
-    return protect(req, res, () => {
-      return adminOnly(req, res, () => {
-        return checkPermission('canManageOrders')(req, res, async () => {
-          return executeGetOrders(req, res);
-        });
+  // If Admin / SuperAdmin
+  if (req.user.role === 'admin' || req.user.role === 'superadmin') {
+    if (!retailerMobile || !retailerMobile.trim()) {
+      return checkPermission('canManageOrders')(req, res, async () => {
+        return executeGetOrders(req, res);
       });
-    });
+    }
+    return executeGetOrders(req, res);
   }
 
-  // Retailer querying their own mobile number
+  // Chemist / Retailer querying their own mobile orders
+  const userPhone = (req.user.phone || '').replace(/\D/g, '').slice(-10);
+  const requestedMobile = (retailerMobile || '').replace(/\D/g, '').slice(-10);
+
+  if (requestedMobile && userPhone && requestedMobile !== userPhone) {
+    return res.status(403).json({ success: false, message: 'You are not authorized to view orders for another store.' });
+  }
+
+  req.query.retailerMobile = userPhone || requestedMobile;
   return executeGetOrders(req, res);
 });
 

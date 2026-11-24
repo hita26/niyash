@@ -19,8 +19,8 @@ const protect = async (req, res, next) => {
         return res.status(401).json({ success: false, message: 'Not authorized, user not found' });
       }
 
-      // Admin and SuperAdmin accounts are always active
-      if (req.user.role === 'admin' || req.user.role === 'superadmin') {
+      // Root SuperAdmin account is always active
+      if (req.user.email === 'info@niyanshpharma.com') {
         req.user.isActive = true;
       }
 

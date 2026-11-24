@@ -602,6 +602,7 @@ const DEFAULT_COMPANIES = [
 ];
 
 function QuickOrder() {
+  const { t } = useLanguage();
   const { isLoggedIn, openAuth } = useAuth();
   // Retailer Header Info State
   const [shopName, setShopName] = useState('');

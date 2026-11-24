@@ -19,12 +19,7 @@ const connectDB = async () => {
 
   connectionPromise = (async () => {
     try {
-      let connStr = process.env.MONGODB_URI || process.env.MONGO_URI || NEW_ATLAS_URI;
-      // Guarantee connection to the new MongoDB Atlas cluster across all deployment environments
-      if (!connStr || !connStr.includes('niyansh.evdp376.mongodb.net')) {
-        console.log('Switching connection string to new Atlas cluster (niyansh.evdp376.mongodb.net)...');
-        connStr = NEW_ATLAS_URI;
-      }
+      const connStr = process.env.MONGODB_URI || process.env.MONGO_URI || NEW_ATLAS_URI;
       console.log('Connecting to MongoDB database...');
       
       const conn = await mongoose.connect(connStr);

@@ -139,8 +139,8 @@ router.get('/', protect, adminOnly, checkPermission('canManageLedgers'), async (
 
 // @desc    Record payment transaction and deduct from oldest unpaid/partial invoices
 // @route   POST /api/ledger/payment
-// @access  Public
-router.post('/payment', async (req, res) => {
+// @access  Protected
+router.post('/payment', protect, async (req, res) => {
   try {
     const {
       retailerMobile,
@@ -156,6 +156,14 @@ router.post('/payment', async (req, res) => {
     const targetMobile = (retailerMobile || mobile || '').toString().replace(/\D/g, '');
     if (!targetMobile || targetMobile.length !== 10) {
       return res.status(400).json({ message: 'Retailer mobile number must contain exactly 10 numeric digits' });
+    }
+
+    // Authorization guard: non-admins can only apply payments to their own mobile account
+    if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {
+      const userMobile = (req.user.phone || '').replace(/\D/g, '').slice(-10);
+      if (userMobile && targetMobile !== userMobile) {
+        return res.status(403).json({ message: 'You are not authorized to record payments for another retailer account' });
+      }
     }
 
     const payAmount = parseFloat(amount);
@@ -281,13 +289,21 @@ router.post('/send-statement', async (req, res) => {
 
 // @desc    Get retailer ledger by mobile number (creates initial if not found)
 // @route   GET /api/ledger/:mobile
-// @access  Public
-router.get('/:mobile', async (req, res) => {
+// @access  Protected
+router.get('/:mobile', protect, async (req, res) => {
   try {
     const rawMobile = req.params.mobile.trim();
     const cleanMobile = cleanMobileDigits(rawMobile);
     if (cleanMobile.length !== 10) {
       return res.status(400).json({ message: 'Retailer mobile number must contain exactly 10 numeric digits' });
+    }
+
+    // Authorization guard: non-admins can only view their own ledger
+    if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {
+      const userMobile = (req.user.phone || '').replace(/\D/g, '').slice(-10);
+      if (userMobile && cleanMobile !== userMobile) {
+        return res.status(403).json({ message: 'Not authorized to view another retailer ledger' });
+      }
     }
 
     let ledger = await findLedgerByMobile(rawMobile);

@@ -81,4 +81,7 @@ visitorLogSchema.index({ timestamp: -1, isBot: 1 });
 visitorLogSchema.index({ sessionId: 1, timestamp: -1 });
 visitorLogSchema.index({ path: 1, timestamp: -1 });
 
+// TTL index to automatically purge visitor logs older than 30 days and protect MongoDB Atlas storage
+visitorLogSchema.index({ createdAt: 1 }, { expireAfterSeconds: 30 * 24 * 60 * 60 });
+
 module.exports = mongoose.model('VisitorLog', visitorLogSchema);

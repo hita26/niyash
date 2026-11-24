@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import SkeletonLoader from '../components/SkeletonLoader';
 import { useLiveSync, SYNC_EVENTS } from '../utils/liveSync';
+import { useLanguage } from '../context/LanguageContext';
 import { 
   Flame, 
   TrendingDown, 
@@ -117,6 +118,7 @@ const CATEGORIES = [
 ];
 
 function NewsFeed() {
+  const { t } = useLanguage();
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

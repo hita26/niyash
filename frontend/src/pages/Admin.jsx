@@ -1437,6 +1437,7 @@ function Admin() {
 
   // Bulk Excel Import States
   const [bulkParsedRows, setBulkParsedRows] = useState([]);
+  const [bulkCsvText, setBulkCsvText] = useState('');
   const [bulkPreviewFilter, setBulkPreviewFilter] = useState('all'); // 'all' | 'valid' | 'duplicates'
   const [bulkPreviewSearch, setBulkPreviewSearch] = useState('');
   const [bulkPreviewPage, setBulkPreviewPage] = useState(1);
@@ -2988,6 +2989,25 @@ _Helpline: +91 9316566894_`;
       id,
       name
     });
+  };
+
+  const handleUpdateEnquiryStatus = async (id, status) => {
+    try {
+      const res = await fetch(`/api/enquiries/${id}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ status })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        showToast(err.message || 'Failed to update enquiry status', 'error');
+        return;
+      }
+      setEnquiries(prev => prev.map(e => e._id === id ? { ...e, status } : e));
+      showToast(`Enquiry status updated to ${status}`, 'success');
+    } catch (err) {
+      showToast('Error updating enquiry status: ' + err.message, 'error');
+    }
   };
 
   const handleRequestDeleteCareer = (id, name = 'Job application record') => {

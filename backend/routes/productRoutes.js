@@ -522,9 +522,12 @@ router.get('/', async (req, res) => {
       findQuery = findQuery.select('name brand company category subCategory sku price mrp stockQuantity inStock packing composition form rackId batchNumber hsnCode purchaseGst salesGst expiryDate scheme qualitySpecs unitsPerBox minReorderQty imageUrl images featured isOurProduct isActive');
     }
 
-    const [total, rawProducts] = await Promise.all([
+    const [total, rawProducts, activeCount, outOfStockCount, featuredCount] = await Promise.all([
       Product.countDocuments(query),
-      findQuery.lean()
+      findQuery.lean(),
+      Product.countDocuments({ ...query, isActive: { $ne: false } }),
+      Product.countDocuments({ ...query, $or: [{ inStock: false }, { stockQuantity: { $lte: 0 } }] }),
+      Product.countDocuments({ ...query, featured: true })
     ]);
 
     const products = rawProducts.map(p => ({
@@ -543,9 +546,9 @@ router.get('/', async (req, res) => {
       total,
       stats: {
         totalProducts: total,
-        activeProducts: total,
-        outOfStock: 0,
-        featuredProducts: 0
+        activeProducts: activeCount,
+        outOfStock: outOfStockCount,
+        featuredProducts: featuredCount
       }
     });
   } catch (error) {

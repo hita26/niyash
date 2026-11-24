@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import SkeletonLoader from '../components/SkeletonLoader';
+import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import {
   FileText,
   CreditCard,
@@ -228,13 +230,16 @@ const FALLBACK_LEDGERS = {
 };
 
 export default function OutstandingLedger({ user }) {
+  const { t } = useLanguage();
+  const { token, user: authUser } = useAuth();
+  const effectiveUser = user || authUser;
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Mobile number query parameter or active logged in user
   const initialMobile =
     searchParams.get('mobile') ||
-    user?.phone ||
-    user?.mobile ||
+    effectiveUser?.phone ||
+    effectiveUser?.mobile ||
     localStorage.getItem('niyansh_retailer_mobile') ||
     '9825012345';
 
@@ -292,7 +297,12 @@ export default function OutstandingLedger({ user }) {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/ledger/${cleanMobile}`);
+      const response = await fetch(`/api/ledger/${cleanMobile}`, {
+        headers: {
+          'x-silent-request': 'true',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        }
+      });
       const data = await response.json();
 
       if (response.ok && data.success && data.ledger) {

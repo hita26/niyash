@@ -29,6 +29,7 @@ import {
   Send
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 
 const TOP_BANKS = [
   { id: 'HDFC', name: 'HDFC Bank', code: 'HDFC0000001', color: '#004c8f', logo: '🏛️' },
@@ -63,6 +64,7 @@ export default function PaymentGatewayModal({
   onPaymentSuccess
 }) {
   const { t, formatCurrency, formatDate } = useLanguage();
+  const { token } = useAuth();
 
   // Amount selection state
   const initialDue = Math.max(0, Number(dueAmount) || 0);
@@ -318,7 +320,10 @@ export default function PaymentGatewayModal({
     try {
       const response = await fetch('/api/ledger/payment', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         body: JSON.stringify(paymentPayload),
       });
 

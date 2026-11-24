@@ -106,7 +106,10 @@ export default function RetailerDashboard() {
         queryParams.append('limit', '50');
 
         const res = await fetch(`/api/orders?${queryParams.toString()}`, {
-          headers: { 'x-silent-request': 'true' }
+          headers: {
+            'x-silent-request': 'true',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          }
         });
         if (res.ok) {
           const data = await res.json();
@@ -142,7 +145,10 @@ export default function RetailerDashboard() {
       try {
         const target = cleanMobile || '9974442291';
         const res = await fetch(`/api/ledger/${target}?shopName=${encodeURIComponent(shopName)}`, {
-          headers: { 'x-silent-request': 'true' }
+          headers: {
+            'x-silent-request': 'true',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          }
         });
         if (res.ok) {
           const data = await res.json();

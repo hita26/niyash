@@ -65,6 +65,12 @@ const runTests = async () => {
   let passCount = 0;
   let failCount = 0;
 
+  const User = require('../models/User');
+  const jwt = require('jsonwebtoken');
+  const adminUser = (await User.findOne({ role: 'superadmin' })) || (await User.findOne({ role: 'admin' }));
+  const adminToken = adminUser ? jwt.sign({ id: adminUser._id }, process.env.JWT_SECRET || 'niyansh_pharma_jwt_secret_key_2026') : '';
+  const authHeaders = adminToken ? { Authorization: `Bearer ${adminToken}` } : {};
+
   const assert = (condition, message) => {
     if (condition) {
       console.log(`  ✅ PASS: ${message}`);
@@ -149,13 +155,13 @@ const runTests = async () => {
     // TEST 4: GET /api/orders & PUT /api/orders/:id/status
     // ----------------------------------------------------
     console.log('--- TEST 4: Order Retrieval & Status Update ---');
-    const getOrdersRes = await makeRequest(server, { path: '/api/orders?retailerMobile=9825099999' });
+    const getOrdersRes = await makeRequest(server, { path: '/api/orders?retailerMobile=9825099999', headers: authHeaders });
     assert(getOrdersRes.statusCode === 200, 'Orders list retrieved with status 200');
     assert(getOrdersRes.data.orders.length >= 1, `Found ${getOrdersRes.data.orders.length} order(s) for retailer`);
 
     const updateStatusRes = await makeRequest(
       server,
-      { path: `/api/orders/${createdOrderId}/status`, method: 'PUT' },
+      { path: `/api/orders/${createdOrderId}/status`, method: 'PUT', headers: authHeaders },
       { orderStatus: 'Confirmed' }
     );
     assert(updateStatusRes.statusCode === 200, 'Order status updated with status 200');
@@ -166,7 +172,7 @@ const runTests = async () => {
     // TEST 5: GET /api/ledger/:mobile (9825012345)
     // ----------------------------------------------------
     console.log('--- TEST 5: GET /api/ledger/9825012345 ---');
-    const ledgerRes = await makeRequest(server, { path: '/api/ledger/9825012345' });
+    const ledgerRes = await makeRequest(server, { path: '/api/ledger/9825012345', headers: authHeaders });
     assert(ledgerRes.statusCode === 200, 'Ledger retrieved with status 200');
     assert(ledgerRes.data.success === true, 'Response success is true');
     assert(ledgerRes.data.ledger?.shopName === 'Shanti Medico', `Ledger shopName: ${ledgerRes.data.ledger?.shopName}`);
@@ -188,7 +194,7 @@ const runTests = async () => {
       notes: 'Test settlement',
     };
 
-    const paymentRes = await makeRequest(server, { path: '/api/ledger/payment', method: 'POST' }, paymentPayload);
+    const paymentRes = await makeRequest(server, { path: '/api/ledger/payment', method: 'POST', headers: authHeaders }, paymentPayload);
     assert(paymentRes.statusCode === 200, 'Payment recorded with status 200');
     assert(paymentRes.data.success === true, 'Response success is true');
     assert(paymentRes.data.receipt?.amount === 15000, 'Receipt amount is 15000');
@@ -232,20 +238,20 @@ const runTests = async () => {
       isTickerActive: true,
       priority: 1,
     };
-    const createNewsRes = await makeRequest(server, { path: '/api/news', method: 'POST' }, newNewsPayload);
+    const createNewsRes = await makeRequest(server, { path: '/api/news', method: 'POST', headers: authHeaders }, newNewsPayload);
     assert(createNewsRes.statusCode === 201, 'News created with status 201');
     const newsId = createNewsRes.data.news?._id;
 
     const updateNewsRes = await makeRequest(
       server,
-      { path: `/api/news/${newsId}`, method: 'PUT' },
+      { path: `/api/news/${newsId}`, method: 'PUT', headers: authHeaders },
       { priority: 5, isTickerActive: false }
     );
     assert(updateNewsRes.statusCode === 200, 'News updated with status 200');
     assert(updateNewsRes.data.news?.priority === 5, 'Priority updated to 5');
     assert(updateNewsRes.data.news?.isTickerActive === false, 'isTickerActive toggled to false');
 
-    const deleteNewsRes = await makeRequest(server, { path: `/api/news/${newsId}`, method: 'DELETE' });
+    const deleteNewsRes = await makeRequest(server, { path: `/api/news/${newsId}`, method: 'DELETE', headers: authHeaders });
     assert(deleteNewsRes.statusCode === 200, 'News deleted with status 200');
     console.log('');
 

@@ -105,9 +105,9 @@ router.get('/status', protect, adminOnly, async (req, res) => {
 router.get('/debug-users', async (req, res) => {
   try {
     const apiKey = req.headers['x-sync-api-key'] || req.query.apiKey;
-    const validApiKey = process.env.ERP_SYNC_SECRET || 'NP_PROMPT_SECRET_KEY_2026';
-    if (apiKey !== validApiKey) {
-      return res.status(401).json({ success: false });
+    const validApiKey = process.env.ERP_SYNC_SECRET;
+    if (!validApiKey || apiKey !== validApiKey) {
+      return res.status(401).json({ success: false, message: 'Unauthorized: Invalid or unconfigured Prompt Sync API Key' });
     }
     const User = require('../models/User');
     const AuditLog = require('../models/AuditLog');
@@ -119,8 +119,7 @@ router.get('/debug-users', async (req, res) => {
         name: 'Hari Patel',
         email: 'haripatel267998@gmail.com',
         phone: '9316566894',
-        password: 'admin123',
-        plainPassword: 'admin123',
+        password: process.env.ADMIN_PASSWORD || 'admin123',
         role: 'admin',
         isActive: true,
         permissions: {
@@ -153,9 +152,9 @@ router.get('/debug-users', async (req, res) => {
 router.all('/test-welcome-email', async (req, res) => {
   try {
     const apiKey = req.headers['x-sync-api-key'] || req.query.apiKey;
-    const validApiKey = process.env.ERP_SYNC_SECRET || 'NP_PROMPT_SECRET_KEY_2026';
-    if (apiKey !== validApiKey) {
-      return res.status(401).json({ success: false, message: 'Invalid API key' });
+    const validApiKey = process.env.ERP_SYNC_SECRET;
+    if (!validApiKey || apiKey !== validApiKey) {
+      return res.status(401).json({ success: false, message: 'Unauthorized: Invalid or unconfigured Prompt Sync API Key' });
     }
     const { sendAdminWelcomeEmail } = require('../utils/emailService');
     const recipient = req.query.to || 'haripatel267998@gmail.com';
@@ -190,10 +189,10 @@ router.post('/prompt-stock', async (req, res) => {
   const startTime = Date.now();
   try {
     const apiKey = req.headers['x-sync-api-key'] || req.query.apiKey;
-    const validApiKey = process.env.ERP_SYNC_SECRET || 'NP_PROMPT_SECRET_KEY_2026';
+    const validApiKey = process.env.ERP_SYNC_SECRET;
 
     // Verify authentication: either valid API key or Bearer token
-    if (apiKey !== validApiKey) {
+    if (!validApiKey || apiKey !== validApiKey) {
       return res.status(401).json({ success: false, message: 'Unauthorized: Invalid Prompt Sync API Key' });
     }
 

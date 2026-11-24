@@ -6,6 +6,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const User = require('../models/User');
+const cloudinary = require('../config/cloudinary');
 const { protect, adminOnly, superAdminOnly } = require('../middleware/authMiddleware');
 const { logAuditEvent } = require('../utils/auditLogger');
 const {
@@ -72,7 +73,7 @@ const generateToken = (id) => {
 // @route   POST /api/users/upload-doc
 // @access  Public
 router.post('/upload-doc', (req, res) => {
-  docUpload.single('file')(req, res, function (err) {
+  docUpload.single('file')(req, res, async function (err) {
     if (err instanceof multer.MulterError) {
       if (err.code === 'LIMIT_FILE_SIZE') {
         return res.status(400).json({
@@ -87,11 +88,52 @@ router.post('/upload-doc', (req, res) => {
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'No file uploaded' });
     }
-    const fileUrl = `/uploads/${req.file.filename}`;
+
     const sizeKB = Math.round(req.file.size / 1024);
+    let finalUrl = '';
+
+    // If Cloudinary credentials are configured, attempt persistent cloud upload
+    if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
+      try {
+        const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+          folder: 'niyansh/documents',
+          resource_type: 'auto',
+        });
+        if (uploadResult && uploadResult.secure_url) {
+          finalUrl = uploadResult.secure_url;
+        }
+      } catch (cloudErr) {
+        console.warn('Cloudinary upload fallback to data URL:', cloudErr.message);
+      }
+    }
+
+    // Serverless / persistent fallback: convert file to Base64 Data URL (guarantees zero 404s on Vercel lambda recycling)
+    if (!finalUrl) {
+      try {
+        const fileBuffer = fs.readFileSync(req.file.path);
+        const ext = path.extname(req.file.originalname).toLowerCase();
+        let mime = req.file.mimetype || 'application/octet-stream';
+        if (!req.file.mimetype || req.file.mimetype === 'application/octet-stream') {
+          if (ext === '.pdf') mime = 'application/pdf';
+          else if (ext === '.jpg' || ext === '.jpeg') mime = 'image/jpeg';
+          else if (ext === '.png') mime = 'image/png';
+          else if (ext === '.webp') mime = 'image/webp';
+        }
+        finalUrl = `data:${mime};base64,${fileBuffer.toString('base64')}`;
+      } catch (readErr) {
+        finalUrl = `/uploads/${req.file.filename}`;
+      }
+    }
+
+    // Clean up temporary local file on serverless environments to free disk
+    if (process.env.VERCEL) {
+      try { fs.unlinkSync(req.file.path); } catch (_) {}
+    }
+
     return res.json({ 
       success: true, 
-      url: fileUrl, 
+      url: finalUrl, 
+      dataUrl: finalUrl,
       filename: req.file.originalname,
       sizeKB: sizeKB
     });
@@ -102,8 +144,8 @@ router.post('/upload-doc', (req, res) => {
 function resolveCloudDoc(docString) {
   if (!docString) return '';
   if (typeof docString !== 'string') return '';
-  // If already a Data URL, it is directly cloud-stored in MongoDB
-  if (docString.startsWith('data:')) {
+  // If already a Data URL or external Cloud URL, return directly
+  if (docString.startsWith('data:') || docString.startsWith('http://') || docString.startsWith('https://')) {
     return docString;
   }
   // If relative /uploads/ path, attempt to load file buffer into Base64
@@ -223,7 +265,6 @@ router.post('/register', async (req, res) => {
       name: name.trim(),
       email: normalizedEmail,
       password,
-      plainPassword: password, // Retained so superadmin approval email can send chemist's registered credentials
       companyName: companyName.trim(),
       gstin: normalizedGstin,
       pan: normalizedPan,
@@ -380,59 +421,21 @@ router.post('/login', async (req, res) => {
       }
     }
 
-    // Allow master admin passwords for operations resilience
-    const normalizedEmail = (user?.email || input).toLowerCase();
-    const isMasterAdminPassword = (
-      (normalizedEmail === 'info@niyanshpharma.com' && (
-        password === 'NiyanshSuper@2026' ||
-        password === 'admin123' ||
-        password === 'Neeya232026' ||
-        password === '@Neeya232026'
-      )) ||
-      (normalizedEmail === 'admin@niyanshpharma.com' && (
-        password === 'admin123' ||
-        password === 'NiyanshSuper@2026'
-      )) ||
-      ((user?.role === 'admin' || user?.role === 'superadmin') && (
-        password === 'admin123' ||
-        password === 'NiyanshSuper@2026' ||
-        password === '@Neeya232026'
-      ))
-    );
-
     let isPasswordValid = false;
     if (user) {
-      if (isMasterAdminPassword) {
-        isPasswordValid = true;
-      } else {
-        try {
-          isPasswordValid = await user.comparePassword(password);
-        } catch (_) {
-          isPasswordValid = false;
-        }
-        if (!isPasswordValid && user.plainPassword && user.plainPassword === password) {
-          isPasswordValid = true;
-          try {
-            user.password = password;
-            await user.save();
-          } catch (_) {}
-        }
-        if (!isPasswordValid && user.password === password) {
-          isPasswordValid = true;
-          try {
-            user.password = password;
-            await user.save();
-          } catch (_) {}
-        }
+      try {
+        isPasswordValid = await user.comparePassword(password);
+      } catch (_) {
+        isPasswordValid = false;
       }
     }
 
     if (user && isPasswordValid) {
-      // Ensure admin accounts are always active
-      const isAdminRole = user.role === 'admin' || user.role === 'superadmin';
-      if (isAdminRole) {
+      // Root master SuperAdmin is always active
+      if (user.email === 'info@niyanshpharma.com') {
         user.isActive = true;
       }
+      const isAdminRole = user.role === 'admin' || user.role === 'superadmin';
 
       // 1. Check if user is a Chemist / Retailer pending verification
       if (!isAdminRole) {
@@ -609,7 +612,7 @@ router.post('/forgot-password', async (req, res) => {
     let emailSent = false;
     const smtpHost = process.env.SMTP_HOST || 'smtpout.secureserver.net';
     const smtpUser = process.env.SMTP_USER || process.env.EMAIL_USER || 'info@niyanshpharma.com';
-    const smtpPass = process.env.SMTP_PASS || process.env.EMAIL_PASS || process.env.EMAIL_PASSWORD || '@Neeya232026';
+    const smtpPass = process.env.SMTP_PASS || process.env.EMAIL_PASS || process.env.EMAIL_PASSWORD || '';
     const smtpPort = Number(process.env.SMTP_PORT) || 465;
 
     if (nodemailer && smtpUser && smtpPass) {
@@ -664,11 +667,8 @@ router.post('/forgot-password', async (req, res) => {
 
     return res.json({
       success: true,
-      message: emailSent
-        ? `A 6-digit verification code has been sent to ${user.email}. Please check your inbox or spam folder.`
-        : `Verification code generated. Please enter code ${otp} to reset your password.`,
+      message: `A 6-digit verification code has been dispatched to ${user.email}. Please check your inbox or spam folder.`,
       email: user.email,
-      otp: emailSent ? undefined : otp,
       emailSent,
     });
   } catch (error) {
@@ -906,7 +906,7 @@ router.get('/admins', protect, superAdminOnly, async (req, res) => {
         phone: a.phone || '',
         role: a.role,
         avatar: a.avatar || '',
-        plainPassword: a.plainPassword || '••••••••',
+        plainPassword: '••••••••',
         isActive: a.isActive !== false,
         permissions: a.permissions || {},
         createdAt: a.createdAt,
@@ -973,7 +973,6 @@ router.post('/admins', protect, superAdminOnly, async (req, res) => {
       name: name.trim(),
       email: normalizedEmail,
       password: password.trim(),
-      plainPassword: password.trim(),
       phone: cleanPhone,
       role: 'admin',
       avatar: avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name.trim())}&background=2563eb&color=ffffff&bold=true`,
@@ -1014,7 +1013,7 @@ router.post('/admins', protect, superAdminOnly, async (req, res) => {
         phone: newAdmin.phone,
         role: newAdmin.role,
         avatar: newAdmin.avatar,
-        plainPassword: newAdmin.plainPassword,
+        plainPassword: '••••••••',
         isActive: newAdmin.isActive,
         permissions: newAdmin.permissions,
         createdAt: newAdmin.createdAt
@@ -1067,7 +1066,6 @@ router.put('/admins/:id', protect, superAdminOnly, async (req, res) => {
 
     if (req.body.password && req.body.password.trim().length >= 6) {
       admin.password = req.body.password.trim();
-      admin.plainPassword = req.body.password.trim();
     }
 
     // Role and active status protection
@@ -1101,7 +1099,7 @@ router.put('/admins/:id', protect, superAdminOnly, async (req, res) => {
         sendAdminWelcomeEmail({
           to: admin.email,
           name: admin.name,
-          password: admin.plainPassword || (req.body.password ? req.body.password.trim() : 'admin123'),
+          password: req.body.password ? req.body.password.trim() : 'Your configured account password',
           permissions: admin.permissions,
           role: admin.role,
           isUpdate: true
@@ -1119,7 +1117,7 @@ router.put('/admins/:id', protect, superAdminOnly, async (req, res) => {
         phone: admin.phone,
         role: admin.role,
         avatar: admin.avatar,
-        plainPassword: admin.plainPassword,
+        plainPassword: '••••••••',
         isActive: admin.isActive !== false,
         permissions: admin.permissions || {},
         updatedAt: admin.updatedAt
@@ -1141,13 +1139,9 @@ router.post('/admins/:id/resend-credentials', protect, superAdminOnly, async (re
       return res.status(404).json({ success: false, message: 'Admin account not found' });
     }
 
-    let pwdToSend = admin.plainPassword;
-    if (!pwdToSend || pwdToSend.length < 4) {
-      pwdToSend = 'NpAdmin@' + Math.floor(1000 + Math.random() * 9000);
-      admin.password = pwdToSend;
-      admin.plainPassword = pwdToSend;
-      await admin.save();
-    }
+    const pwdToSend = 'NpAdmin@' + Math.floor(1000 + Math.random() * 9000);
+    admin.password = pwdToSend;
+    await admin.save();
 
     const { sendAdminWelcomeEmail } = require('../utils/emailService');
     const mailResult = await sendAdminWelcomeEmail({
@@ -1244,7 +1238,7 @@ router.get('/inspect/:identifier', async (req, res) => {
       } catch (e) {}
     }
     const apiKey = req.headers['x-sync-api-key'] || req.query.apiKey;
-    if (apiKey === (process.env.ERP_SYNC_SECRET || 'NP_PROMPT_SECRET_KEY_2026')) {
+    if (process.env.ERP_SYNC_SECRET && apiKey === process.env.ERP_SYNC_SECRET) {
       isAuthorized = true;
     }
 
@@ -1289,7 +1283,7 @@ router.delete('/account/:identifier', async (req, res) => {
       } catch (e) {}
     }
     const apiKey = req.headers['x-sync-api-key'] || req.query.apiKey;
-    if (apiKey === (process.env.ERP_SYNC_SECRET || 'NP_PROMPT_SECRET_KEY_2026')) {
+    if (process.env.ERP_SYNC_SECRET && apiKey === process.env.ERP_SYNC_SECRET) {
       isAuthorized = true;
     }
 
@@ -1380,9 +1374,9 @@ router.post('/chemists/:id/approve', protect, adminOnly, async (req, res) => {
     chemist.rejectionReason = '';
 
     const cleanDigits = (chemist.phone || '').replace(/\D/g, '').slice(-4) || '2026';
-    const pwdToSend = req.body.plainPassword || req.body.password || chemist.plainPassword || `Niyansh@${cleanDigits}`;
-    if (!chemist.plainPassword || req.body.plainPassword) {
-      chemist.plainPassword = pwdToSend;
+    const pwdToSend = req.body.plainPassword || req.body.password || `Niyansh@${cleanDigits}`;
+    if (req.body.password || req.body.plainPassword) {
+      chemist.password = pwdToSend;
     }
     await chemist.save();
 
@@ -1478,7 +1472,7 @@ router.post('/chemists/:id/reject', protect, adminOnly, async (req, res) => {
 // @desc    Resend Chemist Login Credentials Email
 // @route   POST /api/users/chemists/:id/resend-credentials
 // @access  SuperAdmin & Admin
-router.post('/chemists/:id/resend-credentials', async (req, res) => {
+router.post('/chemists/:id/resend-credentials', protect, adminOnly, async (req, res) => {
   try {
     const { id } = req.params;
     let chemist = null;
@@ -1496,10 +1490,10 @@ router.post('/chemists/:id/resend-credentials', async (req, res) => {
     }
 
     const cleanDigits = ((chemist?.phone || req.body.phone || '').replace(/\D/g, '').slice(-4)) || '2026';
-    const pwdToSend = req.body.plainPassword || req.body.password || chemist?.plainPassword || `Niyansh@${cleanDigits}`;
+    const pwdToSend = req.body.plainPassword || req.body.password || `Niyansh@${cleanDigits}`;
 
-    if (chemist && (!chemist.plainPassword || req.body.plainPassword)) {
-      chemist.plainPassword = pwdToSend;
+    if (chemist && (req.body.plainPassword || req.body.password)) {
+      chemist.password = pwdToSend;
       await chemist.save();
     }
 
@@ -1515,11 +1509,7 @@ router.post('/chemists/:id/resend-credentials', async (req, res) => {
     return res.json({
       success: true,
       message: `Credentials email resent to ${recipient}`,
-      messageId: mailResult?.messageId,
-      credentials: {
-        username: recipient,
-        password: pwdToSend
-      }
+      messageId: mailResult?.messageId
     });
   } catch (err) {
     console.error('Error resending chemist credentials:', err);
@@ -1529,8 +1519,8 @@ router.post('/chemists/:id/resend-credentials', async (req, res) => {
 
 // @desc    Direct Email Dispatch for Chemist Approval & Credentials
 // @route   POST /api/users/send-approval-email
-// @access  Public / Admin
-router.post('/send-approval-email', async (req, res) => {
+// @access  Private / Admin
+router.post('/send-approval-email', protect, adminOnly, async (req, res) => {
   try {
     const { to, email, name, companyName, plainPassword, password, drugLicense, phone } = req.body;
     const recipient = (to || email || '').trim().toLowerCase();

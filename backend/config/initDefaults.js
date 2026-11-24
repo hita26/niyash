@@ -248,8 +248,7 @@ const initDefaults = async () => {
           await User.create({
             name: 'Niyansh Super Admin',
             email: superAdminEmail,
-            password: 'NiyanshSuper@2026',
-            plainPassword: 'NiyanshSuper@2026',
+            password: process.env.SUPERADMIN_PASSWORD || 'NiyanshSuper@2026',
             companyName: 'Niyansh Pharma Wholesale Distribution',
             role: 'superadmin',
             phone: '9316566894',
@@ -269,10 +268,6 @@ const initDefaults = async () => {
           superAdmin.role = 'superadmin';
           needSave = true;
         }
-        if (!superAdmin.plainPassword) {
-          superAdmin.plainPassword = 'NiyanshSuper@2026';
-          needSave = true;
-        }
         if (!superAdmin.avatar) {
           superAdmin.avatar = 'https://ui-avatars.com/api/?name=Super+Admin&background=f59e0b&color=ffffff&bold=true';
           needSave = true;
@@ -290,8 +285,7 @@ const initDefaults = async () => {
           await User.create({
             name: 'Niyansh Staff Admin',
             email: 'admin@niyanshpharma.com',
-            password: 'admin123',
-            plainPassword: 'admin123',
+            password: process.env.ADMIN_PASSWORD || 'admin123',
             companyName: 'Niyansh Pharma Wholesale Distribution',
             role: 'admin',
             phone: '9316566894',

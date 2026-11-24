@@ -3172,11 +3172,12 @@ body.dark-theme {
   display: flex;
   gap: 16px;
   width: max-content;
-  animation: marquee-scroll 45s linear infinite;
+  animation: marqueeContinuousLeft 85s linear infinite;
   align-items: center;
 }
 
-.brands-marquee-track:hover {
+.brands-marquee-track:hover,
+.brands-marquee-track:active {
   animation-play-state: paused;
 }
 
@@ -5199,7 +5200,7 @@ body:has(.admin-container) .floating-b2b-widget {
   display: flex;
   gap: 14px;
   width: max-content;
-  animation: marqueeContinuousLeft 34s linear infinite;
+  animation: marqueeContinuousLeft 85s linear infinite;
   will-change: transform;
 }
 
@@ -5207,12 +5208,14 @@ body:has(.admin-container) .floating-b2b-widget {
   display: flex;
   gap: 14px;
   width: max-content;
-  animation: marqueeContinuousRight 38s linear infinite;
+  animation: marqueeContinuousRight 92s linear infinite;
   will-change: transform;
 }
 
 .brands-marquee-track:hover,
-.brands-marquee-track-reverse:hover {
+.brands-marquee-track-reverse:hover,
+.brands-marquee-track:active,
+.brands-marquee-track-reverse:active {
   animation-play-state: paused;
 }
 

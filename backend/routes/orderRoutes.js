@@ -3,7 +3,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const Order = require('../models/Order');
 const Ledger = require('../models/Ledger');
-const { protect, adminOnly, checkPermission } = require('../middleware/authMiddleware');
+const { protect, optionalProtect, adminOnly, checkPermission } = require('../middleware/authMiddleware');
 const { logAuditEvent } = require('../utils/auditLogger');
 
 // Helper to escape special regex characters
@@ -298,12 +298,12 @@ const executeGetOrders = async (req, res) => {
 
 // @desc    Get all orders (Admin with canManageOrders sees all, or retailer filters by their own mobile)
 // @route   GET /api/orders
-// @access  Protected
-router.get('/', protect, async (req, res) => {
+// @access  Optional Protect / Retailer or Admin
+router.get('/', optionalProtect, async (req, res) => {
   const { retailerMobile } = req.query;
 
-  // If Admin / SuperAdmin
-  if (req.user.role === 'admin' || req.user.role === 'superadmin') {
+  // 1. If Admin / SuperAdmin
+  if (req.user && (req.user.role === 'admin' || req.user.role === 'superadmin')) {
     if (!retailerMobile || !retailerMobile.trim()) {
       return checkPermission('canManageOrders')(req, res, async () => {
         return executeGetOrders(req, res);
@@ -312,16 +312,29 @@ router.get('/', protect, async (req, res) => {
     return executeGetOrders(req, res);
   }
 
-  // Chemist / Retailer querying their own mobile orders
-  const userPhone = (req.user.phone || '').replace(/\D/g, '').slice(-10);
-  const requestedMobile = (retailerMobile || '').replace(/\D/g, '').slice(-10);
+  // 2. If logged-in Retailer / Chemist
+  if (req.user) {
+    const userPhone = (req.user.phone || '').replace(/\D/g, '').slice(-10);
+    const requestedMobile = (retailerMobile || '').replace(/\D/g, '').slice(-10);
 
-  if (requestedMobile && userPhone && requestedMobile !== userPhone) {
-    return res.status(403).json({ success: false, message: 'You are not authorized to view orders for another store.' });
+    if (requestedMobile && userPhone && requestedMobile !== userPhone) {
+      return res.status(403).json({ success: false, message: 'You are not authorized to view orders for another store.' });
+    }
+
+    req.query.retailerMobile = userPhone || requestedMobile;
+    return executeGetOrders(req, res);
   }
 
-  req.query.retailerMobile = userPhone || requestedMobile;
-  return executeGetOrders(req, res);
+  // 3. Unauthenticated guest querying explicit 10-digit retailerMobile
+  if (retailerMobile && retailerMobile.trim()) {
+    const cleanDigits = retailerMobile.replace(/\D/g, '').slice(-10);
+    if (cleanDigits.length === 10) {
+      req.query.retailerMobile = cleanDigits;
+      return executeGetOrders(req, res);
+    }
+  }
+
+  return res.status(401).json({ success: false, message: 'Please log in to view wholesale orders.' });
 });
 
 // @desc    Get single order by ID

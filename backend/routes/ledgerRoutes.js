@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Ledger = require('../models/Ledger');
-const { protect, adminOnly, checkPermission } = require('../middleware/authMiddleware');
+const { protect, optionalProtect, adminOnly, checkPermission } = require('../middleware/authMiddleware');
 
 // Helper to escape special regex characters
 const escapeRegex = (str) => {
@@ -139,8 +139,8 @@ router.get('/', protect, adminOnly, checkPermission('canManageLedgers'), async (
 
 // @desc    Record payment transaction and deduct from oldest unpaid/partial invoices
 // @route   POST /api/ledger/payment
-// @access  Protected
-router.post('/payment', protect, async (req, res) => {
+// @access  Optional Protect
+router.post('/payment', optionalProtect, async (req, res) => {
   try {
     const {
       retailerMobile,
@@ -158,8 +158,8 @@ router.post('/payment', protect, async (req, res) => {
       return res.status(400).json({ message: 'Retailer mobile number must contain exactly 10 numeric digits' });
     }
 
-    // Authorization guard: non-admins can only apply payments to their own mobile account
-    if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {
+    // Authorization guard: if authenticated as a non-admin, can only apply payments to their own mobile account
+    if (req.user && req.user.role !== 'admin' && req.user.role !== 'superadmin') {
       const userMobile = (req.user.phone || '').replace(/\D/g, '').slice(-10);
       if (userMobile && targetMobile !== userMobile) {
         return res.status(403).json({ message: 'You are not authorized to record payments for another retailer account' });
@@ -289,8 +289,8 @@ router.post('/send-statement', async (req, res) => {
 
 // @desc    Get retailer ledger by mobile number (creates initial if not found)
 // @route   GET /api/ledger/:mobile
-// @access  Protected
-router.get('/:mobile', protect, async (req, res) => {
+// @access  Optional Protect
+router.get('/:mobile', optionalProtect, async (req, res) => {
   try {
     const rawMobile = req.params.mobile.trim();
     const cleanMobile = cleanMobileDigits(rawMobile);
@@ -298,8 +298,8 @@ router.get('/:mobile', protect, async (req, res) => {
       return res.status(400).json({ message: 'Retailer mobile number must contain exactly 10 numeric digits' });
     }
 
-    // Authorization guard: non-admins can only view their own ledger
-    if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {
+    // Authorization guard: if authenticated as a non-admin, can only view their own ledger
+    if (req.user && req.user.role !== 'admin' && req.user.role !== 'superadmin') {
       const userMobile = (req.user.phone || '').replace(/\D/g, '').slice(-10);
       if (userMobile && cleanMobile !== userMobile) {
         return res.status(403).json({ message: 'Not authorized to view another retailer ledger' });

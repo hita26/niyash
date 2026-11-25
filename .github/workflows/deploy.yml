@@ -75,4 +75,6 @@ jobs:
 
           echo "Verifying deployment on live server..."
           ssh -o StrictHostKeyChecking=no -i /tmp/id_rsa_decrypted "$SSH_USER@$SSH_HOST" "cd ~/public_html && echo 'Live index.html JS bundle:' && grep 'index-' index.html"
+          echo "Inspecting GoDaddy Node & system capabilities..."
+          ssh -o StrictHostKeyChecking=no -i /tmp/id_rsa_decrypted "$SSH_USER@$SSH_HOST" "echo 'HOME:' \$HOME && echo 'Node path:' && which node 2>&1 || true; echo 'Node ver:' && node -v 2>&1 || true; echo 'NPM:' && npm -v 2>&1 || true" || true
           echo "Deployment to niyanshpharma.com finished successfully!"

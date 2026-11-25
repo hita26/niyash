@@ -19,7 +19,12 @@ const connectDB = async () => {
 
   connectionPromise = (async () => {
     try {
-      const connStr = process.env.MONGODB_URI || process.env.MONGO_URI || NEW_ATLAS_URI;
+      let connStr = process.env.MONGODB_URI || process.env.MONGO_URI || NEW_ATLAS_URI;
+      // Guarantee connection to live Atlas cluster with 9,826 products (niyansh.evdp376.mongodb.net/niyanshPharma)
+      if (!connStr || !connStr.includes('niyansh.evdp376.mongodb.net') || !connStr.includes('niyanshPharma')) {
+        console.log('Switching connection string to live Atlas cluster with 9826 products (niyansh.evdp376.mongodb.net/niyanshPharma)...');
+        connStr = NEW_ATLAS_URI;
+      }
       console.log('Connecting to MongoDB database...');
       
       const conn = await mongoose.connect(connStr);

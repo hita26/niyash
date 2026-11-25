@@ -31,50 +31,59 @@ try {
   // Ignore in read-only environments
 }
 app.use('/uploads', express.static(uploadDir));
+app.use('/api/uploads', express.static(uploadDir));
 
-// Database readiness & cache-busting middleware for all /api routes
+// Centralized API router (supports both /api/* and root /* if Passenger strips PassengerBaseURI "/api")
+const apiRouter = express.Router();
+
+// Database readiness & cache-busting middleware for all API routes
 let isDefaultsInitialized = false;
-app.use(async (req, res, next) => {
-  if (req.path.startsWith('/api')) {
-    // Ensure all API responses return fresh data and are never cached by browser or CDN
-    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-    res.set('Pragma', 'no-cache');
-    res.set('Expires', '0');
-    res.set('Surrogate-Control', 'no-store');
-    try {
-      await connectDB();
-      if (!isDefaultsInitialized) {
-        await initDefaults();
-        isDefaultsInitialized = true;
-      }
-    } catch (err) {
-      return res.status(503).json({ message: 'Database unavailable', error: err.message });
+apiRouter.use(async (req, res, next) => {
+  // Ensure all API responses return fresh data and are never cached by browser or CDN
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  res.set('Surrogate-Control', 'no-store');
+  try {
+    await connectDB();
+    if (!isDefaultsInitialized) {
+      await initDefaults();
+      isDefaultsInitialized = true;
     }
+  } catch (err) {
+    return res.status(503).json({ message: 'Database unavailable', error: err.message });
   }
   next();
 });
 
-// Routes
-app.use('/api/products', require('./routes/productRoutes'));
-app.use('/api/companies', require('./routes/companyRoutes'));
-app.use('/api/orders', require('./routes/orderRoutes'));
-app.use('/api/ledger', require('./routes/ledgerRoutes'));
-app.use('/api/news', require('./routes/newsRoutes'));
-app.use('/api/enquiries', require('./routes/enquiryRoutes'));
-app.use('/api/careers', require('./routes/careerRoutes'));
-app.use('/api/users', require('./routes/userRoutes'));
-app.use('/api/ai', require('./routes/aiRoutes'));
-app.use('/api/settings', require('./routes/settingRoutes'));
-app.use('/api/sync', require('./routes/syncRoutes'));
-app.use('/api/audit', require('./routes/auditRoutes'));
-app.use('/api/analytics', require('./routes/analyticsRoutes'));
+// API Health / Landing Check
+apiRouter.get('/', (req, res) => {
+  res.json({ status: 'ok', message: 'Niyansh Pharma API is running...' });
+});
+
+// API Routes
+apiRouter.use('/products', require('./routes/productRoutes'));
+apiRouter.use('/companies', require('./routes/companyRoutes'));
+apiRouter.use('/orders', require('./routes/orderRoutes'));
+apiRouter.use('/ledger', require('./routes/ledgerRoutes'));
+apiRouter.use('/news', require('./routes/newsRoutes'));
+apiRouter.use('/enquiries', require('./routes/enquiryRoutes'));
+apiRouter.use('/careers', require('./routes/careerRoutes'));
+apiRouter.use('/users', require('./routes/userRoutes'));
+apiRouter.use('/ai', require('./routes/aiRoutes'));
+apiRouter.use('/settings', require('./routes/settingRoutes'));
+apiRouter.use('/sync', require('./routes/syncRoutes'));
+apiRouter.use('/audit', require('./routes/auditRoutes'));
+apiRouter.use('/analytics', require('./routes/analyticsRoutes'));
+
+app.use('/api', apiRouter);
 app.use('/', require('./routes/seoRoutes'));
 
-
-// Serve static frontend build if available
+// Serve static frontend build if available (dev / monolithic mode)
 const frontendDist = path.join(__dirname, '../frontend/dist');
+const isPassengerMounted = Boolean(process.env.IN_PASSENGER || process.env.PASSENGER_BASE_URI);
 
-if (fs.existsSync(frontendDist)) {
+if (fs.existsSync(frontendDist) && !isPassengerMounted) {
   app.use(express.static(frontendDist));
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
@@ -83,10 +92,8 @@ if (fs.existsSync(frontendDist)) {
     res.sendFile(path.join(frontendDist, 'index.html'));
   });
 } else {
-  // Default API landing in dev mode without frontend build
-  app.get('/', (req, res) => {
-    res.send('Niyansh Pharma API is running...');
-  });
+  // GoDaddy cPanel Passenger / API-only mode: also mount apiRouter at root in case PassengerBaseURI "/api" strips /api
+  app.use('/', apiRouter);
 }
 
 // Error handling middleware
@@ -101,7 +108,7 @@ app.use((err, req, res, next) => {
 if (process.env.NODE_ENV !== 'test') {
   const PORT = process.env.PORT || 5001;
   app.listen(PORT, () => {
-    console.log(`Server running in development mode on port ${PORT}`);
+    console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
   });
 }
 

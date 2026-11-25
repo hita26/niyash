@@ -13,7 +13,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup SSH and Push Dist to GoDaddy
+      - name: Setup SSH and Deploy Frontend & Backend to GoDaddy
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_USER: ${{ secrets.SSH_USER }}
@@ -39,6 +39,39 @@ jobs:
           scp -o StrictHostKeyChecking=no -i /tmp/id_rsa_decrypted -r frontend/dist/* "$SSH_USER@$SSH_HOST:public_html/"
           scp -o StrictHostKeyChecking=no -i /tmp/id_rsa_decrypted frontend/dist/.htaccess "$SSH_USER@$SSH_HOST:public_html/.htaccess" || true
           scp -o StrictHostKeyChecking=no -i /tmp/id_rsa_decrypted frontend/dist/products/.htaccess "$SSH_USER@$SSH_HOST:public_html/products/.htaccess" || true
+
+          echo "Packaging and pushing backend files to GoDaddy ~/backend..."
+          tar --exclude='node_modules' --exclude='.env' --exclude='uploads' --exclude='tmp' --exclude='db_data' -czf /tmp/backend.tar.gz -C backend .
+          scp -o StrictHostKeyChecking=no -i /tmp/id_rsa_decrypted /tmp/backend.tar.gz "$SSH_USER@$SSH_HOST:/tmp/backend.tar.gz"
+
+          echo "Installing backend dependencies and restarting Passenger on GoDaddy..."
+          ssh -o StrictHostKeyChecking=no -i /tmp/id_rsa_decrypted "$SSH_USER@$SSH_HOST" '
+            set -e
+            mkdir -p ~/backend ~/backend/tmp ~/backend/uploads
+            tar -xzf /tmp/backend.tar.gz -C ~/backend
+            rm -f /tmp/backend.tar.gz
+
+            if [ ! -e ~/public_html/uploads ]; then
+              ln -s ~/backend/uploads ~/public_html/uploads
+            fi
+
+            ACTIVATE_SCRIPT=$(ls -1 ~/nodevenv/backend/*/bin/activate 2>/dev/null | sort -V | tail -n 1 || true)
+            if [ -n "$ACTIVATE_SCRIPT" ]; then
+              echo "Activating cPanel Node.js virtualenv: $ACTIVATE_SCRIPT"
+              source "$ACTIVATE_SCRIPT"
+              cd ~/backend && npm install --omit=dev
+            elif command -v npm >/dev/null 2>&1; then
+              echo "Using system npm..."
+              cd ~/backend && npm install --omit=dev
+            else
+              echo "WARNING: cPanel Node.js virtualenv not found at ~/nodevenv/backend/*/bin/activate. Create the Node.js App in cPanel first."
+            fi
+
+            touch ~/backend/tmp/restart.txt
+            if [ ! -f ~/public_html/api/.htaccess ]; then
+              echo "NOTE: ~/public_html/api/.htaccess not found yet. Make sure Setup Node.js App in cPanel has Application URL set to api."
+            fi
+          '
 
           echo "Verifying deployment on live server..."
           ssh -o StrictHostKeyChecking=no -i /tmp/id_rsa_decrypted "$SSH_USER@$SSH_HOST" "cd ~/public_html && echo 'Live index.html JS bundle:' && grep 'index-' index.html"

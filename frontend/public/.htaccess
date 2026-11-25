@@ -9,15 +9,16 @@ DirectoryIndex index.html
   RewriteEngine On
   RewriteBase /
 
-  # 1. Directly intercept /products and /products/ and rewrite to index.html immediately
-  RewriteRule ^products/?$ /index.html [L,QSA]
-
-  # 2. Never rewrite physical files that actually exist (images, css, js, fonts, pdf, php, json)
-  RewriteCond %{REQUEST_FILENAME} -f
+  # 1. Let /api requests pass directly to GoDaddy Node.js App (Passenger)
+  RewriteCond %{REQUEST_URI} ^/api/ [OR]
+  RewriteCond %{REQUEST_URI} ^/api$
   RewriteRule ^ - [L]
 
-  # 3. Allow API PHP scripts to execute directly
-  RewriteCond %{REQUEST_URI} ^/api/
+  # 2. Directly intercept /products and /products/ and rewrite to index.html immediately
+  RewriteRule ^products/?$ /index.html [L,QSA]
+
+  # 3. Never rewrite physical files that actually exist (images, css, js, fonts, pdf, php, json)
+  RewriteCond %{REQUEST_FILENAME} -f
   RewriteRule ^ - [L]
 
   # 4. Route all other requests (including any directory request without a file) to index.html

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const https = require('https');
 
-const LIVE_URL = 'https://pharma-bay-two.vercel.app/api/products/sync-batch';
+const LIVE_URL = 'https://niyanshpharma.com/api/products/sync-batch';
 const SYNC_SECRET = 'niyansh_sync_2026';
 const LOCAL_MONGO_URI = 'mongodb://127.0.0.1:27017/niyanshPharma';
 

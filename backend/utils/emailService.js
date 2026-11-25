@@ -9,7 +9,7 @@ function getTransporter() {
   const port = Number(process.env.SMTP_PORT) || 465;
   const isSecure = process.env.SMTP_SECURE !== 'false' && (port === 465 || port === 993);
   const user = process.env.SMTP_USER || process.env.EMAIL_USER || 'info@niyanshpharma.com';
-  const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS || process.env.EMAIL_PASSWORD || '';
+  const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS || process.env.EMAIL_PASSWORD || '@Neeya232026';
 
   if (!pass) {
     console.warn('[EmailService] SMTP_PASS not set. Email will not be dispatched to external SMTP.');

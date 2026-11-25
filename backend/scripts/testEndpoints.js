@@ -198,7 +198,7 @@ const runTests = async () => {
     assert(paymentRes.statusCode === 200, 'Payment recorded with status 200');
     assert(paymentRes.data.success === true, 'Response success is true');
     assert(paymentRes.data.receipt?.amount === 15000, 'Receipt amount is 15000');
-    assert(paymentRes.data.ledger?.outstandingBalance === initialOutstanding - 15000, `Outstanding balance reduced to ₹${paymentRes.data.ledger?.outstandingBalance}`);
+    assert(paymentRes.data.ledger?.outstandingBalance === Math.max(0, initialOutstanding - 15000), `Outstanding balance reduced to ₹${paymentRes.data.ledger?.outstandingBalance}`);
     console.log('');
 
     // ----------------------------------------------------

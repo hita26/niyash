@@ -20,6 +20,11 @@ const Product = require('../models/Product');
 const Company = require('../models/Company');
 
 async function clearCatalog() {
+  if (!process.argv.includes('--confirm-wipe')) {
+    console.error('SAFETY GUARD: Refusing to delete all products and companies without "--confirm-wipe" flag.');
+    console.error('Usage: node backend/scripts/clearAllProductsAndCompanies.js --confirm-wipe');
+    process.exit(1);
+  }
   console.log('====================================================');
   console.log('🔄 NIYANSH PHARMA - CATALOG RESET PROCEDURE');
   console.log('====================================================');

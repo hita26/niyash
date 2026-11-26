@@ -3840,17 +3840,24 @@ _Helpline: +91 9316566894_`;
   };
 
   const handleClearAllProducts = async () => {
-    if (!window.confirm('ARE YOU SURE? This will permanently delete ALL products from the database so you can add products manually from scratch.')) {
+    if (!window.confirm('ARE YOU SURE? This will permanently delete ALL products from the database.')) {
       return;
     }
-    if (!window.confirm('Double Confirmation: Delete ALL products now? This action cannot be undone.')) {
+    const typed = window.prompt('CATALOG PROTECTION GUARD: Type "DELETE ALL PRODUCTS" exactly to confirm wiping the entire product catalog:');
+    if (typed !== 'DELETE ALL PRODUCTS') {
+      showToast('Catalog wipe cancelled — all products remain safe.', 'info');
       return;
     }
     setIsClearingProducts(true);
     try {
       const res = await fetch('/api/products/clear-all', {
         method: 'DELETE',
-        headers: getAuthHeaders(),
+        headers: {
+          ...getAuthHeaders(),
+          'Content-Type': 'application/json',
+          'x-confirm-wipe': 'PERMANENTLY_DELETE_ALL_PRODUCTS',
+        },
+        body: JSON.stringify({ confirmWipe: 'PERMANENTLY_DELETE_ALL_PRODUCTS' }),
       });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -4730,17 +4737,24 @@ _Helpline: +91 9316566894_`;
   };
 
   const handleClearAllCompanies = async () => {
-    if (!window.confirm('ARE YOU SURE? This will permanently delete ALL companies from the database so you can add companies manually from scratch.')) {
+    if (!window.confirm('ARE YOU SURE? This will permanently delete ALL companies from the database.')) {
       return;
     }
-    if (!window.confirm('Double Confirmation: Delete ALL companies now? This action cannot be undone.')) {
+    const typed = window.prompt('PROTECTION GUARD: Type "DELETE ALL COMPANIES" exactly to confirm wiping all companies:');
+    if (typed !== 'DELETE ALL COMPANIES') {
+      showToast('Company wipe cancelled — all companies remain safe.', 'info');
       return;
     }
     setIsClearingCompanies(true);
     try {
       const res = await fetch('/api/companies/clear-all', {
         method: 'DELETE',
-        headers: getAuthHeaders(),
+        headers: {
+          ...getAuthHeaders(),
+          'Content-Type': 'application/json',
+          'x-confirm-wipe': 'PERMANENTLY_DELETE_ALL_COMPANIES',
+        },
+        body: JSON.stringify({ confirmWipe: 'PERMANENTLY_DELETE_ALL_COMPANIES' }),
       });
       const data = await res.json();
       if (res.ok && data.success) {

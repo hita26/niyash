@@ -14,6 +14,11 @@ try { require('dotenv').config({ path: path.join(__dirname, '../.env') }); } cat
 const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/niyanshPharma';
 
 async function clearAllProducts() {
+  if (!process.argv.includes('--confirm-wipe')) {
+    console.error('SAFETY GUARD: Refusing to delete all products without "--confirm-wipe" flag.');
+    console.error('Usage: node backend/scripts/clearAllProducts.js --confirm-wipe');
+    process.exit(1);
+  }
   try {
     console.log('Connecting to MongoDB:', MONGO_URI);
     await mongoose.connect(MONGO_URI);

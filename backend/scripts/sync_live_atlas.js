@@ -91,7 +91,7 @@ async function run() {
     console.log(`✅ Synced: ${res.companiesSynced}`);
   }
 
-  // 2. Sync Products in batches of 200 with clearProducts on first chunk
+  // 2. Sync Products in batches of 200 using non-destructive upserts (never wipe catalog)
   const PROD_CHUNK_SIZE = 200;
   const totalProdChunks = Math.ceil(localProducts.length / PROD_CHUNK_SIZE);
   console.log(`\n📦 Syncing ${localProducts.length} products in ${totalProdChunks} chunks of ${PROD_CHUNK_SIZE}...`);
@@ -103,7 +103,7 @@ async function run() {
 
     const res = await sendWithRetry({
       secret: SYNC_SECRET,
-      clearProducts: chunkIndex === 1, // Only clear on first batch to make it exactly match local
+      clearProducts: false, // Never wipe live catalog before chunked sync
       companies: [],
       products: chunk
     });

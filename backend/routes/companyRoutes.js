@@ -285,6 +285,13 @@ router.put('/:id', protect, adminOnly, checkPermission('canManageCompanies'), as
 // ========================================================
 router.delete('/clear-all', protect, adminOnly, checkPermission('canClearDatabase'), async (req, res) => {
   try {
+    const confirmPhrase = req.body?.confirmWipe || req.headers['x-confirm-wipe'];
+    if (confirmPhrase !== 'PERMANENTLY_DELETE_ALL_COMPANIES') {
+      return res.status(400).json({
+        success: false,
+        message: 'Company wipe blocked: explicit confirmation token is required. No companies were deleted.',
+      });
+    }
     const result = await Company.deleteMany({});
     console.log(`[ADMIN ACTION] Cleared all companies from database by ${req.user.name} (${req.user.email}). Count: ${result.deletedCount}`);
 

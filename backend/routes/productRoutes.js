@@ -619,13 +619,29 @@ router.delete('/custom-fields/:key', protect, adminOnly, checkPermission('canMan
   }
 });
 
-// @desc    Delete ALL products from catalog (SuperAdmin / canClearDatabase permission only)
-// @route   DELETE /api/products/clear-all or POST /api/products/clear-all
+// @desc    Delete ALL products from catalog (SuperAdmin / canClearDatabase permission only + explicit confirmation)
+// @route   DELETE /api/products/clear-all
 // @access  Private / Admin
-router.all('/clear-all', protect, adminOnly, checkPermission('canClearDatabase'), async (req, res) => {
+router.delete('/clear-all', protect, adminOnly, checkPermission('canClearDatabase'), async (req, res) => {
   try {
+    const confirmPhrase = req.body?.confirmWipe || req.headers['x-confirm-wipe'];
+    if (confirmPhrase !== 'PERMANENTLY_DELETE_ALL_PRODUCTS') {
+      return res.status(400).json({
+        success: false,
+        message: 'Catalog wipe blocked: explicit confirmation token is required. No products were deleted.',
+      });
+    }
+
     const result = await Product.deleteMany({});
     console.log(`[ADMIN ACTION] Cleared all products from database by ${req.user.name} (${req.user.email}). Count: ${result.deletedCount}`);
+
+    logAuditEvent({
+      req,
+      action: 'DELETE',
+      category: 'PRODUCT',
+      details: `Cleared all ${result.deletedCount} products from catalog via explicit confirmation.`
+    });
+
     res.json({
       success: true,
       message: `All ${result.deletedCount} products have been deleted successfully.`,
@@ -642,14 +658,20 @@ router.all('/clear-all', protect, adminOnly, checkPermission('canClearDatabase')
 // @access  Private / SuperAdmin Only
 router.post('/sync-batch', protect, superAdminOnly, async (req, res) => {
   try {
-    const { companies, products, secret, clearProducts } = req.body;
+    const { companies, products, secret, clearProducts, confirmFullReplace } = req.body;
     if (secret !== 'niyansh_sync_2026') {
       return res.status(401).json({ success: false, message: 'Invalid sync secret' });
     }
 
     if (clearProducts) {
+      if (confirmFullReplace !== 'CONFIRM_FULL_CATALOG_REPLACE' || !Array.isArray(products) || products.length < 100) {
+        return res.status(400).json({
+          success: false,
+          message: 'Blocked destructive clearProducts during sync-batch: requires confirmFullReplace="CONFIRM_FULL_CATALOG_REPLACE" and at least 100 replacement products in the same request.',
+        });
+      }
       await Product.deleteMany({});
-      console.log('Cleared existing products for exact catalog sync');
+      console.log('Cleared existing products for explicitly confirmed full catalog replace');
     }
 
     let compCount = 0;

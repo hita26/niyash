@@ -11,6 +11,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
   
   // Pagination and sorting states
   const [page, setPage] = useState(1);
@@ -201,6 +202,7 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
   const fetchProducts = useCallback(async (isSilent = false, isRetry = false) => {
     if (!isSilent) {
       setLoading(true);
+      setFetchError(false);
     }
     try {
       const queryParams = new URLSearchParams();
@@ -225,17 +227,70 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
       queryParams.append('page', pageVal);
       queryParams.append('limit', '12');
 
+      const cacheKey = `niyansh_products_cache_${queryParams.toString()}`;
       const response = await fetch(`/api/products?${queryParams.toString()}`, {
         headers: isSilent ? { 'x-silent-request': 'true' } : {}
       });
-      if (!response.ok) throw new Error('Failed to fetch products');
+      if (!response.ok) throw new Error(`Failed to fetch products (${response.status})`);
       
       const data = await response.json();
-      setProducts(Array.isArray(data.products) ? data.products : []);
+      if (!data || !Array.isArray(data.products)) {
+        throw new Error('Invalid products payload');
+      }
+
+      setProducts(data.products);
       setPages(data.pages || 1);
       setTotal(data.total || 0);
+      setFetchError(false);
+
+      // Persist last good catalog page in sessionStorage for instant resilience on transient network errors
+      if (data.products.length > 0 && pageVal === '1' && !searchVal) {
+        try {
+          sessionStorage.setItem(cacheKey, JSON.stringify({
+            products: data.products,
+            pages: data.pages || 1,
+            total: data.total || 0
+          }));
+        } catch (_) {}
+      }
     } catch (error) {
       console.error('Error fetching products:', error);
+      // Restore cached page if available before showing an error state
+      try {
+        const queryParams = new URLSearchParams();
+        const searchVal = searchParams.get('search') || '';
+        const catVal = searchParams.get('category') || '';
+        const brandVal = searchParams.get('brand') || '';
+        const compVal = searchParams.get('company') || '';
+        const formVal = searchParams.get('form') || '';
+        const maxPriceParam = searchParams.get('maxPrice');
+        const sortVal = searchParams.get('sort') || 'popular';
+        const pageVal = searchParams.get('page') || '1';
+        if (searchVal) queryParams.append('search', searchVal);
+        if (catVal) queryParams.append('category', catVal);
+        if (brandVal) queryParams.append('brand', brandVal);
+        if (compVal) queryParams.append('company', compVal);
+        if (formVal) queryParams.append('form', formVal);
+        if (maxPriceParam && parseFloat(maxPriceParam) < MAX_PRICE_LIMIT) {
+          queryParams.append('maxPrice', maxPriceParam);
+        }
+        if (sortVal) queryParams.append('sort', sortVal);
+        queryParams.append('page', pageVal);
+        queryParams.append('limit', '12');
+        const cachedRaw = sessionStorage.getItem(`niyansh_products_cache_${queryParams.toString()}`);
+        if (cachedRaw) {
+          const cached = JSON.parse(cachedRaw);
+          if (Array.isArray(cached.products) && cached.products.length > 0) {
+            setProducts(cached.products);
+            setPages(cached.pages || 1);
+            setTotal(cached.total || 0);
+          }
+        }
+      } catch (_) {}
+
+      if (!isSilent) {
+        setFetchError(true);
+      }
       // Auto-recover once on cold boot or network lag
       if (!isSilent && !isRetry) {
         setTimeout(() => fetchProducts(false, true), 1200);
@@ -659,6 +714,17 @@ function Products({ addToCart, searchTerm, setSearchTerm }) {
           {/* Products Grid */}
           {loading ? (
             <SkeletonLoader variant="product-grid" count={8} />
+          ) : fetchError && products.length === 0 ? (
+            <div className="card" style={{ padding: '70px 20px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+              <RefreshCcw size={44} color="var(--primary-blue)" />
+              <h3 style={{ fontSize: '1.2rem', color: 'var(--text-dark)' }}>Unable to Load Product Catalog</h3>
+              <p style={{ color: 'var(--text-medium)', maxWidth: '440px', fontSize: '0.9rem' }}>
+                The product server is temporarily unreachable. Your catalog is safe — please retry connecting.
+              </p>
+              <button onClick={() => fetchProducts(false, false)} className="btn btn-primary btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <RefreshCcw size={14} /> Retry Loading Products
+              </button>
+            </div>
           ) : products.length === 0 ? (
             <div className="card" style={{ padding: '70px 20px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
               <SlidersHorizontal size={44} color="var(--text-light)" />

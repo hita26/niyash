@@ -1,5 +1,5 @@
 // Niyansh Pharma Service Worker (PWA Offline & App Shell Engine)
-const CACHE_NAME = 'niyansh-pharma-v5';
+const CACHE_NAME = 'niyansh-pharma-v6';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -48,8 +48,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Never intercept API or upload requests; let them bypass the service worker directly to the GoDaddy Node.js backend
-  if (url.pathname.startsWith('/api') || url.pathname.startsWith('/uploads')) {
+  // Never intercept API or upload requests; let them bypass the service worker directly to the backend
+  if (url.pathname.startsWith('/api') || url.pathname.startsWith('/uploads') || url.hostname.includes('vercel.app')) {
     return;
   }
 

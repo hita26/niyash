@@ -384,11 +384,14 @@ const initDefaults = async () => {
         // ignore
       }
 
-      // 5. Catalog sync (only if explicitly enabled via AUTO_SEED_CATALOG env)
+      // 5. Catalog safety auto-recovery (auto-heals if product collection ever drops to 0, or when AUTO_SEED_CATALOG=true)
       try {
         const productCount = await Product.countDocuments();
-        if (process.env.AUTO_SEED_CATALOG === 'true' && productCount < 500) {
-          console.log(`AUTO_SEED_CATALOG is active and product count (${productCount}) is below threshold. Starting catalog sync...`);
+        const shouldAutoHealCatalog =
+          (productCount === 0 && process.env.DISABLE_AUTO_CATALOG_RECOVERY !== 'true') ||
+          (process.env.AUTO_SEED_CATALOG === 'true' && productCount < 500);
+        if (shouldAutoHealCatalog) {
+          console.log(`Catalog auto-recovery active (productCount=${productCount}). Starting catalog sync...`);
           let companiesData = null;
           let productsData = null;
 

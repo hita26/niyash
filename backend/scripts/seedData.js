@@ -966,6 +966,11 @@ const sampleNews = [
 ];
 
 const seedData = async () => {
+  if (!process.argv.includes('--confirm-wipe')) {
+    console.error('SAFETY GUARD: seedData.js deletes all existing products, ledgers, and news.');
+    console.error('Pass --confirm-wipe if you intentionally want to wipe and re-seed sample data.');
+    process.exit(1);
+  }
   try {
     // Connect to database
     await connectDB();

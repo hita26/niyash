@@ -39,6 +39,15 @@ export default function PharmaMoleculesCanvas({
     let globalTime = 0;
     let rippleRadius = 0;
     let rippleAlpha = 0;
+    let heroLogoImg = null;
+
+    if (typeof Image !== 'undefined') {
+      const logoLoader = new Image();
+      logoLoader.onload = () => {
+        heroLogoImg = logoLoader;
+      };
+      logoLoader.src = '/np-hero-logo.png';
+    }
 
     const mouse = { x: -1000, y: -1000, radius: 150 };
 
@@ -492,111 +501,18 @@ export default function PharmaMoleculesCanvas({
       ctx.lineWidth = 1.0;
       ctx.stroke();
 
-      // 6. Vector Holographic NP Insignia & Brand Typography (100% Vector, Zero Image Artifacts)
-      ctx.save();
-      const alphaBrand = 0.38 + breathing * 0.08;
-
-      // Sprouting Botanical Leaf atop logo
-      ctx.beginPath();
-      ctx.moveTo(3, isMobile ? -30 : -42);
-      ctx.bezierCurveTo(
-        -2, isMobile ? -42 : -56,
-        14, isMobile ? -44 : -60,
-        15, isMobile ? -36 : -50
-      );
-      ctx.closePath();
-      ctx.fillStyle = `rgba(74, 222, 128, ${alphaBrand * 1.3})`;
-      ctx.shadowColor = 'rgba(74, 222, 128, 0.85)';
-      ctx.shadowBlur = 8;
-      ctx.fill();
-
-      // Stylized 'N' in glowing Cyan
-      ctx.beginPath();
-      const nScale = isMobile ? 0.72 : 1.0;
-      ctx.moveTo(-16 * nScale, (isMobile ? -8 : -10));
-      ctx.lineTo(-16 * nScale, (isMobile ? -32 : -44));
-      ctx.quadraticCurveTo(-16 * nScale, (isMobile ? -38 : -52), -8 * nScale, (isMobile ? -38 : -52));
-      ctx.lineTo(-2 * nScale, (isMobile ? -28 : -38));
-      ctx.lineWidth = 3.6 * nScale;
-      ctx.lineCap = 'round';
-      ctx.strokeStyle = `rgba(56, 189, 248, ${alphaBrand * 1.3})`;
-      ctx.shadowColor = 'rgba(56, 189, 248, 0.85)';
-      ctx.shadowBlur = 10;
-      ctx.stroke();
-
-      // Stylized 'P' in glowing Emerald
-      ctx.beginPath();
-      ctx.moveTo(4 * nScale, (isMobile ? -8 : -10));
-      ctx.lineTo(4 * nScale, (isMobile ? -34 : -46));
-      ctx.bezierCurveTo(
-        18 * nScale, (isMobile ? -34 : -46),
-        20 * nScale, (isMobile ? -24 : -32),
-        13 * nScale, (isMobile ? -17 : -23)
-      );
-      ctx.quadraticCurveTo(8 * nScale, (isMobile ? -14 : -19), 4 * nScale, (isMobile ? -14 : -19));
-      ctx.lineWidth = 3.6 * nScale;
-      ctx.lineCap = 'round';
-      ctx.strokeStyle = `rgba(52, 211, 153, ${alphaBrand * 1.35})`;
-      ctx.shadowColor = 'rgba(52, 211, 153, 0.85)';
-      ctx.shadowBlur = 10;
-      ctx.stroke();
-
-      // Center Pharmaceutical Capsule Pill
-      const pillW = isMobile ? 24 : 32;
-      const pillH = isMobile ? 12 : 16;
-      const pillR = pillH / 2;
-      const pillY = isMobile ? -20 : -28;
-
-      ctx.save();
-      ctx.translate(-2, pillY);
-      ctx.rotate(-Math.PI / 4);
-
-      // Capsule left half (Cyan)
-      ctx.beginPath();
-      ctx.arc(-pillW / 4, 0, pillR, Math.PI / 2, Math.PI * 1.5);
-      ctx.lineTo(0, -pillR);
-      ctx.lineTo(0, pillR);
-      ctx.closePath();
-      ctx.fillStyle = `rgba(56, 189, 248, ${alphaBrand * 1.25})`;
-      ctx.fill();
-
-      // Capsule right half (Emerald)
-      ctx.beginPath();
-      ctx.arc(pillW / 4, 0, pillR, Math.PI * 1.5, Math.PI / 2);
-      ctx.lineTo(0, pillR);
-      ctx.lineTo(0, -pillR);
-      ctx.closePath();
-      ctx.fillStyle = `rgba(52, 211, 153, ${alphaBrand * 1.25})`;
-      ctx.fill();
-
-      // Center divider
-      ctx.beginPath();
-      ctx.moveTo(0, -pillR);
-      ctx.lineTo(0, pillR);
-      ctx.strokeStyle = `rgba(255, 255, 255, ${alphaBrand * 1.4})`;
-      ctx.lineWidth = 1.2;
-      ctx.stroke();
-      ctx.restore();
-
-      // Brand Typography: NIYANSH PHARMA
-      const fontSize = isMobile ? 12 : 15;
-      ctx.font = `900 ${fontSize}px Outfit, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = `rgba(255, 255, 255, ${alphaBrand * 1.35})`;
-      ctx.shadowColor = 'rgba(52, 211, 153, 0.9)';
-      ctx.shadowBlur = 12;
-      ctx.fillText('NIYANSH PHARMA', 0, isMobile ? 6 : 8);
-
-      // Clinical Standard Subtitle: CARE • QUALITY • TRUST
-      const subSize = isMobile ? 7 : 8.5;
-      ctx.font = `700 ${subSize}px Outfit, -apple-system, BlinkMacSystemFont, sans-serif`;
-      ctx.fillStyle = `rgba(134, 239, 172, ${alphaBrand * 1.2})`;
-      ctx.shadowColor = 'rgba(56, 189, 248, 0.7)';
-      ctx.shadowBlur = 6;
-      ctx.fillText('CARE • QUALITY • TRUST', 0, isMobile ? 20 : 26);
-
-      ctx.restore();
+      // 6. Official Transparent NP NIYANSH PHARMA Hologram Logo inside Circular Chamber
+      if (heroLogoImg && heroLogoImg.complete && heroLogoImg.naturalWidth > 0) {
+        ctx.save();
+        const alphaBrand = 0.52 + breathing * 0.10;
+        const targetW = baseR * 1.18;
+        const targetH = targetW * (heroLogoImg.naturalHeight / heroLogoImg.naturalWidth);
+        ctx.globalAlpha = alphaBrand;
+        ctx.shadowColor = 'rgba(56, 189, 248, 0.35)';
+        ctx.shadowBlur = 12;
+        ctx.drawImage(heroLogoImg, -targetW / 2, -targetH / 2, targetW, targetH);
+        ctx.restore();
+      }
 
       ctx.restore();
     };

@@ -14,7 +14,7 @@ const cloudinary = require('../config/cloudinary');
 const { protect, adminOnly, superAdminOnly, checkPermission } = require('../middleware/authMiddleware');
 const { logAuditEvent } = require('../utils/auditLogger');
 
-// Upload directory setup
+// Upload directory setup (used for local fallback & cleanup of legacy /uploads files)
 const uploadDir = process.env.VERCEL ? path.join('/tmp', 'uploads') : path.join(__dirname, '../uploads');
 try {
   if (!fs.existsSync(uploadDir)) {
@@ -24,35 +24,28 @@ try {
   // Ignore in read-only environment
 }
 
-// Multer Storage Configuration
-const storage = multer.diskStorage({
-  destination(req, file, cb) {
-    cb(null, uploadDir);
-  },
-  filename(req, file, cb) {
-    let ext = path.extname(file.originalname).toLowerCase();
-    if (!ext && file.mimetype) {
-      if (file.mimetype === 'image/jpeg') ext = '.jpg';
-      else if (file.mimetype === 'image/png') ext = '.png';
-      else if (file.mimetype === 'image/webp') ext = '.webp';
-      else if (file.mimetype === 'image/gif') ext = '.gif';
-    }
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    cb(null, `prod-${uniqueSuffix}${ext || '.png'}`);
-  },
-});
+// Use memoryStorage so serverless/read-only environments never fail on disk writes
+const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
-  const allowedExts = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
-  const ext = path.extname(file.originalname).toLowerCase();
-  const allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-  if (!ext && file.mimetype && allowedMimes.includes(file.mimetype)) {
-    return cb(null, true);
-  }
-  if (allowedMimes.includes(file.mimetype) || allowedExts.includes(ext)) {
+  const allowedExts = ['.jpg', '.jpeg', '.jfif', '.png', '.webp', '.gif', '.avif', '.bmp'];
+  const ext = path.extname(file.originalname || '').toLowerCase();
+  const allowedMimes = [
+    'image/jpeg',
+    'image/jpg',
+    'image/pjpeg',
+    'image/png',
+    'image/webp',
+    'image/gif',
+    'image/avif',
+    'image/bmp',
+    'image/x-ms-bmp',
+  ];
+  const mime = (file.mimetype || '').toLowerCase();
+  if (allowedMimes.includes(mime) || mime.startsWith('image/') || allowedExts.includes(ext)) {
     cb(null, true);
   } else {
-    cb(new Error('Invalid image file format. Supported formats: JPG, JPEG, PNG, WEBP, GIF'));
+    cb(new Error('Invalid image file format. Supported formats: JPG, JPEG, PNG, WEBP, GIF, AVIF, BMP'));
   }
 };
 
@@ -61,6 +54,57 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB per file
   fileFilter,
 });
+
+const getMimeFromFile = (file) => {
+  const ext = path.extname(file.originalname || '').toLowerCase();
+  if (file.mimetype && file.mimetype.startsWith('image/') && file.mimetype !== 'application/octet-stream') {
+    return file.mimetype === 'image/jpg' ? 'image/jpeg' : file.mimetype;
+  }
+  if (ext === '.png') return 'image/png';
+  if (ext === '.webp') return 'image/webp';
+  if (ext === '.gif') return 'image/gif';
+  if (ext === '.avif') return 'image/avif';
+  if (ext === '.bmp') return 'image/bmp';
+  return 'image/jpeg';
+};
+
+const uploadBufferToCloudinary = (buffer, options) => {
+  return new Promise((resolve, reject) => {
+    const cfg = typeof cloudinary.config === 'function' ? cloudinary.config() : {};
+    if (!cfg?.cloud_name || !cfg?.api_key || !cfg?.api_secret) {
+      return reject(new Error('Cloudinary credentials not configured'));
+    }
+    if (!cloudinary?.uploader || typeof cloudinary.uploader.upload_stream !== 'function') {
+      return reject(new Error('Cloudinary upload_stream not available'));
+    }
+
+    let settled = false;
+    const timer = setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        reject(new Error('Cloudinary upload timed out'));
+      }
+    }, 15000);
+
+    const stream = cloudinary.uploader.upload_stream(options, (error, result) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      if (error) return reject(error);
+      if (!result || !result.secure_url) return reject(new Error('No URL returned from Cloudinary'));
+      resolve(result);
+    });
+
+    stream.on('error', (err) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      reject(err);
+    });
+
+    stream.end(buffer);
+  });
+};
 
 // Helper to escape special regex characters to prevent syntax crashes and ReDoS
 const escapeRegex = (str) => {
@@ -179,16 +223,19 @@ const searchWebMedicineImages = (query) => {
       const searchQuery = `${clean} medicine packaging`;
       const url = `https://www.bing.com/images/search?q=${encodeURIComponent(searchQuery)}&form=HDRSC2&first=1`;
 
-      https.get(url, {
+      const req = https.get(url, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        }
+        },
+        timeout: 6000
       }, (resp) => {
         let body = '';
         resp.on('data', chunk => body += chunk);
         resp.on('end', () => {
-          const murlMatches = [...body.matchAll(/murl&quot;:&quot;(https?:\/\/[^&]+)&quot;/g)].map(m => m[1]);
-          const cleanImgs = murlMatches.filter(u =>
+          const escapedMatches = [...body.matchAll(/murl&quot;:&quot;(https?:\/\/[^&]+)&quot;/g)].map(m => m[1]);
+          const jsonMatches = [...body.matchAll(/"murl"\s*:\s*"(https?:\/\/[^"]+)"/g)].map(m => m[1]);
+          const allMatches = [...new Set([...escapedMatches, ...jsonMatches])];
+          const cleanImgs = allMatches.filter(u =>
             !u.includes('vector') &&
             !u.includes('icon') &&
             !u.includes('logo') &&
@@ -196,7 +243,9 @@ const searchWebMedicineImages = (query) => {
           );
           resolve(cleanImgs.slice(0, 8));
         });
-      }).on('error', () => resolve([]));
+      });
+      req.on('timeout', () => { req.destroy(); resolve([]); });
+      req.on('error', () => resolve([]));
     } catch {
       resolve([]);
     }
@@ -343,12 +392,15 @@ router.get('/admin/all', protect, adminOnly, async (req, res) => {
   }
 });
 
-// @desc    Upload multiple product photos (Stored securely on Cloudinary Cloud Storage)
+// @desc    Upload multiple product photos (Cloudinary with persistent Data URL fallback)
 // @route   POST /api/products/upload
 // @access  Private/Admin
 router.post('/upload', protect, adminOnly, (req, res) => {
   upload.array('photos', 10)(req, res, async function (err) {
     if (err instanceof multer.MulterError) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ success: false, message: 'Photo size exceeds 10MB limit.' });
+      }
       return res.status(400).json({ success: false, message: `Upload error: ${err.message}` });
     } else if (err) {
       return res.status(400).json({ success: false, message: err.message || 'File upload failed' });
@@ -358,39 +410,60 @@ router.post('/upload', protect, adminOnly, (req, res) => {
       return res.status(400).json({ success: false, message: 'No image files provided' });
     }
 
-    try {
-      const urls = [];
-      for (const file of req.files) {
-        try {
-          // Upload to Cloudinary with auto-compression, auto WebP format, and 1200px limit
-          const result = await cloudinary.uploader.upload(file.path, {
-            folder: 'niyansh_pharma/products',
-            resource_type: 'image',
-            transformation: [
-              { width: 1200, height: 1200, crop: 'limit' },
-              { quality: 'auto:good' },
-              { fetch_format: 'auto' }
-            ]
-          });
+    const urls = [];
+    const storagesUsed = new Set();
 
-          urls.push(result.secure_url);
+    for (const file of req.files) {
+      if (!file.buffer || file.buffer.length === 0) continue;
 
-          // Delete temporary local file immediately to free server disk space
-          if (fs.existsSync(file.path)) {
-            try { fs.unlinkSync(file.path); } catch (e) {}
+      try {
+        // Primary: Upload to Cloudinary with auto-compression, auto WebP format, and 1200px limit
+        const result = await uploadBufferToCloudinary(file.buffer, {
+          folder: 'niyansh_pharma/products',
+          resource_type: 'image',
+          transformation: [
+            { width: 1200, height: 1200, crop: 'limit' },
+            { quality: 'auto:good' },
+            { fetch_format: 'auto' }
+          ]
+        });
+
+        urls.push(result.secure_url);
+        storagesUsed.add('cloudinary');
+      } catch (cloudErr) {
+        console.warn('Cloudinary upload warning, using persistent fallback:', cloudErr.message);
+
+        // Fallback 1: Persistent Base64 Data URL for compressed/normal images (<= 2 MB)
+        if (file.buffer.length <= 2 * 1024 * 1024) {
+          const mime = getMimeFromFile(file);
+          urls.push(`data:${mime};base64,${file.buffer.toString('base64')}`);
+          storagesUsed.add('data_url');
+        } else if (!process.env.VERCEL) {
+          // Fallback 2 (non-serverless only): Save to local uploads directory
+          try {
+            if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+            const mime = getMimeFromFile(file);
+            const ext = mime === 'image/png' ? '.png' : mime === 'image/webp' ? '.webp' : mime === 'image/gif' ? '.gif' : '.jpg';
+            const filename = `prod-${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
+            fs.writeFileSync(path.join(uploadDir, filename), file.buffer);
+            urls.push(`/uploads/${filename}`);
+            storagesUsed.add('local_fallback');
+          } catch (fsErr) {
+            console.error('Local fallback write failed:', fsErr.message);
           }
-        } catch (cloudErr) {
-          console.warn('Cloudinary upload warning, using local file as fallback:', cloudErr.message);
-          urls.push(`/uploads/${file.filename}`);
         }
       }
-
-      res.json({ success: true, urls, count: urls.length, storage: 'cloudinary' });
-    } catch (uploadError) {
-      console.error('Upload processing error:', uploadError);
-      const fallbackUrls = req.files.map((file) => `/uploads/${file.filename}`);
-      res.json({ success: true, urls: fallbackUrls, count: fallbackUrls.length, storage: 'local_fallback' });
     }
+
+    if (urls.length === 0) {
+      return res.status(502).json({
+        success: false,
+        message: 'Could not store uploaded photo(s). Please try a smaller image (under 2 MB) or paste an image URL.',
+      });
+    }
+
+    const storage = storagesUsed.size === 1 ? [...storagesUsed][0] : 'mixed';
+    res.json({ success: true, urls, count: urls.length, storage });
   });
 });
 
@@ -1056,12 +1129,13 @@ router.put('/:id', protect, adminOnly, checkPermission('canManageProducts'), asy
 
     // Process images
     if (req.body.images && Array.isArray(req.body.images)) {
-      req.body.images = req.body.images.filter((img) => img && img.trim() !== '');
-      if (req.body.imageUrl && !req.body.images.includes(req.body.imageUrl)) {
-        req.body.images.unshift(req.body.imageUrl);
-      } else if (!req.body.imageUrl && req.body.images.length > 0) {
-        req.body.imageUrl = req.body.images[0];
+      const cleaned = [...new Set(req.body.images.map((img) => (img ? String(img).trim() : '')).filter(Boolean))];
+      const mainImg = req.body.imageUrl ? String(req.body.imageUrl).trim() : '';
+      if (mainImg && !cleaned.includes(mainImg)) {
+        cleaned.unshift(mainImg);
       }
+      req.body.images = cleaned.slice(0, 5);
+      req.body.imageUrl = mainImg || req.body.images[0] || '';
     }
 
     if (req.body.stockQuantity !== undefined) {

@@ -539,7 +539,7 @@ function ProductDetail({ addToCart }) {
                   backgroundColor: '#eff6ff',
                   border: '1.5px dashed #3b82f6',
                   borderRadius: '10px',
-                  padding: '12px 16px',
+                  padding: '12px 14px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
@@ -548,7 +548,7 @@ function ProductDetail({ addToCart }) {
                   width: '100%',
                   boxSizing: 'border-box'
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: '1 1 200px', minWidth: 0 }}>
+                  <div className="wholesale-protect-info" style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
                     <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: '#dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       <Lock size={18} color="var(--primary-blue)" />
                     </div>
@@ -565,7 +565,7 @@ function ProductDetail({ addToCart }) {
                     type="button"
                     onClick={openAuth}
                     className="btn btn-primary btn-sm wholesale-protect-login-btn"
-                    style={{ padding: '7px 16px', fontSize: '0.82rem', fontWeight: '700', borderRadius: '6px', gap: '6px', whiteSpace: 'nowrap' }}
+                    style={{ padding: '8px 16px', fontSize: '0.82rem', fontWeight: '700', borderRadius: '8px', gap: '6px', whiteSpace: 'nowrap' }}
                   >
                     <LogIn size={14} /> {t('productDetail.loginToViewPtr', 'Login to View PTR')}
                   </button>
@@ -795,17 +795,21 @@ function ProductDetail({ addToCart }) {
 
         {/* Related Formulations Section */}
         {related.length > 0 && (
-          <div style={{ marginTop: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <div>
-                <h2 style={{ fontSize: '1.4rem', color: 'var(--text-dark)', fontWeight: '800', margin: '0 0 4px 0' }}>
+          <div style={{ marginTop: '24px' }}>
+            <div className="related-section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '18px' }}>
+              <div style={{ flex: '1 1 220px', minWidth: 0 }}>
+                <h2 style={{ fontSize: 'clamp(1.15rem, 3vw, 1.4rem)', color: 'var(--text-dark)', fontWeight: '800', margin: '0 0 4px 0', lineHeight: 1.25 }}>
                   {t('productDetail.relatedTitle', 'Related Medicines & Formulations')}
                 </h2>
-                <p style={{ margin: 0, fontSize: '0.86rem', color: 'var(--text-medium)' }}>
+                <p style={{ margin: 0, fontSize: '0.84rem', color: 'var(--text-medium)', lineHeight: 1.4 }}>
                   {t('productDetail.relatedDesc', 'Other high-demand therapeutic formulations in this category')}
                 </p>
               </div>
-              <Link to="/products" className="btn btn-outline btn-sm" style={{ textDecoration: 'none' }}>
+              <Link
+                to="/products"
+                className="btn btn-outline btn-sm related-view-all-btn"
+                style={{ textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0, borderRadius: '20px', padding: '7px 14px', fontSize: '0.8rem' }}
+              >
                 {t('productDetail.viewAllCatalog', 'View All Catalog →')}
               </Link>
             </div>

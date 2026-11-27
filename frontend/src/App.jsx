@@ -56,6 +56,7 @@ function ProtectedRoute({ children }) {
 function AppContent() {
   const [enquiryCart, setEnquiryCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [cartToast, setCartToast] = useState(null);
   const [pendingCartProduct, setPendingCartProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -188,13 +189,14 @@ function AppContent() {
     }
   }, [user]);
 
-  // Save cart to localStorage whenever it changes
+  // Save cart to localStorage and notify ProductCards whenever it changes
   useEffect(() => {
     if (user) {
       localStorage.setItem('niyansh_enquiry_cart', JSON.stringify(enquiryCart));
     } else {
       localStorage.removeItem('niyansh_enquiry_cart');
     }
+    window.dispatchEvent(new CustomEvent('niyansh:cart-updated', { detail: enquiryCart }));
   }, [enquiryCart, user]);
 
   // Global Uppercase Form Input Enforcer (All forms except Login credentials & passwords)
@@ -272,6 +274,13 @@ function AppContent() {
     return () => window.removeEventListener('input', handleGlobalInput, true);
   }, []);
 
+  const showCartAddedToast = (productName) => {
+    setCartToast({ name: productName, id: Date.now() });
+    setTimeout(() => {
+      setCartToast((prev) => (prev && Date.now() - prev.id >= 2900 ? null : prev));
+    }, 3200);
+  };
+
   const addToCart = (product, quantity = 1) => {
     // Only authenticated verified chemists can add products to wholesale inquiry cart
     if (!user) {
@@ -283,15 +292,23 @@ function AppContent() {
     setEnquiryCart((prevCart) => {
       const existingItem = prevCart.find((item) => item.product._id === product._id);
       if (existingItem) {
+        const nextQty = existingItem.quantity + quantity;
+        if (nextQty <= 0) {
+          return prevCart.filter((item) => item.product._id !== product._id);
+        }
         return prevCart.map((item) =>
           item.product._id === product._id
-            ? { ...item, quantity: item.quantity + quantity }
+            ? { ...item, quantity: nextQty }
             : item
         );
       }
+      if (quantity <= 0) return prevCart;
       return [...prevCart, { product, quantity }];
     });
-    setIsCartOpen(true);
+
+    if (quantity > 0) {
+      showCartAddedToast(product.name);
+    }
     return true;
   };
 
@@ -467,6 +484,61 @@ function AppContent() {
           token={token}
           onOpenAuth={openAuth}
         />
+
+        {/* Non-blocking Smart Cart Added Toast */}
+        {cartToast && !isCartOpen && (
+          <div
+            className="smart-cart-toast"
+            style={{
+              position: 'fixed',
+              top: '76px',
+              right: '16px',
+              left: 'auto',
+              maxWidth: 'calc(100vw - 32px)',
+              zIndex: 9992,
+              backgroundColor: '#0c3d6c',
+              color: '#ffffff',
+              borderRadius: '12px',
+              padding: '10px 14px',
+              boxShadow: '0 10px 28px rgba(12, 61, 108, 0.35)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              border: '1px solid rgba(255,255,255,0.18)',
+              animation: 'fadeIn 0.2s ease'
+            }}
+          >
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ fontSize: '0.72rem', color: '#86efac', fontWeight: '800', textTransform: 'uppercase' }}>
+                ✓ Added to Cart
+              </div>
+              <div style={{ fontSize: '0.84rem', fontWeight: '700', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {cartToast.name}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setCartToast(null);
+                setIsCartOpen(true);
+              }}
+              style={{
+                backgroundColor: '#ea580c',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '7px 12px',
+                fontSize: '0.78rem',
+                fontWeight: '800',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                flexShrink: 0
+              }}
+            >
+              View Cart ({enquiryCart.reduce((total, item) => total + item.quantity, 0)})
+            </button>
+          </div>
+        )}
 
         <AuthModal 
           isOpen={isAuthOpen}

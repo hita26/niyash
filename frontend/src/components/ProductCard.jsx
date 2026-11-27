@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   ShoppingBag, Eye, CheckCircle2, AlertTriangle, Lock, Check, Plus, Minus, 
@@ -10,19 +10,50 @@ import WatermarkedImage from './WatermarkedImage';
 
 function getFormIcon(form) {
   const f = (form || '').toLowerCase();
-  if (f.includes('inject')) return <Syringe size={22} />;
-  if (f.includes('drop') || f.includes('syrup') || f.includes('liquid') || f.includes('susp')) return <Droplets size={22} />;
-  if (f.includes('cream') || f.includes('gel') || f.includes('ointment')) return <Activity size={22} />;
-  if (f.includes('surgic') || f.includes('powder')) return <Package size={22} />;
-  return <Pill size={22} />;
+  if (f.includes('inject')) return <Syringe size={20} />;
+  if (f.includes('drop') || f.includes('syrup') || f.includes('liquid') || f.includes('susp')) return <Droplets size={20} />;
+  if (f.includes('cream') || f.includes('gel') || f.includes('ointment')) return <Activity size={20} />;
+  if (f.includes('surgic') || f.includes('powder')) return <Package size={20} />;
+  return <Pill size={20} />;
+}
+
+function getCartQtyForProduct(productId) {
+  try {
+    const raw = localStorage.getItem('niyansh_enquiry_cart');
+    if (!raw) return 0;
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return 0;
+    const found = parsed.find((item) => item?.product?._id === productId);
+    return found ? Math.max(0, Number(found.quantity) || 0) : 0;
+  } catch {
+    return 0;
+  }
 }
 
 function ProductCard({ product, addToCart }) {
   const { t, language, translateCategory, translateDosageForm, formatCurrency } = useLanguage();
   const { isLoggedIn, user, openAuth } = useAuth();
-  const [quantity, setQuantity] = useState(0);
+  const [quantity, setQuantity] = useState(() => (user ? getCartQtyForProduct(product._id) : 0));
   const [isAdded, setIsAdded] = useState(false);
   const [imgError, setImgError] = useState(false);
+
+  // Keep card stepper synced with global cart updates across tabs/pages
+  useEffect(() => {
+    const syncQty = () => {
+      if (!user) {
+        setQuantity(0);
+        return;
+      }
+      setQuantity(getCartQtyForProduct(product._id));
+    };
+    syncQty();
+    window.addEventListener('niyansh:cart-updated', syncQty);
+    window.addEventListener('storage', syncQty);
+    return () => {
+      window.removeEventListener('niyansh:cart-updated', syncQty);
+      window.removeEventListener('storage', syncQty);
+    };
+  }, [product._id, user]);
 
   const handleWhatsAppOrder = (e) => {
     e.preventDefault();
@@ -181,6 +212,7 @@ function ProductCard({ product, addToCart }) {
           />
         ) : (
           <div 
+            className="product-card-rx-placeholder"
             style={{ 
               width: '100%', 
               height: '100%',
@@ -191,139 +223,165 @@ function ProductCard({ product, addToCart }) {
               backgroundColor: 'var(--bg-surface)',
               borderRadius: '8px',
               border: '1px dashed var(--border-medium)',
-              padding: '10px',
+              padding: '28px 8px 8px 8px',
               boxSizing: 'border-box',
               textAlign: 'center',
               position: 'relative'
             }}
           >
-            <span style={{ position: 'absolute', top: '6px', left: '8px', fontSize: '0.9rem', fontWeight: '900', color: '#cbd5e1', fontStyle: 'italic', userSelect: 'none' }}>
+            <span style={{ position: 'absolute', top: '28px', left: '8px', fontSize: '0.78rem', fontWeight: '900', color: '#cbd5e1', fontStyle: 'italic', userSelect: 'none' }}>
               Rx
             </span>
             <div style={{ 
-              width: '38px', 
-              height: '38px', 
+              width: '34px', 
+              height: '34px', 
               borderRadius: '50%', 
               backgroundColor: '#e0f2fe', 
               display: 'flex', 
               alignItems: 'center', 
               justifyContent: 'center',
               marginBottom: '6px',
-              color: 'var(--primary-blue)'
+              color: 'var(--primary-blue)',
+              flexShrink: 0
             }}>
               {getFormIcon(product.form)}
             </div>
-            <span style={{ fontSize: '0.74rem', fontWeight: '800', color: 'var(--text-dark)', maxWidth: '92%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <span style={{
+              fontSize: '0.70rem',
+              fontWeight: '800',
+              color: 'var(--text-dark)',
+              maxWidth: '96%',
+              overflow: 'hidden',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              lineHeight: 1.25,
+              wordBreak: 'break-word'
+            }}>
               {product.name}
             </span>
-            <span style={{ fontSize: '0.66rem', color: 'var(--text-light)', marginTop: '2px', fontWeight: '600' }}>
+            <span style={{ fontSize: '0.62rem', color: 'var(--text-light)', marginTop: '3px', fontWeight: '600', maxWidth: '94%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {product.packing || product.form || 'Pharmaceutical'}
             </span>
           </div>
         )}
 
-        {/* Company / Brand Badge (Only shown when not identical to product title) */}
-        {showBrandTag && (
-          <span 
-            style={{
-              position: 'absolute', 
-              top: '8px', 
-              left: '8px', 
-              backgroundColor: 'rgba(255, 255, 255, 0.94)',
-              color: 'var(--primary-blue)', 
-              fontSize: '0.70rem', 
-              fontWeight: '700', 
-              padding: '2px 8px',
-              borderRadius: '12px', 
-              border: '1px solid rgba(12, 61, 108, 0.15)', 
-              backdropFilter: 'blur(4px)',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
-              maxWidth: '65%',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
-            }}
-            title={brandName}
-          >
-            {brandName}
-          </span>
-        )}
+        {/* Non-overlapping Top Badges Row (Left Brand + Right WHO-GMP/Scheme) */}
+        <div
+          className="product-card-badges-row"
+          style={{
+            position: 'absolute',
+            top: '6px',
+            left: '6px',
+            right: '6px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: showBrandTag ? 'space-between' : 'flex-end',
+            gap: '4px',
+            zIndex: 3,
+            pointerEvents: 'none'
+          }}
+        >
+          {showBrandTag && (
+            <span 
+              className="product-card-brand-badge"
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                color: 'var(--primary-blue)', 
+                fontSize: '0.64rem', 
+                fontWeight: '700', 
+                padding: '2px 6px',
+                borderRadius: '10px', 
+                border: '1px solid rgba(12, 61, 108, 0.15)', 
+                backdropFilter: 'blur(4px)',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
+                flex: '0 1 auto',
+                minWidth: 0,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}
+              title={brandName}
+            >
+              {brandName}
+            </span>
+          )}
 
-        {/* Top-Right Badge: Scheme or WHO-GMP Shield */}
-        {product.scheme ? (
-          <span 
-            style={{
-              position: 'absolute', 
-              top: '8px', 
-              right: '8px', 
-              backgroundColor: '#fff7ed',
-              color: '#ea580c', 
-              fontSize: '0.68rem', 
-              fontWeight: '800', 
-              padding: '2px 7px',
-              borderRadius: '10px', 
-              border: '1px solid #fed7aa', 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '3px',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-            }}
-          >
-            <Sparkles size={11} /> {product.scheme}
-          </span>
-        ) : product.featured ? (
-          <span 
-            style={{
-              position: 'absolute', 
-              top: '8px', 
-              right: '8px', 
-              backgroundColor: '#fef3c7',
-              color: '#b45309', 
-              fontSize: '0.68rem', 
-              fontWeight: '700', 
-              padding: '2px 7px',
-              borderRadius: '10px', 
-              border: '1px solid #fde68a',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-            }}
-          >
-            ★ {t('products.scheme', 'Featured')}
-          </span>
-        ) : (
-          <span 
-            style={{
-              position: 'absolute', 
-              top: '8px', 
-              right: '8px', 
-              backgroundColor: 'rgba(255, 255, 255, 0.94)',
-              color: '#059669', 
-              fontSize: '0.66rem', 
-              fontWeight: '700', 
-              padding: '2px 7px',
-              borderRadius: '10px', 
-              border: '1px solid #a7f3d0', 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '3px',
-              backdropFilter: 'blur(4px)',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-            }}
-          >
-            <ShieldCheck size={11} color="#059669" /> WHO-GMP
-          </span>
-        )}
+          {product.scheme ? (
+            <span 
+              className="product-card-status-badge"
+              style={{
+                backgroundColor: '#fff7ed',
+                color: '#ea580c', 
+                fontSize: '0.62rem', 
+                fontWeight: '800', 
+                padding: '2px 6px',
+                borderRadius: '10px', 
+                border: '1px solid #fed7aa', 
+                display: 'inline-flex', 
+                alignItems: 'center', 
+                gap: '2px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+                flexShrink: 0,
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <Sparkles size={10} /> {product.scheme}
+            </span>
+          ) : product.featured ? (
+            <span 
+              className="product-card-status-badge"
+              style={{
+                backgroundColor: '#fef3c7',
+                color: '#b45309', 
+                fontSize: '0.62rem', 
+                fontWeight: '700', 
+                padding: '2px 6px',
+                borderRadius: '10px', 
+                border: '1px solid #fde68a',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+                flexShrink: 0,
+                whiteSpace: 'nowrap'
+              }}
+            >
+              ★ {t('products.scheme', 'Featured')}
+            </span>
+          ) : (
+            <span 
+              className="product-card-status-badge"
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                color: '#059669', 
+                fontSize: '0.62rem', 
+                fontWeight: '700', 
+                padding: '2px 6px',
+                borderRadius: '10px', 
+                border: '1px solid #a7f3d0', 
+                display: 'inline-flex', 
+                alignItems: 'center', 
+                gap: '2px',
+                backdropFilter: 'blur(4px)',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+                flexShrink: 0,
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <ShieldCheck size={10} color="#059669" /> WHO-GMP
+            </span>
+          )}
+        </div>
       </Link>
 
       {/* Product Details Section */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         
         {/* Category Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
-          <span style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px', marginBottom: '2px', minWidth: 0 }}>
+          <span style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
             {translateCategory(validCategory)}
           </span>
           {product.sku && (
-            <span style={{ fontSize: '0.68rem', color: '#94a3b8', fontFamily: 'monospace' }}>
+            <span style={{ fontSize: '0.65rem', color: '#94a3b8', fontFamily: 'monospace', whiteSpace: 'nowrap', flexShrink: 0 }}>
               {product.sku}
             </span>
           )}
@@ -333,16 +391,16 @@ function ProductCard({ product, addToCart }) {
         <Link to={`/products/${product._id}`} style={{ textDecoration: 'none' }}>
           <h3 
             style={{
-              fontSize: '0.94rem', 
+              fontSize: '0.92rem', 
               fontWeight: '700', 
               color: 'var(--text-dark)', 
-              minHeight: '2.5rem', 
-              height: '2.5rem',
+              minHeight: '2.4rem', 
+              height: '2.4rem',
               overflow: 'hidden', 
               display: '-webkit-box', 
               WebkitLineClamp: 2, 
               WebkitBoxOrient: 'vertical',
-              lineHeight: '1.35', 
+              lineHeight: '1.3', 
               margin: '2px 0 4px 0',
               transition: 'color 0.15s ease'
             }}
@@ -355,7 +413,7 @@ function ProductCard({ product, addToCart }) {
         </Link>
         
         {/* Packing & Formulation Form */}
-        <div style={{ fontSize: '0.80rem', color: 'var(--text-medium)', marginBottom: '3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <div style={{ fontSize: '0.74rem', color: 'var(--text-medium)', marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           <span>{t('products.packing', 'Packing')}: <strong style={{ color: 'var(--text-dark)' }}>{product.packing || 'Standard'}</strong></span>
           {product.form && <span style={{ color: '#94a3b8' }}> • {translateDosageForm(product.form)}</span>}
         </div>
@@ -363,10 +421,10 @@ function ProductCard({ product, addToCart }) {
         {/* Composition Snippet */}
         <div 
           style={{ 
-            fontSize: '0.75rem', 
+            fontSize: '0.72rem', 
             color: 'var(--text-light)', 
             marginBottom: '6px', 
-            minHeight: '1.25rem', 
+            minHeight: '1.15rem', 
             overflow: 'hidden', 
             textOverflow: 'ellipsis', 
             whiteSpace: 'nowrap' 
@@ -387,50 +445,50 @@ function ProductCard({ product, addToCart }) {
             marginTop: 'auto', 
             paddingTop: '8px', 
             borderTop: '1px solid var(--border-light)', 
-            minHeight: '62px',
+            minHeight: '60px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
-            gap: '3px'
+            gap: '4px'
           }}
         >
           {isLoggedIn ? (
             <>
               {/* Logged-in Chemist View: MRP Strikethrough + Margin Tag */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
-                <span style={{ fontSize: '0.74rem', color: '#94a3b8', textDecoration: 'line-through' }} className="tabular-nums">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.72rem', color: '#94a3b8', textDecoration: 'line-through', whiteSpace: 'nowrap' }} className="tabular-nums">
                   {t('products.mrp', 'MRP')} {formatCurrency(displayMrp)}
                 </span>
                 {hasMargin && (
-                  <span style={{ fontSize: '0.68rem', backgroundColor: '#ecfdf5', color: '#059669', fontWeight: '800', padding: '1px 6px', borderRadius: '4px', border: '1px solid #a7f3d0' }}>
+                  <span style={{ fontSize: '0.64rem', backgroundColor: '#ecfdf5', color: '#059669', fontWeight: '800', padding: '1px 5px', borderRadius: '4px', border: '1px solid #a7f3d0', whiteSpace: 'nowrap' }}>
                     {marginPercent}% {language === 'gu' ? 'માર્જિન' : language === 'hi' ? 'मार्जिन' : 'MARGIN'}
                   </span>
                 )}
               </div>
               
               {/* Wholesale PTR Rate + Stock Status */}
-              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '6px' }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
-                  <span style={{ fontSize: '0.70rem', color: 'var(--primary-blue)', fontWeight: '800', textTransform: 'uppercase' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px', minWidth: 0 }}>
+                  <span style={{ fontSize: '0.66rem', color: 'var(--primary-blue)', fontWeight: '800', textTransform: 'uppercase' }}>
                     {t('products.ptr', 'PTR')}:
                   </span>
-                  <span style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--primary-blue)' }} className="tabular-nums">
+                  <span style={{ fontSize: '1.08rem', fontWeight: '800', color: 'var(--primary-blue)' }} className="tabular-nums">
                     {formatCurrency(displayPrice)}
                   </span>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-medium)' }}>
+                  <span style={{ fontSize: '0.66rem', color: 'var(--text-medium)', whiteSpace: 'nowrap' }}>
                     /{language === 'gu' ? 'નંગ' : language === 'hi' ? 'यूनिट' : 'unit'}
                   </span>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '0.74rem', fontWeight: '600' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '0.68rem', fontWeight: '700', whiteSpace: 'nowrap', flexShrink: 0 }}>
                   {product.inStock ? (
                     <>
-                      <CheckCircle2 size={12} color="#059669" />
+                      <CheckCircle2 size={11} color="#059669" />
                       <span style={{ color: '#059669' }}>{t('products.inStock', 'In Stock')}</span>
                     </>
                   ) : (
                     <>
-                      <AlertTriangle size={12} color="#ef4444" />
+                      <AlertTriangle size={11} color="#ef4444" />
                       <span style={{ color: '#ef4444' }}>{t('products.outOfStock', 'Out of Stock')}</span>
                     </>
                   )}
@@ -440,28 +498,28 @@ function ProductCard({ product, addToCart }) {
           ) : (
             <>
               {/* Guest / Public View: Retail MRP + In Stock */}
-              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '6px' }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                  <span style={{ fontSize: '0.70rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px', minWidth: 0 }}>
+                  <span style={{ fontSize: '0.66rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase' }}>
                     {t('products.mrp', 'MRP')}:
                   </span>
-                  <span style={{ fontSize: '1.18rem', fontWeight: '800', color: 'var(--text-dark)' }} className="tabular-nums">
+                  <span style={{ fontSize: '1.06rem', fontWeight: '800', color: 'var(--text-dark)' }} className="tabular-nums">
                     {formatCurrency(displayMrp)}
                   </span>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-medium)' }}>
+                  <span style={{ fontSize: '0.66rem', color: 'var(--text-medium)', whiteSpace: 'nowrap' }}>
                     /{language === 'gu' ? 'નંગ' : language === 'hi' ? 'यूनिट' : 'unit'}
                   </span>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '0.74rem', fontWeight: '600' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '0.68rem', fontWeight: '700', whiteSpace: 'nowrap', flexShrink: 0 }}>
                   {product.inStock ? (
                     <>
-                      <CheckCircle2 size={12} color="#059669" />
+                      <CheckCircle2 size={11} color="#059669" />
                       <span style={{ color: '#059669' }}>{t('products.inStock', 'In Stock')}</span>
                     </>
                   ) : (
                     <>
-                      <AlertTriangle size={12} color="#ef4444" />
+                      <AlertTriangle size={11} color="#ef4444" />
                       <span style={{ color: '#ef4444' }}>{t('products.outOfStock', 'Out of Stock')}</span>
                     </>
                   )}
@@ -482,21 +540,24 @@ function ProductCard({ product, addToCart }) {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '5px',
+                    gap: '4px',
                     backgroundColor: '#eff6ff',
                     border: '1px dashed #3b82f6',
                     color: 'var(--primary-blue)',
-                    padding: '3px 8px',
+                    padding: '4px 6px',
                     borderRadius: '6px',
-                    fontSize: '0.74rem',
+                    fontSize: '0.69rem',
                     fontWeight: '700',
                     cursor: 'pointer',
-                    transition: 'var(--transition-smooth)'
+                    transition: 'var(--transition-smooth)',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
                   }}
                   title="Login as verified chemist to view Wholesale PTR Rate"
                 >
-                  <Lock size={11} color="var(--primary-blue)" />
-                  <span>{t('products.loginForPtr', 'Login for PTR Rate')}</span>
+                  <Lock size={11} color="var(--primary-blue)" style={{ flexShrink: 0 }} />
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t('products.loginForPtr', 'Login for PTR Rate')}</span>
                 </button>
               </div>
             </>
@@ -516,6 +577,7 @@ function ProductCard({ product, addToCart }) {
       >
         {quantity > 0 ? (
           <div 
+            className="product-card-stepper"
             style={{ 
               display: 'flex', 
               alignItems: 'center', 
@@ -526,30 +588,33 @@ function ProductCard({ product, addToCart }) {
               padding: '2px 4px',
               minHeight: '36px',
               height: '36px',
+              minWidth: 0,
               boxSizing: 'border-box'
             }}
           >
             <button 
+              type="button"
               onClick={handleDecrement}
               style={{ 
-                width: '26px', height: '26px', borderRadius: '5px', 
+                width: '24px', height: '24px', minHeight: '24px', borderRadius: '5px', flexShrink: 0,
                 backgroundColor: '#ffffff', color: '#047857', border: '1px solid #a7f3d0', 
-                display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' 
+                display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0
               }}
               title="Decrease quantity"
               aria-label="Decrease quantity"
             >
               <Minus size={12} />
             </button>
-            <span style={{ fontWeight: '800', fontSize: '0.80rem', color: '#064e3b' }}>
+            <span style={{ fontWeight: '800', fontSize: '0.75rem', color: '#064e3b', whiteSpace: 'nowrap', padding: '0 2px' }}>
               {quantity} {language === 'gu' ? 'બોક્સ' : language === 'hi' ? 'बॉक्स' : 'Box'}
             </span>
             <button 
+              type="button"
               onClick={handleIncrement}
               style={{ 
-                width: '26px', height: '26px', borderRadius: '5px', 
+                width: '24px', height: '24px', minHeight: '24px', borderRadius: '5px', flexShrink: 0,
                 backgroundColor: '#059669', color: '#ffffff', border: 'none', 
-                display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' 
+                display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0
               }}
               title="Add another box"
               aria-label="Add another box"

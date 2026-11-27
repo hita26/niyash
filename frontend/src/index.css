@@ -241,7 +241,12 @@ button {
 
 @media (max-width: 768px) {
   .quickorder-mobile-sticky-bar {
-    bottom: calc(60px + env(safe-area-inset-bottom, 0px)) !important;
+    bottom: 0px !important;
+    padding-bottom: max(10px, env(safe-area-inset-bottom, 0px));
+  }
+  body.standalone-pwa .quickorder-mobile-sticky-bar {
+    bottom: calc(58px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: 8px;
   }
   .container {
     padding: 0 16px;
@@ -4461,14 +4466,21 @@ html[lang="gu"] .nav-link, html[lang="hi"] .nav-link {
 /* Adaptive Dashboard Metrics Grid */
 .dashboard-metrics-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (max-width: 340px) {
+  .dashboard-metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
 }
 
 @media (min-width: 540px) {
   .dashboard-metrics-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
+    gap: 14px;
   }
 }
 
@@ -4535,11 +4547,20 @@ html[lang="gu"] .nav-link, html[lang="hi"] .nav-link {
 
 @media (max-width: 768px) {
   .quickorder-page-wrapper {
+    padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  body.standalone-pwa .quickorder-page-wrapper {
     padding-bottom: calc(170px + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   .quickorder-mobile-sticky-bar {
-    bottom: calc(60px + env(safe-area-inset-bottom, 0px)) !important;
+    bottom: 0px !important;
+    padding-bottom: max(10px, env(safe-area-inset-bottom, 0px));
+  }
+
+  body.standalone-pwa .quickorder-mobile-sticky-bar {
+    bottom: calc(58px + env(safe-area-inset-bottom, 0px)) !important;
     padding-bottom: 8px;
   }
 }
@@ -4714,7 +4735,12 @@ html[lang="gu"] .nav-link, html[lang="hi"] .nav-link {
   .wholesale-protect-box {
     flex-direction: column !important;
     align-items: stretch !important;
-    gap: 12px !important;
+    gap: 10px !important;
+    padding: 12px !important;
+  }
+  .wholesale-protect-info {
+    flex: 0 0 auto !important;
+    width: 100% !important;
   }
   .wholesale-protect-login-btn {
     width: 100% !important;
@@ -6246,4 +6272,140 @@ a:active,
   from { transform: translateX(-100%); }
   to { transform: translateX(0); }
 }
+
+/* ==========================================================================
+   MOBILE & SMART CART POLISH FIXES (Search, ProductDetail, Dashboard, QuickOrder)
+   ========================================================================== */
+.no-uppercase,
+.no-uppercase::placeholder,
+.header-search-input,
+.header-search-input::placeholder {
+  text-transform: none !important;
+}
+
+.wholesale-protect-info {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.quickorder-matrix-layout > * {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+@media (max-width: 768px) {
+  .b2b-mobile-search-form input.header-search-input {
+    min-height: 0 !important;
+    height: 100% !important;
+    font-size: 15px !important;
+    padding: 0 4px 0 0 !important;
+  }
+
+  .search-bar input.header-search-input {
+    min-height: 42px !important;
+    font-size: 15px !important;
+    padding: 8px 48px 8px 14px !important;
+  }
+
+  .stepper-qty-input {
+    min-height: 32px !important;
+    height: 32px !important;
+    font-size: 15px !important;
+    padding: 0 !important;
+    line-height: 32px !important;
+  }
+
+  .retailer-order-search-input {
+    min-height: 34px !important;
+    height: 34px !important;
+    font-size: 15px !important;
+    padding: 0 !important;
+  }
+
+  .quickorder-mobile-card {
+    padding: 12px !important;
+  }
+
+  .quickorder-mobile-sticky-bar {
+    padding: 8px 12px !important;
+    box-sizing: border-box !important;
+    max-width: 100vw !important;
+    overflow: hidden !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .retailer-hero-banner {
+    padding: 16px 14px !important;
+  }
+
+  .retailer-hero-actions {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+
+  .retailer-hero-actions > * {
+    width: 100% !important;
+    padding: 9px 8px !important;
+    font-size: 0.78rem !important;
+    box-sizing: border-box !important;
+  }
+
+  .retailer-dashboard-main {
+    padding: 14px 12px !important;
+  }
+
+  .dashboard-kpi-card {
+    padding: 12px !important;
+    border-radius: 12px !important;
+  }
+
+  .dashboard-kpi-card .tabular-nums {
+    font-size: 1.15rem !important;
+  }
+
+  .dashboard-kpi-card a,
+  .dashboard-kpi-card button {
+    font-size: 0.72rem !important;
+    padding: 6px 8px !important;
+  }
+
+  .retailer-tabs-bar {
+    width: 100% !important;
+    padding: 4px !important;
+    gap: 4px !important;
+  }
+
+  .retailer-tabs-bar button {
+    padding: 7px 10px !important;
+    font-size: 0.76rem !important;
+  }
+
+  .smart-cart-toast {
+    top: auto !important;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+    left: 12px !important;
+    right: 12px !important;
+    max-width: none !important;
+  }
+
+  body.standalone-pwa .smart-cart-toast {
+    bottom: calc(74px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .related-section-header {
+    gap: 10px !important;
+  }
+
+  .related-view-all-btn {
+    padding: 6px 12px !important;
+    font-size: 0.76rem !important;
+    min-height: 34px !important;
+  }
+}
+
 

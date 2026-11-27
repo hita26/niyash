@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import SkeletonLoader from '../components/SkeletonLoader';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useLiveSync, SYNC_EVENTS } from '../utils/liveSync';
+import { openWholesaleInvoiceWindow } from '../utils/invoiceTemplate';
 import {
   Search,
   ShoppingCart,
@@ -603,7 +604,8 @@ const DEFAULT_COMPANIES = [
 
 function QuickOrder() {
   const { t } = useLanguage();
-  const { isLoggedIn, openAuth } = useAuth();
+  const { isLoggedIn, user, openAuth } = useAuth();
+  const [searchParams] = useSearchParams();
   // Retailer Header Info State
   const [shopName, setShopName] = useState('');
   const [retailerMobile, setRetailerMobile] = useState('');
@@ -617,14 +619,39 @@ function QuickOrder() {
   const [isCatalogLoading, setIsCatalogLoading] = useState(true);
   const [companiesList, setCompaniesList] = useState(DEFAULT_COMPANIES);
   const [formsList, setFormsList] = useState(ALL_FORMS);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(() => searchParams.get('search') || '');
   const [selectedCompany, setSelectedCompany] = useState('All');
   const [selectedForm, setSelectedForm] = useState('All');
   const [showOnlySelected, setShowOnlySelected] = useState(false);
   const [viewMode, setViewMode] = useState(() => (typeof window !== 'undefined' && window.innerWidth < 768 ? 'card' : 'table')); // 'table' | 'card'
 
-  // Box Quantities state: { [productId]: boxQtyNumber }
-  const [boxQuantities, setBoxQuantities] = useState({});
+  // Sync searchQuery whenever URL ?search= parameter changes
+  useEffect(() => {
+    const urlSearch = searchParams.get('search');
+    if (urlSearch !== null && urlSearch !== searchQuery) {
+      setSearchQuery(urlSearch);
+    }
+  }, [searchParams]);
+
+  // Box Quantities state: { [productId]: boxQtyNumber } persisted in localStorage
+  const [boxQuantities, setBoxQuantities] = useState(() => {
+    try {
+      const saved = localStorage.getItem('niyansh_quickorder_cart');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+          return parsed;
+        }
+      }
+    } catch (_) {}
+    return {};
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('niyansh_quickorder_cart', JSON.stringify(boxQuantities));
+    } catch (_) {}
+  }, [boxQuantities]);
 
   // Dispatch & Modal States
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -1234,7 +1261,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
     window.location.href = mailtoUrl;
   };
 
-  // 4. Print Wholesale Tax Invoice
+  // 4. Print Wholesale Tax Invoice using shared GST Bill Template
   const handlePrintInvoice = () => {
     if (commercialBilling.totalSelectedItems === 0) {
       alert('Please select items to generate printable invoice.');
@@ -1242,168 +1269,24 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
     }
 
     const orderNo = `NP-INV-${Date.now().toString().slice(-6)}`;
-    const dateStr = new Date().toLocaleDateString('en-IN', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric'
+    openWholesaleInvoiceWindow({
+      invoiceNumber: orderNo,
+      invoiceDate: new Date().toISOString(),
+      shopName: shopName || 'Retail Chemist Store',
+      retailerMobile: retailerMobile || 'N/A',
+      retailerEmail: retailerEmail || '',
+      gstin: gstin || '',
+      drugLicense: user?.drugLicense1 || user?.drugLicense || '',
+      items: commercialBilling.lineItems,
+      taxableSubtotal: commercialBilling.taxableSubtotal,
+      totalGstAmount: commercialBilling.totalGstAmount,
+      grandTotal: commercialBilling.grandTotal,
+      totalBoxes: commercialBilling.totalBoxes,
+      totalUnits: commercialBilling.totalUnits,
+      totalSchemeBonusUnits: commercialBilling.totalSchemeBonusUnits,
+      totalSchemeSavings: commercialBilling.totalSchemeSavings,
+      paymentStatus: 'Pending Wholesale Dispatch'
     });
-
-    const printHtml = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Niyansh Pharma - Wholesale Commercial Invoice ${orderNo}</title>
-        <style>
-          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 25px; color: #1e293b; line-height: 1.4; }
-          .header { border-bottom: 2px solid #0c3d6c; padding-bottom: 15px; display: flex; justify-content: space-between; align-items: flex-start; }
-          .title { color: #0c3d6c; font-size: 24px; font-weight: bold; margin-bottom: 4px; }
-          .subtitle { font-size: 12px; color: #475569; }
-          .inv-meta { text-align: right; }
-          .badge { display: inline-block; padding: 3px 8px; font-size: 11px; font-weight: bold; background: #e0f2fe; color: #0369a1; border-radius: 4px; }
-          .details { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; font-size: 13px; }
-          .box { border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; }
-          .box-title { font-weight: bold; color: #0c3d6c; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 8px; }
-          table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
-          th { background: #f1f5f9; color: #0c3d6c; font-weight: bold; text-align: left; padding: 8px; border: 1px solid #cbd5e1; }
-          td { padding: 8px; border: 1px solid #e2e8f0; }
-          .text-right { text-align: right; }
-          .summary-table { width: 320px; margin-left: auto; margin-top: 20px; border-collapse: collapse; }
-          .summary-table td { padding: 6px 10px; border: 1px solid #cbd5e1; font-size: 13px; }
-          .grand-total { font-weight: bold; font-size: 16px; background: #f8fafc; color: #0c3d6c; }
-          .footer { margin-top: 40px; font-size: 11px; color: #64748b; border-top: 1px dashed #cbd5e1; padding-top: 15px; display: flex; justify-content: space-between; }
-          @media print {
-            button { display: none; }
-            body { padding: 0; }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <div>
-            <div class="title">NIYANSH PHARMA</div>
-            <div class="subtitle">Wholesale Pharmaceutical & Healthcare Distributors</div>
-            <div class="subtitle">Rajkot Wholesale Hub, Gujarat | D.L.No.: 20B GJ-RJT-264618, 21B GJ-RJT-264619</div>
-            <div class="subtitle">GSTIN: 24BVXPP6108F2Z7 | PAN No.: BVXPP6108F | Food License no.: 20726030000567 | Contact: +91 99099 23130</div>
-          </div>
-          <div class="inv-meta">
-            <span class="badge">B2B TAX INVOICE</span>
-            <div style="font-weight: bold; margin-top: 8px; font-size: 14px;"># ${orderNo}</div>
-            <div style="font-size: 12px; color: #64748b;">Date: ${dateStr}</div>
-          </div>
-        </div>
-
-        <div class="details">
-          <div class="box">
-            <div class="box-title">BILLED TO (RETAILER / CHEMIST)</div>
-            <div><strong>Store Name:</strong> ${shopName || 'Retail Chemist Store'}</div>
-            <div><strong>Mobile:</strong> ${retailerMobile || 'N/A'}</div>
-            <div><strong>Email:</strong> ${retailerEmail || 'N/A'}</div>
-            <div><strong>GSTIN:</strong> ${gstin || 'Unregistered / B2C'}</div>
-          </div>
-          <div class="box">
-            <div class="box-title">DISPATCH & PAYMENT TERMS</div>
-            <div><strong>Dispatch Hub:</strong> Niyansh Pharma Logistics Desk</div>
-            <div><strong>Payment Mode:</strong> Bank NEFT / RTGS / Instant UPI</div>
-            <div><strong>UPI ID:</strong> 9316566894@okbizaxis</div>
-            <div><strong>Account Status:</strong> Verified B2B Trade Dispatch</div>
-          </div>
-        </div>
-
-        <table>
-          <thead>
-            <tr>
-              <th style="width: 30px;">#</th>
-              <th>Product Name & Composition</th>
-              <th>Company</th>
-              <th>Form</th>
-              <th class="text-right">Boxes</th>
-              <th class="text-right">Units</th>
-              <th class="text-right">PTR Rate (₹)</th>
-              <th class="text-right">GST %</th>
-              <th class="text-right">Subtotal (₹)</th>
-              <th class="text-right">Total with GST (₹)</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${commercialBilling.lineItems
-              .map(
-                (item, idx) => `
-              <tr>
-                <td>${idx + 1}</td>
-                <td>
-                  <strong>${item.productName}</strong><br/>
-                  <span style="font-size: 10px; color: #64748b;">${item.composition || ''} [${item.packing || ''}]</span>
-                  ${item.scheme ? `<br/><span style="font-size: 10px; color: #ea580c; font-weight: bold;">Scheme: ${item.scheme}</span>` : ''}
-                </td>
-                <td>${item.company}</td>
-                <td>${item.form}</td>
-                <td class="text-right">${item.boxes}</td>
-                <td class="text-right">${item.totalUnits}</td>
-                <td class="text-right">${item.unitPrice.toFixed(2)}</td>
-                <td class="text-right">${item.gstRate}%</td>
-                <td class="text-right">${item.lineSubtotal.toFixed(2)}</td>
-                <td class="text-right"><strong>${item.lineTotal.toFixed(2)}</strong></td>
-              </tr>
-            `
-              )
-              .join('')}
-          </tbody>
-        </table>
-
-        <table class="summary-table">
-          <tr>
-            <td>Total Items / Boxes</td>
-            <td class="text-right">${commercialBilling.totalSelectedItems} Items (${commercialBilling.totalBoxes} Boxes)</td>
-          </tr>
-          <tr>
-            <td>Taxable Subtotal</td>
-            <td class="text-right">₹${commercialBilling.taxableSubtotal.toFixed(2)}</td>
-          </tr>
-          <tr>
-            <td>Total GST (12% / 18%)</td>
-            <td class="text-right">₹${commercialBilling.totalGstAmount.toFixed(2)}</td>
-          </tr>
-          ${
-            commercialBilling.totalSchemeSavings > 0
-              ? `
-          <tr>
-            <td style="color: #16a34a; font-weight: bold;">Trade Scheme Free Value</td>
-            <td class="text-right" style="color: #16a34a; font-weight: bold;">-₹${commercialBilling.totalSchemeSavings.toFixed(2)}</td>
-          </tr>`
-              : ''
-          }
-          <tr class="grand-total">
-            <td>Grand Commercial Total</td>
-            <td class="text-right">₹${commercialBilling.grandTotal.toFixed(2)}</td>
-          </tr>
-        </table>
-
-        <div class="footer">
-          <div>
-            <strong>Terms & Conditions:</strong><br/>
-            1. Goods once sold will not be returned unless batch verified for transit damage within 24 hours.<br/>
-            2. Payment to be cleared within credit terms to maintain uninterrupted dispatch quota.
-          </div>
-          <div style="text-align: right;">
-            <br/><br/>
-            <strong>For NIYANSH PHARMA</strong><br/>
-            Authorized Signatory
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
-
-    const printWin = window.open('', '_blank');
-    if (printWin) {
-      printWin.document.open();
-      printWin.document.write(printHtml);
-      printWin.document.close();
-      setTimeout(() => {
-        printWin.focus();
-        printWin.print();
-      }, 500);
-    }
   };
 
   // 5. Fetch & Open Retailer Outstanding Ledger
@@ -1760,30 +1643,38 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
           style={{
             backgroundColor: 'var(--bg-card)',
             borderRadius: '12px',
-            padding: '16px 20px',
-            marginBottom: '20px',
+            padding: '14px',
+            marginBottom: '18px',
             boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
-            border: '1px solid var(--border-light)'
+            border: '1px solid var(--border-light)',
+            minWidth: 0,
+            maxWidth: '100%',
+            boxSizing: 'border-box',
+            overflow: 'hidden'
           }}
         >
           {/* Top Search & Company Filter Row */}
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '14px' }}>
-            <div style={{ flex: 1, minWidth: '260px', position: 'relative' }}>
-              <Search size={17} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '12px', minWidth: 0 }}>
+            <div style={{ flex: '1 1 220px', minWidth: 0, width: '100%', position: 'relative' }}>
+              <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
               <input
                 type="text"
-                placeholder={t('quickOrder.searchQuickPlaceholder', 'Search products by brand, medicine name, composition (e.g. Acetylcysteine, Paracetamol)...')}
+                className="no-uppercase quickorder-search-input"
+                data-no-uppercase="true"
+                placeholder="Search medicine, brand, composition..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '10px 14px 10px 38px',
+                  boxSizing: 'border-box',
+                  padding: '9px 34px 9px 36px',
                   borderRadius: '8px',
                   border: '1px solid var(--border-light)',
                   backgroundColor: 'var(--bg-input)',
                   color: 'var(--text-dark)',
                   fontSize: '0.88rem',
-                  outline: 'none'
+                  outline: 'none',
+                  textTransform: 'none'
                 }}
               />
               {searchQuery && (
@@ -1797,7 +1688,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
             </div>
 
             {/* Company Dropdown Filter */}
-            <div style={{ minWidth: '180px' }}>
+            <div style={{ flex: '1 1 160px', minWidth: 0 }}>
               <select
                 value={selectedCompany}
                 onChange={(e) => setSelectedCompany(e.target.value)}
@@ -1871,8 +1762,8 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
           </div>
 
           {/* Formulation Form Filter Pills */}
-          <div>
-            <div style={{ fontSize: '0.74rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>
+          <div style={{ minWidth: 0, maxWidth: '100%' }}>
+            <div style={{ fontSize: '0.72rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>
               Filter by Formulation Form:
             </div>
             <div
@@ -1883,7 +1774,10 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                 overflowX: 'auto',
                 paddingBottom: '4px',
                 WebkitOverflowScrolling: 'touch',
-                whiteSpace: 'nowrap'
+                whiteSpace: 'nowrap',
+                width: '100%',
+                maxWidth: '100%',
+                minWidth: 0
               }}
             >
               {formsList.map((formName) => {
@@ -1914,10 +1808,10 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
         </div>
 
         {/* Main 2-Column Portal Grid: Matrix / Catalog + Live Commercial Sidebar */}
-        <div className="quickorder-matrix-layout">
+        <div className="quickorder-matrix-layout" style={{ minWidth: 0, maxWidth: '100%' }}>
           
           {/* LEFT COLUMN: Product Catalog / Matrix Grid */}
-          <div id="quickorder-catalog-anchor">
+          <div id="quickorder-catalog-anchor" style={{ minWidth: 0, maxWidth: '100%' }}>
             {/* Filter Count Subtitle */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
               <div style={{ fontSize: '0.85rem', color: '#475569', fontWeight: '600' }}>
@@ -2306,7 +2200,14 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
             {filteredProducts.length > 0 && (
               <div 
                 className={viewMode === 'card' ? 'quickorder-cards-container' : 'quickorder-mobile-cards-forced'}
-                style={{ display: viewMode === 'card' ? 'grid' : undefined, gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '16px' }}
+                style={{
+                  display: viewMode === 'card' ? 'grid' : undefined,
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 265px), 1fr))',
+                  gap: '14px',
+                  width: '100%',
+                  minWidth: 0,
+                  boxSizing: 'border-box'
+                }}
               >
                 {paginatedProducts.map((product) => {
                   const boxQty = getBoxQty(product._id);
@@ -2321,56 +2222,74 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                   return (
                     <div
                       key={product._id}
+                      className="quickorder-mobile-card"
                       style={{
                         backgroundColor: isSelected ? 'rgba(52, 211, 153, 0.12)' : 'var(--bg-card)',
                         borderRadius: '12px',
-                        padding: '16px',
+                        padding: '14px',
                         boxShadow: isSelected ? '0 4px 15px rgba(34, 197, 94, 0.15)' : '0 2px 10px rgba(0,0,0,0.03)',
                         border: isSelected ? '2px solid #22c55e' : '1px solid var(--border-light)',
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'space-between',
-                        transition: 'all 0.2s ease'
+                        transition: 'all 0.2s ease',
+                        minWidth: 0,
+                        width: '100%',
+                        boxSizing: 'border-box',
+                        overflow: 'hidden'
                       }}
                     >
-                      <div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
-                          <span style={{ fontSize: '0.72rem', fontWeight: '800', backgroundColor: isDaxia ? '#0c3d6c' : 'var(--bg-surface-alt)', color: isDaxia ? '#ffffff' : 'var(--text-medium)', padding: '2px 8px', borderRadius: '4px' }}>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                          <span style={{
+                            fontSize: '0.70rem', fontWeight: '800',
+                            backgroundColor: isDaxia ? '#0c3d6c' : 'var(--bg-surface-alt)',
+                            color: isDaxia ? '#ffffff' : 'var(--text-medium)',
+                            padding: '2px 8px', borderRadius: '4px',
+                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0
+                          }}>
                             {product.company || product.brand}
                           </span>
-                          <span style={{ fontSize: '0.72rem', fontWeight: '600', backgroundColor: '#e0f2fe', color: '#0369a1', padding: '2px 8px', borderRadius: '12px' }}>
+                          <span style={{
+                            fontSize: '0.70rem', fontWeight: '700',
+                            backgroundColor: '#e0f2fe', color: '#0369a1',
+                            padding: '2px 8px', borderRadius: '12px',
+                            whiteSpace: 'nowrap', flexShrink: 0
+                          }}>
                             {product.form}
                           </span>
                         </div>
 
-                        <h3 style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--text-dark)', margin: '10px 0 4px 0', lineHeight: '1.3', minHeight: '2.6rem', height: '2.6rem', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                        <h3 style={{ fontSize: '0.96rem', fontWeight: '800', color: 'var(--text-dark)', margin: '8px 0 4px 0', lineHeight: '1.3', minHeight: '2.5rem', height: '2.5rem', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
                           {product.name}
                         </h3>
 
-                        <div style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '8px', minHeight: '2.4rem', height: '2.4rem', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }} title={product.composition || ''}>
+                        <div style={{ fontSize: '0.76rem', color: '#64748b', marginBottom: '8px', minHeight: '2.2rem', height: '2.2rem', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }} title={product.composition || ''}>
                           {product.composition || <span style={{ visibility: 'hidden' }}>&nbsp;</span>}
                         </div>
 
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: 'var(--text-medium)', backgroundColor: 'var(--bg-surface-alt)', padding: '6px 10px', borderRadius: '6px', marginBottom: '10px' }}>
-                          <span>Pack: <strong>{product.packing || `${unitsPerBox} Units/Box`}</strong></span>
-                          <span>MOQ: <strong>{product.minReorderQty || 1} Box</strong></span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap', fontSize: '0.76rem', color: 'var(--text-medium)', backgroundColor: 'var(--bg-surface-alt)', padding: '6px 10px', borderRadius: '6px', marginBottom: '10px' }}>
+                          <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Pack: <strong>{product.packing || `${unitsPerBox} Units/Box`}</strong></span>
+                          <span style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>MOQ: <strong>{product.minReorderQty || 1} Box</strong></span>
                         </div>
 
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
                           {isLoggedIn ? (
-                            <div>
-                              <span style={{ fontSize: '1.15rem', fontWeight: '800', color: '#0c3d6c' }}>
-                                ₹{product.price?.toFixed(2)}
+                            <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: '1.12rem', fontWeight: '800', color: 'var(--primary-blue)' }} className="tabular-nums">
+                                ₹{(Number(product.price) || 0).toFixed(2)}
                               </span>
-                              <span style={{ fontSize: '0.78rem', color: '#94a3b8', textDecoration: 'line-through', marginLeft: '6px' }}>
-                                ₹{product.mrp?.toFixed(2)}
-                              </span>
+                              {product.mrp > 0 && (
+                                <span style={{ fontSize: '0.76rem', color: '#94a3b8', textDecoration: 'line-through' }} className="tabular-nums">
+                                  ₹{Number(product.mrp).toFixed(2)}
+                                </span>
+                              )}
                             </div>
                           ) : (
                             <div>
                               <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '700', marginRight: '4px' }}>MRP:</span>
-                              <span style={{ fontSize: '1.1rem', fontWeight: '800', color: '#1e293b' }}>
-                                ₹{(product.mrp || product.price)?.toFixed(2)}
+                              <span style={{ fontSize: '1.08rem', fontWeight: '800', color: 'var(--text-dark)' }}>
+                                ₹{(product.mrp || product.price || 0).toFixed(2)}
                               </span>
                               <button
                                 type="button"
@@ -2393,7 +2312,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                             </div>
                           )}
                           {product.scheme && (
-                            <span style={{ fontSize: '0.72rem', fontWeight: '800', backgroundColor: '#ffedd5', color: '#ea580c', padding: '2px 6px', borderRadius: '4px' }}>
+                            <span style={{ fontSize: '0.70rem', fontWeight: '800', backgroundColor: '#ffedd5', color: '#ea580c', padding: '2px 6px', borderRadius: '4px', whiteSpace: 'nowrap' }}>
                               🔥 {product.scheme}
                             </span>
                           )}
@@ -2401,13 +2320,15 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                       </div>
 
                       {/* Card Stepper & Action */}
-                      <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '10px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
-                          <div style={{ display: 'inline-flex', alignItems: 'center', border: '1px solid #cbd5e1', borderRadius: '6px', overflow: 'hidden', backgroundColor: '#ffffff' }}>
+                      <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '10px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', border: '1px solid #cbd5e1', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#ffffff', height: '34px', flexShrink: 0 }}>
                             <button
+                              type="button"
                               onClick={() => decrementBoxQty(product._id)}
                               disabled={boxQty === 0}
-                              style={{ width: '28px', height: '30px', border: 'none', backgroundColor: '#e2e8f0', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                              style={{ width: '32px', height: '34px', minHeight: '34px', padding: 0, border: 'none', backgroundColor: boxQty === 0 ? '#f1f5f9' : '#e2e8f0', color: '#0f172a', cursor: boxQty === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                              aria-label="Decrease boxes"
                             >
                               <Minus size={13} />
                             </button>
@@ -2415,31 +2336,44 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                               type="number"
                               inputMode="numeric"
                               min="0"
+                              className="stepper-qty-input"
                               value={boxQty === 0 ? '' : boxQty}
                               placeholder="0"
                               onChange={(e) => setBoxQty(product._id, e.target.value)}
-                              style={{ width: '45px', height: '30px', textAlign: 'center', border: 'none', fontWeight: '700', outline: 'none' }}
+                              style={{ width: '44px', height: '34px', minHeight: '34px', lineHeight: '34px', padding: 0, margin: 0, textAlign: 'center', border: 'none', fontWeight: '800', fontSize: '0.9rem', outline: 'none', color: '#0c3d6c', backgroundColor: '#ffffff' }}
+                              aria-label="Box quantity"
                             />
                             <button
+                              type="button"
                               onClick={() => incrementBoxQty(product._id)}
-                              style={{ width: '28px', height: '30px', border: 'none', backgroundColor: '#0c3d6c', color: '#ffffff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                              style={{ width: '32px', height: '34px', minHeight: '34px', padding: 0, border: 'none', backgroundColor: '#0c3d6c', color: '#ffffff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                              aria-label="Increase boxes"
                             >
                               <Plus size={13} />
                             </button>
                           </div>
 
-                          <div style={{ display: 'flex', gap: '4px' }}>
+                          <div style={{ display: 'flex', gap: '5px', alignItems: 'center', flexShrink: 0 }}>
                             <button
+                              type="button"
                               onClick={() => incrementBoxQty(product._id, 5)}
-                              style={{ padding: '4px 8px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: '700', backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1', cursor: 'pointer' }}
+                              style={{ height: '34px', minHeight: '34px', padding: '0 9px', borderRadius: '6px', fontSize: '0.74rem', fontWeight: '700', backgroundColor: '#f1f5f9', color: '#334155', border: '1px solid #cbd5e1', cursor: 'pointer' }}
                             >
                               +5
                             </button>
                             <button
+                              type="button"
                               onClick={() => incrementBoxQty(product._id, 10)}
-                              style={{ padding: '4px 8px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: '700', backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1', cursor: 'pointer' }}
+                              style={{ height: '34px', minHeight: '34px', padding: '0 9px', borderRadius: '6px', fontSize: '0.74rem', fontWeight: '700', backgroundColor: '#f1f5f9', color: '#334155', border: '1px solid #cbd5e1', cursor: 'pointer' }}
                             >
                               +10
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setMoqQty(product)}
+                              style={{ height: '34px', minHeight: '34px', padding: '0 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: '700', backgroundColor: '#eff6ff', color: '#0c3d6c', border: '1px solid #bfdbfe', cursor: 'pointer' }}
+                            >
+                              MOQ
                             </button>
                           </div>
                         </div>
@@ -2604,14 +2538,18 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
           </div>
 
           {/* RIGHT COLUMN: Live Commercial Wholesale Billing Sidebar */}
-          <div className="sticky-form-desktop" style={{ position: 'sticky', top: '90px' }}>
+          <div className="sticky-form-desktop" style={{ position: 'sticky', top: '90px', minWidth: 0, maxWidth: '100%' }}>
             <div
               style={{
                 backgroundColor: 'var(--bg-card)',
                 borderRadius: '14px',
-                padding: '20px',
+                padding: '16px',
                 boxShadow: 'var(--card-shadow)',
-                border: '1px solid var(--border-light)'
+                border: '1px solid var(--border-light)',
+                minWidth: 0,
+                maxWidth: '100%',
+                boxSizing: 'border-box',
+                overflow: 'hidden'
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light)', paddingBottom: '12px', marginBottom: '14px' }}>
@@ -2729,20 +2667,22 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                   backgroundColor: '#f0fdf4',
                   border: '2px solid #86efac',
                   borderRadius: '10px',
-                  padding: '12px 14px',
+                  padding: '12px',
                   marginBottom: '16px',
                   display: 'flex',
                   justifyContent: 'space-between',
-                  alignItems: 'center'
+                  alignItems: 'center',
+                  gap: '8px',
+                  flexWrap: 'wrap'
                 }}
               >
-                <div>
-                  <div style={{ fontSize: '0.75rem', color: '#166534', fontWeight: '700', textTransform: 'uppercase' }}>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: '0.74rem', color: '#166534', fontWeight: '700', textTransform: 'uppercase' }}>
                     Grand Commercial Total
                   </div>
-                  <div style={{ fontSize: '0.7rem', color: '#4ade80' }}>{t('quickOrder.inclusiveTaxes', 'Inclusive of all Taxes')}</div>
+                  <div style={{ fontSize: '0.7rem', color: '#15803d' }}>{t('quickOrder.inclusiveTaxes', 'Inclusive of all Taxes')}</div>
                 </div>
-                <div style={{ fontSize: isLoggedIn ? '1.45rem' : '1.05rem', fontWeight: '900', color: '#15803d' }}>
+                <div style={{ fontSize: isLoggedIn ? '1.35rem' : '1rem', fontWeight: '900', color: '#15803d', flexShrink: 0 }} className="tabular-nums">
                     {isLoggedIn ? (
                       `₹${commercialBilling.grandTotal.toFixed(2)}`
                     ) : (
@@ -2812,9 +2752,9 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                     onClick={handlePrintInvoice}
                     disabled={commercialBilling.totalSelectedItems === 0}
                     style={{
-                      padding: '9px',
+                      padding: '9px 6px',
                       borderRadius: '8px',
-                      fontSize: '0.8rem',
+                      fontSize: '0.78rem',
                       fontWeight: '700',
                       display: 'flex',
                       alignItems: 'center',
@@ -2823,10 +2763,11 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                       backgroundColor: '#f8fafc',
                       color: '#334155',
                       border: '1px solid #cbd5e1',
-                      cursor: commercialBilling.totalSelectedItems === 0 ? 'not-allowed' : 'pointer'
+                      cursor: commercialBilling.totalSelectedItems === 0 ? 'not-allowed' : 'pointer',
+                      minWidth: 0
                     }}
                   >
-                    <Printer size={14} /> {t('quickOrder.printInvoice', 'Print')} Invoice
+                    <Printer size={14} style={{ flexShrink: 0 }} /> <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t('quickOrder.printInvoice', 'Print Invoice')}</span>
                   </button>
 
                   {/* 4. Send via Email */}
@@ -2834,9 +2775,9 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                     onClick={handleSendEmail}
                     disabled={commercialBilling.totalSelectedItems === 0}
                     style={{
-                      padding: '9px',
+                      padding: '9px 6px',
                       borderRadius: '8px',
-                      fontSize: '0.8rem',
+                      fontSize: '0.78rem',
                       fontWeight: '700',
                       display: 'flex',
                       alignItems: 'center',
@@ -2845,10 +2786,11 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                       backgroundColor: '#f8fafc',
                       color: '#334155',
                       border: '1px solid #cbd5e1',
-                      cursor: commercialBilling.totalSelectedItems === 0 ? 'not-allowed' : 'pointer'
+                      cursor: commercialBilling.totalSelectedItems === 0 ? 'not-allowed' : 'pointer',
+                      minWidth: 0
                     }}
                   >
-                    <Mail size={14} /> Email PO
+                    <Mail size={14} style={{ flexShrink: 0 }} /> <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Email PO</span>
                   </button>
                 </div>
               </div>

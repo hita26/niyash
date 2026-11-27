@@ -525,8 +525,33 @@ function Header({
                 />
               </Link>
 
-              {/* Mobile Action Controls: Theme Toggle & Hamburger */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {/* Mobile Action Controls: Cart Pill, Theme Toggle & Hamburger */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                <button
+                  type="button"
+                  onClick={onOpenCart}
+                  aria-label={`Open Wholesale Cart (${cartCount} items)`}
+                  style={{
+                    height: '38px',
+                    padding: cartCount > 0 ? '0 10px' : '0 9px',
+                    boxSizing: 'border-box',
+                    borderRadius: '10px',
+                    border: cartCount > 0 ? '1.5px solid #ea580c' : '1.5px solid var(--border-light)',
+                    backgroundColor: cartCount > 0 ? '#ea580c' : 'var(--bg-surface-alt)',
+                    color: cartCount > 0 ? '#ffffff' : 'var(--text-dark)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '5px',
+                    fontSize: '0.78rem',
+                    fontWeight: '800',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <ShoppingBag size={16} />
+                  <span>{cartCount}</span>
+                </button>
+
                 <ThemeToggle />
 
                 <button 
@@ -585,7 +610,9 @@ function Header({
                 <input
                   ref={searchInputRef}
                   type="text"
-                  placeholder={t('nav.searchB2BPlaceholder', 'Search Wholesale Medicines, Compositions...')}
+                  className="no-uppercase header-search-input"
+                  data-no-uppercase="true"
+                  placeholder={t('nav.searchB2BPlaceholder', 'Search medicines, compositions...')}
                   value={searchTerm}
                   onChange={(e) => {
                     setSearchTerm(e.target.value);
@@ -598,17 +625,23 @@ function Header({
                     border: 'none',
                     background: 'transparent',
                     outline: 'none',
-                    width: '100%',
+                    flex: '1 1 0%',
+                    minWidth: 0,
+                    width: 'auto',
                     height: '100%',
                     fontSize: '0.84rem',
                     color: 'var(--text-dark)',
-                    fontWeight: '500'
+                    fontWeight: '500',
+                    textTransform: 'none'
                   }}
                   aria-label="Fast search for wholesale medicines"
                 />
                 <button 
                   type="submit" 
+                  className="search-button"
                   style={{ 
+                    position: 'static',
+                    transform: 'none',
                     width: '30px',
                     height: '30px',
                     borderRadius: '50%',
@@ -980,39 +1013,58 @@ function Header({
           <div className="hide-desktop" style={{ width: '100%', paddingTop: '8px' }}>
             <form 
               onSubmit={handleSearchSubmit} 
+              className="b2b-mobile-search-form"
               style={{ 
-                height: '38px',
+                height: '42px',
                 boxSizing: 'border-box',
                 display: 'flex', 
                 alignItems: 'center', 
+                gap: '8px',
                 backgroundColor: 'var(--bg-surface-alt)', 
                 border: '1.5px solid var(--border-light)', 
                 borderRadius: '24px', 
-                padding: '0 4px 0 12px'
+                padding: '0 4px 0 12px',
+                width: '100%',
+                overflow: 'hidden'
               }}
               role="search"
             >
-              <Search size={15} color="var(--primary-blue, #0c3d6c)" style={{ marginRight: '6px', flexShrink: 0 }} />
+              <Search size={15} color="var(--primary-blue, #0c3d6c)" style={{ flexShrink: 0 }} />
               <input
                 type="text"
-                placeholder={t('nav.searchB2BPlaceholder', 'Search Wholesale Medicines...')}
+                className="no-uppercase header-search-input"
+                data-no-uppercase="true"
+                placeholder="Search medicines, compositions..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{
                   border: 'none',
                   background: 'transparent',
                   outline: 'none',
-                  width: '100%',
+                  flex: '1 1 0%',
+                  minWidth: 0,
+                  width: 'auto',
                   height: '100%',
-                  fontSize: '0.82rem',
-                  color: 'var(--text-dark)'
+                  minHeight: 0,
+                  padding: '0 4px 0 0',
+                  fontSize: '0.86rem',
+                  color: 'var(--text-dark)',
+                  textTransform: 'none',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden'
                 }}
               />
               <button 
                 type="submit" 
+                className="search-button search-button-inline"
                 style={{ 
-                  width: '30px',
-                  height: '30px',
+                  position: 'static',
+                  transform: 'none',
+                  width: '32px',
+                  height: '32px',
+                  minHeight: '32px',
+                  minWidth: '32px',
                   borderRadius: '50%',
                   backgroundColor: '#0c3d6c', 
                   color: '#ffffff', 
@@ -1021,12 +1073,13 @@ function Header({
                   alignItems: 'center',
                   justifyContent: 'center',
                   flexShrink: 0,
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  boxShadow: 'none'
                 }}
                 title={t('common.search', 'Search')}
                 aria-label={t('common.search', 'Search')}
               >
-                <Search size={13} color="#ffffff" />
+                <Search size={14} color="#ffffff" />
               </button>
             </form>
           </div>
@@ -1133,6 +1186,8 @@ function Header({
               <input
                 ref={searchInputRef}
                 type="text"
+                className="no-uppercase header-search-input"
+                data-no-uppercase="true"
                 placeholder={t('nav.searchPlaceholder', 'Search medicines, companies, compositions...')}
                 value={searchTerm}
                 onChange={(e) => {
@@ -1269,6 +1324,36 @@ function Header({
           <div className="header-actions">
             {/* Language Selector (English | ગુજરાતી | हिन्दी) */}
             <LanguageSelector />
+
+            {/* Mobile & Desktop Quick Cart Button when logged in or items in cart */}
+            {(user || cartCount > 0) && (
+              <button
+                type="button"
+                onClick={onOpenCart}
+                className="header-cart-pill"
+                aria-label={`Open Wholesale Cart (${cartCount} items)`}
+                style={{
+                  height: '36px',
+                  padding: '0 10px',
+                  boxSizing: 'border-box',
+                  borderRadius: '18px',
+                  border: cartCount > 0 ? '1.5px solid #ea580c' : '1.5px solid var(--border-light)',
+                  backgroundColor: cartCount > 0 ? '#ea580c' : 'var(--bg-surface-alt)',
+                  color: cartCount > 0 ? '#ffffff' : 'var(--text-dark)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '5px',
+                  fontSize: '0.78rem',
+                  fontWeight: '800',
+                  cursor: 'pointer',
+                  flexShrink: 0
+                }}
+              >
+                <ShoppingBag size={15} />
+                <span>{cartCount}</span>
+              </button>
+            )}
 
             {/* Dark / Light Mode Toggle */}
             <ThemeToggle />

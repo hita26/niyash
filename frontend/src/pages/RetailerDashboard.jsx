@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import PaymentGatewayModal from '../components/PaymentGatewayModal';
 import SkeletonLoader from '../components/SkeletonLoader';
+import { openWholesaleInvoiceWindow } from '../utils/invoiceTemplate';
 
 export default function RetailerDashboard() {
   const { t, formatCurrency, formatDate, translateStatus, translatePaymentStatus } = useLanguage();
@@ -378,10 +379,10 @@ export default function RetailerDashboard() {
       )}
 
       {/* Chemist Identity Banner - Clean, High-Contrast Modern Enterprise Header */}
-      <section style={{ 
+      <section className="retailer-hero-banner" style={{ 
         background: 'linear-gradient(135deg, #091e3a 0%, #0f2b48 50%, #153e66 100%)', 
         color: '#ffffff', 
-        padding: '28px 16px', 
+        padding: '24px 16px', 
         borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
         position: 'relative',
         overflow: 'hidden'
@@ -390,78 +391,83 @@ export default function RetailerDashboard() {
         <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '220px', height: '220px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
         <div style={{ maxWidth: '1240px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
+          <div className="retailer-hero-inner" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
             
             {/* Store & Chemist Details */}
-            <div style={{ flex: '1 1 340px' }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', backgroundColor: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(52, 211, 153, 0.3)', padding: '3px 12px', borderRadius: '20px', fontSize: '0.74rem', fontWeight: '800', letterSpacing: '0.5px', marginBottom: '10px', color: '#6ee7b7' }}>
-                <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#10b981', display: 'inline-block', boxShadow: '0 0 8px #10b981' }}></span>
-                {t('retailerDashboard.verifiedPharmacyBadge', 'WHO-GMP VERIFIED B2B RETAIL PHARMACY')}
+            <div style={{ flex: '1 1 260px', minWidth: 0 }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(52, 211, 153, 0.3)', padding: '3px 10px', borderRadius: '20px', fontSize: '0.70rem', fontWeight: '800', letterSpacing: '0.4px', marginBottom: '8px', color: '#6ee7b7', maxWidth: '100%' }}>
+                <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#10b981', display: 'inline-block', boxShadow: '0 0 8px #10b981', flexShrink: 0 }}></span>
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {t('retailerDashboard.verifiedPharmacyBadge', 'WHO-GMP VERIFIED B2B RETAIL PHARMACY')}
+                </span>
               </div>
               
               <h1 style={{ 
                 color: '#ffffff', 
-                fontSize: 'clamp(1.4rem, 2.5vw, 1.95rem)', 
+                fontSize: 'clamp(1.25rem, 2.5vw, 1.9rem)', 
                 fontWeight: '900', 
                 margin: '0 0 10px 0', 
                 display: 'flex', 
                 alignItems: 'center', 
-                gap: '12px',
+                gap: '10px',
                 letterSpacing: '-0.02em',
-                lineHeight: 1.2
+                lineHeight: 1.2,
+                wordBreak: 'break-word'
               }}>
-                <div style={{ width: '42px', height: '42px', borderRadius: '12px', backgroundColor: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Building2 size={24} color="#38bdf8" />
+                <div style={{ width: '38px', height: '38px', borderRadius: '10px', backgroundColor: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Building2 size={20} color="#38bdf8" />
                 </div>
-                <span style={{ color: '#ffffff' }}>{shopName}</span>
+                <span style={{ color: '#ffffff', minWidth: 0 }}>{shopName}</span>
               </h1>
               
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', color: '#cbd5e1', fontSize: '0.82rem' }}>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(255, 255, 255, 0.08)', padding: '4px 10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                  <User size={13} color="#93c5fd" /> {user?.name || 'Authorized Partner'}
+              <div className="retailer-hero-chips" style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', color: '#cbd5e1', fontSize: '0.76rem' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(255, 255, 255, 0.08)', padding: '4px 8px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', maxWidth: '100%' }}>
+                  <User size={12} color="#93c5fd" /> <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.name || 'Authorized Partner'}</span>
                 </span>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(255, 255, 255, 0.08)', padding: '4px 10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                  <Phone size={13} color="#93c5fd" /> +91 {cleanMobile}
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(255, 255, 255, 0.08)', padding: '4px 8px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <Phone size={12} color="#93c5fd" /> +91 {cleanMobile}
                 </span>
                 {user?.gstin ? (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#bae6fd', padding: '4px 10px', borderRadius: '8px', fontWeight: '700', fontSize: '0.78rem', border: '1px solid rgba(56, 189, 248, 0.25)' }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#bae6fd', padding: '4px 8px', borderRadius: '8px', fontWeight: '700', fontSize: '0.74rem', border: '1px solid rgba(56, 189, 248, 0.25)', maxWidth: '100%', wordBreak: 'break-all' }}>
                     GST: {user.gstin}
                   </span>
                 ) : user?.pan ? (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#bae6fd', padding: '4px 10px', borderRadius: '8px', fontWeight: '700', fontSize: '0.78rem', border: '1px solid rgba(56, 189, 248, 0.25)' }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#bae6fd', padding: '4px 8px', borderRadius: '8px', fontWeight: '700', fontSize: '0.74rem', border: '1px solid rgba(56, 189, 248, 0.25)', maxWidth: '100%', wordBreak: 'break-all' }}>
                     PAN: {user.pan}
                   </span>
                 ) : (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#bae6fd', padding: '4px 10px', borderRadius: '8px', fontWeight: '700', fontSize: '0.78rem', border: '1px solid rgba(56, 189, 248, 0.25)' }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#bae6fd', padding: '4px 8px', borderRadius: '8px', fontWeight: '700', fontSize: '0.74rem', border: '1px solid rgba(56, 189, 248, 0.25)' }}>
                     GST: Exempted
                   </span>
                 )}
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#a7f3d0', padding: '4px 10px', borderRadius: '8px', fontWeight: '700', fontSize: '0.78rem', border: '1px solid rgba(16, 185, 129, 0.25)' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#a7f3d0', padding: '4px 8px', borderRadius: '8px', fontWeight: '700', fontSize: '0.74rem', border: '1px solid rgba(16, 185, 129, 0.25)', maxWidth: '100%', wordBreak: 'break-all' }}>
                   DL: {user?.drugLicense1 || user?.drugLicense || '20B/21B Verified'}
                 </span>
               </div>
             </div>
 
             {/* Quick Actions (Desktop & Mobile) */}
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <div className="retailer-hero-actions" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
               <Link
                 to="/quick-order"
                 style={{
                   backgroundColor: '#ea580c',
                   color: '#ffffff',
-                  padding: '10px 18px',
+                  padding: '10px 16px',
                   borderRadius: '10px',
                   textDecoration: 'none',
                   fontWeight: '800',
-                  fontSize: '0.88rem',
+                  fontSize: '0.84rem',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '7px',
+                  justifyContent: 'center',
+                  gap: '6px',
                   boxShadow: '0 4px 14px rgba(234, 88, 12, 0.35)',
-                  transition: 'all 0.15s ease'
+                  transition: 'all 0.15s ease',
+                  whiteSpace: 'nowrap'
                 }}
               >
-                <Zap size={16} /> {t('retailerDashboard.quickOrderPad', 'Quick Order Pad')}
+                <Zap size={15} /> {t('retailerDashboard.quickOrderPad', 'Quick Order Pad')}
               </Link>
 
               <button
@@ -470,19 +476,21 @@ export default function RetailerDashboard() {
                   backgroundColor: 'rgba(255, 255, 255, 0.08)',
                   color: '#ffffff',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
-                  padding: '10px 16px',
+                  padding: '10px 14px',
                   borderRadius: '10px',
                   cursor: 'pointer',
                   fontWeight: '700',
-                  fontSize: '0.85rem',
+                  fontSize: '0.82rem',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '7px',
-                  transition: 'all 0.15s ease'
+                  justifyContent: 'center',
+                  gap: '6px',
+                  transition: 'all 0.15s ease',
+                  whiteSpace: 'nowrap'
                 }}
                 title="Send ledger statement to WhatsApp"
               >
-                <MessageCircle size={16} color="#34d399" /> {t('retailerDashboard.whatsAppStatement', 'WhatsApp Statement')}
+                <MessageCircle size={15} color="#34d399" /> {t('retailerDashboard.whatsAppStatement', 'WhatsApp Statement')}
               </button>
             </div>
 
@@ -491,13 +499,13 @@ export default function RetailerDashboard() {
       </section>
 
       {/* Main Workstation Workspace */}
-      <main style={{ maxWidth: '1240px', margin: '0 auto', padding: '24px 16px' }}>
+      <main className="retailer-dashboard-main" style={{ maxWidth: '1240px', margin: '0 auto', padding: '18px 14px' }}>
 
         {/* 4 Financial & Operational Metric Cards */}
-        <div className="dashboard-metrics-grid" style={{ marginBottom: '26px' }}>
+        <div className="dashboard-metrics-grid" style={{ marginBottom: '20px' }}>
           
           {/* Card 1: Outstanding Due Balance */}
-          <div style={{
+          <div className="dashboard-kpi-card" style={{
             backgroundColor: 'var(--bg-card)',
             borderRadius: '16px',
             padding: '20px',
@@ -552,40 +560,44 @@ export default function RetailerDashboard() {
               </div>
             </div>
 
-            <div style={{ marginTop: '16px', display: 'flex', gap: '8px' }}>
+            <div style={{ marginTop: '12px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
               <button
                 onClick={() => handleOpenPayment(outstandingBal)}
                 disabled={outstandingBal <= 0}
                 style={{
-                  flex: 1,
+                  flex: '1 1 auto',
                   backgroundColor: outstandingBal > 0 ? '#0c3d6c' : 'var(--bg-surface-alt)',
                   color: outstandingBal > 0 ? '#ffffff' : 'var(--text-light)',
                   border: 'none',
-                  padding: '8px 12px',
+                  padding: '8px 10px',
                   borderRadius: '8px',
-                  fontSize: '0.8rem',
+                  fontSize: '0.78rem',
                   fontWeight: '700',
                   cursor: outstandingBal > 0 ? 'pointer' : 'default',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '6px'
+                  gap: '5px',
+                  whiteSpace: 'nowrap'
                 }}
               >
-                <CreditCard size={14} /> Pay Dues Now
+                <CreditCard size={14} /> Pay Dues
               </button>
               <Link
                 to="/outstanding"
                 style={{
-                  padding: '8px 12px',
+                  flex: '0 1 auto',
+                  padding: '8px 10px',
                   borderRadius: '8px',
                   border: '1px solid var(--border-light)',
                   color: 'var(--text-medium)',
                   textDecoration: 'none',
-                  fontSize: '0.8rem',
+                  fontSize: '0.78rem',
                   fontWeight: '700',
                   display: 'flex',
-                  alignItems: 'center'
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  whiteSpace: 'nowrap'
                 }}
                 title="View Full Ledger"
               >
@@ -595,7 +607,7 @@ export default function RetailerDashboard() {
           </div>
 
           {/* Card 2: Wholesale Credit Limit */}
-          <div style={{
+          <div className="dashboard-kpi-card" style={{
             backgroundColor: 'var(--bg-card)',
             borderRadius: '16px',
             padding: '20px',
@@ -659,7 +671,7 @@ export default function RetailerDashboard() {
           </div>
 
           {/* Card 3: Wholesale Orders Placed */}
-          <div style={{
+          <div className="dashboard-kpi-card" style={{
             backgroundColor: 'var(--bg-card)',
             borderRadius: '16px',
             padding: '20px',
@@ -730,7 +742,7 @@ export default function RetailerDashboard() {
           </div>
 
           {/* Card 4: Chemist Margins & Live Schemes */}
-          <div style={{
+          <div className="dashboard-kpi-card" style={{
             backgroundColor: 'var(--bg-card)',
             borderRadius: '16px',
             padding: '20px',
@@ -803,85 +815,91 @@ export default function RetailerDashboard() {
         </div>
 
         {/* Floating Segmented Pill Tab Switcher */}
-        <div style={{
-          display: 'flex',
-          gap: '6px',
-          backgroundColor: 'var(--bg-surface-alt, #f1f5f9)',
-          padding: '5px',
-          borderRadius: '14px',
-          border: '1px solid var(--border-light, #e2e8f0)',
-          marginBottom: '22px',
-          overflowX: 'auto',
-          WebkitOverflowScrolling: 'touch',
-          width: 'fit-content',
-          maxWidth: '100%'
-        }}>
+        <div
+          className="retailer-tabs-bar touch-scroll-row no-scrollbar"
+          style={{
+            display: 'flex',
+            gap: '6px',
+            backgroundColor: 'var(--bg-surface-alt, #f1f5f9)',
+            padding: '5px',
+            borderRadius: '14px',
+            border: '1px solid var(--border-light, #e2e8f0)',
+            marginBottom: '18px',
+            overflowX: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            width: 'fit-content',
+            maxWidth: '100%'
+          }}
+        >
           <button
             onClick={() => handleTabChange('orders')}
             style={{
-              padding: '9px 18px',
+              padding: '8px 14px',
               borderRadius: '10px',
               border: 'none',
               background: activeTab === 'orders' ? 'var(--primary-blue, #0c3d6c)' : 'transparent',
               color: activeTab === 'orders' ? '#ffffff' : 'var(--text-medium, #64748b)',
-              fontSize: '0.86rem',
+              fontSize: '0.82rem',
               fontWeight: '700',
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '7px',
+              gap: '6px',
               whiteSpace: 'nowrap',
+              flexShrink: 0,
               boxShadow: activeTab === 'orders' ? '0 2px 8px rgba(12, 61, 108, 0.25)' : 'none',
               transition: 'all 0.18s ease'
             }}
           >
-            <Package size={16} />
+            <Package size={15} />
             <span>{t('retailerDashboard.tabMyOrders', 'My Wholesale Orders')} ({orders.length})</span>
           </button>
 
           <button
             onClick={() => handleTabChange('invoices')}
             style={{
-              padding: '9px 18px',
+              padding: '8px 14px',
               borderRadius: '10px',
               border: 'none',
               background: activeTab === 'invoices' ? 'var(--primary-blue, #0c3d6c)' : 'transparent',
               color: activeTab === 'invoices' ? '#ffffff' : 'var(--text-medium, #64748b)',
-              fontSize: '0.86rem',
+              fontSize: '0.82rem',
               fontWeight: '700',
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '7px',
+              gap: '6px',
               whiteSpace: 'nowrap',
+              flexShrink: 0,
               boxShadow: activeTab === 'invoices' ? '0 2px 8px rgba(12, 61, 108, 0.25)' : 'none',
               transition: 'all 0.18s ease'
             }}
           >
-            <FileText size={16} />
+            <FileText size={15} />
             <span>{t('retailerDashboard.tabInvoicesStatements', 'Invoices & Statements')} ({ledger?.invoices?.length || 0})</span>
           </button>
 
           <button
             onClick={() => handleTabChange('schemes')}
             style={{
-              padding: '9px 18px',
+              padding: '8px 14px',
               borderRadius: '10px',
               border: 'none',
               background: activeTab === 'schemes' ? '#ea580c' : 'transparent',
               color: activeTab === 'schemes' ? '#ffffff' : 'var(--text-medium, #64748b)',
-              fontSize: '0.86rem',
+              fontSize: '0.82rem',
               fontWeight: '700',
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '7px',
+              gap: '6px',
               whiteSpace: 'nowrap',
+              flexShrink: 0,
               boxShadow: activeTab === 'schemes' ? '0 2px 8px rgba(234, 88, 12, 0.3)' : 'none',
               transition: 'all 0.18s ease'
             }}
           >
-            <Sparkles size={16} />
+            <Sparkles size={15} />
             <span>{t('retailerDashboard.tabHighMarginSchemes', 'High-Margin Schemes & PTR Rates')}</span>
           </button>
         </div>
@@ -890,45 +908,74 @@ export default function RetailerDashboard() {
         {activeTab === 'orders' && (
           <div>
             {/* Filter & Search Bar */}
-            <div style={{
+            <div className="retailer-order-filter-bar" style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
               flexWrap: 'wrap',
-              gap: '12px',
-              marginBottom: '16px',
-              backgroundColor: '#ffffff',
-              padding: '12px 16px',
+              gap: '10px',
+              marginBottom: '14px',
+              backgroundColor: 'var(--bg-card)',
+              padding: '10px 12px',
               borderRadius: '12px',
-              border: '1px solid #e2e8f0'
+              border: '1px solid var(--border-light)'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: '1 1 240px', maxWidth: '400px', backgroundColor: '#f1f5f9', padding: '7px 14px', borderRadius: '8px' }}>
-                <Search size={16} color="#94a3b8" />
+              <div className="retailer-order-search-box" style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                flex: '1 1 220px',
+                minWidth: 0,
+                maxWidth: '420px',
+                backgroundColor: 'var(--bg-surface-alt)',
+                padding: '4px 12px',
+                borderRadius: '10px',
+                border: '1px solid var(--border-light)',
+                height: '40px',
+                boxSizing: 'border-box'
+              }}>
+                <Search size={15} color="#94a3b8" style={{ flexShrink: 0 }} />
                 <input
                   type="text"
-                  placeholder="Search order number, medicine name..."
+                  className="no-uppercase retailer-order-search-input"
+                  data-no-uppercase="true"
+                  placeholder="Search order # or medicine..."
                   value={orderSearch}
                   onChange={(e) => setOrderSearch(e.target.value)}
-                  style={{ border: 'none', background: 'transparent', width: '100%', outline: 'none', fontSize: '0.86rem' }}
+                  style={{
+                    border: 'none',
+                    background: 'transparent',
+                    width: '100%',
+                    minWidth: 0,
+                    height: '100%',
+                    minHeight: 0,
+                    padding: 0,
+                    outline: 'none',
+                    fontSize: '0.86rem',
+                    color: 'var(--text-dark)',
+                    textTransform: 'none'
+                  }}
                 />
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-medium)', fontWeight: '700' }}>Status:</span>
+              <div className="retailer-status-pills touch-scroll-row no-scrollbar" style={{ display: 'flex', alignItems: 'center', gap: '6px', maxWidth: '100%', overflowX: 'auto', paddingBottom: '2px' }}>
+                <span style={{ fontSize: '0.76rem', color: 'var(--text-medium)', fontWeight: '700', flexShrink: 0 }}>Status:</span>
                 {['All', 'Booked', 'Confirmed', 'Dispatched', 'Delivered'].map((st) => (
                   <button
                     key={st}
                     onClick={() => setOrderStatusFilter(st)}
                     style={{
-                      padding: '5px 12px',
-                      borderRadius: '6px',
-                      fontSize: '0.78rem',
+                      padding: '5px 11px',
+                      borderRadius: '8px',
+                      fontSize: '0.76rem',
                       fontWeight: '700',
                       border: '1px solid',
-                      borderColor: orderStatusFilter === st ? 'var(--primary-blue)' : '#e2e8f0',
-                      backgroundColor: orderStatusFilter === st ? '#eff6ff' : '#ffffff',
+                      borderColor: orderStatusFilter === st ? 'var(--primary-blue)' : 'var(--border-light)',
+                      backgroundColor: orderStatusFilter === st ? '#eff6ff' : 'var(--bg-card)',
                       color: orderStatusFilter === st ? 'var(--primary-blue)' : 'var(--text-medium)',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                      flexShrink: 0
                     }}
                   >
                     {st}
@@ -941,12 +988,12 @@ export default function RetailerDashboard() {
             {loadingOrders ? (
               <SkeletonLoader variant="table" rows={4} />
             ) : filteredOrders.length === 0 ? (
-              <div style={{ 
+              <div className="retailer-empty-orders-card" style={{ 
                 textAlign: 'center', 
-                padding: '60px 24px', 
-                backgroundColor: '#ffffff', 
+                padding: '36px 18px', 
+                backgroundColor: 'var(--bg-card)', 
                 borderRadius: '16px', 
-                border: '1px solid #e2e8f0',
+                border: '1px solid var(--border-light)',
                 boxShadow: '0 4px 16px rgba(0,0,0,0.02)'
               }}>
                 <div style={{ width: '70px', height: '70px', borderRadius: '50%', backgroundColor: '#eff6ff', color: 'var(--primary-blue)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
@@ -1066,25 +1113,59 @@ export default function RetailerDashboard() {
                             </div>
                           </div>
 
-                          <button
-                            onClick={() => handleWhatsAppReorder(order)}
-                            style={{
-                              backgroundColor: '#ecfdf5',
-                              color: '#065f46',
-                              border: '1px solid #a7f3d0',
-                              padding: '8px 14px',
-                              borderRadius: '8px',
-                              fontSize: '0.82rem',
-                              fontWeight: '700',
-                              cursor: 'pointer',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '6px'
-                            }}
-                            title="Re-order these exact items via WhatsApp"
-                          >
-                            <RepeatIcon size={14} /> Re-Order
-                          </button>
+                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            <button
+                              onClick={() => openWholesaleInvoiceWindow({
+                                invoiceNumber: order.orderNumber,
+                                invoiceDate: order.createdAt,
+                                shopName: order.shopName || shopName,
+                                retailerMobile: order.retailerMobile || cleanMobile,
+                                gstin: order.gstin || user?.gstin || '',
+                                drugLicense: user?.drugLicense1 || user?.drugLicense || '',
+                                items: order.items || [],
+                                taxableSubtotal: order.subTotal || 0,
+                                totalGstAmount: order.gstAmount || 0,
+                                grandTotal: order.grandTotal || 0,
+                                paymentStatus: order.paymentStatus || 'Pending'
+                              })}
+                              style={{
+                                backgroundColor: '#eff6ff',
+                                color: '#0c3d6c',
+                                border: '1px solid #bfdbfe',
+                                padding: '8px 12px',
+                                borderRadius: '8px',
+                                fontSize: '0.8rem',
+                                fontWeight: '700',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '5px'
+                              }}
+                              title="View / Print GST Tax Invoice"
+                            >
+                              <Printer size={14} /> Bill
+                            </button>
+
+                            <button
+                              onClick={() => handleWhatsAppReorder(order)}
+                              style={{
+                                backgroundColor: '#ecfdf5',
+                                color: '#065f46',
+                                border: '1px solid #a7f3d0',
+                                padding: '8px 14px',
+                                borderRadius: '8px',
+                                fontSize: '0.82rem',
+                                fontWeight: '700',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px'
+                              }}
+                              title="Re-order these exact items via WhatsApp"
+                            >
+                              <RepeatIcon size={14} /> Re-Order
+                            </button>
+                          </div>
                         </div>
                       </div>
 

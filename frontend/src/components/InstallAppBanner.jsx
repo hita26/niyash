@@ -89,9 +89,10 @@ function InstallAppBanner() {
     localStorage.setItem('niyansh_pwa_dismissed_at', Date.now().toString());
   };
 
-  // Do not render if installed or dismissed or not installable on non-iOS
+  // Do not render if installed or dismissed or not installable on non-iOS or on Quick Order page
   if (isInstalled || isDismissed) return null;
   if (!isInstallable && !isIOS) return null;
+  if (typeof window !== 'undefined' && (window.location.pathname.startsWith('/quick-order') || window.location.pathname.startsWith('/admin'))) return null;
 
   return (
     <>
@@ -100,23 +101,23 @@ function InstallAppBanner() {
         className="pwa-install-bar"
         style={{
           position: 'fixed',
-          bottom: 'calc(68px + env(safe-area-inset-bottom, 0px))',
+          bottom: 'calc(82px + env(safe-area-inset-bottom, 0px))',
           left: '12px',
           right: '12px',
-          maxWidth: '520px',
+          maxWidth: '480px',
           margin: '0 auto',
-          zIndex: 9980,
+          zIndex: 9970,
           background: 'linear-gradient(135deg, rgba(12, 61, 108, 0.98), rgba(15, 23, 42, 0.98))',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
-          borderRadius: '16px',
+          borderRadius: '14px',
           border: '1px solid rgba(255, 255, 255, 0.15)',
           boxShadow: '0 12px 36px -4px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(59, 130, 246, 0.25)',
-          padding: '12px 14px',
+          padding: '10px 12px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: '12px',
+          gap: '10px',
           color: '#ffffff',
           animation: 'pwaSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
         }}

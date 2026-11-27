@@ -1,41 +1,81 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import {
+  WATERMARK_DATA_URI,
+  applyNiyanshWatermark,
+  hasBakedNiyanshWatermark,
+  markUrlAsWatermarked,
+} from '../utils/watermark';
 
-const STAMP_GROUP = (cx, cy) =>
-  `<g transform="translate(${cx}, ${cy}) rotate(-28)">` +
-    `<g transform="translate(-76, -15) scale(0.3)">` +
-      `<circle cx="50" cy="50" r="44" fill="#0c3d6c"/>` +
-      `<circle cx="50" cy="50" r="38" fill="#ffffff"/>` +
-      `<path d="M30 70C30 45 45 30 60 30C63.5 30 67 32 67 36C67 47 47 47 47 70C47 73.5 44 76 40 76C36 76 33 73.5 30 70Z" fill="#0c3d6c"/>` +
-      `<path d="M47 70C47 47 62 38 75 38C78.5 38 82 41.5 82 45C82 56 62 56 62 76C62 79.5 58.5 83 55 83C51.5 83 47 79.5 47 70Z" fill="#16a34a"/>` +
-      `<circle cx="50" cy="50" r="8" fill="#ffffff" stroke="#1b75bc" stroke-width="2.5"/>` +
-    `</g>` +
-    `<text x="-40" y="5" font-size="14" font-weight="800" font-family="Arial, Helvetica, sans-serif" letter-spacing="0.5" fill="#0f172a" stroke="#ffffff" stroke-width="2.5" paint-order="stroke">NIYANSH PHARMA</text>` +
-  `</g>`;
+export { hasBakedNiyanshWatermark, markUrlAsWatermarked };
 
-const WATERMARK_DATA_URI = `url("data:image/svg+xml,${encodeURIComponent(
-  `<svg xmlns="http://www.w3.org/2000/svg" width="340" height="220" viewBox="0 0 340 220">` +
-    `<g opacity="0.22">${STAMP_GROUP(85, 55)}${STAMP_GROUP(255, 165)}</g>` +
-  `</svg>`
-)}")`;
+// In-memory cache of URL -> watermarked blob URL so repeated renders across cards are instant
+const bakedBlobCache = new Map();
+const pendingBakeMap = new Map();
 
-export function hasBakedNiyanshWatermark(url) {
-  if (!url || typeof url !== 'string') return false;
-  return /(?:[?&]npwm=1|#npwm)(?:&|$)/.test(url);
-}
+function bakeImageUrlWithWatermark(src) {
+  if (!src || typeof src !== 'string') return Promise.resolve(null);
+  if (bakedBlobCache.has(src)) return Promise.resolve(bakedBlobCache.get(src));
+  if (pendingBakeMap.has(src)) return pendingBakeMap.get(src);
 
-export function markUrlAsWatermarked(url) {
-  if (!url || typeof url !== 'string') return url;
-  if (hasBakedNiyanshWatermark(url)) return url;
-  if (url.startsWith('data:')) {
-    return `${url}#npwm`;
-  }
-  return `${url}${url.includes('?') ? '&' : '?'}npwm=1`;
+  const promise = new Promise((resolve) => {
+    try {
+      const img = new Image();
+      if (/^https?:\/\//i.test(src)) {
+        img.crossOrigin = 'anonymous';
+      }
+      img.onload = () => {
+        try {
+          const w = img.naturalWidth || img.width;
+          const h = img.naturalHeight || img.height;
+          if (!w || !h) {
+            resolve(null);
+            return;
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(null);
+            return;
+          }
+          ctx.drawImage(img, 0, 0, w, h);
+          applyNiyanshWatermark(ctx, w, h);
+          canvas.toBlob(
+            (blob) => {
+              if (blob && blob.size > 0) {
+                const blobUrl = URL.createObjectURL(blob);
+                bakedBlobCache.set(src, blobUrl);
+                resolve(blobUrl);
+              } else {
+                resolve(null);
+              }
+            },
+            'image/webp',
+            0.9
+          );
+        } catch (_) {
+          resolve(null);
+        }
+      };
+      img.onerror = () => resolve(null);
+      img.src = src;
+    } catch (_) {
+      resolve(null);
+    }
+  }).finally(() => {
+    pendingBakeMap.delete(src);
+  });
+
+  pendingBakeMap.set(src, promise);
+  return promise;
 }
 
 /**
- * Displays a product image with copy-protection (disabled right-click/drag)
- * and a diagonal tiled "NIYANSH PHARMA" brand watermark for any existing or
- * external-URL image that doesn't already have the baked upload watermark.
+ * Displays a product image with copy-protection (disabled right-click/drag),
+ * bakes the "NIYANSH PHARMA" tiled watermark directly into the image pixels via
+ * Canvas when CORS/same-origin allows, and renders a crisp tiled SVG overlay
+ * as instant display & fallback for non-CORS third-party URLs.
  */
 function WatermarkedImage({
   src,
@@ -53,10 +93,33 @@ function WatermarkedImage({
   disableWatermark = false,
 }) {
   const [failedSrc, setFailedSrc] = useState(null);
-  const imgFailed = Boolean(src) && failedSrc === src;
+  const [bakedEntry, setBakedEntry] = useState(() =>
+    src && bakedBlobCache.has(src) ? { src, url: bakedBlobCache.get(src) } : null
+  );
 
-  const alreadyBaked = hasBakedNiyanshWatermark(src);
-  const showOverlay = Boolean(src) && !imgFailed && !disableWatermark && !alreadyBaked;
+  const imgFailed = Boolean(src) && failedSrc === src;
+  const alreadyBakedInUrl = hasBakedNiyanshWatermark(src);
+  const activeBakedUrl = bakedEntry && bakedEntry.src === src ? bakedEntry.url : null;
+  const effectiveSrc = activeBakedUrl || src;
+  const showOverlay =
+    Boolean(src) && !imgFailed && !disableWatermark && !alreadyBakedInUrl && !activeBakedUrl;
+
+  useEffect(() => {
+    if (!src || disableWatermark || alreadyBakedInUrl || compact) return;
+    if (bakedBlobCache.has(src)) {
+      setBakedEntry({ src, url: bakedBlobCache.get(src) });
+      return;
+    }
+    let cancelled = false;
+    bakeImageUrlWithWatermark(src).then((blobUrl) => {
+      if (!cancelled && blobUrl) {
+        setBakedEntry({ src, url: blobUrl });
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [src, disableWatermark, alreadyBakedInUrl, compact]);
 
   const handleImageError = (e) => {
     setFailedSrc(src || '__failed__');
@@ -89,7 +152,7 @@ function WatermarkedImage({
       onClick={onClick}
     >
       <img
-        src={src}
+        src={effectiveSrc}
         alt={alt}
         loading={loading}
         draggable={false}

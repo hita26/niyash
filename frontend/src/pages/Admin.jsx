@@ -19,6 +19,7 @@ import SkeletonLoader from '../components/SkeletonLoader';
 import AdminChemistApprovals from '../components/AdminChemistApprovals';
 import ErrorBoundary from '../components/ErrorBoundary';
 import WatermarkedImage, { markUrlAsWatermarked } from '../components/WatermarkedImage';
+import { applyNiyanshWatermark } from '../utils/watermark';
 
 // ==========================================
 // FALLBACK DATASETS FOR OFFLINE / ROBUST DEMO
@@ -3222,113 +3223,6 @@ _Helpline: +91 9316566894_`;
     if (file.type && file.type.startsWith('image/')) return true;
     const name = (file.name || '').toLowerCase();
     return /\.(jpe?g|jfif|png|webp|gif|bmp|svg|avif|heic|heif)$/i.test(name);
-  };
-
-  // Draw diagonal tiled "NIYANSH PHARMA" brand watermark across uploaded product photos
-  const applyNiyanshWatermark = (ctx, width, height) => {
-    const refDim = Math.max(width, height, 400);
-    const scale = Math.max(0.35, Math.min(1, refDim / 1200));
-    const iconSize = Math.round(48 * scale);
-    const fontSize = Math.round(25 * scale);
-    const gap = Math.round(10 * scale);
-    const labelText = 'NIYANSH PHARMA';
-
-    // Build reusable stamp canvas (Niyansh emblem + text)
-    const stampCanvas = document.createElement('canvas');
-    const measureCtx = stampCanvas.getContext('2d');
-    if (!measureCtx) return;
-
-    const fontSpec = `800 ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif`;
-    measureCtx.font = fontSpec;
-    const textWidth = Math.ceil(measureCtx.measureText(labelText).width);
-    const pad = Math.round(8 * scale);
-    const stampW = pad * 2 + iconSize + gap + textWidth;
-    const stampH = Math.max(iconSize, fontSize) + pad * 2;
-    stampCanvas.width = stampW;
-    stampCanvas.height = stampH;
-
-    const sCtx = stampCanvas.getContext('2d');
-    if (!sCtx) return;
-
-    sCtx.globalAlpha = 0.19;
-
-    // Draw Niyansh Pharma circular emblem on left (matching favicon.svg)
-    const iconY = (stampH - iconSize) / 2;
-    sCtx.save();
-    sCtx.translate(pad, iconY);
-    sCtx.scale(iconSize / 100, iconSize / 100);
-
-    sCtx.beginPath();
-    sCtx.arc(50, 50, 44, 0, Math.PI * 2);
-    sCtx.fillStyle = '#0c3d6c';
-    sCtx.fill();
-
-    sCtx.beginPath();
-    sCtx.arc(50, 50, 38, 0, Math.PI * 2);
-    sCtx.fillStyle = '#ffffff';
-    sCtx.fill();
-
-    sCtx.beginPath();
-    sCtx.moveTo(30, 70);
-    sCtx.bezierCurveTo(30, 45, 45, 30, 60, 30);
-    sCtx.bezierCurveTo(63.5, 30, 67, 32, 67, 36);
-    sCtx.bezierCurveTo(67, 47, 47, 47, 47, 70);
-    sCtx.bezierCurveTo(47, 73.5, 44, 76, 40, 76);
-    sCtx.bezierCurveTo(36, 76, 33, 73.5, 30, 70);
-    sCtx.closePath();
-    sCtx.fillStyle = '#0c3d6c';
-    sCtx.fill();
-
-    sCtx.beginPath();
-    sCtx.moveTo(47, 70);
-    sCtx.bezierCurveTo(47, 47, 62, 38, 75, 38);
-    sCtx.bezierCurveTo(78.5, 38, 82, 41.5, 82, 45);
-    sCtx.bezierCurveTo(82, 56, 62, 56, 62, 76);
-    sCtx.bezierCurveTo(62, 79.5, 58.5, 83, 55, 83);
-    sCtx.bezierCurveTo(51.5, 83, 47, 79.5, 47, 70);
-    sCtx.closePath();
-    sCtx.fillStyle = '#16a34a';
-    sCtx.fill();
-
-    sCtx.beginPath();
-    sCtx.arc(50, 50, 8, 0, Math.PI * 2);
-    sCtx.fillStyle = '#ffffff';
-    sCtx.fill();
-    sCtx.lineWidth = 2.5;
-    sCtx.strokeStyle = '#1b75bc';
-    sCtx.stroke();
-    sCtx.restore();
-
-    // Draw "NIYANSH PHARMA" label next to emblem
-    const textX = pad + iconSize + gap;
-    const textY = stampH / 2;
-    sCtx.font = fontSpec;
-    sCtx.textBaseline = 'middle';
-    sCtx.textAlign = 'left';
-    sCtx.lineWidth = Math.max(1.5, 2.5 * scale);
-    sCtx.strokeStyle = '#ffffff';
-    sCtx.strokeText(labelText, textX, textY);
-    sCtx.fillStyle = '#0f172a';
-    sCtx.fillText(labelText, textX, textY);
-
-    // Tile across rotated grid so corners & center are uniformly protected
-    const stepX = stampW + Math.round(90 * scale);
-    const stepY = stampH + Math.round(115 * scale);
-    const diag = Math.ceil(Math.hypot(width, height));
-
-    ctx.save();
-    ctx.translate(width / 2, height / 2);
-    ctx.rotate(-Math.PI / 6);
-
-    let rowIdx = 0;
-    for (let y = -diag * 0.75; y <= diag * 0.75; y += stepY) {
-      const rowOffset = (rowIdx % 2) * (stepX / 2);
-      for (let x = -diag * 0.75 - stepX; x <= diag * 0.75 + stepX; x += stepX) {
-        ctx.drawImage(stampCanvas, x + rowOffset - stampW / 2, y - stampH / 2);
-      }
-      rowIdx += 1;
-    }
-    ctx.restore();
   };
 
   // Compress & normalize image files client-side so large phone photos & AVIF/BMP/JFIF

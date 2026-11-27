@@ -1,5 +1,5 @@
 // Niyansh Pharma Service Worker (PWA Offline & App Shell Engine)
-const CACHE_NAME = 'niyansh-pharma-v6';
+const CACHE_NAME = 'niyansh-pharma-v7';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

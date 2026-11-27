@@ -1202,6 +1202,11 @@ function Admin() {
   const [prodImageUrl, setProdImageUrl] = useState('');
   const [prodImages, setProdImages] = useState([]);
   const [newImageUrlInput, setNewImageUrlInput] = useState('');
+  const prodImagesRef = useRef([]);
+  const prodImageUrlRef = useRef('');
+  const uploadImageFilesRef = useRef(null);
+  useEffect(() => { prodImagesRef.current = prodImages; }, [prodImages]);
+  useEffect(() => { prodImageUrlRef.current = prodImageUrl; }, [prodImageUrl]);
   const [prodDescription, setProdDescription] = useState('');
 
   // Fixed Pharma Inventory & Tax Fields
@@ -3155,10 +3160,17 @@ _Helpline: +91 9316566894_`;
         });
       }
       setProdCustomValues(customMap);
-      setProdImageUrl(product.imageUrl || '');
-      const initialImages = Array.isArray(product.images) && product.images.length > 0
-        ? product.images
-        : (product.imageUrl ? [product.imageUrl] : []);
+      const rawList = [
+        ...(product.imageUrl ? [product.imageUrl] : []),
+        ...(Array.isArray(product.images) ? product.images : [])
+      ]
+        .map((img) => (img ? String(img).trim() : ''))
+        .filter(Boolean);
+      const initialImages = [...new Set(rawList)].slice(0, 5);
+      const initialMain = initialImages[0] || '';
+      prodImageUrlRef.current = initialMain;
+      prodImagesRef.current = initialImages;
+      setProdImageUrl(initialMain);
       setProdImages(initialImages);
       setProdDescription(product.description || '');
     } else {
@@ -3190,20 +3202,234 @@ _Helpline: +91 9316566894_`;
       setIsCustomSalesGst(false);
       setProdExpiryDate('');
       setProdCustomValues({});
+      prodImageUrlRef.current = '';
+      prodImagesRef.current = [];
       setProdImageUrl('');
       setProdImages([]);
       setProdDescription('');
     }
     setNewImageUrlInput('');
+    setWebImageResults([]);
+    setPhotoDragActive(false);
+    setIsUploadingPhotos(false);
     setIsProductModalOpen(true);
   };
 
-  // Strictly validate if a file is an image (JPG, PNG, WebP, GIF, BMP, SVG, AVIF)
+  // Strictly validate if a file is an image (JPG, PNG, WebP, GIF, BMP, SVG, AVIF, JFIF, HEIC)
   const isImageFile = (file) => {
     if (!file) return false;
     if (file.type && file.type.startsWith('image/')) return true;
     const name = (file.name || '').toLowerCase();
-    return /\.(jpe?g|png|webp|gif|bmp|svg|avif)$/i.test(name);
+    return /\.(jpe?g|jfif|png|webp|gif|bmp|svg|avif|heic|heif)$/i.test(name);
+  };
+
+  // Draw diagonal tiled "NIYANSH PHARMA" brand watermark across uploaded product photos
+  const applyNiyanshWatermark = (ctx, width, height) => {
+    const refDim = Math.max(width, height, 400);
+    const scale = Math.max(0.35, Math.min(1, refDim / 1200));
+    const iconSize = Math.round(48 * scale);
+    const fontSize = Math.round(25 * scale);
+    const gap = Math.round(10 * scale);
+    const labelText = 'NIYANSH PHARMA';
+
+    // Build reusable stamp canvas (Niyansh emblem + text)
+    const stampCanvas = document.createElement('canvas');
+    const measureCtx = stampCanvas.getContext('2d');
+    if (!measureCtx) return;
+
+    const fontSpec = `800 ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif`;
+    measureCtx.font = fontSpec;
+    const textWidth = Math.ceil(measureCtx.measureText(labelText).width);
+    const pad = Math.round(8 * scale);
+    const stampW = pad * 2 + iconSize + gap + textWidth;
+    const stampH = Math.max(iconSize, fontSize) + pad * 2;
+    stampCanvas.width = stampW;
+    stampCanvas.height = stampH;
+
+    const sCtx = stampCanvas.getContext('2d');
+    if (!sCtx) return;
+
+    sCtx.globalAlpha = 0.19;
+
+    // Draw Niyansh Pharma circular emblem on left (matching favicon.svg)
+    const iconY = (stampH - iconSize) / 2;
+    sCtx.save();
+    sCtx.translate(pad, iconY);
+    sCtx.scale(iconSize / 100, iconSize / 100);
+
+    sCtx.beginPath();
+    sCtx.arc(50, 50, 44, 0, Math.PI * 2);
+    sCtx.fillStyle = '#0c3d6c';
+    sCtx.fill();
+
+    sCtx.beginPath();
+    sCtx.arc(50, 50, 38, 0, Math.PI * 2);
+    sCtx.fillStyle = '#ffffff';
+    sCtx.fill();
+
+    sCtx.beginPath();
+    sCtx.moveTo(30, 70);
+    sCtx.bezierCurveTo(30, 45, 45, 30, 60, 30);
+    sCtx.bezierCurveTo(63.5, 30, 67, 32, 67, 36);
+    sCtx.bezierCurveTo(67, 47, 47, 47, 47, 70);
+    sCtx.bezierCurveTo(47, 73.5, 44, 76, 40, 76);
+    sCtx.bezierCurveTo(36, 76, 33, 73.5, 30, 70);
+    sCtx.closePath();
+    sCtx.fillStyle = '#0c3d6c';
+    sCtx.fill();
+
+    sCtx.beginPath();
+    sCtx.moveTo(47, 70);
+    sCtx.bezierCurveTo(47, 47, 62, 38, 75, 38);
+    sCtx.bezierCurveTo(78.5, 38, 82, 41.5, 82, 45);
+    sCtx.bezierCurveTo(82, 56, 62, 56, 62, 76);
+    sCtx.bezierCurveTo(62, 79.5, 58.5, 83, 55, 83);
+    sCtx.bezierCurveTo(51.5, 83, 47, 79.5, 47, 70);
+    sCtx.closePath();
+    sCtx.fillStyle = '#16a34a';
+    sCtx.fill();
+
+    sCtx.beginPath();
+    sCtx.arc(50, 50, 8, 0, Math.PI * 2);
+    sCtx.fillStyle = '#ffffff';
+    sCtx.fill();
+    sCtx.lineWidth = 2.5;
+    sCtx.strokeStyle = '#1b75bc';
+    sCtx.stroke();
+    sCtx.restore();
+
+    // Draw "NIYANSH PHARMA" label next to emblem
+    const textX = pad + iconSize + gap;
+    const textY = stampH / 2;
+    sCtx.font = fontSpec;
+    sCtx.textBaseline = 'middle';
+    sCtx.textAlign = 'left';
+    sCtx.lineWidth = Math.max(1.5, 2.5 * scale);
+    sCtx.strokeStyle = '#ffffff';
+    sCtx.strokeText(labelText, textX, textY);
+    sCtx.fillStyle = '#0f172a';
+    sCtx.fillText(labelText, textX, textY);
+
+    // Tile across rotated grid so corners & center are uniformly protected
+    const stepX = stampW + Math.round(90 * scale);
+    const stepY = stampH + Math.round(115 * scale);
+    const diag = Math.ceil(Math.hypot(width, height));
+
+    ctx.save();
+    ctx.translate(width / 2, height / 2);
+    ctx.rotate(-Math.PI / 6);
+
+    let rowIdx = 0;
+    for (let y = -diag * 0.75; y <= diag * 0.75; y += stepY) {
+      const rowOffset = (rowIdx % 2) * (stepX / 2);
+      for (let x = -diag * 0.75 - stepX; x <= diag * 0.75 + stepX; x += stepX) {
+        ctx.drawImage(stampCanvas, x + rowOffset - stampW / 2, y - stampH / 2);
+      }
+      rowIdx += 1;
+    }
+    ctx.restore();
+  };
+
+  // Compress & normalize image files client-side so large phone photos & AVIF/BMP/JFIF
+  // stay well under serverless limits (4.5 MB) and upload cleanly in universal JPG/WebP format.
+  const compressImageForUpload = async (file, index = 0) => {
+    if (!file) return file;
+    const mime = (file.type || '').toLowerCase();
+    // Preserve animated GIFs if already reasonably sized
+    if (mime === 'image/gif' && file.size <= 3 * 1024 * 1024) {
+      return file;
+    }
+
+    const baseName = (file.name || `photo-${Date.now()}-${index + 1}`)
+      .replace(/\.[^.]+$/, '')
+      .replace(/[^a-zA-Z0-9_-]/g, '_') || `photo-${Date.now()}-${index + 1}`;
+
+    return new Promise((resolve) => {
+      const objectUrl = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const maxDim = 1200;
+          let width = img.naturalWidth || img.width || 800;
+          let height = img.naturalHeight || img.height || 800;
+          if (width > maxDim || height > maxDim) {
+            if (width >= height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, width);
+          canvas.height = Math.max(1, height);
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            URL.revokeObjectURL(objectUrl);
+            return resolve(file);
+          }
+
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          applyNiyanshWatermark(ctx, canvas.width, canvas.height);
+
+          const finishWithType = (outType, ext, quality) => {
+            canvas.toBlob(
+              (blob) => {
+                if (blob && blob.size > 0 && blob.type === outType) {
+                  URL.revokeObjectURL(objectUrl);
+                  return resolve(new File([blob], `${baseName}.${ext}`, { type: outType }));
+                }
+                if (outType !== 'image/jpeg') {
+                  return finishWithType('image/jpeg', 'jpg', 0.86);
+                }
+                URL.revokeObjectURL(objectUrl);
+                resolve(file);
+              },
+              outType,
+              quality
+            );
+          };
+
+          // Try WebP first (supports transparency & smallest size); falls back to JPEG automatically
+          finishWithType('image/webp', 'webp', 0.85);
+        } catch (_) {
+          URL.revokeObjectURL(objectUrl);
+          resolve(file);
+        }
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        resolve(file);
+      };
+      img.src = objectUrl;
+    });
+  };
+
+  // Normalize pasted/typed image URLs (supports Google imgres links, www. URLs, and Data URLs)
+  const normalizeImageUrlInput = (rawInput) => {
+    if (!rawInput || typeof rawInput !== 'string') return '';
+    let trimmed = rawInput.trim();
+    if (!trimmed) return '';
+
+    if (trimmed.includes('google.com/imgres') && trimmed.includes('imgurl=')) {
+      try {
+        const parsed = new URL(trimmed);
+        const extracted = parsed.searchParams.get('imgurl');
+        if (extracted) trimmed = extracted.trim();
+      } catch (_) {}
+    }
+
+    if (/^www\./i.test(trimmed)) {
+      trimmed = `https://${trimmed}`;
+    }
+
+    const isValid =
+      /^https?:\/\/\S+/i.test(trimmed) ||
+      trimmed.startsWith('/uploads/') ||
+      trimmed.startsWith('data:image/');
+    return isValid ? trimmed : '';
   };
 
   // Extract images from clipboardData (supports files copied from Windows Explorer, screenshots, and web images)
@@ -3278,51 +3504,80 @@ _Helpline: +91 9316566894_`;
       return;
     }
 
-    if (prodImages.length >= 5) {
+    const currentImages = prodImagesRef.current || [];
+    if (currentImages.length >= 5) {
       showToast('Maximum 5 photos allowed per product', 'warning');
       return;
     }
 
-    const availableSlots = 5 - prodImages.length;
+    const availableSlots = 5 - currentImages.length;
     const filesToUpload = validImageFiles.slice(0, availableSlots);
     if (filesToUpload.length < validImageFiles.length) {
       showToast(`Only ${availableSlots} more photo(s) can be added (Maximum 5 photos limit)`, 'warning');
     }
 
     setIsUploadingPhotos(true);
-    const formData = new FormData();
-    for (let i = 0; i < filesToUpload.length; i++) {
-      const file = filesToUpload[i];
-      let fileName = file.name || '';
-      if (!fileName || fileName === 'image.png' || fileName === 'blob' || !/\.[a-zA-Z0-9]+$/.test(fileName)) {
-        const ext = file.type ? file.type.split('/')[1] || 'png' : 'png';
-        fileName = `pasted-photo-${Date.now()}-${i + 1}.${ext === 'jpeg' ? 'jpg' : ext}`;
-      }
-      formData.append('photos', file, fileName);
-    }
-
     try {
+      const preparedFiles = await Promise.all(
+        filesToUpload.map((file, idx) => compressImageForUpload(file, idx))
+      );
+
+      const totalBytes = preparedFiles.reduce((sum, f) => sum + (f?.size || 0), 0);
+      if (totalBytes > 4.2 * 1024 * 1024) {
+        showToast('Selected image(s) exceed 4 MB even after compression. Please upload fewer or smaller images.', 'error');
+        return;
+      }
+
+      const formData = new FormData();
+      for (let i = 0; i < preparedFiles.length; i++) {
+        const file = preparedFiles[i];
+        let fileName = file.name || '';
+        if (!fileName || fileName === 'image.png' || fileName === 'blob' || !/\.[a-zA-Z0-9]+$/.test(fileName)) {
+          const ext = file.type ? file.type.split('/')[1] || 'png' : 'png';
+          fileName = `pasted-photo-${Date.now()}-${i + 1}.${ext === 'jpeg' ? 'jpg' : ext}`;
+        }
+        formData.append('photos', file, fileName);
+      }
+
       const token = adminToken || localStorage.getItem('niyansh_admin_token');
+      const headers = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const res = await fetch('/api/products/upload', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
+        headers,
         body: formData
       });
-      const data = await res.json();
-      if (res.ok && data.urls) {
-        setProdImages(prev => {
-          const combined = [...prev, ...data.urls].slice(0, 5);
-          if (!prodImageUrl && combined.length > 0) {
-            setProdImageUrl(combined[0]);
+      const rawText = await res.text();
+      let data = {};
+      try {
+        data = rawText ? JSON.parse(rawText) : {};
+      } catch (_) {
+        data = {};
+      }
+
+      if (res.ok && Array.isArray(data.urls) && data.urls.length > 0) {
+        const latestImages = prodImagesRef.current || [];
+        const combined = [...latestImages];
+        data.urls.forEach((url) => {
+          if (url && !combined.includes(url) && combined.length < 5) {
+            combined.push(url);
           }
-          return combined;
         });
+        prodImagesRef.current = combined;
+        setProdImages(combined);
+
+        if (!prodImageUrlRef.current && combined.length > 0) {
+          prodImageUrlRef.current = combined[0];
+          setProdImageUrl(combined[0]);
+        }
+
         const actionVerb = source === 'paste' ? 'Pasted & attached' : 'Uploaded';
         showToast(`${actionVerb} ${data.urls.length} photo(s) successfully!`);
       } else {
-        showToast(data.message || 'Image upload failed', 'error');
+        showToast(data.message || `Image upload failed (HTTP ${res.status})`, 'error');
       }
     } catch (err) {
       console.error('Photo upload error:', err);
@@ -3332,6 +3587,7 @@ _Helpline: +91 9316566894_`;
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
+  uploadImageFilesRef.current = uploadImageFiles;
 
   const handlePhotoUpload = async (e) => {
     const files = e.target.files || e.dataTransfer?.files;
@@ -3366,7 +3622,7 @@ _Helpline: +91 9316566894_`;
         // Intercept and upload image files
         e.preventDefault();
         e.stopPropagation();
-        uploadImageFiles(imageFiles, 'paste');
+        uploadImageFilesRef.current?.(imageFiles, 'paste');
         return;
       }
 
@@ -3390,55 +3646,69 @@ _Helpline: +91 9316566894_`;
     return () => {
       window.removeEventListener('paste', handleWindowPaste);
     };
-  }, [isProductModalOpen, prodImages.length, adminToken]);
+  }, [isProductModalOpen]);
 
   const handleSetMainPhoto = (url) => {
+    const current = prodImagesRef.current || prodImages;
+    const reordered = [url, ...current.filter(img => img !== url)];
+    prodImagesRef.current = reordered;
+    prodImageUrlRef.current = url;
+    setProdImages(reordered);
     setProdImageUrl(url);
-    setProdImages(prev => [url, ...prev.filter(img => img !== url)]);
     showToast('Designated as primary photo');
   };
 
   const handleRemovePhoto = (url) => {
-    setProdImages(prev => {
-      const updated = prev.filter(img => img !== url);
-      if (prodImageUrl === url) {
-        setProdImageUrl(updated[0] || '');
-      }
-      return updated;
-    });
+    const current = prodImagesRef.current || prodImages;
+    const updated = current.filter(img => img !== url);
+    prodImagesRef.current = updated;
+    setProdImages(updated);
+    if (prodImageUrlRef.current === url || !updated.includes(prodImageUrlRef.current)) {
+      const nextMain = updated[0] || '';
+      prodImageUrlRef.current = nextMain;
+      setProdImageUrl(nextMain);
+    }
   };
 
   const handleMovePhoto = (idx, direction) => {
-    setProdImages(prev => {
-      const targetIdx = idx + direction;
-      if (targetIdx < 0 || targetIdx >= prev.length) return prev;
-      const copy = [...prev];
-      const temp = copy[idx];
-      copy[idx] = copy[targetIdx];
-      copy[targetIdx] = temp;
-      if (idx === 0 || targetIdx === 0) {
-        setProdImageUrl(copy[0]);
-      }
-      return copy;
-    });
+    const current = prodImagesRef.current || prodImages;
+    const targetIdx = idx + direction;
+    if (targetIdx < 0 || targetIdx >= current.length) return;
+    const copy = [...current];
+    const temp = copy[idx];
+    copy[idx] = copy[targetIdx];
+    copy[targetIdx] = temp;
+    prodImagesRef.current = copy;
+    setProdImages(copy);
+    if (idx === 0 || targetIdx === 0) {
+      prodImageUrlRef.current = copy[0];
+      setProdImageUrl(copy[0]);
+    }
   };
 
   const handleAddImageUrl = () => {
     if (!newImageUrlInput || !newImageUrlInput.trim()) return;
-    if (prodImages.length >= 5) {
+    const current = prodImagesRef.current || prodImages;
+    if (current.length >= 5) {
       showToast('Maximum 5 photos allowed per product', 'warning');
       return;
     }
-    const trimmed = newImageUrlInput.trim();
-    if (prodImages.includes(trimmed)) {
+    const normalized = normalizeImageUrlInput(newImageUrlInput);
+    if (!normalized) {
+      showToast('Please enter a valid image URL starting with https:// or http://', 'warning');
+      return;
+    }
+    if (current.includes(normalized)) {
       showToast('This photo URL is already in the gallery', 'warning');
       return;
     }
-    setProdImages(prev => {
-      const combined = [...prev, trimmed].slice(0, 5);
-      return combined;
-    });
-    if (!prodImageUrl) setProdImageUrl(trimmed);
+    const combined = [...current, normalized].slice(0, 5);
+    prodImagesRef.current = combined;
+    setProdImages(combined);
+    if (!prodImageUrlRef.current) {
+      prodImageUrlRef.current = normalized;
+      setProdImageUrl(normalized);
+    }
     setNewImageUrlInput('');
     showToast('Image URL added to gallery');
   };
@@ -3503,16 +3773,24 @@ _Helpline: +91 9316566894_`;
   };
 
   const handleSelectWebImage = (imgUrl) => {
-    if (prodImages.includes(imgUrl)) {
+    const current = prodImagesRef.current || prodImages;
+    if (current.includes(imgUrl)) {
+      const reordered = [imgUrl, ...current.filter(i => i !== imgUrl)];
+      prodImagesRef.current = reordered;
+      prodImageUrlRef.current = imgUrl;
+      setProdImages(reordered);
       setProdImageUrl(imgUrl);
       showToast('Photo designated as primary!');
       return;
     }
-    if (prodImages.length >= 5) {
+    if (current.length >= 5) {
       showToast('Maximum 5 photos allowed per product', 'warning');
       return;
     }
-    setProdImages(prev => [imgUrl, ...prev].slice(0, 5));
+    const updated = [imgUrl, ...current].slice(0, 5);
+    prodImagesRef.current = updated;
+    prodImageUrlRef.current = imgUrl;
+    setProdImages(updated);
     setProdImageUrl(imgUrl);
     showToast('Photo attached to product!');
   };
@@ -3633,14 +3911,34 @@ _Helpline: +91 9316566894_`;
       }
     }
 
+    // Auto-attach any pending valid image URL typed into the URL box before confirmation
+    const pendingUrl = normalizeImageUrlInput(newImageUrlInput);
+    if (pendingUrl && prodImages.length < 5 && !prodImages.includes(pendingUrl)) {
+      const updatedImgs = [...prodImages, pendingUrl].slice(0, 5);
+      prodImagesRef.current = updatedImgs;
+      setProdImages(updatedImgs);
+      if (!prodImageUrl) {
+        prodImageUrlRef.current = pendingUrl;
+        setProdImageUrl(pendingUrl);
+      }
+      setNewImageUrlInput('');
+    }
+
     // Open verification confirmation modal before actually saving!
     setShowSaveConfirm(true);
   };
 
   const executeActualSaveProduct = async () => {
     const finalCategory = (prodCategory || '').trim() || (prodCustomCategory || '').trim() || 'Pharma Products';
-    const finalImages = prodImages.filter(img => img && img.trim() !== '').slice(0, 5);
-    const finalMainImage = prodImageUrl || (finalImages.length > 0 ? finalImages[0] : '');
+    const pendingUrl = normalizeImageUrlInput(newImageUrlInput);
+    const mergedGallery = [
+      ...prodImages.filter(img => img && img.trim() !== ''),
+      ...(pendingUrl && !prodImages.includes(pendingUrl) ? [pendingUrl] : [])
+    ];
+    const finalImages = [...new Set(mergedGallery)].slice(0, 5);
+    const finalMainImage = (prodImageUrl && finalImages.includes(prodImageUrl))
+      ? prodImageUrl
+      : (finalImages[0] || '');
 
     const stockNum = parseInt(prodStockQuantity, 10);
     const validStock = !isNaN(stockNum) ? stockNum : (prodInStock ? 100 : 0);
@@ -11966,7 +12264,7 @@ _Helpline: +91 9316566894_`;
                       onDragOver={(e) => { e.preventDefault(); setPhotoDragActive(true); }}
                       onDragLeave={() => setPhotoDragActive(false)}
                       onDrop={(e) => { e.preventDefault(); setPhotoDragActive(false); handlePhotoUpload(e); }}
-                      onClick={() => fileInputRef.current?.click()}
+                      onClick={() => !isUploadingPhotos && fileInputRef.current?.click()}
                       onPaste={handlePasteImages}
                       tabIndex={0}
                       role="button"
@@ -11991,7 +12289,7 @@ _Helpline: +91 9316566894_`;
                         ref={fileInputRef}
                         type="file" 
                         multiple 
-                        accept="image/jpeg,image/png,image/webp,image/gif"
+                        accept="image/*,.jpg,.jpeg,.jfif,.png,.webp,.gif,.avif,.bmp"
                         onChange={handlePhotoUpload}
                         style={{ display: 'none' }}
                       />
@@ -12186,10 +12484,17 @@ _Helpline: +91 9316566894_`;
                     {/* Or enter photo URL */}
                     <div style={{ display: 'flex', gap: '8px', marginBottom: '10px', width: '100%', boxSizing: 'border-box' }}>
                       <input 
-                        type="url"
+                        type="text"
+                        inputMode="url"
                         placeholder="Or enter image URL (https://...)"
                         value={newImageUrlInput}
                         onChange={(e) => setNewImageUrlInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddImageUrl();
+                          }
+                        }}
                         style={{ 
                           flex: 1, 
                           minWidth: 0, 

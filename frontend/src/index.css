@@ -5077,14 +5077,39 @@ html[lang="gu"] .nav-link, html[lang="hi"] .nav-link {
 }
 
 .hero-quick-order-btn,
-[data-theme="dark"] .hero-quick-order-btn {
-  background-color: #ffffff !important;
+[data-theme="dark"] .hero-quick-order-btn,
+[data-theme="bw"] .hero-quick-order-btn {
+  background: linear-gradient(135deg, #ffffff 0%, #e0f2fe 100%) !important;
+  background-image: linear-gradient(135deg, #ffffff 0%, #e0f2fe 100%) !important;
   color: #0c3d6c !important;
   border: 1.5px solid #ffffff !important;
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2) !important;
 }
-.hero-quick-order-btn:hover {
-  background-color: #f1f5f9 !important;
-  color: #0c3d6c !important;
+.hero-quick-order-btn:hover,
+[data-theme="dark"] .hero-quick-order-btn:hover,
+[data-theme="bw"] .hero-quick-order-btn:hover {
+  background: #ffffff !important;
+  background-image: none !important;
+  color: #071e3d !important;
+  transform: translateY(-2px);
+}
+.hero-whatsapp-btn,
+[data-theme="dark"] .hero-whatsapp-btn,
+[data-theme="bw"] .hero-whatsapp-btn {
+  background: rgba(16, 185, 129, 0.2) !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18) !important;
+}
+.hero-whatsapp-btn:hover,
+[data-theme="dark"] .hero-whatsapp-btn:hover,
+[data-theme="bw"] .hero-whatsapp-btn:hover {
+  background: #16a34a !important;
+  border-color: #22c55e !important;
+  color: #ffffff !important;
+  transform: translateY(-2px);
 }
 
 /* 2. Floating B2B Action Widget Ripple Rings */

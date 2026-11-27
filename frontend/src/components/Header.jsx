@@ -341,10 +341,16 @@ function Header({
                     padding: '4px 12px 4px 5px',
                     height: '38px',
                     borderRadius: '20px',
-                    border: `1.5px solid ${(adminUser?.role === 'superadmin' || adminUser?.email === 'info@niyanshpharma.com') ? '#fde68a' : 'var(--border-light, #e2e8f0)'}`,
-                    backgroundColor: (adminUser?.role === 'superadmin' || adminUser?.email === 'info@niyanshpharma.com') ? '#fffbeb' : 'var(--bg-surface, #ffffff)',
+                    border: `1.5px solid ${
+                      (adminUser?.role === 'superadmin' || adminUser?.email === 'info@niyanshpharma.com')
+                        ? (isDark ? 'rgba(245, 158, 11, 0.45)' : '#fde68a')
+                        : (isDark ? 'rgba(56, 189, 248, 0.35)' : 'var(--border-light, #e2e8f0)')
+                    }`,
+                    backgroundColor: (adminUser?.role === 'superadmin' || adminUser?.email === 'info@niyanshpharma.com')
+                      ? (isDark ? 'rgba(245, 158, 11, 0.14)' : '#fffbeb')
+                      : (isDark ? 'rgba(30, 41, 59, 0.9)' : 'var(--bg-surface, #ffffff)'),
                     cursor: 'pointer',
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
+                    boxShadow: isDark ? '0 2px 8px rgba(0,0,0,0.35)' : '0 1px 4px rgba(0,0,0,0.05)',
                     transition: 'all 0.2s ease'
                   }}
                   title="My Admin Account"
@@ -361,14 +367,22 @@ function Header({
                     }}
                   />
                   <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column' }}>
-                    <span style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-dark, #1e293b)', lineHeight: 1.1, maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <span style={{ fontSize: '0.82rem', fontWeight: '700', color: isDark ? '#f8fafc' : '#1e293b', lineHeight: 1.1, maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {adminUser?.name || ((adminUser?.role === 'superadmin' || adminUser?.email === 'info@niyanshpharma.com') ? 'Super Admin' : 'Admin')}
                     </span>
-                    <span style={{ fontSize: '0.62rem', fontWeight: '800', color: (adminUser?.role === 'superadmin' || adminUser?.email === 'info@niyanshpharma.com') ? '#b45309' : '#0284c7', letterSpacing: '0.3px', lineHeight: 1 }}>
+                    <span style={{
+                      fontSize: '0.62rem',
+                      fontWeight: '800',
+                      color: (adminUser?.role === 'superadmin' || adminUser?.email === 'info@niyanshpharma.com')
+                        ? (isDark ? '#fbbf24' : '#b45309')
+                        : (isDark ? '#38bdf8' : '#0284c7'),
+                      letterSpacing: '0.3px',
+                      lineHeight: 1
+                    }}>
                       {(adminUser?.role === 'superadmin' || adminUser?.email === 'info@niyanshpharma.com') ? 'SUPER ADMIN' : 'STAFF ADMIN'}
                     </span>
                   </div>
-                  <ChevronDown size={14} style={{ color: 'var(--text-medium, #64748b)', transform: isAdminProfileOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }} />
+                  <ChevronDown size={14} style={{ color: isDark ? '#cbd5e1' : 'var(--text-medium, #64748b)', transform: isAdminProfileOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }} />
                 </button>
 
                 {/* Profile Dropdown Menu */}
@@ -405,8 +419,15 @@ function Header({
                           display: 'inline-block',
                           fontSize: '0.62rem',
                           fontWeight: '800',
-                          backgroundColor: (adminUser?.role === 'superadmin' || adminUser?.email === 'info@niyanshpharma.com') ? '#fef3c7' : '#e0f2fe',
-                          color: (adminUser?.role === 'superadmin' || adminUser?.email === 'info@niyanshpharma.com') ? '#b45309' : '#0369a1',
+                          backgroundColor: (adminUser?.role === 'superadmin' || adminUser?.email === 'info@niyanshpharma.com')
+                            ? (isDark ? 'rgba(245, 158, 11, 0.18)' : '#fef3c7')
+                            : (isDark ? 'rgba(56, 189, 248, 0.16)' : '#e0f2fe'),
+                          color: (adminUser?.role === 'superadmin' || adminUser?.email === 'info@niyanshpharma.com')
+                            ? (isDark ? '#fbbf24' : '#b45309')
+                            : (isDark ? '#38bdf8' : '#0369a1'),
+                          border: isDark
+                            ? `1px solid ${(adminUser?.role === 'superadmin' || adminUser?.email === 'info@niyanshpharma.com') ? 'rgba(245, 158, 11, 0.35)' : 'rgba(56, 189, 248, 0.3)'}`
+                            : 'none',
                           padding: '1px 7px',
                           borderRadius: '8px',
                           marginTop: '3px'

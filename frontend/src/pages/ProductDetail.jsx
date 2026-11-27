@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import SkeletonLoader from '../components/SkeletonLoader';
+import WatermarkedImage from '../components/WatermarkedImage';
 import { useAuth } from '../context/AuthContext';
 import { useLiveSync, SYNC_EVENTS } from '../utils/liveSync';
 import { 
@@ -246,14 +247,10 @@ function ProductDetail({ addToCart }) {
               )}
 
               {currentPhoto ? (
-                <img 
-                  src={currentPhoto} 
-                  alt={`${product.name} packaging`} 
+                <WatermarkedImage
+                  src={currentPhoto}
+                  alt={`${product.name} packaging`}
                   loading="lazy"
-                  onError={(e) => {
-                    // Hide image completely on failure to leave section empty per instructions
-                    e.target.style.display = 'none';
-                  }}
                   style={{
                     width: '100%',
                     height: '100%',
@@ -354,11 +351,11 @@ function ProductDetail({ addToCart }) {
                     }}
                     aria-label={`View photo ${idx + 1}`}
                   >
-                    <img 
-                      src={imgUrl} 
-                      alt={`Thumbnail ${idx + 1}`} 
+                    <WatermarkedImage
+                      src={imgUrl}
+                      alt={`Thumbnail ${idx + 1}`}
                       loading="lazy"
-                      onError={(e) => { e.target.style.display = 'none'; }}
+                      compact
                       style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                     />
                   </button>

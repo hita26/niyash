@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import WatermarkedImage from './WatermarkedImage';
 
 function getFormIcon(form) {
   const f = (form || '').toLowerCase();
@@ -161,19 +162,19 @@ function ProductCard({ product, addToCart }) {
         title={`View details for ${product.name}`}
       >
         {hasValidImage && !imgError ? (
-          <img 
-            src={product.imageUrl} 
+          <WatermarkedImage
+            src={product.imageUrl}
             alt={product.name}
             loading="lazy"
             onError={() => {
               setImgError(true);
             }}
-            style={{ 
-              width: '100%', 
-              height: '100%', 
-              objectFit: 'contain', 
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
               objectPosition: 'center',
-              transition: 'transform 0.25s ease' 
+              transition: 'transform 0.25s ease'
             }}
             onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
             onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}

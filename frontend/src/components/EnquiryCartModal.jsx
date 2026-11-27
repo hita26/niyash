@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Trash2, Plus, Minus, Send, CheckCircle, ShoppingBag, AlertCircle } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import WatermarkedImage from './WatermarkedImage';
 
 function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFromCart, clearCart, user, token, onOpenAuth }) {
   const { t } = useLanguage();
@@ -198,13 +199,12 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                     }}
                   >
                     {item.product.imageUrl && item.product.imageUrl !== '/pharma-products.jpg' ? (
-                      <img 
-                        src={item.product.imageUrl} 
-                        alt={item.product.name} 
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                        }}
-                        style={{ width: '50px', height: '50px', aspectRatio: '1 / 1', objectFit: 'contain', borderRadius: '6px', backgroundColor: '#ffffff', padding: '4px', border: '1px solid var(--border-light)' }}
+                      <WatermarkedImage
+                        src={item.product.imageUrl}
+                        alt={item.product.name}
+                        compact
+                        wrapperStyle={{ width: '50px', height: '50px', flexShrink: 0, aspectRatio: '1 / 1', borderRadius: '6px', backgroundColor: '#ffffff', padding: '4px', border: '1px solid var(--border-light)' }}
+                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                       />
                     ) : null}
                     

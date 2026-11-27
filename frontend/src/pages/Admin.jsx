@@ -18,6 +18,7 @@ import { useLanguage } from '../context/LanguageContext';
 import SkeletonLoader from '../components/SkeletonLoader';
 import AdminChemistApprovals from '../components/AdminChemistApprovals';
 import ErrorBoundary from '../components/ErrorBoundary';
+import WatermarkedImage, { markUrlAsWatermarked } from '../components/WatermarkedImage';
 
 // ==========================================
 // FALLBACK DATASETS FOR OFFLINE / ROBUST DEMO
@@ -3562,8 +3563,9 @@ _Helpline: +91 9316566894_`;
         const latestImages = prodImagesRef.current || [];
         const combined = [...latestImages];
         data.urls.forEach((url) => {
-          if (url && !combined.includes(url) && combined.length < 5) {
-            combined.push(url);
+          const markedUrl = markUrlAsWatermarked(url);
+          if (markedUrl && !combined.includes(markedUrl) && combined.length < 5) {
+            combined.push(markedUrl);
           }
         });
         prodImagesRef.current = combined;
@@ -7633,11 +7635,11 @@ _Helpline: +91 9316566894_`;
                                       <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
                                         <div style={{ position: 'relative', width: '44px', height: '44px', minWidth: '44px', aspectRatio: '1 / 1', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#ffffff', padding: '2px', boxSizing: 'border-box', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                           {photoUrl ? (
-                                            <img 
-                                              src={photoUrl} 
-                                              alt={p.name} 
-                                              style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
-                                              onError={(e) => { e.target.style.display = 'none'; }}
+                                            <WatermarkedImage
+                                              src={photoUrl}
+                                              alt={p.name}
+                                              compact
+                                              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                                             />
                                           ) : (
                                             <ImageIcon size={18} color="#94a3b8" />
@@ -7859,7 +7861,7 @@ _Helpline: +91 9316566894_`;
                               <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                                 <div style={{ width: '54px', height: '54px', minWidth: '54px', aspectRatio: '1 / 1', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#ffffff', padding: '4px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                   {photoUrl ? (
-                                    <img src={photoUrl} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none'; }} />
+                                    <WatermarkedImage src={photoUrl} alt={p.name} compact style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                                   ) : (
                                     <ImageIcon size={22} color="#94a3b8" />
                                   )}
@@ -8061,11 +8063,10 @@ _Helpline: +91 9316566894_`;
                             {/* Card Media Preview Header - Standard 1:1 Square */}
                             <div style={{ position: 'relative', width: '100%', aspectRatio: '1 / 1', backgroundColor: '#ffffff', padding: '12px', boxSizing: 'border-box', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                               {photoUrl ? (
-                                <img 
-                                  src={photoUrl} 
-                                  alt={p.name} 
-                                  style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
-                                  onError={(e) => { e.target.style.display = 'none'; }}
+                                <WatermarkedImage
+                                  src={photoUrl}
+                                  alt={p.name}
+                                  style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                                 />
                               ) : (
                                 <ImageIcon size={40} color="#cbd5e1" />
@@ -12541,13 +12542,13 @@ _Helpline: +91 9316566894_`;
                                 boxShadow: isMain ? '0 0 0 2px rgba(245, 158, 11, 0.2)' : 'none'
                               }}
                             >
-                              <img 
-                                src={img} 
-                                alt={`Photo ${idx + 1}`} 
+                              <WatermarkedImage
+                                src={img}
+                                alt={`Photo ${idx + 1}`}
+                                compact
                                 onClick={() => setPreviewImage(img)}
-                                style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'zoom-in' }} 
+                                style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'zoom-in' }}
                                 title="Click to view full photo preview"
-                                onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=200&q=80'; }}
                               />
 
                               {/* Main Badge */}
@@ -15080,16 +15081,22 @@ _Helpline: +91 9316566894_`;
               alignItems: 'center'
             }}
           >
-            <img 
-              src={previewImage} 
+            <WatermarkedImage
+              src={previewImage}
               alt="Photo Preview"
-              style={{
+              wrapperStyle={{
+                width: 'auto',
+                height: 'auto',
                 maxWidth: '100%',
                 maxHeight: '78vh',
-                objectFit: 'contain',
                 borderRadius: '12px',
                 boxShadow: '0 25px 60px rgba(0, 0, 0, 0.8)',
                 border: '1px solid rgba(255, 255, 255, 0.2)'
+              }}
+              style={{
+                maxWidth: '100%',
+                maxHeight: '78vh',
+                objectFit: 'contain'
               }}
             />
             <div style={{ marginTop: '14px', display: 'flex', gap: '12px', alignItems: 'center' }}>

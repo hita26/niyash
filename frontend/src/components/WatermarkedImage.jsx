@@ -23,7 +23,7 @@ function bakeImageUrlWithWatermark(src) {
       if (/^https?:\/\//i.test(src)) {
         img.crossOrigin = 'anonymous';
       }
-      img.onload = () => {
+      img.onload = async () => {
         try {
           const w = img.naturalWidth || img.width;
           const h = img.naturalHeight || img.height;
@@ -40,7 +40,7 @@ function bakeImageUrlWithWatermark(src) {
             return;
           }
           ctx.drawImage(img, 0, 0, w, h);
-          applyNiyanshWatermark(ctx, w, h);
+          await applyNiyanshWatermark(ctx, w, h);
           canvas.toBlob(
             (blob) => {
               if (blob && blob.size > 0) {

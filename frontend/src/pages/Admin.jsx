@@ -3242,7 +3242,7 @@ _Helpline: +91 9316566894_`;
     return new Promise((resolve) => {
       const objectUrl = URL.createObjectURL(file);
       const img = new Image();
-      img.onload = () => {
+      img.onload = async () => {
         try {
           const maxDim = 1200;
           let width = img.naturalWidth || img.width || 800;
@@ -3267,7 +3267,7 @@ _Helpline: +91 9316566894_`;
           }
 
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          applyNiyanshWatermark(ctx, canvas.width, canvas.height);
+          await applyNiyanshWatermark(ctx, canvas.width, canvas.height);
 
           const finishWithType = (outType, ext, quality) => {
             canvas.toBlob(

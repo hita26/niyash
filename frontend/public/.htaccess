@@ -9,6 +9,10 @@ DirectoryIndex index.html
   RewriteEngine On
   RewriteBase /
 
+  # 0. Permanently redirect niyanshpharma.in (and www) to https://niyanshpharma.com
+  RewriteCond %{HTTP_HOST} ^(www\.)?niyanshpharma\.in$ [NC]
+  RewriteRule ^(.*)$ https://niyanshpharma.com/$1 [R=301,L]
+
   # 1. Let /api requests pass directly to GoDaddy Node.js App (Passenger)
   RewriteCond %{REQUEST_URI} ^/api/ [OR]
   RewriteCond %{REQUEST_URI} ^/api$

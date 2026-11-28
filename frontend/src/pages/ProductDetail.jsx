@@ -13,6 +13,7 @@ import {
   Clock, Info, Lock, LogIn, Syringe, Droplets, Activity
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { cleanPharmaText, getEffectiveMrp, getEffectivePtr, getMarginPercent } from '../utils/pricing';
 
 function ProductDetail({ addToCart }) {
   const { t, translateCategory, translateDosageForm, formatCurrency } = useLanguage();
@@ -91,10 +92,10 @@ function ProductDetail({ addToCart }) {
     );
   }
 
-  const unitPrice = Number(product.price) || 0;
-  const unitMrp = Number(product.mrp) || 0;
-  const hasMargin = unitMrp > unitPrice;
-  const marginPercent = hasMargin ? Math.round(((unitMrp - unitPrice) / unitMrp) * 100) : 0;
+  const unitPrice = getEffectivePtr(product);
+  const unitMrp = getEffectiveMrp(product);
+  const marginPercent = getMarginPercent(product);
+  const hasMargin = marginPercent > 0;
   const unitSavings = hasMargin ? (unitMrp - unitPrice) : 0;
   const totalOrderValue = unitPrice * (Number(quantity) || 1);
   const totalRetailValue = unitMrp * (Number(quantity) || 1);
@@ -149,7 +150,7 @@ function ProductDetail({ addToCart }) {
   const hasPhotos = gallery.length > 0;
   const currentPhoto = hasPhotos ? (gallery[activeImageIndex] || gallery[0]) : null;
 
-  const cleanVal = (val, fb = '') => (!val || ['null', 'undefined', 'none', '#n/a'].includes(String(val).toLowerCase().trim()) ? fb : String(val).trim());
+  const cleanVal = (val, fb = '') => cleanPharmaText(val, fb);
   const displayCategory = cleanVal(product.category, 'Pharma Products');
   const displayComposition = cleanVal(product.composition, '');
   const displayPacking = cleanVal(product.packing, 'Standard Pack');

@@ -6,6 +6,7 @@ import {
   Upload, Check, Paperclip, ExternalLink
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 
 const MAX_DOC_SIZE_MB = 5; // Maximum document upload size in MB
 const MAX_DOC_SIZE_BYTES = MAX_DOC_SIZE_MB * 1024 * 1024;
@@ -119,26 +120,17 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
     if (onClose) onClose();
   };
 
-  // Lock body & documentElement scroll and listen for Escape key
+  // Lock background page scroll (iOS Safari safe) and listen for Escape key
+  useBodyScrollLock(isOpen);
+
   useEffect(() => {
     if (!isOpen) return;
-    const originalBodyOverflow = document.body.style.overflow;
-    const originalHtmlOverflow = document.documentElement.style.overflow;
-    const originalBodyTouch = document.body.style.touchAction;
-
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.touchAction = 'none';
-
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') handleModalClose();
     };
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      document.body.style.overflow = originalBodyOverflow;
-      document.documentElement.style.overflow = originalHtmlOverflow;
-      document.body.style.touchAction = originalBodyTouch;
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen]);

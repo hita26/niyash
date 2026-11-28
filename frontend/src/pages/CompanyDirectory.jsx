@@ -330,13 +330,13 @@ function CompanyDirectory() {
                   </div>
 
                   {/* Card Body */}
-                  <div style={{ padding: '16px 18px', flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: '0.74rem', fontWeight: '700', color: 'var(--primary-blue)', backgroundColor: 'rgba(26, 86, 160, 0.08)', padding: '3px 8px', borderRadius: '4px', maxWidth: '65%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <div style={{ padding: '14px 16px', flex: 1, display: 'flex', flexDirection: 'column', gap: '10px', minWidth: 0 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--primary-blue)', backgroundColor: 'rgba(26, 86, 160, 0.08)', padding: '3px 8px', borderRadius: '6px', lineHeight: 1.3, whiteSpace: 'normal', wordBreak: 'break-word' }}>
                         {company.category || 'Pharmaceuticals'}
                       </span>
 
-                      <span style={{ fontSize: '0.78rem', fontWeight: '700', color: '#059669', backgroundColor: '#ecfdf5', padding: '3px 10px', borderRadius: '20px', display: 'inline-flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+                      <span style={{ fontSize: '0.76rem', fontWeight: '700', color: '#059669', backgroundColor: '#ecfdf5', padding: '3px 10px', borderRadius: '20px', display: 'inline-flex', alignItems: 'center', gap: '4px', flexShrink: 0, whiteSpace: 'nowrap' }}>
                         <Package size={12} /> {company.productCount || 0} {t('companies.productsCount', 'Products')}
                       </span>
                     </div>
@@ -356,29 +356,34 @@ function CompanyDirectory() {
                     )}
                   </div>
 
-                  {/* Card Footer Actions */}
-                  <div style={{ padding: '12px 18px', backgroundColor: '#fff', borderTop: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  {/* Card Footer Actions (Uniform Layout Regardless of Product Count) */}
+                  <div style={{ padding: '12px 16px', backgroundColor: 'var(--bg-card)', borderTop: '1px solid var(--border-light)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', minHeight: '20px' }}>
+                      <span style={{ fontSize: '0.73rem', color: 'var(--text-light)', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <CheckCircle2 size={12} color="#059669" />
+                        {t('companies.featuredBadge', 'Authorized Distributor')}
+                      </span>
+
+                      {company.websiteUrl && (
+                        <a
+                          href={company.websiteUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.76rem', color: 'var(--primary-blue)', textDecoration: 'none', fontWeight: '700', whiteSpace: 'nowrap', flexShrink: 0 }}
+                          title="Visit official website"
+                        >
+                          Site <ExternalLink size={12} />
+                        </a>
+                      )}
+                    </div>
+
                     <Link
                       to={targetUrl}
                       className="btn btn-primary btn-sm"
-                      style={{ fontSize: '0.8rem', padding: '7px 14px', textDecoration: 'none', flex: '1 1 auto', textAlign: 'center', justifyContent: 'center' }}
+                      style={{ width: '100%', fontSize: '0.82rem', padding: '8px 14px', textDecoration: 'none', textAlign: 'center', justifyContent: 'center', boxSizing: 'border-box' }}
                     >
-                      {t('companies.viewProducts', 'View Products')} ({company.productCount || 0})
+                      {t('companies.viewProducts', 'View All Products')} ({company.productCount || 0})
                     </Link>
-
-                    {company.websiteUrl ? (
-                      <a
-                        href={company.websiteUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', color: 'var(--primary-blue)', textDecoration: 'none', fontWeight: '600', padding: '6px' }}
-                        title="Visit official website"
-                      >
-                        Site <ExternalLink size={13} />
-                      </a>
-                    ) : (
-                      <span style={{ fontSize: '0.74rem', color: 'var(--text-light)' }}>{t('companies.featuredBadge', 'Verified Partner')}</span>
-                    )}
                   </div>
                 </div>
               );

@@ -7,6 +7,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import WatermarkedImage from './WatermarkedImage';
+import { cleanPharmaText, getEffectiveMrp, getEffectivePtr, getMarginPercent } from '../utils/pricing';
 
 function getFormIcon(form) {
   const f = (form || '').toLowerCase();
@@ -58,9 +59,11 @@ function ProductCard({ product, addToCart }) {
   const handleWhatsAppOrder = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const priceText = isLoggedIn 
-      ? `*PTR (Wholesale):* ₹${Number(product.price || 0).toFixed(2)} / unit`
-      : `*MRP:* ₹${Number(product.mrp || product.price || 0).toFixed(2)} / unit\n*Note:* Please share wholesale PTR quote`;
+    const effectivePtr = getEffectivePtr(product);
+    const effectiveMrp = getEffectiveMrp(product);
+    const priceText = isLoggedIn
+      ? (effectivePtr > 0 ? `*PTR (Wholesale):* ₹${effectivePtr.toFixed(2)} / unit` : `*PTR (Wholesale):* Quote on Request`)
+      : (effectiveMrp > 0 ? `*MRP:* ₹${effectiveMrp.toFixed(2)} / unit\n*Note:* Please share wholesale PTR quote` : `*Note:* Please share wholesale PTR quote`);
 
     const greeting = language === 'gu'
       ? `નમસ્તે નિયાંશ ફાર્મા, મારે આ પ્રોડક્ટ માટે પૂછપરછ / ઓર્ડર કરવો છે:`
@@ -126,10 +129,10 @@ function ProductCard({ product, addToCart }) {
     }
   };
 
-  const displayMrp = Number(product.mrp && product.mrp > 0 ? product.mrp : product.price || 0);
-  const displayPrice = Number(product.price || 0);
-  const hasMargin = displayMrp > displayPrice && displayPrice > 0;
-  const marginPercent = hasMargin ? Math.round(((displayMrp - displayPrice) / displayMrp) * 100) : 0;
+  const displayMrp = getEffectiveMrp(product);
+  const displayPrice = getEffectivePtr(product);
+  const marginPercent = getMarginPercent(product);
+  const hasMargin = marginPercent > 0;
 
   const hasValidImage = Boolean(
     product.imageUrl && 
@@ -140,19 +143,11 @@ function ProductCard({ product, addToCart }) {
     !product.imageUrl.includes('placeholder.com')
   );
 
-  // Sanitize text fields to eliminate raw 'NULL' or 'undefined'
-  const cleanPharmaStr = (val, fallback = '') => {
-    if (!val) return fallback;
-    const s = String(val).trim();
-    if (['null', 'undefined', 'none', '#n/a', 'nil'].includes(s.toLowerCase())) return fallback;
-    return s;
-  };
-
-  const validCategory = cleanPharmaStr(product.category, 'Pharma Products');
-  const cleanComposition = cleanPharmaStr(product.composition, '');
+  const validCategory = cleanPharmaText(product.category, 'Pharma Products');
+  const cleanComposition = cleanPharmaText(product.composition, '');
 
   // Avoid duplicate brand chip if brand name is identical to product title or null
-  const rawBrand = cleanPharmaStr(product.company || product.brand, '');
+  const rawBrand = cleanPharmaText(product.company || product.brand, '');
   const brandName = rawBrand;
   const showBrandTag = Boolean(brandName && brandName.toLowerCase() !== (product.name || '').trim().toLowerCase());
 
@@ -223,24 +218,24 @@ function ProductCard({ product, addToCart }) {
               backgroundColor: 'var(--bg-surface)',
               borderRadius: '8px',
               border: '1px dashed var(--border-medium)',
-              padding: '28px 8px 8px 8px',
+              padding: showBrandTag ? '34px 8px 26px 8px' : '14px 8px 26px 8px',
               boxSizing: 'border-box',
               textAlign: 'center',
               position: 'relative'
             }}
           >
-            <span style={{ position: 'absolute', top: '28px', left: '8px', fontSize: '0.78rem', fontWeight: '900', color: '#cbd5e1', fontStyle: 'italic', userSelect: 'none' }}>
+            <span style={{ position: 'absolute', bottom: '6px', left: '8px', fontSize: '0.78rem', fontWeight: '900', color: '#cbd5e1', fontStyle: 'italic', userSelect: 'none' }}>
               Rx
             </span>
             <div style={{ 
-              width: '34px', 
-              height: '34px', 
+              width: '32px', 
+              height: '32px', 
               borderRadius: '50%', 
               backgroundColor: '#e0f2fe', 
               display: 'flex', 
               alignItems: 'center', 
               justifyContent: 'center',
-              marginBottom: '6px',
+              marginBottom: '5px',
               color: 'var(--primary-blue)',
               flexShrink: 0
             }}>
@@ -260,69 +255,80 @@ function ProductCard({ product, addToCart }) {
             }}>
               {product.name}
             </span>
-            <span style={{ fontSize: '0.62rem', color: 'var(--text-light)', marginTop: '3px', fontWeight: '600', maxWidth: '94%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {product.packing || product.form || 'Pharmaceutical'}
+            <span style={{ fontSize: '0.62rem', color: 'var(--text-light)', marginTop: '3px', fontWeight: '600', maxWidth: '96%', lineHeight: 1.2, wordBreak: 'break-word' }}>
+              {cleanPharmaText(product.packing || product.form, 'Pharmaceutical')}
             </span>
           </div>
         )}
 
-        {/* Non-overlapping Top Badges Row (Left Brand + Right WHO-GMP/Scheme) */}
-        <div
-          className="product-card-badges-row"
-          style={{
-            position: 'absolute',
-            top: '6px',
-            left: '6px',
-            right: '6px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: showBrandTag ? 'space-between' : 'flex-end',
-            gap: '4px',
-            zIndex: 3,
-            pointerEvents: 'none'
-          }}
-        >
-          {showBrandTag && (
+        {/* Top Brand Badge (Full Name, Never Truncated to "DH D...") */}
+        {showBrandTag && (
+          <div
+            className="product-card-badges-row"
+            style={{
+              position: 'absolute',
+              top: '6px',
+              left: '6px',
+              right: '6px',
+              display: 'flex',
+              alignItems: 'flex-start',
+              justifyContent: 'flex-start',
+              zIndex: 3,
+              pointerEvents: 'none'
+            }}
+          >
             <span 
               className="product-card-brand-badge"
               style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                backgroundColor: 'rgba(255, 255, 255, 0.96)',
                 color: 'var(--primary-blue)', 
-                fontSize: '0.64rem', 
-                fontWeight: '700', 
-                padding: '2px 6px',
-                borderRadius: '10px', 
-                border: '1px solid rgba(12, 61, 108, 0.15)', 
+                fontSize: '0.62rem', 
+                fontWeight: '800', 
+                padding: '2px 7px',
+                borderRadius: '8px', 
+                border: '1px solid rgba(12, 61, 108, 0.16)', 
                 backdropFilter: 'blur(4px)',
                 boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
-                flex: '0 1 auto',
-                minWidth: 0,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap'
+                maxWidth: '100%',
+                lineHeight: 1.2,
+                whiteSpace: 'normal',
+                wordBreak: 'break-word'
               }}
               title={brandName}
             >
               {brandName}
             </span>
-          )}
+          </div>
+        )}
 
+        {/* Bottom-Right Quality / Scheme Badge (Separate Row So It Never Collides With Brand) */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '6px',
+            right: '6px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            zIndex: 3,
+            pointerEvents: 'none'
+          }}
+        >
           {product.scheme ? (
             <span 
               className="product-card-status-badge"
               style={{
                 backgroundColor: '#fff7ed',
                 color: '#ea580c', 
-                fontSize: '0.62rem', 
+                fontSize: '0.61rem', 
                 fontWeight: '800', 
                 padding: '2px 6px',
-                borderRadius: '10px', 
+                borderRadius: '8px', 
                 border: '1px solid #fed7aa', 
                 display: 'inline-flex', 
                 alignItems: 'center', 
                 gap: '2px',
                 boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-                flexShrink: 0,
                 whiteSpace: 'nowrap'
               }}
             >
@@ -334,13 +340,12 @@ function ProductCard({ product, addToCart }) {
               style={{
                 backgroundColor: '#fef3c7',
                 color: '#b45309', 
-                fontSize: '0.62rem', 
+                fontSize: '0.61rem', 
                 fontWeight: '700', 
                 padding: '2px 6px',
-                borderRadius: '10px', 
+                borderRadius: '8px', 
                 border: '1px solid #fde68a',
                 boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-                flexShrink: 0,
                 whiteSpace: 'nowrap'
               }}
             >
@@ -350,19 +355,18 @@ function ProductCard({ product, addToCart }) {
             <span 
               className="product-card-status-badge"
               style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                backgroundColor: 'rgba(255, 255, 255, 0.96)',
                 color: '#059669', 
-                fontSize: '0.62rem', 
+                fontSize: '0.61rem', 
                 fontWeight: '700', 
                 padding: '2px 6px',
-                borderRadius: '10px', 
+                borderRadius: '8px', 
                 border: '1px solid #a7f3d0', 
                 display: 'inline-flex', 
                 alignItems: 'center', 
                 gap: '2px',
                 backdropFilter: 'blur(4px)',
                 boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-                flexShrink: 0,
                 whiteSpace: 'nowrap'
               }}
             >
@@ -376,12 +380,12 @@ function ProductCard({ product, addToCart }) {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         
         {/* Category Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px', marginBottom: '2px', minWidth: 0 }}>
-          <span style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '2px 6px', marginBottom: '2px', minWidth: 0 }}>
+          <span style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.2px', lineHeight: 1.2, wordBreak: 'break-word' }}>
             {translateCategory(validCategory)}
           </span>
           {product.sku && (
-            <span style={{ fontSize: '0.65rem', color: '#94a3b8', fontFamily: 'monospace', whiteSpace: 'nowrap', flexShrink: 0 }}>
+            <span style={{ fontSize: '0.63rem', color: '#94a3b8', fontFamily: 'monospace', whiteSpace: 'nowrap', marginLeft: 'auto' }}>
               {product.sku}
             </span>
           )}
@@ -391,17 +395,17 @@ function ProductCard({ product, addToCart }) {
         <Link to={`/products/${product._id}`} style={{ textDecoration: 'none' }}>
           <h3 
             style={{
-              fontSize: '0.92rem', 
+              fontSize: '0.9rem', 
               fontWeight: '700', 
               color: 'var(--text-dark)', 
-              minHeight: '2.4rem', 
-              height: '2.4rem',
+              minHeight: '2.35rem', 
               overflow: 'hidden', 
               display: '-webkit-box', 
               WebkitLineClamp: 2, 
               WebkitBoxOrient: 'vertical',
               lineHeight: '1.3', 
               margin: '2px 0 4px 0',
+              wordBreak: 'break-word',
               transition: 'color 0.15s ease'
             }}
             onMouseOver={(e) => e.currentTarget.style.color = 'var(--primary-blue)'}
@@ -413,21 +417,24 @@ function ProductCard({ product, addToCart }) {
         </Link>
         
         {/* Packing & Formulation Form */}
-        <div style={{ fontSize: '0.74rem', color: 'var(--text-medium)', marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          <span>{t('products.packing', 'Packing')}: <strong style={{ color: 'var(--text-dark)' }}>{product.packing || 'Standard'}</strong></span>
-          {product.form && <span style={{ color: '#94a3b8' }}> • {translateDosageForm(product.form)}</span>}
+        <div style={{ fontSize: '0.73rem', color: 'var(--text-medium)', marginBottom: '3px', lineHeight: 1.3, wordBreak: 'break-word' }}>
+          <span>{t('products.packing', 'Packing')}: <strong style={{ color: 'var(--text-dark)' }}>{cleanPharmaText(product.packing, 'Standard')}</strong></span>
+          {cleanPharmaText(product.form) && <span style={{ color: '#94a3b8' }}> • {translateDosageForm(cleanPharmaText(product.form))}</span>}
         </div>
 
         {/* Composition Snippet */}
         <div 
           style={{ 
-            fontSize: '0.72rem', 
+            fontSize: '0.71rem', 
             color: 'var(--text-light)', 
             marginBottom: '6px', 
-            minHeight: '1.15rem', 
-            overflow: 'hidden', 
-            textOverflow: 'ellipsis', 
-            whiteSpace: 'nowrap' 
+            minHeight: '1.85rem',
+            lineHeight: 1.3,
+            overflow: 'hidden',
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            wordBreak: 'break-word'
           }} 
           title={cleanComposition} 
         >
@@ -472,12 +479,14 @@ function ProductCard({ product, addToCart }) {
                   <span style={{ fontSize: '0.66rem', color: 'var(--primary-blue)', fontWeight: '800', textTransform: 'uppercase' }}>
                     {t('products.ptr', 'PTR')}:
                   </span>
-                  <span style={{ fontSize: '1.08rem', fontWeight: '800', color: 'var(--primary-blue)' }} className="tabular-nums">
-                    {formatCurrency(displayPrice)}
+                  <span style={{ fontSize: displayPrice > 0 ? '1.05rem' : '0.84rem', fontWeight: '800', color: 'var(--primary-blue)' }} className="tabular-nums">
+                    {displayPrice > 0 ? formatCurrency(displayPrice) : 'Rate on Request'}
                   </span>
-                  <span style={{ fontSize: '0.66rem', color: 'var(--text-medium)', whiteSpace: 'nowrap' }}>
-                    /{language === 'gu' ? 'નંગ' : language === 'hi' ? 'यूनिट' : 'unit'}
-                  </span>
+                  {displayPrice > 0 && (
+                    <span style={{ fontSize: '0.66rem', color: 'var(--text-medium)', whiteSpace: 'nowrap' }}>
+                      /{language === 'gu' ? 'નંગ' : language === 'hi' ? 'यूनिट' : 'unit'}
+                    </span>
+                  )}
                 </div>
 
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '0.68rem', fontWeight: '700', whiteSpace: 'nowrap', flexShrink: 0 }}>

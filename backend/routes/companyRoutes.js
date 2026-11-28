@@ -7,6 +7,7 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const { protect, adminOnly, superAdminOnly, checkPermission } = require('../middleware/authMiddleware');
 const { logAuditEvent } = require('../utils/auditLogger');
+const { sanitizeProduct } = require('../utils/productSanitizer');
 
 // Helper to escape special regex characters to prevent crashes and ReDoS
 const escapeRegex = (str) => {
@@ -169,7 +170,7 @@ router.get('/:id', async (req, res) => {
         ...company,
         productCount: products.length,
       },
-      products,
+      products: products.map((p) => sanitizeProduct(p)),
     });
   } catch (err) {
     console.error('Error fetching company details:', err);

@@ -4,6 +4,8 @@ import { X, Trash2, Plus, Minus, Send, CheckCircle, ShoppingBag, AlertCircle, Pr
 import { useLanguage } from '../context/LanguageContext';
 import WatermarkedImage from './WatermarkedImage';
 import { openWholesaleInvoiceWindow } from '../utils/invoiceTemplate';
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
+import { cleanPharmaText, getEffectiveMrp, getEffectivePtr } from '../utils/pricing';
 
 function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFromCart, clearCart, user, token, onOpenAuth }) {
   const { t } = useLanguage();
@@ -17,19 +19,16 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Lock body scroll and listen for Escape key
+  // Lock background page scroll (including iOS Safari) and listen for Escape key
+  useBodyScrollLock(isOpen);
+
   useEffect(() => {
     if (!isOpen) return;
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', handleKeyDown);
-
     return () => {
-      document.body.style.overflow = originalOverflow;
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen, onClose]);
@@ -124,8 +123,9 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
     const lineItems = cartItems.map((item) => {
       const p = item.product || {};
       const qty = Math.max(1, Number(item.quantity) || 1);
-      const unitPrice = Number(user ? p.price : (p.mrp || p.price)) || 0;
-      const mrp = Number(p.mrp || p.price) || 0;
+      const effectivePtr = getEffectivePtr(p);
+      const mrp = getEffectiveMrp(p);
+      const unitPrice = user ? effectivePtr : mrp;
       const gstRate = p.gstRate !== undefined ? Number(p.gstRate) : 12;
       const lineSub = Math.round(unitPrice * qty * 100) / 100;
       const lineGst = Math.round(((lineSub * gstRate) / 100) * 100) / 100;
@@ -137,10 +137,10 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
       return {
         product: p._id,
         productName: p.name,
-        company: p.company || p.brand || 'Niyansh Pharma',
-        form: p.form || 'Tablet',
-        composition: p.composition || '',
-        packing: p.packing || 'Standard Pack',
+        company: cleanPharmaText(p.company || p.brand, 'Niyansh Pharma'),
+        form: cleanPharmaText(p.form, 'Tablet'),
+        composition: cleanPharmaText(p.composition, ''),
+        packing: cleanPharmaText(p.packing, 'Standard Pack'),
         unitsPerBox: 1,
         boxes: qty,
         totalUnits: qty,
@@ -150,7 +150,7 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
         lineSubtotal: lineSub,
         lineGst,
         lineTotal: Math.round((lineSub + lineGst) * 100) / 100,
-        scheme: p.scheme || ''
+        scheme: cleanPharmaText(p.scheme, '')
       };
     });
 
@@ -313,12 +313,12 @@ function EnquiryCartModal({ isOpen, onClose, cartItems, updateQuantity, removeFr
                           {item.product.name}
                         </h4>
                         <p style={{ fontSize: '0.75rem', color: 'var(--text-light)', margin: '2px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {item.product.company || item.product.brand} • {item.product.packing || 'Standard'}
+                          {cleanPharmaText(item.product.company || item.product.brand, 'Niyansh Pharma')} • {cleanPharmaText(item.product.packing, 'Standard')}
                         </p>
                         <p style={{ fontSize: '0.8rem', color: 'var(--primary-blue)', fontWeight: '700', margin: 0 }}>
                           {user 
-                            ? `PTR: ₹${(Number(item.product?.price) || 0).toFixed(2)} × ${item.quantity} = ₹${((Number(item.product?.price) || 0) * item.quantity).toFixed(2)}` 
-                            : `MRP: ₹${(Number(item.product?.mrp || item.product?.price) || 0).toFixed(2)} × ${item.quantity}`}
+                            ? `PTR: ₹${getEffectivePtr(item.product).toFixed(2)} × ${item.quantity} = ₹${(getEffectivePtr(item.product) * item.quantity).toFixed(2)}` 
+                            : `MRP: ₹${getEffectiveMrp(item.product).toFixed(2)} × ${item.quantity}`}
                         </p>
                       </div>
 

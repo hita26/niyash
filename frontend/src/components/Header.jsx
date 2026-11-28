@@ -10,6 +10,7 @@ import {
 import ThemeToggle from './ThemeToggle';
 import { useLanguage, LanguageSelector } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
+import { cleanPharmaText, getEffectiveMrp, getEffectivePtr } from '../utils/pricing';
 
 function Header({ 
   cartCount, 
@@ -612,7 +613,7 @@ function Header({
                   type="text"
                   className="no-uppercase header-search-input"
                   data-no-uppercase="true"
-                  placeholder={t('nav.searchB2BPlaceholder', 'Search medicines, compositions...')}
+                  placeholder="Search medicines, compositions..."
                   value={searchTerm}
                   onChange={(e) => {
                     setSearchTerm(e.target.value);
@@ -753,16 +754,16 @@ function Header({
                               )}
                             </div>
                             <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {prod.composition || prod.company || prod.form || 'Pharma formulation'} • {prod.packing || 'Strip/Box'}
+                              {cleanPharmaText(prod.composition) || cleanPharmaText(prod.company) || cleanPharmaText(prod.form, 'Pharma formulation')} • {cleanPharmaText(prod.packing, 'Strip/Box')}
                             </div>
                           </div>
 
                           <div style={{ textAlign: 'right', flexShrink: 0 }}>
                             <div style={{ fontSize: '0.86rem', fontWeight: '800', color: 'var(--primary-blue, #0c3d6c)' }}>
-                              ₹{Number(prod.ptr || prod.price || 0).toFixed(2)}
+                              ₹{getEffectivePtr(prod).toFixed(2)}
                             </div>
                             <div style={{ fontSize: '0.7rem', color: '#94a3b8', textDecoration: 'line-through' }}>
-                              MRP ₹{Number(prod.mrp || (prod.ptr ? prod.ptr * 1.3 : prod.price * 1.3) || 0).toFixed(2)}
+                              MRP ₹{getEffectiveMrp(prod).toFixed(2)}
                             </div>
                           </div>
                         </div>
@@ -1188,7 +1189,7 @@ function Header({
                 type="text"
                 className="no-uppercase header-search-input"
                 data-no-uppercase="true"
-                placeholder={t('nav.searchPlaceholder', 'Search medicines, companies, compositions...')}
+                placeholder="Search medicines, compositions..."
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
@@ -1295,16 +1296,16 @@ function Header({
                               )}
                             </div>
                             <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {prod.composition || prod.company || prod.form || 'Pharma formulation'} • {prod.packing || 'Strip/Box'}
+                              {cleanPharmaText(prod.composition) || cleanPharmaText(prod.company) || cleanPharmaText(prod.form, 'Pharma formulation')} • {cleanPharmaText(prod.packing, 'Strip/Box')}
                             </div>
                           </div>
 
                           <div style={{ textAlign: 'right', flexShrink: 0 }}>
                             <div style={{ fontSize: '0.86rem', fontWeight: '800', color: 'var(--primary-blue, #0c3d6c)' }}>
-                              ₹{Number(prod.ptr || prod.price || 0).toFixed(2)}
+                              ₹{getEffectivePtr(prod).toFixed(2)}
                             </div>
                             <div style={{ fontSize: '0.7rem', color: '#94a3b8', textDecoration: 'line-through' }}>
-                              MRP ₹{Number(prod.mrp || (prod.ptr ? prod.ptr * 1.3 : prod.price * 1.3) || 0).toFixed(2)}
+                              MRP ₹{getEffectiveMrp(prod).toFixed(2)}
                             </div>
                           </div>
                         </div>

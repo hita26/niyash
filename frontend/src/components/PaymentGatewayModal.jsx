@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 
 const TOP_BANKS = [
   { id: 'HDFC', name: 'HDFC Bank', code: 'HDFC0000001', color: '#004c8f', logo: '🏛️' },
@@ -169,12 +170,11 @@ export default function PaymentGatewayModal({
     };
   }, [gatewayStage, otpCountdown]);
 
-  // Lock body scroll and listen for Escape key
+  // Lock background page scroll (iOS Safari safe) and listen for Escape key
+  useBodyScrollLock(isOpen);
+
   useEffect(() => {
     if (!isOpen) return;
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && gatewayStage !== 'processing') {
         onClose();
@@ -183,7 +183,6 @@ export default function PaymentGatewayModal({
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      document.body.style.overflow = originalOverflow;
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen, gatewayStage, onClose]);

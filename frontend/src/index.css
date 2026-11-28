@@ -2062,6 +2062,8 @@ input[type="submit"]:disabled {
   align-items: flex-end;
   justify-content: center;
   animation: fadeIn 0.2s ease;
+  overscroll-behavior: contain;
+  touch-action: none;
 }
 
 .quickorder-bottom-sheet-panel {
@@ -2069,12 +2071,15 @@ input[type="submit"]:disabled {
   width: 100%;
   max-width: 640px;
   max-height: 85vh;
+  max-height: 85dvh;
   border-radius: 18px 18px 0 0;
   display: flex;
   flex-direction: column;
   box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.2);
   animation: slideUpSheet 0.28s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 
 @keyframes slideUpSheet {
@@ -6284,13 +6289,23 @@ a:active,
 }
 
 .wholesale-protect-info {
-  flex: 1 1 200px;
+  flex: 1 1 auto;
   min-width: 0;
 }
 
 .quickorder-matrix-layout > * {
   min-width: 0 !important;
   max-width: 100% !important;
+}
+
+/* Keep AI floating button clear of QuickOrder mobile sticky checkout bar */
+@media (max-width: 992px) {
+  body:has(.quickorder-mobile-sticky-bar) .ai-smart-trigger-btn {
+    bottom: calc(82px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  body.standalone-pwa:has(.quickorder-mobile-sticky-bar) .ai-smart-trigger-btn {
+    bottom: calc(140px + env(safe-area-inset-bottom, 0px)) !important;
+  }
 }
 
 @media (max-width: 768px) {
@@ -6376,11 +6391,22 @@ a:active,
     width: 100% !important;
     padding: 4px !important;
     gap: 4px !important;
+    box-sizing: border-box !important;
   }
 
   .retailer-tabs-bar button {
     padding: 7px 10px !important;
-    font-size: 0.76rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  .retailer-order-filter-bar {
+    padding: 10px !important;
+    gap: 8px !important;
+  }
+
+  .retailer-order-search-box {
+    flex: 1 1 100% !important;
+    max-width: 100% !important;
   }
 
   .smart-cart-toast {
@@ -6394,6 +6420,10 @@ a:active,
   body.standalone-pwa .smart-cart-toast {
     bottom: calc(74px + env(safe-area-inset-bottom, 0px)) !important;
   }
+
+  body:has(.quickorder-mobile-sticky-bar) .smart-cart-toast {
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+  }
 }
 
 @media (max-width: 480px) {
@@ -6405,6 +6435,7 @@ a:active,
     padding: 6px 12px !important;
     font-size: 0.76rem !important;
     min-height: 34px !important;
+    align-self: flex-start !important;
   }
 }
 

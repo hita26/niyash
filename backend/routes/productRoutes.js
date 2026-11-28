@@ -13,6 +13,7 @@ const jwt = require('jsonwebtoken');
 const cloudinary = require('../config/cloudinary');
 const { protect, adminOnly, superAdminOnly, checkPermission } = require('../middleware/authMiddleware');
 const { logAuditEvent } = require('../utils/auditLogger');
+const { sanitizeProduct, cleanStringField } = require('../utils/productSanitizer');
 
 // Upload directory setup (used for local fallback & cleanup of legacy /uploads files)
 const uploadDir = process.env.VERCEL ? path.join('/tmp', 'uploads') : path.join(__dirname, '../uploads');
@@ -355,14 +356,7 @@ router.get('/admin/all', protect, adminOnly, async (req, res) => {
       ]);
 
     // Sanitize products so UI never receives dirty 'NULL' or 'undefined' values
-    const cleanedProducts = products.map(p => ({
-      ...p,
-      category: (!p.category || ['null', 'undefined', 'none', '#n/a', 'nil', ''].includes(String(p.category).trim().toLowerCase())) ? 'Pharma Products' : p.category,
-      company: (!p.company || ['null', 'undefined', 'none', '#n/a', 'nil', ''].includes(String(p.company).trim().toLowerCase())) ? (p.brand || 'Daxia Healthcare') : p.company,
-      composition: (!p.composition || ['null', 'undefined', 'none', '#n/a', 'nil', ''].includes(String(p.composition).trim().toLowerCase())) ? '' : p.composition,
-      form: (!p.form || ['null', 'undefined', 'none', '#n/a', 'nil', ''].includes(String(p.form).trim().toLowerCase())) ? 'Tablet' : p.form,
-      packing: (!p.packing || ['null', 'undefined', 'none', '#n/a', 'nil', ''].includes(String(p.packing).trim().toLowerCase())) ? '10 x 10 Tablets' : p.packing
-    }));
+    const cleanedProducts = products.map((p) => sanitizeProduct(p, { preserveRawPrice: true }));
 
     // Auto-repair any legacy dirty 'NULL' category records in MongoDB collection asynchronously
     Product.updateMany(
@@ -603,13 +597,7 @@ router.get('/', async (req, res) => {
       Product.countDocuments({ ...query, featured: true })
     ]);
 
-    const products = rawProducts.map(p => ({
-      ...p,
-      category: (!p.category || ['null', 'undefined', 'none', '#n/a', 'nil', ''].includes(String(p.category).trim().toLowerCase())) ? 'Pharma Products' : p.category,
-      company: (!p.company || ['null', 'undefined', 'none', '#n/a', 'nil', ''].includes(String(p.company).trim().toLowerCase())) ? (p.brand || 'Daxia Healthcare') : p.company,
-      form: (!p.form || ['null', 'undefined', 'none', '#n/a', 'nil', ''].includes(String(p.form).trim().toLowerCase())) ? 'Tablet' : p.form,
-      packing: (!p.packing || ['null', 'undefined', 'none', '#n/a', 'nil', ''].includes(String(p.packing).trim().toLowerCase())) ? '10 x 10 Tablets' : p.packing,
-    }));
+    const products = rawProducts.map((p) => sanitizeProduct(p));
 
     res.json({
       success: true,
@@ -890,7 +878,7 @@ router.get('/:id', async (req, res) => {
     let product = null;
 
     if (mongoose.Types.ObjectId.isValid(rawId)) {
-      product = await Product.findById(rawId);
+      product = await Product.findById(rawId).lean();
     }
 
     // Fallback: look up by SKU or exact name
@@ -900,7 +888,7 @@ router.get('/:id', async (req, res) => {
           { sku: rawId },
           { name: new RegExp(`^${escapeRegex(rawId)}$`, 'i') }
         ]
-      });
+      }).lean();
     }
 
     if (!product) {
@@ -908,13 +896,17 @@ router.get('/:id', async (req, res) => {
     }
 
     // Get related products (same category, excluding current product)
-    const related = await Product.find({
+    const relatedRaw = await Product.find({
       category: product.category,
       _id: { $ne: product._id },
       isActive: { $ne: false },
-    }).limit(4);
+    }).limit(4).lean();
 
-    res.json({ success: true, product, related });
+    res.json({
+      success: true,
+      product: sanitizeProduct(product),
+      related: relatedRaw.map((r) => sanitizeProduct(r)),
+    });
   } catch (error) {
     console.error('Get product by ID error:', error);
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
@@ -1365,6 +1357,12 @@ router.post('/bulk', protect, adminOnly, checkPermission('canBulkImport'), async
       const salesGstVal = !isNaN(parseFloat(p.salesGst)) ? parseFloat(p.salesGst) : (!isNaN(parseFloat(p.gstRate)) ? parseFloat(p.gstRate) : 12);
       const purchaseGstVal = !isNaN(parseFloat(p.purchaseGst)) ? parseFloat(p.purchaseGst) : 12;
 
+      const parsedPrice = parseFloat(p.price) || 0;
+      const parsedMrp = parseFloat(p.mrp) || parsedPrice || 0;
+      const resolvedPtr = parsedPrice > 0
+        ? Math.round(parsedPrice * 100) / 100
+        : (parsedMrp > 0 ? Math.round(parsedMrp * 0.70 * 100) / 100 : 0);
+
       const productData = {
         name: cleanField(p._trimmedName, 'Generic Formulation'),
         brand: cleanField(p.brand, cleanField(p._trimmedName, 'Generic Formulation')),
@@ -1372,8 +1370,8 @@ router.post('/bulk', protect, adminOnly, checkPermission('canBulkImport'), async
         category: assignedCategory,
         subCategory: cleanField(p.subCategory, ''),
         sku: cleanField(p._sku, `NP-${Date.now().toString().slice(-6)}`),
-        price: parseFloat(p.price) || 0,
-        mrp: parseFloat(p.mrp) || parseFloat(p.price) || 0,
+        price: resolvedPtr,
+        mrp: parsedMrp,
         stockQuantity: parseInt(p.stockQuantity, 10) || 100,
         inStock: p.inStock !== undefined ? Boolean(p.inStock) : true,
         packing: cleanField(p.packing, '10 x 10 Tablets'),

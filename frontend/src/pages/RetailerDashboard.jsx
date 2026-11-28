@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { cleanPharmaText, getEffectiveMrp, getEffectivePtr, getMarginPercent } from '../utils/pricing';
 import { useLiveSync, SYNC_EVENTS } from '../utils/liveSync';
 import {
   Building2,
@@ -1227,7 +1228,7 @@ export default function RetailerDashboard() {
                 </p>
               </div>
 
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 <button
                   onClick={() => handleOpenPayment(outstandingBal)}
                   disabled={outstandingBal <= 0}
@@ -1399,17 +1400,17 @@ export default function RetailerDashboard() {
                 gap: '16px'
               }}>
                 {schemes.map((p) => {
-                const ptr = Number(p.price) || 0;
-                const mrp = Number(p.mrp) || ptr * 1.35;
-                const marginPct = mrp > ptr ? Math.round(((mrp - ptr) / mrp) * 100) : 25;
+                const ptr = getEffectivePtr(p);
+                const mrp = getEffectiveMrp(p);
+                const marginPct = getMarginPercent(p);
 
                 return (
                   <div
                     key={p._id}
                     style={{
-                      backgroundColor: '#ffffff',
+                      backgroundColor: 'var(--bg-card)',
                       borderRadius: '12px',
-                      border: '1px solid #e2e8f0',
+                      border: '1px solid var(--border-light)',
                       padding: '16px',
                       display: 'flex',
                       flexDirection: 'column',
@@ -1418,20 +1419,22 @@ export default function RetailerDashboard() {
                     }}
                   >
                     <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', gap: '6px', flexWrap: 'wrap' }}>
                         <span style={{ fontSize: '0.72rem', color: 'var(--primary-blue)', fontWeight: '800', textTransform: 'uppercase' }}>
-                          {p.company || 'DAXIA'}
+                          {cleanPharmaText(p.company || p.brand, 'DAXIA')}
                         </span>
-                        <span style={{ backgroundColor: '#ecfdf5', color: '#047857', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: '800' }}>
-                          {marginPct}% MARGIN
-                        </span>
+                        {marginPct > 0 && (
+                          <span style={{ backgroundColor: '#ecfdf5', color: '#047857', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: '800' }}>
+                            {marginPct}% MARGIN
+                          </span>
+                        )}
                       </div>
 
                       <h4 style={{ fontSize: '0.94rem', fontWeight: '800', color: 'var(--text-dark)', margin: '0 0 4px 0', lineHeight: '1.3' }}>
                         {p.name}
                       </h4>
                       <div style={{ fontSize: '0.76rem', color: 'var(--text-medium)', marginBottom: '8px' }}>
-                        {p.composition || p.form || 'Pharmaceutical formulation'}
+                        {cleanPharmaText(p.composition) || cleanPharmaText(p.form, 'Pharmaceutical formulation')}
                       </div>
 
                       {p.scheme && (

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import SkeletonLoader from '../components/SkeletonLoader';
 import WatermarkedImage from '../components/WatermarkedImage';
+import ProductCard from '../components/ProductCard';
 import { 
   Building2, MapPin, Globe, ExternalLink, ShieldCheck, 
   Search, Package, ArrowLeft, Filter, CheckCircle2,
@@ -10,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { cleanPharmaText, getEffectiveMrp, getEffectivePtr } from '../utils/pricing';
 
 function CompanyDetail({ addToCart }) {
   const { id } = useParams();
@@ -231,18 +233,20 @@ function CompanyDetail({ addToCart }) {
         </div>
 
         {/* Company Catalog Toolbar */}
-        <div className="card" style={{ padding: '20px', marginBottom: '25px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
+        <div className="card" style={{ padding: 'clamp(12px, 3vw, 20px)', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
             
             {/* Search within company */}
-            <div style={{ position: 'relative', flex: '1 1 280px', maxWidth: '450px' }}>
-              <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
+            <div style={{ position: 'relative', flex: '1 1 220px', minWidth: 0, width: '100%', maxWidth: '450px' }}>
+              <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)', pointerEvents: 'none' }} />
               <input 
                 type="text" 
+                className="no-uppercase"
+                data-no-uppercase="true"
                 placeholder={t('products.searchFilter', `Search ${company.name} products by name, composition...`)}
                 value={productSearch}
                 onChange={(e) => setProductSearch(e.target.value)}
-                style={{ width: '100%', padding: '9px 14px 9px 38px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}
+                style={{ width: '100%', boxSizing: 'border-box', padding: '9px 14px 9px 38px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem', textTransform: 'none' }}
               />
             </div>
 
@@ -325,137 +329,11 @@ function CompanyDetail({ addToCart }) {
             </p>
           </div>
         ) : viewMode === 'grid' ? (
-          /* GRID VIEW */
+          /* GRID VIEW (Reuses responsive ProductCard with full mobile/desktop polish) */
           <div className="responsive-product-grid">
-            {filteredProducts.map((p) => {
-              const photoUrl = (p.images && p.images.length > 0) ? p.images[0] : (p.imageUrl || '');
-              const isAdded = addedItemIds.has(p._id);
-
-              return (
-                <div key={p._id} className="card" style={{ padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                  
-                  {/* Photo Box */}
-                  <Link to={`/products/${p._id}`} style={{ position: 'relative', width: '100%', aspectRatio: '1 / 1', backgroundColor: '#ffffff', padding: '12px', boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', textDecoration: 'none' }}>
-                    {photoUrl ? (
-                      <WatermarkedImage
-                        src={photoUrl}
-                        alt={p.name}
-                        loading="lazy"
-                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                      />
-                    ) : (
-                      <div style={{ width: '100%', height: '100%' }} aria-label="No photograph available" />
-                    )}
-
-                    {p.images && p.images.length > 1 && (
-                      <span style={{ position: 'absolute', top: '8px', right: '8px', backgroundColor: 'rgba(0,0,0,0.7)', color: '#fff', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '12px', fontWeight: '700' }}>
-                        📸 {p.images.length}
-                      </span>
-                    )}
-
-                    <span style={{
-                      position: 'absolute', bottom: '8px', left: '8px',
-                      backgroundColor: p.inStock ? '#10b981' : '#ef4444',
-                      color: '#fff', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', fontWeight: '700'
-                    }}>
-                      {p.inStock ? `● ${t('products.inStock', 'In Stock')}` : `✕ ${t('products.outOfStock', 'Out of Stock')}`}
-                    </span>
-                  </Link>
-
-                  {/* Body */}
-                  <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '6px' }}>
-                      <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-medium)', backgroundColor: '#f1f5f9', padding: '2px 6px', borderRadius: '4px' }}>
-                        {translateDosageForm(p.form || 'Tablet')}
-                      </span>
-                      {p.packing && (
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>
-                          {p.packing}
-                        </span>
-                      )}
-                    </div>
-
-                    <Link to={`/products/${p._id}`} style={{ textDecoration: 'none', color: 'var(--text-dark)' }}>
-                      <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: '700', lineHeight: 1.3 }}>
-                        {p.name}
-                      </h4>
-                    </Link>
-
-                    {p.composition && (
-                      <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-medium)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {p.composition}
-                      </p>
-                    )}
-
-                    <div style={{ marginTop: 'auto', paddingTop: '10px', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div>
-                        {isLoggedIn ? (
-                          <>
-                            {p.mrp && p.mrp > p.price && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px', flexWrap: 'wrap' }}>
-                                <span style={{ fontSize: '0.72rem', color: 'var(--text-light)', textDecoration: 'line-through' }} className="tabular-nums">
-                                  {t('products.mrp', 'MRP')}: {formatCurrency(p.mrp)}
-                                </span>
-                                <span style={{ fontSize: '0.68rem', backgroundColor: '#ecfdf5', color: '#059669', fontWeight: '800', padding: '1px 5px', borderRadius: '4px' }}>
-                                  {Math.round(((p.mrp - p.price) / p.mrp) * 100)}% {language === 'gu' ? 'માર્જિન' : language === 'hi' ? 'मार्जिन' : 'MARGIN'}
-                                </span>
-                              </div>
-                            )}
-                            <span style={{ fontSize: '0.68rem', color: 'var(--primary-blue)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'block' }}>
-                              {t('products.ptr', 'PTR Rate')}:
-                            </span>
-                            <div style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--primary-blue)' }} className="tabular-nums">
-                              {formatCurrency(p.price)}
-                            </div>
-                          </>
-                        ) : (
-                          <div>
-                            <span style={{ fontSize: '0.68rem', color: 'var(--text-light)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'block' }}>
-                              {t('products.mrp', 'MRP')}:
-                            </span>
-                            <div style={{ fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-dark)' }} className="tabular-nums">
-                              {formatCurrency(p.mrp || p.price)}
-                            </div>
-                            <button
-                              type="button"
-                              onClick={openAuth}
-                              style={{
-                                marginTop: '3px',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '3px',
-                                fontSize: '0.7rem',
-                                fontWeight: '700',
-                                color: 'var(--primary-blue)',
-                                background: 'rgba(37, 99, 235, 0.08)',
-                                border: '1px solid rgba(37, 99, 235, 0.25)',
-                                borderRadius: '4px',
-                                padding: '2px 6px',
-                                cursor: 'pointer'
-                              }}
-                              title="Sign in to view wholesale PTR rate"
-                            >
-                              <Lock size={10} /> {t('products.loginForPtr', 'Login for PTR Rate')}
-                            </button>
-                          </div>
-                        )}
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => handleAdd(p)}
-                        className={`btn ${isAdded ? 'btn-secondary' : 'btn-primary'} btn-sm`}
-                        style={{ padding: '6px 12px', fontSize: '0.8rem', gap: '4px' }}
-                      >
-                        {isAdded ? <Check size={14} /> : <Plus size={14} />}
-                        {isAdded ? t('products.addedToCart', 'Added') : t('products.addToCart', 'Add to Cart')}
-                      </button>
-                    </div>
-                  </div>
-
-                </div>
-              );
-            })}
+            {filteredProducts.map((p) => (
+              <ProductCard key={p._id} product={p} addToCart={addToCart} />
+            ))}
           </div>
         ) : (
           /* TABLE VIEW */
@@ -492,25 +370,25 @@ function CompanyDetail({ addToCart }) {
                           <Link to={`/products/${p._id}`} style={{ textDecoration: 'none', color: 'var(--text-dark)', fontWeight: '700' }}>
                             {p.name}
                           </Link>
-                          {p.composition && (
+                          {cleanPharmaText(p.composition) && (
                             <div style={{ fontSize: '0.75rem', color: 'var(--text-medium)', marginTop: '2px' }}>
-                              {p.composition}
+                              {cleanPharmaText(p.composition)}
                             </div>
                           )}
                         </td>
 
                         <td style={{ padding: '10px 16px', verticalAlign: 'middle' }}>
                           <span style={{ fontSize: '0.8rem', backgroundColor: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', fontWeight: '600' }}>
-                            {translateDosageForm(p.form || 'Tablet')}
+                            {translateDosageForm(cleanPharmaText(p.form, 'Tablet'))}
                           </span>
                           <span style={{ fontSize: '0.8rem', color: 'var(--text-medium)', marginLeft: '6px' }}>
-                            {p.packing || '—'}
+                            {cleanPharmaText(p.packing, '—')}
                           </span>
                         </td>
 
                         <td style={{ padding: '10px 16px', verticalAlign: 'middle', fontWeight: '700', color: 'var(--primary-blue)' }}>
                           {isLoggedIn ? (
-                            formatCurrency(p.price)
+                            getEffectivePtr(p) > 0 ? formatCurrency(getEffectivePtr(p)) : 'Rate on Request'
                           ) : (
                             <button
                               type="button"
@@ -536,7 +414,7 @@ function CompanyDetail({ addToCart }) {
                         </td>
 
                         <td style={{ padding: '10px 16px', verticalAlign: 'middle', color: 'var(--text-dark)', fontWeight: '600', fontSize: '0.85rem' }} className="tabular-nums">
-                          {formatCurrency(p.mrp || p.price)}
+                          {getEffectiveMrp(p) > 0 ? formatCurrency(getEffectiveMrp(p)) : '—'}
                         </td>
 
                         <td style={{ padding: '10px 16px', verticalAlign: 'middle' }}>

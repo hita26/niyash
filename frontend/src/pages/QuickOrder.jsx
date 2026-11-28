@@ -5,6 +5,8 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useLiveSync, SYNC_EVENTS } from '../utils/liveSync';
 import { openWholesaleInvoiceWindow } from '../utils/invoiceTemplate';
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
+import { cleanPharmaText, getEffectiveMrp, getEffectivePtr } from '../utils/pricing';
 import {
   Search,
   ShoppingCart,
@@ -653,6 +655,34 @@ function QuickOrder() {
     } catch (_) {}
   }, [boxQuantities]);
 
+  // Listen for cart updates triggered from Catalog / ProductDetail / Cart Drawer
+  useEffect(() => {
+    const handleExternalQuickOrderUpdate = (e) => {
+      const incoming = e?.detail;
+      if (incoming && typeof incoming === 'object' && !Array.isArray(incoming)) {
+        setBoxQuantities((prev) => {
+          const prevStr = JSON.stringify(prev);
+          const nextStr = JSON.stringify(incoming);
+          return prevStr === nextStr ? prev : incoming;
+        });
+      }
+    };
+    window.addEventListener('niyansh:quickorder-updated', handleExternalQuickOrderUpdate);
+    return () => window.removeEventListener('niyansh:quickorder-updated', handleExternalQuickOrderUpdate);
+  }, []);
+
+  // Keep global Header Cart / EnquiryCartModal synchronized with QuickOrder selections
+  useEffect(() => {
+    if (!isLoggedIn || products.length === 0) return;
+    const syncedItems = products
+      .filter((p) => (boxQuantities[p._id] || 0) > 0)
+      .map((p) => ({ product: p, quantity: boxQuantities[p._id] }));
+    try {
+      localStorage.setItem('niyansh_enquiry_cart', JSON.stringify(syncedItems));
+    } catch (_) {}
+    window.dispatchEvent(new CustomEvent('niyansh:quickorder-cart-sync', { detail: syncedItems }));
+  }, [boxQuantities, products, isLoggedIn]);
+
   // Dispatch & Modal States
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successModalData, setSuccessModalData] = useState(null);
@@ -666,6 +696,9 @@ function QuickOrder() {
   const [ledgerLoading, setLedgerLoading] = useState(false);
   const [ledgerData, setLedgerData] = useState(null);
   const [statementSentMessage, setStatementSentMessage] = useState(false);
+
+  // Lock background page scroll (iOS Safari safe) whenever any QuickOrder modal/sheet is open
+  useBodyScrollLock(isMobileSummaryOpen || Boolean(successModalData) || isLedgerOpen || showClearConfirm);
 
   // Load initial retailer info from localStorage or session
   useEffect(() => {
@@ -917,7 +950,8 @@ function QuickOrder() {
         const itemUnits = boxes * unitsPerBox;
         totalUnits += itemUnits;
 
-        const unitPrice = parseFloat(product.price) || 0;
+        const unitPrice = getEffectivePtr(product);
+        const effectiveMrp = getEffectiveMrp(product);
         const lineSubtotal = Math.round(itemUnits * unitPrice * 100) / 100;
         taxableSubtotal += lineSubtotal;
 
@@ -952,20 +986,20 @@ function QuickOrder() {
         lineItems.push({
           product: product._id,
           productName: product.name,
-          company: product.company || product.brand || 'DAXIA',
-          form: product.form || 'Tablet',
-          composition: product.composition || '',
-          packing: product.packing || '',
+          company: cleanPharmaText(product.company || product.brand, 'DAXIA'),
+          form: cleanPharmaText(product.form, 'Tablet'),
+          composition: cleanPharmaText(product.composition, ''),
+          packing: cleanPharmaText(product.packing, ''),
           unitsPerBox,
           boxes,
           totalUnits: itemUnits,
           unitPrice,
-          mrp: product.mrp || unitPrice * 1.4,
+          mrp: effectiveMrp || unitPrice * 1.4,
           gstRate,
           lineSubtotal,
           lineGst,
           lineTotal: Math.round((lineSubtotal + lineGst) * 100) / 100,
-          scheme: product.scheme || '',
+          scheme: cleanPharmaText(product.scheme, ''),
           bonusBoxes,
           bonusUnits
         });
@@ -1886,10 +1920,16 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                         const isSelected = boxQty > 0;
                         const unitsPerBox = product.unitsPerBox || 10;
                         const totalUnits = boxQty * unitsPerBox;
-                        const lineSubtotal = Math.round(totalUnits * (product.price || 0) * 100) / 100;
+                        const effectivePtr = getEffectivePtr(product);
+                        const effectiveMrp = getEffectiveMrp(product);
+                        const lineSubtotal = Math.round(totalUnits * effectivePtr * 100) / 100;
                         const lineGst = Math.round((lineSubtotal * (product.gstRate || 12) / 100) * 100) / 100;
                         const lineTotal = Math.round((lineSubtotal + lineGst) * 100) / 100;
-                        const isDaxia = (product.company || product.brand || '').toUpperCase().includes('DAXIA');
+                        const cleanComp = cleanPharmaText(product.composition, '');
+                        const cleanCompany = cleanPharmaText(product.company || product.brand, 'Daxia Healthcare');
+                        const cleanForm = cleanPharmaText(product.form, 'Tablet');
+                        const cleanPacking = cleanPharmaText(product.packing, `${unitsPerBox} Units/Box`);
+                        const isDaxia = cleanCompany.toUpperCase().includes('DAXIA');
                         const isMoqViolated = isSelected && boxQty < (product.minReorderQty || 1);
 
                         return (
@@ -1927,18 +1967,20 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                                       </span>
                                     ) : (
                                       <span style={{ fontSize: '0.7rem', fontWeight: '700', backgroundColor: '#f1f5f9', color: '#475569', padding: '1px 6px', borderRadius: '4px' }}>
-                                        {product.company || product.brand}
+                                        {cleanCompany}
                                       </span>
                                     )}
                                   </div>
 
-                                  <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px', lineHeight: '1.3' }}>
-                                    {product.composition}
-                                  </div>
+                                  {cleanComp && (
+                                    <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px', lineHeight: '1.3' }}>
+                                      {cleanComp}
+                                    </div>
+                                  )}
 
                                   <div style={{ display: 'flex', gap: '6px', marginTop: '5px', flexWrap: 'wrap' }}>
                                     <span style={{ fontSize: '0.7rem', fontWeight: '600', backgroundColor: '#e0f2fe', color: '#0369a1', padding: '1px 7px', borderRadius: '10px' }}>
-                                      {product.form || 'Tablet'}
+                                      {cleanForm}
                                     </span>
                                     <span style={{ fontSize: '0.7rem', fontWeight: '600', backgroundColor: '#f0fdf4', color: '#15803d', padding: '1px 7px', borderRadius: '10px' }}>
                                       {product.qualitySpecs || 'WHO-GMP Certified'}
@@ -1951,7 +1993,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                             {/* Column 2: Pack & MOQ */}
                             <td style={{ padding: '14px 12px', verticalAlign: 'middle' }}>
                               <div style={{ fontSize: '0.82rem', fontWeight: '700', color: '#334155' }}>
-                                {product.packing || `${unitsPerBox} Units/Box`}
+                                {cleanPacking}
                               </div>
                               <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>
                                 {unitsPerBox} units / box
@@ -1979,11 +2021,13 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                                 <>
                                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
                                     <span style={{ fontSize: '0.95rem', fontWeight: '800', color: '#0c3d6c' }}>
-                                      ₹{product.price?.toFixed(2)}
+                                      {effectivePtr > 0 ? `₹${effectivePtr.toFixed(2)}` : 'Rate on Request'}
                                     </span>
-                                    <span style={{ fontSize: '0.75rem', color: '#94a3b8', textDecoration: 'line-through' }}>
-                                      ₹{product.mrp?.toFixed(2)}
-                                    </span>
+                                    {effectiveMrp > effectivePtr && (
+                                      <span style={{ fontSize: '0.75rem', color: '#94a3b8', textDecoration: 'line-through' }}>
+                                        ₹{effectiveMrp.toFixed(2)}
+                                      </span>
+                                    )}
                                   </div>
                                   <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
                                     GST: {product.gstRate || 12}%
@@ -1994,7 +2038,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
                                     <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '700' }}>MRP:</span>
                                     <span style={{ fontSize: '0.95rem', fontWeight: '800', color: '#1e293b' }}>
-                                      ₹{(product.mrp || product.price)?.toFixed(2)}
+                                      {effectiveMrp > 0 ? `₹${effectiveMrp.toFixed(2)}` : 'Quote on Request'}
                                     </span>
                                   </div>
                                   <button
@@ -2214,10 +2258,16 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                   const isSelected = boxQty > 0;
                   const unitsPerBox = product.unitsPerBox || 10;
                   const totalUnits = boxQty * unitsPerBox;
-                  const lineSubtotal = Math.round(totalUnits * (product.price || 0) * 100) / 100;
+                  const effectivePtr = getEffectivePtr(product);
+                  const effectiveMrp = getEffectiveMrp(product);
+                  const lineSubtotal = Math.round(totalUnits * effectivePtr * 100) / 100;
                   const lineGst = Math.round((lineSubtotal * (product.gstRate || 12) / 100) * 100) / 100;
                   const lineTotal = Math.round((lineSubtotal + lineGst) * 100) / 100;
-                  const isDaxia = (product.company || product.brand || '').toUpperCase().includes('DAXIA');
+                  const cleanComp = cleanPharmaText(product.composition, '');
+                  const cleanCompany = cleanPharmaText(product.company || product.brand, 'Daxia Healthcare');
+                  const cleanForm = cleanPharmaText(product.form, 'Tablet');
+                  const cleanPacking = cleanPharmaText(product.packing, `${unitsPerBox} Units/Box`);
+                  const isDaxia = cleanCompany.toUpperCase().includes('DAXIA');
 
                   return (
                     <div
@@ -2240,15 +2290,15 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                       }}
                     >
                       <div style={{ minWidth: 0 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', flexWrap: 'wrap', minWidth: 0 }}>
                           <span style={{
                             fontSize: '0.70rem', fontWeight: '800',
                             backgroundColor: isDaxia ? '#0c3d6c' : 'var(--bg-surface-alt)',
                             color: isDaxia ? '#ffffff' : 'var(--text-medium)',
                             padding: '2px 8px', borderRadius: '4px',
-                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0
+                            lineHeight: 1.25, wordBreak: 'break-word'
                           }}>
-                            {product.company || product.brand}
+                            {cleanCompany}
                           </span>
                           <span style={{
                             fontSize: '0.70rem', fontWeight: '700',
@@ -2256,20 +2306,20 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                             padding: '2px 8px', borderRadius: '12px',
                             whiteSpace: 'nowrap', flexShrink: 0
                           }}>
-                            {product.form}
+                            {cleanForm}
                           </span>
                         </div>
 
-                        <h3 style={{ fontSize: '0.96rem', fontWeight: '800', color: 'var(--text-dark)', margin: '8px 0 4px 0', lineHeight: '1.3', minHeight: '2.5rem', height: '2.5rem', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
+                        <h3 style={{ fontSize: '0.96rem', fontWeight: '800', color: 'var(--text-dark)', margin: '8px 0 4px 0', lineHeight: '1.3', minHeight: '2.5rem', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
                           {product.name}
                         </h3>
 
-                        <div style={{ fontSize: '0.76rem', color: '#64748b', marginBottom: '8px', minHeight: '2.2rem', height: '2.2rem', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }} title={product.composition || ''}>
-                          {product.composition || <span style={{ visibility: 'hidden' }}>&nbsp;</span>}
+                        <div style={{ fontSize: '0.76rem', color: '#64748b', marginBottom: '8px', minHeight: cleanComp ? '1.3rem' : '0.4rem', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }} title={cleanComp}>
+                          {cleanComp || null}
                         </div>
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap', fontSize: '0.76rem', color: 'var(--text-medium)', backgroundColor: 'var(--bg-surface-alt)', padding: '6px 10px', borderRadius: '6px', marginBottom: '10px' }}>
-                          <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Pack: <strong>{product.packing || `${unitsPerBox} Units/Box`}</strong></span>
+                          <span style={{ minWidth: 0, wordBreak: 'break-word' }}>Pack: <strong>{cleanPacking}</strong></span>
                           <span style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>MOQ: <strong>{product.minReorderQty || 1} Box</strong></span>
                         </div>
 
@@ -2277,11 +2327,11 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                           {isLoggedIn ? (
                             <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', flexWrap: 'wrap' }}>
                               <span style={{ fontSize: '1.12rem', fontWeight: '800', color: 'var(--primary-blue)' }} className="tabular-nums">
-                                ₹{(Number(product.price) || 0).toFixed(2)}
+                                {effectivePtr > 0 ? `₹${effectivePtr.toFixed(2)}` : 'Rate on Request'}
                               </span>
-                              {product.mrp > 0 && (
+                              {effectiveMrp > effectivePtr && (
                                 <span style={{ fontSize: '0.76rem', color: '#94a3b8', textDecoration: 'line-through' }} className="tabular-nums">
-                                  ₹{Number(product.mrp).toFixed(2)}
+                                  ₹{effectiveMrp.toFixed(2)}
                                 </span>
                               )}
                             </div>
@@ -2289,7 +2339,7 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
                             <div>
                               <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '700', marginRight: '4px' }}>MRP:</span>
                               <span style={{ fontSize: '1.08rem', fontWeight: '800', color: 'var(--text-dark)' }}>
-                                ₹{(product.mrp || product.price || 0).toFixed(2)}
+                                {effectiveMrp > 0 ? `₹${effectiveMrp.toFixed(2)}` : 'Quote on Request'}
                               </span>
                               <button
                                 type="button"
@@ -2588,28 +2638,28 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
 
               {/* Line items preview / breakdown */}
               <div style={{ borderBottom: '1px dashed #cbd5e1', paddingBottom: '12px', marginBottom: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#475569', marginBottom: '6px' }}>
-                  <span>{t('quickOrder.taxableSubtotal', 'Taxable Subtotal (PTR)')}</span>
-                  <span style={{ fontWeight: '700', color: '#0f172a' }}>₹{commercialBilling.taxableSubtotal.toFixed(2)}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', fontSize: '0.85rem', color: '#475569', marginBottom: '6px' }}>
+                  <span style={{ minWidth: 0 }}>{t('quickOrder.taxableSubtotal', 'Taxable Subtotal (PTR)')}</span>
+                  <span style={{ fontWeight: '700', color: '#0f172a', flexShrink: 0 }} className="tabular-nums">₹{commercialBilling.taxableSubtotal.toFixed(2)}</span>
                 </div>
 
                 {commercialBilling.gst12Amount > 0 && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#64748b', marginBottom: '4px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', fontSize: '0.8rem', color: '#64748b', marginBottom: '4px' }}>
                     <span>GST @ 12%</span>
-                    <span>+₹{commercialBilling.gst12Amount.toFixed(2)}</span>
+                    <span style={{ flexShrink: 0 }} className="tabular-nums">+₹{commercialBilling.gst12Amount.toFixed(2)}</span>
                   </div>
                 )}
 
                 {commercialBilling.gst18Amount > 0 && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#64748b', marginBottom: '4px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', fontSize: '0.8rem', color: '#64748b', marginBottom: '4px' }}>
                     <span>GST @ 18%</span>
-                    <span>+₹{commercialBilling.gst18Amount.toFixed(2)}</span>
+                    <span style={{ flexShrink: 0 }} className="tabular-nums">+₹{commercialBilling.gst18Amount.toFixed(2)}</span>
                   </div>
                 )}
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#475569', marginTop: '4px' }}>
-                  <span>{t('quickOrder.totalGst', 'Total GST Tax Amount')}</span>
-                  <span style={{ fontWeight: '600' }}>₹{commercialBilling.totalGstAmount.toFixed(2)}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', fontSize: '0.82rem', color: '#475569', marginTop: '4px' }}>
+                  <span style={{ minWidth: 0 }}>{t('quickOrder.totalGst', 'Total GST Tax Amount')}</span>
+                  <span style={{ fontWeight: '600', flexShrink: 0 }} className="tabular-nums">₹{commercialBilling.totalGstAmount.toFixed(2)}</span>
                 </div>
               </div>
 
@@ -2913,13 +2963,13 @@ _Rajkot Wholesale Hub | Support: +91 9316566894_`;
             </div>
 
             {/* Retailer Store Badge */}
-            <div style={{ padding: '8px 20px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #e2e8f0', fontSize: '0.76rem', color: '#475569', display: 'flex', justifyContent: 'space-between' }}>
+            <div style={{ padding: '8px 16px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #e2e8f0', fontSize: '0.75rem', color: '#475569', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px 10px' }}>
               <span>Store: <strong>{shopName || 'Retail Chemist'}</strong> ({retailerMobile || 'No mobile'})</span>
               <span>WhatsApp: +91 {destinationWhatsApp}</span>
             </div>
 
             {/* Line Items Scrollable List */}
-            <div style={{ overflowY: 'auto', padding: '12px 20px', flex: 1, maxHeight: '42vh' }}>
+            <div style={{ overflowY: 'auto', overscrollBehavior: 'contain', padding: '12px 16px', flex: 1, maxHeight: '42vh' }}>
               {commercialBilling.lineItems.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '30px 0', color: '#94a3b8' }}>
                   No items in order

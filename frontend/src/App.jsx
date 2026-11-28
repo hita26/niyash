@@ -189,7 +189,20 @@ function AppContent() {
     }
   }, [user]);
 
-  // Save cart to localStorage and notify ProductCards whenever it changes
+  // Listen for Quick Order Pad cart updates so Header cart & EnquiryCartModal stay unified
+  useEffect(() => {
+    const handleQuickOrderSync = (e) => {
+      if (!user) return;
+      const nextCart = e?.detail;
+      if (Array.isArray(nextCart)) {
+        setEnquiryCart(nextCart);
+      }
+    };
+    window.addEventListener('niyansh:quickorder-cart-sync', handleQuickOrderSync);
+    return () => window.removeEventListener('niyansh:quickorder-cart-sync', handleQuickOrderSync);
+  }, [user]);
+
+  // Save cart to localStorage and notify ProductCards & QuickOrder whenever it changes
   useEffect(() => {
     if (user) {
       localStorage.setItem('niyansh_enquiry_cart', JSON.stringify(enquiryCart));
@@ -281,6 +294,20 @@ function AppContent() {
     }, 3200);
   };
 
+  const syncQuickOrderItem = (productId, nextQty) => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('niyansh_quickorder_cart') || '{}');
+      const map = (saved && typeof saved === 'object' && !Array.isArray(saved)) ? { ...saved } : {};
+      if (nextQty <= 0) {
+        delete map[productId];
+      } else {
+        map[productId] = nextQty;
+      }
+      localStorage.setItem('niyansh_quickorder_cart', JSON.stringify(map));
+      window.dispatchEvent(new CustomEvent('niyansh:quickorder-updated', { detail: map }));
+    } catch (_) {}
+  };
+
   const addToCart = (product, quantity = 1) => {
     // Only authenticated verified chemists can add products to wholesale inquiry cart
     if (!user) {
@@ -293,6 +320,7 @@ function AppContent() {
       const existingItem = prevCart.find((item) => item.product._id === product._id);
       if (existingItem) {
         const nextQty = existingItem.quantity + quantity;
+        syncQuickOrderItem(product._id, nextQty);
         if (nextQty <= 0) {
           return prevCart.filter((item) => item.product._id !== product._id);
         }
@@ -303,6 +331,7 @@ function AppContent() {
         );
       }
       if (quantity <= 0) return prevCart;
+      syncQuickOrderItem(product._id, quantity);
       return [...prevCart, { product, quantity }];
     });
 
@@ -343,6 +372,7 @@ function AppContent() {
       removeFromCart(productId);
       return;
     }
+    syncQuickOrderItem(productId, quantity);
     setEnquiryCart((prevCart) =>
       prevCart.map((item) =>
         item.product._id === productId ? { ...item, quantity } : item
@@ -351,10 +381,15 @@ function AppContent() {
   };
 
   const removeFromCart = (productId) => {
+    syncQuickOrderItem(productId, 0);
     setEnquiryCart((prevCart) => prevCart.filter((item) => item.product._id !== productId));
   };
 
   const clearCart = () => {
+    try {
+      localStorage.setItem('niyansh_quickorder_cart', JSON.stringify({}));
+      window.dispatchEvent(new CustomEvent('niyansh:quickorder-updated', { detail: {} }));
+    } catch (_) {}
     setEnquiryCart([]);
   };
 
